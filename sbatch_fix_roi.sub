@@ -1,0 +1,27 @@
+#!/bin/bash
+#SBATCH -J fix_roi
+#SBATCH -c 2
+#SBATCH --mem=8G
+#SBATCH -t 2:15:00
+#SBATCH -o logs/fix_roi_%j.out
+#SBATCH -e logs/fix_roi_%j.err
+#SBATCH --nodelist=node2
+
+# Navigate to project directory
+cd /scratch/connectome/haba6030/colorBlind
+
+# Load conda environment
+source ~/.bashrc
+conda activate nilearn
+
+# Run ROI fix script
+echo "Fixing ROI overlap problem..."
+echo ""
+python fix_roi_overlap.py
+
+echo ""
+echo "ROI fix complete!"
+echo ""
+echo "Next steps:"
+echo "1. Re-run diagnostic: sbatch sbatch_diagnostic.sub"
+echo "2. Check if classification accuracy improves"

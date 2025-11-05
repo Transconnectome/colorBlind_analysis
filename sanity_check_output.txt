@@ -1,0 +1,208 @@
+
+============================================================
+DATA SANITY CHECK
+============================================================
+Subject: sub-01
+Project: /scratch/connectome/haba6030/colorBlind
+
+============================================================
+1. FUNCTIONAL DATA PROPERTIES
+============================================================
+
+Loading: sub-01_task-rsvp_run-1_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz
+
+Shape: (97, 115, 97, 288)
+Voxel size: (np.float32(2.0), np.float32(2.0), np.float32(2.0)) mm
+TR: 1.500 s
+
+Data statistics:
+  Mean:   52.1999
+  Std:    152.0900
+  Min:    -80.8633
+  Max:    1467.3459
+  Median: 0.0000
+
+✅ Data is NOT centered (mean = 52.20)
+
+Data quality:
+  Zero values: 244792861 (78.55%)
+  NaN values:  0 (0.00%)
+
+Temporal variance:
+  Mean std across time: 4.3683
+  Active voxels (std > 0): 242061 / 1082035
+
+Temporal SNR (rough estimate):
+  Mean tSNR: 12.29
+  Median tSNR: 9.97
+
+============================================================
+2. EVENT FILE STRUCTURE
+============================================================
+
+Loading: sub-01_task-rsvp_run-1_events.tsv
+
+Shape: (72, 3)
+Columns: ['onset', 'duration', 'trial_type']
+✅ Found column: onset
+✅ Found column: duration
+✅ Found column: trial_type
+
+Trial types:
+trial_type
+blank      20
+color_2     8
+color_4     8
+color_7     7
+color_3     6
+color_5     6
+color_1     6
+color_6     6
+color_8     5
+Name: count, dtype: int64
+
+Color trials: 52
+
+Timing information:
+  First onset: 4.32 s
+  Last onset:  428.25 s
+  Duration range: 1.50 - 1.50 s
+  Mean ISI: 5.97 s
+
+============================================================
+3. ROI-FUNCTIONAL ALIGNMENT
+============================================================
+
+Functional shape: (97, 115, 97)
+Functional affine:
+[[   2.     0.     0.   -96.5]
+ [   0.     2.     0.  -132.5]
+ [   0.     0.     2.   -78.5]
+ [   0.     0.     0.     1. ]]
+
+V1 ROI shape: (97, 115, 97)
+V1 ROI affine:
+[[   2.     0.     0.   -96.5]
+ [   0.     2.     0.  -132.5]
+ [   0.     0.     2.   -78.5]
+ [   0.     0.     0.     1. ]]
+
+✅ Shapes match
+✅ Affines match
+
+V1 ROI:
+  Total voxels: 511
+  Overlapping with active functional: 190 (37.2%)
+  ❌ ERROR: Less than 50% overlap! ROI alignment problem.
+
+Visual cortex coverage:
+  Active voxels in functional: 242061
+  Active voxels in V1: 190
+
+============================================================
+3. ROI-FUNCTIONAL ALIGNMENT
+============================================================
+
+Functional shape: (97, 115, 97)
+Functional affine:
+[[   2.     0.     0.   -96.5]
+ [   0.     2.     0.  -132.5]
+ [   0.     0.     2.   -78.5]
+ [   0.     0.     0.     1. ]]
+
+V2 ROI shape: (97, 115, 97)
+V2 ROI affine:
+[[   2.     0.     0.   -96.5]
+ [   0.     2.     0.  -132.5]
+ [   0.     0.     2.   -78.5]
+ [   0.     0.     0.     1. ]]
+
+✅ Shapes match
+✅ Affines match
+
+V2 ROI:
+  Total voxels: 310
+  Overlapping with active functional: 182 (58.7%)
+  ⚠️  WARNING: Less than 80% overlap
+
+Visual cortex coverage:
+  Active voxels in functional: 242061
+  Active voxels in V2: 182
+
+============================================================
+3. ROI-FUNCTIONAL ALIGNMENT
+============================================================
+
+Functional shape: (97, 115, 97)
+Functional affine:
+[[   2.     0.     0.   -96.5]
+ [   0.     2.     0.  -132.5]
+ [   0.     0.     2.   -78.5]
+ [   0.     0.     0.     1. ]]
+
+BrainMask ROI shape: (97, 115, 97)
+BrainMask ROI affine:
+[[   2.     0.     0.   -96.5]
+ [   0.     2.     0.  -132.5]
+ [   0.     0.     2.   -78.5]
+ [   0.     0.     0.     1. ]]
+
+✅ Shapes match
+✅ Affines match
+
+BrainMask ROI:
+  Total voxels: 230768
+  Overlapping with active functional: 97735 (42.4%)
+  ❌ ERROR: Less than 50% overlap! ROI alignment problem.
+
+Visual cortex coverage:
+  Active voxels in functional: 242061
+  Active voxels in BrainMask: 97735
+
+============================================================
+4. CONFOUND FILE STRUCTURE
+============================================================
+
+Loading: sub-01_task-rsvp_run-1_desc-confounds_timeseries.tsv
+
+Shape: (288, 370)
+Number of columns: 370
+
+Motion parameters found: 24
+  - trans_x
+  - trans_x_derivative1
+  - trans_x_derivative1_power2
+  - trans_x_power2
+  - trans_y
+  - trans_y_derivative1
+
+CompCor components found: 218
+
+Framewise displacement:
+  Mean: 0.3443 mm
+  Max: 3.6919 mm
+  Volumes with FD > 0.5mm: 53
+  ⚠️  WARNING: High mean motion (> 0.3mm)
+
+============================================================
+5. QUALITY CONTROL PLOTS
+============================================================
+
+✅ Saved QC plot: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/data_quality_run1.png
+
+============================================================
+SUMMARY
+============================================================
+
+Checks passed: 7/7
+  ✅ functional
+  ✅ events
+  ✅ roi_V1
+  ✅ roi_V2
+  ✅ roi_BrainMask
+  ✅ confounds
+  ✅ plots
+
+✅ ALL CHECKS PASSED - Proceed with caution
+
+============================================================

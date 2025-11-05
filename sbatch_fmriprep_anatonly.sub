@@ -1,0 +1,58 @@
+#!/bin/bash
+#SBATCH -J fprep_anat
+# 존재하는 파티션 이름이 있으면 지정, 아니면 아예 이 줄을 지우세요.
+#SBATCH -c 4
+#SBATCH --mem=12G
+#SBATCH -t 48:00:00
+#SBATCH -o logs/fprep_anat_%j.out
+#SBATCH -e logs/fprep_anat_%j.err
+#SBATCH --nodelist=node2
+
+# Singularity 절대경로 지정 (which singularity 결과로 교체)
+APPTAINER=/usr/local/bin/singularity
+
+# 출력/작업 폴더: scratch 권한 이슈가 있으니 홈으로
+OUT_DIR=/scratch/connectome/haba6030/fmriprep_out
+WORK_DIR=/scratch/connectome/haba6030/fmriprep_work
+mkdir -p "$OUT_DIR" "$WORK_DIR"
+
+# 필수 경로 기본값 (필요하면 sbatch 전에 export로 덮어쓰세요)
+DS_LOCALIZER=${DS_LOCALIZER:-/scratch/connectome/haba6030/colorBlind/colorBlind_dataOct}
+FS_LICENSE=${FS_LICENSE:-$HOME/fs_license.txt}
+FMRIprep_IMG=${FMRIprep_IMG:-$HOME/fmriprep-23.2.3.sif}
+
+# 경로나 파일이 실제로 존재하는지 간단히 확인해 조기 실패 유도
+if [ ! -d "$DS_LOCALIZER" ]; then
+  echo "Dataset path not found: $DS_LOCALIZER" >&2
+  exit 1
+fi
+if [ ! -f "$FS_LICENSE" ]; then
+  echo "FreeSurfer license not found: $FS_LICENSE" >&2
+  exit 1
+fi
+if [ ! -f "$FMRIprep_IMG" ]; then
+  echo "fMRIPrep image not found: $FMRIprep_IMG" >&2
+  exit 1
+fi
+
+# 처리할 참가자 ID 목록 (공백으로 구분). 필요 시 sbatch 전에 export PARTICIPANT_LABELS="sub-05 sub-06" 형태로 덮어쓰세요.
+# Timeout으로 인한 제거 sub-02 sub-03 sub-04
+PARTICIPANT_LABELS=${PARTICIPANT_LABELS:-"sub-01 sub-02 sub-03 sub-04"}
+IFS=' ' read -r -a PARTICIPANTS <<< "$PARTICIPANT_LABELS"
+if [ ${#PARTICIPANTS[@]} -eq 0 ]; then
+  echo "No participant labels provided. Set PARTICIPANT_LABELS before submitting the job." >&2
+  exit 1
+fi
+
+# 실행
+"$APPTAINER" run --cleanenv \
+  -B "$DS_LOCALIZER":/data:ro \
+  -B "$OUT_DIR":/out \
+  -B "$WORK_DIR":/work \
+  "$FMRIprep_IMG" \
+  /data /out participant \
+  --participant-label "${PARTICIPANTS[@]}" \
+  --anat-only \
+  --fs-license-file $FS_LICENSE \
+  --output-spaces T1w fsaverage MNI152NLin2009cAsym \
+  --n_cpus ${SLURM_CPUS_PER_TASK:-4} --mem_mb 12000 -w /work

@@ -1,0 +1,68 @@
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+thumbs.db
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.ipynb_checkpoints/
+
+# Large data directories
+ProbAtlas_v4/
+probatlas_v4.zip
+output/
+pilot/
+derivatives/
+hrf_test_outputs/
+logs/
+*.nii
+*.nii.gz
+
+# Large PDFs
+*.pdf
+
+# Archives
+*.zip
+Archive.zip
+
+# Backup files
+*.bak
+*_backup.*
+*.ipynb.bak
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+temp_*
+tmp_*
+*.tmp
+
+# Log files
+*.log
+*.out
+*.err
+
+# Cache files
+.cache/
+*.joblib
+*.pkl
+*.pickle
+
+# Results that are too large
+*.png
+*.jpg
+*.jpeg
+
+# Keep these documentation files
+!final_IRB.pdf

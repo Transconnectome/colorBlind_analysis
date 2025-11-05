@@ -1,0 +1,14 @@
+=== ColorBlind Analysis Diagnostic Report ===
+
+
+hrf_comparison:
+{'glover': {'mean_beta': np.float64(2.1330544508516813), 'std_beta': np.float64(51.85117369515857), 'snr': np.float64(0.04113801672033256), 'n_nonzero': np.int64(229241)}, 'glover + derivative': {'mean_beta': np.float64(0.6941962805854726), 'std_beta': np.float64(49.79084459990177), 'snr': np.float64(0.013942247536154863), 'n_nonzero': np.int64(229241)}, 'spm': {'mean_beta': np.float64(2.000778411171293), 'std_beta': np.float64(77.71293347093602), 'snr': np.float64(0.025745758415645314), 'n_nonzero': np.int64(229241)}, 'fir': {'error': 'The expression (color_1) is not valid. This could be due to defining the contrasts using design matrix columns that are invalid python identifiers.'}}
+
+roi_quality:
+{'V1': {'exists': True, 'n_voxels': 511, 'shape': (97, 115, 97), 'aligned': True, 'overlap': 190}, 'V2': {'exists': True, 'n_voxels': 310, 'shape': (97, 115, 97), 'aligned': True, 'overlap': 182}, 'V3': {'exists': True, 'n_voxels': 89, 'shape': (97, 115, 97), 'aligned': True, 'overlap': 62}, 'hV4': {'exists': True, 'n_voxels': 55, 'shape': (97, 115, 97), 'aligned': True, 'overlap': 38}, 'BrainMask': {'exists': True, 'n_voxels': 230768, 'shape': (97, 115, 97), 'aligned': True, 'overlap': 97732}}
+
+beta_comparison:
+See console output
+
+voxel_selection:
+{500: np.float64(0.125)}

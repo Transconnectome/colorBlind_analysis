@@ -9,6 +9,12 @@ Before running any Python code, activate the nilearn conda environment:
 conda activate nilearn
 ```
 
+Most of the files are being ran in the remote server and directory named: 
+haba6030@node2:/scratch/connectome/haba6030/colorBlind
+Also, most of the code is ran by using SLURM.
+Therefore, for running a code to check it, suggest this procedure
+(1) suggest code and sbatch modification -> (2) suggest scp CLI for uploading code -> (3) how to run code in the server -> (4) how to download from the server. 
+
 ## Project Overview
 
 This is a neuroimaging analysis project based on "final_IRB.pdf", modifying **Brouwer & Heeger (2009, J. Neurosci.)** color decoding pipeline. The project analyzes fMRI data to decode color information from visual cortex areas (V1-V4) using forward encoding models. 

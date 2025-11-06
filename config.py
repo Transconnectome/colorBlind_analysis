@@ -31,8 +31,9 @@ class Config:
     # 파생 경로들
     @property
     def output_dir(self):
-        return os.path.join(self.PROJECT_DIR, f'output/pilot/sub-{self.SUB_ID}')
-    
+        # fMRIPrep 출력 디렉토리 (storage 경로 - sbatch_fmriprep_storage.sub 기준)
+        return f'/storage/connectome/haba6030/fmriprep_out/sub-{self.SUB_ID}'
+
     @property
     def fmriprep_dir(self):
         return os.path.join(self.output_dir, 'func')

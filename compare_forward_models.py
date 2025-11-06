@@ -10,6 +10,7 @@ Usage:
 """
 
 import os
+import sys
 import numpy as np
 import argparse
 import pickle
@@ -18,9 +19,31 @@ from ml_forward_model import (
     RidgeForwardModel, RidgeCVForwardModel,
     MLPForwardModel, CNNForwardModel, AttentionForwardModel,
     compare_models, plot_model_comparison,
-    TORCH_AVAILABLE
+    TORCH_AVAILABLE,
+    LABEL2HUE_DEG_PILOT, LABEL2HUE_DEG_MAIN
 )
 from config import cfg
+
+
+# ============================================================================
+# Configuration
+# ============================================================================
+
+# Choose which color set to use
+# Set to 'pilot' for current pilot data (non-uniform spacing)
+# Set to 'main' for future main experiment data (uniform 45° spacing)
+COLOR_SET = 'pilot'  # ← CHANGE THIS WHEN ANALYZING MAIN EXPERIMENT DATA
+
+if COLOR_SET == 'pilot':
+    LABEL2HUE_DEG = LABEL2HUE_DEG_PILOT
+    print(f"[CONFIG] Using PILOT color set (non-uniform Lab hue spacing)")
+elif COLOR_SET == 'main':
+    LABEL2HUE_DEG = LABEL2HUE_DEG_MAIN
+    print(f"[CONFIG] Using MAIN experiment color set (uniform 45° spacing)")
+else:
+    raise ValueError(f"Unknown COLOR_SET: {COLOR_SET}")
+
+sys.stdout.flush()
 
 
 def load_roi_data(roi_name='V1', config=cfg):
@@ -42,23 +65,48 @@ def load_roi_data(roi_name='V1', config=cfg):
         data = np.load(roi_file)  # (n_runs * n_colors, n_voxels)
         print(f"Loaded ROI data: {roi_file}")
         print(f"  Shape: {data.shape}")
+        sys.stdout.flush()
         return data
     else:
         print(f"ROI data not found: {roi_file}")
+        sys.stdout.flush()
         return None
 
 
-def generate_channel_responses(n_colors=8, n_channels=6):
+def generate_channel_responses(n_colors=8, n_channels=6, use_actual_hues=True):
     """
     Generate idealized channel responses for each color
     (Same as B&H 2009 - half-wave rectified & squared sinusoids)
+
+    Parameters
+    ----------
+    n_colors : int
+        Number of colors (default: 8)
+    n_channels : int
+        Number of basis channels (default: 6)
+    use_actual_hues : bool
+        If True, use actual Lab hue values from LABEL2HUE_DEG (pilot or main)
+        If False, use uniform spacing (for testing/comparison)
 
     Returns
     -------
     channels : ndarray (n_colors, n_channels)
         Channel responses for each color
     """
-    angles = np.linspace(0, 360, n_colors, endpoint=False)  # Color angles
+    # Determine color angles
+    if use_actual_hues:
+        # Use actual Lab hue values from experiment
+        angles = np.array([LABEL2HUE_DEG[f'color_{i+1}'] for i in range(n_colors)])
+        print(f"  Using actual Lab hue values from {COLOR_SET} experiment")
+        print(f"  Hue range: {angles.min():.1f}° to {angles.max():.1f}°")
+    else:
+        # Use uniform spacing (for comparison)
+        angles = np.linspace(0, 360, n_colors, endpoint=False)
+        print(f"  Using uniform hue spacing (0° to 360°)")
+
+    sys.stdout.flush()
+
+    # Channel centers (always uniform)
     channel_centers = np.linspace(0, 360, n_channels, endpoint=False)
 
     channels = np.zeros((n_colors, n_channels))
@@ -95,10 +143,11 @@ def prepare_data(roi_name='V1', n_runs=6, config=cfg):
     if voxels is None:
         return None, None
 
-    # Generate channel responses
+    # Generate channel responses using actual Lab hue values
     channel_template = generate_channel_responses(
         n_colors=config.N_COLORS,
-        n_channels=6
+        n_channels=6,
+        use_actual_hues=True  # Use corrected Lab hues from experiment
     )
 
     # Tile across runs
@@ -107,6 +156,7 @@ def prepare_data(roi_name='V1', n_runs=6, config=cfg):
     print(f"\nData prepared:")
     print(f"  Voxels: {voxels.shape}")
     print(f"  Channels: {channels.shape}")
+    sys.stdout.flush()
 
     return voxels, channels
 
@@ -133,11 +183,13 @@ def run_comparison(roi_name='V1', models_to_test=None, save_dir=None):
     print(f"\n{'='*60}")
     print(f"Comparing Forward Models for ROI: {roi_name}")
     print(f"{'='*60}")
+    sys.stdout.flush()
 
     voxels, channels = prepare_data(roi_name, n_runs=cfg.N_RUNS, config=cfg)
 
     if voxels is None or channels is None:
         print(f"ERROR: Could not load data for {roi_name}")
+        sys.stdout.flush()
         return None
 
     # Auto-detect GPU
@@ -150,6 +202,7 @@ def run_comparison(roi_name='V1', models_to_test=None, save_dir=None):
             print(f"   Using device: {device}")
         else:
             print(f"\n⚠️  No GPU detected, using CPU")
+        sys.stdout.flush()
 
     # Define models
     all_models = {
@@ -196,6 +249,7 @@ def run_comparison(roi_name='V1', models_to_test=None, save_dir=None):
         })
     else:
         print("\nWarning: PyTorch not available. Only testing Ridge models.")
+        sys.stdout.flush()
 
     # Filter models if specified
     if models_to_test is not None:
@@ -214,6 +268,7 @@ def run_comparison(roi_name='V1', models_to_test=None, save_dir=None):
     with open(results_file, 'wb') as f:
         pickle.dump(results, f)
     print(f"\nResults saved: {results_file}")
+    sys.stdout.flush()
 
     # Plot comparison
     fig = plot_model_comparison(
@@ -276,7 +331,12 @@ def evaluate_decoding_accuracy(results, n_runs=6, n_colors=8):
     accuracies : dict
         Decoding accuracies for each model
     """
-    channel_template = generate_channel_responses(n_colors=n_colors, n_channels=6)
+    # Use actual Lab hue values for channel template
+    channel_template = generate_channel_responses(
+        n_colors=n_colors,
+        n_channels=6,
+        use_actual_hues=True
+    )
     true_labels = np.tile(np.arange(n_colors), n_runs)
 
     accuracies = {}
@@ -290,6 +350,7 @@ def evaluate_decoding_accuracy(results, n_runs=6, n_colors=8):
 
         print(f"{name:<30} Accuracy: {accuracy:.3f} ({accuracy*100:.1f}%)")
 
+    sys.stdout.flush()
     return accuracies
 
 
@@ -324,6 +385,8 @@ def main():
         print(f"\n{'='*60}")
         print("COLOR DECODING ACCURACY")
         print(f"{'='*60}")
+        sys.stdout.flush()
+
         accuracies = evaluate_decoding_accuracy(
             results,
             n_runs=cfg.N_RUNS,
@@ -337,6 +400,7 @@ def main():
         print(f"Accuracy: {accuracies[best_model]:.3f}")
         print(f"R²: {results[best_model]['mean_r2']:.4f}")
         print(f"{'='*60}")
+        sys.stdout.flush()
 
 
 if __name__ == '__main__':

@@ -20,10 +20,46 @@ All models use the same interface:
 import numpy as np
 import pickle
 import os
+import sys
 from sklearn.linear_model import Ridge, RidgeCV
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import r2_score, mean_squared_error
 import matplotlib.pyplot as plt
+
+
+# ============================================================================
+# Color Space Configuration
+# ============================================================================
+
+# Corrected Lab hue values for PILOT data
+# These were computed from the actual RGB values in colorBlind_pilotTest.py
+# NOT from the IRB document (which had incorrect values)
+LABEL2HUE_DEG_PILOT = {
+    'color_1': 182.142053052572436,   # Cyan-ish (IRB incorrectly said 178.57°)
+    'color_2': 287.979026187069735,   # Blue-purple (IRB incorrectly said 310.77°)
+    'color_3': 305.226546308759566,   # Purple (IRB incorrectly said 316.10°)
+    'color_4': 330.204721787408289,   # Pink (IRB incorrectly said 333.86°)
+    'color_5': 35.269500805260478,    # Orange-red (IRB incorrectly said 54.50°)
+    'color_6': 73.365061454288877,    # Yellow-orange (IRB incorrectly said 68.45°)
+    'color_7': 125.585145639335096,   # Green-yellow (IRB incorrectly said 130.78°)
+    'color_8': 143.909094545652778,   # Green (IRB incorrectly said 153.72°)
+}
+
+# MAIN experiment uses uniform 45° spacing (8 colors evenly distributed)
+# Starting from 0° and going clockwise
+LABEL2HUE_DEG_MAIN = {
+    'color_1': 0.0,      # Red
+    'color_2': 45.0,     # Orange
+    'color_3': 90.0,     # Yellow
+    'color_4': 135.0,    # Yellow-Green
+    'color_5': 180.0,    # Cyan
+    'color_6': 225.0,    # Blue
+    'color_7': 270.0,    # Purple
+    'color_8': 315.0,    # Magenta
+}
+
+# NOTE: Pilot data has non-uniform spacing (gaps from 18.3° to 105.8°)
+# This makes reconstruction harder. Main experiment should perform better.
 
 
 # ============================================================================
@@ -39,6 +75,7 @@ try:
 except ImportError:
     TORCH_AVAILABLE = False
     print("Warning: PyTorch not available. Only Ridge regression will work.")
+    sys.stdout.flush()
 
 
 # ============================================================================
@@ -141,6 +178,7 @@ class RidgeCVForwardModel(ForwardModel):
         self.model.fit(voxels_norm, channels)
 
         print(f"  Best alpha: {self.model.alpha_:.4f}")
+        sys.stdout.flush()
         return self
 
     def predict(self, voxels):
@@ -223,6 +261,7 @@ if TORCH_AVAILABLE:
 
                 if (epoch + 1) % 20 == 0:
                     print(f"  Epoch {epoch+1}/{self.epochs}, Loss: {total_loss/len(loader):.4f}")
+                    sys.stdout.flush()
 
             return self
 
@@ -330,6 +369,7 @@ if TORCH_AVAILABLE:
 
                 if (epoch + 1) % 20 == 0:
                     print(f"  Epoch {epoch+1}/{self.epochs}, Loss: {total_loss/len(loader):.4f}")
+                    sys.stdout.flush()
 
             return self
 
@@ -444,6 +484,7 @@ if TORCH_AVAILABLE:
 
                 if (epoch + 1) % 20 == 0:
                     print(f"  Epoch {epoch+1}/{self.epochs}, Loss: {total_loss/len(loader):.4f}")
+                    sys.stdout.flush()
 
             return self
 
@@ -488,6 +529,7 @@ class EnsembleForwardModel(ForwardModel):
         """Fit all models in ensemble"""
         for i, model in enumerate(self.models):
             print(f"\nTraining model {i+1}/{len(self.models)}: {model.__class__.__name__}")
+            sys.stdout.flush()
             model.fit(voxels, channels)
         return self
 
@@ -566,6 +608,7 @@ def leave_one_run_out_cv(model_class, voxels, channels, n_runs,
     for test_run in range(n_runs):
         if verbose:
             print(f"\nCV Fold {test_run+1}/{n_runs} (test run: {test_run+1})")
+            sys.stdout.flush()
 
         # Split data
         test_idx = slice(test_run * n_samples_per_run,
@@ -593,6 +636,7 @@ def leave_one_run_out_cv(model_class, voxels, channels, n_runs,
 
         if verbose:
             print(f"  R² (test): {metrics['r2_test']:.4f}")
+            sys.stdout.flush()
 
     # Aggregate results
     results = {
@@ -606,6 +650,7 @@ def leave_one_run_out_cv(model_class, voxels, channels, n_runs,
     if verbose:
         print(f"\n{'='*60}")
         print(f"Mean R² across folds: {results['mean_r2']:.4f} ± {results['std_r2']:.4f}")
+        sys.stdout.flush()
 
     return results
 
@@ -634,6 +679,7 @@ def compare_models(models_dict, voxels, channels, n_runs):
         print(f"\n{'='*60}")
         print(f"Evaluating: {name}")
         print(f"{'='*60}")
+        sys.stdout.flush()
 
         results[name] = leave_one_run_out_cv(
             model_class, voxels, channels, n_runs,
@@ -646,10 +692,12 @@ def compare_models(models_dict, voxels, channels, n_runs):
     print(f"{'='*60}")
     print(f"{'Model':<30} {'Mean R²':<15} {'Std R²':<15}")
     print("-" * 60)
+    sys.stdout.flush()
 
     for name, result in results.items():
         print(f"{name:<30} {result['mean_r2']:<15.4f} {result['std_r2']:<15.4f}")
 
+    sys.stdout.flush()
     return results
 
 
@@ -695,6 +743,7 @@ def plot_model_comparison(comparison_results, save_path=None):
     if save_path:
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
         print(f"Saved comparison plot: {save_path}")
+        sys.stdout.flush()
 
     return fig
 
@@ -706,6 +755,7 @@ def plot_model_comparison(comparison_results, save_path=None):
 if __name__ == '__main__':
     print("ML/DL Forward Model Implementations")
     print("=" * 60)
+    sys.stdout.flush()
 
     # Simulate data
     np.random.seed(42)

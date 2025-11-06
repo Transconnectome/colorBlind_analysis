@@ -1,0 +1,73 @@
+#!/bin/bash
+#SBATCH -J fprep_full
+#SBATCH -c 8
+#SBATCH --mem=32G
+#SBATCH -t 48:00:00
+#SBATCH -o logs/fprep_full_%j.out
+#SBATCH -e logs/fprep_full_%j.err
+#SBATCH --nodelist=node2
+
+# Full fMRIPrep (anatomical + functional preprocessing)
+# Remove --anat-only to process BOLD data
+
+# Singularity path
+APPTAINER=/usr/local/bin/singularity
+
+# Output directories
+OUT_DIR=/scratch/connectome/haba6030/fmriprep_out
+WORK_DIR=/scratch/connectome/haba6030/fmriprep_work
+mkdir -p "$OUT_DIR" "$WORK_DIR"
+
+# Required paths
+DS_LOCALIZER=${DS_LOCALIZER:-/scratch/connectome/haba6030/colorBlind/colorBlind_dataOct}
+FS_LICENSE=${FS_LICENSE:-$HOME/fs_license.txt}
+FMRIprep_IMG=${FMRIprep_IMG:-$HOME/fmriprep-23.2.3.sif}
+
+# Check paths exist
+if [ ! -d "$DS_LOCALIZER" ]; then
+  echo "Dataset path not found: $DS_LOCALIZER" >&2
+  exit 1
+fi
+if [ ! -f "$FS_LICENSE" ]; then
+  echo "FreeSurfer license not found: $FS_LICENSE" >&2
+  exit 1
+fi
+if [ ! -f "$FMRIprep_IMG" ]; then
+  echo "fMRIPrep image not found: $FMRIprep_IMG" >&2
+  exit 1
+fi
+
+# Participant to process
+PARTICIPANT_LABELS=${PARTICIPANT_LABELS:-"sub-01"}
+IFS=' ' read -r -a PARTICIPANTS <<< "$PARTICIPANT_LABELS"
+if [ ${#PARTICIPANTS[@]} -eq 0 ]; then
+  echo "No participant labels provided." >&2
+  exit 1
+fi
+
+echo "Running FULL fMRIPrep (anatomical + functional)"
+echo "Participants: ${PARTICIPANTS[@]}"
+echo
+
+# Run fMRIPrep WITHOUT --anat-only
+"$APPTAINER" run --cleanenv \
+  -B "$DS_LOCALIZER":/data:ro \
+  -B "$OUT_DIR":/out \
+  -B "$WORK_DIR":/work \
+  "$FMRIprep_IMG" \
+  /data /out participant \
+  --participant-label "${PARTICIPANTS[@]}" \
+  --fs-license-file $FS_LICENSE \
+  --output-spaces T1w fsaverage MNI152NLin2009cAsym \
+  --bold2t1w-dof 6 \
+  --cifti-output 91k \
+  --use-syn-sdc \
+  --n_cpus ${SLURM_CPUS_PER_TASK:-8} \
+  --mem_mb 32000 \
+  -w /work \
+  --write-graph \
+  --skip-bids-validation
+
+echo
+echo "fMRIPrep completed!"
+echo "Output: $OUT_DIR"

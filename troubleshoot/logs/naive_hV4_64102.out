@@ -1,0 +1,182 @@
+Starting hV4 ROI analysis...
+Working directory: /scratch/connectome/haba6030/colorBlind
+
+Cleared cache: hrf_test_outputs/cache_hV4/
+
+============================================================
+NAIVE_ANALYSIS.PY STARTED
+Subject: sub-01, Task: rsvp, Space: MNI152NLin2009cAsym
+Output directory: ./hrf_test_outputs
+Working directory: /scratch/connectome/haba6030/colorBlind
+============================================================
+
+[INFO] Discovering ROI masks...
+[INFO] Available ROI masks:
+  - brain: output/pilot/sub-01/anat/sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz
+  - BrainMask: derivatives/sub-01/roi/sub-01_BrainMask_mask.nii.gz
+  - EarlyVisual: derivatives/sub-01/roi/sub-01_EarlyVisual_fixed_mask.nii.gz
+  - V1: derivatives/sub-01/roi/sub-01_V1_mask.nii.gz
+  - V2: derivatives/sub-01/roi/sub-01_V2_mask.nii.gz
+  - V3: derivatives/sub-01/roi/sub-01_V3_mask.nii.gz
+  - Ventral: derivatives/sub-01/roi/sub-01_Ventral_fixed_mask.nii.gz
+  - preproc: derivatives/sub-01/roi/sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_desc-preproc_T1w_anat_mask.nii.gz
+  - ribbon: derivatives/sub-01/roi/sub-01_acq-mprage_desc-ribbon_anat_mask.nii.gz
+  - sub-01_acq-mprage_dseg_anat_mask: derivatives/sub-01/roi/sub-01_acq-mprage_dseg_anat_mask.nii.gz
+  - sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_dseg_anat_mask: derivatives/sub-01/roi/sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_dseg_anat_mask.nii.gz
+  - sub-01_functional_mask: derivatives/sub-01/roi/sub-01_functional_mask.nii.gz
+  - hV4: derivatives/sub-01/roi/sub-01_hV4_mask.nii.gz
+[INFO] Loading ROI mask: derivatives/sub-01/roi/sub-01_hV4_mask.nii.gz
+[INFO] This may take 2-3 minutes on slow filesystems...
+[INFO] Mask loaded successfully!
+[INFO] Fitting NiftiMasker (this may take 1-2 minutes)...
+[INFO] NiftiMasker fitted successfully!
+
+[INFO] Configured 6 BOLD runs for analysis
+
+[INFO] Checking for existing TR regressor CSV files...
+[INFO] All TR regressor CSV files found. Skipping generation (saves ~8GB and computation time).
+
+완료: 각 run별 HRF 파형 PNG + TR시점 리그래서 CSV가 생성되었습니다.
+※ amplitude 미지정 시 1로 가정했습니다(공식 시그니처: [onset, duration, amplitude]).
+
+[INFO] Checking for existing design matrix CSV files...
+[INFO] Loading existing design matrices from CSV files (saves computation time)...
+Loaded: ./hrf_test_outputs/sub-01_rsvp_run-1_design_matrix.csv
+Loaded: ./hrf_test_outputs/sub-01_rsvp_run-2_design_matrix.csv
+Loaded: ./hrf_test_outputs/sub-01_rsvp_run-3_design_matrix.csv
+Loaded: ./hrf_test_outputs/sub-01_rsvp_run-4_design_matrix.csv
+Loaded: ./hrf_test_outputs/sub-01_rsvp_run-5_design_matrix.csv
+Loaded: ./hrf_test_outputs/sub-01_rsvp_run-6_design_matrix.csv
+
+[INFO] Loading existing first-level model from ./hrf_test_outputs/sub-01_rsvp_firstlevel.joblib (saves ~8GB and fitting time)...
+[INFO] First-level model loaded successfully.
+
+[INFO] Computing and saving contrast maps...
+Loading existing: ./hrf_test_outputs/sub-01_rsvp_color_1minusblank_zmap.nii.gz
+Loading existing: ./hrf_test_outputs/sub-01_rsvp_color_2minusblank_zmap.nii.gz
+Loading existing: ./hrf_test_outputs/sub-01_rsvp_color_3minusblank_zmap.nii.gz
+Loading existing: ./hrf_test_outputs/sub-01_rsvp_color_4minusblank_zmap.nii.gz
+Loading existing: ./hrf_test_outputs/sub-01_rsvp_color_5minusblank_zmap.nii.gz
+Loading existing: ./hrf_test_outputs/sub-01_rsvp_color_6minusblank_zmap.nii.gz
+Loading existing: ./hrf_test_outputs/sub-01_rsvp_color_7minusblank_zmap.nii.gz
+Loading existing: ./hrf_test_outputs/sub-01_rsvp_color_8minusblank_zmap.nii.gz
+Loading existing: ./hrf_test_outputs/sub-01_rsvp_avg_colorsminusblank_zmap.nii.gz
+
+[INFO] Generating PNG thumbnails...
+Saved: ./hrf_test_outputs/sub-01_rsvp_hV4_run1_observed_predicted_residuals.csv
+Saved: ./hrf_test_outputs/sub-01_rsvp_hV4_run2_observed_predicted_residuals.csv
+Saved: ./hrf_test_outputs/sub-01_rsvp_hV4_run3_observed_predicted_residuals.csv
+Saved: ./hrf_test_outputs/sub-01_rsvp_hV4_run4_observed_predicted_residuals.csv
+Saved: ./hrf_test_outputs/sub-01_rsvp_hV4_run5_observed_predicted_residuals.csv
+Saved: ./hrf_test_outputs/sub-01_rsvp_hV4_run6_observed_predicted_residuals.csv
+Saved metrics: ./hrf_test_outputs/sub-01_rsvp_hV4_observed_predicted_residual_metrics.csv
+
+Metrics summary:
+ run  corr_obs_pred            R2  residual_RMSE
+   1       0.220939      0.789188       5.294517
+   2       0.456276      0.980937       0.780192
+   3      -0.008565 -10195.721425      70.071928
+   4      -0.051865 -87154.873206      70.072427
+   5            NaN           NaN      71.868972
+   6       0.557257      0.991658       0.543725
+Loaded: avg_colorsminusblank (97, 115, 97)
+Loaded: color_1minusblank (97, 115, 97)
+Loaded: color_7minusblank (97, 115, 97)
+Loaded: color_5minusblank (97, 115, 97)
+Loaded: color_8minusblank (97, 115, 97)
+Loaded: color_2minusblank (97, 115, 97)
+Loaded: color_6minusblank (97, 115, 97)
+Loaded: color_4minusblank (97, 115, 97)
+Loaded: color_3minusblank (97, 115, 97)
+Saved: ./hrf_test_outputs/sub-01_rsvp_avgColorsVsBlank_left_surf.png
+Saved: ./hrf_test_outputs/sub-01_rsvp_avgColorsVsBlank_right_surf.png
+Saved: ./hrf_test_outputs/sub-01_rsvp_avgColor_1_VsBlank_left_surf.png
+Saved: ./hrf_test_outputs/sub-01_rsvp_avgColor_1_VsBlank_right_surf.png
+Saved: ./hrf_test_outputs/sub-01_rsvp_avgColor_2_VsBlank_left_surf.png
+Saved: ./hrf_test_outputs/sub-01_rsvp_avgColor_2_VsBlank_right_surf.png
+Saved: ./hrf_test_outputs/sub-01_rsvp_avgColor_3_VsBlank_left_surf.png
+Saved: ./hrf_test_outputs/sub-01_rsvp_avgColor_3_VsBlank_right_surf.png
+Saved: ./hrf_test_outputs/sub-01_rsvp_avgColor_4_VsBlank_left_surf.png
+Saved: ./hrf_test_outputs/sub-01_rsvp_avgColor_4_VsBlank_right_surf.png
+Saved: ./hrf_test_outputs/sub-01_rsvp_avgColor_5_VsBlank_left_surf.png
+Saved: ./hrf_test_outputs/sub-01_rsvp_avgColor_5_VsBlank_right_surf.png
+Saved: ./hrf_test_outputs/sub-01_rsvp_avgColor_6_VsBlank_left_surf.png
+Saved: ./hrf_test_outputs/sub-01_rsvp_avgColor_6_VsBlank_right_surf.png
+Saved: ./hrf_test_outputs/sub-01_rsvp_avgColor_7_VsBlank_left_surf.png
+Saved: ./hrf_test_outputs/sub-01_rsvp_avgColor_7_VsBlank_right_surf.png
+Saved: ./hrf_test_outputs/sub-01_rsvp_avgColor_8_VsBlank_left_surf.png
+Saved: ./hrf_test_outputs/sub-01_rsvp_avgColor_8_VsBlank_right_surf.png
+
+[INFO] Running ROI-dependent analyses for 'hV4' mask
+[INFO] No cached run_mats found. Computing from scratch...
+[OK] Using 6 runs with a common voxel set. Each run matrix shape: (55, 9)
+[INFO] Saved run_mats to ./hrf_test_outputs/cache_hV4/run_mats_k.joblib
+[INFO] Dropping non-color conditions: [np.str_('blank')]
+[OK] Selected top 5000 voxels based on mean |z| scores.
+
+[INFO] No cached classification results found. Computing...
+[Classification][hV4] Test 1: acc=0.125
+[Classification][hV4] Test 2: acc=0.125
+[Classification][hV4] Test 3: acc=0.125
+[Classification][hV4] Test 4: acc=0.125
+[Classification][hV4] Test 5: acc=0.125
+[Classification][hV4] Test 6: acc=0.250
+[INFO] Saved classification results to ./hrf_test_outputs/cache_hV4/classification_results.joblib
+[INFO] Saved classification summary to ./hrf_test_outputs/cache_hV4/classification_results.csv
+
+[Classification][hV4] Per-color accuracy:
+  color_1: 0.500
+  color_8: 0.167
+  color_5: 0.167
+  color_7: 0.167
+  color_4: 0.167
+  color_6: 0.000
+  color_3: 0.000
+  color_2: 0.000
+
+[Classification][hV4] Best color: color_1 (0.500)
+[Classification][hV4] Worst color: color_2 (0.000)
+[Classification][hV4] Worst color misclassified mostly as color_1 (3 errors)
+[Classification][hV4] Best color still misclassified as color_2 (1 errors)
+[Diag-MLC][hV4] Run 1: acc=0.125, p=0.818, thr=0.250
+[Diag-MLC][hV4] Run 2: acc=0.125, p=1.000, thr=0.125
+[Diag-MLC][hV4] Run 3: acc=0.125, p=0.974, thr=0.125
+[Diag-MLC][hV4] Run 4: acc=0.125, p=0.978, thr=0.250
+[Diag-MLC][hV4] Run 5: acc=0.125, p=1.000, thr=0.125
+[Diag-MLC][hV4] Run 6: acc=0.250, p=0.198, thr=0.250
+
+[INFO] Skipping simple forward model test (will run full version with permutation test later)
+
+[INFO] Using Lab hue values (perceptually uniform):
+  color_1: 182.1°
+  color_2: 288.0°
+  color_3: 305.2°
+  color_4: 330.2°
+  color_5: 35.3°
+  color_6: 73.4°
+  color_7: 125.6°
+  color_8: 143.9°
+
+[INFO] Preparing reconstruction analysis with 6 runs
+[INFO] Each run has 8 colors, 55 voxels
+
+[INFO] No cached reconstruction results found. Computing...
+[Forward-Recon][hV4] Run 1: hit=0.000, p=1.000, thr=0.375 (tol=22.5°, lam=0.01, n_perm=1000)
+[Forward-Recon][hV4] Run 2: hit=0.000, p=1.000, thr=0.375 (tol=22.5°, lam=0.01, n_perm=1000)
+[Forward-Recon][hV4] Run 3: hit=0.250, p=0.385, thr=0.375 (tol=22.5°, lam=0.01, n_perm=1000)
+[Forward-Recon][hV4] Run 4: hit=0.250, p=0.416, thr=0.500 (tol=22.5°, lam=0.01, n_perm=1000)
+[Forward-Recon][hV4] Run 5: hit=0.000, p=1.000, thr=0.000 (tol=22.5°, lam=0.01, n_perm=1000)
+[Forward-Recon][hV4] Run 6: hit=0.000, p=1.000, thr=0.500 (tol=22.5°, lam=0.01, n_perm=1000)
+[INFO] Saved reconstruction results to ./hrf_test_outputs/cache_hV4/reconstruction_results.joblib
+[INFO] Saved reconstruction summary to ./hrf_test_outputs/cache_hV4/reconstruction_results.csv
+
+[Forward-Recon][hV4] MEAN hit=0.083, MEAN p=0.800, MEAN thr=0.354
+
+[INFO] Generating polar plot visualization...
+[INFO] Polar plot saved: ./hrf_test_outputs/forward_viz/all_runs_polar_clusters.png
+
+============================================================
+ALL ANALYSES COMPLETED SUCCESSFULLY!
+============================================================
+
+hV4 analysis complete!

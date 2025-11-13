@@ -1,0 +1,22 @@
+================================================
+🧠 fMRIPrep Docker SLURM Job 시작
+BIDS_DIR=/scratch/connectome/haba6030/colorBlind/pilot
+OUTPUT_DIR=/scratch/connectome/haba6030/colorBlind/output/pilot
+WORKDIR=/scratch/connectome/haba6030/colorBlind/work/pilot
+THREADS=16  MEM_MB=16000
+IMAGE=nipreps/fmriprep:25.0.0
+================================================
+bids-validator@1.14.10
+	1: [ERR] Files with such naming scheme are not part of BIDS specification. This error is most commonly caused by typos in file names that make them not BIDS compatible. Please consult the specification and make sure your files are named correctly. If this is not a file naming issue (for example when including files not yet covered by the BIDS specification) you should include a ".bidsignore" file in your dataset (see https://github.com/bids-standard/bids-validator#bidsignore for details). Please note that derived (processed) data should be placed in /derivatives folder and source data (such as DICOMS or behavioural logs in proprietary formats) should be placed in the /sourcedata folder. (code: 1 - NOT_INCLUDED)
+		./run_fmriprep_docker_pilot.sh
+			Evidence: run_fmriprep_docker_pilot.sh
+
+	Please visit https://neurostars.org/search?q=NOT_INCLUDED for existing conversations about this issue.
+
+        Summary:                  Available Tasks:        Available Modalities: 
+        37 Files, 447.24MB        rsvp                    MRI                   
+        1 - Subject                                                             
+        1 - Session                                                             
+
+
+	If you have any questions, please post on https://neurostars.org/tags/bids.

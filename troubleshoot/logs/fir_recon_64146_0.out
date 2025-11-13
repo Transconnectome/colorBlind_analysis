@@ -1,0 +1,50 @@
+========================================================================
+FIR Reconstruction - Array Job 0
+========================================================================
+Job ID: 64147
+Array Job ID: 64146
+Array Task ID: 0
+Node: node2
+ROI: V1
+Use PCA: 1
+PCA components: 20
+Save z-maps: 1
+Working directory: /scratch/connectome/haba6030/colorBlind
+========================================================================
+
+Activating nilearn environment...
+Environment activated: /home/connectome/haba6030/.conda/envs/nilearn/bin/python
+Python version: Python 3.10.14
+
+Starting FIR reconstruction for ROI: V1
+Start time: 2025. 11. 06. (목) 17:01:12 KST
+
+Command: python fir_reconstruction.py --roi V1 --use-pca --n-components 20 --save-zmaps
+
+======================================================================
+FIR-based Color Reconstruction Pipeline
+======================================================================
+Subject: sub-01
+ROI: V1
+Use PCA: True
+PCA components: 20
+Output directory: derivatives/sub-01/fir_reconstruction/V1
+
+[1/8] Loading ROI mask: V1
+  Path: derivatives/sub-01/roi/sub-01_V1_mask.nii.gz
+  Number of voxels: 511
+
+[2/8] Loading 6 runs of functional data and events
+  Run 1: (97, 115, 97, 284), 72 events
+  Run 2: (97, 115, 97, 271), 72 events
+  Run 3: (97, 115, 97, 271), 72 events
+  Run 4: (97, 115, 97, 271), 72 events
+  Run 5: (97, 115, 97, 271), 72 events
+  Run 6: (97, 115, 97, 271), 72 events
+  Total: 6 runs loaded
+
+[3/8] Fitting FIR model (may take 5-10 minutes)
+  Using hrf_model='fir' with 10 time bins
+  Each voxel gets its own response curve
+/scratch/connectome/haba6030/colorBlind/fir_reconstruction.py:218: UserWarning: Mean values of 0 observed. The data have probably been centered. Scaling might not work as expected.
+  fir_model.fit(func_imgs, events_list, confounds_list)

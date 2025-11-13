@@ -1,0 +1,50 @@
+/scratch/connectome/haba6030/colorBlind/naive_analysis.py:342: UserWarning: The following parameters are not needed for the selected strategy 'simple': ['strategy']; parameters accepted: ['motion', 'wm_csf', 'global_signal', 'demean']
+  conf_df, _ = load_confounds_strategy(bold_path, strategy=CONFOUND_STRATEGY)
+/scratch/connectome/haba6030/colorBlind/naive_analysis.py:362: DeprecationWarning: The parameter "ax" will be removed in 0.13.0 release of Nilearn. Please use the parameter "axes" instead.
+  plot_design_matrix(X, ax=ax)
+/scratch/connectome/haba6030/colorBlind/naive_analysis.py:342: UserWarning: The following parameters are not needed for the selected strategy 'simple': ['strategy']; parameters accepted: ['motion', 'wm_csf', 'global_signal', 'demean']
+  conf_df, _ = load_confounds_strategy(bold_path, strategy=CONFOUND_STRATEGY)
+/scratch/connectome/haba6030/colorBlind/naive_analysis.py:362: DeprecationWarning: The parameter "ax" will be removed in 0.13.0 release of Nilearn. Please use the parameter "axes" instead.
+  plot_design_matrix(X, ax=ax)
+/scratch/connectome/haba6030/colorBlind/naive_analysis.py:342: UserWarning: The following parameters are not needed for the selected strategy 'simple': ['strategy']; parameters accepted: ['motion', 'wm_csf', 'global_signal', 'demean']
+  conf_df, _ = load_confounds_strategy(bold_path, strategy=CONFOUND_STRATEGY)
+/scratch/connectome/haba6030/colorBlind/naive_analysis.py:362: DeprecationWarning: The parameter "ax" will be removed in 0.13.0 release of Nilearn. Please use the parameter "axes" instead.
+  plot_design_matrix(X, ax=ax)
+/scratch/connectome/haba6030/colorBlind/naive_analysis.py:342: UserWarning: The following parameters are not needed for the selected strategy 'simple': ['strategy']; parameters accepted: ['motion', 'wm_csf', 'global_signal', 'demean']
+  conf_df, _ = load_confounds_strategy(bold_path, strategy=CONFOUND_STRATEGY)
+/scratch/connectome/haba6030/colorBlind/naive_analysis.py:362: DeprecationWarning: The parameter "ax" will be removed in 0.13.0 release of Nilearn. Please use the parameter "axes" instead.
+  plot_design_matrix(X, ax=ax)
+/scratch/connectome/haba6030/colorBlind/naive_analysis.py:342: UserWarning: The following parameters are not needed for the selected strategy 'simple': ['strategy']; parameters accepted: ['motion', 'wm_csf', 'global_signal', 'demean']
+  conf_df, _ = load_confounds_strategy(bold_path, strategy=CONFOUND_STRATEGY)
+/scratch/connectome/haba6030/colorBlind/naive_analysis.py:362: DeprecationWarning: The parameter "ax" will be removed in 0.13.0 release of Nilearn. Please use the parameter "axes" instead.
+  plot_design_matrix(X, ax=ax)
+/scratch/connectome/haba6030/colorBlind/naive_analysis.py:342: UserWarning: The following parameters are not needed for the selected strategy 'simple': ['strategy']; parameters accepted: ['motion', 'wm_csf', 'global_signal', 'demean']
+  conf_df, _ = load_confounds_strategy(bold_path, strategy=CONFOUND_STRATEGY)
+/scratch/connectome/haba6030/colorBlind/naive_analysis.py:362: DeprecationWarning: The parameter "ax" will be removed in 0.13.0 release of Nilearn. Please use the parameter "axes" instead.
+  plot_design_matrix(X, ax=ax)
+/scratch/connectome/haba6030/colorBlind/naive_analysis.py:378: UserWarning: If design matrices are supplied, [hrf_model, t_r] will be ignored.
+  first_level = FirstLevelModel(
+/scratch/connectome/haba6030/colorBlind/naive_analysis.py:378: UserWarning: Mean values of 0 observed. The data have probably been centered. Scaling might not work as expected.
+  first_level = FirstLevelModel(
+/scratch/connectome/haba6030/colorBlind/naive_analysis.py:392: RuntimeWarning: The same contrast will be used for all 6 runs. If the design matrices are not the same for all runs, (for example with different column names or column order across runs) you should pass contrast as an expression using the name of the conditions as they appear in the design matrices.
+  contrast_maps[name] = first_level.compute_contrast(name, output_type="z_score")
+/scratch/connectome/haba6030/colorBlind/naive_analysis.py:392: RuntimeWarning: The same contrast will be used for all 6 runs. If the design matrices are not the same for all runs, (for example with different column names or column order across runs) you should pass contrast as an expression using the name of the conditions as they appear in the design matrices.
+  contrast_maps[name] = first_level.compute_contrast(name, output_type="z_score")
+/scratch/connectome/haba6030/colorBlind/naive_analysis.py:392: RuntimeWarning: The same contrast will be used for all 6 runs. If the design matrices are not the same for all runs, (for example with different column names or column order across runs) you should pass contrast as an expression using the name of the conditions as they appear in the design matrices.
+  contrast_maps[name] = first_level.compute_contrast(name, output_type="z_score")
+/scratch/connectome/haba6030/colorBlind/naive_analysis.py:392: RuntimeWarning: The same contrast will be used for all 6 runs. If the design matrices are not the same for all runs, (for example with different column names or column order across runs) you should pass contrast as an expression using the name of the conditions as they appear in the design matrices.
+  contrast_maps[name] = first_level.compute_contrast(name, output_type="z_score")
+/scratch/connectome/haba6030/colorBlind/naive_analysis.py:392: RuntimeWarning: The same contrast will be used for all 6 runs. If the design matrices are not the same for all runs, (for example with different column names or column order across runs) you should pass contrast as an expression using the name of the conditions as they appear in the design matrices.
+  contrast_maps[name] = first_level.compute_contrast(name, output_type="z_score")
+/scratch/connectome/haba6030/colorBlind/naive_analysis.py:392: RuntimeWarning: The same contrast will be used for all 6 runs. If the design matrices are not the same for all runs, (for example with different column names or column order across runs) you should pass contrast as an expression using the name of the conditions as they appear in the design matrices.
+  contrast_maps[name] = first_level.compute_contrast(name, output_type="z_score")
+/scratch/connectome/haba6030/colorBlind/naive_analysis.py:392: RuntimeWarning: The same contrast will be used for all 6 runs. If the design matrices are not the same for all runs, (for example with different column names or column order across runs) you should pass contrast as an expression using the name of the conditions as they appear in the design matrices.
+  contrast_maps[name] = first_level.compute_contrast(name, output_type="z_score")
+/scratch/connectome/haba6030/colorBlind/naive_analysis.py:392: RuntimeWarning: The same contrast will be used for all 6 runs. If the design matrices are not the same for all runs, (for example with different column names or column order across runs) you should pass contrast as an expression using the name of the conditions as they appear in the design matrices.
+  contrast_maps[name] = first_level.compute_contrast(name, output_type="z_score")
+/scratch/connectome/haba6030/colorBlind/naive_analysis.py:396: RuntimeWarning: The same contrast will be used for all 6 runs. If the design matrices are not the same for all runs, (for example with different column names or column order across runs) you should pass contrast as an expression using the name of the conditions as they appear in the design matrices.
+  contrast_maps["avg_colors - blank"] = first_level.compute_contrast(avg_vs_blank, output_type="z_score")
+Traceback (most recent call last):
+  File "/scratch/connectome/haba6030/colorBlind/naive_analysis.py", line 481, in <module>
+    display(metrics_df)
+TypeError: 'ZSlicer' object is not callable

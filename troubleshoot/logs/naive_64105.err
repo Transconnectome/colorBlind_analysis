@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/scratch/connectome/haba6030/colorBlind/quick_roi_check.py", line 168, in <module>
+    quick_check()
+  File "/scratch/connectome/haba6030/colorBlind/quick_roi_check.py", line 40, in quick_check
+    cfg.FMRIPREP_DIR, cfg.SUB_ID, "func",
+AttributeError: 'Config' object has no attribute 'FMRIPREP_DIR'
+Traceback (most recent call last):
+  File "/scratch/connectome/haba6030/colorBlind/diagnose_roi_alignment.py", line 44, in <module>
+    FMRIPREP_DIR = cfg.FMRIPREP_DIR
+AttributeError: 'Config' object has no attribute 'FMRIPREP_DIR'

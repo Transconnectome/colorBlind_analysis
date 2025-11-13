@@ -384,6 +384,182 @@ if SAVE_ZMAPS:
     sys.stdout.flush()
 
 # ============================================================================
+# Z-Map Matrix Visualization
+# ============================================================================
+
+if SAVE_ZMAPS:
+    print("Creating z-map matrix visualization...")
+
+    # Extract z-scores for each voxel × color
+    zscores_matrix = np.zeros((n_voxels, cfg.N_COLORS))
+
+    for color_idx in range(cfg.N_COLORS):
+        if z_maps[color_idx] is not None:
+            z_data = masker.transform(z_maps[color_idx]).ravel()
+            zscores_matrix[:, color_idx] = z_data
+
+    # 1. Full Z-Score Matrix Heatmap (unsorted)
+    fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+    fig.suptitle(f'{ROI_NAME}: Z-Score Matrix Visualization', fontsize=16, fontweight='bold')
+
+    # Top-left: Raw matrix (all voxels × colors)
+    ax1 = axes[0, 0]
+    im1 = ax1.imshow(zscores_matrix.T, aspect='auto', cmap='RdBu_r', vmin=-5, vmax=5)
+    ax1.set_xlabel('Voxel Index')
+    ax1.set_ylabel('Color')
+    ax1.set_yticks(range(cfg.N_COLORS))
+    ax1.set_yticklabels([f'c{i+1}' for i in range(cfg.N_COLORS)])
+    ax1.set_title('Raw Z-Scores (Colors × Voxels)')
+    plt.colorbar(im1, ax=ax1, label='Z-score')
+
+    # Top-right: Sorted by peak color preference
+    voxel_peak_colors = np.argmax(np.abs(zscores_matrix), axis=1)
+    sorted_indices = np.argsort(voxel_peak_colors)
+    zscores_sorted = zscores_matrix[sorted_indices, :]
+
+    ax2 = axes[0, 1]
+    im2 = ax2.imshow(zscores_sorted.T, aspect='auto', cmap='RdBu_r', vmin=-5, vmax=5)
+    ax2.set_xlabel('Voxel Index (sorted by peak color)')
+    ax2.set_ylabel('Color')
+    ax2.set_yticks(range(cfg.N_COLORS))
+    ax2.set_yticklabels([f'c{i+1}' for i in range(cfg.N_COLORS)])
+    ax2.set_title('Sorted by Voxel Color Preference')
+    plt.colorbar(im2, ax=ax2, label='Z-score')
+
+    # Bottom-left: Per-color z-score distribution
+    ax3 = axes[1, 0]
+    violin_parts = ax3.violinplot([zscores_matrix[:, i] for i in range(cfg.N_COLORS)],
+                               positions=range(cfg.N_COLORS),
+                               showmeans=True, showmedians=True)
+    ax3.axhline(y=0, color='gray', linestyle='--', alpha=0.5)
+    ax3.axhline(y=2.3, color='red', linestyle=':', alpha=0.5, label='p<0.01')
+    ax3.axhline(y=-2.3, color='red', linestyle=':', alpha=0.5)
+    ax3.set_xlabel('Color')
+    ax3.set_ylabel('Z-score')
+    ax3.set_xticks(range(cfg.N_COLORS))
+    ax3.set_xticklabels([f'c{i+1}' for i in range(cfg.N_COLORS)])
+    ax3.set_title('Z-Score Distribution per Color')
+    ax3.legend()
+    ax3.grid(True, alpha=0.3, axis='y')
+
+    # Bottom-right: Voxel selectivity statistics
+    ax4 = axes[1, 1]
+
+    # Count voxels with significant response (|z| > 2.3) for each color
+    significant_counts = np.sum(np.abs(zscores_matrix) > 2.3, axis=0)
+    selective_voxels = np.sum(np.any(np.abs(zscores_matrix) > 2.3, axis=1))
+
+    bars = ax4.bar(range(cfg.N_COLORS), significant_counts, alpha=0.7, edgecolor='black')
+    ax4.set_xlabel('Color')
+    ax4.set_ylabel('# Voxels with |z| > 2.3')
+    ax4.set_xticks(range(cfg.N_COLORS))
+    ax4.set_xticklabels([f'c{i+1}' for i in range(cfg.N_COLORS)])
+    ax4.set_title(f'Color Selectivity\n({selective_voxels}/{n_voxels} voxels selective)')
+    ax4.grid(True, alpha=0.3, axis='y')
+
+    # Add count labels on bars
+    for bar, count in zip(bars, significant_counts):
+        height = bar.get_height()
+        ax4.text(bar.get_x() + bar.get_width()/2., height,
+                f'{int(count)}',
+                ha='center', va='bottom', fontsize=10, fontweight='bold')
+
+    plt.tight_layout()
+    zmatrix_plot_path = fig_dir / f"{ROI_NAME}_zscores_matrix.png"
+    plt.savefig(zmatrix_plot_path, dpi=150, bbox_inches='tight')
+    plt.close()
+    print(f"  Saved: {zmatrix_plot_path}")
+
+    # 2. Detailed per-color z-score heatmaps (top 100 voxels)
+    fig, axes = plt.subplots(2, 4, figsize=(16, 8))
+    fig.suptitle(f'{ROI_NAME}: Top Voxels per Color (Highest |z|)', fontsize=14, fontweight='bold')
+
+    for color_idx in range(cfg.N_COLORS):
+        ax = axes[color_idx // 4, color_idx % 4]
+
+        # Get top voxels for this color
+        color_zscores = zscores_matrix[:, color_idx]
+        top_indices = np.argsort(np.abs(color_zscores))[-100:][::-1]
+
+        # Show z-scores across all colors for these top voxels
+        top_zscores = zscores_matrix[top_indices, :]
+
+        im = ax.imshow(top_zscores, aspect='auto', cmap='RdBu_r', vmin=-5, vmax=5)
+        ax.set_xlabel('Color')
+        ax.set_ylabel('Top 100 voxels')
+        ax.set_xticks(range(cfg.N_COLORS))
+        ax.set_xticklabels([f'{i+1}' for i in range(cfg.N_COLORS)], fontsize=8)
+        ax.set_title(f'c{color_idx+1} (peak |z|={np.abs(color_zscores).max():.1f})')
+
+        # Highlight the color column
+        ax.axvline(x=color_idx-0.5, color='yellow', linewidth=2, alpha=0.5)
+        ax.axvline(x=color_idx+0.5, color='yellow', linewidth=2, alpha=0.5)
+
+    plt.colorbar(im, ax=axes.ravel().tolist(), label='Z-score', shrink=0.6)
+    plt.tight_layout()
+    top_voxels_plot_path = fig_dir / f"{ROI_NAME}_top_voxels_per_color.png"
+    plt.savefig(top_voxels_plot_path, dpi=150, bbox_inches='tight')
+    plt.close()
+    print(f"  Saved: {top_voxels_plot_path}")
+
+    # 3. Voxel-wise color preference wheel
+    fig, ax = plt.subplots(figsize=(10, 10), subplot_kw=dict(projection='polar'))
+
+    # Map color indices to hue angles
+    color_hues_rad = []
+    for i in range(cfg.N_COLORS):
+        color_name = f'color_{i+1}'
+        hue_deg = LABEL2HUE_DEG_PILOT[color_name]
+        color_hues_rad.append(np.deg2rad(hue_deg))
+
+    # For each voxel, plot its preferred color direction weighted by z-score magnitude
+    for vox_idx in range(n_voxels):
+        vox_zscores = zscores_matrix[vox_idx, :]
+
+        # Only plot if voxel is selective (max |z| > 2.3)
+        if np.abs(vox_zscores).max() > 2.3:
+            # Find peak color
+            peak_color_idx = np.argmax(np.abs(vox_zscores))
+            peak_zscore = vox_zscores[peak_color_idx]
+
+            # Plot at that color's hue angle
+            angle = color_hues_rad[peak_color_idx]
+            radius = np.abs(peak_zscore)
+
+            # Color by sign (positive = excitatory, negative = inhibitory)
+            color = 'red' if peak_zscore > 0 else 'blue'
+            alpha = min(0.3, 30.0 / n_voxels)  # Scale alpha by number of voxels
+
+            ax.scatter(angle, radius, c=color, s=20, alpha=alpha)
+
+    # Add color reference points
+    for i in range(cfg.N_COLORS):
+        angle = color_hues_rad[i]
+        ax.scatter(angle, 1, c='black', s=200, marker='*', zorder=10)
+        ax.text(angle, 1.15, f'c{i+1}', ha='center', va='center', fontsize=12, fontweight='bold')
+
+    ax.set_ylim([0, max(np.abs(zscores_matrix).max(), 5)])
+    ax.set_title(f'{ROI_NAME}: Voxel Color Preferences\n(Red=excitatory, Blue=inhibitory)',
+                 fontsize=14, fontweight='bold', pad=20)
+
+    plt.tight_layout()
+    wheel_plot_path = fig_dir / f"{ROI_NAME}_color_preference_wheel.png"
+    plt.savefig(wheel_plot_path, dpi=150, bbox_inches='tight')
+    plt.close()
+    print(f"  Saved: {wheel_plot_path}")
+
+    # Print statistics
+    print()
+    print("Z-Score Matrix Statistics:")
+    print(f"  Voxels: {n_voxels}")
+    print(f"  Colors: {cfg.N_COLORS}")
+    print(f"  Z-score range: [{zscores_matrix.min():.2f}, {zscores_matrix.max():.2f}]")
+    print(f"  Selective voxels (|z|>2.3 for any color): {selective_voxels} ({100*selective_voxels/n_voxels:.1f}%)")
+    print(f"  Mean |z| per color: {np.mean(np.abs(zscores_matrix), axis=0).round(2)}")
+    print()
+    sys.stdout.flush()
+
+# ============================================================================
 # Helper Functions
 # ============================================================================
 
@@ -641,6 +817,34 @@ print()
 print(f"Mean reconstruction error: {mean_reconstruction_error:.1f}°")
 print(f"Chance level (expected): 90.0° (uniform circular distribution)")
 print()
+
+# Additional statistics from naive_analysis style
+print("=== Detailed Per-Run Statistics ===")
+print(f"{'Run':<6} {'Mean Error':<12} {'Median Error':<14} {'Hit Rate (±30°)':<18} {'Hit Rate (±45°)':<18}")
+print("-" * 78)
+
+all_hit_rates_30 = []
+all_hit_rates_45 = []
+
+for result in reconstruction_results:
+    errors = result['errors']
+    mean_err = result['mean_error']
+    median_err = np.median(errors)
+
+    # Hit rate: percentage within tolerance
+    hit_30 = np.mean(errors <= 30) * 100
+    hit_45 = np.mean(errors <= 45) * 100
+
+    all_hit_rates_30.append(hit_30)
+    all_hit_rates_45.append(hit_45)
+
+    print(f"Run {result['test_run']:<3} {mean_err:>8.2f}°     {median_err:>8.2f}°        {hit_30:>6.1f}%            {hit_45:>6.1f}%")
+
+print("-" * 78)
+print(f"{'Mean':<6} {mean_reconstruction_error:>8.2f}°     "
+      f"{np.median([np.median(r['errors']) for r in reconstruction_results]):>8.2f}°        "
+      f"{np.mean(all_hit_rates_30):>6.1f}%            {np.mean(all_hit_rates_45):>6.1f}%")
+print()
 sys.stdout.flush()
 
 # ============================================================================
@@ -786,6 +990,480 @@ summary_csv_path = output_dir / "summary.csv"
 summary_df.to_csv(summary_csv_path, index=False)
 
 print(f"  Saved: {summary_csv_path}")
+print()
+
+# ============================================================================
+# Visualization: Reconstruction Results
+# ============================================================================
+
+print("Creating reconstruction visualizations...")
+
+# 1. True vs Reconstructed Hues (Leave-One-Run-Out)
+fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+fig.suptitle(f'{ROI_NAME}: Reconstruction Results (Leave-One-Run-Out)', fontsize=16, fontweight='bold')
+
+for idx, result in enumerate(reconstruction_results):
+    ax = axes[idx // 3, idx % 3]
+
+    true_hues = result['true_hues']
+    reconstructed_hues = result['reconstructed_hues']
+    errors = result['errors']
+
+    # Scatter plot
+    ax.scatter(true_hues, reconstructed_hues, s=100, alpha=0.7, c=range(cfg.N_COLORS), cmap='hsv')
+
+    # Perfect reconstruction line
+    ax.plot([0, 360], [0, 360], 'k--', alpha=0.3, label='Perfect reconstruction')
+
+    # Color labels
+    for i, (true_h, recon_h) in enumerate(zip(true_hues, reconstructed_hues)):
+        ax.text(true_h, recon_h, f'c{i+1}', fontsize=8, ha='center', va='bottom')
+
+    ax.set_xlabel('True Hue (°)')
+    ax.set_ylabel('Reconstructed Hue (°)')
+    ax.set_title(f'Run {result["test_run"]}: {result["mean_error"]:.1f}° error')
+    ax.set_xlim([0, 360])
+    ax.set_ylim([0, 360])
+    ax.grid(True, alpha=0.3)
+    ax.legend()
+
+plt.tight_layout()
+reconstruction_plot_path = fig_dir / f"{ROI_NAME}_reconstruction_per_run.png"
+plt.savefig(reconstruction_plot_path, dpi=150, bbox_inches='tight')
+plt.close()
+print(f"  Saved: {reconstruction_plot_path}")
+
+# 2. Confusion Matrix Visualization
+fig, ax = plt.subplots(figsize=(10, 8))
+
+# Create confusion matrix
+conf_matrix = np.zeros((cfg.N_COLORS, cfg.N_COLORS), dtype=int)
+for r in classification_results:
+    for true_idx, pred_idx in zip(r['y_true'], r['y_pred']):
+        conf_matrix[true_idx, pred_idx] += 1
+
+# Plot as heatmap
+im = ax.imshow(conf_matrix, cmap='Blues', aspect='auto')
+
+# Add text annotations
+for i in range(cfg.N_COLORS):
+    for j in range(cfg.N_COLORS):
+        count = conf_matrix[i, j]
+        color = 'white' if count > conf_matrix.max()/2 else 'black'
+        text = ax.text(j, i, str(count), ha="center", va="center", color=color, fontsize=12, fontweight='bold')
+
+# Labels and formatting
+ax.set_xticks(np.arange(cfg.N_COLORS))
+ax.set_yticks(np.arange(cfg.N_COLORS))
+ax.set_xticklabels([f'c{i+1}' for i in range(cfg.N_COLORS)])
+ax.set_yticklabels([f'c{i+1}' for i in range(cfg.N_COLORS)])
+ax.set_xlabel('Predicted Color', fontsize=12, fontweight='bold')
+ax.set_ylabel('True Color', fontsize=12, fontweight='bold')
+ax.set_title(f'{ROI_NAME}: Classification Confusion Matrix\nAccuracy: {mean_classification_acc*100:.1f}%',
+             fontsize=14, fontweight='bold')
+
+# Add colorbar
+cbar = plt.colorbar(im, ax=ax)
+cbar.set_label('Count', rotation=270, labelpad=20, fontsize=10)
+
+plt.tight_layout()
+confusion_plot_path = fig_dir / f"{ROI_NAME}_confusion_matrix.png"
+plt.savefig(confusion_plot_path, dpi=150, bbox_inches='tight')
+plt.close()
+print(f"  Saved: {confusion_plot_path}")
+
+# 3. Polar Reconstruction Plot (naive_analysis style)
+# Convert Lab hue to RGB for display
+from skimage import color
+
+def lab_hue_to_rgb(hue_deg, L=70, C=60):
+    """Convert Lab hue to RGB color for visualization"""
+    # Convert hue to Lab a,b coordinates
+    hue_rad = np.deg2rad(hue_deg)
+    a = C * np.cos(hue_rad)
+    b = C * np.sin(hue_rad)
+
+    # Create Lab color
+    lab = np.array([[[L, a, b]]])
+
+    # Convert to RGB
+    rgb = color.lab2rgb(lab)[0, 0]
+
+    # Clip to valid range
+    rgb = np.clip(rgb, 0, 1)
+
+    return rgb
+
+# Calculate circular mean
+def circular_mean_deg(angles_deg):
+    """Calculate circular mean and resultant vector length"""
+    angles_rad = np.deg2rad(angles_deg)
+    sin_sum = np.sum(np.sin(angles_rad))
+    cos_sum = np.sum(np.cos(angles_rad))
+
+    mean_rad = np.arctan2(sin_sum, cos_sum)
+    mean_deg = np.rad2deg(mean_rad) % 360
+
+    R = np.sqrt(sin_sum**2 + cos_sum**2) / len(angles_deg)
+
+    return mean_deg, R
+
+# ================================
+# One-figure polar plot: all runs, clustered around each stimulus hue
+# ================================
+# (Style from naive_analysis.py)
+
+# Create polar plot
+fig = plt.figure(figsize=(7, 7))
+ax = plt.subplot(111, projection='polar')
+ax.set_title("All runs: True hues and prediction clusters", pad=18)
+ax.set_rticks([])                      # Hide radius ticks
+ax.set_theta_zero_location("E")        # 0° to the right
+ax.set_theta_direction(-1)             # Clockwise is positive
+ax.grid(alpha=0.25)
+
+rng = np.random.default_rng(3)
+r_center = 1.0
+r_pred_base = 0.92
+
+# Plot each color
+for color_idx in range(cfg.N_COLORS):
+    color_name = f'color_{color_idx+1}'
+    true_hue = LABEL2HUE_DEG_PILOT[color_name]
+    theta_true = np.deg2rad(true_hue)
+
+    # Get stimulus RGB color
+    try:
+        stim_rgb = lab_hue_to_rgb(true_hue)
+    except:
+        stim_rgb = 'gray'
+
+    # Center point (true hue with stimulus color)
+    ax.scatter([theta_true], [r_center], s=110, color=stim_rgb,
+               edgecolor='k', linewidths=0.8, zorder=4)
+
+    # Prediction points from all runs
+    preds = []
+    for result in reconstruction_results:
+        preds.append(result['reconstructed_hues'][color_idx])
+
+    if len(preds):
+        thetas = np.deg2rad(np.array(preds))
+        # Add jitter to radius for visibility
+        r_jit = r_pred_base + rng.uniform(-0.05, 0.05, size=len(thetas))
+        ax.scatter(thetas, r_jit, s=28, color=stim_rgb, alpha=0.65, zorder=3)
+
+        # Circular mean vector
+        mu_deg, R = circular_mean_deg(preds)
+        if not np.isnan(mu_deg):
+            mu_rad = np.deg2rad(mu_deg)
+            # Vector length proportional to R (consistency)
+            r0, r1 = 0.70, 0.70 + 0.20*R
+            ax.plot([mu_rad, mu_rad], [r0, r1], color=stim_rgb,
+                    linewidth=2.0, alpha=0.9, zorder=2)
+
+# Legend
+from matplotlib.lines import Line2D
+legend_elems = [
+    Line2D([0],[0], marker='o', color='w', markerfacecolor='gray',
+           markeredgecolor='k', label='True hue (stimulus)', markersize=10),
+    Line2D([0],[0], marker='o', color='w', markerfacecolor='gray',
+           alpha=0.65, label='Predictions (all runs)', markersize=6),
+    Line2D([0],[0], color='gray', lw=2, label='Circular mean vector (per color)')
+]
+ax.legend(handles=legend_elems, loc='upper right', bbox_to_anchor=(1.25, 1.2))
+
+plt.tight_layout()
+polar_recon_plot_path = fig_dir / f"{ROI_NAME}_polar_reconstruction.png"
+plt.savefig(polar_recon_plot_path, dpi=150, bbox_inches='tight')
+plt.close()
+print(f"  Saved: {polar_recon_plot_path}")
+
+# 4. Error Distribution Analysis (naive_analysis style)
+fig, axes = plt.subplots(2, 3, figsize=(16, 10))
+fig.suptitle(f'{ROI_NAME}: Error Distribution per Run', fontsize=16, fontweight='bold')
+
+for idx, result in enumerate(reconstruction_results):
+    ax = axes[idx // 3, idx % 3]
+
+    errors = result['errors']
+
+    # Histogram
+    ax.hist(errors, bins=20, alpha=0.7, color='steelblue', edgecolor='black')
+
+    # Add vertical lines for statistics
+    ax.axvline(result['mean_error'], color='red', linestyle='--', linewidth=2, label=f'Mean: {result["mean_error"]:.1f}°')
+    ax.axvline(np.median(errors), color='orange', linestyle='--', linewidth=2, label=f'Median: {np.median(errors):.1f}°')
+    ax.axvline(30, color='green', linestyle=':', linewidth=1.5, alpha=0.7, label='±30° tolerance')
+    ax.axvline(45, color='purple', linestyle=':', linewidth=1.5, alpha=0.7, label='±45° tolerance')
+
+    # Labels
+    ax.set_xlabel('Reconstruction Error (°)', fontsize=10)
+    ax.set_ylabel('Frequency', fontsize=10)
+    ax.set_title(f'Run {result["test_run"]}: Mean={result["mean_error"]:.1f}°, '
+                 f'Hit@30°={np.mean(errors <= 30)*100:.1f}%', fontsize=11)
+    ax.legend(fontsize=8, loc='upper right')
+    ax.grid(True, alpha=0.3)
+    ax.set_xlim([0, 180])
+
+plt.tight_layout()
+error_dist_plot_path = fig_dir / f"{ROI_NAME}_error_distribution.png"
+plt.savefig(error_dist_plot_path, dpi=150, bbox_inches='tight')
+plt.close()
+print(f"  Saved: {error_dist_plot_path}")
+
+# 5. Per-Run Performance Comparison (naive_analysis style)
+fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+fig.suptitle(f'{ROI_NAME}: Per-Run Performance Analysis', fontsize=16, fontweight='bold')
+
+run_numbers = [r['test_run'] for r in reconstruction_results]
+
+# Top-left: Mean errors
+ax1 = axes[0, 0]
+mean_errors = [r['mean_error'] for r in reconstruction_results]
+bars = ax1.bar(run_numbers, mean_errors, alpha=0.7, color='steelblue', edgecolor='black')
+ax1.axhline(mean_reconstruction_error, color='red', linestyle='--', linewidth=2, label=f'Overall mean: {mean_reconstruction_error:.1f}°')
+ax1.axhline(90, color='gray', linestyle=':', linewidth=1.5, label='Chance: 90°')
+ax1.set_xlabel('Run', fontsize=12)
+ax1.set_ylabel('Mean Error (°)', fontsize=12)
+ax1.set_title('Mean Reconstruction Error per Run', fontsize=12, fontweight='bold')
+ax1.legend()
+ax1.grid(True, alpha=0.3, axis='y')
+ax1.set_xticks(run_numbers)
+
+# Add value labels on bars
+for bar, val in zip(bars, mean_errors):
+    height = bar.get_height()
+    ax1.text(bar.get_x() + bar.get_width()/2., height,
+            f'{val:.1f}°', ha='center', va='bottom', fontsize=9)
+
+# Top-right: Hit rates
+ax2 = axes[0, 1]
+x = np.arange(len(run_numbers))
+width = 0.35
+bars1 = ax2.bar(x - width/2, all_hit_rates_30, width, label='±30° tolerance', alpha=0.7, color='green', edgecolor='black')
+bars2 = ax2.bar(x + width/2, all_hit_rates_45, width, label='±45° tolerance', alpha=0.7, color='purple', edgecolor='black')
+ax2.set_xlabel('Run', fontsize=12)
+ax2.set_ylabel('Hit Rate (%)', fontsize=12)
+ax2.set_title('Hit Rates with Different Tolerances', fontsize=12, fontweight='bold')
+ax2.set_xticks(x)
+ax2.set_xticklabels(run_numbers)
+ax2.legend()
+ax2.grid(True, alpha=0.3, axis='y')
+ax2.set_ylim([0, 100])
+
+# Add value labels
+for bars in [bars1, bars2]:
+    for bar in bars:
+        height = bar.get_height()
+        ax2.text(bar.get_x() + bar.get_width()/2., height,
+                f'{height:.0f}%', ha='center', va='bottom', fontsize=8)
+
+# Bottom-left: Box plot of errors per run
+ax3 = axes[1, 0]
+error_data = [r['errors'] for r in reconstruction_results]
+bp = ax3.boxplot(error_data, labels=run_numbers, patch_artist=True)
+for patch in bp['boxes']:
+    patch.set_facecolor('lightblue')
+ax3.axhline(mean_reconstruction_error, color='red', linestyle='--', linewidth=2, label=f'Overall mean: {mean_reconstruction_error:.1f}°')
+ax3.axhline(90, color='gray', linestyle=':', linewidth=1.5, label='Chance: 90°')
+ax3.set_xlabel('Run', fontsize=12)
+ax3.set_ylabel('Error (°)', fontsize=12)
+ax3.set_title('Error Distribution per Run', fontsize=12, fontweight='bold')
+ax3.legend()
+ax3.grid(True, alpha=0.3, axis='y')
+
+# Bottom-right: Cumulative distribution
+ax4 = axes[1, 1]
+for idx, result in enumerate(reconstruction_results):
+    errors_sorted = np.sort(result['errors'])
+    cumulative = np.arange(1, len(errors_sorted) + 1) / len(errors_sorted) * 100
+    ax4.plot(errors_sorted, cumulative, label=f'Run {result["test_run"]}', linewidth=2, alpha=0.7)
+
+ax4.axvline(30, color='green', linestyle=':', linewidth=2, alpha=0.7, label='±30° tolerance')
+ax4.axvline(45, color='purple', linestyle=':', linewidth=2, alpha=0.7, label='±45° tolerance')
+ax4.axvline(90, color='gray', linestyle='--', linewidth=2, label='Chance: 90°')
+ax4.set_xlabel('Error (°)', fontsize=12)
+ax4.set_ylabel('Cumulative Percentage (%)', fontsize=12)
+ax4.set_title('Cumulative Error Distribution', fontsize=12, fontweight='bold')
+ax4.legend(fontsize=9, loc='lower right')
+ax4.grid(True, alpha=0.3)
+ax4.set_xlim([0, 180])
+ax4.set_ylim([0, 100])
+
+plt.tight_layout()
+per_run_plot_path = fig_dir / f"{ROI_NAME}_per_run_analysis.png"
+plt.savefig(per_run_plot_path, dpi=150, bbox_inches='tight')
+plt.close()
+print(f"  Saved: {per_run_plot_path}")
+
+# 6. Circular Color Space Visualization (naive_analysis style with colored markers)
+fig = plt.figure(figsize=(14, 6))
+
+# Left: Training colors reconstruction
+ax1 = fig.add_subplot(1, 2, 1, projection='polar')
+ax1.set_theta_zero_location("E")        # 0° at right
+ax1.set_theta_direction(-1)             # Clockwise positive
+ax1.set_rticks([])                      # Hide radial ticks
+ax1.grid(alpha=0.25)
+
+rng = np.random.default_rng(42)
+r_center = 1.0
+r_pred_base = 0.85
+
+# Plot true colors at border and predictions inside
+for color_idx in range(cfg.N_COLORS):
+    color_name = f'color_{color_idx + 1}'
+    true_hue = LABEL2HUE_DEG_PILOT[color_name]
+    true_rgb = lab_hue_to_rgb(true_hue)
+
+    # True color at border (large, solid)
+    ax1.scatter([np.deg2rad(true_hue)], [r_center], s=110,
+               color=true_rgb, edgecolor='k', linewidths=0.8, zorder=4)
+
+    # All predictions for this color (small, translucent, colored by predicted hue)
+    for result in reconstruction_results:
+        pred_hue = result['reconstructed_hues'][color_idx]
+        pred_rgb = lab_hue_to_rgb(pred_hue)
+
+        # Jitter radius slightly to avoid overlap
+        r_jit = r_pred_base + rng.uniform(-0.03, 0.03)
+        ax1.scatter([np.deg2rad(pred_hue)], [r_jit], s=28,
+                   color=pred_rgb, alpha=0.65, zorder=3)
+
+ax1.set_ylim([0, 1.1])
+ax1.set_title(f'Training Colors\nMean error: {mean_reconstruction_error:.1f}°', fontsize=12, fontweight='bold')
+
+# Right: Novel colors reconstruction
+ax2 = fig.add_subplot(1, 2, 2, projection='polar')
+ax2.set_theta_zero_location("E")
+ax2.set_theta_direction(-1)
+ax2.set_rticks([])
+ax2.grid(alpha=0.25)
+
+for result in novel_color_results:
+    color_name = result['color']
+    true_hue = LABEL2HUE_DEG_PILOT[color_name]
+    true_rgb = lab_hue_to_rgb(true_hue)
+
+    # True color at border (large, solid)
+    ax2.scatter([np.deg2rad(true_hue)], [r_center], s=110,
+               color=true_rgb, edgecolor='k', linewidths=0.8, zorder=4)
+
+    # Get all reconstructed values for this novel color (from all runs)
+    recon_values = []
+    for run_result in reconstruction_results:
+        color_idx = int(color_name.split('_')[1]) - 1
+        recon_values.append(run_result['reconstructed_hues'][color_idx])
+
+    # Plot all predictions (colored by predicted hue)
+    for pred_hue in recon_values:
+        pred_rgb = lab_hue_to_rgb(pred_hue)
+        r_jit = r_pred_base + rng.uniform(-0.03, 0.03)
+        ax2.scatter([np.deg2rad(pred_hue)], [r_jit], s=28,
+                   color=pred_rgb, alpha=0.65, zorder=3)
+
+    # Optional: show mean prediction with line
+    mean_recon = np.mean(recon_values)
+    mean_rgb = lab_hue_to_rgb(mean_recon)
+    ax2.plot([np.deg2rad(mean_recon), np.deg2rad(mean_recon)], [0.70, 0.90],
+             color=mean_rgb, linewidth=2.5, alpha=0.9, zorder=2)
+
+ax2.set_ylim([0, 1.1])
+ax2.set_title(f'Novel Colors (Leave-One-Out)\nMean error: {mean_novel_error:.1f}° | Chance: 90.0°',
+             fontsize=12, fontweight='bold')
+
+# Add legend
+from matplotlib.lines import Line2D
+legend_elems = [
+    Line2D([0],[0], marker='o', color='w', markerfacecolor='gray', markeredgecolor='k',
+           label='True hue (stimulus)', markersize=10),
+    Line2D([0],[0], marker='o', color='w', markerfacecolor='gray', alpha=0.65,
+           label='Predictions (all runs)', markersize=6),
+    Line2D([0],[0], color='gray', lw=2.5, label='Mean prediction (novel only)')
+]
+ax2.legend(handles=legend_elems, loc='upper right', bbox_to_anchor=(1.28, 1.15), fontsize=9)
+
+plt.suptitle(f'{ROI_NAME}: Circular Color Space (Colors labeled by hue)', fontsize=14, fontweight='bold')
+plt.tight_layout()
+circular_plot_path = fig_dir / f"{ROI_NAME}_circular_color_space.png"
+plt.savefig(circular_plot_path, dpi=150, bbox_inches='tight')
+plt.close()
+print(f"  Saved: {circular_plot_path}")
+
+# 7. Per-Color Error Bar Plot
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
+
+# Training colors
+color_names = [f'c{i+1}' for i in range(cfg.N_COLORS)]
+training_errors = []
+for color_idx in range(cfg.N_COLORS):
+    color_errors = [result['errors'][color_idx] for result in reconstruction_results]
+    training_errors.append(color_errors)
+
+bp1 = ax1.boxplot(training_errors, labels=color_names, patch_artist=True)
+for patch in bp1['boxes']:
+    patch.set_facecolor('lightblue')
+ax1.axhline(y=mean_reconstruction_error, color='red', linestyle='--', label=f'Mean: {mean_reconstruction_error:.1f}°')
+ax1.axhline(y=90, color='gray', linestyle=':', label='Chance: 90°')
+ax1.set_xlabel('Color')
+ax1.set_ylabel('Reconstruction Error (°)')
+ax1.set_title('Training Colors (Leave-One-Run-Out)')
+ax1.legend()
+ax1.grid(True, alpha=0.3)
+
+# Novel colors
+novel_errors_mean = [r['mean_error'] for r in novel_color_results]
+novel_errors_all = [r['errors'] for r in novel_color_results]
+
+bp2 = ax2.boxplot(novel_errors_all, labels=color_names, patch_artist=True)
+for patch in bp2['boxes']:
+    patch.set_facecolor('lightcoral')
+ax2.axhline(y=mean_novel_error, color='red', linestyle='--', label=f'Mean: {mean_novel_error:.1f}°')
+ax2.axhline(y=90, color='gray', linestyle=':', label='Chance: 90°')
+ax2.set_xlabel('Color')
+ax2.set_ylabel('Reconstruction Error (°)')
+ax2.set_title('Novel Colors (Leave-One-Color-Out)')
+ax2.legend()
+ax2.grid(True, alpha=0.3)
+
+plt.suptitle(f'{ROI_NAME}: Per-Color Reconstruction Errors', fontsize=14, fontweight='bold')
+plt.tight_layout()
+error_plot_path = fig_dir / f"{ROI_NAME}_per_color_errors.png"
+plt.savefig(error_plot_path, dpi=150, bbox_inches='tight')
+plt.close()
+print(f"  Saved: {error_plot_path}")
+
+# 8. Summary Comparison Plot
+fig, ax = plt.subplots(figsize=(8, 6))
+
+metrics = ['Classification\nAccuracy (%)', 'Training\nReconstruction\nError (°)', 'Novel Color\nError (°)']
+values = [mean_classification_acc * 100, mean_reconstruction_error, mean_novel_error]
+baselines = [100/cfg.N_COLORS * 100, 90, 90]  # Chance levels
+colors_plot = ['green' if v > b else 'red' if v < b and 'Accuracy' in m else 'green' if v < b else 'red'
+               for v, b, m in zip(values, baselines, metrics)]
+
+bars = ax.bar(metrics, values, color=colors_plot, alpha=0.6, edgecolor='black')
+ax.scatter(metrics, baselines, color='gray', s=100, marker='_', linewidths=3, label='Chance level', zorder=3)
+
+# Add value labels on bars
+for bar, value in zip(bars, values):
+    height = bar.get_height()
+    ax.text(bar.get_x() + bar.get_width()/2., height,
+            f'{value:.1f}',
+            ha='center', va='bottom', fontsize=12, fontweight='bold')
+
+ax.set_ylabel('Value')
+ax.set_title(f'{ROI_NAME}: Quick Fix Method Performance Summary', fontsize=14, fontweight='bold')
+ax.legend()
+ax.grid(True, alpha=0.3, axis='y')
+
+plt.tight_layout()
+summary_plot_path = fig_dir / f"{ROI_NAME}_performance_summary.png"
+plt.savefig(summary_plot_path, dpi=150, bbox_inches='tight')
+plt.close()
+print(f"  Saved: {summary_plot_path}")
+
 print()
 
 # ============================================================================

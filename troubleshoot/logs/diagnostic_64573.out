@@ -1,0 +1,349 @@
+Starting ROI build...
+============================================================
+Building ROI masks for sub-P01
+============================================================
+
+  [INFO] Test subject (P01)
+fMRIPrep data: /storage/connectome/haba6030/fmriprep_out/sub-P01
+Atlas directory: /scratch/connectome/haba6030/colorBlind/ProbAtlas_v4/subj_vol_all
+
+Finding reference images...
+  ✓ Found reference image (res-2): sub-01_task-rsvp_run-1_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz
+    [DEBUG] Reference image shape: (97, 115, 97)
+    [DEBUG] Reference image path: /storage/connectome/haba6030/fmriprep_out/sub-P01/func/sub-01_task-rsvp_run-1_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz
+    [DEBUG] Expected shape: (97, 115, 97) for res-2
+  Reference shape: (97, 115, 97)
+  ✓ Found brain mask (anat): sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz
+
+Output directory: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi
+File prefix: 01
+
+Building V1...
+    [DEBUG] Atlas space - Shape: (182, 218, 182), Voxels: 6685
+    [DEBUG] Target functional space - Shape: (97, 115, 97)
+    [DEBUG] After resampling - Shape: (97, 115, 97), Voxels: 834
+    [DEBUG] Brain mask shape before resample: (97, 115, 97)
+    [DEBUG] Brain mask intersection: 834 -> 822 voxels
+    ✓ Applied brain mask intersection
+  ✓ Created V1: 822 voxels
+    Saved to: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi/sub-01_V1_mask.nii.gz
+
+Building V2...
+    [DEBUG] Atlas space - Shape: (182, 218, 182), Voxels: 4251
+    [DEBUG] Target functional space - Shape: (97, 115, 97)
+    [DEBUG] After resampling - Shape: (97, 115, 97), Voxels: 536
+    [DEBUG] Brain mask shape before resample: (97, 115, 97)
+    [DEBUG] Brain mask intersection: 536 -> 536 voxels
+    ✓ Applied brain mask intersection
+  ✓ Created V2: 536 voxels
+    Saved to: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi/sub-01_V2_mask.nii.gz
+
+Building V3...
+    [DEBUG] Atlas space - Shape: (182, 218, 182), Voxels: 858
+    [DEBUG] Target functional space - Shape: (97, 115, 97)
+    [DEBUG] After resampling - Shape: (97, 115, 97), Voxels: 111
+    [DEBUG] Brain mask shape before resample: (97, 115, 97)
+    [DEBUG] Brain mask intersection: 111 -> 111 voxels
+    ✓ Applied brain mask intersection
+  ✓ Created V3: 111 voxels
+    Saved to: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi/sub-01_V3_mask.nii.gz
+
+Building hV4...
+    [DEBUG] Atlas space - Shape: (182, 218, 182), Voxels: 512
+    [DEBUG] Target functional space - Shape: (97, 115, 97)
+    [DEBUG] After resampling - Shape: (97, 115, 97), Voxels: 72
+    [DEBUG] Brain mask shape before resample: (97, 115, 97)
+    [DEBUG] Brain mask intersection: 72 -> 72 voxels
+    ✓ Applied brain mask intersection
+  ✓ Created hV4: 72 voxels
+    Saved to: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi/sub-01_hV4_mask.nii.gz
+
+============================================================
+SUCCESS: Created 4/4 ROI masks
+============================================================
+  ✓ V1: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi/sub-01_V1_mask.nii.gz
+  ✓ V2: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi/sub-01_V2_mask.nii.gz
+  ✓ V3: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi/sub-01_V3_mask.nii.gz
+  ✓ hV4: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi/sub-01_hV4_mask.nii.gz
+
+Fix and Check...
+============================================================
+FIX ROI OVERLAP PROBLEM
+============================================================
+Subject: sub-P01
+file Pre: sub-01
+
+Creating functional mask from:
+  sub-01_task-rsvp_run-1_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz
+  Active voxels: 242046 / 1082035 (22.4%)
+
+Saved functional mask: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi/sub-P01_functional_mask.nii.gz
+
+============================================================
+Fixing Individual ROIs
+============================================================
+
+Processing ROI: sub-01_V1
+  Original voxels: 822
+  Active voxels: 295 (35.9%)
+  Removed (inactive): 527
+  ✅ OK
+  Saved: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi/sub-01_V1_fixed_mask.nii.gz
+
+Processing ROI: sub-01_V2
+  Original voxels: 536
+  Active voxels: 300 (56.0%)
+  Removed (inactive): 236
+  ✅ OK
+  Saved: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi/sub-01_V2_fixed_mask.nii.gz
+
+Processing ROI: sub-01_V3
+  Original voxels: 111
+  Active voxels: 73 (65.8%)
+  Removed (inactive): 38
+  ⚠️  WARNING: Very few voxels (73)
+  Saved: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi/sub-01_V3_fixed_mask.nii.gz
+
+Processing ROI: sub-01_hV4
+  Original voxels: 72
+  Active voxels: 44 (61.1%)
+  Removed (inactive): 28
+  ⚠️  WARNING: Very few voxels (44)
+  Saved: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi/sub-01_hV4_fixed_mask.nii.gz
+
+⚠️  ROI not found: BrainMask
+
+============================================================
+Creating Combined ROIs
+============================================================
+
+Early Visual (V1 + V2):
+  Total voxels: 595
+  Saved: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi/sub-01_EarlyVisual_fixed_mask.nii.gz
+
+Ventral (V3 + hV4):
+  Total voxels: 117
+  Saved: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi/sub-01_Ventral_fixed_mask.nii.gz
+
+============================================================
+SUMMARY
+============================================================
+
+ROI             Original     Active       Removed      Overlap %   
+------------------------------------------------------------
+V1              822          295          527          35.9        
+V2              536          300          236          56.0        
+V3              111          73           38           65.8        
+hV4             72           44           28           61.1        
+
+============================================================
+NEXT STEPS
+============================================================
+
+1. Re-run diagnostic analysis:
+   python diagnostic_analysis.py
+
+2. Check if classification accuracy improves
+
+3. If accuracy > 25%, ROI was the main problem!
+
+============================================================
+Quick ROI-Functional Check
+============================================================
+ERROR: No functional files found
+
+============================================================
+DATA SANITY CHECK
+============================================================
+Subject: sub-P01
+Prefix: sub-01
+Project: /scratch/connectome/haba6030/colorBlind
+
+============================================================
+1. FUNCTIONAL DATA PROPERTIES
+============================================================
+
+Loading: sub-01_task-rsvp_run-1_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz
+
+Shape: (97, 115, 97, 288)
+Voxel size: (np.float32(2.0), np.float32(2.0), np.float32(2.0)) mm
+TR: 1.500 s
+
+Data statistics:
+  Mean:   52.1999
+  Std:    152.0900
+  Min:    -80.8633
+  Max:    1467.3459
+  Median: 0.0000
+
+✅ Data is NOT centered (mean = 52.20)
+
+Data quality:
+  Zero values: 244792861 (78.55%)
+  NaN values:  0 (0.00%)
+
+Temporal variance:
+  Mean std across time: 4.3683
+  Active voxels (std > 0): 242061 / 1082035
+
+Temporal SNR (rough estimate):
+  Mean tSNR: 12.29
+  Median tSNR: 9.97
+
+============================================================
+2. EVENT FILE STRUCTURE
+============================================================
+
+Loading: sub-01_task-rsvp_run-1_events.tsv
+
+Shape: (72, 3)
+Columns: ['onset', 'duration', 'trial_type']
+✅ Found column: onset
+✅ Found column: duration
+✅ Found column: trial_type
+
+Trial types:
+trial_type
+blank      20
+color_2     8
+color_4     8
+color_7     7
+color_3     6
+color_5     6
+color_1     6
+color_6     6
+color_8     5
+Name: count, dtype: int64
+
+Color trials: 52
+
+Timing information:
+  First onset: 4.32 s
+  Last onset:  428.25 s
+  Duration range: 1.50 - 1.50 s
+  Mean ISI: 5.97 s
+
+============================================================
+3. ROI-FUNCTIONAL ALIGNMENT
+============================================================
+
+Functional shape: (97, 115, 97)
+Functional affine:
+[[   2.     0.     0.   -96.5]
+ [   0.     2.     0.  -132.5]
+ [   0.     0.     2.   -78.5]
+ [   0.     0.     0.     1. ]]
+
+V1 ROI shape: (97, 115, 97)
+V1 ROI affine:
+[[   2.     0.     0.   -96.5]
+ [   0.     2.     0.  -132.5]
+ [   0.     0.     2.   -78.5]
+ [   0.     0.     0.     1. ]]
+
+✅ Shapes match
+✅ Affines match
+
+V1 ROI:
+  Total voxels: 822
+  Overlapping with active functional: 295 (35.9%)
+  ❌ ERROR: Less than 50% overlap! ROI alignment problem.
+
+Visual cortex coverage:
+  Active voxels in functional: 242061
+  Active voxels in V1: 295
+
+============================================================
+3. ROI-FUNCTIONAL ALIGNMENT
+============================================================
+
+Functional shape: (97, 115, 97)
+Functional affine:
+[[   2.     0.     0.   -96.5]
+ [   0.     2.     0.  -132.5]
+ [   0.     0.     2.   -78.5]
+ [   0.     0.     0.     1. ]]
+
+V2 ROI shape: (97, 115, 97)
+V2 ROI affine:
+[[   2.     0.     0.   -96.5]
+ [   0.     2.     0.  -132.5]
+ [   0.     0.     2.   -78.5]
+ [   0.     0.     0.     1. ]]
+
+✅ Shapes match
+✅ Affines match
+
+V2 ROI:
+  Total voxels: 536
+  Overlapping with active functional: 300 (56.0%)
+  ⚠️  WARNING: Less than 80% overlap
+
+Visual cortex coverage:
+  Active voxels in functional: 242061
+  Active voxels in V2: 300
+
+============================================================
+3. ROI-FUNCTIONAL ALIGNMENT
+============================================================
+
+Functional shape: (97, 115, 97)
+Functional affine:
+[[   2.     0.     0.   -96.5]
+ [   0.     2.     0.  -132.5]
+ [   0.     0.     2.   -78.5]
+ [   0.     0.     0.     1. ]]
+
+⚠️  ROI not found: BrainMask
+   Expected: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi/sub-01_BrainMask_mask.nii.gz
+
+============================================================
+4. CONFOUND FILE STRUCTURE
+============================================================
+
+Loading: sub-01_task-rsvp_run-1_desc-confounds_timeseries.tsv
+
+Shape: (288, 370)
+Number of columns: 370
+
+Motion parameters found: 24
+  - trans_x
+  - trans_x_derivative1
+  - trans_x_derivative1_power2
+  - trans_x_power2
+  - trans_y
+  - trans_y_derivative1
+
+CompCor components found: 218
+
+Framewise displacement:
+  Mean: 0.3443 mm
+  Max: 3.6919 mm
+  Volumes with FD > 0.5mm: 53
+  ⚠️  WARNING: High mean motion (> 0.3mm)
+
+============================================================
+5. QUALITY CONTROL PLOTS
+============================================================
+
+✅ Saved QC plot: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/data_quality_run1.png
+
+============================================================
+SUMMARY
+============================================================
+
+Checks passed: 6/7
+  ✅ functional
+  ✅ events
+  ✅ roi_V1
+  ✅ roi_V2
+  ❌ roi_BrainMask
+  ✅ confounds
+  ✅ plots
+
+⚠️  SOME CHECKS FAILED - Fix issues before proceeding
+
+============================================================
+Starting Candid diagnostic analysis...
+Starting PERSUB diagnostic analysis...
+Diagnostic analysis complete!

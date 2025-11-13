@@ -1,0 +1,620 @@
+Starting quick ROI analysis...
+Quick ROI-Functional Check
+============================================================
+Functional: sub-01_task-rsvp_run-1_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz
+  Shape: (97, 115, 97, 288)
+  Affine diagonal: [2. 2. 2. 1.]
+
+Found 10 ROI masks:
+
+sub-01_EarlyVisual_fixed_mask: ✅ GOOD
+  Voxels: 372
+  Alignment: affine=True, shape=True
+  Overlap: 372/372 (100.0%)
+  Non-zero: 372/372 (100.0%)
+  Value range: [1.8, 875.6]
+
+V1: ✅ GOOD
+  Voxels: 190
+  Alignment: affine=True, shape=True
+  Overlap: 190/190 (100.0%)
+  Non-zero: 190/190 (100.0%)
+  Value range: [1.8, 875.6]
+
+V1: ❌ POOR OVERLAP
+  Voxels: 511
+  Alignment: affine=True, shape=True
+  Overlap: 190/511 (37.2%)
+  Non-zero: 190/511 (37.2%)
+  Value range: [0.0, 875.6]
+
+V2: ✅ GOOD
+  Voxels: 182
+  Alignment: affine=True, shape=True
+  Overlap: 182/182 (100.0%)
+  Non-zero: 182/182 (100.0%)
+  Value range: [2.0, 822.1]
+
+V2: ⚠️ SUBOPTIMAL
+  Voxels: 310
+  Alignment: affine=True, shape=True
+  Overlap: 182/310 (58.7%)
+  Non-zero: 182/310 (58.7%)
+  Value range: [0.0, 822.1]
+
+V3: ✅ GOOD
+  Voxels: 62
+  Alignment: affine=True, shape=True
+  Overlap: 62/62 (100.0%)
+  Non-zero: 62/62 (100.0%)
+  Value range: [2.2, 728.8]
+
+V3: ⚠️ SUBOPTIMAL
+  Voxels: 89
+  Alignment: affine=True, shape=True
+  Overlap: 62/89 (69.7%)
+  Non-zero: 62/89 (69.7%)
+  Value range: [0.0, 728.8]
+
+sub-01_Ventral_fixed_mask: ✅ GOOD
+  Voxels: 100
+  Alignment: affine=True, shape=True
+  Overlap: 100/100 (100.0%)
+  Non-zero: 100/100 (100.0%)
+  Value range: [2.2, 728.8]
+
+sub-01_hV4_fixed_mask: ✅ GOOD
+  Voxels: 38
+  Alignment: affine=True, shape=True
+  Overlap: 38/38 (100.0%)
+  Non-zero: 38/38 (100.0%)
+  Value range: [2.6, 648.2]
+
+sub-01_hV4_mask: ⚠️ SUBOPTIMAL
+  Voxels: 55
+  Alignment: affine=True, shape=True
+  Overlap: 38/55 (69.1%)
+  Non-zero: 38/55 (69.1%)
+  Value range: [0.0, 648.2]
+
+Creating visualization...
+Saved: roi_quick_check.png
+
+============================================================
+If you see misalignment or poor overlap:
+  1. Run: python diagnose_roi_alignment.py (detailed check)
+  2. Check ROI construction in roi_build.py
+  3. Verify fMRIPrep output space (MNI vs native)
+============================================================
+Starting detailed ROI analysis...
+======================================================================
+ROI-Functional Alignment Diagnostic
+======================================================================
+Subject: sub-01
+fMRIPrep directory: /scratch/connectome/haba6030/colorBlind/output/pilot/sub-01/func
+Derivatives directory: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01
+
+[1/6] Found functional data:
+  /scratch/connectome/haba6030/colorBlind/output/pilot/sub-01/func/sub-01_task-rsvp_run-1_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz
+  Shape: (97, 115, 97, 288)
+  Affine:
+[[   2.     0.     0.   -96.5]
+ [   0.     2.     0.  -132.5]
+ [   0.     0.     2.   -78.5]
+ [   0.     0.     0.     1. ]]
+  Voxel size: (np.float32(2.0), np.float32(2.0), np.float32(2.0)) mm
+
+[2/6] Found 18 ROI masks:
+  sub-01_BrainMask_fixed_mask:
+    Path: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_BrainMask_fixed_mask.nii.gz
+    Shape: (97, 115, 97)
+    Voxels: 97732
+    Voxel size: (np.float32(2.0), np.float32(2.0), np.float32(2.0)) mm
+  sub-01_BrainMask_mask:
+    Path: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_BrainMask_mask.nii.gz
+    Shape: (97, 115, 97)
+    Voxels: 230768
+    Voxel size: (np.float32(2.0), np.float32(2.0), np.float32(2.0)) mm
+  sub-01_EarlyVisual_fixed_mask:
+    Path: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_EarlyVisual_fixed_mask.nii.gz
+    Shape: (97, 115, 97)
+    Voxels: 372
+    Voxel size: (np.float32(2.0), np.float32(2.0), np.float32(2.0)) mm
+  sub-01_V1_fixed_mask:
+    Path: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_V1_fixed_mask.nii.gz
+    Shape: (97, 115, 97)
+    Voxels: 190
+    Voxel size: (np.float32(2.0), np.float32(2.0), np.float32(2.0)) mm
+  sub-01_V1_mask:
+    Path: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_V1_mask.nii.gz
+    Shape: (97, 115, 97)
+    Voxels: 511
+    Voxel size: (np.float32(2.0), np.float32(2.0), np.float32(2.0)) mm
+  sub-01_V2_fixed_mask:
+    Path: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_V2_fixed_mask.nii.gz
+    Shape: (97, 115, 97)
+    Voxels: 182
+    Voxel size: (np.float32(2.0), np.float32(2.0), np.float32(2.0)) mm
+  sub-01_V2_mask:
+    Path: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_V2_mask.nii.gz
+    Shape: (97, 115, 97)
+    Voxels: 310
+    Voxel size: (np.float32(2.0), np.float32(2.0), np.float32(2.0)) mm
+  sub-01_V3_fixed_mask:
+    Path: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_V3_fixed_mask.nii.gz
+    Shape: (97, 115, 97)
+    Voxels: 62
+    Voxel size: (np.float32(2.0), np.float32(2.0), np.float32(2.0)) mm
+  sub-01_V3_mask:
+    Path: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_V3_mask.nii.gz
+    Shape: (97, 115, 97)
+    Voxels: 89
+    Voxel size: (np.float32(2.0), np.float32(2.0), np.float32(2.0)) mm
+  sub-01_Ventral_fixed_mask:
+    Path: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_Ventral_fixed_mask.nii.gz
+    Shape: (97, 115, 97)
+    Voxels: 100
+    Voxel size: (np.float32(2.0), np.float32(2.0), np.float32(2.0)) mm
+  sub-01_acq-mprage_desc-preproc_T1w_anat_mask:
+    Path: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_acq-mprage_desc-preproc_T1w_anat_mask.nii.gz
+    Shape: (97, 115, 97)
+    Voxels: 99026
+    Voxel size: (np.float32(2.0), np.float32(2.0), np.float32(2.0)) mm
+  sub-01_acq-mprage_desc-ribbon_anat_mask:
+    Path: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_acq-mprage_desc-ribbon_anat_mask.nii.gz
+    Shape: (97, 115, 97)
+    Voxels: 18106
+    Voxel size: (np.float32(2.0), np.float32(2.0), np.float32(2.0)) mm
+  sub-01_acq-mprage_dseg_anat_mask:
+    Path: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_acq-mprage_dseg_anat_mask.nii.gz
+    Shape: (97, 115, 97)
+    Voxels: 50109
+    Voxel size: (np.float32(2.0), np.float32(2.0), np.float32(2.0)) mm
+  sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_desc-preproc_T1w_anat_mask:
+    Path: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_desc-preproc_T1w_anat_mask.nii.gz
+    Shape: (97, 115, 97)
+    Voxels: 104521
+    Voxel size: (np.float32(2.0), np.float32(2.0), np.float32(2.0)) mm
+  sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_dseg_anat_mask:
+    Path: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_dseg_anat_mask.nii.gz
+    Shape: (97, 115, 97)
+    Voxels: 103517
+    Voxel size: (np.float32(2.0), np.float32(2.0), np.float32(2.0)) mm
+  sub-01_functional_mask:
+    Path: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_functional_mask.nii.gz
+    Shape: (97, 115, 97)
+    Voxels: 242046
+    Voxel size: (np.float32(2.0), np.float32(2.0), np.float32(2.0)) mm
+  sub-01_hV4_fixed_mask:
+    Path: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_hV4_fixed_mask.nii.gz
+    Shape: (97, 115, 97)
+    Voxels: 38
+    Voxel size: (np.float32(2.0), np.float32(2.0), np.float32(2.0)) mm
+  sub-01_hV4_mask:
+    Path: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_hV4_mask.nii.gz
+    Shape: (97, 115, 97)
+    Voxels: 55
+    Voxel size: (np.float32(2.0), np.float32(2.0), np.float32(2.0)) mm
+
+[3/6] Checking coordinate space compatibility:
+  Functional data:
+    Shape: (97, 115, 97)
+    Affine:
+[[   2.     0.     0.   -96.5]
+ [   0.     2.     0.  -132.5]
+ [   0.     0.     2.   -78.5]
+ [   0.     0.     0.     1. ]]
+
+  sub-01_BrainMask_fixed_mask: ✅ COMPATIBLE
+    Shape match: True (ROI: (97, 115, 97))
+    Affine match: True
+
+  sub-01_BrainMask_mask: ✅ COMPATIBLE
+    Shape match: True (ROI: (97, 115, 97))
+    Affine match: True
+
+  sub-01_EarlyVisual_fixed_mask: ✅ COMPATIBLE
+    Shape match: True (ROI: (97, 115, 97))
+    Affine match: True
+
+  sub-01_V1_fixed_mask: ✅ COMPATIBLE
+    Shape match: True (ROI: (97, 115, 97))
+    Affine match: True
+
+  sub-01_V1_mask: ✅ COMPATIBLE
+    Shape match: True (ROI: (97, 115, 97))
+    Affine match: True
+
+  sub-01_V2_fixed_mask: ✅ COMPATIBLE
+    Shape match: True (ROI: (97, 115, 97))
+    Affine match: True
+
+  sub-01_V2_mask: ✅ COMPATIBLE
+    Shape match: True (ROI: (97, 115, 97))
+    Affine match: True
+
+  sub-01_V3_fixed_mask: ✅ COMPATIBLE
+    Shape match: True (ROI: (97, 115, 97))
+    Affine match: True
+
+  sub-01_V3_mask: ✅ COMPATIBLE
+    Shape match: True (ROI: (97, 115, 97))
+    Affine match: True
+
+  sub-01_Ventral_fixed_mask: ✅ COMPATIBLE
+    Shape match: True (ROI: (97, 115, 97))
+    Affine match: True
+
+  sub-01_acq-mprage_desc-preproc_T1w_anat_mask: ✅ COMPATIBLE
+    Shape match: True (ROI: (97, 115, 97))
+    Affine match: True
+
+  sub-01_acq-mprage_desc-ribbon_anat_mask: ✅ COMPATIBLE
+    Shape match: True (ROI: (97, 115, 97))
+    Affine match: True
+
+  sub-01_acq-mprage_dseg_anat_mask: ✅ COMPATIBLE
+    Shape match: True (ROI: (97, 115, 97))
+    Affine match: True
+
+  sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_desc-preproc_T1w_anat_mask: ✅ COMPATIBLE
+    Shape match: True (ROI: (97, 115, 97))
+    Affine match: True
+
+  sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_dseg_anat_mask: ✅ COMPATIBLE
+    Shape match: True (ROI: (97, 115, 97))
+    Affine match: True
+
+  sub-01_functional_mask: ✅ COMPATIBLE
+    Shape match: True (ROI: (97, 115, 97))
+    Affine match: True
+
+  sub-01_hV4_fixed_mask: ✅ COMPATIBLE
+    Shape match: True (ROI: (97, 115, 97))
+    Affine match: True
+
+  sub-01_hV4_mask: ✅ COMPATIBLE
+    Shape match: True (ROI: (97, 115, 97))
+    Affine match: True
+
+Summary: 18 compatible, 0 incompatible
+
+[4/6] Checking spatial overlap:
+  Functional brain mask: 242046 non-zero voxels
+
+  sub-01_BrainMask_fixed_mask: ✅ GOOD
+    ROI voxels: 97732
+    Overlap with brain: 97732 (100.0%)
+    Functional values: 97732 non-zero, 0 zero
+    Value range: [0.07, 1020.28]
+    Mean value: 460.82
+
+  sub-01_BrainMask_mask: ❌ BAD
+    ROI voxels: 230768
+    Overlap with brain: 97732 (42.4%)
+    Functional values: 97735 non-zero, 133033 zero
+    Value range: [-12.70, 1020.28]
+    Mean value: 195.16
+
+  sub-01_EarlyVisual_fixed_mask: ✅ GOOD
+    ROI voxels: 372
+    Overlap with brain: 372 (100.0%)
+    Functional values: 372 non-zero, 0 zero
+    Value range: [1.85, 875.56]
+    Mean value: 606.28
+
+  sub-01_V1_fixed_mask: ✅ GOOD
+    ROI voxels: 190
+    Overlap with brain: 190 (100.0%)
+    Functional values: 190 non-zero, 0 zero
+    Value range: [1.85, 875.56]
+    Mean value: 583.33
+
+  sub-01_V1_mask: ❌ BAD
+    ROI voxels: 511
+    Overlap with brain: 190 (37.2%)
+    Functional values: 190 non-zero, 321 zero
+    Value range: [0.00, 875.56]
+    Mean value: 216.89
+
+  sub-01_V2_fixed_mask: ✅ GOOD
+    ROI voxels: 182
+    Overlap with brain: 182 (100.0%)
+    Functional values: 182 non-zero, 0 zero
+    Value range: [2.05, 822.13]
+    Mean value: 630.24
+
+  sub-01_V2_mask: ⚠️ POOR
+    ROI voxels: 310
+    Overlap with brain: 182 (58.7%)
+    Functional values: 182 non-zero, 128 zero
+    Value range: [0.00, 822.13]
+    Mean value: 370.01
+
+  sub-01_V3_fixed_mask: ✅ GOOD
+    ROI voxels: 62
+    Overlap with brain: 62 (100.0%)
+    Functional values: 62 non-zero, 0 zero
+    Value range: [2.17, 728.80]
+    Mean value: 596.42
+
+  sub-01_V3_mask: ⚠️ POOR
+    ROI voxels: 89
+    Overlap with brain: 62 (69.7%)
+    Functional values: 62 non-zero, 27 zero
+    Value range: [0.00, 728.80]
+    Mean value: 415.49
+
+  sub-01_Ventral_fixed_mask: ✅ GOOD
+    ROI voxels: 100
+    Overlap with brain: 100 (100.0%)
+    Functional values: 100 non-zero, 0 zero
+    Value range: [2.17, 728.80]
+    Mean value: 581.79
+
+  sub-01_acq-mprage_desc-preproc_T1w_anat_mask: ❌ BAD
+    ROI voxels: 99026
+    Overlap with brain: 40762 (41.2%)
+    Functional values: 40764 non-zero, 58262 zero
+    Value range: [-12.70, 982.80]
+    Mean value: 184.63
+
+  sub-01_acq-mprage_desc-ribbon_anat_mask: ❌ BAD
+    ROI voxels: 18106
+    Overlap with brain: 6061 (33.5%)
+    Functional values: 6061 non-zero, 12045 zero
+    Value range: [0.00, 927.30]
+    Mean value: 177.60
+
+  sub-01_acq-mprage_dseg_anat_mask: ❌ BAD
+    ROI voxels: 50109
+    Overlap with brain: 14473 (28.9%)
+    Functional values: 14473 non-zero, 35636 zero
+    Value range: [0.00, 982.80]
+    Mean value: 149.95
+
+  sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_desc-preproc_T1w_anat_mask: ❌ BAD
+    ROI voxels: 104521
+    Overlap with brain: 44040 (42.1%)
+    Functional values: 44042 non-zero, 60479 zero
+    Value range: [-12.70, 982.80]
+    Mean value: 186.81
+
+  sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_dseg_anat_mask: ❌ BAD
+    ROI voxels: 103517
+    Overlap with brain: 43716 (42.2%)
+    Functional values: 43718 non-zero, 59799 zero
+    Value range: [-12.70, 982.80]
+    Mean value: 188.19
+
+  sub-01_functional_mask: ✅ GOOD
+    ROI voxels: 242046
+    Overlap with brain: 242046 (100.0%)
+    Functional values: 242046 non-zero, 0 zero
+    Value range: [0.00, 1020.28]
+    Mean value: 233.35
+
+  sub-01_hV4_fixed_mask: ✅ GOOD
+    ROI voxels: 38
+    Overlap with brain: 38 (100.0%)
+    Functional values: 38 non-zero, 0 zero
+    Value range: [2.63, 648.16]
+    Mean value: 557.92
+
+  sub-01_hV4_mask: ⚠️ POOR
+    ROI voxels: 55
+    Overlap with brain: 38 (69.1%)
+    Functional values: 38 non-zero, 17 zero
+    Value range: [0.00, 648.16]
+    Mean value: 385.47
+
+[5/6] Testing voxel extraction with NiftiMasker:
+  Test data shape: (97, 115, 97, 10)
+
+  sub-01_BrainMask_fixed_mask: ✅ Extraction successful
+    Extracted shape: (10, 97732)
+    Expected: (10, 97732)
+    Value range: [-80.82, 1299.04]
+    Mean: 465.25, Std: 223.55
+    Contains NaN: False
+    All zeros: False
+
+  sub-01_BrainMask_mask: ✅ Extraction successful
+    Extracted shape: (10, 230768)
+    Expected: (10, 230768)
+    Value range: [-80.82, 1299.04]
+    Mean: 197.04, Std: 272.05
+    Contains NaN: False
+    All zeros: False
+
+  sub-01_EarlyVisual_fixed_mask: ✅ Extraction successful
+    Extracted shape: (10, 372)
+    Expected: (10, 372)
+    Value range: [0.00, 1075.26]
+    Mean: 625.85, Std: 128.91
+    Contains NaN: False
+    All zeros: False
+
+  sub-01_V1_fixed_mask: ✅ Extraction successful
+    Extracted shape: (10, 190)
+    Expected: (10, 190)
+    Value range: [0.00, 902.53]
+    Mean: 607.78, Std: 146.03
+    Contains NaN: False
+    All zeros: False
+
+  sub-01_V1_mask: ✅ Extraction successful
+    Extracted shape: (10, 511)
+    Expected: (10, 511)
+    Value range: [0.00, 902.53]
+    Mean: 225.98, Std: 306.93
+    Contains NaN: False
+    All zeros: False
+
+  sub-01_V2_fixed_mask: ✅ Extraction successful
+    Extracted shape: (10, 182)
+    Expected: (10, 182)
+    Value range: [0.00, 1075.26]
+    Mean: 644.71, Std: 104.91
+    Contains NaN: False
+    All zeros: False
+
+  sub-01_V2_mask: ✅ Extraction successful
+    Extracted shape: (10, 310)
+    Expected: (10, 310)
+    Value range: [0.00, 1075.26]
+    Mean: 378.51, Std: 327.45
+    Contains NaN: False
+    All zeros: False
+
+  sub-01_V3_fixed_mask: ✅ Extraction successful
+    Extracted shape: (10, 62)
+    Expected: (10, 62)
+    Value range: [0.00, 773.84]
+    Mean: 606.04, Std: 98.40
+    Contains NaN: False
+    All zeros: False
+
+  sub-01_V3_mask: ✅ Extraction successful
+    Extracted shape: (10, 89)
+    Expected: (10, 89)
+    Value range: [0.00, 773.84]
+    Mean: 422.19, Std: 290.46
+    Contains NaN: False
+    All zeros: False
+
+  sub-01_Ventral_fixed_mask: ✅ Extraction successful
+    Extracted shape: (10, 100)
+    Expected: (10, 100)
+    Value range: [0.00, 773.84]
+    Mean: 594.84, Std: 103.72
+    Contains NaN: False
+    All zeros: False
+
+  sub-01_acq-mprage_desc-preproc_T1w_anat_mask: ✅ Extraction successful
+    Extracted shape: (10, 99026)
+    Expected: (10, 99026)
+    Value range: [-28.64, 1299.04]
+    Mean: 186.59, Std: 267.86
+    Contains NaN: False
+    All zeros: False
+
+  sub-01_acq-mprage_desc-ribbon_anat_mask: ✅ Extraction successful
+    Extracted shape: (10, 18106)
+    Expected: (10, 18106)
+    Value range: [0.00, 1242.90]
+    Mean: 178.76, Std: 271.05
+    Contains NaN: False
+    All zeros: False
+
+  sub-01_acq-mprage_dseg_anat_mask: ✅ Extraction successful
+    Extracted shape: (10, 50109)
+    Expected: (10, 50109)
+    Value range: [0.00, 1299.04]
+    Mean: 150.54, Std: 256.63
+    Contains NaN: False
+    All zeros: False
+
+  sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_desc-preproc_T1w_anat_mask: ✅ Extraction successful
+    Extracted shape: (10, 104521)
+    Expected: (10, 104521)
+    Value range: [-50.24, 1299.04]
+    Mean: 188.85, Std: 268.16
+    Contains NaN: False
+    All zeros: False
+
+  sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_dseg_anat_mask: ✅ Extraction successful
+    Extracted shape: (10, 103517)
+    Expected: (10, 103517)
+    Value range: [-50.24, 1299.04]
+    Mean: 190.25, Std: 268.83
+    Contains NaN: False
+    All zeros: False
+
+  sub-01_functional_mask: ✅ Extraction successful
+    Extracted shape: (10, 242046)
+    Expected: (10, 242046)
+    Value range: [-80.82, 1299.04]
+    Mean: 235.61, Std: 249.90
+    Contains NaN: False
+    All zeros: False
+
+  sub-01_hV4_fixed_mask: ✅ Extraction successful
+    Extracted shape: (10, 38)
+    Expected: (10, 38)
+    Value range: [0.00, 716.92]
+    Mean: 576.56, Std: 109.42
+    Contains NaN: False
+    All zeros: False
+
+  sub-01_hV4_mask: ✅ Extraction successful
+    Extracted shape: (10, 55)
+    Expected: (10, 55)
+    Value range: [0.00, 716.92]
+    Mean: 398.35, Std: 281.54
+    Contains NaN: False
+    All zeros: False
+
+[6/6] Creating visualizations:
+  ✅ sub-01_BrainMask_fixed_mask: roi_diagnostics/sub-01_BrainMask_fixed_mask_overlay.png
+  ✅ sub-01_BrainMask_mask: roi_diagnostics/sub-01_BrainMask_mask_overlay.png
+  ✅ sub-01_EarlyVisual_fixed_mask: roi_diagnostics/sub-01_EarlyVisual_fixed_mask_overlay.png
+  ✅ sub-01_V1_fixed_mask: roi_diagnostics/sub-01_V1_fixed_mask_overlay.png
+  ✅ sub-01_V1_mask: roi_diagnostics/sub-01_V1_mask_overlay.png
+  ✅ sub-01_V2_fixed_mask: roi_diagnostics/sub-01_V2_fixed_mask_overlay.png
+  ✅ sub-01_V2_mask: roi_diagnostics/sub-01_V2_mask_overlay.png
+  ✅ sub-01_V3_fixed_mask: roi_diagnostics/sub-01_V3_fixed_mask_overlay.png
+  ✅ sub-01_V3_mask: roi_diagnostics/sub-01_V3_mask_overlay.png
+  ✅ sub-01_Ventral_fixed_mask: roi_diagnostics/sub-01_Ventral_fixed_mask_overlay.png
+  ✅ sub-01_acq-mprage_desc-preproc_T1w_anat_mask: roi_diagnostics/sub-01_acq-mprage_desc-preproc_T1w_anat_mask_overlay.png
+  ✅ sub-01_acq-mprage_desc-ribbon_anat_mask: roi_diagnostics/sub-01_acq-mprage_desc-ribbon_anat_mask_overlay.png
+  ✅ sub-01_acq-mprage_dseg_anat_mask: roi_diagnostics/sub-01_acq-mprage_dseg_anat_mask_overlay.png
+  ✅ sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_desc-preproc_T1w_anat_mask: roi_diagnostics/sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_desc-preproc_T1w_anat_mask_overlay.png
+  ✅ sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_dseg_anat_mask: roi_diagnostics/sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_dseg_anat_mask_overlay.png
+  ✅ sub-01_functional_mask: roi_diagnostics/sub-01_functional_mask_overlay.png
+  ✅ sub-01_hV4_fixed_mask: roi_diagnostics/sub-01_hV4_fixed_mask_overlay.png
+  ✅ sub-01_hV4_mask: roi_diagnostics/sub-01_hV4_mask_overlay.png
+
+Visualizations saved to: roi_diagnostics/
+
+======================================================================
+DIAGNOSTIC REPORT
+======================================================================
+
+✅ Found 18 compatible ROI masks
+
+⚠️ Potential Issues Detected:
+  ⚠️ sub-01_BrainMask_mask: Low overlap (42.4%)
+  ⚠️ sub-01_BrainMask_mask: >50% of voxels are zero
+  ⚠️ sub-01_V1_mask: Low overlap (37.2%)
+  ⚠️ sub-01_V1_mask: >50% of voxels are zero
+  ⚠️ sub-01_V2_mask: Low overlap (58.7%)
+  ⚠️ sub-01_V3_mask: Low overlap (69.7%)
+  ⚠️ sub-01_acq-mprage_desc-preproc_T1w_anat_mask: Low overlap (41.2%)
+  ⚠️ sub-01_acq-mprage_desc-preproc_T1w_anat_mask: >50% of voxels are zero
+  ⚠️ sub-01_acq-mprage_desc-ribbon_anat_mask: Low overlap (33.5%)
+  ⚠️ sub-01_acq-mprage_desc-ribbon_anat_mask: >50% of voxels are zero
+  ⚠️ sub-01_acq-mprage_dseg_anat_mask: Low overlap (28.9%)
+  ⚠️ sub-01_acq-mprage_dseg_anat_mask: >50% of voxels are zero
+  ⚠️ sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_desc-preproc_T1w_anat_mask: Low overlap (42.1%)
+  ⚠️ sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_desc-preproc_T1w_anat_mask: >50% of voxels are zero
+  ⚠️ sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_dseg_anat_mask: Low overlap (42.2%)
+  ⚠️ sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_dseg_anat_mask: >50% of voxels are zero
+  ⚠️ sub-01_hV4_mask: Low overlap (69.1%)
+
+Recommendations:
+  1. Check registration quality in fMRIPrep QC reports
+  2. Verify ROI construction used correct template
+  3. Consider using different probability threshold for ROI masks
+
+======================================================================
+Diagnostic complete!
+======================================================================
+
+Next steps:
+  1. Review visualizations in roi_diagnostics/
+  2. Check report above for issues
+  3. If issues found, fix and re-run ROI construction
+  4. If all good, investigate GLM/model issues
+
+analysis complete!

@@ -1,0 +1,34 @@
+Starting V1 ROI analysis...
+Working directory: /scratch/connectome/haba6030/colorBlind
+
+Cleared cache: hrf_test_outputs/cache_V1/
+
+============================================================
+NAIVE_ANALYSIS.PY STARTED
+Subject: sub-01, Task: rsvp, Space: MNI152NLin2009cAsym
+Output directory: ./hrf_test_outputs
+Working directory: /scratch/connectome/haba6030/colorBlind
+============================================================
+
+[INFO] Discovering ROI masks...
+[INFO] Available ROI masks:
+  - brain: output/pilot/sub-01/anat/sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz
+  - BrainMask: derivatives/sub-01/roi/sub-01_BrainMask_mask.nii.gz
+  - EarlyVisual: derivatives/sub-01/roi/sub-01_EarlyVisual_fixed_mask.nii.gz
+  - V1: derivatives/sub-01/roi/sub-01_V1_mask.nii.gz
+  - V2: derivatives/sub-01/roi/sub-01_V2_mask.nii.gz
+  - V3: derivatives/sub-01/roi/sub-01_V3_mask.nii.gz
+  - Ventral: derivatives/sub-01/roi/sub-01_Ventral_fixed_mask.nii.gz
+  - preproc: derivatives/sub-01/roi/sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_desc-preproc_T1w_anat_mask.nii.gz
+  - ribbon: derivatives/sub-01/roi/sub-01_acq-mprage_desc-ribbon_anat_mask.nii.gz
+  - sub-01_acq-mprage_dseg_anat_mask: derivatives/sub-01/roi/sub-01_acq-mprage_dseg_anat_mask.nii.gz
+  - sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_dseg_anat_mask: derivatives/sub-01/roi/sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_dseg_anat_mask.nii.gz
+  - sub-01_functional_mask: derivatives/sub-01/roi/sub-01_functional_mask.nii.gz
+  - hV4: derivatives/sub-01/roi/sub-01_hV4_mask.nii.gz
+[INFO] Loading ROI mask: derivatives/sub-01/roi/sub-01_V1_mask.nii.gz
+[INFO] This may take 2-3 minutes on slow filesystems...
+[INFO] Mask loaded successfully!
+[INFO] Fitting NiftiMasker (this may take 1-2 minutes)...
+[INFO] NiftiMasker fitted successfully!
+
+[INFO] Configured 6 BOLD runs for analysis

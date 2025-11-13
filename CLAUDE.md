@@ -9,11 +9,26 @@ Before running any Python code, activate the nilearn conda environment:
 conda activate nilearn
 ```
 
-Most of the files are being ran in the remote server and directory named: 
+Most of the files are being ran in the remote server and directory named:
 haba6030@node2:/scratch/connectome/haba6030/colorBlind
 Also, most of the code is ran by using SLURM.
 Therefore, for running a code to check it, suggest this procedure
-(1) suggest code and sbatch modification -> (2) suggest scp CLI for uploading code -> (3) how to run code in the server -> (4) how to download from the server. 
+(1) suggest code and sbatch modification -> (2) suggest scp CLI for uploading code -> (3) how to run code in the server -> (4) how to download from the server.
+
+## SLURM Configuration (CRITICAL)
+
+**All SBATCH files MUST include:**
+```bash
+#SBATCH --nodelist=node2  # ALWAYS specify node2
+```
+
+**NEVER include:**
+```bash
+#SBATCH --partition=normal  # DO NOT specify partition
+``` 
+
+## logs Recording
+For each conversation, make MD file, and record all of the prompting and your answer in that md file. 
 
 ## Project Overview
 
@@ -68,13 +83,73 @@ passes through f_CVD and becomes restored to behave like the normal (NC) case.
 - `config.py`: Global configuration settings and file paths
 - `combine_atlas.py`: Atlas combination utilities
 
+## Subject Naming Convention (CRITICAL)
+
+**Pilot vs Test subjects must be clearly distinguished:**
+
+- **P01** = Pilot subject
+  - fMRIPrep directory: `/storage/connectome/haba6030/fmriprep_out/sub-P01/`
+  - File naming: `sub-01_task-rsvp_run-X_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz`
+  - Derivatives: `derivatives/sub-P01/` (to distinguish from test sub-01)
+  - Color mapping: Irregular spacing (LABEL2HUE_DEG_PILOT)
+  - Already preprocessed with res-2
+
+- **01, 02, 03, 04** = Test subjects
+  - fMRIPrep directory: `/storage/connectome/haba6030/fmriprep_out/sub-01/`, `sub-02/`, etc.
+  - File naming: `sub-01_task-rsvp_run-X_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz`
+  - Derivatives: `derivatives/sub-01/`, `sub-02/`, etc.
+  - Color mapping: Regular 45° spacing (LABEL2HUE_DEG_TEST)
+  - Need preprocessing with identical res-2 settings as pilot
+
+**NEVER confuse pilot P01 with test 01!**
+
 ## Data Structure
 
 The project expects fMRIPrep preprocessed data in this structure:
-- `output/pilot/sub-{SUB_ID}/func/`: fMRIPrep BOLD files
-- `pilot/sub-{SUB_ID}/func/`: Event files (.tsv)
-- `derivatives/sub-{SUB_ID}/`: Analysis outputs
+- `/storage/connectome/haba6030/fmriprep_out/sub-{P01|01|02|03|04}/func/`: fMRIPrep BOLD files
+- `/storage/connectome/haba6030/colorBlind_dataOct/sub-{P01|01|02|03|04}/func/`: Event files (.tsv)
+- `derivatives/sub-{P01|01|02|03|04}/`: Analysis outputs (ROI masks, results)
 - `ProbAtlas_v4/`: Wang et al. (2015) probabilistic visual area atlas
+
+## fMRIPrep Configuration (CRITICAL)
+
+**Must match pilot preprocessing settings exactly:**
+
+Pilot was preprocessed with fMRIPrep 25.0.0 using these settings (from config.toml):
+```bash
+fmriprep /data /out participant \
+  --participant-label 01 \
+  --fs-license-file /opt/freesurfer/license.txt \
+  --output-spaces MNI152NLin2009cAsym:res-2 \
+  --bold2t1w-dof 6 \
+  --nthreads 16 \
+  --mem-mb 16000 \
+  -w /work
+```
+
+**Key settings from config.toml:**
+- `output_spaces = "MNI152NLin2009cAsym:res-2"` - ONLY this space, with res-2
+- `bold2anat_dof = 6` - MUST be 6 (same as pilot)
+- `use_syn_sdc = false` - NO synthetic distortion correction (pilot used actual GRE fieldmap)
+- `nprocs = 16`, `memory_gb = 16.0`
+- Fieldmap: Phase-drift map with two consecutive GRE acquisitions
+
+**For test subjects (01-04):**
+- Use same `--output-spaces MNI152NLin2009cAsym:res-2`
+- If fieldmap exists: let fMRIPrep auto-detect
+- If no fieldmap: add `--use-syn-sdc` for fieldmap-less distortion correction
+
+**Expected output files (matching pilot):**
+```
+sub-01_task-rsvp_run-X_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz
+sub-01_task-rsvp_run-X_space-MNI152NLin2009cAsym_res-2_boldref.nii.gz
+sub-01_task-rsvp_run-X_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz
+sub-01_task-rsvp_run-X_desc-confounds_timeseries.tsv  # No space/res in confounds
+```
+
+**Resolution:** 97×115×97 (2mm MNI space with res-2)
+
+**DO NOT add T1w or fsaverage spaces** - pilot only has MNI152NLin2009cAsym:res-2
 
 ## Main Analysis Pipeline
 

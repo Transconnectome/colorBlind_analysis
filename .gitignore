@@ -23,9 +23,7 @@ output/
 pilot/
 derivatives/
 hrf_test_outputs/
-logs/
 *.nii
-*.nii.gz
 
 # Large PDFs
 *.pdf
@@ -48,11 +46,6 @@ temp_*
 tmp_*
 *.tmp
 
-# Log files
-*.log
-*.out
-*.err
-
 # Cache files
 .cache/
 *.joblib
@@ -60,9 +53,9 @@ tmp_*
 *.pickle
 
 # Results that are too large
-*.png
-*.jpg
-*.jpeg
+# *.png
+# *.jpg
+# *.jpeg
 
 # Keep these documentation files
 !final_IRB.pdf

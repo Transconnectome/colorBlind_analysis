@@ -1,0 +1,27 @@
+#!/bin/bash
+#SBATCH -J roiJobs
+#SBATCH -c 4
+#SBATCH --mem=64G
+#SBATCH -t 10:00:00
+#SBATCH -o logs/naive_%j.out
+#SBATCH -e logs/naive_%j.err
+#SBATCH --nodelist=node2
+
+export PYTHONUNBUFFERED=1
+export PYTHONDONTWRITEBYTECODE=1
+
+# Navigate to project directory
+cd /scratch/connectome/haba6030/colorBlind
+
+# Load conda environment
+source ~/.bashrc
+conda activate nilearn
+
+# Run diagnostic analysis
+echo "Starting quick ROI analysis..."
+python -u quick_roi_check.py
+
+echo "Starting detailed ROI analysis..."
+python -u diagnose_roi_alignment.py
+
+echo "analysis complete!"

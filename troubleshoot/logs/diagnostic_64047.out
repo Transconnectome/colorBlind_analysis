@@ -1,0 +1,94 @@
+Starting diagnostic analysis...
+
+============================================================
+
+=== HRF Model Comparison ===
+
+Testing HRF model: glover
+  Mean beta: 2.1331
+  Std beta: 51.8512
+  SNR: 0.0411
+
+Testing HRF model: glover + derivative
+  Mean beta: 0.6942
+  Std beta: 49.7908
+  SNR: 0.0139
+
+Testing HRF model: spm
+  Mean beta: 2.0008
+  Std beta: 77.7129
+  SNR: 0.0257
+
+Testing HRF model: fir
+  Error computing contrast: The expression (color_1) is not valid. This could be due to defining the contrasts using design matrix columns that are invalid python identifiers.
+
+============================================================
+
+=== ROI Quality Check ===
+
+V1:
+  Shape: (97, 115, 97)
+  N voxels: 511
+  Volume: 4.09 cm³
+  Overlap with non-zero voxels: 190 (37.2%)
+
+V2:
+  Shape: (97, 115, 97)
+  N voxels: 310
+  Volume: 2.48 cm³
+  Overlap with non-zero voxels: 182 (58.7%)
+
+V3:
+  Shape: (97, 115, 97)
+  N voxels: 89
+  Volume: 0.71 cm³
+  Overlap with non-zero voxels: 62 (69.7%)
+
+hV4:
+  Shape: (97, 115, 97)
+  N voxels: 55
+  Volume: 0.44 cm³
+  Overlap with non-zero voxels: 38 (69.1%)
+
+BrainMask:
+  Shape: (97, 115, 97)
+  N voxels: 230768
+  Volume: 1846.14 cm³
+  Overlap with non-zero voxels: 97732 (42.4%)
+
+============================================================
+
+=== Beta Estimate Comparison ===
+
+Method 1: Standard GLM (glover + derivative)
+
+Method 2: Deconvolution approach
+
+Comparison:
+  Standard - mean: 0.5174, std: 37.0207
+  Deconv   - mean: 1.8314, std: 7.4756
+  Correlation: -0.0007
+
+============================================================
+
+=== Voxel Selection Impact ===
+
+Total voxels available: 511
+
+Testing with k=500 voxels
+  Classification accuracy: 0.125
+
+Skipping k=1000 (exceeds available voxels)
+
+Skipping k=2000 (exceeds available voxels)
+
+Skipping k=5000 (exceeds available voxels)
+
+Skipping k=10000 (exceeds available voxels)
+
+============================================================
+
+Diagnostic report saved: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/diagnostic_report.txt
+
+=== Diagnostic Analysis Complete ===
+Diagnostic analysis complete!

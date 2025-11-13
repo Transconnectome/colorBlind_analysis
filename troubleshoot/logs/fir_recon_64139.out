@@ -1,0 +1,193 @@
+========================================================================
+FIR Reconstruction - Single ROI
+========================================================================
+Job ID: 64139
+Node: node2
+ROI: V2
+Use PCA: 1
+PCA components: 20
+Save z-maps: 1
+Working directory: /scratch/connectome/haba6030/colorBlind
+========================================================================
+
+Activating nilearn environment...
+Environment activated: /home/connectome/haba6030/.conda/envs/nilearn/bin/python
+Python version: Python 3.10.14
+
+Starting FIR reconstruction for ROI: V2
+Start time: 2025. 11. 06. (목) 16:21:25 KST
+
+Command: python fir_reconstruction.py --roi V2 --use-pca --n-components 20 --save-zmaps
+
+======================================================================
+FIR-based Color Reconstruction Pipeline
+======================================================================
+Subject: sub-01
+ROI: V2
+Use PCA: True
+PCA components: 20
+Output directory: derivatives/sub-01/fir_reconstruction/V2
+
+[1/8] Loading ROI mask: V2
+  Path: derivatives/sub-01/roi/sub-01_V2_mask.nii.gz
+  Number of voxels: 310
+
+[2/8] Loading 6 runs of functional data and events
+  Run 1: (97, 115, 97, 284), 72 events
+  Run 2: (97, 115, 97, 271), 72 events
+  Run 3: (97, 115, 97, 271), 72 events
+  Run 4: (97, 115, 97, 271), 72 events
+  Run 5: (97, 115, 97, 271), 72 events
+  Run 6: (97, 115, 97, 271), 72 events
+  Total: 6 runs loaded
+
+[3/8] Fitting FIR model (may take 5-10 minutes)
+  Using hrf_model='fir' with 10 time bins
+  Each voxel gets its own response curve
+/scratch/connectome/haba6030/colorBlind/fir_reconstruction.py:218: UserWarning: Mean values of 0 observed. The data have probably been centered. Scaling might not work as expected.
+  fir_model.fit(func_imgs, events_list, confounds_list)
+  FIR model fitted successfully!
+
+[4/8] Visualizing mean HRF estimated from FIR
+/scratch/connectome/haba6030/colorBlind/fir_reconstruction.py:240: RuntimeWarning: The same contrast will be used for all 6 runs. If the design matrices are not the same for all runs, (for example with different column names or column order across runs) you should pass contrast as an expression using the name of the conditions as they appear in the design matrices.
+  contrast_map = fir_model.compute_contrast(contrast_name, output_type='effect_size')
+  Saved: derivatives/sub-01/fir_reconstruction/V2/figures/V2_mean_hrf.png
+
+[5/8] Extracting beta estimates for 8 colors
+/scratch/connectome/haba6030/colorBlind/fir_reconstruction.py:293: RuntimeWarning: The same contrast will be used for all 6 runs. If the design matrices are not the same for all runs, (for example with different column names or column order across runs) you should pass contrast as an expression using the name of the conditions as they appear in the design matrices.
+  contrast_map = fir_model.compute_contrast(contrast_name, output_type='effect_size')
+/scratch/connectome/haba6030/colorBlind/fir_reconstruction.py:299: RuntimeWarning: The same contrast will be used for all 6 runs. If the design matrices are not the same for all runs, (for example with different column names or column order across runs) you should pass contrast as an expression using the name of the conditions as they appear in the design matrices.
+  z_map = fir_model.compute_contrast(contrast_name, output_type='z_score')
+  Run 1: Extracted 8 color betas
+  Run 2: Extracted 8 color betas
+  Run 3: Extracted 8 color betas
+  Run 4: Extracted 8 color betas
+  Run 5: Extracted 8 color betas
+  Run 6: Extracted 8 color betas
+  Total shape: (6, 8, 310)
+
+  Saving z-maps for each color...
+  Saved z-maps to: derivatives/sub-01/fir_reconstruction/V2/zmaps
+
+[6/8] Classification with diagonal LDA (leave-one-run-out)
+  Using PCA: 20 components
+  Test run 1: 1.000 (100.0%)
+  Test run 2: 1.000 (100.0%)
+  Test run 3: 1.000 (100.0%)
+  Test run 4: 1.000 (100.0%)
+  Test run 5: 1.000 (100.0%)
+  Test run 6: 1.000 (100.0%)
+
+Mean classification accuracy: 1.000 (100.0%)
+Baseline (chance): 0.125 (12.5%)
+
+Confusion matrix (aggregated across runs):
+        c  1c  2c  3c  4c  5c  6c  7c  8
+  c1:   6   0   0   0   0   0   0   0 
+  c2:   0   6   0   0   0   0   0   0 
+  c3:   0   0   6   0   0   0   0   0 
+  c4:   0   0   0   6   0   0   0   0 
+  c5:   0   0   0   0   6   0   0   0 
+  c6:   0   0   0   0   0   6   0   0 
+  c7:   0   0   0   0   0   0   6   0 
+  c8:   0   0   0   0   0   0   0   6 
+
+Per-color classification accuracy:
+  color_1: 1.000 (6/6)
+  color_2: 1.000 (6/6)
+  color_3: 1.000 (6/6)
+  color_4: 1.000 (6/6)
+  color_5: 1.000 (6/6)
+  color_6: 1.000 (6/6)
+  color_7: 1.000 (6/6)
+  color_8: 1.000 (6/6)
+
+[7/8] Reconstruction with B&H forward model
+
+  === Detailed reconstruction for test run 1 ===
+  color_1 (true: 182.1°):
+    Reconstructed: 192° (error: 9.9°)
+    Estimated channels: [-0.135, -0.194, -0.133, 0.708, 0.202, -0.232]
+    Top 5 correlations: 192°(0.995) 191°(0.995) 193°(0.995) 190°(0.995) 194°(0.994) 
+  color_2 (true: 288.0°):
+    Reconstructed: 280° (error: 8.0°)
+    Estimated channels: [-0.175, -0.241, -0.293, -0.184, 0.326, 0.599]
+    Top 5 correlations: 280°(0.995) 281°(0.995) 279°(0.994) 282°(0.994) 278°(0.993) 
+  color_3 (true: 305.2°):
+    Reconstructed: 299° (error: 6.2°)
+    Estimated channels: [0.040, -0.280, -0.245, -0.300, 0.055, 0.606]
+    Top 5 correlations: 299°(0.987) 300°(0.987) 298°(0.986) 301°(0.986) 297°(0.985) 
+  color_4 (true: 330.2°):
+    Reconstructed: 334° (error: 3.8°)
+    Estimated channels: [0.575, -0.231, -0.477, -0.301, -0.104, 0.457]
+    Top 5 correlations: 334°(0.960) 333°(0.960) 335°(0.960) 332°(0.959) 336°(0.959) 
+  color_5 (true: 35.3°):
+    Reconstructed: 38° (error: 2.7°)
+    Estimated channels: [0.374, 0.577, -0.154, -0.177, -0.120, -0.369]
+    Top 5 correlations: 38°(0.973) 37°(0.973) 39°(0.973) 36°(0.972) 40°(0.972) 
+  color_6 (true: 73.4°):
+    Reconstructed: 65° (error: 8.4°)
+    Estimated channels: [-0.097, 0.730, 0.063, -0.266, -0.100, -0.286]
+    Top 5 correlations: 65°(0.983) 66°(0.983) 64°(0.983) 67°(0.982) 63°(0.982) 
+  color_7 (true: 125.6°):
+    Reconstructed: 121° (error: 4.6°)
+    Estimated channels: [-0.165, -0.081, 0.571, -0.051, -0.095, -0.286]
+    Top 5 correlations: 121°(0.971) 122°(0.971) 120°(0.970) 123°(0.970) 119°(0.969) 
+  color_8 (true: 143.9°):
+    Reconstructed: 147° (error: 3.1°)
+    Estimated channels: [-0.418, -0.281, 0.667, 0.572, -0.164, -0.489]
+    Top 5 correlations: 147°(0.975) 148°(0.975) 146°(0.975) 149°(0.975) 145°(0.974) 
+
+  Test run 1: Mean error = 5.8°
+  Test run 2: Mean error = 5.8°
+  Test run 3: Mean error = 5.8°
+  Test run 4: Mean error = 5.8°
+  Test run 5: Mean error = 5.8°
+  Test run 6: Mean error = 5.8°
+
+Mean reconstruction error: 5.8°
+Chance level (expected): 90.0° (uniform circular distribution)
+
+[8/8] Leave-one-color-out reconstruction (novel colors)
+  color_1: Mean error = 150.1°
+  color_2: Mean error = 139.0°
+  color_3: Mean error = 26.2°
+  color_4: Mean error = 65.8°
+  color_5: Mean error = 70.7°
+  color_6: Mean error = 99.4°
+  color_7: Mean error = 153.6°
+  color_8: Mean error = 103.1°
+
+Mean error (novel colors): 101.0°
+
+Saving results...
+  Saved: derivatives/sub-01/fir_reconstruction/V2/results.pkl
+  Saved: derivatives/sub-01/fir_reconstruction/V2/summary.csv
+
+======================================================================
+FIR Reconstruction Complete
+======================================================================
+
+ROI: V2
+Voxels: 310
+PCA: 20 components
+
+Results:
+  Classification accuracy: 100.0% (chance: 12.5%)
+  Reconstruction error: 5.8° (chance: 90.0°)
+  Novel color error: 101.0°
+
+Output directory: derivatives/sub-01/fir_reconstruction/V2
+======================================================================
+Exception ignored in: Exception ignored in sys.unraisablehook
+Exit code: 120
+End time: 2025. 11. 06. (목) 16:30:10 KST
+
+❌ V2 failed with exit code 120
+
+Check error log for details:
+  logs/fir_recon_64139.err
+
+Check analysis log for details:
+  derivatives/sub-01/fir_reconstruction/V2/log.txt
+========================================================================

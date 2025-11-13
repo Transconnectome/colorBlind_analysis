@@ -1,0 +1,123 @@
+Starting ROI build...
+============================================================
+Building ROI masks for sub-P01
+============================================================
+
+  [INFO] Test subject (P01)
+fMRIPrep data: /storage/connectome/haba6030/fmriprep_out/sub-P01
+Atlas directory: /scratch/connectome/haba6030/colorBlind/ProbAtlas_v4/subj_vol_all
+
+Finding reference images...
+  ✓ Found reference image (res-2): sub-01_task-rsvp_run-1_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz
+    [DEBUG] Reference image shape: (97, 115, 97)
+    [DEBUG] Reference image path: /storage/connectome/haba6030/fmriprep_out/sub-P01/func/sub-01_task-rsvp_run-1_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz
+    [DEBUG] Expected shape: (97, 115, 97) for res-2
+  Reference shape: (97, 115, 97)
+  ✓ Found brain mask (anat): sub-01_acq-mprage_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz
+
+Output directory: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi
+File prefix: 01
+
+Building V1...
+    [DEBUG] Atlas space - Shape: (182, 218, 182), Voxels: 6685
+    [DEBUG] Target functional space - Shape: (97, 115, 97)
+    [DEBUG] After resampling - Shape: (97, 115, 97), Voxels: 834
+    [DEBUG] Brain mask shape before resample: (97, 115, 97)
+    [DEBUG] Brain mask intersection: 834 -> 822 voxels
+    ✓ Applied brain mask intersection
+  ✓ Created V1: 822 voxels
+    Saved to: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi/01_V1_mask.nii.gz
+
+Building V2...
+    [DEBUG] Atlas space - Shape: (182, 218, 182), Voxels: 4251
+    [DEBUG] Target functional space - Shape: (97, 115, 97)
+    [DEBUG] After resampling - Shape: (97, 115, 97), Voxels: 536
+    [DEBUG] Brain mask shape before resample: (97, 115, 97)
+    [DEBUG] Brain mask intersection: 536 -> 536 voxels
+    ✓ Applied brain mask intersection
+  ✓ Created V2: 536 voxels
+    Saved to: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi/01_V2_mask.nii.gz
+
+Building V3...
+    [DEBUG] Atlas space - Shape: (182, 218, 182), Voxels: 858
+    [DEBUG] Target functional space - Shape: (97, 115, 97)
+    [DEBUG] After resampling - Shape: (97, 115, 97), Voxels: 111
+    [DEBUG] Brain mask shape before resample: (97, 115, 97)
+    [DEBUG] Brain mask intersection: 111 -> 111 voxels
+    ✓ Applied brain mask intersection
+  ✓ Created V3: 111 voxels
+    Saved to: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi/01_V3_mask.nii.gz
+
+Building hV4...
+    [DEBUG] Atlas space - Shape: (182, 218, 182), Voxels: 512
+    [DEBUG] Target functional space - Shape: (97, 115, 97)
+    [DEBUG] After resampling - Shape: (97, 115, 97), Voxels: 72
+    [DEBUG] Brain mask shape before resample: (97, 115, 97)
+    [DEBUG] Brain mask intersection: 72 -> 72 voxels
+    ✓ Applied brain mask intersection
+  ✓ Created hV4: 72 voxels
+    Saved to: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi/01_hV4_mask.nii.gz
+
+============================================================
+SUCCESS: Created 4/4 ROI masks
+============================================================
+  ✓ V1: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi/01_V1_mask.nii.gz
+  ✓ V2: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi/01_V2_mask.nii.gz
+  ✓ V3: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi/01_V3_mask.nii.gz
+  ✓ hV4: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi/01_hV4_mask.nii.gz
+
+============================================================
+FIX ROI OVERLAP PROBLEM
+============================================================
+Subject: sub-P01
+file Pre: sub-01
+
+Creating functional mask from:
+  sub-01_task-rsvp_run-1_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz
+  Active voxels: 242046 / 1082035 (22.4%)
+
+Saved functional mask: /scratch/connectome/haba6030/colorBlind/derivatives/sub-P01/roi/sub-P01_functional_mask.nii.gz
+
+============================================================
+Fixing Individual ROIs
+============================================================
+
+⚠️  ROI not found: V1
+
+⚠️  ROI not found: V2
+
+⚠️  ROI not found: V3
+
+⚠️  ROI not found: hV4
+
+⚠️  ROI not found: BrainMask
+
+============================================================
+Creating Combined ROIs
+============================================================
+
+============================================================
+SUMMARY
+============================================================
+
+ROI             Original     Active       Removed      Overlap %   
+------------------------------------------------------------
+
+============================================================
+NEXT STEPS
+============================================================
+
+1. Re-run diagnostic analysis:
+   python diagnostic_analysis.py
+
+2. Check if classification accuracy improves
+
+3. If accuracy > 25%, ROI was the main problem!
+
+============================================================
+Quick ROI-Functional Check
+============================================================
+ERROR: No functional files found
+Starting Candid diagnostic analysis...
+Starting PERSUB diagnostic analysis...
+Diagnostic analysis complete!

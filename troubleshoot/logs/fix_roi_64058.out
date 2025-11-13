@@ -1,0 +1,94 @@
+Fixing ROI overlap problem...
+
+============================================================
+FIX ROI OVERLAP PROBLEM
+============================================================
+Subject: sub-01
+
+Creating functional mask from:
+  sub-01_task-rsvp_run-1_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz
+  Active voxels: 242046 / 1082035 (22.4%)
+
+Saved functional mask: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_functional_mask.nii.gz
+
+============================================================
+Fixing Individual ROIs
+============================================================
+
+Processing ROI: sub-01_V1
+  Original voxels: 511
+  Active voxels: 190 (37.2%)
+  Removed (inactive): 321
+  ✅ OK
+  Saved: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_V1_fixed_mask.nii.gz
+
+Processing ROI: sub-01_V2
+  Original voxels: 310
+  Active voxels: 182 (58.7%)
+  Removed (inactive): 128
+  ✅ OK
+  Saved: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_V2_fixed_mask.nii.gz
+
+Processing ROI: sub-01_V3
+  Original voxels: 89
+  Active voxels: 62 (69.7%)
+  Removed (inactive): 27
+  ⚠️  WARNING: Very few voxels (62)
+  Saved: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_V3_fixed_mask.nii.gz
+
+Processing ROI: sub-01_hV4
+  Original voxels: 55
+  Active voxels: 38 (69.1%)
+  Removed (inactive): 17
+  ⚠️  WARNING: Very few voxels (38)
+  Saved: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_hV4_fixed_mask.nii.gz
+
+Processing ROI: sub-01_BrainMask
+  Original voxels: 230768
+  Active voxels: 97732 (42.4%)
+  Removed (inactive): 133036
+  ✅ OK
+  Saved: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_BrainMask_fixed_mask.nii.gz
+
+============================================================
+Creating Combined ROIs
+============================================================
+
+Early Visual (V1 + V2):
+  Total voxels: 372
+  Saved: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_EarlyVisual_fixed_mask.nii.gz
+
+Ventral (V3 + hV4):
+  Total voxels: 100
+  Saved: /scratch/connectome/haba6030/colorBlind/derivatives/sub-01/roi/sub-01_Ventral_fixed_mask.nii.gz
+
+============================================================
+SUMMARY
+============================================================
+
+ROI             Original     Active       Removed      Overlap %   
+------------------------------------------------------------
+V1              511          190          321          37.2        
+V2              310          182          128          58.7        
+V3              89           62           27           69.7        
+hV4             55           38           17           69.1        
+BrainMask       230768       97732        133036       42.4        
+
+============================================================
+NEXT STEPS
+============================================================
+
+1. Re-run diagnostic analysis:
+   python diagnostic_analysis.py
+
+2. Check if classification accuracy improves
+
+3. If accuracy > 25%, ROI was the main problem!
+
+============================================================
+
+ROI fix complete!
+
+Next steps:
+1. Re-run diagnostic: sbatch sbatch_diagnostic.sub
+2. Check if classification accuracy improves

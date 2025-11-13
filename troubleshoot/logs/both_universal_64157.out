@@ -1,0 +1,281 @@
+========================================================================
+Running BOTH Universal HRF Methods in Parallel
+========================================================================
+Job ID: 64157
+Node: node2
+ROI: V2
+========================================================================
+
+Starting Method 1: Quick Fix...
+Time: 2025. 11. 06. (목) 21:37:38 KST
+Method 1 started (PID: 213514)
+Starting Method 2: True Paper Method...
+Time: 2025. 11. 06. (목) 21:37:38 KST
+Method 2 started (PID: 213516)
+
+Waiting for both methods to complete...
+
+======================================================================
+Universal HRF Reconstruction Pipeline (B&H 2009)
+======================================================================
+Subject: sub-01
+ROI: V2
+Method: Two-stage universal HRF
+Use PCA: True
+PCA components: 20
+Output directory: derivatives/sub-01/fir_reconstruction/V2_universal_hrf
+
+[1/8] Loading ROI mask: V2
+  Path: derivatives/sub-01/roi/sub-01_V2_mask.nii.gz
+======================================================================
+TRUE B&H 2009 Paper Method: Universal HRF as GLM Basis
+======================================================================
+Subject: sub-01
+ROI: V2
+Method: Two-stage GLM with universal HRF
+Use PCA: True
+PCA components: 20
+Output directory: derivatives/sub-01/fir_reconstruction/V2_true_paper
+
+[1/9] Loading ROI mask: V2
+  Path: derivatives/sub-01/roi/sub-01_V2_mask.nii.gz
+  Number of voxels: 310
+
+[2/9] Loading 6 runs of functional data and events
+  Number of voxels: 310
+
+[2/8] Loading 6 runs of functional data and events
+  Run 1: (97, 115, 97, 284), 72 events
+  Run 1: (97, 115, 97, 284), 72 events
+  Run 2: (97, 115, 97, 271), 72 events
+  Run 2: (97, 115, 97, 271), 72 events
+  Run 3: (97, 115, 97, 271), 72 events
+  Run 3: (97, 115, 97, 271), 72 events
+  Run 4: (97, 115, 97, 271), 72 events
+  Run 4: (97, 115, 97, 271), 72 events
+  Run 5: (97, 115, 97, 271), 72 events
+  Run 5: (97, 115, 97, 271), 72 events
+  Run 6: (97, 115, 97, 271), 72 events
+  Total: 6 runs loaded
+
+[3/8] Fitting FIR model (may take 5-10 minutes)
+  Using hrf_model='fir' with 10 time bins
+  Each voxel gets its own response curve
+  Run 6: (97, 115, 97, 271), 72 events
+  Total: 6 runs loaded
+
+[3/9] STAGE 1: Estimating universal HRF with FIR
+  Using hrf_model='fir' with 8 time bins
+  This estimates per-voxel HRFs to be averaged
+/scratch/connectome/haba6030/colorBlind/fir_reconstruction_universal_hrf.py:226: UserWarning: Mean values of 0 observed. The data have probably been centered. Scaling might not work as expected.
+  fir_model.fit(func_imgs, events_list, confounds_list)
+/scratch/connectome/haba6030/colorBlind/fir_reconstruction_true_paper.py:221: UserWarning: Mean values of 0 observed. The data have probably been centered. Scaling might not work as expected.
+  fir_model.fit(func_imgs, events_list, confounds_list)
+  FIR model fitted successfully!
+
+[4/9] Extracting universal HRF by averaging across voxels and colors
+/scratch/connectome/haba6030/colorBlind/fir_reconstruction_true_paper.py:243: RuntimeWarning: The same contrast will be used for all 6 runs. If the design matrices are not the same for all runs, (for example with different column names or column order across runs) you should pass contrast as an expression using the name of the conditions as they appear in the design matrices.
+  contrast_map = fir_model.compute_contrast(contrast_name, output_type='effect_size')
+  FIR model fitted successfully!
+
+[4/8] Visualizing mean HRF estimated from FIR
+/scratch/connectome/haba6030/colorBlind/fir_reconstruction_universal_hrf.py:248: RuntimeWarning: The same contrast will be used for all 6 runs. If the design matrices are not the same for all runs, (for example with different column names or column order across runs) you should pass contrast as an expression using the name of the conditions as they appear in the design matrices.
+  contrast_map = fir_model.compute_contrast(contrast_name, output_type='effect_size')
+  Universal HRF shape: (8,)
+  Universal HRF values: [ 0.01409645 -0.23496391 -0.41385217 -1.32792353 -1.86394326 -2.09867758
+ -1.43646717 -1.39818475]
+  Normalized HRF: [ 0.00671682 -0.11195808 -0.19719664 -0.63274299 -0.88815132 -1.
+ -0.68446301 -0.6662218 ]
+  Peak at delay: 5 TRs (7.5s)
+
+  Saved: derivatives/sub-01/fir_reconstruction/V2_true_paper/figures/V2_universal_hrf_true_paper.png
+
+[5/9] STAGE 2: Re-fitting GLM with universal HRF as custom basis
+  This extracts amplitude weights (not delays!) for each voxel×color
+  Fitting GLM with custom universal HRF basis...
+/scratch/connectome/haba6030/colorBlind/fir_reconstruction_true_paper.py:348: UserWarning: If design matrices are supplied, [t_r] will be ignored.
+  glm_model.fit(func_imgs, design_matrices=design_matrices)
+
+  === Universal HRF Analysis (CORRECTED) ===
+  Universal HRF (averaged across 8 colors and 310 voxels):
+  Full HRF curve: [-0.43704855 -0.45164522 -0.86694317 -1.68348012 -1.69738195 -2.30509877
+ -1.61428582 -1.97193908 -0.78342149 -1.0425632 ]
+  Absolute values: [0.43704855 0.45164522 0.86694317 1.68348012 1.69738195 2.30509877
+ 1.61428582 1.97193908 0.78342149 1.0425632 ]
+  Optimal delay: 5 TRs (7.5s)
+  Peak amplitude: -2.3051
+  Peak absolute amplitude: 2.3051
+  Original PEAK_DELAY: 3 TRs (4.5s)
+
+  >>> Using optimal delay 5 TRs (7.5s) for all voxels
+
+  Saved: derivatives/sub-01/fir_reconstruction/V2_universal_hrf/figures/V2_universal_hrf.png
+
+[5/8] Extracting beta estimates for 8 colors
+/scratch/connectome/haba6030/colorBlind/fir_reconstruction_universal_hrf.py:334: RuntimeWarning: The same contrast will be used for all 6 runs. If the design matrices are not the same for all runs, (for example with different column names or column order across runs) you should pass contrast as an expression using the name of the conditions as they appear in the design matrices.
+  contrast_map = fir_model.compute_contrast(contrast_name, output_type='effect_size')
+/scratch/connectome/haba6030/colorBlind/fir_reconstruction_universal_hrf.py:340: RuntimeWarning: The same contrast will be used for all 6 runs. If the design matrices are not the same for all runs, (for example with different column names or column order across runs) you should pass contrast as an expression using the name of the conditions as they appear in the design matrices.
+  z_map = fir_model.compute_contrast(contrast_name, output_type='z_score')
+  Run 1: Extracted 8 color betas
+/scratch/connectome/haba6030/colorBlind/fir_reconstruction_true_paper.py:348: UserWarning: Mean values of 0 observed. The data have probably been centered. Scaling might not work as expected.
+  glm_model.fit(func_imgs, design_matrices=design_matrices)
+  Run 2: Extracted 8 color betas
+  Run 3: Extracted 8 color betas
+  Run 4: Extracted 8 color betas
+  Run 5: Extracted 8 color betas
+  Run 6: Extracted 8 color betas
+  Total shape: (6, 8, 310)
+
+  Saving z-maps for each color...
+  Saved z-maps to: derivatives/sub-01/fir_reconstruction/V2_universal_hrf/zmaps
+
+[6/8] Classification with diagonal LDA (leave-one-run-out)
+  Using PCA: 20 components
+  Test run 1: 1.000 (100.0%)
+  Test run 2: 1.000 (100.0%)
+  Test run 3: 1.000 (100.0%)
+  Test run 4: 1.000 (100.0%)
+  Test run 5: 1.000 (100.0%)
+  Test run 6: 1.000 (100.0%)
+
+Mean classification accuracy: 1.000 (100.0%)
+Baseline (chance): 0.125 (12.5%)
+
+Confusion matrix (aggregated across runs):
+        c  1c  2c  3c  4c  5c  6c  7c  8
+  c1:   6   0   0   0   0   0   0   0 
+  c2:   0   6   0   0   0   0   0   0 
+  c3:   0   0   6   0   0   0   0   0 
+  c4:   0   0   0   6   0   0   0   0 
+  c5:   0   0   0   0   6   0   0   0 
+  c6:   0   0   0   0   0   6   0   0 
+  c7:   0   0   0   0   0   0   6   0 
+  c8:   0   0   0   0   0   0   0   6 
+
+Per-color classification accuracy:
+  color_1: 1.000 (6/6)
+  color_2: 1.000 (6/6)
+  color_3: 1.000 (6/6)
+  color_4: 1.000 (6/6)
+  color_5: 1.000 (6/6)
+  color_6: 1.000 (6/6)
+  color_7: 1.000 (6/6)
+  color_8: 1.000 (6/6)
+
+[7/8] Reconstruction with B&H forward model
+
+  === Detailed reconstruction for test run 1 ===
+  color_1 (true: 182.1°):
+    Reconstructed: 192° (error: 9.9°)
+    Estimated channels: [-0.210, -0.231, -0.117, 0.725, 0.222, -0.185]
+    Top 5 correlations: 192°(0.999) 191°(0.999) 193°(0.999) 190°(0.998) 194°(0.998) 
+  color_2 (true: 288.0°):
+    Reconstructed: 280° (error: 8.0°)
+    Estimated channels: [-0.135, -0.214, -0.244, -0.197, 0.297, 0.524]
+    Top 5 correlations: 280°(0.996) 279°(0.996) 281°(0.996) 278°(0.995) 282°(0.995) 
+  color_3 (true: 305.2°):
+    Reconstructed: 299° (error: 6.2°)
+    Estimated channels: [0.059, -0.289, -0.393, -0.296, 0.095, 0.719]
+    Top 5 correlations: 299°(0.980) 298°(0.980) 300°(0.980) 297°(0.980) 301°(0.979) 
+  color_4 (true: 330.2°):
+    Reconstructed: 333° (error: 2.8°)
+    Estimated channels: [0.499, -0.254, -0.344, -0.291, -0.121, 0.403]
+    Top 5 correlations: 333°(0.980) 334°(0.980) 332°(0.980) 335°(0.979) 331°(0.978) 
+  color_5 (true: 35.3°):
+    Reconstructed: 35° (error: 0.3°)
+    Estimated channels: [0.450, 0.606, -0.248, -0.189, -0.115, -0.348]
+    Top 5 correlations: 35°(0.981) 34°(0.981) 36°(0.981) 33°(0.980) 37°(0.980) 
+  color_6 (true: 73.4°):
+    Reconstructed: 70° (error: 3.4°)
+    Estimated channels: [-0.146, 0.715, 0.153, -0.260, -0.112, -0.324]
+    Top 5 correlations: 70°(0.983) 69°(0.983) 71°(0.983) 68°(0.982) 72°(0.982) 
+  color_7 (true: 125.6°):
+    Reconstructed: 125° (error: 0.6°)
+    Estimated channels: [-0.268, -0.141, 0.526, -0.023, -0.046, -0.164]
+    Top 5 correlations: 125°(0.951) 124°(0.951) 126°(0.951) 123°(0.950) 127°(0.950) 
+  color_8 (true: 143.9°):
+    Reconstructed: 146° (error: 2.1°)
+    Estimated channels: [-0.249, -0.191, 0.668, 0.531, -0.220, -0.626]
+    Top 5 correlations: 146°(0.950) 145°(0.950) 147°(0.949) 144°(0.949) 148°(0.949) 
+
+  Test run 1: Mean error = 4.1°
+  Test run 2: Mean error = 4.1°
+  Test run 3: Mean error = 4.1°
+  Test run 4: Mean error = 4.1°
+  Test run 5: Mean error = 4.1°
+  Test run 6: Mean error = 4.1°
+
+Mean reconstruction error: 4.1°
+Chance level (expected): 90.0° (uniform circular distribution)
+
+[8/8] Leave-one-color-out reconstruction (novel colors)
+  color_1: Mean error = 81.9°
+  color_2: Mean error = 11.0°
+  color_3: Mean error = 9.2°
+  color_4: Mean error = 36.2°
+  color_5: Mean error = 117.7°
+  color_6: Mean error = 58.6°
+  color_7: Mean error = 31.6°
+  color_8: Mean error = 72.9°
+
+Mean error (novel colors): 52.4°
+
+Saving results...
+  Saved: derivatives/sub-01/fir_reconstruction/V2_universal_hrf/results.pkl
+  Saved: derivatives/sub-01/fir_reconstruction/V2_universal_hrf/summary.csv
+
+======================================================================
+Universal HRF Reconstruction Complete (B&H 2009)
+======================================================================
+
+ROI: V2
+Method: Universal HRF (optimal delay: 5 TRs / 7.5s)
+Voxels: 310
+PCA: 20 components
+
+Results:
+  Classification accuracy: 100.0% (chance: 12.5%)
+  Reconstruction error: 4.1° (chance: 90.0°)
+  Novel color error: 52.4°
+
+Output directory: derivatives/sub-01/fir_reconstruction/V2_universal_hrf
+======================================================================
+Exception ignored in: Exception ignored in sys.unraisablehookMethod 1 (Quick Fix) completed with exit code: 120
+  GLM refitting complete!
+
+[6/9] Extracting beta amplitudes for 8 colors
+  NOTE: No delays - each voxel has 1 amplitude per color!
+/scratch/connectome/haba6030/colorBlind/fir_reconstruction_true_paper.py:371: RuntimeWarning: The same contrast will be used for all 6 runs. If the design matrices are not the same for all runs, (for example with different column names or column order across runs) you should pass contrast as an expression using the name of the conditions as they appear in the design matrices.
+  contrast_map = glm_model.compute_contrast(color_name, output_type='effect_size')
+  Run 1: Extracted 8 color amplitudes
+  Run 2: Extracted 8 color amplitudes
+  Run 3: Extracted 8 color amplitudes
+  Run 4: Extracted 8 color amplitudes
+  Run 5: Extracted 8 color amplitudes
+  Run 6: Extracted 8 color amplitudes
+  Total shape: (6, 8, 310)
+  Parameters: 8 HRF + 2480 amplitudes = 2488
+
+======================================================================
+TRUE PAPER METHOD IMPLEMENTATION COMPLETE!
+Continuing with same classification/reconstruction pipeline...
+======================================================================
+
+IMPLEMENTATION NOTE: Classification and reconstruction code continues...
+(Same as other methods from this point)
+
+Exception ignored in: Exception ignored in sys.unraisablehookMethod 2 (True Paper) completed with exit code: 120
+
+========================================================================
+RESULTS COMPARISON
+========================================================================
+
+Method 1 (Quick Fix - Corrected Delay):
+ROI,Method,N_voxels,Optimal_delay_TRs,Use_PCA,N_components,Classification_accuracy,Reconstruction_error_deg,Novel_color_error_deg
+V2,universal_hrf,310,5,True,20,1.0,4.146176376135031,52.39623334774552
+
+Method 2 (True Paper - GLM Basis):
+
+========================================================================
+End time: 2025. 11. 06. (목) 22:00:57 KST
+========================================================================

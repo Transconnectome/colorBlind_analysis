@@ -43,21 +43,21 @@ mkdir -p logs
 # Method 1: Quick Fix (Corrected Delay Selection)
 # ============================================================================
 
-echo "Starting Method 1: Quick Fix..."
-echo "Time: $(date)"
+# echo "Starting Method 1: Quick Fix..."
+# echo "Time: $(date)"
 
-CMD1="python fir_reconstruction_universal_hrf.py --roi ${ROI}"
-if [ $USE_PCA -eq 1 ]; then
-    CMD1="${CMD1} --use-pca --n-components ${N_COMPONENTS}"
-fi
-if [ $SAVE_ZMAPS -eq 1 ]; then
-    CMD1="${CMD1} --save-zmaps"
-fi
+# CMD1="python fir_reconstruction_universal_hrf.py --roi ${ROI}"
+# if [ $USE_PCA -eq 1 ]; then
+#     CMD1="${CMD1} --use-pca --n-components ${N_COMPONENTS}"
+# fi
+# if [ $SAVE_ZMAPS -eq 1 ]; then
+#     CMD1="${CMD1} --save-zmaps"
+# fi
 
-${CMD1} &
-PID1=$!
+# ${CMD1} &
+# PID1=$!
 
-echo "Method 1 started (PID: $PID1)"
+# echo "Method 1 started (PID: $PID1)"
 
 # ============================================================================
 # Method 2: True Paper Method (GLM with Universal HRF)
@@ -87,9 +87,9 @@ echo
 echo "Waiting for both methods to complete..."
 echo
 
-wait $PID1
-EXIT1=$?
-echo "Method 1 (Quick Fix) completed with exit code: $EXIT1"
+# wait $PID1
+# EXIT1=$?
+# echo "Method 1 (Quick Fix) completed with exit code: $EXIT1"
 
 wait $PID2
 EXIT2=$?

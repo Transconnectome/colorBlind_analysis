@@ -1,22 +1,27 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-fir_reconstruction_zScore.py
------------------------------
-Z-score based Universal HRF reconstruction (Modified from B&H 2009)
+fir_reconstruction_zScore_voxelSelect.py
+-----------------------------------------
+Z-score based Universal HRF with FUNCTIONAL VOXEL SELECTION
 
-DIFFERENCE FROM BETA VERSION:
-- Uses Z-score maps instead of Beta maps for all analyses
-- Z-scores automatically weight voxels by statistical significance
-- Expected to reduce overfitting and improve generalization
+DIFFERENCE FROM zScore.py:
+- Adds functional voxel selection after Z-score extraction
+- Only uses voxels with |mean_z_score| > 2.3 (p < 0.01)
+- Mean z-score = average across all 8 colors (Color vs Gray)
+- Implements B&H 2009 approach: Anatomical ROI ∩ Functional localizer
+- Removes non-responsive voxels (~78-85%)
 
-Two-stage approach:
-1. Fit FIR to estimate HRF shape averaged across all ROI voxels
-2. Find optimal delay from universal HRF
-3. Extract Z-SCORES at that single optimal delay for all voxels
+Workflow:
+1. Fit FIR to estimate universal HRF
+2. Extract Z-scores at optimal delay for ALL voxels
+3. **Compute mean |z| across 8 colors per voxel**
+4. **Select only voxels with mean |z| > 2.3** (color-responsive)
+5. Continue PCA/classification/reconstruction with selected voxels only
 
 Features:
 - Universal HRF estimation (B&H 2009 method)
+- Functional voxel selection (Color vs Gray, p < 0.01)
 - Z-score based features (noise suppression)
 - Correct Lab hue values (from pilot data)
 - Diagonal LDA classification (paper method)
@@ -24,10 +29,10 @@ Features:
 - Optional PCA dimensionality reduction
 
 Usage:
-    python fir_reconstruction_zScore.py --roi V2 --use-pca --n-components 20
+    python fir_reconstruction_zScore_voxelSelect.py --roi V2 --use-pca --n-components 6
 
 EDITLOG:
-    11.13. Created from fir_reconstruction_universal_hrf.py
+    11.15. Created from fir_reconstruction_zScore.py
     - Changed Line 402: output_type='z_score' (was 'effect_size')
     - Changed output_dir: added /zScore/ subfolder
     - All downstream analyses now use Z-scores instead of Betas
@@ -145,9 +150,9 @@ else:
 # ============================================================================
 
 if SUBJECT_ID == 'P01':
-    output_dir = Path(f"derivatives/pilot/{DERIVATIVE_PREFIX}/fir_reconstruction_uni_hrf/zScore/{ROI_NAME}_universal_hrf")
+    output_dir = Path(f"derivatives/pilot/{DERIVATIVE_PREFIX}/fir_reconstruction_uni_hrf/voxelSelect/{ROI_NAME}_universal_hrf")
 else:
-    output_dir = Path(f"derivatives/{DERIVATIVE_PREFIX}/fir_reconstruction_uni_hrf/zScore/{ROI_NAME}_universal_hrf")
+    output_dir = Path(f"derivatives/{DERIVATIVE_PREFIX}/fir_reconstruction_uni_hrf/voxelSelect/{ROI_NAME}_universal_hrf")
 output_dir.mkdir(parents=True, exist_ok=True)
 
 fig_dir = output_dir / "figures"
@@ -429,6 +434,66 @@ for run_idx in range(N_RUNS):
 all_betas = np.array(all_betas)  # (n_runs, n_colors, n_voxels) - CONTAINS Z-SCORES!
 print(f"  Total shape: {all_betas.shape}")
 print(f"  Data type: Z-SCORES (not betas!)")
+print()
+sys.stdout.flush()
+
+# ============================================================================
+# FUNCTIONAL VOXEL SELECTION (Color vs Gray, p < 0.01)
+# ============================================================================
+
+print(f"[5B/8] Functional voxel selection (|mean_z| > 2.3)")
+print(f"  This implements: Anatomical ROI ∩ Functional Localizer")
+sys.stdout.flush()
+
+# Compute mean |z-score| across all 8 colors and all runs
+mean_abs_z_per_voxel = np.mean(np.abs(all_betas), axis=(0, 1))  # (n_voxels,)
+
+# Threshold
+Z_THRESHOLD = 2.3  # p < 0.01, two-tailed
+selected_voxels_mask = mean_abs_z_per_voxel > Z_THRESHOLD
+
+# Statistics BEFORE selection
+n_voxels_anatomical = n_voxels
+n_voxels_selected = selected_voxels_mask.sum()
+selection_percentage = 100.0 * n_voxels_selected / n_voxels_anatomical
+
+print(f"  Anatomical ROI voxels: {n_voxels_anatomical}")
+print(f"  Functional threshold: |z| > {Z_THRESHOLD} (p < 0.01)")
+print(f"  Selected voxels: {n_voxels_selected} ({selection_percentage:.1f}%)")
+print(f"  Removed voxels: {n_voxels_anatomical - n_voxels_selected} ({100-selection_percentage:.1f}%)")
+print()
+
+# Statistics of selected voxels
+mean_z_selected = mean_abs_z_per_voxel[selected_voxels_mask]
+print(f"  Selected voxel statistics:")
+print(f"    Mean |z|: {mean_z_selected.mean():.2f} ± {mean_z_selected.std():.2f}")
+print(f"    Range |z|: [{mean_z_selected.min():.2f}, {mean_z_selected.max():.2f}]")
+print()
+sys.stdout.flush()
+
+# Apply selection to data
+all_betas = all_betas[:, :, selected_voxels_mask]  # (n_runs, n_colors, n_selected_voxels)
+n_voxels = n_voxels_selected  # Update voxel count
+
+print(f"  Data shape after selection: {all_betas.shape}")
+print(f"  Updated n_voxels: {n_voxels}")
+print()
+sys.stdout.flush()
+
+# Save selection mask
+selection_mask_data = np.zeros(roi_img.get_fdata().shape)
+# Get voxel coordinates from original ROI
+roi_coords = np.where(roi_img.get_fdata() > 0)
+selected_indices = np.where(selected_voxels_mask)[0]
+
+# Map selected voxels back to 3D space
+for idx in selected_indices:
+    selection_mask_data[roi_coords[0][idx], roi_coords[1][idx], roi_coords[2][idx]] = 1
+
+selection_mask_img = nib.Nifti1Image(selection_mask_data, affine=roi_img.affine)
+selection_mask_path = output_dir / f"{ROI_NAME}_functional_selection_mask.nii.gz"
+nib.save(selection_mask_img, selection_mask_path)
+print(f"  Saved selection mask: {selection_mask_path}")
 print()
 sys.stdout.flush()
 
@@ -886,117 +951,6 @@ if USE_PCA and SAVE_ZMAPS:
     print(f"  Mean component std across folds: {pca_matrix_std.mean():.4f}")
     print(f"  Color with highest variance: c{np.argmax(color_variances_mean)+1} ({color_variances_mean.max():.3f}±{color_variances_std[np.argmax(color_variances_mean)]:.3f})")
     print(f"  Robustness metric (mean std/mean value): {pca_matrix_std.mean() / np.abs(pca_matrix_mean).mean():.4f}")
-    print()
-    sys.stdout.flush()
-
-    # ========================================================================
-    # PCA Color Space Visualization (B&H 2009 Figure 6 style)
-    # ========================================================================
-
-    print("Creating PCA color space scatter plots...")
-
-    # Define colors for plotting (matching stimulus hues)
-    color_names = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8']
-    plot_colors = ['red', 'orange', 'yellow', 'lime', 'cyan', 'blue', 'purple', 'magenta']
-
-    # Create figure with 3 subplots for different PC combinations
-    fig, axes = plt.subplots(1, 3, figsize=(18, 6))
-    fig.suptitle(f'{ROI_NAME}: PCA Color Space (Z-score based, mean across {N_RUNS} folds)',
-                 fontsize=16, fontweight='bold')
-
-    # Plot 1: PC1 vs PC2 (main variation)
-    ax = axes[0]
-    for color_idx in range(N_COLORS):
-        # Get PC scores for this color across all folds
-        pc1_scores = pca_matrices_per_fold[:, color_idx, 0]  # (N_RUNS,)
-        pc2_scores = pca_matrices_per_fold[:, color_idx, 1]  # (N_RUNS,)
-
-        # Plot individual fold points (small dots)
-        ax.scatter(pc1_scores, pc2_scores,
-                   c=plot_colors[color_idx], alpha=0.3, s=30, edgecolors='none')
-
-        # Plot centroid (large marker)
-        centroid_pc1 = pca_matrix_mean[color_idx, 0]
-        centroid_pc2 = pca_matrix_mean[color_idx, 1]
-        ax.scatter(centroid_pc1, centroid_pc2,
-                   c=plot_colors[color_idx], s=200, marker='o',
-                   edgecolors='black', linewidths=2, label=color_names[color_idx],
-                   zorder=5)
-
-        # Connect centroids in order
-        if color_idx > 0:
-            prev_pc1 = pca_matrix_mean[color_idx-1, 0]
-            prev_pc2 = pca_matrix_mean[color_idx-1, 1]
-            ax.plot([prev_pc1, centroid_pc1], [prev_pc2, centroid_pc2],
-                    'k-', alpha=0.3, linewidth=1, zorder=1)
-
-    # Connect last to first to close the circle
-    ax.plot([pca_matrix_mean[-1, 0], pca_matrix_mean[0, 0]],
-            [pca_matrix_mean[-1, 1], pca_matrix_mean[0, 1]],
-            'k-', alpha=0.3, linewidth=1, zorder=1)
-
-    ax.axhline(y=0, color='gray', linestyle='--', alpha=0.3)
-    ax.axvline(x=0, color='gray', linestyle='--', alpha=0.3)
-    ax.set_xlabel(f'PC1 ({explained_var_mean[0]:.1%} var)')
-    ax.set_ylabel(f'PC2 ({explained_var_mean[1]:.1%} var)')
-    ax.set_title('PC1 vs PC2')
-    ax.legend(fontsize=8, loc='best')
-    ax.grid(True, alpha=0.2)
-    ax.set_aspect('equal', adjustable='box')
-
-    # Plot 2: PC1 vs PC3 (if N_PCA_COMPONENTS >= 3)
-    if N_PCA_COMPONENTS >= 3:
-        ax = axes[1]
-        for color_idx in range(N_COLORS):
-            pc1_scores = pca_matrices_per_fold[:, color_idx, 0]
-            pc3_scores = pca_matrices_per_fold[:, color_idx, 2]
-
-            ax.scatter(pc1_scores, pc3_scores,
-                       c=plot_colors[color_idx], alpha=0.3, s=30, edgecolors='none')
-
-            centroid_pc1 = pca_matrix_mean[color_idx, 0]
-            centroid_pc3 = pca_matrix_mean[color_idx, 2]
-            ax.scatter(centroid_pc1, centroid_pc3,
-                       c=plot_colors[color_idx], s=200, marker='o',
-                       edgecolors='black', linewidths=2, zorder=5)
-
-        ax.axhline(y=0, color='gray', linestyle='--', alpha=0.3)
-        ax.axvline(x=0, color='gray', linestyle='--', alpha=0.3)
-        ax.set_xlabel(f'PC1 ({explained_var_mean[0]:.1%} var)')
-        ax.set_ylabel(f'PC3 ({explained_var_mean[2]:.1%} var)')
-        ax.set_title('PC1 vs PC3')
-        ax.grid(True, alpha=0.2)
-        ax.set_aspect('equal', adjustable='box')
-
-    # Plot 3: PC2 vs PC3 (if N_PCA_COMPONENTS >= 3)
-    if N_PCA_COMPONENTS >= 3:
-        ax = axes[2]
-        for color_idx in range(N_COLORS):
-            pc2_scores = pca_matrices_per_fold[:, color_idx, 1]
-            pc3_scores = pca_matrices_per_fold[:, color_idx, 2]
-
-            ax.scatter(pc2_scores, pc3_scores,
-                       c=plot_colors[color_idx], alpha=0.3, s=30, edgecolors='none')
-
-            centroid_pc2 = pca_matrix_mean[color_idx, 1]
-            centroid_pc3 = pca_matrix_mean[color_idx, 2]
-            ax.scatter(centroid_pc2, centroid_pc3,
-                       c=plot_colors[color_idx], s=200, marker='o',
-                       edgecolors='black', linewidths=2, zorder=5)
-
-        ax.axhline(y=0, color='gray', linestyle='--', alpha=0.3)
-        ax.axvline(x=0, color='gray', linestyle='--', alpha=0.3)
-        ax.set_xlabel(f'PC2 ({explained_var_mean[1]:.1%} var)')
-        ax.set_ylabel(f'PC3 ({explained_var_mean[2]:.1%} var)')
-        ax.set_title('PC2 vs PC3')
-        ax.grid(True, alpha=0.2)
-        ax.set_aspect('equal', adjustable='box')
-
-    plt.tight_layout()
-    pca_colorspace_path = fig_dir / f"{ROI_NAME}_pca_colorspace.png"
-    plt.savefig(pca_colorspace_path, dpi=150, bbox_inches='tight')
-    plt.close()
-    print(f"  Saved: {pca_colorspace_path}")
     print()
     sys.stdout.flush()
 

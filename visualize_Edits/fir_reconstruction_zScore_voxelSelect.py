@@ -441,16 +441,16 @@ sys.stdout.flush()
 # FUNCTIONAL VOXEL SELECTION (Color vs Gray, p < 0.01)
 # ============================================================================
 
-print(f"[5B/8] Functional voxel selection (|mean_z| > 2.3)")
+print(f"[5B/8] Functional voxel selection (|max_z| > 2.3)")
 print(f"  This implements: Anatomical ROI ∩ Functional Localizer")
 sys.stdout.flush()
 
-# Compute mean |z-score| across all 8 colors and all runs
-mean_abs_z_per_voxel = np.mean(np.abs(all_betas), axis=(0, 1))  # (n_voxels,)
+# Compute max |z-score| across all 8 colors and all runs (color-responsive voxels)
+max_abs_z_per_voxel = np.max(np.abs(all_betas), axis=(0, 1))  # (n_voxels,)
 
 # Threshold
 Z_THRESHOLD = 2.3  # p < 0.01, two-tailed
-selected_voxels_mask = mean_abs_z_per_voxel > Z_THRESHOLD
+selected_voxels_mask = max_abs_z_per_voxel > Z_THRESHOLD
 
 # Statistics BEFORE selection
 n_voxels_anatomical = n_voxels
@@ -464,10 +464,10 @@ print(f"  Removed voxels: {n_voxels_anatomical - n_voxels_selected} ({100-select
 print()
 
 # Statistics of selected voxels
-mean_z_selected = mean_abs_z_per_voxel[selected_voxels_mask]
+max_z_selected = max_abs_z_per_voxel[selected_voxels_mask]
 print(f"  Selected voxel statistics:")
-print(f"    Mean |z|: {mean_z_selected.mean():.2f} ± {mean_z_selected.std():.2f}")
-print(f"    Range |z|: [{mean_z_selected.min():.2f}, {mean_z_selected.max():.2f}]")
+print(f"    Mean max |z|: {max_z_selected.mean():.2f} ± {max_z_selected.std():.2f}")
+print(f"    Range max |z|: [{max_z_selected.min():.2f}, {max_z_selected.max():.2f}]")
 print()
 sys.stdout.flush()
 

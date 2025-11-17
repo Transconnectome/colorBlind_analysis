@@ -20,12 +20,12 @@ Combines:
 - Optional PCA dimensionality reduction
 
 Usage:
-    python fir_reconstruction_universal_hrf.py --roi V2 --use-pca --n-components 20
+    python fir_reconstruction_universal_hrf.py --roi V2 --use-pca --n-components 6
     
-EDITLOG:
-    11.11. 12:23 AM: Editted for pilot run & various ROI verification (edit ROI part when 결정)
-    - 성능 준수 (V1, V2 상승 나머지 하락) - 완벽 재현을 위해 candid와 차이 비교중
-        - 
+Apply Changes?:
+    [O] CHANGE 1: Output directory structure (using OutputManager)
+    [O] CHANGE 2: PCA with leave-one-run-out CV (already in original)
+    [?] CHANGE 3: Accurate Lab→RGB color conversion for figures
 """
 
 import sys
@@ -80,6 +80,19 @@ LABEL2HUE_DEG_TEST = {
     'color_8': 315.0,
 }
 
+# Actual stimulus colors in CIELab (for accurate RGB conversion) [CHECK]
+COLOR_LAB = {
+    'color_1': [75, 40.0, 0.0],        # 0°: Red
+    'color_2': [75, 28.28, 28.28],     # 45°: Orange
+    'color_3': [75, 0.0, 40.0],        # 90°: Yellow
+    'color_4': [75, -28.28, 28.28],    # 135°: Green
+    'color_5': [75, -40.0, 0.0],       # 180°: Cyan
+    'color_6': [75, -28.28, -28.28],   # 225°: Blue
+    'color_7': [75, 0.0, -40.0],       # 270°: Violet
+    'color_8': [75, 28.28, -28.28],    # 315°: Pinkish
+    'blank': [75, 0.0, 0.0]            # Neutral Gray
+}
+
 # Experiment parameters
 TR = 1.5
 N_RUNS = 6
@@ -88,6 +101,154 @@ N_COLORS = 8
 # FIR parameters
 FIR_DELAYS = range(10)  # 0-15 seconds (10 TRs × 1.5s)
 PEAK_DELAY = 3  # ~4.5s post-onset (typical HRF peak)
+
+
+# ============================================================================
+# Helper Functions
+# ============================================================================
+
+def diag_linear_predict(train_X, train_y, test_X):
+    """Diagonal Linear Discriminant Analysis (B&H 2009 method)"""
+    classes = np.unique(train_y)
+    means = np.stack([train_X[train_y==c].mean(axis=0) for c in classes])
+    vars_  = np.stack([train_X[train_y==c].var(axis=0) + 1e-8 for c in classes])
+
+    ll = []
+    for k in range(len(classes)):
+        ll_k = -0.5 * (
+            np.log(2*np.pi*vars_[k]).sum() +
+            ((test_X - means[k])**2 / vars_[k]).sum(axis=1)
+        )
+        ll.append(ll_k)
+    ll = np.stack(ll, axis=1)
+    preds = classes[ll.argmax(axis=1)]
+    return preds
+
+def circular_diff_deg(a, b):
+    """Circular difference in degrees (0-360)"""
+    diff = np.abs(a - b)
+    return np.minimum(diff, 360 - diff)
+
+def circular_mean_deg(angles_deg):
+    """Calculate circular mean of angles in degrees and resultant vector length"""
+    if len(angles_deg) == 0:
+        return np.nan, 0.0
+    ang = np.deg2rad(np.asarray(angles_deg))
+    C = np.cos(ang).mean()
+    S = np.sin(ang).mean()
+    mean_ang = (np.rad2deg(np.arctan2(S, C)) + 360) % 360
+    R = np.hypot(C, S)  # 0~1, higher = more concentrated
+    return mean_ang, R
+
+def lab_hue_to_rgb(hue_deg, L=70, C=60):
+    """Convert Lab hue to RGB color for visualization
+
+    Simplified approach: use HSV as approximation
+    Lab hue ~= HSV hue (not perfect but good enough for visualization)
+    """
+    from matplotlib.colors import hsv_to_rgb
+
+    # Normalize hue to [0, 1] for HSV
+    h = (hue_deg % 360) / 360.0
+
+    # Use high saturation and value for vivid colors
+    s = 0.8  # Saturation
+    v = 0.9  # Value
+
+    # Convert HSV to RGB
+    rgb = hsv_to_rgb([h, s, v])
+
+    return rgb
+
+
+def lab2rgb_accurate(L, a, b, clip=True):
+    """
+    Convert CIELab to RGB using proper color space conversion
+
+    Parameters:
+    -----------
+    L : float
+        Lightness (0-100)
+    a : float
+        Green-Red axis
+    b : float
+        Blue-Yellow axis
+    clip : bool
+        Clip RGB values to [0, 1]
+
+    Returns:
+    --------
+    tuple : (R, G, B) in [0, 1] range
+    """
+    L, a, b = float(L), float(a), float(b)
+
+    # Lab to XYZ
+    y = (L + 16) / 116
+    x = a / 500 + y
+    z = y - b / 200
+
+    xyz = np.array([x, y, z])
+    xyz = np.where(xyz > 0.206893, xyz**3, (xyz - 16/116) / 7.787)
+    xyz *= [0.95047, 1., 1.08883]  # D65 white point
+
+    # XYZ to RGB (sRGB matrix)
+    rgb = np.dot([[3.2406, -1.5372, -0.4986],
+                  [-0.9689, 1.8758, 0.0415],
+                  [0.0557, -0.2040, 1.0570]], xyz)
+
+    # Gamma correction
+    rgb = np.where(rgb <= 0.0031308, 12.92 * rgb, 1.055 * rgb**(1/2.4) - 0.055)
+
+    if clip:
+        rgb = np.clip(rgb, 0, 1)
+
+    return tuple(rgb)
+
+def get_stimulus_color_rgb(color_name):
+    """
+    Get actual stimulus RGB color for visualization
+    Uses COLOR_LAB for accurate color representation
+
+    Parameters:
+    -----------
+    color_name : str
+        Color name (e.g., 'color_1')
+
+    Returns:
+    --------
+    tuple : (R, G, B) in [0, 1] range
+    """
+    if color_name in COLOR_LAB:
+        L, a, b = COLOR_LAB[color_name]
+        return lab2rgb_accurate(L, a, b)
+    else:
+        # Fallback to HSV approximation
+        from matplotlib.colors import hsv_to_rgb
+        hue_deg = LABEL2HUE_DEG[color_name]
+        h = (hue_deg % 360) / 360.0
+        return hsv_to_rgb([h, 0.8, 0.9])
+
+def lab_hue_to_rgb(hue_deg, L=70, C=60):
+    """Convert Lab hue to RGB color for visualization
+
+    Simplified approach: use HSV as approximation
+    Lab hue ~= HSV hue (not perfect but good enough for visualization)
+
+    Kept for backward compatibility.
+    """
+    from matplotlib.colors import hsv_to_rgb
+
+    # Normalize hue to [0, 1] for HSV
+    h = (hue_deg % 360) / 360.0
+
+    # Use high saturation and value for vivid colors
+    s = 0.8  # Saturation
+    v = 0.9  # Value
+
+    # Convert HSV to RGB
+    rgb = hsv_to_rgb([h, s, v])
+
+    return rgb
 
 # ============================================================================
 # Parse Arguments
@@ -647,9 +808,10 @@ if SAVE_ZMAPS:
 
 if USE_PCA and SAVE_ZMAPS:
     print("Creating PCA component visualization (leave-one-run-out)...")
+    print("  NOTE: Fitting PCA on Z-SCORES (not betas!)")
     print("  NOTE: Fitting PCA separately for each fold to avoid data leakage")
 
-    # Store results from each fold
+    # Store results from each folda
     pca_matrices_per_fold = []  # (n_folds, n_colors, n_components)
     explained_variance_per_fold = []  # (n_folds, n_components)
     pca_loadings_per_fold = []  # (n_folds, n_components, n_voxels)
@@ -842,7 +1004,7 @@ if USE_PCA and SAVE_ZMAPS:
                 transform=ax.transAxes, va='top', fontsize=9,
                 bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
 
-    # Last subplot: cumulative variance with error bars
+    # 4. Subplot: cumulative variance with error bars + recommendation
     ax = axes[1, 2]
     ax.plot(range(N_PCA_COMPONENTS), cumsum_var_mean,
             'bo-', linewidth=2, markersize=6, label='Mean')
@@ -850,13 +1012,28 @@ if USE_PCA and SAVE_ZMAPS:
                      cumsum_var_mean - cumsum_var_std,
                      cumsum_var_mean + cumsum_var_std,
                      color='blue', alpha=0.2, label='±std')
-    ax.axhline(y=0.9, color='green', linestyle='--', alpha=0.5, label='90%')
-    ax.axhline(y=0.95, color='orange', linestyle='--', alpha=0.5, label='95%')
+
+    # Calculate components needed for 90% variance
+    components_for_90 = [np.argmax(np.cumsum(ev) >= 0.9) + 1 for ev in explained_variance_per_fold]
+    mean_comp_90 = int(np.round(np.mean(components_for_90)))
+
+    # Mark 90% and 95% thresholds
+    ax.axhline(y=0.9, color='green', linestyle='--', alpha=0.5, label='90% threshold')
+    ax.axhline(y=0.95, color='orange', linestyle='--', alpha=0.5, label='95% threshold')
+
+    # Mark recommended number of components
+    if mean_comp_90 < N_PCA_COMPONENTS:
+        ax.axvline(x=mean_comp_90, color='red', linestyle=':', linewidth=2, alpha=0.7,
+                   label=f'Recommended: {mean_comp_90}')
+        ax.scatter([mean_comp_90], [cumsum_var_mean[mean_comp_90]],
+                   color='red', s=100, zorder=5, marker='*')
+
     ax.set_xlabel('Number of Components')
     ax.set_ylabel('Cumulative Explained Variance')
-    ax.set_title('Scree Plot (Robustness Check)')
-    ax.legend(fontsize=8)
+    ax.set_title(f'Scree Plot (90% at {mean_comp_90}±{np.std(components_for_90):.1f} components)')
+    ax.legend(fontsize=8, loc='lower right')
     ax.grid(True, alpha=0.3)
+    ax.set_xlim([-0.5, N_PCA_COMPONENTS-0.5])
 
     plt.tight_layout()
     pca_loadings_path = fig_dir / f"{ROI_NAME}_pca_loadings.png"
@@ -865,7 +1042,7 @@ if USE_PCA and SAVE_ZMAPS:
     print(f"  Saved: {pca_loadings_path}")
 
     print()
-    print("PCA Component Analysis Statistics (across folds):")
+    print("PCA Component Analysis Statistics (across folds, Z-score based):")
     print(f"  Total components: {N_PCA_COMPONENTS}")
     print(f"  Explained variance: {cumsum_var_mean[-1]:.1%} ± {cumsum_var_std[-1]:.1%}")
     components_for_90 = [np.argmax(np.cumsum(ev) >= 0.9) + 1 for ev in explained_variance_per_fold]
@@ -877,42 +1054,122 @@ if USE_PCA and SAVE_ZMAPS:
     print()
     sys.stdout.flush()
 
-# ============================================================================
-# Helper Functions
-# ============================================================================
+    # 5. PCA Color Space Visualization (B&H 2009 Figure 6 style)
+    print("Creating PCA color space scatter plots...")
 
-def diag_linear_predict(train_X, train_y, test_X):
-    """Diagonal Linear Discriminant Analysis (B&H 2009 method)"""
-    classes = np.unique(train_y)
-    means = np.stack([train_X[train_y==c].mean(axis=0) for c in classes])
-    vars_  = np.stack([train_X[train_y==c].var(axis=0) + 1e-8 for c in classes])
+    # Define colors for plotting (matching stimulus hues)
+    color_names = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8']
+    plot_colors = ['red', 'orange', 'yellow', 'lime', 'cyan', 'blue', 'purple', 'magenta']
 
-    ll = []
-    for k in range(len(classes)):
-        ll_k = -0.5 * (
-            np.log(2*np.pi*vars_[k]).sum() +
-            ((test_X - means[k])**2 / vars_[k]).sum(axis=1)
-        )
-        ll.append(ll_k)
-    ll = np.stack(ll, axis=1)
-    preds = classes[ll.argmax(axis=1)]
-    return preds
+    # Create figure with 3 subplots for different PC combinations
+    fig, axes = plt.subplots(1, 3, figsize=(18, 6))
+    fig.suptitle(f'{ROI_NAME}: PCA Color Space (Z-score based, mean across {N_RUNS} folds)',
+                 fontsize=16, fontweight='bold')
 
-def circular_diff_deg(a, b):
-    """Circular difference in degrees (0-360)"""
-    diff = np.abs(a - b)
-    return np.minimum(diff, 360 - diff)
+    # Plot 1: PC1 vs PC2 (main variation)
+    ax = axes[0]
+    for color_idx in range(N_COLORS):
+        color_name = f"color_{color_idx+1}"
+        true_rgb = get_stimulus_color_rgb(color_name)  # Use actual stimulus color
 
-def circular_mean_deg(angles_deg):
-    """Calculate circular mean of angles in degrees and resultant vector length"""
-    if len(angles_deg) == 0:
-        return np.nan, 0.0
-    ang = np.deg2rad(np.asarray(angles_deg))
-    C = np.cos(ang).mean()
-    S = np.sin(ang).mean()
-    mean_ang = (np.rad2deg(np.arctan2(S, C)) + 360) % 360
-    R = np.hypot(C, S)  # 0~1, higher = more concentrated
-    return mean_ang, R
+        # Get PC scores for this color across all folds
+        pc1_scores = pca_matrices_per_fold[:, color_idx, 0]  # (N_RUNS,)
+        pc2_scores = pca_matrices_per_fold[:, color_idx, 1]  # (N_RUNS,)
+
+        # Plot individual fold points (small dots)
+        ax.scatter(pc1_scores, pc2_scores,
+                   c=[true_rgb], alpha=0.3, s=30, edgecolors='none')
+
+        # Plot centroid (large marker)
+        centroid_pc1 = pca_matrix_mean[color_idx, 0]
+        centroid_pc2 = pca_matrix_mean[color_idx, 1]
+        ax.scatter(centroid_pc1, centroid_pc2,
+                   c=[true_rgb], s=200, marker='o',
+                   edgecolors='black', linewidths=2, label=color_names[color_idx],
+                   zorder=5)
+
+        # Connect centroids in order
+        if color_idx > 0:
+            prev_pc1 = pca_matrix_mean[color_idx-1, 0]
+            prev_pc2 = pca_matrix_mean[color_idx-1, 1]
+            ax.plot([prev_pc1, centroid_pc1], [prev_pc2, centroid_pc2],
+                    'k-', alpha=0.3, linewidth=1, zorder=1)
+
+    # Connect last to first to close the circle
+    ax.plot([pca_matrix_mean[-1, 0], pca_matrix_mean[0, 0]],
+            [pca_matrix_mean[-1, 1], pca_matrix_mean[0, 1]],
+            'k-', alpha=0.3, linewidth=1, zorder=1)
+
+    ax.axhline(y=0, color='gray', linestyle='--', alpha=0.3)
+    ax.axvline(x=0, color='gray', linestyle='--', alpha=0.3)
+    ax.set_xlabel(f'PC1 ({explained_var_mean[0]:.1%} var)')
+    ax.set_ylabel(f'PC2 ({explained_var_mean[1]:.1%} var)')
+    ax.set_title('PC1 vs PC2')
+    ax.legend(fontsize=8, loc='best')
+    ax.grid(True, alpha=0.2)
+    ax.set_aspect('equal', adjustable='box')
+
+    # Plot 2: PC1 vs PC3 (if N_PCA_COMPONENTS >= 3)
+    if N_PCA_COMPONENTS >= 3:
+        ax = axes[1]
+        for color_idx in range(N_COLORS):
+            color_name = f"color_{color_idx+1}"
+            true_rgb = get_stimulus_color_rgb(color_name)  # Use actual stimulus color
+
+            pc1_scores = pca_matrices_per_fold[:, color_idx, 0]
+            pc3_scores = pca_matrices_per_fold[:, color_idx, 2]
+
+            ax.scatter(pc1_scores, pc3_scores,
+                       c=[true_rgb], alpha=0.3, s=30, edgecolors='none')
+
+            centroid_pc1 = pca_matrix_mean[color_idx, 0]
+            centroid_pc3 = pca_matrix_mean[color_idx, 2]
+            ax.scatter(centroid_pc1, centroid_pc3,
+                       c=[true_rgb], s=200, marker='o',
+                       edgecolors='black', linewidths=2, zorder=5)
+
+        ax.axhline(y=0, color='gray', linestyle='--', alpha=0.3)
+        ax.axvline(x=0, color='gray', linestyle='--', alpha=0.3)
+        ax.set_xlabel(f'PC1 ({explained_var_mean[0]:.1%} var)')
+        ax.set_ylabel(f'PC3 ({explained_var_mean[2]:.1%} var)')
+        ax.set_title('PC1 vs PC3')
+        ax.grid(True, alpha=0.2)
+        ax.set_aspect('equal', adjustable='box')
+
+    # Plot 3: PC2 vs PC3 (if N_PCA_COMPONENTS >= 3)
+    if N_PCA_COMPONENTS >= 3:
+        ax = axes[2]
+        for color_idx in range(N_COLORS):
+            color_name = f"color_{color_idx+1}"
+            true_rgb = get_stimulus_color_rgb(color_name)  # Use actual stimulus color
+
+            pc2_scores = pca_matrices_per_fold[:, color_idx, 1]
+            pc3_scores = pca_matrices_per_fold[:, color_idx, 2]
+
+            ax.scatter(pc2_scores, pc3_scores,
+                       c=[true_rgb], alpha=0.3, s=30, edgecolors='none')
+
+            centroid_pc2 = pca_matrix_mean[color_idx, 1]
+            centroid_pc3 = pca_matrix_mean[color_idx, 2]
+            ax.scatter(centroid_pc2, centroid_pc3,
+                       c=[true_rgb], s=200, marker='o',
+                       edgecolors='black', linewidths=2, zorder=5)
+
+        ax.axhline(y=0, color='gray', linestyle='--', alpha=0.3)
+        ax.axvline(x=0, color='gray', linestyle='--', alpha=0.3)
+        ax.set_xlabel(f'PC2 ({explained_var_mean[1]:.1%} var)')
+        ax.set_ylabel(f'PC3 ({explained_var_mean[2]:.1%} var)')
+        ax.set_title('PC2 vs PC3')
+        ax.grid(True, alpha=0.2)
+        ax.set_aspect('equal', adjustable='box')
+
+    plt.tight_layout()
+    pca_colorspace_path = fig_dir / f"{ROI_NAME}_pca_colorspace.png"
+    plt.savefig(pca_colorspace_path, dpi=150, bbox_inches='tight')
+    plt.close()
+    print(f"  Saved: {pca_colorspace_path}")
+    print()
+    sys.stdout.flush()
 
 # ============================================================================
 # Classification (Leave-One-Run-Out)
@@ -1621,8 +1878,8 @@ fig = plt.figure(figsize=(14, 6))
 
 # Left: Training colors reconstruction
 ax1 = fig.add_subplot(1, 2, 1, projection='polar')
-ax1.set_theta_zero_location("E")        # 0° at right
-ax1.set_theta_direction(-1)             # Clockwise positive
+ax1.set_theta_zero_location("E")        # 0° at right (middle-right)
+ax1.set_theta_direction(1)              # Anticlockwise positive (counterclockwise)
 ax1.set_rticks([])                      # Hide radial ticks
 ax1.grid(alpha=0.25)
 
@@ -1634,7 +1891,7 @@ r_pred_base = 0.85
 for color_idx in range(N_COLORS):
     color_name = f'color_{color_idx + 1}'
     true_hue = LABEL2HUE_DEG[color_name]
-    true_rgb = lab_hue_to_rgb(true_hue)
+    true_rgb = get_stimulus_color_rgb(color_name)  # Use actual stimulus color
 
     # True color at border (large, solid)
     ax1.scatter([np.deg2rad(true_hue)], [r_center], s=110,
@@ -1654,15 +1911,15 @@ ax1.set_title(f'Training Colors\nMean error: {mean_reconstruction_error:.1f}°',
 
 # Right: Novel colors reconstruction
 ax2 = fig.add_subplot(1, 2, 2, projection='polar')
-ax2.set_theta_zero_location("E")
-ax2.set_theta_direction(-1)
+ax2.set_theta_zero_location("E")        # 0° at right (middle-right)
+ax2.set_theta_direction(1)              # Anticlockwise positive (counterclockwise)
 ax2.set_rticks([])
 ax2.grid(alpha=0.25)
 
 for result in novel_color_results:
     color_name = result['color']
     true_hue = LABEL2HUE_DEG[color_name]
-    true_rgb = lab_hue_to_rgb(true_hue)
+    true_rgb = get_stimulus_color_rgb(color_name)  # Use actual stimulus color
 
     # True color at border (large, solid)
     ax2.scatter([np.deg2rad(true_hue)], [r_center], s=110,

@@ -15,6 +15,18 @@
 - All steps are currently linear (except final argmax)
 - Goal: Model nonlinearity in cone → brain perception pathway
 
+**Current Baseline Performance** (from ANALYSIS_SUMMARY_20251117.md):
+- **Methods**: zscore vs voxelSelect
+- **PCA components**: 6 (current standard)
+- **Subjects**: sub-01, sub-02 (Non-CVD) vs sub-03, sub-04 (CVD)
+- **Performance**:
+  - Classification: 100% (perfect)
+  - Reconstruction error: **20.19° ± 23.64°** (zscore), 22.81° (voxelSelect)
+  - Novel color error: **84.88° ± 25.40°** (zscore), 91.17° (voxelSelect)
+- **Best ROI**: V2 (zscore: 6.09°, voxelSelect: 9.81°)
+- **Best configuration**: sub-01, V2, voxelSelect (2.38° reconstruction)
+- **CVD vs Non-CVD**: CVD shows 2x higher errors (26.66° vs 13.72°)
+
 ---
 
 ## Current Pipeline Analysis
@@ -305,73 +317,102 @@ def create_forward_model(model_type, args):
 
 ### Phase 1: Proof of Concept
 
-**Setup**:
-- Subject: P01 (pilot data, validated)
-- ROI: V2 or hV4 (best current performance)
-- PCA: 20 components
+**Setup** (updated to match current baseline):
+- **Subject**: sub-01 or sub-02 (Non-CVD, best performing)
+- **ROI**: V2 (most stable, current baseline: 6.09° zscore, 9.81° voxelSelect)
+- **PCA**: 6 components (current standard)
+- **Method**: zscore (baseline comparison target)
+- **Target**: Beat current baseline of **6.09° ± SD** reconstruction error
 
 **Models**:
-1. Linear (baseline)
-2. RF-simple: `n_estimators=50, max_depth=5, min_samples_leaf=3`
-3. MLP-tiny: `hidden=32, ReLU, L2=0.01, dropout=0.2`
+1. **Linear (baseline)**: Current zscore method
+   - Expected: ~6-20° reconstruction (based on V2 performance)
+2. **RF-simple**: `n_estimators=100, max_depth=5, min_samples_leaf=3`
+   - Target: <10° reconstruction (30-50% improvement)
+3. **MLP-tiny**: `hidden=8-16, ReLU, L2=0.05, dropout=0.3`
+   - Note: Smaller hidden units due to PCA=6 (not 20)
+   - Target: <10° reconstruction with better generalization
 
-**Metrics**:
+**Metrics** (compare against baseline):
 - Reconstruction error (leave-one-run-out, 6 folds)
+  - Baseline: 6.09° (V2 average) to 20.19° (overall average)
 - Novel color error (leave-one-color-out, 8×6)
-- Per-color error distribution
+  - Baseline: 84.88° (very challenging, room for improvement)
+- Per-color error distribution (which colors improve?)
 
 **Analysis**:
-- Error boxplot comparison
-- Paired t-test (statistical significance)
-- Feature importance (RF) / Weight visualization (MLP)
+- Error boxplot comparison (Linear vs RF vs MLP)
+- Paired t-test (statistical significance vs baseline)
+- Feature importance (RF): Which of 6 PCs matter most?
+- Weight visualization (MLP): PC interaction patterns
+- **Success criterion**: Statistically significant improvement over linear baseline (p < 0.05)
 
 ---
 
 ### Phase 2: Hyperparameter Optimization
 
-**RF Grid**:
+**RF Grid** (if Phase 1 shows promise):
 - `max_depth`: {3, 5, 7, 10}
 - `n_estimators`: {50, 100, 200}
 - `min_samples_leaf`: {2, 3, 5}
 
-**MLP Grid**:
-- `n_hidden`: {16, 32, 64}
+**MLP Grid** (adjusted for PCA=6):
+- `n_hidden`: {6, 8, 12, 16} (smaller due to 6 input features)
 - `learning_rate`: {0.001, 0.005, 0.01}
 - `weight_decay`: {0.01, 0.05, 0.1}
-- `dropout`: {0.0, 0.2, 0.3}
+- `dropout`: {0.0, 0.2, 0.3, 0.4} (higher dropout for small data)
 
 **Method**: Grid search with nested CV
 - Outer loop: Leave-one-run-out (6 folds)
 - Inner loop: 5-fold CV for hyperparameter tuning
+
+**Additional consideration**: VoxelSelect option
+- Test best models with voxelSelect (fewer voxels, less overfitting risk)
+- Compare: zscore + nonlinear vs voxelSelect + nonlinear
 
 ---
 
 ### Phase 3: Novel Color Generalization
 
 **Critical Test**: Leave-one-color-out reconstruction
+- **Current baseline**: 84.88° (zscore), 91.17° (voxelSelect)
+- **This is the main challenge** - very high error, near chance (90°)
 
 **Expected Results**:
-- **Linear**: Baseline
-- **RF**: Good interpolation within training range, weaker extrapolation
-- **MLP**: Better smooth interpolation, better generalization
+- **Linear**: ~85-91° (current baseline)
+- **RF**: Target <75° (10-15% improvement)
+- **MLP**: Target <70° (20%+ improvement through smooth interpolation)
 
 **Analysis**:
 - Circular distance from held-out color to nearest training color
 - Interpolation vs extrapolation performance
+- Per-color analysis: Which novel colors are hardest?
+- **Success criterion**: Reduce error below 75° (significantly better than chance)
 
 ---
 
 ### Phase 4: Multi-ROI & Multi-Subject
 
-**Extension**:
-- All ROIs: V1, V2, V3, hV4
-- All subjects: P01, 01, 02, 03, 04
+**Extension** (based on current baseline data):
+- **All ROIs**: V1, V2, V3, hV4
+- **All subjects**: sub-01, sub-02 (Non-CVD) vs sub-03, sub-04 (CVD)
+
+**ROI-specific expectations** (from current baseline):
+- **V1**: Good with voxelSelect (14.91°), test if nonlinear helps zscore
+- **V2**: Already excellent (6.09° zscore), can nonlinear improve further?
+- **V3**: Moderate performance (22.88° zscore), room for improvement
+- **hV4**: Worst with voxelSelect (52.81°), test if nonlinear helps
+
+**CVD Analysis** (critical for project goal):
+- **Current gap**: CVD 26.66° vs Non-CVD 13.72° (2x difference)
+- **Hypothesis**: Do CVD individuals have different nonlinearity patterns?
+- **Question**: Can nonlinear model reduce this gap?
+- **Implication**: If yes, provides insight for filter g(x) design
 
 **Analysis**:
-- ROI-specific nonlinearity differences
-  - Hypothesis: V1 more linear, hV4 more nonlinear
-- Subject variability
-- CVD vs NC comparison (future)
+- ROI × Model interaction: Is V1 linear, hV4 nonlinear?
+- Subject variability: Individual-specific nonlinearities?
+- CVD vs NC: Different interaction patterns in PC space?
 
 ---
 
@@ -501,42 +542,73 @@ python fir_reconstruction_zScore_nonlinear.py \
 
 ### Best Case Scenario
 
-**RF or MLP shows 10-20% error reduction**:
-- Indicates brain uses nonlinear color encoding
-- Validates biological hypothesis
-- Proceed to CVD application
+**RF or MLP shows significant improvement**:
+- **Reconstruction**: 6.09° → <5° (20%+ improvement on V2)
+- **Novel color**: 84.88° → <70° (meaningful improvement, clearly below chance)
+- **CVD gap reduction**: 26.66° → closer to 13.72° (NC level)
+
+**Implications**:
+- Brain uses nonlinear color encoding in PCA space
+- Validates biological hypothesis (cone → perception nonlinearity)
+- Provides insights for CVD filter g(x) design
+- Novel color generalization improves (most important for practical application)
+
+### Moderate Success
+
+**Reconstruction improves, novel color stays high**:
+- **Reconstruction**: 6.09° → 4-5° (good, but not dramatic)
+- **Novel color**: Still >75° (limited generalization)
+
+**Implications**:
+- Nonlinearity helps trained colors but doesn't solve generalization
+- May need different approach for novel colors (e.g., better basis functions)
+- Still useful for CVD analysis (within-training-set colors)
 
 ### No Improvement
 
-**Nonlinear models = Linear**:
-- Either: Data too small for nonlinear models to learn
-- Or: Brain actually uses linear encoding in these ROIs
-- Or: Current features (PCA) already capture nonlinearity
+**Nonlinear models ≈ Linear (within statistical noise)**:
+- Possible reasons:
+  1. **Data too small**: 40 training samples insufficient for nonlinear learning
+  2. **Already optimal**: V2 at 6.09° may be near ceiling given noise
+  3. **Linear encoding**: Brain actually uses linear combination in V2
+  4. **PCA bottleneck**: 6 components already linear, nonlinearity lost upstream
+
+**Next actions**:
+- Test on other ROIs (V3, hV4 have more room for improvement)
+- Try voxelSelect (fewer voxels, cleaner signal?)
+- Increase PCA components (6 → 10 → 15) to preserve more nonlinearity
 
 ### Overfitting Detected
 
-**Train error < Test error significantly**:
-- Increase regularization
-- Reduce model complexity
-- Consider data augmentation
+**Train error << Test error**:
+- **Sign**: Reconstruction good, novel color terrible (>100°)
+- **Cause**: Memorizing 8 training colors without learning structure
+
+**Mitigation**:
+- Increase regularization (weight decay, dropout)
+- Reduce model complexity (MLP: 16 → 8 hidden, RF: depth 5 → 3)
+- Ensemble multiple models (reduce variance)
+- Use voxelSelect (cleaner features, less noise)
 
 ---
 
 ## Next Steps
 
-### Implementation Priority
+### Implementation Priority (Updated)
 
 1. **Create base classes**: `ForwardModel`, `LinearForwardModel`
 2. **Implement RF**: Simplest, most robust
-3. **Implement MLP**: More complex, needs careful tuning
+3. **Implement MLP**: More complex, needs careful tuning (adjusted for PCA=6)
 4. **Add comparison visualizations**
-5. **Test on P01/V2**: Proof of concept
-6. **Hyperparameter sweep**: Find best settings
-7. **Extend to all ROIs/subjects**
+5. **Test on sub-01/V2**: Proof of concept (baseline: 6.09°)
+6. **Critical test**: Novel color generalization (baseline: 84.88°)
+7. **Hyperparameter sweep**: Find best settings (if Phase 1 promising)
+8. **Extend to all ROIs**: V1, V2, V3, hV4 (ROI-specific patterns)
+9. **CVD analysis**: sub-03, sub-04 (understand nonlinearity differences)
 
 ### Questions to Answer
 
-1. **Performance**: Do nonlinear models improve reconstruction?
+1. **Performance**: Do nonlinear models improve reconstruction below 6.09°?
 2. **Generalization**: Do they work on novel colors?
 3. **Interpretability**: What interactions do they learn?
 4. **ROI differences**: Is V1 linear, hV4 nonlinear?
@@ -586,13 +658,66 @@ colorBlind_analysis/
 
 ---
 
+---
+
+## UPDATED: Baseline Comparison (2025-11-17)
+
+**User feedback**: "The current baseline is PCA=6 and voxelSelect option. Update the standard based on ANALYSIS_SUMMARY_20251117.md"
+
+### Current Baseline Performance
+
+| Metric | zscore (baseline) | voxelSelect | Target for Nonlinear |
+|--------|------------------|-------------|---------------------|
+| **PCA components** | 6 | 6 | 6 (start here) |
+| **Voxels** | 235.0 ± 185.9 | 41.4 ± 29.9 | Test both |
+| **Classification** | 100% | 100% | Maintain 100% |
+| **Reconstruction** | **20.19° ± 23.64°** | 22.81° ± 20.65° | **<15°** (25% improvement) |
+| **Novel color** | **84.88° ± 25.40°** | 91.17° ± 25.38° | **<75°** (meaningful) |
+
+### ROI-Specific Baselines (zscore)
+
+| ROI | Voxels | Reconstruction | Novel Color | Nonlinear Target |
+|-----|--------|---------------|-------------|-----------------|
+| **V2** | 321.3 | **6.09°** ⭐ | 84.56° | <5° recon, <70° novel |
+| V1 | 482.8 | 37.44° | 92.53° | <30° recon |
+| V3 | 87.8 | 22.88° | 76.19° | <15° recon, <65° novel |
+| hV4 | 48.3 | 14.34° | 86.25° | <10° recon |
+
+### Group Comparison (Critical for CVD)
+
+| Group | Subjects | Reconstruction | Novel Color | CVD Gap |
+|-------|----------|---------------|-------------|---------|
+| **Non-CVD** | sub-01, sub-02 | **13.72° ± 20.07°** | 80.05° ± 27.73° | Baseline |
+| **CVD** | sub-03, sub-04 | **26.66° ± 26.45°** | 89.72° ± 23.67° | **2x worse** |
+
+**Key Target**: Can nonlinear models reduce CVD gap from 2x to <1.5x?
+
+### Updated Experimental Plan
+
+**Phase 1 Target**:
+- Subject: sub-01 (Non-CVD, best baseline)
+- ROI: V2 (6.09° baseline, most stable)
+- Beat: **6.09°** reconstruction, **84.56°** novel color
+- Success: <5° reconstruction (20% improvement) OR <70° novel (meaningful)
+
+**Critical Challenge**: Novel color error (84.88°) is near chance (90°)
+- This is THE main problem to solve
+- Linear model already perfect at classification
+- Linear model decent at reconstruction (6-20° range)
+- But generalization to novel colors fails
+
+**Hypothesis**: Nonlinear models may learn smoother interpolation in color space, improving novel color reconstruction
+
+---
+
 ## End of Discussion Summary
 
-**Status**: Conceptual design complete, ready for implementation
+**Status**: Conceptual design complete, baseline updated to match current results
 **Next Action**: Code implementation (start with ForwardModel classes)
 **Timeline**:
-- Phase 1 (PoC): 1-2 days
-- Phase 2 (Hyperparameter): 3-5 days
-- Phase 3-4 (Extension): 1 week
+- Phase 1 (PoC on sub-01/V2): 1-2 days
+- Phase 2 (Hyperparameter if promising): 3-5 days
+- Phase 3-4 (All ROIs, CVD analysis): 1 week
 
-**User's Next Request**: Record this discussion for future follow-up ✅
+**Updated**: 2025-11-17 - Baseline targets adjusted based on ANALYSIS_SUMMARY_20251117.md
+**User's Request**: Record this discussion for future follow-up ✅

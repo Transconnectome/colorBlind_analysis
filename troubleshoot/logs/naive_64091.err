@@ -1,6 +1,0 @@
-/scratch/connectome/haba6030/colorBlind/test_roi_reconstruction.py:13: DeprecationWarning: The import path 'nilearn.input_data' is deprecated in version 0.9. Importing from 'nilearn.input_data' will be possible at least until release 0.13.0. Please import from 'nilearn.maskers' instead.
-  from nilearn.input_data import NiftiMasker
-Traceback (most recent call last):
-  File "/scratch/connectome/haba6030/colorBlind/test_roi_reconstruction.py", line 75, in <module>
-    print(f"  Brain mask: {brain_results['mean_hit_rate']:.3f} hit rate, p={brain_results['mean_p_value']:.3f}")
-KeyError: 'mean_hit_rate'

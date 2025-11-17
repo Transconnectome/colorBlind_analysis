@@ -64,13 +64,13 @@ chmod +x run_reconstruction.sh
 cd /scratch/connectome/haba6030/colorBlind
 
 # Universal HRF method (PCA-6 사용)
-bash run_all_subjects_rois.sh universal_hrf --use-pca --n-components 6
+bash run_all_subjects.sh universal_hrf --use-pca --n-components 6 --save-zmaps
 
 # 또는 zScore method
-bash run_all_subjects_rois.sh zScore --use-pca --n-components 6
+bash run_all_subjects.sh zScore --use-pca --n-components 6 --save-zmaps
 
 # 또는 voxelSelect method
-bash run_all_subjects_rois.sh voxelSelect --use-pca --n-components 6
+bash run_all_subjects.sh voxelSelect --use-pca --n-components 6 --save-zmaps
 ```
 
 **예상 출력:**

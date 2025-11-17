@@ -105,6 +105,9 @@ def parse_args():
                         help='Number of PCA components (only if --use-pca)')
     parser.add_argument('--save-zmaps', action='store_true',
                         help='Save z-maps for each color')
+    parser.add_argument('--timestamp', type=str, default=None,
+                        help='Timestamp for output directory (e.g., 20250116_143022). '
+                             'If not specified, generates automatically.')
     return parser.parse_args()
 
 args = parse_args()
@@ -114,6 +117,7 @@ ROI_NAME = args.roi
 USE_PCA = args.use_pca
 N_PCA_COMPONENTS = args.n_components
 SAVE_ZMAPS = args.save_zmaps
+TIMESTAMP_ARG = args.timestamp
 
 # ============================================================================
 # Path Configuration (Pilot vs Test Data)
@@ -136,13 +140,23 @@ else:
     LABEL2HUE_DEG = LABEL2HUE_DEG_TEST  # Use test color mapping
 
 # ============================================================================
-# Setup Output Directory
+# Setup Output Directory (TIMESTAMP AT TOP LEVEL)
 # ============================================================================
 
+from datetime import datetime
+
+# Use provided timestamp or generate new one
+if TIMESTAMP_ARG:
+    timestamp = TIMESTAMP_ARG
+    print(f"Using provided timestamp: {timestamp}")
+else:
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    print(f"Generated new timestamp: {timestamp}")
+
 if SUBJECT_ID == 'P01':
-    output_dir = Path(f"derivatives/pilot/{DERIVATIVE_PREFIX}/fir_reconstruction_uni_hrf/{ROI_NAME}_universal_hrf")
-else: 
-    output_dir = Path(f"derivatives/{DERIVATIVE_PREFIX}/fir_reconstruction_uni_hrf/{ROI_NAME}_universal_hrf")
+    output_dir = Path(f"derivatives/{timestamp}/pilot/{DERIVATIVE_PREFIX}/fir_reconstruction_uni_hrf/{ROI_NAME}_universal_hrf")
+else:
+    output_dir = Path(f"derivatives/{timestamp}/{DERIVATIVE_PREFIX}/fir_reconstruction_uni_hrf/{ROI_NAME}_universal_hrf")
 output_dir.mkdir(parents=True, exist_ok=True)
 
 fig_dir = output_dir / "figures"
@@ -1790,6 +1804,9 @@ print(f"Output directory: {output_dir}")
 print("="*70)
 sys.stdout.flush()
 
-# Close dual logger
-if hasattr(sys.stdout, 'close'):
-    sys.stdout.close()
+# Close dual logger and restore original stdout
+if isinstance(sys.stdout, DualLogger):
+    logger = sys.stdout
+    sys.stdout = logger.terminal  # Restore original stdout FIRST
+    sys.stderr = sys.__stderr__   # Restore original stderr
+    logger.close()  # Then close log file

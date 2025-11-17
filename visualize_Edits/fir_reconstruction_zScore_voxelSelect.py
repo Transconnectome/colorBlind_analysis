@@ -113,8 +113,14 @@ def parse_args():
                         help='Use PCA dimensionality reduction')
     parser.add_argument('--n-components', type=int, default=20,
                         help='Number of PCA components (only if --use-pca)')
+    parser.add_argument('--z-threshold', type=float, default=2.3,
+                        help='Z-score threshold for voxel selection (default: 2.3 for p<0.01). '
+                             'Lower values (e.g., 1.96 for p<0.05, 1.64 for p<0.10) select more voxels.')
     parser.add_argument('--save-zmaps', action='store_true',
                         help='Save z-maps for each color')
+    parser.add_argument('--timestamp', type=str, default=None,
+                        help='Timestamp for output directory (e.g., 20250116_143022). '
+                             'If not specified, generates automatically.')
     return parser.parse_args()
 
 args = parse_args()
@@ -123,7 +129,9 @@ SUBJECT_ID = args.subject
 ROI_NAME = args.roi
 USE_PCA = args.use_pca
 N_PCA_COMPONENTS = args.n_components
+Z_THRESHOLD = args.z_threshold
 SAVE_ZMAPS = args.save_zmaps
+TIMESTAMP_ARG = args.timestamp
 
 # ============================================================================
 # Path Configuration (Pilot vs Test Data)
@@ -146,13 +154,23 @@ else:
     LABEL2HUE_DEG = LABEL2HUE_DEG_TEST  # Use test color mapping
 
 # ============================================================================
-# Setup Output Directory (WITH ZSCORE SUBFOLDER)
+# Setup Output Directory (TIMESTAMP AT TOP LEVEL)
 # ============================================================================
 
-if SUBJECT_ID == 'P01':
-    output_dir = Path(f"derivatives/pilot/{DERIVATIVE_PREFIX}/fir_reconstruction_uni_hrf/voxelSelect/{ROI_NAME}_universal_hrf")
+from datetime import datetime
+
+# Use provided timestamp or generate new one
+if TIMESTAMP_ARG:
+    timestamp = TIMESTAMP_ARG
+    print(f"Using provided timestamp: {timestamp}")
 else:
-    output_dir = Path(f"derivatives/{DERIVATIVE_PREFIX}/fir_reconstruction_uni_hrf/voxelSelect/{ROI_NAME}_universal_hrf")
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    print(f"Generated new timestamp: {timestamp}")
+
+if SUBJECT_ID == 'P01':
+    output_dir = Path(f"derivatives/{timestamp}/pilot/{DERIVATIVE_PREFIX}/fir_reconstruction_uni_hrf/voxelSelect/{ROI_NAME}_universal_hrf")
+else:
+    output_dir = Path(f"derivatives/{timestamp}/{DERIVATIVE_PREFIX}/fir_reconstruction_uni_hrf/voxelSelect/{ROI_NAME}_universal_hrf")
 output_dir.mkdir(parents=True, exist_ok=True)
 
 fig_dir = output_dir / "figures"
@@ -441,15 +459,14 @@ sys.stdout.flush()
 # FUNCTIONAL VOXEL SELECTION (Color vs Gray, p < 0.01)
 # ============================================================================
 
-print(f"[5B/8] Functional voxel selection (|max_z| > 2.3)")
+print(f"[5B/8] Functional voxel selection (|max_z| > {Z_THRESHOLD})")
 print(f"  This implements: Anatomical ROI ∩ Functional Localizer")
 sys.stdout.flush()
 
 # Compute max |z-score| across all 8 colors and all runs (color-responsive voxels)
 max_abs_z_per_voxel = np.max(np.abs(all_betas), axis=(0, 1))  # (n_voxels,)
 
-# Threshold
-Z_THRESHOLD = 2.3  # p < 0.01, two-tailed
+# Threshold (from command line argument)
 selected_voxels_mask = max_abs_z_per_voxel > Z_THRESHOLD
 
 # Statistics BEFORE selection
@@ -462,6 +479,29 @@ print(f"  Functional threshold: |z| > {Z_THRESHOLD} (p < 0.01)")
 print(f"  Selected voxels: {n_voxels_selected} ({selection_percentage:.1f}%)")
 print(f"  Removed voxels: {n_voxels_anatomical - n_voxels_selected} ({100-selection_percentage:.1f}%)")
 print()
+
+# CRITICAL: Check if enough voxels remain
+MIN_VOXELS_REQUIRED = 10  # Need at least 10 voxels for stable decoding
+if n_voxels_selected < MIN_VOXELS_REQUIRED:
+    print("=" * 80)
+    print(f"ERROR: Insufficient voxels after functional selection!")
+    print(f"  Selected: {n_voxels_selected} voxels")
+    print(f"  Required: {MIN_VOXELS_REQUIRED} voxels minimum")
+    print()
+    print("Possible solutions:")
+    print(f"  1. Lower z-threshold (current: {Z_THRESHOLD})")
+    print(f"     Try: --z-threshold 1.96 (p < 0.05) or 1.64 (p < 0.10)")
+    print(f"  2. Use larger anatomical ROI")
+    print(f"  3. Use universal_hrf or zScore method (no voxel selection)")
+    print()
+    print(f"Voxel selection statistics:")
+    print(f"  Max |z| range: [{max_abs_z_per_voxel.min():.2f}, {max_abs_z_per_voxel.max():.2f}]")
+    print(f"  Voxels with |z| > 2.0: {(max_abs_z_per_voxel > 2.0).sum()}")
+    print(f"  Voxels with |z| > 1.96: {(max_abs_z_per_voxel > 1.96).sum()}")
+    print(f"  Voxels with |z| > 1.64: {(max_abs_z_per_voxel > 1.64).sum()}")
+    print("=" * 80)
+    sys.stdout.flush()
+    sys.exit(1)
 
 # Statistics of selected voxels
 max_z_selected = max_abs_z_per_voxel[selected_voxels_mask]
@@ -533,13 +573,16 @@ if SAVE_ZMAPS:
 if SAVE_ZMAPS:
     print("Creating z-map matrix visualization...")
 
-    # Extract z-scores for each voxel × color
-    zscores_matrix = np.zeros((n_voxels, N_COLORS))
-
+    # Extract z-scores for each voxel × color (AFTER voxel selection)
+    # Use same logic as voxel selection: max |z| across runs
+    # For each (voxel, color) pair, take the z-score with maximum absolute value across runs
+    max_abs_idx = np.argmax(np.abs(all_betas), axis=0)  # (n_colors, n_voxels)
+    zscores_matrix = np.zeros((N_COLORS, n_voxels))
     for color_idx in range(N_COLORS):
-        if z_maps[color_idx] is not None:
-            z_data = masker.transform(z_maps[color_idx]).ravel()
-            zscores_matrix[:, color_idx] = z_data
+        for voxel_idx in range(n_voxels):
+            run_idx = max_abs_idx[color_idx, voxel_idx]
+            zscores_matrix[color_idx, voxel_idx] = all_betas[run_idx, color_idx, voxel_idx]
+    zscores_matrix = zscores_matrix.T  # (n_voxels, n_colors)
 
     # 1. Full Z-Score Matrix Heatmap (unsorted)
     fig, axes = plt.subplots(2, 2, figsize=(16, 12))
@@ -990,6 +1033,26 @@ def circular_mean_deg(angles_deg):
     mean_ang = (np.rad2deg(np.arctan2(S, C)) + 360) % 360
     R = np.hypot(C, S)  # 0~1, higher = more concentrated
     return mean_ang, R
+
+def lab_hue_to_rgb(hue_deg, L=70, C=60):
+    """Convert Lab hue to RGB color for visualization
+
+    Simplified approach: use HSV as approximation
+    Lab hue ~= HSV hue (not perfect but good enough for visualization)
+    """
+    from matplotlib.colors import hsv_to_rgb
+
+    # Normalize hue to [0, 1] for HSV
+    h = (hue_deg % 360) / 360.0
+
+    # Use high saturation and value for vivid colors
+    s = 0.8  # Saturation
+    v = 0.9  # Value
+
+    # Convert HSV to RGB
+    rgb = hsv_to_rgb([h, s, v])
+
+    return rgb
 
 # ============================================================================
 # Classification (Leave-One-Run-Out) - NOW USING Z-SCORES!
@@ -1491,8 +1554,95 @@ plt.savefig(confusion_plot_path, dpi=150, bbox_inches='tight')
 plt.close()
 print(f"  Saved: {confusion_plot_path}")
 
-# 3-8: Additional visualizations (same code as beta version, omitted for brevity - continues for ~500 more lines)
-# ...
+# 3. Circular Color Space Visualization (naive_analysis style with colored markers)
+fig = plt.figure(figsize=(14, 6))
+
+# Left: Training colors reconstruction
+ax1 = fig.add_subplot(1, 2, 1, projection='polar')
+ax1.set_theta_zero_location("E")        # 0° at right
+ax1.set_theta_direction(-1)             # Clockwise positive
+ax1.set_rticks([])                      # Hide radial ticks
+ax1.grid(alpha=0.25)
+
+rng = np.random.default_rng(42)
+r_center = 1.0
+r_pred_base = 0.85
+
+# Plot true colors at border and predictions inside
+for color_idx in range(N_COLORS):
+    color_name = f'color_{color_idx + 1}'
+    true_hue = LABEL2HUE_DEG[color_name]
+    true_rgb = lab_hue_to_rgb(true_hue)
+
+    # True color at border (large, solid)
+    ax1.scatter([np.deg2rad(true_hue)], [r_center], s=110,
+               color=true_rgb, edgecolor='k', linewidths=0.8, zorder=4)
+
+    # All predictions for this color (position=predicted angle, color=TRUE stimulus color)
+    for result in reconstruction_results:
+        pred_hue = result['reconstructed_hues'][color_idx]
+
+        # Jitter radius slightly to avoid overlap
+        r_jit = r_pred_base + rng.uniform(-0.03, 0.03)
+        ax1.scatter([np.deg2rad(pred_hue)], [r_jit], s=28,
+                   color=true_rgb, alpha=0.65, zorder=3)
+
+ax1.set_ylim([0, 1.1])
+ax1.set_title(f'Training Colors\nMean error: {mean_reconstruction_error:.1f}°', fontsize=12, fontweight='bold')
+
+# Right: Novel colors reconstruction
+ax2 = fig.add_subplot(1, 2, 2, projection='polar')
+ax2.set_theta_zero_location("E")
+ax2.set_theta_direction(-1)
+ax2.set_rticks([])
+ax2.grid(alpha=0.25)
+
+for result in novel_color_results:
+    color_name = result['color']
+    true_hue = LABEL2HUE_DEG[color_name]
+    true_rgb = lab_hue_to_rgb(true_hue)
+
+    # True color at border (large, solid)
+    ax2.scatter([np.deg2rad(true_hue)], [r_center], s=110,
+               color=true_rgb, edgecolor='k', linewidths=0.8, zorder=4)
+
+    # Novel color reconstruction: all 6 predictions (one per run)
+    all_pred_hues = result['reconstructed_hues']
+
+    # Plot each prediction with jitter (position=predicted angle, color=TRUE stimulus color)
+    for pred_hue in all_pred_hues:
+        # Jitter radius slightly to avoid overlap
+        r_jit = r_pred_base + rng.uniform(-0.03, 0.03)
+        ax2.scatter([np.deg2rad(pred_hue)], [r_jit], s=28,
+                   color=true_rgb, alpha=0.65, zorder=3)
+
+    # Draw circular mean vector (transparent, behind prediction points)
+    mean_pred_hue, R = circular_mean_deg(all_pred_hues)
+    ax2.arrow(np.deg2rad(mean_pred_hue), 0, 0, r_pred_base * R,
+             head_width=0.1, head_length=0.05, fc=true_rgb, ec='k',
+             linewidth=1.5, alpha=0.35, zorder=2)
+
+ax2.set_ylim([0, 1.1])
+ax2.set_title(f'Novel Colors (Leave-One-Out)\nMean error: {mean_novel_error:.1f}° | Chance: 90.0°',
+             fontsize=12, fontweight='bold')
+
+# Add legend
+from matplotlib.lines import Line2D
+legend_elems = [
+    Line2D([0],[0], marker='o', color='w', markerfacecolor='gray', markeredgecolor='k',
+           label='True hue (stimulus)', markersize=10),
+    Line2D([0],[0], marker='o', color='w', markerfacecolor='gray', alpha=0.65,
+           label='Predictions (position=angle, color=truth)', markersize=6),
+    Line2D([0],[0], color='gray', lw=1, label='Error line (novel only)')
+]
+ax2.legend(handles=legend_elems, loc='upper right', bbox_to_anchor=(1.28, 1.15), fontsize=9)
+
+plt.suptitle(f'{ROI_NAME}: Circular Color Space (Prediction accuracy visualization)', fontsize=14, fontweight='bold')
+plt.tight_layout()
+circular_plot_path = fig_dir / f"{ROI_NAME}_circular_color_space.png"
+plt.savefig(circular_plot_path, dpi=150, bbox_inches='tight')
+plt.close()
+print(f"  Saved: {circular_plot_path}")
 
 print()
 
@@ -1520,6 +1670,9 @@ print(f"Output directory: {output_dir}")
 print("="*70)
 sys.stdout.flush()
 
-# Close dual logger
-if hasattr(sys.stdout, 'close'):
-    sys.stdout.close()
+# Close dual logger and restore original stdout
+if isinstance(sys.stdout, DualLogger):
+    logger = sys.stdout
+    sys.stdout = logger.terminal  # Restore original stdout FIRST
+    sys.stderr = sys.__stderr__   # Restore original stderr
+    logger.close()  # Then close log file

@@ -721,3 +721,60 @@ colorBlind_analysis/
 
 **Updated**: 2025-11-17 - Baseline targets adjusted based on ANALYSIS_SUMMARY_20251117.md
 **User's Request**: Record this discussion for future follow-up ✅
+
+---
+
+## CORRECTION (2025-11-18)
+
+**User feedback**: "baseline codes are in visualize_Edits folder, not visualize_Edits_FIXED"
+
+### Issues Found
+
+1. ❌ **Wrong baseline**: Used `visualize_Edits_FIXED_20251117/` instead of `visualize_Edits/`
+2. ❌ **Wrong output structure**: Used `test_results_nonlinear/` instead of `derivatives/{timestamp}/...`
+3. ❌ **Wrong PCA default**: Used 20 instead of 6
+
+### Corrected Files
+
+1. ✅ `test_nonlinear_models_CORRECTED.py` - Matches visualize_Edits baseline
+2. ✅ `run_test_nonlinear_CORRECTED.sh` - Corrected SBATCH script
+3. ✅ `TEST_NONLINEAR_CORRECTED_GUIDE.md` - Updated guide
+4. ✅ `discussion_logs/20251118_nonlinear_correction.md` - Detailed correction log
+
+### Key Changes
+
+**Baseline reference**:
+```
+WRONG: visualize_Edits_FIXED_20251117/UNIFIED_fir_reconstruction_zScore.py
+RIGHT: visualize_Edits/fir_reconstruction_zScore.py
+```
+
+**Output structure**:
+```
+WRONG: test_results_nonlinear/sub-01_V2/
+RIGHT: derivatives/{timestamp}/sub-01/zScore_NONLINEAR/V2_universal_hrf/
+```
+
+**PCA default**:
+```
+WRONG: 20 components
+RIGHT: 6 components (as per CLAUDE.md)
+```
+
+### Usage (Corrected)
+
+```bash
+# Upload corrected version
+scp -r forward_models test_nonlinear_models_CORRECTED.py run_test_nonlinear_CORRECTED.sh haba6030@node2:/scratch/connectome/haba6030/colorBlind/
+
+# Run
+ssh haba6030@node2
+cd /scratch/connectome/haba6030/colorBlind
+sbatch run_test_nonlinear_CORRECTED.sh
+```
+
+**See**: `TEST_NONLINEAR_CORRECTED_GUIDE.md` for full details
+
+---
+
+**Updated**: 2025-11-18 - Corrected for visualize_Edits baseline

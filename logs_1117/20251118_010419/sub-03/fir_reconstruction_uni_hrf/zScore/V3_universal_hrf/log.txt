@@ -1,0 +1,241 @@
+======================================================================
+Z-Score Universal HRF Reconstruction Pipeline (Modified B&H 2009)
+======================================================================
+Subject: 03 (files: sub-03, derivatives: sub-03)
+ROI: V3
+Method: Z-score based universal HRF
+Feature type: Z-SCORE (statistical significance weighted)
+Use PCA: True
+PCA components: 6
+Color mapping: TEST (regular 45°)
+Output directory: derivatives/20251118_010419/sub-03/fir_reconstruction_uni_hrf/zScore/V3_universal_hrf
+
+[1/8] Loading ROI mask: V3
+  Path: derivatives/sub-03/roi_pipeline/V3_mask_thr50_intnearest_binTrue_masknone_gmTrue_subjFalse.nii.gz
+  Number of voxels: 100
+
+[2/8] Loading 6 runs of functional data and events
+  Run 1: (97, 115, 97, 284), 72 events
+  Run 2: (97, 115, 97, 284), 72 events
+  Run 3: (97, 115, 97, 284), 72 events
+  Run 4: (97, 115, 97, 284), 72 events
+  Run 5: (97, 115, 97, 284), 72 events
+  Run 6: (97, 115, 97, 284), 72 events
+  Total: 6 runs loaded
+
+[3/8] Fitting FIR model (may take 5-10 minutes)
+  Using hrf_model='fir' with 10 time bins
+  Each voxel gets its own response curve
+/scratch/connectome/haba6030/colorBlind/fir_reconstruction_zScore.py:481: UserWarning: Mean values of 0 observed. The data have probably been centered. Scaling might not work as expected.
+  fir_model.fit(func_imgs, events_list, confounds_list)
+  FIR model fitted successfully!
+
+[4/8] Visualizing mean HRF estimated from FIR
+/scratch/connectome/haba6030/colorBlind/fir_reconstruction_zScore.py:503: RuntimeWarning: The same contrast will be used for all 6 runs. If the design matrices are not the same for all runs, (for example with different column names or column order across runs) you should pass contrast as an expression using the name of the conditions as they appear in the design matrices.
+  contrast_map = fir_model.compute_contrast(contrast_name, output_type='effect_size')
+
+  === Universal HRF Analysis (CORRECTED) ===
+  Universal HRF (averaged across 8 colors and 100 voxels):
+  Full HRF curve: [ 0.08791856 -0.03056739 -0.44463474 -0.28088506 -0.38119366 -0.43271765
+ -0.33699804 -0.12347419  0.03896485  0.30217297]
+  Absolute values: [0.08791856 0.03056739 0.44463474 0.28088506 0.38119366 0.43271765
+ 0.33699804 0.12347419 0.03896485 0.30217297]
+  Optimal delay: 2 TRs (3.0s)
+  Peak amplitude: -0.4446
+  Peak absolute amplitude: 0.4446
+  Original PEAK_DELAY: 3 TRs (4.5s)
+
+  >>> Using optimal delay 2 TRs (3.0s) for all voxels
+
+  Saved: derivatives/20251118_010419/sub-03/fir_reconstruction_uni_hrf/zScore/V3_universal_hrf/figures/V3_universal_hrf.png
+
+[5/8] Extracting Z-SCORE estimates for 8 colors
+  NOTE: Using Z-scores instead of Beta values!
+  Z-scores automatically weight voxels by statistical significance
+/scratch/connectome/haba6030/colorBlind/fir_reconstruction_zScore.py:592: RuntimeWarning: The same contrast will be used for all 6 runs. If the design matrices are not the same for all runs, (for example with different column names or column order across runs) you should pass contrast as an expression using the name of the conditions as they appear in the design matrices.
+  contrast_map = fir_model.compute_contrast(contrast_name, output_type='z_score')
+/scratch/connectome/haba6030/colorBlind/fir_reconstruction_zScore.py:598: RuntimeWarning: The same contrast will be used for all 6 runs. If the design matrices are not the same for all runs, (for example with different column names or column order across runs) you should pass contrast as an expression using the name of the conditions as they appear in the design matrices.
+  z_map = fir_model.compute_contrast(contrast_name, output_type='z_score')
+  Run 1: Extracted 8 color z-scores
+  Run 2: Extracted 8 color z-scores
+  Run 3: Extracted 8 color z-scores
+  Run 4: Extracted 8 color z-scores
+  Run 5: Extracted 8 color z-scores
+  Run 6: Extracted 8 color z-scores
+  Total shape: (6, 8, 100)
+  Data type: Z-SCORES (not betas!)
+
+  Saving z-maps for each color...
+/scratch/connectome/haba6030/colorBlind/fir_reconstruction_zScore.py:629: UserWarning: empty mask
+  display = plotting.plot_stat_map(
+  Saved z-maps to: derivatives/20251118_010419/sub-03/fir_reconstruction_uni_hrf/zScore/V3_universal_hrf/zmaps
+
+Creating z-map matrix visualization...
+  Saved: derivatives/20251118_010419/sub-03/fir_reconstruction_uni_hrf/zScore/V3_universal_hrf/figures/V3_zscores_matrix.png
+/scratch/connectome/haba6030/colorBlind/fir_reconstruction_zScore.py:758: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+  plt.tight_layout()
+  Saved: derivatives/20251118_010419/sub-03/fir_reconstruction_uni_hrf/zScore/V3_universal_hrf/figures/V3_top_voxels_per_color.png
+  Saved: derivatives/20251118_010419/sub-03/fir_reconstruction_uni_hrf/zScore/V3_universal_hrf/figures/V3_color_preference_wheel.png
+
+Z-Score Matrix Statistics:
+  Voxels: 100
+  Colors: 8
+  Z-score range: [-3.77, 2.85]
+  Selective voxels (|z|>2.3 for any color): 13 (13.0%)
+  Mean |z| per color: [0.82 0.82 0.89 0.85 0.83 0.75 0.78 0.68]
+
+Creating PCA component visualization (leave-one-run-out)...
+  NOTE: Fitting PCA on Z-SCORES (not betas!)
+  NOTE: Fitting PCA separately for each fold to avoid data leakage
+  PCA components: 6
+  Explained variance ratio (mean±std): 0.921±0.000
+  PCA matrix shape: (8, 6)
+  Robustness check: std across folds = 0.0000
+  Saved: derivatives/20251118_010419/sub-03/fir_reconstruction_uni_hrf/zScore/V3_universal_hrf/figures/V3_pca_components_matrix.png
+  Saved: derivatives/20251118_010419/sub-03/fir_reconstruction_uni_hrf/zScore/V3_universal_hrf/figures/V3_pca_top_components_per_color.png
+  Saved: derivatives/20251118_010419/sub-03/fir_reconstruction_uni_hrf/zScore/V3_universal_hrf/figures/V3_pca_loadings.png
+
+PCA Component Analysis Statistics (across folds, Z-score based):
+  Total components: 6
+  Explained variance: 92.1% ± 0.0%
+  Components for 90% variance: 6.0 ± 0.0
+  Mean component value range: [-9.357, 7.396]
+  Mean component std across folds: 0.0000
+  Color with highest variance: c2 (14.836±0.000)
+  Robustness metric (mean std/mean value): 0.0000
+
+Creating PCA color space scatter plots...
+  Saved: derivatives/20251118_010419/sub-03/fir_reconstruction_uni_hrf/zScore/V3_universal_hrf/figures/V3_pca_colorspace.png
+
+[6/8] Classification with diagonal LDA (leave-one-run-out)
+  Using Z-SCORES as features (not betas!)
+  Using PCA: 6 components
+  Test run 1: 1.000 (100.0%)
+  Test run 2: 1.000 (100.0%)
+  Test run 3: 1.000 (100.0%)
+  Test run 4: 1.000 (100.0%)
+  Test run 5: 1.000 (100.0%)
+  Test run 6: 1.000 (100.0%)
+
+Mean classification accuracy: 1.000 (100.0%)
+Baseline (chance): 0.125 (12.5%)
+
+Confusion matrix (aggregated across runs):
+        c  1c  2c  3c  4c  5c  6c  7c  8
+  c1:   6   0   0   0   0   0   0   0 
+  c2:   0   6   0   0   0   0   0   0 
+  c3:   0   0   6   0   0   0   0   0 
+  c4:   0   0   0   6   0   0   0   0 
+  c5:   0   0   0   0   6   0   0   0 
+  c6:   0   0   0   0   0   6   0   0 
+  c7:   0   0   0   0   0   0   6   0 
+  c8:   0   0   0   0   0   0   0   6 
+
+Per-color classification accuracy:
+  color_1: 1.000 (6/6)
+  color_2: 1.000 (6/6)
+  color_3: 1.000 (6/6)
+  color_4: 1.000 (6/6)
+  color_5: 1.000 (6/6)
+  color_6: 1.000 (6/6)
+  color_7: 1.000 (6/6)
+  color_8: 1.000 (6/6)
+
+[7/8] Reconstruction with B&H forward model
+  Using Z-SCORES as features (not betas!)
+
+  === Detailed reconstruction for test run 1 ===
+  color_1 (true: 0.0°):
+    Reconstructed: 170° (error: 170.0°)
+    Estimated channels: [0.268, -0.138, 0.091, 0.298, -0.013, -0.506]
+    Top 5 correlations: 170°(0.563) 171°(0.563) 169°(0.563) 172°(0.563) 168°(0.563) 
+  color_2 (true: 45.0°):
+    Reconstructed: 357° (error: 48.0°)
+    Estimated channels: [1.674, 1.154, -1.108, -1.875, -1.050, 1.205]
+    Top 5 correlations: 357°(0.773) 358°(0.773) 356°(0.773) 359°(0.773) 355°(0.773) 
+  color_3 (true: 90.0°):
+    Reconstructed: 153° (error: 63.0°)
+    Estimated channels: [-1.988, -0.082, 1.619, 1.734, 0.738, -2.022]
+    Top 5 correlations: 153°(0.771) 154°(0.771) 152°(0.771) 155°(0.771) 151°(0.771) 
+  color_4 (true: 135.0°):
+    Reconstructed: 330° (error: 165.0°)
+    Estimated channels: [1.174, 0.288, -0.242, -1.375, -1.050, 1.205]
+    Top 5 correlations: 330°(0.844) 329°(0.843) 331°(0.843) 328°(0.843) 332°(0.843) 
+  color_5 (true: 180.0°):
+    Reconstructed: 177° (error: 3.0°)
+    Estimated channels: [-0.732, -0.388, 0.341, 1.298, 0.237, -0.756]
+    Top 5 correlations: 177°(0.945) 178°(0.945) 176°(0.945) 179°(0.945) 175°(0.944) 
+  color_6 (true: 225.0°):
+    Reconstructed: 214° (error: 11.0°)
+    Estimated channels: [-0.709, -0.445, -0.008, 0.780, 1.009, -0.627]
+    Top 5 correlations: 214°(0.944) 213°(0.944) 215°(0.943) 212°(0.943) 216°(0.942) 
+  color_7 (true: 270.0°):
+    Reconstructed: 312° (error: 42.0°)
+    Estimated channels: [0.523, 0.056, -0.686, -1.139, -0.014, 1.260]
+    Top 5 correlations: 312°(0.872) 313°(0.872) 311°(0.871) 314°(0.871) 310°(0.870) 
+  color_8 (true: 315.0°):
+    Reconstructed: 196° (error: 119.0°)
+    Estimated channels: [-0.209, -0.445, -0.008, 0.280, 0.143, 0.239]
+    Top 5 correlations: 196°(0.608) 195°(0.608) 197°(0.608) 194°(0.608) 198°(0.608) 
+
+  Test run 1: Mean error = 77.6°
+  Test run 2: Mean error = 77.6°
+  Test run 3: Mean error = 77.6°
+  Test run 4: Mean error = 77.6°
+  Test run 5: Mean error = 77.6°
+  Test run 6: Mean error = 77.6°
+
+Mean reconstruction error: 77.6°
+Chance level (expected): 90.0° (uniform circular distribution)
+
+=== Detailed Per-Run Statistics ===
+Run    Mean Error   Median Error   Hit Rate (±30°)    Hit Rate (±45°)   
+------------------------------------------------------------------------------
+Run 1      77.62°        55.50°          25.0%              37.5%
+Run 2      77.62°        55.50°          25.0%              37.5%
+Run 3      77.62°        55.50°          25.0%              37.5%
+Run 4      77.62°        55.50°          25.0%              37.5%
+Run 5      77.62°        55.50°          25.0%              37.5%
+Run 6      77.62°        55.50°          25.0%              37.5%
+------------------------------------------------------------------------------
+Mean      77.62°        55.50°          25.0%              37.5%
+
+[8/8] Leave-one-color-out reconstruction (novel colors)
+  Using Z-SCORES as features (not betas!)
+  color_1: Mean error = 171.0°
+  color_2: Mean error = 77.0°
+  color_3: Mean error = 15.0°
+  color_4: Mean error = 166.0°
+  color_5: Mean error = 149.0°
+  color_6: Mean error = 102.0°
+  color_7: Mean error = 167.0°
+  color_8: Mean error = 129.0°
+
+Mean error (novel colors): 122.0°
+
+Saving results...
+  Saved: derivatives/20251118_010419/sub-03/fir_reconstruction_uni_hrf/zScore/V3_universal_hrf/results.pkl
+  Saved: derivatives/20251118_010419/sub-03/fir_reconstruction_uni_hrf/zScore/V3_universal_hrf/summary.csv
+
+Creating reconstruction visualizations...
+  Saved: derivatives/20251118_010419/sub-03/fir_reconstruction_uni_hrf/zScore/V3_universal_hrf/figures/V3_reconstruction_per_run.png
+  Saved: derivatives/20251118_010419/sub-03/fir_reconstruction_uni_hrf/zScore/V3_universal_hrf/figures/V3_confusion_matrix.png
+  Saved: derivatives/20251118_010419/sub-03/fir_reconstruction_uni_hrf/zScore/V3_universal_hrf/figures/V3_circular_color_space.png
+
+======================================================================
+Z-Score Universal HRF Reconstruction Complete (Modified B&H 2009)
+======================================================================
+
+ROI: V3
+Method: Z-score based Universal HRF (optimal delay: 2 TRs / 3.0s)
+Feature type: Z-SCORES (statistical significance weighted)
+Voxels: 100
+PCA: 6 components
+
+Results:
+  Classification accuracy: 100.0% (chance: 12.5%)
+  Reconstruction error: 77.6° (chance: 90.0°)
+  Novel color error: 122.0°
+
+Output directory: derivatives/20251118_010419/sub-03/fir_reconstruction_uni_hrf/zScore/V3_universal_hrf
+======================================================================

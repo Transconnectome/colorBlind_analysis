@@ -1,0 +1,89 @@
+======================================================================
+Z-Score Universal HRF Reconstruction Pipeline (Modified B&H 2009)
+======================================================================
+Subject: 02 (files: sub-02, derivatives: sub-02)
+ROI: hV4
+Method: Z-score based universal HRF
+Feature type: Z-SCORE (statistical significance weighted)
+Use PCA: True
+PCA components: 6
+Color mapping: TEST (regular 45°)
+Output directory: derivatives/20251118_012145/sub-02/fir_reconstruction_uni_hrf/voxelSelect/hV4_universal_hrf
+
+[1/8] Loading ROI mask: hV4
+  Path: derivatives/sub-02/roi_pipeline/hV4_mask_thr50_intnearest_binTrue_masknone_gmTrue_subjFalse.nii.gz
+  Number of voxels: 44
+
+[2/8] Loading 6 runs of functional data and events
+  Run 1: (97, 115, 97, 284), 72 events
+  Run 2: (97, 115, 97, 284), 72 events
+  Run 3: (97, 115, 97, 284), 72 events
+  Run 4: (97, 115, 97, 284), 72 events
+  Run 5: (97, 115, 97, 284), 72 events
+  Run 6: (97, 115, 97, 284), 72 events
+  Total: 6 runs loaded
+
+[3/8] Fitting FIR model (may take 5-10 minutes)
+  Using hrf_model='fir' with 10 time bins
+  Each voxel gets its own response curve
+  FIR model fitted successfully!
+
+[4/8] Visualizing mean HRF estimated from FIR
+/scratch/connectome/haba6030/colorBlind/fir_reconstruction_zScore_voxelSelect.py:506: RuntimeWarning: The same contrast will be used for all 6 runs. If the design matrices are not the same for all runs, (for example with different column names or column order across runs) you should pass contrast as an expression using the name of the conditions as they appear in the design matrices.
+  contrast_map = fir_model.compute_contrast(contrast_name, output_type='effect_size')
+
+  === Universal HRF Analysis (CORRECTED) ===
+  Universal HRF (averaged across 8 colors and 44 voxels):
+  Full HRF curve: [ 0.06490261  0.40942789  0.2105965  -0.10308018 -0.17491489 -0.11638621
+ -0.26761662 -0.10389856 -0.07126999 -0.09730016]
+  Absolute values: [0.06490261 0.40942789 0.2105965  0.10308018 0.17491489 0.11638621
+ 0.26761662 0.10389856 0.07126999 0.09730016]
+  Optimal delay: 1 TRs (1.5s)
+  Peak amplitude: 0.4094
+  Peak absolute amplitude: 0.4094
+  Original PEAK_DELAY: 3 TRs (4.5s)
+
+  >>> Using optimal delay 1 TRs (1.5s) for all voxels
+
+  Saved: derivatives/20251118_012145/sub-02/fir_reconstruction_uni_hrf/voxelSelect/hV4_universal_hrf/figures/hV4_universal_hrf.png
+
+[5/8] Extracting Z-SCORE estimates for 8 colors
+  NOTE: Using Z-scores instead of Beta values!
+  Z-scores automatically weight voxels by statistical significance
+/scratch/connectome/haba6030/colorBlind/fir_reconstruction_zScore_voxelSelect.py:595: RuntimeWarning: The same contrast will be used for all 6 runs. If the design matrices are not the same for all runs, (for example with different column names or column order across runs) you should pass contrast as an expression using the name of the conditions as they appear in the design matrices.
+  contrast_map = fir_model.compute_contrast(contrast_name, output_type='z_score')
+/scratch/connectome/haba6030/colorBlind/fir_reconstruction_zScore_voxelSelect.py:601: RuntimeWarning: The same contrast will be used for all 6 runs. If the design matrices are not the same for all runs, (for example with different column names or column order across runs) you should pass contrast as an expression using the name of the conditions as they appear in the design matrices.
+  z_map = fir_model.compute_contrast(contrast_name, output_type='z_score')
+  Run 1: Extracted 8 color z-scores
+  Run 2: Extracted 8 color z-scores
+  Run 3: Extracted 8 color z-scores
+  Run 4: Extracted 8 color z-scores
+  Run 5: Extracted 8 color z-scores
+  Run 6: Extracted 8 color z-scores
+  Total shape: (6, 8, 44)
+  Data type: Z-SCORES (not betas!)
+
+[5B/8] Functional voxel selection (|max_z| > 2.3)
+  This implements: Anatomical ROI ∩ Functional Localizer
+  Anatomical ROI voxels: 44
+  Functional threshold: |z| > 2.3 (p < 0.01)
+  Selected voxels: 9 (20.5%)
+  Removed voxels: 35 (79.5%)
+
+================================================================================
+ERROR: Insufficient voxels after functional selection!
+  Selected: 9 voxels
+  Required: 10 voxels minimum
+
+Possible solutions:
+  1. Lower z-threshold (current: 2.3)
+     Try: --z-threshold 1.96 (p < 0.05) or 1.64 (p < 0.10)
+  2. Use larger anatomical ROI
+  3. Use universal_hrf or zScore method (no voxel selection)
+
+Voxel selection statistics:
+  Max |z| range: [0.86, 3.39]
+  Voxels with |z| > 2.0: 13
+  Voxels with |z| > 1.96: 13
+  Voxels with |z| > 1.64: 23
+================================================================================

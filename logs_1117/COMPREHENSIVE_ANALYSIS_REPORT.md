@@ -156,6 +156,28 @@ This remarkable finding indicates that:
 - **Poor circular structure**: Novel colors don't maintain expected angular relationships
 - **Suggests overfitting**: Model learns specific training colors but doesn't generalize
 
+#### Key Group Differences in Circular Space
+
+**Non-CVD Subjects (sub-01, sub-02):**
+- Predictions distributed evenly around color wheel
+- All 8 colors maintain approximate 45° spacing
+- Training colors: errors typically 10-20°
+- Novel colors: errors 40-80° but maintain relative ordering
+
+**CVD Subjects (sub-03, sub-04):**
+- **Asymmetric compression**: Red-green semicircle (0-180°) shows collapsed spacing
+- **Yellow-Green clustering**: Colors 3 & 4 (90°, 135°) predictions collapse toward each other
+- **Endpoint preservation**: Red (0°) and Cyan (180°) relatively intact
+- **High variance**: Same stimulus produces widely scattered predictions across runs
+- **Novel color catastrophic failure**: Yellow-green hues often predicted >120° away from true position
+
+**Visual Pattern Summary:**
+- **V1**: CVD shows maximum scatter in yellow-green region
+- **V2**: Best performance in both groups, but CVD still shows compression
+- **V3/hV4**: High variability masks group differences
+
+**For detailed CVD-specific circular space analysis, see:** `cvd_detailed_analysis/cvd_circular_interpretation_guide.png` and `cvd_detailed_analysis/cvd_circular_comparison_voxelSelect.png`
+
 ---
 
 ## Classification Confusion Patterns

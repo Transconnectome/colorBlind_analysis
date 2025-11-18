@@ -237,7 +237,58 @@ results = {
    - Panel C: 오차 분포 히스토그램
    - Panel D: 색상별 바이올린 플롯
 
-**Report:** `logs_1117/CVD_DETAILED_ANALYSIS_REPORT.md` (22KB, 532 lines)
+4. `cvd_circular_comparison_voxelSelect.png` (1.5MB) - **NEW: Circular 공간 비교**
+   - ROI별 Non-CVD vs CVD 나란히 비교
+   - Training colors (왼쪽) vs Novel colors (오른쪽)
+   - 황록 영역 압축 시각화
+
+5. `cvd_circular_interpretation_guide.png` (1.0MB) - **NEW: Circular 해석 가이드**
+   - 주석 달린 예제 (Non-CVD vs CVD)
+   - 색 공간 압축 도식도
+   - 핵심 특징 강조 표시
+
+**Report:** `logs_1117/CVD_DETAILED_ANALYSIS_REPORT.md` (22KB, 598 lines)
+- **NEW Section 3.5**: Circular Color Space Visualization (66 lines added)
+
+---
+
+## User Feedback #2: Add Circular Graphs
+
+> "둘의 분석에서 핵심이 되는 그래프는 circular 그래프들일 거 같은데 그게 하나도 안 추가되었네요. 추가되면 좋을 만한 곳이 있지 않을까요?"
+
+**Response:**
+- 완전히 맞는 지적 - circular 그래프가 핵심인데 리포트에 빠져있었음
+- 이미 생성된 comprehensive circular space 그래프들이 있었지만 상세 분석 없이 언급만 됨
+
+**Solution:**
+1. `create_cvd_circular_comparison.py` 생성
+   - ROI별 Non-CVD vs CVD 나란히 비교
+   - 해석 가이드 생성 (주석 포함)
+
+2. CVD_DETAILED_ANALYSIS_REPORT.md에 Section 3.5 추가 (66 lines)
+   - Circular space interpretation guide
+   - ROI-by-ROI comparison analysis
+   - Quantitative patterns extraction
+   - Compressed-Orthogonal Framework 시각화
+
+3. COMPREHENSIVE_ANALYSIS_REPORT.md 업데이트 (22 lines)
+   - Group differences in circular space 섹션 추가
+   - Non-CVD vs CVD 패턴 요약
+   - CVD 상세 분석 교차 참조
+
+**Key Insights from Circular Graphs:**
+- **황록 클러스터링**: CVD에서 90°, 135° 색들이 서로 가까이 예측됨
+- **비대칭 압축**: 적록 반원(0-180°)이 압축, 청황(225-315°)은 상대적 보존
+- **끝점 고정**: 빨강(0°), 청록(180°)은 CVD에서도 안정적
+- **높은 분산**: CVD는 같은 색에 대해 시행마다 매우 다른 예측
+- **Novel 색 실패**: 황록 영역 중간 색들이 >120° 벗어남
+
+**Visual Evidence:**
+Circular 그래프가 다음을 **직접 시각화**:
+1. 색상 간격 압축 (spacing analysis의 시각적 증거)
+2. PCA 클러스터링 (적록 vs 청황 분리)
+3. 각도 혼동 패턴 (어떤 색이 어디로 잘못 가는지)
+4. Compressed-Orthogonal Framework (한 눈에 보이는 모델 증거)
 
 ---
 
@@ -245,6 +296,7 @@ results = {
 
 1. `analyze_results_comprehensive.py` - 초기 종합 분석 스크립트
 2. `analyze_cvd_detailed.py` - CVD 상세 분석 스크립트
+3. `create_cvd_circular_comparison.py` - **NEW: Circular 그래프 특화 스크립트**
 
 ---
 

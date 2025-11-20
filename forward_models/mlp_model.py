@@ -199,7 +199,7 @@ class MLPForwardModel(ForwardModel):
         self.model.eval()
         with torch.no_grad():
             X_test_t = torch.FloatTensor(X_test)
-            y_pred = self.model(X_test_t).numpy()
+            y_pred = self.model(X_test_t).detach().cpu().numpy()
 
         # (n_samples, n_channels) → (n_channels, n_samples)
         return y_pred.T
@@ -229,4 +229,4 @@ class MLPForwardModel(ForwardModel):
         if self.model is None:
             raise RuntimeError("Model must be fitted first")
 
-        return self.model.fc1.weight.detach().numpy()
+        return self.model.fc1.weight.detach().cpu().numpy()

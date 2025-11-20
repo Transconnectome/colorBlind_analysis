@@ -326,9 +326,9 @@ else:
     print(f"Generated new timestamp: {timestamp}")
 
 if SUBJECT_ID == 'P01':
-    output_dir = Path(f"derivatives/{timestamp}/pilot/{DERIVATIVE_PREFIX}/fir_reconstruction_uni_hrf/zScore/{ROI_NAME}_universal_hrf")
+    output_dir = Path(f"derivatives/zScore/pilot/{timestamp}_{DERIVATIVE_PREFIX}_{ROI_NAME}")
 else:
-    output_dir = Path(f"derivatives/{timestamp}/{DERIVATIVE_PREFIX}/fir_reconstruction_uni_hrf/zScore/{ROI_NAME}_universal_hrf")
+    output_dir = Path(f"derivatives/zScore/{timestamp}_{DERIVATIVE_PREFIX}_{ROI_NAME}")
 output_dir.mkdir(parents=True, exist_ok=True)
 
 fig_dir = output_dir / "figures"

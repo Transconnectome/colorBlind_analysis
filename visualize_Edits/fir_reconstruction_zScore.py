@@ -1361,9 +1361,8 @@ for test_run in range(N_RUNS):
     reconstructed_hues = []
     true_hues = []
 
-    # Debug: print detailed reconstruction for first run
-    if test_run == 0:
-        print(f"\n  === Detailed reconstruction for test run 1 ===")
+    # Print detailed reconstruction for ALL runs
+    print(f"\n  === Detailed reconstruction for test run {test_run+1} ===")
 
     for test_idx, color_idx in enumerate(y_test):
         # Estimated channels
@@ -1386,21 +1385,20 @@ for test_run in range(N_RUNS):
         reconstructed_hues.append(reconstructed_hue)
         true_hues.append(true_hue)
 
-        # Debug: print details for first run
-        if test_run == 0:
-            error = circular_diff_deg(reconstructed_hue, true_hue)
-            # Top 5 correlations
-            top5_indices = np.argsort(correlations)[-5:][::-1]
-            top5_hues = top5_indices
-            top5_corrs = correlations[top5_indices]
+        # Print details for ALL runs
+        error = circular_diff_deg(reconstructed_hue, true_hue)
+        # Top 5 correlations
+        top5_indices = np.argsort(correlations)[-5:][::-1]
+        top5_hues = top5_indices
+        top5_corrs = correlations[top5_indices]
 
-            print(f"  {color_name} (true: {true_hue:.1f}°):")
-            print(f"    Reconstructed: {reconstructed_hue}° (error: {error:.1f}°)")
-            print(f"    Estimated channels: [{', '.join([f'{c:.3f}' for c in estimated_channels])}]")
-            print(f"    Top 5 correlations: ", end="")
-            for h, c in zip(top5_hues, top5_corrs):
-                print(f"{h}°({c:.3f}) ", end="")
-            print()
+        print(f"  {color_name} (true: {true_hue:.1f}°):")
+        print(f"    Reconstructed: {reconstructed_hue}° (error: {error:.1f}°)")
+        print(f"    Estimated channels: [{', '.join([f'{c:.3f}' for c in estimated_channels])}]")
+        print(f"    Top 5 correlations: ", end="")
+        for h, c in zip(top5_hues, top5_corrs):
+            print(f"{h}°({c:.3f}) ", end="")
+        print()
 
     # Calculate reconstruction error
     errors = circular_diff_deg(np.array(reconstructed_hues), np.array(true_hues))
@@ -1414,9 +1412,10 @@ for test_run in range(N_RUNS):
         'errors': errors
     })
 
-    if test_run == 0:
-        print()
+    print()
     print(f"  Test run {test_run+1}: Mean error = {mean_error:.1f}°")
+    print(f"  Reconstructed hues for this run: {reconstructed_hues}")
+    print()
 
 mean_reconstruction_error = np.mean([r['mean_error'] for r in reconstruction_results])
 print()

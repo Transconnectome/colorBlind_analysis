@@ -18,14 +18,6 @@ Combines:
 - Diagonal LDA classification (paper method)
 - B&H forward model for reconstruction
 - Optional PCA dimensionality reduction
-
-Usage:
-    python fir_reconstruction_universal_hrf.py --roi V2 --use-pca --n-components 6
-    
-Apply Changes?:
-    [O] CHANGE 1: Output directory structure (using OutputManager)
-    [O] CHANGE 2: PCA with leave-one-run-out CV (already in original)
-    [?] CHANGE 3: Accurate Lab→RGB color conversion for figures
 """
 
 import sys
@@ -162,24 +154,6 @@ def lab_hue_to_rgb(hue_deg, L=70, C=60):
 
 
 def lab2rgb_accurate(L, a, b, clip=True):
-    """
-    Convert CIELab to RGB using proper color space conversion
-
-    Parameters:
-    -----------
-    L : float
-        Lightness (0-100)
-    a : float
-        Green-Red axis
-    b : float
-        Blue-Yellow axis
-    clip : bool
-        Clip RGB values to [0, 1]
-
-    Returns:
-    --------
-    tuple : (R, G, B) in [0, 1] range
-    """
     L, a, b = float(L), float(a), float(b)
 
     # Lab to XYZ
@@ -205,19 +179,6 @@ def lab2rgb_accurate(L, a, b, clip=True):
     return tuple(rgb)
 
 def get_stimulus_color_rgb(color_name):
-    """
-    Get actual stimulus RGB color for visualization
-    Uses COLOR_LAB for accurate color representation
-
-    Parameters:
-    -----------
-    color_name : str
-        Color name (e.g., 'color_1')
-
-    Returns:
-    --------
-    tuple : (R, G, B) in [0, 1] range
-    """
     if color_name in COLOR_LAB:
         L, a, b = COLOR_LAB[color_name]
         return lab2rgb_accurate(L, a, b)
@@ -229,13 +190,6 @@ def get_stimulus_color_rgb(color_name):
         return hsv_to_rgb([h, 0.8, 0.9])
 
 def lab_hue_to_rgb(hue_deg, L=70, C=60):
-    """Convert Lab hue to RGB color for visualization
-
-    Simplified approach: use HSV as approximation
-    Lab hue ~= HSV hue (not perfect but good enough for visualization)
-
-    Kept for backward compatibility.
-    """
     from matplotlib.colors import hsv_to_rgb
 
     # Normalize hue to [0, 1] for HSV
@@ -1341,9 +1295,8 @@ for test_run in range(N_RUNS):
     reconstructed_hues = []
     true_hues = []
 
-    # Debug: print detailed reconstruction for first run
-    if test_run == 0:
-        print(f"\n  === Detailed reconstruction for test run 1 ===")
+    # Print detailed reconstruction for ALL runs
+    print(f"\n  === Detailed reconstruction for test run {test_run+1} ===")
 
     for test_idx, color_idx in enumerate(y_test):
         # Estimated channels
@@ -1366,21 +1319,20 @@ for test_run in range(N_RUNS):
         reconstructed_hues.append(reconstructed_hue)
         true_hues.append(true_hue)
 
-        # Debug: print details for first run
-        if test_run == 0:
-            error = circular_diff_deg(reconstructed_hue, true_hue)
-            # Top 5 correlations
-            top5_indices = np.argsort(correlations)[-5:][::-1]
-            top5_hues = top5_indices
-            top5_corrs = correlations[top5_indices]
+        # Print details for ALL runs
+        error = circular_diff_deg(reconstructed_hue, true_hue)
+        # Top 5 correlations
+        top5_indices = np.argsort(correlations)[-5:][::-1]
+        top5_hues = top5_indices
+        top5_corrs = correlations[top5_indices]
 
-            print(f"  {color_name} (true: {true_hue:.1f}°):")
-            print(f"    Reconstructed: {reconstructed_hue}° (error: {error:.1f}°)")
-            print(f"    Estimated channels: [{', '.join([f'{c:.3f}' for c in estimated_channels])}]")
-            print(f"    Top 5 correlations: ", end="")
-            for h, c in zip(top5_hues, top5_corrs):
-                print(f"{h}°({c:.3f}) ", end="")
-            print()
+        print(f"  {color_name} (true: {true_hue:.1f}°):")
+        print(f"    Reconstructed: {reconstructed_hue}° (error: {error:.1f}°)")
+        print(f"    Estimated channels: [{', '.join([f'{c:.3f}' for c in estimated_channels])}]")
+        print(f"    Top 5 correlations: ", end="")
+        for h, c in zip(top5_hues, top5_corrs):
+            print(f"{h}°({c:.3f}) ", end="")
+        print()
 
     # Calculate reconstruction error
     errors = circular_diff_deg(np.array(reconstructed_hues), np.array(true_hues))
@@ -1394,9 +1346,10 @@ for test_run in range(N_RUNS):
         'errors': errors
     })
 
-    if test_run == 0:
-        print()
+    print()
     print(f"  Test run {test_run+1}: Mean error = {mean_error:.1f}°")
+    print(f"  Reconstructed hues for this run: {reconstructed_hues}")
+    print()
 
 mean_reconstruction_error = np.mean([r['mean_error'] for r in reconstruction_results])
 print()

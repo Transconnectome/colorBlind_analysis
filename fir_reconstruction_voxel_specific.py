@@ -1,47 +1,45 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-fir_reconstruction_BH2009.py
-----------------------------------
-Faithful implementation of Brouwer & Heeger (2009, J. Neurosci.) methodology
+fir_reconstruction_voxel_specific.py
+------------------------------------
+VOXEL-SPECIFIC HRF Implementation
 
-KEY DIFFERENCES FROM PREVIOUS IMPLEMENTATIONS:
-1. Uses 8 FIR delays (not 10) - matching B&H's 12s window at 1.5s TR
-2. Voxel-wise FIR HRF estimation via pseudo-inverse (not optimal delay selection)
-3. R² threshold: top 50% voxels only (SNR-based voxel selection)
-4. 2nd-level GLM with HRF + derivative regressors (16 columns total)
-5. Per-run, per-voxel amplitude estimation (full pipeline)
+KEY MODIFICATION FROM B&H (2009):
+Instead of using ROI average HRF for all voxels, each voxel uses its own HRF.
+
+MOTIVATION:
+- HRF variability analysis shows mean correlation = 0.066 (very low!)
+- ROI average HRF does not represent individual voxels well
+- Using voxel-specific HRF should improve amplitude estimation accuracy
 
 PIPELINE:
-Step 1: Voxel-wise FIR deconvolution
+Step 1: Voxel-wise FIR deconvolution (SAME)
   - Build FIR design matrix (8 delays, color-ignored)
   - h_v = pinv(X_fir) @ y_voxel for each voxel
 
-Step 2: R² calculation and voxel selection
+Step 2: R² calculation and voxel selection (SAME)
   - r2[v] = 1 - SS_residual / SS_total
   - Select top 50% voxels by r²
 
-Step 3: ROI average HRF
-  - ROI_HRF = mean(h_v for v in selected_voxels)
-  - ROI_HRF_deriv = numerical_derivative(ROI_HRF)
+Step 3: SKIP ROI average HRF (MODIFIED!)
+  - Keep individual HRF_voxels[v] for each voxel
+  - Compute derivatives per voxel
 
-Step 4: 2nd-level GLM (amplitude estimation)
-  - Design: [color_1⊗h, ..., color_8⊗h, color_1⊗h', ..., color_8⊗h']
-  - β = pinv(X) @ y per voxel per run
-  - Extract first 8 betas as color amplitudes
+Step 4: 2nd-level GLM with VOXEL-SPECIFIC HRF (MODIFIED!)
+  - For each voxel v:
+    - Use HRF_voxels[v] and its derivative
+    - Design: [color_1⊗h_v, ..., color_8⊗h_v, color_1⊗h'_v, ..., color_8⊗h'_v]
+    - β = pinv(X_v) @ y_v per run
+  - Expected: Better amplitude estimation, higher run-to-run reliability
 
-Step 5: Z-score normalization
-  - Z-score per voxel per run (across 8 colors)
-
-Step 6: Classification and reconstruction
-  - Leave-one-run-out cross-validation
-  - 6-channel forward encoding model
+Step 5-6: SAME as B&H (2009)
 
 Usage:
-    python fir_reconstruction_BH2009.py --roi V1 --subject P01
+    python fir_reconstruction_voxel_specific.py --roi V1 --subject 01
 
-Created: 2025-01-20
-Based on: Brouwer & Heeger (2009, J. Neurosci.)
+Created: 2025-11-20
+Based on: B&H (2009) with voxel-specific HRF modification
 """
 
 import sys
@@ -824,20 +822,25 @@ print()
 sys.stdout.flush()
 
 # ============================================================================
-# Step 3: ROI Average HRF and Derivative
+# Step 3: VOXEL-SPECIFIC HRF Derivatives (MODIFIED!)
 # ============================================================================
 
-print(f"[5/9] Step 3: Computing ROI average HRF")
+print(f"[5/9] Step 3: Computing voxel-specific HRF derivatives")
 sys.stdout.flush()
 
-# Average HRF across selected voxels
-ROI_HRF = np.mean(HRF_voxel[selected_voxels_mask], axis=0)
+# Compute numerical derivative for EACH voxel (not just ROI average)
+HRF_voxel_deriv = np.zeros_like(HRF_voxel)
+for v in range(HRF_voxel.shape[0]):
+    HRF_voxel_deriv[v] = np.gradient(HRF_voxel[v])
 
-# Compute numerical derivative
+# Also compute ROI average for visualization purposes only
+ROI_HRF = np.mean(HRF_voxel[selected_voxels_mask], axis=0)
 ROI_HRF_deriv = np.gradient(ROI_HRF)
 
-print(f"  ROI HRF shape: {ROI_HRF.shape}")
-print(f"  Peak delay: {np.argmax(np.abs(ROI_HRF))} (time={np.argmax(np.abs(ROI_HRF))*TR:.1f}s)")
+print(f"  Voxel-specific HRF shape: {HRF_voxel.shape}")
+print(f"  Voxel-specific HRF deriv shape: {HRF_voxel_deriv.shape}")
+print(f"  ROI average HRF (for visualization only): {ROI_HRF.shape}")
+print(f"  Peak delay (ROI avg): {np.argmax(np.abs(ROI_HRF))} (time={np.argmax(np.abs(ROI_HRF))*TR:.1f}s)")
 print()
 sys.stdout.flush()
 
@@ -1084,15 +1087,19 @@ print()
 sys.stdout.flush()
 
 # ============================================================================
-# Step 4: 2nd-level GLM (Amplitude Estimation per Run)
+# Step 4: 2nd-level GLM with VOXEL-SPECIFIC HRF (MODIFIED!)
 # ============================================================================
 
-print(f"[6/9] Step 4: 2nd-level GLM for amplitude estimation")
-print(f"  Design: 16 columns [8 colors ⊗ HRF, 8 colors ⊗ HRF']")
+print(f"[6/9] Step 4: 2nd-level GLM with voxel-specific HRF")
+print(f"  Design: 16 columns per voxel [8 colors ⊗ h_v, 8 colors ⊗ h'_v]")
+print(f"  KEY: Each voxel uses its OWN HRF, not ROI average!")
 sys.stdout.flush()
 
 # Storage: (n_runs, n_colors, n_voxels_selected)
 amplitudes_raw = np.zeros((N_RUNS, N_COLORS, n_voxels_selected))
+
+# Get selected voxel indices (in original voxel array)
+selected_voxel_indices = np.where(selected_voxels_mask)[0]
 
 for run_idx in range(N_RUNS):
     print(f"  Processing run {run_idx + 1}/{N_RUNS}...")
@@ -1101,18 +1108,27 @@ for run_idx in range(N_RUNS):
     y_run = all_func_data[run_idx][:, selected_voxels_mask]  # (n_scans, n_voxels_selected)
     n_scans = y_run.shape[0]
 
-    # Build 2nd-level design matrix
-    X_2nd = build_2nd_level_design_matrix(events_list[run_idx], n_scans, TR,
-                                          ROI_HRF, ROI_HRF_deriv)
+    # Estimate amplitudes PER VOXEL with VOXEL-SPECIFIC HRF
+    for v_idx, voxel_id in enumerate(selected_voxel_indices):
+        # Get THIS voxel's HRF and derivative
+        voxel_hrf = HRF_voxel[voxel_id]
+        voxel_hrf_deriv = HRF_voxel_deriv[voxel_id]
 
-    # Estimate amplitudes per voxel: β = pinv(X) @ y
-    X_pinv = np.linalg.pinv(X_2nd)
-    betas = X_pinv @ y_run  # (16, n_voxels_selected) = [8 HRF + 8 deriv]
+        # Build voxel-specific design matrix
+        X_2nd_voxel = build_2nd_level_design_matrix(
+            events_list[run_idx], n_scans, TR,
+            voxel_hrf, voxel_hrf_deriv  # ← VOXEL-SPECIFIC!
+        )
 
-    # Extract first 8 betas (HRF regressors only, discard derivative betas)
-    amplitudes_raw[run_idx] = betas[:N_COLORS, :]
+        # Estimate amplitudes for this voxel
+        y_voxel = y_run[:, v_idx]
+        betas = np.linalg.pinv(X_2nd_voxel) @ y_voxel  # (16,) = [8 HRF + 8 deriv]
+
+        # Extract first 8 betas (HRF regressors only)
+        amplitudes_raw[run_idx, :, v_idx] = betas[:N_COLORS]
 
 print(f"  Amplitude array shape: {amplitudes_raw.shape} (runs, colors, voxels)")
+print(f"  ✓ Used voxel-specific HRF for each of {n_voxels_selected} voxels")
 print()
 sys.stdout.flush()
 

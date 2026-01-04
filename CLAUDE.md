@@ -15,233 +15,161 @@ Also, most of the code is ran by using SLURM.
 Therefore, for running a code to check it, suggest this procedure
 (1) suggest code and sbatch modification -> (2) suggest scp CLI for uploading code -> (3) how to run code in the server -> (4) how to download from the server.
 
-## 2. SLURM Configuration (CRITICAL)
+### 1-1. CRITICAL: Server Connection
 
-**All SBATCH files MUST include:**
+**ALWAYS use `node2` for server connections:**
+
 ```bash
-#SBATCH --nodelist=node2  # ALWAYS specify node2
+# ✅ CORRECT - Upload files
+scp file.py haba6030@node2:/scratch/connectome/haba6030/colorBlind/
+
+# ✅ CORRECT - Download files
+scp haba6030@node2:/scratch/connectome/haba6030/colorBlind/results.txt ./
+
+# ✅ CORRECT - SSH connection
+ssh haba6030@node2
+
+# ❌ WRONG - Do NOT use IP address
+scp file.py haba6030@node2:/scratch/...  # NEVER USE THIS
+```
+
+**Reason**: The server hostname `node2` is configured in SSH config and ensures correct node access.
+
+### 1-2. SLURM Configuration (CRITICAL)
+
+**CPU Jobs (node2) - 기본 배치 작업:**
+```bash
+#SBATCH --qos=shared               # ⚠️ REQUIRED: 노드 공유 필수!
+#SBATCH --nodelist=node2
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=16G
+```
+
+**GPU Jobs (node3) - GPU 필요한 작업:**
+```bash
+#SBATCH --qos=shared_interactive   # ⚠️ CRITICAL: interactive 아님!
+#SBATCH --nodelist=node3
+#SBATCH --gres=gpu:1
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=16G
 ```
 
 **NEVER include:**
 ```bash
-#SBATCH --partition=normal  # DO NOT specify partition
-``` 
+#SBATCH --partition=normal         # ❌ Invalid partition error!
+#SBATCH --partition=shared         # ❌ Invalid partition error!
+#SBATCH --qos=interactive          # ❌ node3에서는 shared_interactive 사용!
+```
 
-## logs Recording
-For each conversation, make MD file, and record all of the prompting and your answer in that md file. 
+**핵심 규칙:**
+- **node2 (CPU)**: --qos=shared 필수
+- **node3 (GPU)**: --qos=shared_interactive 필수
+- **절대 금지**: --partition 지정 (서버가 자동 할당)
 
-## 3. Project Overview
+## 2. File Structure to fMRIPrep Output Check 
+**Specific Information is in docs/GUIDE_to_fMRIprep**
+- BIDS file, fMRIPrep Setting, Outcome Diagnose
+
+**Subject Groups:**
+- **Non-CVD subjects (all)**: sub-01, sub-02, sub-03, sub-04, sub-05, sub-06, sub-07 (7 subjects)
+- **CVD subjects (all)**: sub-08, sub-09, sub-10 (3 subjects)
+
+**Analyzable Subjects (as of 2025-12-17):**
+- **Non-CVD (individual-level)**: sub-01, sub-02, sub-03, sub-05, sub-06, sub-07 (6 subjects)
+- **Non-CVD (group-level)**: sub-02, sub-03, sub-05, sub-06, sub-07 (5 subjects) - **sub-01 excluded**
+- **CVD (analyzable)**: sub-08, sub-09, sub-10 (3 subjects)
+- **Excluded from all**: sub-04 (No BOLD signal at V1 atlas location)
+
+**Exclusion Reasons:**
+
+**sub-04 (excluded from all analysis):**
+- ROI alignment diagnostic (Job 67066+) revealed V1 atlas location has zero BOLD signal across all timepoints
+- fMRIPrep functional brain mask excludes posterior visual cortex
+- Unlike sub-03/09/10, BOLD data itself is zeros at V1 location (not just masked out)
+- Root cause: Likely insufficient EPI coverage or signal dropout
+- See: `logs/diagnostics/brain_mask_verification.txt` and `ALIGNMENT_DIAGNOSTICS_FINAL_REPORT.md`
+
+**sub-01 (excluded from group-level analysis only):**
+- Significantly fewer voxels after feature selection compared to other subjects
+- V3 outlier: 3 voxels vs 58 voxels in others (5% of group median)
+- Including sub-01 would discard 95% of V3 data from 5 good subjects
+- Similar issues in V2 (80% of median) and V1 (95% of median)
+- Individual-level decoding still valid, but problematic for group alignment
+- See: `docs/SUB01_OUTLIER_DIAGNOSIS.md`
+
+**Data Paths (After Deoblique Preprocessing):**
+```bash
+INPUT_DIR=/storage/connectome/haba6030/colorBlind_data_deoblique
+OUTPUT_DIR_V1=/storage/connectome/haba6030/fmriprep_out_deoblique      # Original (fieldmap not applied)
+OUTPUT_DIR_V2=/storage/connectome/haba6030/fmriprep_out_deoblique_v2   # Improved (fieldmap applied)
+WORK_DIR_V1=/storage/connectome/haba6030/fmriprep_work_deoblique_batch2
+WORK_DIR_V2_B1=/storage/connectome/haba6030/fmriprep_work_deoblique_v2_batch1  # Sub-01~05
+WORK_DIR_V2_B2=/storage/connectome/haba6030/fmriprep_work_deoblique_v2_batch2  # Sub-06~10
+```
+
+- **Event/Stimulus files**: `/storage/connectome/haba6030/colorBlind_data_deoblique/sub-{ID}/func/`
+
+- **fMRIPrep outputs (v1 - DEPRECATED)**: `/storage/connectome/haba6030/fmriprep_out_deoblique/sub-{ID}/func/`
+  - ⚠️ **Fieldmap not applied** (missing B0FieldIdentifier)
+  - ⚠️ DO NOT use for new analysis
+
+- **fMRIPrep outputs (v2 - RECOMMENDED)**: `/storage/connectome/haba6030/fmriprep_out_deoblique_v2/sub-{ID}/func/`
+  - ✅ **Fieldmap applied** (B0FieldIdentifier present)
+  - ✅ Better registration (DOF 9, BBR forced, dummy scans removed)
+  - ✅ All 10 subjects (01-10)
+  - BOLD files: `sub-{ID}_task-rsvp_run-X_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz`
+  - Confounds: `sub-{ID}_task-rsvp_run-X_desc-confounds_timeseries.tsv`
+
+- **Analysis outputs (derivatives)**: `/scratch/connectome/haba6030/colorBlind/derivatives/`
+
+**Baseline Analysis Results Structure (CRITICAL for group-level scripts):**
+```bash
+# Path structure:
+derivatives/BH2009_{dataset}/{timestamp}/sm*_sub-{ID}_{roi}_*/
+
+# Example:
+derivatives/BH2009_deoblique_v2/baseline81_deob_determin/sm6.0_hpYe_moCo_ccNo_drNo_stTr_sub-02_hV4_None/
+
+# Contains:
+amplitudes_z.npy          # (n_runs, n_colors, n_voxels) - z-scored channel amplitudes
+classification_results.txt
+roi_mask.nii.gz
+# etc.
+```
+
+**Loading baseline results in Python:**
+```python
+from pathlib import Path
+import glob
+
+dataset = 'deoblique_v2'
+timestamp = 'baseline81_deob_determin'
+subject_id = '02'
+roi = 'V1'
+
+base_path = Path(f'derivatives/BH2009_{dataset}/{timestamp}')
+pattern = str(base_path / f'sm*_sub-{subject_id}_{roi}_*')
+matches = glob.glob(pattern)
+result_dir = Path(matches[0])
+amplitudes = np.load(result_dir / 'amplitudes_z.npy')
+```
+
+**IMPORTANT**:
+- **All analysis MUST use the most recent version suggested in `logs/GUIDE_to_fMRIprep`**
+- **Group-level scripts MUST use the correct derivatives path structure above** 
+
+## 3. Project Overview and Analysis
+**Specific Information is in docs/GUIDE_to_classify_reconstruct**
 
 This is a neuroimaging analysis project based on "final_IRB.pdf", modifying **Brouwer & Heeger (2009, J. Neurosci.)** color decoding pipeline. The project analyzes fMRI data to decode color information from visual cortex areas (V1-V4) using forward encoding models. 
 
-### Step 1: Formation of color reconstruction method to evaluate color perception
-When defining the forwarding function f:
-
-- Consider prediction performance on Non-CVD individuals.
-- Consider performance differences between Non-CVD and CVD mappings.
-- Consider whether the visualized channel space preserves consistent distance between colors (i.e., perceptual spacing).
-
-Choose the model type (deep learning vs. linear matrix W) based on:
-
-- Model performance
-- Model complexity
-
-For the forward model, applying **Brouwer & Heeger (2009, J. Neurosci.)** is an option, and using Machine-Learning or Deep-Learning to replicate brain's nonlinearlity is the other option. 
-
-### Step 2: Overview of filter design for this project
-Formulation: 
-CH_CVD = f_CVD(vox_CVD)
-CH_NC = f_NC(vox_NC)
- → f_CVD represents how the weighted sum across channels appears for a CVD participant.
-
-Goal: Find a function g(x) such that
-
-    vox_NC = g(vox_CVD)
-
-so that the decoding outputs in channel space (CH values) become equivalent
-between CVD and NC individuals.
-
-Assumptions: 
-- For Non-CVD (NC) individuals, the mapping function f is similar or effectively identical.
-- For CVD individuals, f is similar with that of NC individuals. However, their voxel activation pattern differs across people because each person shows a unique CVD pattern.
-
-Neural response formulation: 
-vox = V(color)
-
-→ Therefore, we want to find g_CVD(color) such that:
-
-    V( g_CVD(color) )
-
-passes through f_CVD and becomes restored to behave like the normal (NC) case.
-
-## Key Analysis Files
-
-- `bh_anal.py`: Main analysis pipeline implementing B&H (2009) methodology
-- `naive_analysis.py`: Alternative HRF model comparison analysis
-- `fir_reconstruction_*.py`: Current best pipeline, using universal FIR, optimal delay and PCA
-- `roi_build.py`: ROI mask construction utilities using Wang (2015) atlas
-- `config.py`: Global configuration settings and file paths
-- `combine_atlas.py`: Atlas combination utilities
-
-## Subject Naming Convention (CRITICAL)
-
-**Pilot vs Test subjects must be clearly distinguished:**
-
-- **P01** = Pilot subject
-  - fMRIPrep directory: `/storage/connectome/haba6030/fmriprep_out/pilot/sub-01/`
-  - File naming: `sub-01_task-rsvp_run-X_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz`
-  - Derivatives: `derivatives/{timestamp}/pilot/sub-01/zScore/{ROI_NAME}_universal_hrf` (to distinguish from test files)
-  - Color mapping: Irregular spacing (LABEL2HUE_DEG_PILOT)
-  - Already preprocessed with res-2
-
-- **01, 02, 03, 04** = Test subjects
-  - fMRIPrep directory: `/storage/connectome/haba6030/fmriprep_out/sub-01/`, `sub-02/`, etc.
-  - File naming: `sub-01_task-rsvp_run-X_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz`
-  - Derivatives: `derivatives/{timestamp}/sub-01/zScore/{ROI_NAME}_universal_hrf`, etc.
-  - Color mapping: Regular 45° spacing (LABEL2HUE_DEG_TEST)
-  - Already preprocessed with res-2
-
-**NEVER confuse pilot P01 with test files**
-
-## Data Structure
-
-The project expects fMRIPrep preprocessed data in this structure:
-- `/storage/connectome/haba6030/fmriprep_out/sub-{01|02|03|04}/func/`: fMRIPrep BOLD files
-- `/storage/connectome/haba6030/colorBlind_dataOct/sub-{01|02|03|04}/func/`: Event files (.tsv)
-- `derivatives/{timestamp}/sub-01|02|03|04/zScore/{ROI_NAME}_universal_hrf`: Analysis outputs (ROI masks, results)
-- `ProbAtlas_v4/`: Wang et al. (2015) probabilistic visual area atlas
-
-## fMRIPrep Configuration (CRITICAL)
-
-**Must match pilot preprocessing settings exactly:**
-
-Pilot was preprocessed with fMRIPrep 25.0.0 using these settings (from config.toml):
-```bash
-fmriprep /data /out participant \
-  --participant-label 01 \
-  --fs-license-file /opt/freesurfer/license.txt \
-  --output-spaces MNI152NLin2009cAsym:res-2 \
-  --bold2t1w-dof 6 \
-  --nthreads 16 \
-  --mem-mb 16000 \
-  -w /work
-```
-
-**Key settings from config.toml:**
-- `output_spaces = "MNI152NLin2009cAsym:res-2"` - ONLY this space, with res-2
-- `bold2anat_dof = 6` - MUST be 6 (same as pilot)
-- `use_syn_sdc = false` - NO synthetic distortion correction (pilot used actual GRE fieldmap)
-- `nprocs = 16`, `memory_gb = 16.0`
-- Fieldmap: Phase-drift map with two consecutive GRE acquisitions
-
-**For test subjects (01-04):**
-- Use same `--output-spaces MNI152NLin2009cAsym:res-2`
-- If fieldmap exists: let fMRIPrep auto-detect
-- If no fieldmap: add `--use-syn-sdc` for fieldmap-less distortion correction
-
-**Expected output files (matching pilot):**
-```
-sub-01_task-rsvp_run-X_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz
-sub-01_task-rsvp_run-X_space-MNI152NLin2009cAsym_res-2_boldref.nii.gz
-sub-01_task-rsvp_run-X_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz
-sub-01_task-rsvp_run-X_desc-confounds_timeseries.tsv  # No space/res in confounds
-```
-
-**Resolution:** 97×115×97 (2mm MNI space with res-2)
-
-**DO NOT add T1w or fsaverage spaces** - pilot only has MNI152NLin2009cAsym:res-2
-
-## Main Analysis Pipeline
-
-### 1. ROI Mask construction & overlaying
-#### ROI Construction
-ROIs are built from Wang (2015) atlas using mappings defined in `roi_build.py`:
-- V1: roi1 (V1v) + roi2 (V1d)
-- V2: roi3 (V2v) + roi4 (V2d)
-- V3: roi5 (V3v) + roi6 (V3d)
-- hV4: roi7
-
-Also, for comparison, whole func BOLD will be used with ROI marked as BrainMask (sub-01_BrainMask_mask.nii.gz)
-
-#### ROI Mask construction
-ROI Masks for each participants are built with `roi_pipeline_comprehensive.py`:
-- Match affine with reference anatomical & functional data to `MNI152NLin2009cAsym`
-- Parameters: 
-  - `threshold` = 50
-  - `interpolation` = `nearest`
-  - `binarize` = False
-  - `brain_mask` = `func`
-  - `use_gm_probseg` = 0.35
-
-### 2. GLM & Preprocessing for extracting voxel responses
-#### Configuration
-- `TR = 1.5`: Repetition time
-- `N_RUNS = 6`: Number of runs
-- `N_COLORS = 8`: Color conditions
-- `VOLS_TO_DROP = 4`: Volumes to discard at start
-
-Planning to use `config.py`
-
-#### Procedure
-The `fir_reconstruction_*.py` files implements these stages:
-1. `load_roi_mask`: load ROI mask 
-2. `load_data`: load functional data and events, compounds
-- Drop first four scans for stability
-3. `design`: Build FIR design matrices (8 colors + blank)
-4. `deconv_glm`: Fit voxelwise FIR GLM per run
-5. `optimal_delay`: Determine optimal delay and universal HRF via selecting maximum absolute values.
-6. `z-score`: Extract Z-score Estimates and create Z-maps from contrast maps of each color
-- If `voxelChoice`: Extract voxels whose max_z is larger than threshold
-
-### 3. Classification, Reconstruction
-The `fir_reconstruction_*.py` files implements these stages:
-1. `PCA`: From (Chosen) Z-score voxels, apply PCA for components = 6
-2. `Classification`: with diagonal LDA, use one-run-out-cross validation
-3. `Reconstruction`: Six-channel encoding model with leave-one-run-out & leave-one-color-out CV
-
-### 4. Visualization
-The `fir_reconstruction_*.py` files implements these stages:
-
-#### Settings
-- Visualize via actual stimulus colors in CIELab
-- For circular graph, increase degree in anticlock wise, with middle-right being 0-degree
-
-#### Figures 
-1. Visualize Mean HRF from FIR: 
-  - Extract FIR response for each color at all delays
-  - Plot HRF with universal HRF highlighted
-  - Plot universal HRF (bold) with annotating optimal delay
-2. Z-Map Matrix Visualization:
-  - Full Z-Score Matrix Heatmap (unsorted): 
-    - Raw matrix (all voxels × colors) 
-    - Sorted by peak color preference
-    - Per-color z-score distribution
-    - Voxel selectivity statistics: Count voxels with significant response (|z| > 2.3) for each color
-  - Detailed per-color z-score heatmaps (top 100 voxels):
-    - Get top voxels for this color
-    - Show z-scores across all colors for these top voxels
-  - Voxel-wise color preference wheel
-    - Map color indices to hue angles, For each voxel, plot its preferred color direction weighted by z-score magnitude
-3. PCA Component Visualization
-  - Store results from each fold
-  - Fit PCA for each fold independently
-  1. Component × Color Matrix Heatmap with Robustness
-    - Top-left: Mean matrix (colors × components)
-    - Top-right: Std matrix (robustness check)
-    - Bottom-left: Explained variance per component with error bars
-    - Bottom-right: Per-color component variance with robustness
-  2. Top Components per Color
-  3. Component Loadings (top 5 components) - Mean across folds
-  4. Subplot: cumulative variance with error bars + recommendation numbers
-  5. PCA Color Space Visualization (B&H 2009 Figure 6 style)
-    - Combination of PC1, PC2, PC3
-4. Visualization: Reconstruction Results
-  1. True vs Reconstructed Hues (Leave-One-Run-Out)
-  2. Confusion Matrix Visualization
-  3. Circular Color Space Visualization (naive_analysis style with colored markers)
-    - Left: Training colors reconstruction 
-    - Right: Novel colors reconstruction
-    - Plot true colors at border and predictions inside
+### Guide
+Procedure: 
+  1. Preprocessing: Find out best preprocessing setting
+  2. Baseline: Check baseline result (classification & reconstruction) of chosen preprocessing setting
+  3. Feature Selection: Figure out the best feature selection method. 
+  4. Group-level analysis: Across non-cvd participants (sub 01 ~ 07) make a common beta-map and conduct classification & reconstruction
+  5. Try non-linear color reconstruction method
 
 ## Dependencies
 
@@ -253,17 +181,15 @@ Core packages (install via conda):
 - sklearn: Machine learning utilities
 - scipy: Statistical functions
 
-## Analysis Methodology
-
-The forward encoding model uses:
-- Six idealized color channels (half-wave rectified & squared sinusoids)
-- Ordinary least squares estimation (not ridge regression)
-- Leave-one-run-out cross-validation
-- Two-tailed permutation testing (1000 iterations) for significance
-
 ## File Outputs
 
 Analysis creates:
 - `derivatives/sub-{SUB_ID}/`: GLM results, ROI masks, extracted data
 - Design matrices, beta maps, decoding accuracies
 - Quality control figures and statistical summaries
+
+## Systematic Preprocessing Review Analysis
+
+**Primary document**: `SYSTEMATIC_PREPROCESSING_ANALYSIS.md`
+
+This analysis systematically evaluated 144 preprocessing configurations (3 smoothing × 2 high-pass × 3 motion × 2 CompCor × 2 drift × 2 standardization) across 2 subjects and 4 ROIs (V1, V2, V3, hV4).

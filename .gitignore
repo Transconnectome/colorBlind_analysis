@@ -1,4 +1,6 @@
-# OS files
+# ============================================
+# OS-specific files
+# ============================================
 .DS_Store
 .DS_Store?
 ._*
@@ -6,58 +8,176 @@
 .Trashes
 thumbs.db
 Thumbs.db
+*.swp
+*~
 
+# ============================================
 # Python
+# ============================================
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
 *.egg-info/
+dist/
+build/
 .ipynb_checkpoints/
+.pytest_cache/
+.mypy_cache/
+*.pyc
 
-# Large data directories
-ProbAtlas_v4/
-probatlas_v4.zip
-output/
-pilot/
-derivatives/
-hrf_test_outputs/
-*.nii
-logs_backup/
-
-# Large PDFs
-*.pdf
-
-# Archives
-*.zip
-Archive.zip
-
-# Backup files
-*.bak
-*_backup.*
+# ============================================
+# Jupyter Notebook
+# ============================================
+.ipynb_checkpoints/
 *.ipynb.bak
 
-# IDE
-.vscode/
-.idea/
+# ============================================
+# Data & Results (Large files)
+# ============================================
 
-# Temporary files
-temp_*
-tmp_*
-*.tmp
+## fMRI data (NIfTI files)
+*.nii
+*.nii.gz
+*.mgz
 
-# Cache files
-.cache/
+## Atlases and reference data
+ProbAtlas_v4/
+probatlas_v4.zip
+materials/Atlas/
+
+## fMRI preprocessed data (CRITICAL: Never commit!)
+data/sub-*/
+data/derivatives/
+
+## Analysis outputs
+derivatives/
+results/
+output/
+pilot/
+hrf_test_outputs/
+brain_mask_verification/
+native_roi_report/
+sub01_roi_figures/
+prepfigs/
+preps/
+
+## Intermediate results
+results_summary.csv
 *.joblib
 *.pkl
 *.pickle
+
+## Log directories
+logs/
+" logs"/
+logs_backup/
+
+# ============================================
+# SLURM & Server Outputs
+# ============================================
+*.out
+*.err
+slurm-*.out
+slurm-*.err
+qc_runwise_sub-*.tsv
+
+# ============================================
+# LaTeX build files
+# ============================================
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+*.run.xml
+*.nav
+*.snm
+*.vrb
+
+# Keep paper PDFs
+!docs/paper/*.pdf
+!docs/program_paper/*.pdf
+
+# But ignore other PDFs
+*.pdf
+
+# Exceptions: Keep specific important PDFs
+!final_IRB.pdf
+
+# ============================================
+# Archives & Backups
+# ============================================
+*.zip
+Archive.zip
+*.tar.gz
+*.bak
+*_backup.*
+backup/
+
+# ============================================
+# IDE & Editors
+# ============================================
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# ============================================
+# Temporary & Cache
+# ============================================
+temp_*
+tmp_*
+*.tmp
+.cache/
 docs/prev/
 
-# Results that are too large
+# ============================================
+# Documentation (selective)
+# ============================================
+
+## Keep essential root-level docs
+!README.md
+!CLAUDE.md
+!LICENSE
+
+## Ignore all other root-level markdown temporarily
+/*.md
+!README.md
+!CLAUDE.md
+!REORGANIZATION_PLAN.md
+
+## Archive outdated docs
+docs/archive/
+docs/trial_options/
+docs/OHBM_abstract/
+
+# ============================================
+# Images (selective - comment out if needed)
+# ============================================
+# Uncomment below to ignore large images
 # *.png
 # *.jpg
 # *.jpeg
 
-# Keep these documentation files
-!final_IRB.pdf
+# But always keep documentation images
+!prediction_model/docs/*.png
+!docs/paper/figure/
+!docs/program_paper/figure/
+
+# ============================================
+# Conda & Environment
+# ============================================
+.conda/
+.env
+.venv/
+venv/
+ENV/

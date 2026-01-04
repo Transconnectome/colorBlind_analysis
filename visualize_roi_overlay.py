@@ -1,253 +1,199 @@
 #!/usr/bin/env python3
 """
-visualize_roi_overlay.py
-------------------------
-ROI mask를 BOLD 이미지 위에 overlay하여 시각화
-기존 과정과 동일한 방법으로 정렬 확인
+Visualize ROI Overlay on Functional Data
+
+Creates visual overlays to check if ROI masks are in the correct location.
+For problem subjects, this will reveal if the alignment is actually correct.
 """
 
-import os
-import sys
 import nibabel as nib
 import numpy as np
+from nilearn import plotting
 import matplotlib.pyplot as plt
-from nilearn import plotting, image
+from pathlib import Path
 
-def create_roi_overlay(roi_path, bold_path, roi_name, output_dir):
-    """ROI overlay 시각화 생성"""
+# Configuration
+BASE_DIR = Path('/scratch/connectome/haba6030/colorBlind')
+FMRIPREP_DIR = Path('/storage/connectome/haba6030/fmriprep_out_deoblique_v2')
+DERIVATIVES_DIR = BASE_DIR / 'derivatives'
+OUTPUT_DIR = BASE_DIR / 'logs' / 'alignment_visualizations'
 
-    print(f"Processing {roi_name}...")
+# Subjects to check
+PROBLEM_SUBJECTS = ['02', '03', '04', '09', '10']
+GOOD_SUBJECTS = ['01', '05']  # For comparison
 
-    # ROI mask 로드
-    roi_img = nib.load(roi_path)
-
-    # BOLD mean 이미지 생성 (background로 사용)
-    bold_img = nib.load(bold_path)
-    mean_bold = image.mean_img(bold_img)
-
-    # Output path
-    output_path = os.path.join(output_dir, f'{roi_name}_overlay.png')
-
-    # Overlay plot 생성
-    display = plotting.plot_roi(
-        roi_img,
-        bg_img=mean_bold,
-        title=f'{roi_name} ROI Overlay on BOLD',
-        cut_coords=(-10, -80, 0),  # Occipital cortex 중심
-        display_mode='ortho',
-        cmap='Reds',
-        alpha=0.7,
-        output_file=output_path
-    )
-
-    print(f"  ✅ Saved: {output_path}")
-
-    # Voxel count 정보 추가
-    roi_data = roi_img.get_fdata()
-    n_voxels = (roi_data > 0).sum()
-
-    # BOLD와 overlap 확인
-    bold_data = bold_img.get_fdata()
-    bold_mean_data = bold_data.mean(axis=-1)
-    epi_mask = bold_mean_data > 0
-    roi_mask = roi_data > 0
-    overlap = np.logical_and(roi_mask, epi_mask)
-    overlap_ratio = overlap.sum() / n_voxels if n_voxels > 0 else 0
-
-    print(f"  Voxel count: {n_voxels}")
-    print(f"  EPI overlap: {overlap.sum()}/{n_voxels} ({overlap_ratio*100:.1f}%)")
-
-    return output_path
-
-
-def create_all_rois_combined(roi_paths, bold_path, output_dir):
-    """모든 ROI를 하나의 이미지에 표시"""
-
-    print(f"\nCreating combined ROI overlay...")
-
-    # BOLD mean 이미지
-    bold_img = nib.load(bold_path)
-    mean_bold = image.mean_img(bold_img)
-
-    # 큰 figure 생성
-    fig, axes = plt.subplots(2, 2, figsize=(16, 14))
-    fig.suptitle('All ROIs Overlay on BOLD (MNI152NLin2009cAsym:res-2)',
-                 fontsize=16, fontweight='bold')
-
-    rois = ['V1', 'V2', 'V3', 'hV4']
-
-    for idx, roi_name in enumerate(rois):
-        roi_path = roi_paths.get(roi_name)
-
-        if roi_path is None or not os.path.exists(roi_path):
-            print(f"  ⚠️ Skipping {roi_name} (not found)")
-            continue
-
-        roi_img = nib.load(roi_path)
-        roi_data = roi_img.get_fdata()
-        n_voxels = (roi_data > 0).sum()
-
-        ax = axes[idx // 2, idx % 2]
-
-        # Overlay plot
-        plotting.plot_roi(
-            roi_img,
-            bg_img=mean_bold,
-            title=f'{roi_name} (n={n_voxels} voxels)',
-            cut_coords=(-10, -80, 0),
-            display_mode='ortho',
-            cmap='Reds',
-            alpha=0.7,
-            axes=ax
-        )
-
-    plt.tight_layout()
-
-    output_path = os.path.join(output_dir, 'all_rois_overlay.png')
-    plt.savefig(output_path, dpi=150, bbox_inches='tight')
-    plt.close()
-
-    print(f"  ✅ Saved: {output_path}")
-
-    return output_path
-
-
-def create_glass_brain_view(roi_paths, output_dir):
-    """Glass brain view - 전체 뇌에서 ROI 위치 파악"""
-
-    print(f"\nCreating glass brain view...")
-
-    fig = plt.figure(figsize=(16, 10))
-    fig.suptitle('ROI Locations - Glass Brain View', fontsize=16, fontweight='bold')
-
-    rois = ['V1', 'V2', 'V3', 'hV4']
-    colors = ['blue', 'red', 'green', 'orange']
-
-    for idx, (roi_name, color) in enumerate(zip(rois, colors)):
-        roi_path = roi_paths.get(roi_name)
-
-        if roi_path is None or not os.path.exists(roi_path):
-            print(f"  ⚠️ Skipping {roi_name} (not found)")
-            continue
-
-        roi_img = nib.load(roi_path)
-
-        ax = plt.subplot(2, 2, idx + 1)
-
-        plotting.plot_glass_brain(
-            roi_img,
-            title=f'{roi_name}',
-            colorbar=False,
-            cmap=color,
-            alpha=0.8,
-            axes=ax
-        )
-
-    plt.tight_layout()
-
-    output_path = os.path.join(output_dir, 'glass_brain_view.png')
-    plt.savefig(output_path, dpi=150, bbox_inches='tight')
-    plt.close()
-
-    print(f"  ✅ Saved: {output_path}")
-
-    return output_path
-
-
-def main():
-    """Main visualization function"""
-
-    # Config
-    try:
-        from config import cfg
-        sub_id = cfg.SUB_ID
-        project_dir = cfg.PROJECT_DIR
-    except ImportError:
-        print("⚠️ Could not import config, using defaults")
-        sub_id = 'P01'
-        project_dir = os.path.dirname(os.path.abspath(__file__))
+def visualize_subject(subject_id, is_problem=False):
+    """Create overlay visualizations for one subject"""
+    print(f"\n{'='*70}")
+    print(f"Visualizing sub-{subject_id}")
+    print(f"{'='*70}")
 
     # Paths
-    roi_dir = os.path.join(project_dir, 'derivatives', f'sub-{sub_id}', 'roi')
-    output_dir = os.path.join(roi_dir, 'qc_figures')
-    os.makedirs(output_dir, exist_ok=True)
+    subj_dir = FMRIPREP_DIR / f'sub-{subject_id}'
+    func_dir = subj_dir / 'func'
+    deriv_dir = DERIVATIVES_DIR / f'sub-{subject_id}' / 'roi_pipeline'
 
-    # Reference BOLD image (run-1)
-    bold_path = f'/storage/connectome/haba6030/fmriprep_out/sub-{sub_id}/func/sub-01_task-rsvp_run-1_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'
+    boldref_path = func_dir / f'sub-{subject_id}_task-rsvp_run-1_space-MNI152NLin2009cAsym_res-2_boldref.nii.gz'
+    brain_mask_path = func_dir / f'sub-{subject_id}_task-rsvp_run-1_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz'
 
-    # Check if BOLD exists
-    if not os.path.exists(bold_path):
-        # Try alternative path
-        bold_path = os.path.join(
-            project_dir, 'output', 'pilot', f'sub-{sub_id}', 'func',
-            f'sub-{sub_id}_task-rsvp_run-1_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'
+    if not boldref_path.exists():
+        print(f"⚠️  BOLDREF not found")
+        return
+
+    # Load images
+    boldref = nib.load(str(boldref_path))
+    brain_mask = nib.load(str(brain_mask_path)) if brain_mask_path.exists() else None
+
+    # Create output directory
+    subj_output_dir = OUTPUT_DIR / f'sub-{subject_id}'
+    subj_output_dir.mkdir(parents=True, exist_ok=True)
+
+    # ROIs to visualize
+    rois = ['V1', 'V2', 'V3', 'hV4']
+
+    for roi in rois:
+        roi_mask_none = deriv_dir / f'{roi}_mask_thr50_intnearest_binTrue_masknone_gmTrue_subjFalse.nii.gz'
+        roi_mask_func = deriv_dir / f'{roi}_mask_thr50_intnearest_binTrue_maskfunc_gmTrue_subjFalse.nii.gz'
+
+        # Check if ROI masks exist
+        if not roi_mask_none.exists():
+            print(f"  ⚠️  {roi} mask=none not found")
+            continue
+
+        # Load ROI masks
+        roi_none = nib.load(str(roi_mask_none))
+        roi_none_data = roi_none.get_fdata()
+        roi_none_voxels = np.count_nonzero(roi_none_data)
+
+        roi_func_voxels = 0
+        if roi_mask_func.exists():
+            roi_func = nib.load(str(roi_mask_func))
+            roi_func_data = roi_func.get_fdata()
+            roi_func_voxels = np.count_nonzero(roi_func_data)
+
+        print(f"\n  {roi}:")
+        print(f"    mask=none voxels: {roi_none_voxels}")
+        print(f"    mask=func voxels: {roi_func_voxels}")
+
+        # Create visualization
+        fig = plt.figure(figsize=(20, 10))
+
+        # Subplot 1: ROI on BOLDREF (mask=none)
+        ax1 = plt.subplot(2, 3, 1)
+        display = plotting.plot_roi(
+            roi_none,
+            bg_img=boldref,
+            display_mode='ortho',
+            cut_coords=None,
+            title=f'sub-{subject_id} {roi} mask=none\nVoxels: {roi_none_voxels}',
+            axes=ax1,
+            draw_cross=True,
+            annotate=True
         )
 
-    if not os.path.exists(bold_path):
-        print(f"❌ ERROR: Could not find reference BOLD image")
-        print(f"   Tried: {bold_path}")
-        sys.exit(1)
+        # Subplot 2: ROI on BOLDREF (sagittal)
+        ax2 = plt.subplot(2, 3, 2)
+        display = plotting.plot_roi(
+            roi_none,
+            bg_img=boldref,
+            display_mode='x',
+            cut_coords=5,
+            title=f'{roi} - Sagittal slices',
+            axes=ax2,
+            annotate=True
+        )
 
-    print("="*60)
+        # Subplot 3: Brain mask overlay
+        if brain_mask is not None:
+            ax3 = plt.subplot(2, 3, 3)
+            display = plotting.plot_roi(
+                brain_mask,
+                bg_img=boldref,
+                display_mode='ortho',
+                cut_coords=None,
+                title=f'Brain Mask Coverage',
+                axes=ax3,
+                draw_cross=True,
+                cmap='Reds',
+                alpha=0.5
+            )
+
+        # Subplot 4: Axial view of ROI
+        ax4 = plt.subplot(2, 3, 4)
+        display = plotting.plot_roi(
+            roi_none,
+            bg_img=boldref,
+            display_mode='z',
+            cut_coords=5,
+            title=f'{roi} - Axial slices',
+            axes=ax4,
+            annotate=True
+        )
+
+        # Subplot 5: Coronal view focusing on occipital
+        ax5 = plt.subplot(2, 3, 5)
+        display = plotting.plot_roi(
+            roi_none,
+            bg_img=boldref,
+            display_mode='y',
+            cut_coords=[-90, -80, -70, -60, -50],  # Posterior slices
+            title=f'{roi} - Coronal (Posterior)',
+            axes=ax5,
+            annotate=True
+        )
+
+        # Subplot 6: Check if ROI overlaps with functional signal
+        ax6 = plt.subplot(2, 3, 6)
+        boldref_data = boldref.get_fdata()
+
+        # Calculate overlap with non-zero BOLD signal
+        bold_nonzero = boldref_data > np.percentile(boldref_data[boldref_data > 0], 5)
+        roi_in_bold = roi_none_data * bold_nonzero
+        overlap_voxels = np.count_nonzero(roi_in_bold)
+        overlap_ratio = overlap_voxels / roi_none_voxels if roi_none_voxels > 0 else 0
+
+        ax6.text(0.1, 0.5,
+                 f'{roi} Overlap Analysis\n\n'
+                 f'ROI voxels: {roi_none_voxels}\n'
+                 f'Overlap with BOLD signal: {overlap_voxels}\n'
+                 f'Overlap ratio: {100*overlap_ratio:.1f}%\n\n'
+                 f'mask=func voxels: {roi_func_voxels}\n'
+                 f'Difference: {roi_none_voxels - roi_func_voxels}',
+                 fontsize=12,
+                 verticalalignment='center')
+        ax6.axis('off')
+
+        plt.tight_layout()
+
+        # Save
+        output_path = subj_output_dir / f'{roi}_overlay.png'
+        plt.savefig(output_path, dpi=150, bbox_inches='tight')
+        plt.close()
+
+        print(f"    ✓ Saved: {output_path}")
+
+    print(f"\n✓ Completed sub-{subject_id}")
+
+def main():
+    """Main visualization"""
+    print("="*70)
     print("ROI OVERLAY VISUALIZATION")
-    print("="*60)
-    print(f"Subject: {sub_id}")
-    print(f"ROI Directory: {roi_dir}")
-    print(f"Output Directory: {output_dir}")
-    print(f"Reference BOLD: {bold_path}")
-    print("="*60)
+    print("="*70)
 
-    # ROI paths
-    rois = ['V1', 'V2', 'V3', 'hV4']
-    roi_paths = {}
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    for roi_name in rois:
-        roi_path = os.path.join(roi_dir, f'sub-{sub_id}_{roi_name}_mask.nii.gz')
-        if os.path.exists(roi_path):
-            roi_paths[roi_name] = roi_path
-        else:
-            print(f"⚠️ WARNING: {roi_name} mask not found at {roi_path}")
+    print("\nVisualizing GOOD subjects (for comparison):")
+    for subject in GOOD_SUBJECTS:
+        visualize_subject(subject, is_problem=False)
 
-    if not roi_paths:
-        print("❌ ERROR: No ROI masks found!")
-        print(f"\nExpected location: {roi_dir}/sub-{sub_id}_<ROI>_mask.nii.gz")
-        print(f"\n💡 Run roi_build.py first to create ROI masks")
-        sys.exit(1)
+    print("\n\nVisualizing PROBLEM subjects:")
+    for subject in PROBLEM_SUBJECTS:
+        visualize_subject(subject, is_problem=True)
 
-    # 1. Individual ROI overlays
-    print(f"\n1. Creating individual ROI overlays...")
-    print("-" * 60)
-    for roi_name, roi_path in roi_paths.items():
-        create_roi_overlay(roi_path, bold_path, roi_name, output_dir)
+    print("\n" + "="*70)
+    print("VISUALIZATION COMPLETE")
+    print(f"Output: {OUTPUT_DIR}")
+    print("="*70)
 
-    # 2. Combined view
-    print(f"\n2. Creating combined ROI view...")
-    print("-" * 60)
-    create_all_rois_combined(roi_paths, bold_path, output_dir)
-
-    # 3. Glass brain view
-    print(f"\n3. Creating glass brain view...")
-    print("-" * 60)
-    create_glass_brain_view(roi_paths, output_dir)
-
-    # Summary
-    print("\n" + "="*60)
-    print("✅ VISUALIZATION COMPLETE!")
-    print("="*60)
-    print(f"\nOutput files saved in: {output_dir}")
-    print(f"\nGenerated files:")
-    print(f"  - Individual overlays: V1_overlay.png, V2_overlay.png, etc.")
-    print(f"  - Combined view: all_rois_overlay.png")
-    print(f"  - Glass brain: glass_brain_view.png")
-    print("\n📝 Check these images to verify:")
-    print("  ✓ ROIs are in occipital cortex (visual areas)")
-    print("  ✓ ROIs are symmetric (left/right)")
-    print("  ✓ ROIs don't extend outside brain")
-    print("  ✓ ROIs overlap with BOLD activation")
-    print("="*60)
-
-    return 0
-
-
-if __name__ == '__main__':
-    sys.exit(main())
+if __name__ == "__main__":
+    main()

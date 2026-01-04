@@ -18,13 +18,13 @@ from datetime import datetime
 
 # Configuration
 BASE_DIR = Path('/scratch/connectome/haba6030/colorBlind')
-ATLAS_DIR = BASE_DIR / 'ProbAtlas_v4' / 'subj_vol_all'  # Wang atlas volumetric files
-
-# Dataset selection (choose one):
-# FMRIPREP_DIR = Path('/storage/connectome/haba6030/fmriprep_out')  # Original
-FMRIPREP_DIR = Path('/storage/connectome/haba6030/fmriprep_out_deoblique_v2')  # NEW: fieldmap applied, DOF 9, BBR
-
-PILOT_DIR = FMRIPREP_DIR / 'pilot'  # Pilot data location: /storage/.../fmriprep_out/pilot/
+# UPDATED 2025-12-12: Use 2mm atlas (pre-converted to match fMRIPrep MNI space)
+# Original 1mm atlas caused alignment issues due to resolution/affine mismatch
+# See: ROI_ALIGNMENT_ISSUES_ANALYSIS.md and convert_wang_atlas_to_2mm.py
+ATLAS_DIR = BASE_DIR / 'ProbAtlas_v4_2mm' / 'subj_vol_all'  # Wang atlas 2mm (aligned)
+# ATLAS_DIR = BASE_DIR / 'ProbAtlas_v4' / 'subj_vol_all'  # Old 1mm atlas (DO NOT USE)
+FMRIPREP_DIR = Path('/storage/connectome/haba6030/fmriprep_out_deoblique_v2')  # v2: fieldmap applied
+DATA_DIR = Path('/storage/connectome/haba6030/colorBlind_data_deoblique')  # Event/stimulus files
 DERIVATIVES_DIR = BASE_DIR / 'derivatives'
 
 # Target space (matching pilot preprocessing)
@@ -74,17 +74,18 @@ ROI_DEFINITIONS = {
 
 # Parameter grid for testing
 # NOTE: Wang atlas stores probabilities as 0-100 (percentage), not 0-1!
+# UPDATED for deoblique data: Testing multiple brain_mask configurations
 PARAM_GRID = {
-    'threshold': [5, 10, 20, 35, 50],  # Percentage values (0-100 scale)
+    'threshold': [50],  # Percentage values (0-100 scale)
     # 5 = 5%, 10 = 10%, 20 = 20%, 35 = 35% (past default), 50 = 50%
-    'interpolation': ['nearest', 'linear'],
-    'binarize_after_resample': [True, False],
-    'brain_mask_type': ['none', 'func', 'epi_intersect'],  # Brain mask options
-    # 'none': No masking
-    # 'func': Use functional brain mask
+    'interpolation': ['nearest'],
+    'binarize_after_resample': [True],
+    'brain_mask_type': ['none', 'func'],  # Compare no mask vs functional mask
+    # 'none': No masking (baseline)
+    # 'func': Use functional brain mask (recommended for deoblique)
     # 'epi_intersect': Use EPI brain mask intersection (most conservative)
-    'use_gm_probseg': [True, False],  # GM probseg intersection (from past code)
-    'use_subject_roi': [True, False]  # Subject-specific ROI intersection (from past code)
+    'use_gm_probseg': [True],  # GM probseg intersection (threshold=0.35)
+    'use_subject_roi': [True, False]  # Compare with/without subject-specific ROI
 }
 
 # Constants for GM probseg
@@ -106,19 +107,14 @@ class ROIPipelineComprehensive:
 
     def setup_paths(self):
         """Setup all necessary paths"""
-        # Subject directories
-        if self.subject_id == 'P01':
-            # Pilot: fMRIPrep in pilot folder, derivatives in pilot subfolder
-            self.fmriprep_subj_dir = PILOT_DIR / 'sub-01'
-            self.deriv_subj_dir = DERIVATIVES_DIR / 'pilot' / 'sub-01'
-        else:
-            # Test subjects: standard structure
-            self.fmriprep_subj_dir = FMRIPREP_DIR / f'sub-{self.subject_id}'
-            self.deriv_subj_dir = DERIVATIVES_DIR / f'sub-{self.subject_id}'
+        # Subject directories - all subjects now use standard structure
+        # Subject IDs: 01-07 (Non-CVD), 08-10 (CVD)
+        self.fmriprep_subj_dir = FMRIPREP_DIR / f'sub-{self.subject_id}'
+        self.deriv_subj_dir = DERIVATIVES_DIR / f'sub-{self.subject_id}'
 
         # Create output directory for this analysis
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-        self.output_dir = self.deriv_subj_dir / f'roi_pipeline_{timestamp}'
+        self.output_dir = self.deriv_subj_dir / f'roi_pipeline'
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
         # Reference images
@@ -136,9 +132,7 @@ class ROIPipelineComprehensive:
 
     def _get_func_ref(self):
         """Get functional reference image (boldref)"""
-        # Pilot is stored as sub-01 in pilot folder
-        subj_label = '01' if self.subject_id == 'P01' else self.subject_id
-        pattern = f'sub-{subj_label}_task-rsvp_run-{self.run_id}_space-{TARGET_SPACE}_res-{TARGET_RES}_boldref.nii.gz'
+        pattern = f'sub-{self.subject_id}_task-rsvp_run-{self.run_id}_space-{TARGET_SPACE}_res-{TARGET_RES}_boldref.nii.gz'
 
         func_file = self.fmriprep_subj_dir / 'func' / pattern
         if not func_file.exists():
@@ -598,7 +592,7 @@ class ROIPipelineComprehensive:
             'shape': mask_data.shape,
             'shape_match': shape_match,
             'affine_match': affine_match,
-            'center_of_mass': com.tolist(),
+            'center_of_mass': np.asarray(com).tolist(),  # Fixed: ensure numpy array before .tolist()
             **params  # Include all parameters
         }
 

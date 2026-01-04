@@ -185,48 +185,6 @@ These questions address methodological foundations for the 3-phase neural-guided
 
 ---
 
-## Paper & Publications
-
-### Current Manuscript
-
-**Title**: *Development of a Personalized Color Vision Correction Display Filter for Individuals with Color Vision Deficiency Using fMRI-Based Neural Responses and Deep Learning*
-
-**Authors**: Jinil Kim, Minkue Cho, Jungwoo Seo, Jiook Cha
-
-**Status**: In preparation (Korean version completed)
-
-**Location**: `docs/paper/main_kr.tex` (LaTeX), `docs/paper/main_kr.pdf` (compiled)
-
-### Structure
-
-1. **Introduction**
-   - Color vision deficiency prevalence and impact
-   - Limitations of current correction approaches
-   - Forward encoding models in neuroscience
-
-2. **Methods**
-   - Participants and data acquisition
-   - Preprocessing pipeline (fMRIPrep)
-   - ROI definition and feature selection
-   - Forward encoding model (Brouwer & Heeger, 2009)
-   - Procrustes analysis for CVD-HC comparison
-
-3. **Results**
-   - Baseline decoding accuracy (Phase 1)
-   - CVD-HC representational differences
-   - Filter learning performance (Phase 2A)
-
-4. **Discussion**
-   - Neural basis of CVD color perception
-   - Implications for personalized correction
-   - Future directions
-
-### Conference Abstracts
-
-- **OHBM 2024**: Submitted (see `docs/archive/OHBM_abstract/`)
-
----
-
 ## Project Phases
 
 ### Phase 1: Baseline Analysis ✅
@@ -298,7 +256,7 @@ L_total = λ_rdm * L_rdm + λ_proc * L_procrustes + λ_reg * L_regularization
 
 ### Overall Pipeline
 
-![Overall Pipeline](prediction_model/docs/overall.png)
+![Overall Pipeline](prediction_model_workspace/docs/overall.png)
 
 Our future work follows a systematic 3-phase approach to develop personalized, neural-guided color correction filters:
 
@@ -310,7 +268,7 @@ Our future work follows a systematic 3-phase approach to develop personalized, n
 
 ### Phase 1: Hyperalignment for HC Common Space 📋
 
-![Phase 1 Pipeline](prediction_model/docs/phase1.png)
+![Phase 1 Pipeline](prediction_model_workspace/docs/phase1.png)
 
 **Goal**: Align HC participants' brain responses into a common representational space
 
@@ -344,13 +302,13 @@ Our future work follows a systematic 3-phase approach to develop personalized, n
 
 **Expected Outcome**: Stable common space enabling robust encoder learning for Phase 2
 
-**Documents**: `prediction_model/docs/PHASE1_HYPERALIGNMENT.md`
+**Documents**: `prediction_model_workspace/docs/PHASE1_HYPERALIGNMENT.md`
 
 ---
 
 ### Phase 2: Continuous Hue Interpolation Model 📋
 
-![Phase 2 Pipeline](prediction_model/docs/phase2.png)
+![Phase 2 Pipeline](prediction_model_workspace/docs/phase2.png)
 
 **Goal**: Develop a continuous hue encoder that predicts brain responses for any color in 360° space
 
@@ -391,13 +349,13 @@ Our future work follows a systematic 3-phase approach to develop personalized, n
 
 **Expected Outcome**: Validated continuous encoder: `Ŷ_hc(θ) = C(θ) @ W_enc` for any θ ∈ [0°, 360°]
 
-**Documents**: `prediction_model/docs/PHASE2_PREDICTION_MODEL.md`
+**Documents**: `prediction_model_workspace/docs/PHASE2_PREDICTION_MODEL.md`
 
 ---
 
 ### Phase 3: CVD Filter Optimization via 360° Search 🎯
 
-![Phase 3 Pipeline](prediction_model/docs/phase3.png)
+![Phase 3 Pipeline](prediction_model_workspace/docs/phase3.png)
 
 **Goal**: For each original color, find the optimal display color that makes CVD brain responses match HC responses
 
@@ -460,7 +418,7 @@ where:
 - Proof-of-concept real-time image filter
 - Data for psychophysical validation study
 
-**Documents**: `prediction_model/docs/PHASE3_CVD_FILTER_OPTIMIZATION.md`
+**Documents**: `prediction_model_workspace/docs/PHASE3_CVD_FILTER_OPTIMIZATION.md`
 
 ---
 
@@ -658,10 +616,10 @@ colorBlind_analysis/
 │   │   ├── CVD_ANALYSIS_FINAL.md
 │   │   └── FINAL_REPORT_WITH_VISUALIZATION.md
 │   │
-│   ├── paper/                        # Manuscript (Korean version)
-│   │   ├── main_kr.tex
-│   │   ├── main_kr.pdf
-│   │   └── figures/
+│   ├── program_paper/                # Paper manuscript
+│   │   ├── main.tex                  # English version
+│   │   ├── main_kr.tex               # Korean version
+│   │   └── figure/
 │   │
 │   └── archive/                      # Outdated/legacy documents
 │       ├── trial_options/
@@ -771,7 +729,7 @@ See `materials/` for stimulus generation code.
 
 ### Additional References
 
-- See `docs/paper/main_kr.tex` for complete bibliography
+- See `docs/program_paper/main.tex` for complete bibliography
 - Key papers available in `papers/` directory
 
 ---

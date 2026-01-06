@@ -14,7 +14,7 @@ from pathlib import Path
 
 # Configuration
 BASE_DIR = Path('/scratch/connectome/haba6030/colorBlind')
-FMRIPREP_DIR = Path('/storage/connectome/haba6030/fmriprep_out_deoblique_v2')
+FMRIPREP_DIR = Path('/storage/connectome/haba6030/fmriprep_out_original_v3')  # v3: FreeSurfer removed
 DERIVATIVES_DIR = BASE_DIR / 'derivatives'
 OUTPUT_DIR = BASE_DIR / 'logs' / 'alignment_visualizations'
 

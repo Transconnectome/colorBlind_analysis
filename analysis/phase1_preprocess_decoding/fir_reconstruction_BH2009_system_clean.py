@@ -466,8 +466,8 @@ def parse_args():
     parser.add_argument('--roi', type=str, default='V1',
                         help='ROI name (e.g., V1, V2, V3, V4, hV4)')
     parser.add_argument('--dataset', type=str, default='afni_deoblique_v3',
-                        choices=['afni_deoblique_v3', 'deoblique_v2', 'deoblique', 'original'],
-                        help='Dataset version (afni_deoblique_v3: AFNI deoblique [NEW STANDARD], deoblique_v2: header-only deoblique [DEPRECATED], deoblique: v1, original: fmriprep_out)')
+                        choices=['afni_deoblique_v3', 'deoblique_v2', 'deoblique', 'original', 'original_v3'],
+                        help='Dataset version (afni_deoblique_v3: AFNI deoblique [NEW STANDARD], deoblique_v2: header-only deoblique [DEPRECATED], deoblique: v1, original: fmriprep_out, original_v3: FreeSurfer removed)')
     parser.add_argument('--roi-mask', type=str, default=None,
                         help='ROI mask file path (if None, auto-detect from derivatives/sub-XX/roi_pipeline/)')
     parser.add_argument('--roi-pipeline-dir', type=str, default='roi_pipeline',
@@ -559,6 +559,11 @@ DATASET_CONFIGS = {
         'fmriprep': '/storage/connectome/haba6030/fmriprep_out_new',
         'events': '/storage/connectome/haba6030/colorBlind_dataOct',
         'description': 'Original fmriprep output (new version)'
+    },
+    'original_v3': {
+        'fmriprep': '/storage/connectome/haba6030/fmriprep_out_original_v3',
+        'events': '/storage/connectome/haba6030/bids_editted',
+        'description': 'v3: Original data with FreeSurfer removed (--fs-no-reconall)'
     }
 }
 

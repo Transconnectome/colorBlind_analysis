@@ -74,53 +74,69 @@ scp file.py haba6030@node2:/scratch/...  # NEVER USE THIS
 - **Non-CVD subjects (all)**: sub-01, sub-02, sub-03, sub-04, sub-05, sub-06, sub-07 (7 subjects)
 - **CVD subjects (all)**: sub-08, sub-09, sub-10 (3 subjects)
 
-**Analyzable Subjects (as of 2025-12-17):**
-- **Non-CVD (individual-level)**: sub-01, sub-02, sub-03, sub-05, sub-06, sub-07 (6 subjects)
-- **Non-CVD (group-level)**: sub-02, sub-03, sub-05, sub-06, sub-07 (5 subjects) - **sub-01 excluded**
-- **CVD (analyzable)**: sub-08, sub-09, sub-10 (3 subjects)
-- **Excluded from all**: sub-04 (No BOLD signal at V1 atlas location)
+**Analyzable Subjects (as of 2026-01-05, original_v3 dataset):**
 
-**Exclusion Reasons:**
+Based on preprocessing quality assessment (docs/0104_Preprocessing_Report.md):
 
-**sub-04 (excluded from all analysis):**
-- ROI alignment diagnostic (Job 67066+) revealed V1 atlas location has zero BOLD signal across all timepoints
-- fMRIPrep functional brain mask excludes posterior visual cortex
-- Unlike sub-03/09/10, BOLD data itself is zeros at V1 location (not just masked out)
-- Root cause: Likely insufficient EPI coverage or signal dropout
-- See: `logs/diagnostics/brain_mask_verification.txt` and `ALIGNMENT_DIAGNOSTICS_FINAL_REPORT.md`
+**Tier 1: Excellent (100% pass, Dice ≥0.93)**
+- **Subjects**: sub-01, sub-03, sub-04, sub-08, sub-09, sub-10 (6 subjects)
+- **Usage**: Primary analyses, publications, group-level
+- **Quality**: All 24 runs pass (Dice ≥0.80), minimal motion (<0.2mm)
 
-**sub-01 (excluded from group-level analysis only):**
-- Significantly fewer voxels after feature selection compared to other subjects
-- V3 outlier: 3 voxels vs 58 voxels in others (5% of group median)
-- Including sub-01 would discard 95% of V3 data from 5 good subjects
-- Similar issues in V2 (80% of median) and V1 (95% of median)
-- Individual-level decoding still valid, but problematic for group alignment
-- See: `docs/SUB01_OUTLIER_DIAGNOSIS.md`
+**Tier 2: Good (83% pass, Dice ~0.82-0.92)**
+- **Subjects**: sub-02, sub-05 (2 subjects)
+- **Usage**: Individual-level and group-level (with caution)
+- **Note**: 20/24 runs pass; consider excluding 4 bad runs (Dice <0.80)
 
-**Data Paths (After Deoblique Preprocessing):**
+**Tier 3: Partial (33% pass, Dice ~0.73-0.75)**
+- **Subjects**: sub-06, sub-07 (2 subjects)
+- **Usage**: Individual-level (good runs only); exclude from group-level
+- **Issue**: High run-to-run variability, T1w mask over-extraction
+- **Recommendation**: Supplementary analyses or case studies only
+
+**Analysis Groups:**
+- **Non-CVD (all)**: sub-01, 02, 03, 04, 05, 06, 07 (7 subjects)
+- **CVD (all)**: sub-08, 09, 10 (3 subjects)
+- **Tier 1+2 for group analysis**: sub-01, 02, 03, 04, 05, 08, 09, 10 (8 subjects)
+- **HC for Procrustes**: sub-01, 02, 03, 04, 05 (5 Tier 1+2 non-CVD subjects)
+- **CVD for testing**: sub-08, 09, 10 (3 CVD subjects)
+
+**Data Paths (Current: original_v3 - 2026-01-05):**
 ```bash
-INPUT_DIR=/storage/connectome/haba6030/colorBlind_data_deoblique
-OUTPUT_DIR_V1=/storage/connectome/haba6030/fmriprep_out_deoblique      # Original (fieldmap not applied)
-OUTPUT_DIR_V2=/storage/connectome/haba6030/fmriprep_out_deoblique_v2   # Improved (fieldmap applied)
-WORK_DIR_V1=/storage/connectome/haba6030/fmriprep_work_deoblique_batch2
-WORK_DIR_V2_B1=/storage/connectome/haba6030/fmriprep_work_deoblique_v2_batch1  # Sub-01~05
-WORK_DIR_V2_B2=/storage/connectome/haba6030/fmriprep_work_deoblique_v2_batch2  # Sub-06~10
+# ✅ CURRENT DATASET (Use this for all new analyses)
+FMRIPREP_OUT=/storage/connectome/haba6030/fmriprep_out_original_v3
+EVENT_DIR=/storage/connectome/haba6030/bids_editted
+DERIVATIVES=/scratch/connectome/haba6030/colorBlind/derivatives
 ```
 
-- **Event/Stimulus files**: `/storage/connectome/haba6030/colorBlind_data_deoblique/sub-{ID}/func/`
+**fMRIPrep original_v3 (CURRENT - USE THIS):**
+- **Location**: `/storage/connectome/haba6030/fmriprep_out_original_v3/sub-{ID}/func/`
+- **Key features**:
+  - ✅ FreeSurfer removed (`--fs-no-reconall`)
+  - ✅ BBR coregistration without surface-based alignment
+  - ✅ Fieldmap applied
+  - ✅ Quality: Dice 0.889 (mean), 83.3% pass rate, 0% ROI failure
+- **BOLD files**: `sub-{ID}_task-rsvp_run-X_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz`
+- **Confounds**: `sub-{ID}_task-rsvp_run-X_desc-confounds_timeseries.tsv`
+- **See**: `docs/0104_Preprocessing_Report.md` for quality metrics
 
-- **fMRIPrep outputs (v1 - DEPRECATED)**: `/storage/connectome/haba6030/fmriprep_out_deoblique/sub-{ID}/func/`
-  - ⚠️ **Fieldmap not applied** (missing B0FieldIdentifier)
-  - ⚠️ DO NOT use for new analysis
+**Event/Stimulus files:**
+- **Location**: `/storage/connectome/haba6030/bids_editted/sub-{ID}/func/`
+- **Files**: `sub-{ID}_task-rsvp_run-X_events.tsv`
+- **Format**: BIDS-compliant (onset, duration, trial_type, color)
 
-- **fMRIPrep outputs (v2 - RECOMMENDED)**: `/storage/connectome/haba6030/fmriprep_out_deoblique_v2/sub-{ID}/func/`
-  - ✅ **Fieldmap applied** (B0FieldIdentifier present)
-  - ✅ Better registration (DOF 9, BBR forced, dummy scans removed)
-  - ✅ All 10 subjects (01-10)
-  - BOLD files: `sub-{ID}_task-rsvp_run-X_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz`
-  - Confounds: `sub-{ID}_task-rsvp_run-X_desc-confounds_timeseries.tsv`
+**Analysis outputs (derivatives):**
+- **Location**: `/scratch/connectome/haba6030/colorBlind/derivatives/`
+- **Structure**: `BH2009_{dataset}/{timestamp}/sm*_sub-{ID}_{ROI}_*/`
 
-- **Analysis outputs (derivatives)**: `/scratch/connectome/haba6030/colorBlind/derivatives/`
+**Legacy datasets (DEPRECATED - DO NOT USE FOR NEW ANALYSES):**
+```bash
+# ⚠️ DEPRECATED: deoblique_v1 (fieldmap not applied)
+/storage/connectome/haba6030/fmriprep_out_deoblique
+
+# ⚠️ DEPRECATED: deoblique_v2 (fieldmap applied but oblique issues)
+/storage/connectome/haba6030/fmriprep_out_deoblique_v2
+```
 
 **Baseline Analysis Results Structure (CRITICAL for group-level scripts):**
 ```bash
@@ -158,20 +174,110 @@ amplitudes = np.load(result_dir / 'amplitudes_z.npy')
 - **All analysis MUST use the most recent version suggested in `logs/GUIDE_to_fMRIprep`**
 - **Group-level scripts MUST use the correct derivatives path structure above** 
 
-## 3. Project Overview and Analysis
-**Specific Information is in docs/GUIDE_to_classify_reconstruct**
+## 3. Project Overview and Analysis Pipeline
+**Specific Information is in docs/GUIDE_to_classify_reconstruct and analysis/README.md**
 
-This is a neuroimaging analysis project based on "final_IRB.pdf", modifying **Brouwer & Heeger (2009, J. Neurosci.)** color decoding pipeline. The project analyzes fMRI data to decode color information from visual cortex areas (V1-V4) using forward encoding models. 
+This is a neuroimaging analysis project based on "final_IRB.pdf", modifying **Brouwer & Heeger (2009, J. Neurosci.)** color decoding pipeline. The project analyzes fMRI data to decode color information from visual cortex areas (V1-V4) using forward encoding models.
 
-### Guide
-Procedure: 
-  1. Preprocessing: Find out best preprocessing setting
-  2. Baseline: Check baseline result (classification & reconstruction) of chosen preprocessing setting
-  3. Feature Selection: Figure out the best feature selection method. 
-  4. Group-level analysis: Across non-cvd participants (sub 01 ~ 07) make a common beta-map and conduct classification & reconstruction
-  5. Try non-linear color reconstruction method
+### Current Analysis Pipeline (original_v3 dataset)
 
-## Dependencies
+**Phase 0: Baseline Decoding**
+  1. **ROI Extraction**: Wang Atlas (2015) probabilistic ROIs → MNI space
+  2. **Baseline Reconstruction & Classification**:
+     - FIR-based HRF estimation (8 delays, 12s window)
+     - Voxel selection: Top 50% by FIR R²
+     - 2nd-level GLM with HRF + derivative
+     - Forward encoding model (6 half-wave rectified channels)
+     - Leave-one-run-out cross-validation
+  3. **Feature Selection**: ANOVA F-test based voxel selection (optional)
+
+**Phase 1: Representational Similarity Analysis (RSA)**
+  4. **RDM Analysis**: Compute 8×8 Representational Dissimilarity Matrices
+  5. **Inter-subject consistency**: Spearman correlation + Mantel test
+
+**Phase 2: Procrustes Analysis & CVD-HC Comparison**
+  6. **Procrustes Alignment**: Reference-based geometric alignment (sub-02 as reference)
+  7. **HC Group Template**: Learn common decoder across aligned HC subjects
+  8. **CVD Testing**: Apply Procrustes + HC decoder to CVD subjects
+  9. **3D Characterization**: Magnitude, Sign/Baseline, Structure (RDM) differences
+
+**Phase 3: Filter Learning (RQ3 - Neural-Guided Personalized Filter)**
+  10. **3-Dimensional Loss Optimization**:
+      - Loss = λ_mag × L_magnitude + λ_base × L_baseline + λ_rdm × L_RDM
+      - Learn linear transformation F = Y @ A + b
+      - Subject-specific filters for CVD→HC pattern mapping
+
+**Next Research Questions (SRQs - Future Phases)**:
+  - **SRQ1**: Shared Decoder Validation (completed via Procrustes)
+  - **SRQ2**: Hyperalignment for HC Common Space (trial-aligned GPA)
+  - **SRQ3**: Continuous Hue Interpolation (360° forward encoding)
+  - **SRQ4**: CVD Filter Optimization via 360° Search
+
+## 4. Preprocessing Settings
+
+### 4.1 fMRIPrep Settings (original_v3)
+
+**Key Parameters:**
+```bash
+--fs-no-reconall                    # FreeSurfer removed (critical fix)
+--use-syn-sdc                       # Fieldmap-based distortion correction
+--bold2t1w-dof 9                    # BBR with 9 DOF (no FreeSurfer surface)
+--force-bbr                         # Force boundary-based registration
+--dummy-scans 4                     # Remove first 4 volumes
+--output-spaces MNI152NLin2009cAsym:res-2  # 2mm MNI space
+```
+
+**Quality Improvements (vs deoblique_v2):**
+- Dice coefficient: 0.889 (vs 0.376 before, +136%)
+- Pass rate (≥0.80): 83.3% (vs 0.0%, +83pp)
+- ROI generation failure: 0.0% (vs 45.4%, complete resolution)
+
+**Rationale:**
+- `--fs-no-reconall`: FreeSurfer surface-based registration caused distortion in narrow visual cortex EPI
+- BBR without surface constraints: Better T1w-BOLD alignment (Dice 0.889)
+- See: `docs/0104_Preprocessing_Report.md`
+
+### 4.2 Baseline Decoding Settings (Baseline32)
+
+**Current Standard Configuration:**
+```python
+# Baseline32 configuration (determined via systematic review)
+Smoothing:      0mm (no smoothing)
+High-pass:      0.01 Hz
+Motion:         cosine (6 cosine basis functions)
+CompCor:        None
+Drift:          none (handled by high-pass)
+Standardize:    False (preserve raw beta values)
+PCA:            30 components
+```
+
+**FIR GLM Parameters:**
+```python
+N_DELAYS = 8                    # 8 FIR delays (12s window at TR=1.5s)
+VOXEL_SELECTION = 'top50'       # Top 50% voxels by FIR R²
+HRF_MODEL = 'fir + derivative'  # 2nd-level GLM with HRF + temporal derivative
+```
+
+**Forward Encoding Model:**
+```python
+N_CHANNELS = 6                  # 6 half-wave rectified basis functions
+CHANNEL_CENTERS = [0°, 60°, 120°, 180°, 240°, 300°]  # Equally spaced in hue space
+CHANNEL_WIDTH = 60°             # FWHM of Gaussian basis functions
+CROSS_VALIDATION = 'LORO'       # Leave-One-Run-Out
+```
+
+**Rationale:**
+- **No smoothing**: Preserves fine-grained voxel patterns for MVPA
+- **High-pass 0.01 Hz**: Removes slow drifts (100s period) while preserving task signal
+- **Cosine motion**: Lightweight correction without removing task-related variance
+- **No CompCor**: Avoids removing signal from visual cortex
+- **PCA 30**: Computational efficiency while retaining 95%+ variance
+- **FIR approach**: Model-free HRF estimation, no assumptions about HRF shape
+- **Top 50% R²**: SNR-based voxel selection for robust signal
+
+**See**: `docs/SYSTEMATIC_PREPROCESSING_ANALYSIS.md` for full systematic review (144 configurations tested)
+
+## 5. Dependencies
 
 Core packages (install via conda):
 - nilearn: fMRI analysis
@@ -180,11 +286,15 @@ Core packages (install via conda):
 - matplotlib: Visualization
 - sklearn: Machine learning utilities
 - scipy: Statistical functions
+- torch: Deep learning (for Phase 3 filter learning)
 
-## File Outputs
+## 6. File Outputs
 
 Analysis creates:
-- `derivatives/sub-{SUB_ID}/`: GLM results, ROI masks, extracted data
+- `derivatives/BH2009_{dataset}/{timestamp}/`: Baseline results per subject-ROI
+- `derivatives/phase1_results/`: RDM analysis outputs
+- `derivatives/phase2_procrustes/`: Procrustes alignment and CVD-HC comparison
+- `derivatives/phase3_filters/`: Learned transformation filters
 - Design matrices, beta maps, decoding accuracies
 - Quality control figures and statistical summaries
 

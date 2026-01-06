@@ -52,15 +52,11 @@ import matplotlib.pyplot as plt
 def load_subject_amplitudes(subject_id, roi, timestamp, dataset='deoblique_v2'):
     """피험자 데이터 로드"""
     base_dir = Path('/scratch/connectome/haba6030/colorBlind')
-    dataset_dir = base_dir / 'derivatives' / f'BH2009_{dataset}' / timestamp
+    # New structure: derivatives/V3_Comprehensive/BH2009_{dataset}/{timestamp}/sub-{subject}/{roi}
+    result_dir = base_dir / 'derivatives' / 'V3_Comprehensive' / f'BH2009_{dataset}' / timestamp / f'sub-{subject_id}' / roi
 
-    pattern = f'*_sub-{subject_id}_{roi}_*'
-    matches = sorted(dataset_dir.glob(pattern))
-
-    if len(matches) == 0:
-        raise FileNotFoundError(f"No data found for sub-{subject_id}, ROI {roi}")
-
-    result_dir = matches[0]
+    if not result_dir.exists():
+        raise FileNotFoundError(f"No data found for sub-{subject_id}, ROI {roi} at {result_dir}")
     amp_file = result_dir / 'amplitudes_z.npy'
     amplitudes = np.load(amp_file)
 

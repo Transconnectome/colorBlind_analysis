@@ -12,11 +12,11 @@ import json
 
 # 경로 설정
 BASE_DIR = Path("/scratch/connectome/haba6030/colorBlind")
-DERIVATIVES_DIR = BASE_DIR / "derivatives/BH2009_deoblique_v2/baseline32_deob_determin"
+DERIVATIVES_DIR = BASE_DIR / "derivatives/V3_Comprehensive/BH2009_original_v3/baseline32_original_v3"
 OUTPUT_DIR = BASE_DIR / "results/group_level/phase2a_data/patterns"
 
 # 피험자 및 ROI 정보
-HC_SUBJECTS = ['03', '05', '06', '07']
+HC_SUBJECTS = ['01', '02', '03', '04', '05', '06', '07']
 CVD_SUBJECTS = ['08', '09', '10']
 ALL_SUBJECTS = HC_SUBJECTS + CVD_SUBJECTS
 ROIS = ['V1', 'V2', 'V3', 'hV4']
@@ -34,15 +34,12 @@ def extract_pattern(subject_id, roi):
         pattern: (8, n_voxels) - 8개 색에 대한 복셀별 활성
         n_voxels: 선택된 복셀 수
     """
-    # ROI 디렉토리 패턴 (flat structure: all dirs directly in DERIVATIVES_DIR)
-    roi_pattern = f"*sub-{subject_id}_{roi}_*"
-    roi_dirs = list(DERIVATIVES_DIR.glob(roi_pattern))
+    # New structure: derivatives/.../sub-{subject}/{roi}
+    roi_dir = DERIVATIVES_DIR / f"sub-{subject_id}" / roi
 
-    if not roi_dirs:
-        print(f"  Warning: No ROI directory for sub-{subject_id} {roi}")
+    if not roi_dir.exists():
+        print(f"  Warning: No ROI directory for sub-{subject_id} {roi} at {roi_dir}")
         return None, 0
-
-    roi_dir = roi_dirs[0]
 
     # 파일 경로
     amp_file = roi_dir / "amplitudes_z.npy"
@@ -132,7 +129,7 @@ def create_metadata():
     metadata = {
         "description": "fMRI patterns for Phase 2A",
         "created_date": "2025-12-19",
-        "source": "derivatives/BH2009_deoblique_v2/baseline32_deob_determin",
+        "source": "derivatives/V3_Comprehensive/BH2009_original_v3/baseline32_original_v3",
         "preprocessing": "baseline32_deob_determin (deoblique, deterministic HRF)",
         "subjects": {
             "HC": HC_SUBJECTS,

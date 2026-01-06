@@ -249,60 +249,34 @@ def load_baseline_amplitudes(subject, roi, timestamp, dataset='deoblique_v2'):
         n_runs, n_colors, n_voxels: Data dimensions
         result_dir: Path to baseline result directory
     """
-    import glob
+    # New structure: derivatives/V3_Comprehensive/BH2009_{dataset}/{timestamp}/sub-{subject}/{roi}
+    result_dir = Path(f'derivatives/V3_Comprehensive/BH2009_{dataset}/{timestamp}/sub-{subject}/{roi}')
 
-    # Find baseline result directory (pattern: sm*_sub-{subject}_{roi}_*)
-    base_path = Path(f'derivatives/BH2009_{dataset}/{timestamp}')
-    pattern = str(base_path / f'sm*_sub-{subject}_{roi}_*')
-
-    matches = glob.glob(pattern)
-
-    if len(matches) == 0:
+    if not result_dir.exists():
         raise FileNotFoundError(
             f"Baseline result not found!\n"
-            f"  Pattern: {pattern}\n"
+            f"  Path: {result_dir}\n"
             f"  Please run baseline preprocessing first:\n"
             f"    Dataset: {dataset}\n"
             f"    Timestamp: {timestamp}\n"
             f"    Subject: {subject}, ROI: {roi}"
         )
 
-    # CRITICAL FIX: Filter by directories that contain amplitudes_z.npy
-    # Some baseline directories (gmTrue) may be empty, only keep valid ones
-    valid_matches = [m for m in matches if Path(m).joinpath('amplitudes_z.npy').exists()]
-
-    if not valid_matches:
+    # Verify amplitudes_z.npy exists
+    amp_file = result_dir / 'amplitudes_z.npy'
+    if not amp_file.exists():
         raise FileNotFoundError(
-            f"No valid baseline results with amplitudes_z.npy found!\n"
-            f"  Subject: {subject}, ROI: {roi}\n"
-            f"  Pattern: {pattern}\n"
-            f"  Found {len(matches)} directories but none contain amplitudes_z.npy"
+            f"amplitudes_z.npy not found!\n"
+            f"  Path: {amp_file}\n"
+            f"  Please run baseline preprocessing first for sub-{subject}, {roi}"
         )
 
-    # PRIORITY 1: Prefer directories ending with '_None' (auto-detected roi_config)
-    none_matches = [m for m in valid_matches if m.endswith('_None')]
-
-    # PRIORITY 2: Prefer directory with analysis_summary.json (indicates complete analysis)
-    summary_matches = [m for m in valid_matches if Path(m).joinpath('analysis_summary.json').exists()]
-
-    if len(none_matches) > 0:
-        # Sort by modification time (most recent first) and pick the latest
-        none_matches_sorted = sorted(none_matches, key=lambda x: Path(x).stat().st_mtime, reverse=True)
-        result_dir = Path(none_matches_sorted[0])
-        print(f"  Using latest auto-detected baseline: {result_dir.name}")
-    elif len(summary_matches) > 0:
-        result_dir = Path(summary_matches[0])
-    else:
-        # Use first valid match (has amplitudes_z.npy)
-        result_dir = Path(valid_matches[0])
-
-    amplitudes_path = result_dir / 'amplitudes_z.npy'
-
-    amplitudes_z = np.load(amplitudes_path)
+    # Load amplitudes
+    amplitudes_z = np.load(amp_file)
     n_runs, n_colors, n_voxels = amplitudes_z.shape
 
     print(f"  ✓ Loaded amplitudes: {amplitudes_z.shape}")
-    print(f"    Path: {amplitudes_path}")
+    print(f"    Path: {amp_file}")
 
     return amplitudes_z, n_runs, n_colors, n_voxels, str(result_dir)
 
@@ -792,13 +766,13 @@ def main():
         # Save to permutation_analysis for consistency in permutation workflow
         if args.output_subdir:
             # Use custom subdirectory (e.g., 'k5' for strict validation)
-            output_dir = Path(f'derivatives/feature_selection/permutation_analysis/{args.output_subdir}/anova_{CONFIG_NAME}')
+            output_dir = Path(f'derivatives/V3_Comprehensive/feature_selection/permutation_analysis/{args.output_subdir}/anova_{CONFIG_NAME}')
         else:
             # Default permutation_analysis directory
-            output_dir = Path(f'derivatives/feature_selection/permutation_analysis/anova_{CONFIG_NAME}')
+            output_dir = Path(f'derivatives/V3_Comprehensive/feature_selection/permutation_analysis/anova_{CONFIG_NAME}')
     else:
         # Regular analysis (not part of permutation workflow)
-        output_dir = Path(f'derivatives/feature_selection/anova_{CONFIG_NAME}')
+        output_dir = Path(f'derivatives/V3_Comprehensive/feature_selection/anova_{CONFIG_NAME}')
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Save classification & reconstruction results

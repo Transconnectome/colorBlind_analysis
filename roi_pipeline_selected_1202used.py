@@ -25,7 +25,7 @@ ATLAS_DIR = BASE_DIR / 'ProbAtlas_v4_2mm' / 'subj_vol_all'  # Wang atlas 2mm (al
 # ATLAS_DIR = BASE_DIR / 'ProbAtlas_v4' / 'subj_vol_all'  # Old 1mm atlas (DO NOT USE)
 FMRIPREP_DIR = Path('/storage/connectome/haba6030/fmriprep_out_original_v3')  # v3: FreeSurfer removed
 DATA_DIR = Path('/storage/connectome/haba6030/bids_editted')  # Event/stimulus files
-DERIVATIVES_DIR = BASE_DIR / 'derivatives'
+DERIVATIVES_DIR = BASE_DIR / 'derivatives' / 'V3_Comprehensive'  # v3 comprehensive analysis results
 
 # Target space (matching pilot preprocessing)
 TARGET_SPACE = 'MNI152NLin2009cAsym'

@@ -118,14 +118,11 @@ def load_subject_amplitudes(subject_id, roi, timestamp, dataset='deoblique_v2'):
     - Phase 1B는 개별 최적 K 복셀 사용 (baseline 분석과 동일)
     - amplitudes_z: z-scored channel response (각 run별로 표준화됨)
     """
-    base_path = Path(f'derivatives/BH2009_{dataset}/{timestamp}')
-    pattern = str(base_path / f'sm*_sub-{subject_id}_{roi}_*')
+    # New structure: derivatives/V3_Comprehensive/BH2009_{dataset}/{timestamp}/sub-{subject}/{roi}
+    result_dir = Path(f'derivatives/V3_Comprehensive/BH2009_{dataset}/{timestamp}/sub-{subject_id}/{roi}')
 
-    matches = glob.glob(pattern)
-    if not matches:
-        raise FileNotFoundError(f"No results for sub-{subject_id} {roi}")
-
-    result_dir = Path(matches[0])
+    if not result_dir.exists():
+        raise FileNotFoundError(f"No results for sub-{subject_id} {roi} at {result_dir}")
     amp_file = result_dir / 'amplitudes_z.npy'
 
     amplitudes = np.load(amp_file)  # (n_runs, n_colors, n_voxels)
@@ -151,7 +148,7 @@ def load_common_voxels(roi, timestamp, scenario='B_sufficient_voxels'):
     Returns:
         common_voxels array or None
     """
-    voxel_file = Path(f'derivatives/group_level/{timestamp}/{roi}/voxel_overlap/{scenario}/common_voxels_indices.npy')
+    voxel_file = Path(f'derivatives/V3_Comprehensive/group_level/{timestamp}/{roi}/voxel_overlap/{scenario}/common_voxels_indices.npy')
 
     if not voxel_file.exists():
         return None
@@ -167,7 +164,7 @@ def detect_phase1a_scenarios(roi, timestamp):
     Returns:
         list of scenario names (e.g., ['A_all_subjects', 'B_sufficient_voxels'])
     """
-    base_dir = Path(f'derivatives/group_level/{timestamp}/{roi}/voxel_overlap')
+    base_dir = Path(f'derivatives/V3_Comprehensive/group_level/{timestamp}/{roi}/voxel_overlap')
 
     if not base_dir.exists():
         return []
@@ -557,7 +554,7 @@ def main():
 
     # Output directory
     if args.output_dir is None:
-        base_dir = Path(f"derivatives/group_level/{args.timestamp}/{args.roi}/rsa")
+        base_dir = Path(f"derivatives/V3_Comprehensive/group_level/{args.timestamp}/{args.roi}/rsa")
         if args.scenario:
             output_dir = base_dir / args.scenario
         else:
@@ -578,7 +575,7 @@ def main():
 
     elif args.scenario == 'RDM_guided':
         print(f"Loading RDM-guided voxels from Phase 1A-alt...")
-        voxel_file = Path(f'derivatives/group_level/{args.timestamp}/{args.roi}/voxel_overlap/RDM_guided/rdm_guided_voxels_indices.npy')
+        voxel_file = Path(f'derivatives/V3_Comprehensive/group_level/{args.timestamp}/{args.roi}/voxel_overlap/RDM_guided/rdm_guided_voxels_indices.npy')
         if voxel_file.exists():
             common_voxels = np.load(voxel_file)
             print(f"  ✓ Loaded {len(common_voxels)} RDM-guided voxels\n")

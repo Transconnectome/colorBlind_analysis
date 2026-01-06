@@ -481,7 +481,7 @@ def parse_args():
     parser.add_argument('--n-components', type=int, default=6,
                         help='Number of PCA components (only if --use-pca)')
     parser.add_argument('--output-dir', type=str, default=None,
-                        help='Output directory (default: derivatives/BH2009_{dataset}/timestamp/)')
+                        help='Output directory (default: derivatives/V3_Comprehensive/BH2009_{dataset}/timestamp/)')
 
     # Preprocessing options
     parser.add_argument('--smooth', type=float, default=0.0,
@@ -599,15 +599,11 @@ if args.output_dir:
     output_dir = str(output_dir)
     fig_dir = str(output_dir) + '/figures_'
 else:
-    # Standard mode: add timestamp subdirectory with dataset name
-    # Structure: derivatives/BH2009_{dataset}/{timestamp}
-    output_dir = Path(f"derivatives/BH2009_{DATASET}/{timestamp}")
+    # Standard mode: organized by subject then ROI
+    # Structure: derivatives/V3_Comprehensive/BH2009_{dataset}/{timestamp}/sub-{subject}/{roi}
+    output_dir = Path(f"derivatives/V3_Comprehensive/BH2009_{DATASET}/{timestamp}/sub-{SUBJECT_ID}/{ROI_NAME}")
     output_dir.mkdir(parents=True, exist_ok=True)
-
-    # Add ROI config to output directory name
-    roi_config_name = args.roi_config if args.roi_mask is None else "custom"
-    output_dir = str(output_dir) + f"/{CONFIG_NAME}_{DERIVATIVE_PREFIX}_{ROI_NAME}_{roi_config_name}"
-    os.makedirs(output_dir, exist_ok=True)
+    output_dir = str(output_dir)
     fig_dir = str(output_dir) + '/figures_'
 
 print("="*70)

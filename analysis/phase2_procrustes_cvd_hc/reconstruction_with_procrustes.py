@@ -112,14 +112,11 @@ LABEL2HUE_DEG = {
 }
 
 def load_subject_amplitudes(subject_id, roi, timestamp, dataset='deoblique_v2'):
-    base_path = Path(f'derivatives/BH2009_{dataset}/{timestamp}')
-    pattern = str(base_path / f'sm*_sub-{subject_id}_{roi}_*')
-    matches = glob.glob(pattern)
+    # New structure: derivatives/V3_Comprehensive/BH2009_{dataset}/{timestamp}/sub-{subject}/{roi}
+    result_dir = Path(f'derivatives/V3_Comprehensive/BH2009_{dataset}/{timestamp}/sub-{subject_id}/{roi}')
 
-    if len(matches) == 0:
-        raise FileNotFoundError(f"No results for sub-{subject_id} {roi}")
-
-    result_dir = Path(matches[0])
+    if not result_dir.exists():
+        raise FileNotFoundError(f"No results for sub-{subject_id} {roi} at {result_dir}")
     amp_file = result_dir / 'amplitudes_z.npy'
 
     if not amp_file.exists():

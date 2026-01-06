@@ -1,381 +1,341 @@
-# Complete Analysis Pipeline for fMRIPrep original_v3
+# Analysis Pipeline for fMRIPrep original_v3
 
 ## Overview
 
-This directory contains the comprehensive analysis pipeline for running all "original phases" analyses on the new fMRIPrep original_v3 dataset. This pipeline covers the primary research questions (RQ1-RQ3) from the project:
+Complete analysis pipeline for fMRIPrep original_v3 dataset covering three research questions:
 
 - **RQ1**: Neural Color Discrimination Despite Retinal Deficits
 - **RQ2**: Inter-Individual Heterogeneity in CVD
 - **RQ3**: Neural-Guided Personalized Filter Design
 
-## Dataset Specification: original_v3
+## Dataset: original_v3
 
-### Data Location
+### Data Paths
 
-**fMRIPrep Output**: `/storage/connectome/haba6030/fmriprep_out_original_v3`
-- FreeSurfer removed (`--fs-no-reconall`)
-- BBR coregistration without FreeSurfer surface-based alignment
-- Standard MNI152NLin2009cAsym space, 2mm resolution
-
-**Events/Stimuli**: `/storage/connectome/haba6030/bids_editted/`
-- Original BIDS-formatted event files
-- 8 colors × 6 runs per subject
-- RSVP task (500ms per stimulus)
+- **fMRIPrep**: `/storage/connectome/haba6030/fmriprep_out_original_v3`
+  - FreeSurfer removed (`--fs-no-reconall`)
+  - BBR coregistration, MNI152NLin2009cAsym 2mm
+- **Events**: `/storage/connectome/haba6030/bids_editted/`
+  - 8 colors × 6 runs per subject, RSVP (500ms/stimulus)
 
 ### Quality Metrics
 
-Based on preprocessing diagnosis report (docs/0104_Preprocessing_Report.md):
+From preprocessing diagnosis (docs/0104_Preprocessing_Report.md):
 
-| Metric | Value | Previous (deoblique_v2) | Improvement |
-|--------|-------|------------------------|-------------|
-| **Dice coefficient (mean)** | 0.889 | 0.376 | +136% |
-| **Pass rate (≥0.80)** | 83.3% | 0.0% | +83pp |
-| **ROI generation failure** | 0.0% | 45.4% | Complete resolution |
-| **Excellent runs (≥0.90)** | 73.3% | 0.0% | +73pp |
+| Metric | Value | Previous | Improvement |
+|--------|-------|----------|-------------|
+| Dice coefficient (mean) | 0.889 | 0.376 | +136% |
+| Pass rate (≥0.80) | 83.3% | 0.0% | +83pp |
+| ROI failure rate | 0.0% | 45.4% | Resolved |
 
 ### Subject Tiers
 
-#### Tier 1: Excellent (100% pass rate)
-- **Subjects**: 01, 03, 04, 08, 09, 10 (6 subjects)
-- **Dice**: 0.936-0.954 (mean ≥0.93)
-- **Quality**: All 24 runs pass (Dice ≥0.80)
-- **Motion**: < 0.2mm mean framewise displacement
-- **Usage**: Primary analyses, publications
+**Tier 1 (100% pass)**: 01, 03, 04, 08, 09, 10
+- Dice: 0.936-0.954
+- All 24 runs pass
+- Primary analyses
 
-#### Tier 2: Good (83% pass rate)
-- **Subjects**: 02, 05 (2 subjects)
-- **Dice**: 0.823, 0.916
-- **Quality**: 20/24 runs pass; 4 runs with Dice < 0.80
-- **Usage**: Individual-level and group-level (with caution)
-- **Recommendation**: Consider excluding bad runs
+**Tier 2 (83% pass)**: 02, 05
+- Dice: 0.823, 0.916
+- 20/24 runs pass
+- Use with caution
 
-#### Tier 3: Partial (33% pass rate)
-- **Subjects**: 06, 07 (2 subjects)
-- **Dice**: 0.730, 0.746
-- **Quality**: 8/24 runs pass; high run-to-run variability
-- **Issue**: T1w brain mask over-extraction
-- **Usage**: Individual-level (good runs only); exclude from group-level
-- **Recommendation**: Supplementary analyses or case studies only
+**Tier 3 (33% pass)**: 06, 07
+- Dice: 0.730, 0.746
+- 8/24 runs pass
+- Supplementary only
 
-## Preprocessing Configuration: Baseline32
+## Preprocessing: Baseline32
 
-The analysis uses the **Baseline32** preprocessing configuration, which was determined through systematic preprocessing review (see docs/SYSTEMATIC_PREPROCESSING_ANALYSIS.md).
+Parameters determined through systematic review (docs/SYSTEMATIC_PREPROCESSING_ANALYSIS.md):
 
-### Parameters
-
-```bash
-Smoothing:      0mm (no smoothing)
+```
+Smoothing:      0mm
 High-pass:      0.01 Hz
-Motion:         cosine (6 cosine basis functions)
+Motion:         cosine (6 basis functions)
 CompCor:        None
-Drift:          none (handled by high-pass filter)
-Standardize:    No (raw beta values preserved)
+Drift:          none
+Standardize:    No
 PCA:            30 components
 ```
 
-### Rationale
+Rationale:
+- No smoothing preserves voxel patterns for MVPA
+- High-pass 0.01 Hz removes drift while preserving task signal
+- Cosine motion correction avoids over-correction
+- No CompCor/standardization preserves task-related signal
+- PCA 30 for computational efficiency
 
-- **No smoothing**: Preserves fine-grained voxel patterns for MVPA
-- **High-pass 0.01 Hz**: Removes slow drifts while preserving task-related signal
-- **Cosine motion**: Lightweight motion correction without over-correction
-- **No CompCor**: Avoids removing task-related signal
-- **No per-run standardization**: Preserves between-run amplitude differences
-- **PCA 30**: Dimensionality reduction for computational efficiency
+## Pipeline Structure
 
-## Analysis Pipeline Structure
-
-### Phase 0: ROI Building and Baseline Decoding
+### Phase 0: Baseline Decoding
 
 **0A. ROI Building** (`roi_pipeline_selected_1202used.py`)
 - Extract V1, V2, V3, hV4 from Wang Atlas (2015)
-- Transform to subject-specific MNI space
-- Apply functional brain mask
-- Threshold: 50% (atlas probability)
+- Transform to subject MNI space, apply functional mask
+- Threshold: 50% atlas probability
 
-**0B. Overlay Visualization** (`visualize_roi_overlay.py`)
-- QC check: ROI alignment on functional data
-- Generate overlay figures for all subjects/ROIs
+**0B. QC Visualization** (`visualize_roi_overlay.py`)
+- ROI alignment check on functional data
 
-**0C. Baseline Reconstruction & Classification** (`fir_reconstruction_BH2009_system_clean.py`)
+**0C. Baseline Analysis** (`fir_reconstruction_BH2009_system_clean.py`)
 - FIR-based HRF estimation (8 delays, 12s window)
 - Voxel selection: Top 50% by FIR R²
 - 2nd-level GLM with HRF + derivative
-- Forward encoding model (6 half-wave rectified channels)
+- Forward encoding (6 half-wave rectified channels, 60° FWHM)
 - Leave-one-run-out cross-validation
-- **Outputs**:
-  - Classification accuracy (8-way)
-  - Reconstruction error (circular angular error)
-  - Channel amplitudes (z-scored)
+- Outputs: Classification accuracy, reconstruction error, channel amplitudes
 
-### Phase 1: RDM/RSA Analysis
+### Phase 1: RSA
 
-**Representational Similarity Analysis** (`phase1_rsa.py`)
-- Compute 8×8 Representational Dissimilarity Matrices (RDM)
+**RDM Analysis** (`phase1_rsa.py`)
+- 8×8 Representational Dissimilarity Matrices
 - Inter-subject RDM correlation (Spearman)
-- Mantel test for statistical significance
-- **Purpose**: Quantify consistency of neural color representation geometry across HC subjects
+- Mantel test significance
+- Quantifies HC neural color representation consistency
 
-### Phase 2: Procrustes Analysis and CVD-HC Comparison
+### Phase 2: Procrustes & CVD-HC Comparison
 
-**2A. Procrustes Alignment** (`option2b_procrustes_alignment.py`)
-- Reference-based alignment (sub-02 as reference)
-- Compute HC super-participant template
-- Alignment quality: Procrustes disparity, RDM correlation
+**2A. Alignment** (`option2b_procrustes_alignment.py`)
+- Reference-based alignment (sub-02)
+- HC super-participant template
+- Quality metrics: Procrustes disparity, RDM correlation
 
 **2B. HC Training** (`reconstruction_with_procrustes.py --mode train`)
 - Learn common W matrix across aligned HC subjects
-- Outputs: Shared decoder for HC group
 
 **2C. CVD Testing** (`reconstruction_with_procrustes.py --mode test`)
-- Apply Procrustes alignment to CVD subjects
-- Test with HC common W matrix
-- Evaluate CVD→HC transformation quality
+- Apply Procrustes to CVD subjects
+- Test with HC W matrix
 
-**2D. Systematic CVD-HC Comparison** (`option2d_procrustes_cvd_comparison.py`)
-- Three-dimensional characterization:
-  - **Magnitude**: L2 norm differences
-  - **Sign/Baseline**: Directional biases
-  - **Structure**: RDM dissimilarity
-- Procrustes disparity and reduction metrics
+**2D. Systematic Comparison** (`option2d_procrustes_cvd_comparison.py`)
+- 3D characterization: Magnitude (L2 norm), Sign/Baseline, Structure (RDM)
 
 ### Phase 3: Feature Selection
 
-**ANOVA F-test Based Voxel Selection** (`feature_selection/feature_selection_anova.py`)
-- **Purpose**: Core quality improvement step for voxel refinement
-- **Method**: F-statistic calculation for each voxel
-  - F = MSB / MSW (between-color variance / within-color variance)
-  - Select voxels with high F-values (high color discriminability)
-- **Note**: Complements baseline Top 50% voxels by FIR R² selection
-- **Usage**: Runs on all subjects (10 subjects × 4 ROIs) to maximize information quality
-- **Outputs**:
-  - Selected voxel indices for different K values
-  - F-values for all voxels
-  - Classification accuracy vs K
-  - Reconstruction error vs K
-  - SNR statistics
+**ANOVA F-test** (`feature_selection_anova.py`)
+- F = MSB / MSW voxel-wise
+- Complements FIR R² selection
+- All subjects (10 × 4 ROIs)
+- Outputs: Voxel indices, F-values, accuracy vs K, SNR
 
-### Phase 4: 3D Loss Function Optimization (Filter Learning)
+### Phase 4: Filter Learning
 
-**Personalized CVD→HC Filter Learning** (`scripts/phase2a_filter_learning/`)
-- **Goal**: Learn linear transformation F = Y @ A + b to map CVD patterns to HC-like patterns
-- **3-Dimensional Loss Function**:
-  ```python
-  L_total = λ_mag × L_magnitude + λ_base × L_baseline + λ_rdm × L_RDM
-  ```
-  - **L_magnitude**: Match color-wise L2 norms (overall activation strength)
-  - **L_baseline**: Match color-wise mean activations (baseline shifts)
-  - **L_RDM**: Match representational geometry (color discrimination structure)
+**CVD→HC Transformation** (`phase2a_filter_learning/`)
+- Goal: F = Y @ A + b mapping CVD to HC patterns
+- Loss: L = λ_mag × L_magnitude + λ_base × L_baseline + λ_rdm × L_RDM
+- Steps:
+  1. Pattern extraction (`phase2a_extract_patterns.py`)
+  2. Training (`phase2a_train_filter.py`): PyTorch gradient descent
+  3. Analysis (`phase2a_analyze_results.py`)
+- Outputs: Transformation matrices (A, b), training curves, metrics
 
-**Pipeline Steps**:
-1. **Pattern Extraction** (`phase2a_extract_patterns.py`)
-   - Extract CVD and HC patterns from Procrustes-aligned data
-   - Prepare training data for filter learning
+## Execution
 
-2. **Filter Training** (`phase2a_train_filter.py`)
-   - Initialize transformation with identity matrix
-   - Optimize A and b using PyTorch gradient descent
-   - Subject-specific weight tuning: (λ_mag, λ_base, λ_rdm)
-   - Regularization: α × ||A - I||² + β × ||b||² (preserve structure)
+### Parallel Mode (Production)
 
-3. **Filter Analysis** (`phase2a_analyze_results.py`)
-   - Evaluate learned filters on validation data
-   - Compute Procrustes disparity reduction
-   - RDM similarity improvement
-   - Reconstruction accuracy
+Runtime: 10-16 hours (vs 83-131 sequential)
 
-**Outputs**:
-- Learned transformation matrices (A, b) per CVD subject per ROI
-- Training curves (loss, magnitude, baseline, RDM components)
-- Validation metrics (disparity, RDM correlation)
-- Transformed CVD patterns
-
-## Running the Pipeline
-
-### 1. Prepare Files (Local)
-
-Update Python scripts to use original_v3 dataset:
+**Upload:**
 ```bash
 cd /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis
 
-# Files to modify:
-# - analysis/phase1_preprocess_decoding/fir_reconstruction_BH2009_system_clean.py
-# - roi_pipeline_selected_1202used.py
-# - visualize_roi_overlay.py
+# Python scripts (11 files)
+scp roi_pipeline_selected_1202used.py haba6030@node2:/scratch/connectome/haba6030/colorBlind/
+scp visualize_roi_overlay.py haba6030@node2:/scratch/connectome/haba6030/colorBlind/
+scp analysis/phase1_preprocess_decoding/fir_reconstruction_BH2009_system_clean.py haba6030@node2:/scratch/connectome/haba6030/colorBlind/
+scp analysis/phase2_baseline_comparing/phase1_rsa.py haba6030@node2:/scratch/connectome/haba6030/colorBlind/
+scp analysis/phase2_procrustes_cvd_hc/option2b_procrustes_alignment.py haba6030@node2:/scratch/connectome/haba6030/colorBlind/
+scp analysis/phase2_procrustes_cvd_hc/reconstruction_with_procrustes.py haba6030@node2:/scratch/connectome/haba6030/colorBlind/
+scp analysis/phase2_procrustes_cvd_hc/option2d_procrustes_cvd_comparison.py haba6030@node2:/scratch/connectome/haba6030/colorBlind/
+scp analysis/phase1_preprocess_decoding/feature_selection/feature_selection_anova.py haba6030@node2:/scratch/connectome/haba6030/colorBlind/
+scp scripts/phase2a_filter_learning/phase2a_extract_patterns.py haba6030@node2:/scratch/connectome/haba6030/colorBlind/
+scp scripts/phase2a_filter_learning/phase2a_train_filter.py haba6030@node2:/scratch/connectome/haba6030/colorBlind/
+scp scripts/phase2a_filter_learning/phase2a_analyze_results.py haba6030@node2:/scratch/connectome/haba6030/colorBlind/
+
+# Execution scripts (3 files)
+scp analysis/phase0_parallel.sbatch haba6030@node2:/scratch/connectome/haba6030/colorBlind/
+scp analysis/phase1to4_sequential.sbatch haba6030@node2:/scratch/connectome/haba6030/colorBlind/
+scp analysis/run_complete_pipeline_parallel.sh haba6030@node2:/scratch/connectome/haba6030/colorBlind/
 ```
 
-### 2. Upload to Server
-
-```bash
-# Upload modified Python scripts
-scp analysis/phase1_preprocess_decoding/fir_reconstruction_BH2009_system_clean.py \
-    haba6030@node2:/scratch/connectome/haba6030/colorBlind/
-
-scp roi_pipeline_selected_1202used.py \
-    haba6030@node2:/scratch/connectome/haba6030/colorBlind/
-
-scp visualize_roi_overlay.py \
-    haba6030@node2:/scratch/connectome/haba6030/colorBlind/
-
-# Upload sbatch script
-scp analysis/comprehensive_first_analysis.sbatch \
-    haba6030@node2:/scratch/connectome/haba6030/colorBlind/
-```
-
-### 3. Submit Job on Server
-
+**Execute:**
 ```bash
 ssh haba6030@node2
 cd /scratch/connectome/haba6030/colorBlind
-
-# Submit the job
-sbatch comprehensive_first_analysis.sbatch
-
-# Monitor progress
-tail -f logs/complete_pipeline_v3_*.out
-
-# Check job status
-squeue -u haba6030
+chmod +x run_complete_pipeline_parallel.sh
+bash run_complete_pipeline_parallel.sh
 ```
 
-### 4. Monitor Execution
+Execution details:
+- Phase 0: 10 array tasks (1 per subject), each processes 4 ROIs (8-12h per task)
+- Phase 1-4: Auto-starts after Phase 0, sequential (2-4h)
 
-The pipeline logs progress for each phase:
-- Phase 0A: ROI building status
-- Phase 0B: Overlay visualization (non-critical)
-- Phase 0C: Subject×ROI success/failure counts (40 total)
-- Phase 1: RDM analysis per ROI (4 ROIs)
-- Phase 2: Procrustes alignment, HC training, CVD testing, comparison
+**Monitor:**
+```bash
+squeue -u haba6030
+tail -f logs/phase0_v3_sub-1_*.out
+tail -f logs/phase1to4_v3_*.out
+grep -h "Success:\|Failed:" logs/phase0_v3_sub-*_*.out | sort
+```
 
-## Expected Runtime
+### Sequential Mode (Debug Only)
 
-| Phase | Description | Estimated Time |
-|-------|-------------|----------------|
-| **0A** | ROI Building | 5-10 min |
-| **0B** | Overlay Visualization | 5-10 min |
-| **0C** | Baseline Reconstruction | 80-120 hours |
-|        | (10 subjects × 4 ROIs × 2-3 hrs) | |
-| **1** | RDM Analysis | 40-80 min |
-|        | (4 ROIs × 10-20 min) | |
-| **2A-D** | Procrustes Analysis | 30-60 min |
-| **3** | Feature Selection | 40-80 min |
-|        | (10 subjects × 4 ROIs × 1-2 min) | |
-| **4** | 3D Loss Optimization | 2-4 hours |
-|        | (3 CVD × 4 ROIs × 20-40 min) | |
-| **Total** | **~83-131 hours** | **(3.5-5.5 days)** |
+Runtime: 83-131 hours
 
-**Note**: Phase 0C is the bottleneck (~95% of total time). Consider using array jobs for parallelization in future runs.
+```bash
+scp analysis/comprehensive_first_analysis.sbatch haba6030@node2:/scratch/connectome/haba6030/colorBlind/
+ssh haba6030@node2
+cd /scratch/connectome/haba6030/colorBlind
+sbatch comprehensive_first_analysis.sbatch
+tail -f logs/complete_pipeline_v3_*.out
+```
+
+## Runtime Breakdown
+
+| Phase | Parallel | Sequential |
+|-------|----------|------------|
+| 0 (Baseline) | 8-12h (10 jobs) | 80-120h |
+| 1 (RDM) | 40-80min | 40-80min |
+| 2 (Procrustes) | 30-60min | 30-60min |
+| 3 (Feature) | 40-80min | 40-80min |
+| 4 (Filter) | 2-4h | 2-4h |
+| **Total** | **10-16h** | **83-131h** |
 
 ## Output Structure
 
-Results are saved to the following directories:
-
 ```
-/scratch/connectome/haba6030/colorBlind/derivatives/
-├── BH2009_original_v3/
-│   └── baseline32_original_v3/
-│       ├── sm0.0_hpYe_moCo_ccNo_drNo_stFa_sub-01_V1_None/
-│       │   ├── amplitudes_z.npy          # (n_runs, 8, n_voxels)
-│       │   ├── classification_results.txt
-│       │   ├── reconstruction_results.txt
-│       │   ├── roi_mask.nii.gz
-│       │   └── figures/
-│       └── ... (40 subject-ROI combinations)
-│
-├── phase1_results/
-│   ├── rdm_analysis_V1_baseline32_original_v3/
-│   │   ├── rdm_similarity_matrix.npy
-│   │   ├── mantel_test_results.txt
+derivatives/V3_Comprehensive/
+├── sub-{01-10}/roi_pipeline/              # ROI masks
+│   ├── V1_mask_*.nii.gz
+│   └── ... (V2, V3, hV4)
+├── BH2009_original_v3/baseline32_original_v3/
+│   ├── sub-01/{V1,V2,V3,hV4}/             # Subject-organized
+│   │   ├── amplitudes_z.npy               # (n_runs, 8, n_voxels)
+│   │   ├── classification_results.txt
+│   │   ├── reconstruction_results.txt
+│   │   ├── roi_mask.nii.gz
 │   │   └── figures/
-│   └── ... (4 ROIs)
-│
-├── phase2_procrustes/
+│   └── ... (sub-02 through sub-10)
+├── phase1_results/                        # RDM/RSA
+│   └── rdm_analysis_{ROI}_baseline32_original_v3/
+├── phase2_procrustes/                     # Procrustes
 │   ├── alignment_quality_metrics.txt
-│   ├── hc_common_decoder_V1.npz
-│   ├── cvd_procrustes_results_sub-08_V1.npz
-│   └── ... (CVD subjects × ROIs)
-│
-├── feature_selection/
-│   ├── anova_results_sub-01_V1.csv
-│   ├── selected_voxels_sub-01_V1_k*.npy
-│   └── ... (10 subjects × 4 ROIs)
-│
-└── phase3_filters/
-    └── ... (moved to results/group_level/phase2a_data/models/)
+│   ├── hc_common_decoder_{ROI}.npz
+│   └── cvd_procrustes_results_sub-{08,09,10}_{ROI}.npz
+└── feature_selection/                     # ANOVA
+    └── anova_results_sub-{ID}_{ROI}.csv
 
-/scratch/connectome/haba6030/colorBlind/results/
-└── group_level/
-    └── phase2a_data/
-        ├── patterns/                      # Extracted CVD/HC patterns
-        │   ├── cvd_sub-08_V1_patterns.npz
-        │   └── hc_target_V1_patterns.npz
-        └── models/                        # Learned filters
-            ├── filter_sub-08_V1_model.pth
-            ├── filter_sub-08_V1_metrics.json
-            ├── training_curves_sub-08_V1.png
-            └── ... (3 CVD × 4 ROIs)
+results/group_level/phase2a_data/
+├── patterns/                              # Filter learning
+│   ├── cvd_sub-{08,09,10}_{ROI}_patterns.npz
+│   └── hc_target_{ROI}_patterns.npz
+└── models/
+    ├── filter_sub-{08,09,10}_{ROI}_model.pth
+    ├── filter_sub-{08,09,10}_{ROI}_metrics.json
+    └── training_curves_sub-{08,09,10}_{ROI}.png
 ```
 
-## Key Files Modified
+## Execution Scripts
 
-1. **`analysis/phase1_preprocess_decoding/fir_reconstruction_BH2009_system_clean.py`**
-   - Added 'original_v3' dataset configuration
-   - Updated argparse choices
+### Parallel (Production)
+- `phase0_parallel.sbatch`: Array job (tasks 1-10), 8-12h per task
+- `phase1to4_sequential.sbatch`: Auto-starts after Phase 0, 2-4h
+- `run_complete_pipeline_parallel.sh`: Master orchestrator
 
-2. **`roi_pipeline_selected_1202used.py`**
-   - Updated FMRIPREP_DIR to point to fmriprep_out_original_v3
-   - Updated DATA_DIR to bids_editted
+### Sequential (Debug)
+- `comprehensive_first_analysis.sbatch`: All phases, 83-131h
 
-3. **`visualize_roi_overlay.py`**
-   - Updated FMRIPREP_DIR to point to fmriprep_out_original_v3
+### Analysis Scripts (ROOT)
+1. `roi_pipeline_selected_1202used.py`
+2. `visualize_roi_overlay.py`
+3. `fir_reconstruction_BH2009_system_clean.py`
+4. `phase1_rsa.py`
+5. `option2b_procrustes_alignment.py`
+6. `reconstruction_with_procrustes.py`
+7. `option2d_procrustes_cvd_comparison.py`
+8. `feature_selection_anova.py`
+9. `phase2a_extract_patterns.py`
+10. `phase2a_train_filter.py`
+11. `phase2a_analyze_results.py`
 
 ## Troubleshooting
 
 ### Common Issues
 
-**Issue 1**: ROI generation fails
-- **Check**: Brain mask overlap with atlas regions
-- **Solution**: Verify fMRIPrep quality with Dice scores
+**ROI generation fails**
+- Check: Brain mask overlap with atlas
+- Solution: Verify Dice scores in preprocessing report
 
-**Issue 2**: Baseline reconstruction fails for specific subject-ROI
-- **Check**: Sufficient voxels after thresholding (≥100 voxels recommended)
-- **Solution**: Lower threshold or use Tier 1 subjects only
+**Baseline fails for subject-ROI**
+- Check: Voxel count ≥100 after thresholding
+- Solution: Use Tier 1 subjects
 
-**Issue 3**: Phase 1 RDM analysis fails
-- **Check**: Phase 0C completed successfully for all HC subjects
-- **Solution**: Re-run Phase 0C for missing subjects
+**Phase 1 RDM fails**
+- Check: Phase 0 completed for all HC subjects
+- Solution: Re-run missing subjects
 
-**Issue 4**: Procrustes alignment fails
-- **Check**: Matching voxel counts across subjects
-- **Solution**: Algorithm automatically truncates to minimum voxel count
+**Array task fails**
+- Check: `grep "Failed:" logs/phase0_v3_sub-*_*.out`
+- Solution: `sbatch --array=5 phase0_parallel.sbatch` (re-run task 5)
+
+**Phase 1-4 pending**
+- Check: `squeue -u haba6030`
+- Reason: Waiting for all Phase 0 tasks
+- Solution: If some failed, cancel and submit manually:
+  ```bash
+  scancel JOBID
+  sbatch phase1to4_sequential.sbatch
+  ```
+
+**Out of memory**
+- Check: Logs for "killed" or "out of memory"
+- Solution: Edit sbatch `#SBATCH --mem=128GB`
 
 ### Log Files
 
-- **Pipeline log**: `logs/complete_pipeline_v3_*.out`
-- **Error log**: `logs/complete_pipeline_v3_*.err`
-- **Phase-specific logs**: Check derivatives directories
+Parallel:
+- `logs/phase0_v3_sub-{1-10}_{JOBID}.out/err`
+- `logs/phase1to4_v3_{JOBID}.out/err`
 
-### Contact
+Sequential:
+- `logs/complete_pipeline_v3_{JOBID}.out/err`
 
-For questions about this analysis pipeline, refer to:
-- **Main README**: `/Users/jinilkim/.../colorBlind_analysis/README.md`
-- **CLAUDE.md**: Development guide and conventions
-- **Preprocessing report**: `docs/0104_Preprocessing_Report.md`
+### Progress Check
+
+```bash
+# Phase 0 summary
+grep -h "Success:\|Failed:" logs/phase0_v3_sub-*_*.out | sort
+
+# Completed subjects
+ls -lh derivatives/V3_Comprehensive/BH2009_original_v3/baseline32_original_v3/
+
+# Count ROIs (should be 40)
+find derivatives/V3_Comprehensive/BH2009_original_v3/baseline32_original_v3/ -name "amplitudes_z.npy" | wc -l
+```
 
 ## Version History
 
-- **2026-01-05**: Initial creation for original_v3 dataset
-- **Dataset**: fmriprep_out_original_v3 (FreeSurfer removed, Dice 0.889)
-- **Configuration**: Baseline32 (sm0, hp0.01, cosine, PCA30)
-- **Subjects**: All 10 (01-10)
-- **ROIs**: V1, V2, V3, hV4
+**2026-01-06**: Parallel execution implementation
+- SLURM array jobs (10 subjects simultaneous)
+- Runtime reduction: 83-131h → 10-16h
+- Directory structure: `V3_Comprehensive/sub-{ID}/{ROI}/`
+- Simplified paths: All scripts in ROOT
+- Automatic dependencies: Phase 1-4 auto-starts
+
+**2026-01-05**: Initial planning
+- Dataset: fmriprep_out_original_v3 (Dice 0.889)
+- Config: Baseline32
+- Subjects: 10 (01-10)
+- ROIs: V1, V2, V3, hV4
 
 ## References
 
-- **Preprocessing Report**: docs/0104_Preprocessing_Report.md
-- **Systematic Review**: docs/SYSTEMATIC_PREPROCESSING_ANALYSIS.md
-- **Project README**: ../README.md
-- **CLAUDE.md**: ../CLAUDE.md
+- Preprocessing Report: `docs/0104_Preprocessing_Report.md`
+- Systematic Review: `docs/SYSTEMATIC_PREPROCESSING_ANALYSIS.md`
+- Project README: `../README.md`
+- Development Guide: `../CLAUDE.md`
 
 ---
 
-**Last Updated**: 2026-01-05
+Last Updated: 2026-01-06

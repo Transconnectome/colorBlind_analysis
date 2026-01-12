@@ -1,331 +1,245 @@
-# Hyperalignment Project: 단계별 실행 가이드
+# 실행 가이드: 업로드, 실행, 로그/결과 위치
 
-**프로젝트**: CVD Individual Filter Optimization using Hyperalignment
-**시작일**: 2025-12-28
+**날짜**: 2026-01-11
 
 ---
 
-## 🎯 전체 흐름 요약
+## 📤 1. 업로드
 
-```
-Week 1: Data Validation & Feasibility Check
-  └─ Step 1.1: Trial order consistency ✓
-  └─ Step 1.2: Reliability comparison (baseline vs trial-wise)
-  └─ Step 1.3: Pilot hyperalignment (HC 2명)
+```bash
+# 로컬 터미널
+cd /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/prediction_model_workspace/scripts
 
-Week 2: Full Hyperalignment (HC 5명)
-  └─ Step 2.1: Full hyperalignment
-  └─ Step 2.2: Alignment quality evaluation
+scp 02_trial_wise_glm_optimized.py haba6030@node2:/scratch/connectome/haba6030/colorBlind/prediction_model_workspace/scripts/
 
-Week 3: Phase 2 Pilot (Encoder)
-  └─ Step 3.1: Channel encoder learning
-  └─ Step 3.2: LOCO CV validation
-
-Week 4: Phase 3 Pilot (CVD Filter)
-  └─ Step 4.1: CVD projection
-  └─ Step 4.2: Filter optimization
-  └─ Step 4.3: Tier 1 validation
+scp test_02_sub01_V1_optimized.sbatch haba6030@node2:/scratch/connectome/haba6030/colorBlind/prediction_model_workspace/scripts/
 ```
 
 ---
 
-## 📅 Week 1: Data Validation
+## 🚀 2. 실행
 
-### **Step 1.1: Trial Order Consistency Check** ✅
-
-**목표**: 모든 subject/run에서 trial 순서가 동일한지 확인
-
-**Local에서 실행**:
 ```bash
-cd ~/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/prediction_model/scripts
-
-# HC 5명 확인
-python 00_check_data_structure.py --subjects 02 03 05 06 07
-
-# 예상 출력:
-# ✅ 결론: 모든 subject-run에서 자극 순서 IDENTICAL
-# → Hyperalignment (trial-aligned GPA) 가능!
-```
-
-**결과 확인**:
-```bash
-cat ../results/data_structure_check/data_structure_summary.json
-```
-
-**의사결정**:
-- ✅ `"stimulus_order_consistent": true` → **Proceed to Step 1.2**
-- ❌ `"stimulus_order_consistent": false` → **Fallback: 조건 기반 GPA (8 colors)**
-
----
-
-### **Step 1.2: Reliability Comparison** ⭐
-
-**목표**: Color-averaged vs Trial-wise reliability 비교
-
-#### **Phase A: 파일 업로드**
-
-**Local에서**:
-```bash
-# 스크립트 업로드
-scp prediction_model/scripts/01_reliability_comparison.py \
-    haba6030@node2:/scratch/connectome/haba6030/colorBlind/prediction_model/scripts/
-
-# Sbatch 파일 업로드
-scp prediction_model/run_step1_reliability_check.sbatch \
-    haba6030@node2:/scratch/connectome/haba6030/colorBlind/prediction_model/
-```
-
-#### **Phase B: 서버에서 실행**
-
-**SSH 접속**:
-```bash
+# 서버 접속
 ssh haba6030@node2
-cd /scratch/connectome/haba6030/colorBlind/prediction_model
+
+# 작업 제출
+cd /scratch/connectome/haba6030/colorBlind/prediction_model_workspace/scripts
+sbatch test_02_sub01_V1_optimized.sbatch
+
+# 출력: Submitted batch job 123456
 ```
 
-**Pilot test (1 subject, 1 ROI)**:
-```bash
-# HC 1명 (sub-02), V1
-sbatch run_step1_reliability_check.sbatch 02 V1
+---
 
-# Job 제출 확인
+## 📊 3. 상태 확인
+
+```bash
+# 작업 상태
 squeue -u haba6030
 
-# 실시간 로그 확인 (optional)
-tail -f logs/step1_reliability_sub-<JOB_ID>.out
-```
-
-**예상 실행 시간**: ~30-60분
-
-#### **Phase C: 결과 확인**
-
-**서버에서**:
-```bash
-# 로그 확인
-cat logs/step1_reliability_sub-<JOB_ID>.out
-
-# 결과 파일 확인
-cat results/reliability_check/reliability_sub-02_V1.json
-```
-
-**Local로 다운로드**:
-```bash
-# Local terminal에서
-scp haba6030@node2:/scratch/connectome/haba6030/colorBlind/prediction_model/results/reliability_check/reliability_sub-02_V1.json \
-    ~/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/prediction_model/results/reliability_check/
-```
-
-#### **Phase D: 결과 해석**
-
-**결과 파일 확인**:
-```bash
-cd ~/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/prediction_model
-cat results/reliability_check/reliability_sub-02_V1.json
-```
-
-**예상 출력 형식**:
-```json
-{
-  "subject": "02",
-  "roi": "V1",
-  "color_averaged": {
-    "mean_reliability": 0.75,
-    "per_color": {
-      "red": 0.78,
-      "orange": 0.72,
-      ...
-    }
-  },
-  "trial_wise": {
-    "mean_reliability": 0.45,
-    "per_color": {
-      "red": 0.48,
-      "orange": 0.42,
-      ...
-    }
-  },
-  "decision": "PROCEED_WITH_CAUTION",
-  "decision_message": "..."
-}
-```
-
-**의사결정 매트릭스**:
-
-| Color-averaged | Trial-wise | Decision | Action |
-|---------------|-----------|----------|--------|
-| < 0.3 | any | `STOP` | Data quality 문제, preprocessing 재검토 |
-| ≥ 0.5 | < 0.3 | `IMPROVE_GLM` | Smoothing ↑ (8mm), confounds 추가 |
-| ≥ 0.3 | ≥ 0.3 | `PROCEED_WITH_CAUTION` | Pilot GPA, regularization |
-| any | ≥ 0.4 | `PROCEED` | Full hyperalignment 진행 |
-
----
-
-### **Step 1.2 후속 조치**
-
-#### **Scenario 1: STOP (Data quality 문제)**
-```bash
-# 원인 진단
-# 1. Alignment 확인
-# 2. fMRIPrep quality check
-# 3. Subject exclusion 고려
-
-# DO NOT proceed
-```
-
-#### **Scenario 2: IMPROVE_GLM (SNR 문제)**
-```bash
-# Smoothing 증가로 재실행
-sbatch run_step1_reliability_check.sbatch 02 V1 --smoothing_fwhm 8.0
-
-# 또는 confounds 추가
-# 스크립트 수정: --confounds_strategy motion_compcor
-```
-
-**수정 후 재실행**:
-```bash
-# 파일 수정 (local)
-# scripts/01_reliability_comparison.py
-# default smoothing_fwhm = 8.0
-
-# 재업로드
-scp prediction_model/scripts/01_reliability_comparison.py \
-    haba6030@node2:/scratch/connectome/haba6030/colorBlind/prediction_model/scripts/
-
-# 재실행
-ssh haba6030@node2
-cd /scratch/connectome/haba6030/colorBlind/prediction_model
-sbatch run_step1_reliability_check.sbatch 02 V1
-```
-
-#### **Scenario 3: PROCEED_WITH_CAUTION (정상 범위)**
-```bash
-# ✅ Trial-wise ≥ 0.3 달성
-# → Step 1.3 (Pilot GPA) 진행
+# 실시간 로그
+tail -f /scratch/connectome/haba6030/colorBlind/prediction_model_workspace/logs/test_trial_glm_opt_sub01_V1_*.out
 ```
 
 ---
 
-### **Step 1.3: Pilot Hyperalignment** (다음 단계)
+## 📁 4. 로그 위치 (서버)
 
-**목표**: HC 2명으로 full voxel space GPA 수렴 확인
-
-**예정 스크립트**: `02_pilot_hyperalignment.py`
-**예정 시간**: ~1-2시간
-
-**Prerequisites**:
-- ✅ Step 1.2 완료
-- ✅ Decision: `PROCEED` or `PROCEED_WITH_CAUTION`
-
----
-
-## 📊 진행 상황 체크리스트
-
-### **Week 1 Progress**
-
-- [x] Step 1.1: Trial order consistency
-  - [x] 스크립트 실행
-  - [x] 결과 확인: stimulus_order_consistent = true
-
-- [ ] Step 1.2: Reliability comparison
-  - [ ] 스크립트 작성 ✅
-  - [ ] 서버 업로드
-  - [ ] Pilot test (sub-02, V1)
-  - [ ] 결과 해석
-  - [ ] 의사결정
-
-- [ ] Step 1.3: Pilot hyperalignment
-  - [ ] 스크립트 작성 (대기)
-  - [ ] HC 2명 테스트
-  - [ ] 수렴 확인
-
----
-
-## 🔧 Troubleshooting
-
-### **Problem 1: ROI mask not found**
-
-**Error message**:
 ```
-FileNotFoundError: ROI mask for V1 not found
+/scratch/connectome/haba6030/colorBlind/prediction_model_workspace/logs/
+├── test_trial_glm_opt_sub01_V1_123456.out  ← 메인 로그
+└── test_trial_glm_opt_sub01_V1_123456.err  ← 에러 로그
 ```
 
-**Solution**:
+### 로그 확인
+
 ```bash
-# 기존 baseline 분석에서 ROI mask 복사
-# 서버에서:
-cd /scratch/connectome/haba6030/colorBlind/derivatives/BH2009_deoblique_v2/baseline81_deob_determin
+# 전체 로그
+cat logs/test_trial_glm_opt_sub01_V1_*.out
 
-# V1 mask 찾기
-find . -name "roi_mask.nii.gz" | grep V1 | head -1
+# RDM reliability만
+grep -A 5 "RDM-based split-half" logs/*.out
 
-# 복사 (if needed)
-mkdir -p /scratch/connectome/haba6030/colorBlind/prediction_model/roi_masks
-cp <path_to_v1_mask> /scratch/connectome/haba6030/colorBlind/prediction_model/roi_masks/V1_mask.nii.gz
+# Data quality만
+grep -A 10 "Data Quality Warnings" logs/*.out
 ```
 
-**스크립트 수정**:
+---
+
+## 📦 5. 결과 위치 (서버)
+
+```
+/scratch/connectome/haba6030/colorBlind/prediction_model_workspace/results/trial_wise_glm/original_v3/
+└── sub-01_V1/
+    ├── trial_betas.npy          ← Beta values (n_trials, n_voxels)
+    ├── trial_metadata.csv       ← Trial info (run, color, onset, etc)
+    └── quality_metrics.json     ← Quality metrics (RDM r, recovery rate, warnings)
+```
+
+### 결과 확인
+
+```bash
+# 디렉토리 확인
+ls -lh /scratch/connectome/haba6030/colorBlind/prediction_model_workspace/results/trial_wise_glm/original_v3/sub-01_V1/
+
+# JSON 내용 확인
+cat results/trial_wise_glm/original_v3/sub-01_V1/quality_metrics.json | python -m json.tool
+
+# CSV 확인
+head -20 results/trial_wise_glm/original_v3/sub-01_V1/trial_metadata.csv
+```
+
+---
+
+## ⚙️ 6. 설정(Config) 위치
+
+### SBATCH 설정 (서버)
+
+**파일**: `/scratch/connectome/haba6030/colorBlind/prediction_model_workspace/scripts/test_02_sub01_V1_optimized.sbatch`
+
+```bash
+#SBATCH --qos=shared
+#SBATCH --nodelist=node4
+#SBATCH --mem=16G
+#SBATCH --time=00:30:00
+```
+
+### Python 기본 설정
+
+**파일**: `/scratch/connectome/haba6030/colorBlind/prediction_model_workspace/scripts/02_trial_wise_glm_optimized.py`
+
 ```python
-# 01_reliability_comparison.py
-# load_roi_mask() 함수에서 직접 경로 지정
-def load_roi_mask(roi_name):
-    roi_mask_file = f'/scratch/.../roi_masks/{roi_name}_mask.nii.gz'
-    return image.load_img(roi_mask_file)
+# 데이터 경로
+fmriprep_dir = '/storage/connectome/haba6030/fmriprep_out_original_v3'
+bids_dir = '/storage/connectome/haba6030/bids_editted'
+output_dir = '/scratch/.../results/trial_wise_glm'
+
+# 분석 파라미터
+smoothing_fwhm = 0.0  # Phase 0와 일치
+confounds_strategy = 'motion'
+
+# 품질 기준
+MIN_TRIALS_PER_SPLIT = 3  # RDM 최소 threshold
+EXPECTED_TOTAL_TRIALS = 432
 ```
 
-### **Problem 2: Memory error**
+---
 
-**Error message**:
-```
-MemoryError: Unable to allocate array
-```
+## 📥 7. 결과 다운로드 (로컬로)
 
-**Solution**:
 ```bash
-# Sbatch 파일 수정: 메모리 증가
-#SBATCH --mem=32G  # 16G → 32G
+# 로컬 터미널
+cd /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/prediction_model_workspace
+
+# 결과 다운로드
+scp haba6030@node2:/scratch/connectome/haba6030/colorBlind/prediction_model_workspace/results/trial_wise_glm/original_v3/sub-01_V1/* \
+    results/trial_wise_glm/original_v3/sub-01_V1/
+
+# 로그 다운로드
+scp haba6030@node2:/scratch/connectome/haba6030/colorBlind/prediction_model_workspace/logs/test_trial_glm_opt_sub01_V1_*.out \
+    logs/
 ```
 
-### **Problem 3: LS-S too slow**
+### 로컬에서 결과 분석
 
-**Issue**: Trial-wise GLM 너무 느림 (384 trials × 6 runs)
-
-**Solution**:
 ```python
-# 스크립트 최적화 옵션:
-# 1. minimize_memory=True
-# 2. Run 병렬처리 고려
-# 3. Pilot은 1-2 runs만 테스트
+import numpy as np
+import pandas as pd
+import json
+
+# 결과 로딩
+betas = np.load('results/trial_wise_glm/original_v3/sub-01_V1/trial_betas.npy')
+metadata = pd.read_csv('results/trial_wise_glm/original_v3/sub-01_V1/trial_metadata.csv')
+
+with open('results/trial_wise_glm/original_v3/sub-01_V1/quality_metrics.json') as f:
+    metrics = json.load(f)
+
+# 핵심 결과 확인
+procrustes_stability = metrics['split_half_reliability']['mean']
+rdm_r = metrics['rdm_reliability']['spearman_r']
+recovery = metrics['data_quality']['recovery_rate']
+
+print(f"Procrustes stability (PRIMARY): {procrustes_stability:.3f}")
+print(f"RDM Spearman r (SECONDARY): {rdm_r:.3f}")
+print(f"Trial recovery: {recovery*100:.1f}%")
+
+if procrustes_stability >= 0.30:
+    print("✅ GOOD or EXCELLENT - Proceed to full execution")
 ```
 
 ---
 
-## 📝 다음 단계 준비
+## 📋 빠른 참조
 
-### **Step 1.3 스크립트 (예정)**
+### 주요 경로 (서버)
 
-필요 사항:
-- [ ] LS-S GLM 함수 (Step 1.2에서 재사용)
-- [ ] Regularized GPA 구현
-- [ ] HC 2명 데이터 로드
-- [ ] 수렴 확인 메트릭
+| 항목 | 경로 |
+|------|------|
+| 스크립트 | `/scratch/connectome/haba6030/colorBlind/prediction_model_workspace/scripts/` |
+| 로그 | `/scratch/connectome/haba6030/colorBlind/prediction_model_workspace/logs/` |
+| 결과 | `/scratch/connectome/haba6030/colorBlind/prediction_model_workspace/results/trial_wise_glm/original_v3/` |
 
-예정 실행:
+### 주요 경로 (로컬)
+
+| 항목 | 경로 |
+|------|------|
+| 스크립트 | `/Users/jinilkim/.../prediction_model_workspace/scripts/` |
+| 결과 | `/Users/jinilkim/.../prediction_model_workspace/results/trial_wise_glm/original_v3/` |
+| 로그 | `/Users/jinilkim/.../prediction_model_workspace/logs/` |
+
+### 주요 명령어
+
 ```bash
-# Pilot: sub-02, 03 / V1
-python 02_pilot_hyperalignment.py --subjects 02 03 --roi V1
+# 업로드
+scp local_file haba6030@node2:/scratch/.../scripts/
+
+# 실행
+sbatch script.sbatch
+
+# 상태
+squeue -u haba6030
+
+# 로그
+tail -f logs/*.out
+
+# 다운로드
+scp haba6030@node2:/scratch/.../results/* ./
 ```
 
 ---
 
-## 🎯 Week 1 성공 기준
+## 🎯 핵심 확인 사항
 
-- ✅ Step 1.1: Trial order consistent
-- ✅ Step 1.2: Trial-wise reliability ≥ 0.3
-- ✅ Step 1.3: Pilot GPA converges (disparity 감소)
+### 로그에서 확인할 것
 
-**Week 1 완료 시**: Week 2 (Full Hyperalignment) 진행 가능
+```bash
+# Procrustes stability (PRIMARY - 핵심!)
+grep "Procrustes stability (PRIMARY):" logs/*.out
+# 예상: Procrustes stability (PRIMARY): 0.XXX
+
+# RDM correlation (SECONDARY - 참고)
+grep "RDM Spearman r (SECONDARY):" logs/*.out
+# 예상: RDM Spearman r (SECONDARY): 0.XXX
+
+# Trial recovery
+grep "Total trials:" logs/*.out
+# 예상: Total trials: 330/432 (76.4%)
+
+# 품질 판단
+grep "EXCELLENT\|GOOD\|MARGINAL\|POOR" logs/*.out
+# 예상: ✅ EXCELLENT or ✅ GOOD or ⚠️ MARGINAL or ❌ POOR
+```
+
+### 성공 기준 (PRIMARY: Procrustes Stability)
+
+- ✅ **Stability ≥ 0.50** → EXCELLENT, 즉시 전체 실행
+- ✅ **0.30 ≤ Stability < 0.50** → GOOD, 전체 실행 진행
+- ⚠️ **0.10 ≤ Stability < 0.30** → MARGINAL, 파라미터 조정 고려
+- ❌ **Stability < 0.10** → POOR, 최적화 필요
+
+**중요**: RDM correlation은 SECONDARY (국소적 진단용), 낮아도 Procrustes 높으면 OK!
 
 ---
 
-**마지막 업데이트**: 2025-12-28
-**다음 업데이트 예정**: Step 1.2 결과 확인 후
+**예상 시간**: 10-15분 (sub-01 V1 하나)

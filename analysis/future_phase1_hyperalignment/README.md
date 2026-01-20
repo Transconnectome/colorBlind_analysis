@@ -3,8 +3,8 @@
 **Supporting Research Question (SRQ2)**: Can trial-aligned GPA create a stable HC common space for robust encoder learning?
 **시행별 정렬 GPA가 견고한 인코더 학습을 위한 안정적인 HC 공통 공간을 생성할 수 있는가?**
 
-**Status**: Planned 📋 (Active development in `prediction_model_workspace/`)
-**Timeline**: 2 weeks
+**Status**: Planned 📋 (Methodology comparison in COMPARISON.md; implementation pending stimulus-wise GLM)
+**Timeline**: 2-3 weeks
 **Scripts**: Currently in development workspace
 
 ---
@@ -30,6 +30,9 @@
 **전체 계획**: `../../prediction_model_workspace/MASTER_PLAN.md`
 
 **이 README는 최종 요약 버전입니다.** 진행 중인 작업은 workspace를 참조하세요.
+
+**⚠️ 방법론 비교**: `COMPARISON.md` 문서에서 Hyperalignment vs SRM 비교 참조
+**⚠️ TODO 추적**: 전체 TODO 체크리스트는 `../../prediction_model_workspace/MASTER_PLAN.md` Phase 1 참조
 
 ---
 

@@ -240,7 +240,13 @@ def visualize_results(individual_rdms, group_rdm, rdm_similarities, subjects_inf
     n_colors = group_rdm.shape[0]
 
     # 1. RDM Grid
-    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+    # Create grid to accommodate n_subjects + 1 (group RDM)
+    # For 7 HC subjects: need 8 subplots (7 individual + 1 group) → 3x3 grid
+    total_plots = n_subjects + 1
+    n_cols = 3
+    n_rows = int(np.ceil(total_plots / n_cols))
+
+    fig, axes = plt.subplots(n_rows, n_cols, figsize=(15, 5 * n_rows))
     axes = axes.flatten()
 
     # 개인 RDMs
@@ -255,12 +261,16 @@ def visualize_results(individual_rdms, group_rdm, rdm_similarities, subjects_inf
         plt.colorbar(im, ax=ax)
 
     # 그룹 RDM
-    ax = axes[-1]
+    ax = axes[n_subjects]  # Use n_subjects index instead of -1
     im = ax.imshow(group_rdm, cmap='viridis', vmin=0, vmax=2)
     ax.set_title('Group Template\n(Procrustes aligned)')
     ax.set_xlabel('Color')
     ax.set_ylabel('Color')
     plt.colorbar(im, ax=ax)
+
+    # Hide unused subplots
+    for i in range(total_plots, len(axes)):
+        axes[i].axis('off')
 
     plt.tight_layout()
     plt.savefig(output_dir / 'procrustes_rdms_grid.png', dpi=150, bbox_inches='tight')
@@ -312,7 +322,8 @@ def run_procrustes_analysis(args):
     print()
 
     # Output directory
-    output_base = Path('results/group_level') / args.timestamp
+    base_dir = Path('/scratch/connectome/haba6030/colorBlind')
+    output_base = base_dir / 'analysis' / 'comprehensive' / 'results' / args.timestamp
     output_base.mkdir(parents=True, exist_ok=True)
 
     # Summary results

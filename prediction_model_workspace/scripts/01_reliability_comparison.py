@@ -21,6 +21,7 @@ from pathlib import Path
 from nilearn import image
 from nilearn.glm.first_level import FirstLevelModel
 from nilearn.maskers import NiftiMasker
+from scipy.spatial import procrustes
 import json
 
 
@@ -44,13 +45,13 @@ def parse_args():
     parser.add_argument(
         '--fmriprep_dir',
         type=str,
-        default='/storage/connectome/haba6030/fmriprep_out_deoblique_v2',
-        help='fMRIPrep output directory'
+        default='/storage/connectome/haba6030/fmriprep_out_original_v3',
+        help='fMRIPrep output directory (default: original_v3)'
     )
     parser.add_argument(
         '--bids_dir',
         type=str,
-        default='/storage/connectome/haba6030/colorBlind_data_deoblique',
+        default='/storage/connectome/haba6030/bids_editted',
         help='BIDS data directory'
     )
     parser.add_argument(
@@ -76,12 +77,14 @@ def parse_args():
     return parser.parse_args()
 
 
-def load_roi_mask(roi_name, derivatives_dir='/scratch/connectome/haba6030/colorBlind/derivatives'):
+def load_roi_mask(subject_id, roi_name, derivatives_dir='/scratch/connectome/haba6030/colorBlind/derivatives'):
     """
-    ROI mask 로드
+    ROI mask 로드 (V3_Comprehensive 구조)
 
     Parameters
     ----------
+    subject_id : str
+        Subject ID (e.g., '01', '02')
     roi_name : str
         ROI 이름 (V1, V2, V3, hV4)
     derivatives_dir : str
@@ -92,22 +95,22 @@ def load_roi_mask(roi_name, derivatives_dir='/scratch/connectome/haba6030/colorB
     roi_mask_img : Nifti1Image
         ROI mask image
     """
-    # 기존 분석에서 사용한 ROI mask 찾기
-    # 예: derivatives/BH2009_deoblique_v2/baseline81_deob_determin/sm6.0_*_V1_*/roi_mask.nii.gz
+    # V3_Comprehensive 구조 사용
+    # Path: derivatives/V3_Comprehensive/ROI_mask/sub-{ID}/roi_pipeline/{ROI}_mask_*.nii.gz
 
-    roi_mask_pattern = f"*_{roi_name}_*/roi_mask.nii.gz"
+    roi_mask_file = Path(derivatives_dir) / "V3_Comprehensive" / "ROI_mask" / \
+                    f"sub-{subject_id}" / "roi_pipeline" / \
+                    f"{roi_name}_mask_thr50_intnearest_binTrue_maskfunc_gmTrue_subjFalse.nii.gz"
 
-    # Search in derivatives
-    from glob import glob
-    matches = glob(str(Path(derivatives_dir) / "BH2009_deoblique_v2" / "baseline81_deob_determin" / roi_mask_pattern))
+    if not roi_mask_file.exists():
+        raise FileNotFoundError(
+            f"ROI mask not found: {roi_mask_file}\n"
+            f"Expected structure: derivatives/V3_Comprehensive/ROI_mask/sub-{subject_id}/roi_pipeline/"
+        )
 
-    if not matches:
-        raise FileNotFoundError(f"ROI mask for {roi_name} not found in {derivatives_dir}")
-
-    roi_mask_file = matches[0]
     print(f"Loading ROI mask: {roi_mask_file}")
 
-    roi_mask_img = image.load_img(roi_mask_file)
+    roi_mask_img = image.load_img(str(roi_mask_file))
     return roi_mask_img
 
 
@@ -161,11 +164,50 @@ def load_confounds(subject_id, run_id, fmriprep_dir, strategy='motion'):
     return confounds
 
 
+def compute_reliability_both_metrics(betas_array, metric_name=""):
+    """
+    두 가지 reliability metric 계산: Voxel-wise + Procrustes
+
+    Parameters
+    ----------
+    betas_array : ndarray
+        (6, n_voxels) - 6 runs의 beta values
+    metric_name : str
+        Metric name for logging
+
+    Returns
+    -------
+    voxel_corr : float
+        Voxel-wise correlation
+    procrustes_stab : float
+        Procrustes stability (1 - disparity)
+    """
+    # Odd runs (1,3,5) vs Even runs (2,4,6)
+    odd_runs = betas_array[[0, 2, 4]].mean(axis=0)  # (n_voxels,)
+    even_runs = betas_array[[1, 3, 5]].mean(axis=0)  # (n_voxels,)
+
+    # (1) Voxel-wise correlation
+    voxel_corr = np.corrcoef(odd_runs, even_runs)[0, 1]
+
+    # (2) Procrustes stability
+    _, _, disparity = procrustes(
+        odd_runs.reshape(-1, 1),
+        even_runs.reshape(-1, 1)
+    )
+    procrustes_stab = 1.0 - disparity
+
+    return voxel_corr, procrustes_stab
+
+
 def compute_color_averaged_reliability(subject_id, roi_mask_img, fmriprep_dir,
                                        bids_dir, smoothing_fwhm=6.0,
                                        confounds_strategy='motion'):
     """
     Color-averaged reliability (기존 방법)
+
+    두 가지 metric 측정:
+    - Voxel-wise correlation (좌표계 의존적)
+    - Procrustes stability (좌표계 독립적, 권장)
 
     Parameters
     ----------
@@ -184,10 +226,11 @@ def compute_color_averaged_reliability(subject_id, roi_mask_img, fmriprep_dir,
 
     Returns
     -------
-    mean_reliability : float
-        Mean split-half reliability
-    correlations : dict
-        Per-color correlations
+    metrics : dict
+        {
+            'voxel_wise': {'mean': float, 'per_color': dict},
+            'procrustes': {'mean': float, 'per_color': dict}
+        }
     """
     print("\n" + "="*60)
     print("Computing Color-averaged Reliability (Baseline)")
@@ -199,9 +242,11 @@ def compute_color_averaged_reliability(subject_id, roi_mask_img, fmriprep_dir,
     # Store color betas per run
     color_betas = {color: [] for color in color_names}
 
-    # Masker
-    masker = NiftiMasker(mask_img=roi_mask_img, smoothing_fwhm=smoothing_fwhm,
-                        standardize=True, detrend=True)
+    # Masker (only for extraction, no preprocessing)
+    # Preprocessing (smoothing, standardize, detrend) done by FirstLevelModel
+    masker = NiftiMasker(mask_img=roi_mask_img, smoothing_fwhm=None,
+                        standardize=False, detrend=False)
+    masker.fit()  # Fit once
 
     for run_id in range(1, 7):
         print(f"\nProcessing run {run_id}...")
@@ -234,7 +279,7 @@ def compute_color_averaged_reliability(subject_id, roi_mask_img, fmriprep_dir,
             hrf_model='spm',
             drift_model='cosine',
             high_pass=1/128,
-            smoothing_fwhm=None,  # Already smoothed by masker
+            smoothing_fwhm=smoothing_fwhm,  # Apply smoothing in GLM
             mask_img=roi_mask_img,
             minimize_memory=False
         )
@@ -245,39 +290,53 @@ def compute_color_averaged_reliability(subject_id, roi_mask_img, fmriprep_dir,
         for color in color_names:
             try:
                 beta_map = glm.compute_contrast(color, output_type='effect_size')
-                beta_voxels = masker.fit_transform(beta_map).ravel()
+                beta_voxels = masker.transform(beta_map).ravel()  # Use transform only
                 color_betas[color].append(beta_voxels)
             except Exception as e:
                 print(f"  Warning: Failed to compute contrast for {color}: {e}")
                 continue
 
-    # Compute split-half reliability
-    correlations = {}
+    # Compute split-half reliability (두 가지 metric)
+    voxel_wise = {}
+    procrustes_stab = {}
+
+    print("\n  Color          Voxel-wise   Procrustes")
+    print("  " + "-"*42)
 
     for color in color_names:
         if len(color_betas[color]) < 6:
-            print(f"  Warning: {color} has only {len(color_betas[color])} runs")
-            correlations[color] = np.nan
+            print(f"  {color:12s}  INSUFFICIENT DATA")
+            voxel_wise[color] = np.nan
+            procrustes_stab[color] = np.nan
             continue
 
         betas_array = np.array(color_betas[color])  # (6, n_voxels)
 
-        # Odd runs (1,3,5) vs Even runs (2,4,6)
-        odd_runs = betas_array[[0, 2, 4]].mean(axis=0)
-        even_runs = betas_array[[1, 3, 5]].mean(axis=0)
+        # 두 가지 metric 계산
+        v_corr, p_stab = compute_reliability_both_metrics(betas_array, color)
 
-        corr = np.corrcoef(odd_runs, even_runs)[0, 1]
-        correlations[color] = corr
+        voxel_wise[color] = v_corr
+        procrustes_stab[color] = p_stab
 
-        print(f"  {color:8s}: r = {corr:.3f}")
+        print(f"  {color:12s}  {v_corr:6.3f}       {p_stab:6.3f}")
 
     # Mean reliability
-    valid_corrs = [v for v in correlations.values() if not np.isnan(v)]
-    mean_reliability = np.mean(valid_corrs) if valid_corrs else np.nan
+    valid_v = [v for v in voxel_wise.values() if not np.isnan(v)]
+    valid_p = [v for v in procrustes_stab.values() if not np.isnan(v)]
 
-    print(f"\n  Mean reliability: {mean_reliability:.3f}")
+    mean_voxel = np.mean(valid_v) if valid_v else np.nan
+    mean_procrustes = np.mean(valid_p) if valid_p else np.nan
 
-    return mean_reliability, correlations
+    print("  " + "-"*42)
+    print(f"  Mean:          {mean_voxel:6.3f}       {mean_procrustes:6.3f}")
+    print(f"\n  ⭐ Procrustes stability (권장 metric): {mean_procrustes:.3f}")
+
+    metrics = {
+        'voxel_wise': {'mean': mean_voxel, 'per_color': voxel_wise},
+        'procrustes': {'mean': mean_procrustes, 'per_color': procrustes_stab}
+    }
+
+    return metrics
 
 
 def compute_trial_wise_reliability(subject_id, roi_mask_img, fmriprep_dir,
@@ -312,9 +371,11 @@ def compute_trial_wise_reliability(subject_id, roi_mask_img, fmriprep_dir,
     print("Computing Trial-wise Reliability (LS-S)")
     print("="*60)
 
-    # Masker
-    masker = NiftiMasker(mask_img=roi_mask_img, smoothing_fwhm=smoothing_fwhm,
-                        standardize=True, detrend=True)
+    # Masker (only for extraction, no preprocessing)
+    # Preprocessing (smoothing, standardize, detrend) done by FirstLevelModel
+    masker = NiftiMasker(mask_img=roi_mask_img, smoothing_fwhm=None,
+                        standardize=False, detrend=False)
+    masker.fit()  # Fit once
 
     # Store all trials
     all_trial_betas = []
@@ -381,7 +442,7 @@ def compute_trial_wise_reliability(subject_id, roi_mask_img, fmriprep_dir,
                 hrf_model='spm',
                 drift_model='cosine',
                 high_pass=1/128,
-                smoothing_fwhm=None,
+                smoothing_fwhm=smoothing_fwhm,  # Apply smoothing in GLM
                 mask_img=roi_mask_img,
                 minimize_memory=False
             )
@@ -391,7 +452,7 @@ def compute_trial_wise_reliability(subject_id, roi_mask_img, fmriprep_dir,
             # Extract beta for target trial
             try:
                 beta_map = glm.compute_contrast('target', output_type='effect_size')
-                beta_voxels = masker.fit_transform(beta_map).ravel()
+                beta_voxels = masker.transform(beta_map).ravel()  # Use transform only
 
                 all_trial_betas.append(beta_voxels)
                 all_trial_labels.append(target_color)
@@ -410,9 +471,13 @@ def compute_trial_wise_reliability(subject_id, roi_mask_img, fmriprep_dir,
     print(f"\nTotal trials extracted: {len(trial_betas)}")
     print(f"Shape: {trial_betas.shape}")
 
-    # Compute split-half reliability per color
+    # Compute split-half reliability per color (두 가지 metric)
     unique_colors = np.unique(trial_labels)
-    correlations = {}
+    voxel_wise = {}
+    procrustes_stab = {}
+
+    print("\n  Color          Voxel-wise   Procrustes   Trials(odd/even)")
+    print("  " + "-"*60)
 
     for color in unique_colors:
         color_mask = trial_labels == color
@@ -424,37 +489,58 @@ def compute_trial_wise_reliability(subject_id, roi_mask_img, fmriprep_dir,
         even_mask = np.isin(color_runs, [2, 4, 6])
 
         if odd_mask.sum() == 0 or even_mask.sum() == 0:
-            print(f"  {color:8s}: Insufficient data")
-            correlations[color] = np.nan
+            print(f"  {color:12s}  INSUFFICIENT DATA")
+            voxel_wise[color] = np.nan
+            procrustes_stab[color] = np.nan
             continue
 
         odd_avg = color_betas[odd_mask].mean(axis=0)
         even_avg = color_betas[even_mask].mean(axis=0)
 
-        corr = np.corrcoef(odd_avg, even_avg)[0, 1]
-        correlations[color] = corr
+        # (1) Voxel-wise correlation
+        v_corr = np.corrcoef(odd_avg, even_avg)[0, 1]
 
-        print(f"  {color:8s}: r = {corr:.3f} (n_odd={odd_mask.sum()}, n_even={even_mask.sum()})")
+        # (2) Procrustes stability
+        _, _, disparity = procrustes(
+            odd_avg.reshape(-1, 1),
+            even_avg.reshape(-1, 1)
+        )
+        p_stab = 1.0 - disparity
+
+        voxel_wise[color] = v_corr
+        procrustes_stab[color] = p_stab
+
+        print(f"  {color:12s}  {v_corr:6.3f}       {p_stab:6.3f}      {odd_mask.sum()}/{even_mask.sum()}")
 
     # Mean reliability
-    valid_corrs = [v for v in correlations.values() if not np.isnan(v)]
-    mean_reliability = np.mean(valid_corrs) if valid_corrs else np.nan
+    valid_v = [v for v in voxel_wise.values() if not np.isnan(v)]
+    valid_p = [v for v in procrustes_stab.values() if not np.isnan(v)]
 
-    print(f"\n  Mean reliability: {mean_reliability:.3f}")
+    mean_voxel = np.mean(valid_v) if valid_v else np.nan
+    mean_procrustes = np.mean(valid_p) if valid_p else np.nan
 
-    return mean_reliability, correlations
+    print("  " + "-"*60)
+    print(f"  Mean:          {mean_voxel:6.3f}       {mean_procrustes:6.3f}")
+    print(f"\n  ⭐ Procrustes stability (권장 metric): {mean_procrustes:.3f}")
+
+    metrics = {
+        'voxel_wise': {'mean': mean_voxel, 'per_color': voxel_wise},
+        'procrustes': {'mean': mean_procrustes, 'per_color': procrustes_stab}
+    }
+
+    return metrics
 
 
-def make_decision(rel_color_avg, rel_trial_wise):
+def make_decision(metrics_color_avg, metrics_trial_wise):
     """
-    의사결정 로직
+    의사결정 로직 (Procrustes stability 기준)
 
     Parameters
     ----------
-    rel_color_avg : float
-        Color-averaged reliability
-    rel_trial_wise : float
-        Trial-wise reliability
+    metrics_color_avg : dict
+        Color-averaged metrics (voxel_wise + procrustes)
+    metrics_trial_wise : dict
+        Trial-wise metrics (voxel_wise + procrustes)
 
     Returns
     -------
@@ -464,54 +550,76 @@ def make_decision(rel_color_avg, rel_trial_wise):
         Decision message
     """
     print("\n" + "="*60)
-    print("Decision")
+    print("Decision (Procrustes-based)")
     print("="*60)
-    print(f"Color-averaged: {rel_color_avg:.3f}")
-    print(f"Trial-wise:     {rel_trial_wise:.3f}")
-    print(f"Difference:     {rel_trial_wise - rel_color_avg:+.3f}")
+
+    # Primary metric: Procrustes stability
+    p_color_avg = metrics_color_avg['procrustes']['mean']
+    p_trial_wise = metrics_trial_wise['procrustes']['mean']
+
+    # Secondary metric: Voxel-wise (참고용)
+    v_color_avg = metrics_color_avg['voxel_wise']['mean']
+    v_trial_wise = metrics_trial_wise['voxel_wise']['mean']
+
+    print(f"\nProcrustes Stability (⭐ Primary):")
+    print(f"  Color-averaged: {p_color_avg:.3f}")
+    print(f"  Trial-wise:     {p_trial_wise:.3f}")
+    print(f"  Difference:     {p_trial_wise - p_color_avg:+.3f}")
+
+    print(f"\nVoxel-wise Correlation (참고):")
+    print(f"  Color-averaged: {v_color_avg:.3f}")
+    print(f"  Trial-wise:     {v_trial_wise:.3f}")
     print("-" * 60)
 
-    if np.isnan(rel_color_avg) or np.isnan(rel_trial_wise):
+    # Decision based on Procrustes stability (더 정확한 metric)
+    if np.isnan(p_color_avg) or np.isnan(p_trial_wise):
         decision = "ERROR"
         message = "❌ ERROR: Failed to compute reliability"
 
-    elif rel_color_avg < 0.3:
+    elif p_color_avg < 0.70:
         decision = "STOP"
-        message = """❌ CRITICAL: Color-averaged reliability < 0.3
+        message = f"""❌ CRITICAL: Color-averaged Procrustes stability < 0.70
+   → Stability: {p_color_avg:.3f}
    → Data quality 자체 문제
    → Action: Check preprocessing (alignment, smoothing, confounds)
    → DO NOT proceed to hyperalignment"""
 
-    elif rel_color_avg >= 0.5 and rel_trial_wise < 0.3:
+    elif p_color_avg >= 0.80 and p_trial_wise < 0.70:
         decision = "IMPROVE_GLM"
-        message = """⚠️ WARNING: Color-averaged good BUT trial-wise poor
+        message = f"""⚠️ WARNING: Color-averaged good BUT trial-wise poor
+   → Color-averaged: {p_color_avg:.3f}
+   → Trial-wise:     {p_trial_wise:.3f}
    → SNR 문제 (single-trial estimation unreliable)
    → Action:
       1. Increase smoothing (6mm → 8mm)
       2. Add more confounds (motion + CompCor)
-      3. Regularization in GLM
+      3. Try AR(1) model for temporal correlation
    → Re-run trial-wise GLM with adjustments"""
 
-    elif rel_trial_wise >= 0.3 and rel_trial_wise < (rel_color_avg - 0.1):
+    elif p_trial_wise >= 0.70 and p_trial_wise < (p_color_avg - 0.10):
         decision = "PROCEED_WITH_CAUTION"
         message = f"""⚠️ CAUTION: Trial-wise lower than color-averaged (expected)
-   → Color-averaged: {rel_color_avg:.3f}
-   → Trial-wise:     {rel_trial_wise:.3f}
-   → Drop: {rel_color_avg - rel_trial_wise:.3f}
+   → Color-averaged: {p_color_avg:.3f}
+   → Trial-wise:     {p_trial_wise:.3f}
+   → Drop: {p_color_avg - p_trial_wise:.3f}
    → This is normal (single-trial has more noise)
    → Action: Proceed to pilot GPA with regularization"""
 
-    elif rel_trial_wise >= 0.4:
+    elif p_trial_wise >= 0.80:
         decision = "PROCEED"
-        message = f"""✅ EXCELLENT: Trial-wise reliability high
-   → Trial-wise: {rel_trial_wise:.3f}
-   → Action: Proceed to pilot hyperalignment"""
+        message = f"""✅ EXCELLENT: Trial-wise Procrustes stability high
+   → Stability: {p_trial_wise:.3f}
+   → Action: Proceed to pilot hyperalignment
+
+   📝 Note: Voxel-wise correlation ({v_trial_wise:.3f}) 낮아도 OK
+      → 좌표계 차이 때문 (정상)"""
 
     else:
         decision = "PROCEED_WITH_CAUTION"
-        message = f"""⚠️ BORDERLINE: Trial-wise reliability marginal
-   → Trial-wise: {rel_trial_wise:.3f}
-   → Action: Proceed to pilot, monitor closely"""
+        message = f"""⚠️ BORDERLINE: Trial-wise Procrustes stability marginal
+   → Stability: {p_trial_wise:.3f} (기준: > 0.70)
+   → Action: Proceed to pilot, monitor closely
+   → Consider increasing regularization in GPA"""
 
     print(message)
     print(f"\n✨ Recommendation: {decision}")
@@ -539,14 +647,14 @@ def main():
 
     # Load ROI mask
     try:
-        roi_mask_img = load_roi_mask(args.roi)
+        roi_mask_img = load_roi_mask(args.subject, args.roi)
     except FileNotFoundError as e:
         print(f"\n❌ Error: {e}")
-        print("Please create ROI mask first (from baseline analysis)")
+        print("Please check that ROI masks exist in derivatives/V3_Comprehensive/ROI_mask/")
         return
 
-    # Part A: Color-averaged reliability
-    rel_color_avg, corrs_color_avg = compute_color_averaged_reliability(
+    # Part A: Color-averaged reliability (두 가지 metric)
+    metrics_color_avg = compute_color_averaged_reliability(
         args.subject,
         roi_mask_img,
         args.fmriprep_dir,
@@ -555,8 +663,8 @@ def main():
         args.confounds_strategy
     )
 
-    # Part B: Trial-wise reliability
-    rel_trial_wise, corrs_trial_wise = compute_trial_wise_reliability(
+    # Part B: Trial-wise reliability (두 가지 metric)
+    metrics_trial_wise = compute_trial_wise_reliability(
         args.subject,
         roi_mask_img,
         args.fmriprep_dir,
@@ -565,8 +673,8 @@ def main():
         args.confounds_strategy
     )
 
-    # Part C: Decision
-    decision, message = make_decision(rel_color_avg, rel_trial_wise)
+    # Part C: Decision (Procrustes 기준)
+    decision, message = make_decision(metrics_color_avg, metrics_trial_wise)
 
     # Save results
     results = {
@@ -575,17 +683,36 @@ def main():
         'smoothing_fwhm': args.smoothing_fwhm,
         'confounds_strategy': args.confounds_strategy,
         'color_averaged': {
-            'mean_reliability': float(rel_color_avg) if not np.isnan(rel_color_avg) else None,
-            'per_color': {k: float(v) if not np.isnan(v) else None
-                         for k, v in corrs_color_avg.items()}
+            'voxel_wise': {
+                'mean': float(metrics_color_avg['voxel_wise']['mean'])
+                        if not np.isnan(metrics_color_avg['voxel_wise']['mean']) else None,
+                'per_color': {k: float(v) if not np.isnan(v) else None
+                             for k, v in metrics_color_avg['voxel_wise']['per_color'].items()}
+            },
+            'procrustes': {
+                'mean': float(metrics_color_avg['procrustes']['mean'])
+                        if not np.isnan(metrics_color_avg['procrustes']['mean']) else None,
+                'per_color': {k: float(v) if not np.isnan(v) else None
+                             for k, v in metrics_color_avg['procrustes']['per_color'].items()}
+            }
         },
         'trial_wise': {
-            'mean_reliability': float(rel_trial_wise) if not np.isnan(rel_trial_wise) else None,
-            'per_color': {k: float(v) if not np.isnan(v) else None
-                         for k, v in corrs_trial_wise.items()}
+            'voxel_wise': {
+                'mean': float(metrics_trial_wise['voxel_wise']['mean'])
+                        if not np.isnan(metrics_trial_wise['voxel_wise']['mean']) else None,
+                'per_color': {k: float(v) if not np.isnan(v) else None
+                             for k, v in metrics_trial_wise['voxel_wise']['per_color'].items()}
+            },
+            'procrustes': {
+                'mean': float(metrics_trial_wise['procrustes']['mean'])
+                        if not np.isnan(metrics_trial_wise['procrustes']['mean']) else None,
+                'per_color': {k: float(v) if not np.isnan(v) else None
+                             for k, v in metrics_trial_wise['procrustes']['per_color'].items()}
+            }
         },
         'decision': decision,
-        'decision_message': message
+        'decision_message': message,
+        'note': 'Procrustes stability is the primary metric (coordinate-system independent)'
     }
 
     output_file = output_dir / f'reliability_sub-{args.subject}_{args.roi}.json'

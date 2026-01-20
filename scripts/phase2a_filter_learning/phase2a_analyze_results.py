@@ -10,12 +10,14 @@ import pandas as pd
 import json
 from pathlib import Path
 import matplotlib.pyplot as plt
-import seaborn as sns
+import sys
+import traceback
 
 # 경로 설정
-BASE_DIR = Path("/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis")
-RESULTS_DIR = BASE_DIR / "results/group_level/phase2a_data"
-OUTPUT_DIR = BASE_DIR / "results/group_level/phase2a_analysis"
+BASE_DIR = Path("/scratch/connectome/haba6030/colorBlind")
+RESULTS_DIR = BASE_DIR / "analysis" / "comprehensive" / "results" / "phase2a_data"
+RESULTS_DIR_OLD = BASE_DIR / "results" / "group_level" / "phase2a_data"  # Fallback
+OUTPUT_DIR = BASE_DIR / "analysis" / "comprehensive" / "results" / "phase2a_analysis"
 
 SUBJECTS = ['08', '09', '10']
 ROIS = ['V1', 'V2']
@@ -27,47 +29,69 @@ OPTION_NAMES = {
 }
 
 def load_metadata(option, subject, roi):
-    """메타데이터 로드"""
+    """메타데이터 로드 (신 경로 우선, 구 경로 fallback)"""
     if option == 'D':
-        model_dir = RESULTS_DIR / "models"
+        model_dir_new = RESULTS_DIR / "models"
+        model_dir_old = RESULTS_DIR_OLD / "models"
     else:
-        model_dir = RESULTS_DIR / f"models_option{option}"
+        model_dir_new = RESULTS_DIR / f"models_option{option}"
+        model_dir_old = RESULTS_DIR_OLD / f"models_option{option}"
 
-    metadata_file = model_dir / f"sub-{subject}" / roi / "metadata.json"
+    # Try new path first
+    metadata_file = model_dir_new / f"sub-{subject}" / roi / "metadata.json"
+    if metadata_file.exists():
+        with open(metadata_file, 'r') as f:
+            return json.load(f)
 
-    if not metadata_file.exists():
-        return None
+    # Fallback to old path
+    metadata_file_old = model_dir_old / f"sub-{subject}" / roi / "metadata.json"
+    if metadata_file_old.exists():
+        with open(metadata_file_old, 'r') as f:
+            return json.load(f)
 
-    with open(metadata_file, 'r') as f:
-        return json.load(f)
+    return None
 
 def load_A_matrix(option, subject, roi):
-    """A 행렬 로드"""
+    """A 행렬 로드 (신 경로 우선, 구 경로 fallback)"""
     if option == 'D':
-        model_dir = RESULTS_DIR / "models"
+        model_dir_new = RESULTS_DIR / "models"
+        model_dir_old = RESULTS_DIR_OLD / "models"
     else:
-        model_dir = RESULTS_DIR / f"models_option{option}"
+        model_dir_new = RESULTS_DIR / f"models_option{option}"
+        model_dir_old = RESULTS_DIR_OLD / f"models_option{option}"
 
-    A_file = model_dir / f"sub-{subject}" / roi / "A_matrix.npy"
+    # Try new path first
+    A_file = model_dir_new / f"sub-{subject}" / roi / "A_matrix.npy"
+    if A_file.exists():
+        return np.load(A_file)
 
-    if not A_file.exists():
-        return None
+    # Fallback to old path
+    A_file_old = model_dir_old / f"sub-{subject}" / roi / "A_matrix.npy"
+    if A_file_old.exists():
+        return np.load(A_file_old)
 
-    return np.load(A_file)
+    return None
 
 def load_b_vector(option, subject, roi):
-    """b 벡터 로드"""
+    """b 벡터 로드 (신 경로 우선, 구 경로 fallback)"""
     if option == 'D':
-        model_dir = RESULTS_DIR / "models"
+        model_dir_new = RESULTS_DIR / "models"
+        model_dir_old = RESULTS_DIR_OLD / "models"
     else:
-        model_dir = RESULTS_DIR / f"models_option{option}"
+        model_dir_new = RESULTS_DIR / f"models_option{option}"
+        model_dir_old = RESULTS_DIR_OLD / f"models_option{option}"
 
-    b_file = model_dir / f"sub-{subject}" / roi / "b_vector.npy"
+    # Try new path first
+    b_file = model_dir_new / f"sub-{subject}" / roi / "b_vector.npy"
+    if b_file.exists():
+        return np.load(b_file)
 
-    if not b_file.exists():
-        return None
+    # Fallback to old path
+    b_file_old = model_dir_old / f"sub-{subject}" / roi / "b_vector.npy"
+    if b_file_old.exists():
+        return np.load(b_file_old)
 
-    return np.load(b_file)
+    return None
 
 def compare_options():
     """3가지 옵션 비교"""
@@ -75,7 +99,15 @@ def compare_options():
     print("Phase 2A: 옵션별 결과 비교")
     print("=" * 80)
 
+    # Check if RESULTS_DIR exists
+    if not RESULTS_DIR.exists():
+        print(f"\n⚠️  ERROR: Results directory not found!")
+        print(f"   Expected: {RESULTS_DIR}")
+        print(f"   Please ensure Phase 2A filter learning has completed successfully.")
+        return pd.DataFrame()
+
     results = []
+    found_any = False
 
     for subject in SUBJECTS:
         for roi in ROIS:
@@ -90,8 +122,10 @@ def compare_options():
                     print(f"  Option {option}: NOT FOUND")
                     continue
 
-                final_loss = metadata['final_loss']
-                n_iter = metadata['n_iterations']
+                found_any = True
+
+                final_loss = metadata.get('final_loss', np.nan)
+                n_iter = metadata.get('n_iterations', metadata.get('epoch', np.nan))
 
                 # A 행렬 통계
                 A = load_A_matrix(option, subject, roi)
@@ -104,11 +138,14 @@ def compare_options():
                 b_mean = b.mean()
                 b_std = b.std()
 
+                # Handle different loss key names (structure/rdm)
+                structure_loss = final_loss.get('structure', final_loss.get('rdm', np.nan))
+
                 print(f"\n  Option {option} ({OPTION_NAMES[option]}):")
-                print(f"    Total Loss:     {final_loss['total']:.6f}")
-                print(f"    - Magnitude:    {final_loss['magnitude']:.6f}")
-                print(f"    - Baseline:     {final_loss['baseline']:.6f}")
-                print(f"    - Structure:    {final_loss['structure']:.6f}")
+                print(f"    Total Loss:     {final_loss.get('total', np.nan):.6f}")
+                print(f"    - Magnitude:    {final_loss.get('magnitude', np.nan):.6f}")
+                print(f"    - Baseline:     {final_loss.get('baseline', np.nan):.6f}")
+                print(f"    - Structure:    {structure_loss:.6f}")
                 print(f"    Iterations:     {n_iter}")
                 print(f"    A diagonal:     mean={A_mean:.3f}, std={A_std:.3f}")
                 print(f"    b vector:       mean={b_mean:.4f}, std={b_std:.4f}")
@@ -118,16 +155,22 @@ def compare_options():
                     'roi': roi,
                     'option': option,
                     'option_name': OPTION_NAMES[option],
-                    'total_loss': final_loss['total'],
-                    'magnitude_loss': final_loss['magnitude'],
-                    'baseline_loss': final_loss['baseline'],
-                    'structure_loss': final_loss['structure'],
+                    'total_loss': final_loss.get('total', np.nan),
+                    'magnitude_loss': final_loss.get('magnitude', np.nan),
+                    'baseline_loss': final_loss.get('baseline', np.nan),
+                    'structure_loss': structure_loss,
                     'n_iterations': n_iter,
                     'A_mean': A_mean,
                     'A_std': A_std,
                     'b_mean': b_mean,
                     'b_std': b_std
                 })
+
+    if not found_any:
+        print(f"\n⚠️  WARNING: No filter learning results found!")
+        print(f"   Searched in: {RESULTS_DIR}")
+        print(f"   Expected structure: models/sub-{{ID}}/{{ROI}}/metadata.json")
+        print(f"\n   This is normal if Phase 2A filter learning hasn't run yet or failed.")
 
     return pd.DataFrame(results)
 
@@ -246,32 +289,52 @@ def plot_comparison(df):
 
 def main():
     """메인 실행"""
-    # 결과 비교
-    df = compare_options()
+    try:
+        # 결과 비교
+        df = compare_options()
 
-    # CSV 저장
-    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    csv_file = OUTPUT_DIR / "option_comparison.csv"
-    df.to_csv(csv_file, index=False, float_format='%.6f')
-    print(f"\n\nSaved summary: {csv_file}")
+        # Check if we have any data
+        if df.empty:
+            print("\n" + "=" * 80)
+            print("⚠️  SKIPPING: No filter learning results to analyze")
+            print("=" * 80)
+            print("\nThis is expected if Phase 2A filter learning hasn't run yet.")
+            print("The pipeline will continue with other analyses.")
+            sys.exit(0)  # Exit gracefully without error
 
-    # 최적 옵션 분석
-    analyze_best_options(df)
+        # CSV 저장
+        OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+        csv_file = OUTPUT_DIR / "option_comparison.csv"
+        df.to_csv(csv_file, index=False, float_format='%.6f')
+        print(f"\n\nSaved summary: {csv_file}")
 
-    # 시각화
-    print("\n" + "=" * 80)
-    print("시각화 생성 중...")
-    print("=" * 80)
-    plot_comparison(df)
+        # 최적 옵션 분석
+        analyze_best_options(df)
 
-    print("\n" + "=" * 80)
-    print("분석 완료!")
-    print("=" * 80)
-    print(f"\n결과 디렉토리: {OUTPUT_DIR}")
-    print(f"  - option_comparison.csv")
-    print(f"  - option_comparison_total_loss.png")
-    print(f"  - option_comparison_components.png")
-    print(f"  - option_comparison_A_matrix.png")
+        # 시각화
+        print("\n" + "=" * 80)
+        print("시각화 생성 중...")
+        print("=" * 80)
+        plot_comparison(df)
+
+        print("\n" + "=" * 80)
+        print("분석 완료!")
+        print("=" * 80)
+        print(f"\n결과 디렉토리: {OUTPUT_DIR}")
+        print(f"  - option_comparison.csv")
+        print(f"  - option_comparison_total_loss.png")
+        print(f"  - option_comparison_components.png")
+        print(f"  - option_comparison_A_matrix.png")
+
+    except Exception as e:
+        print("\n" + "=" * 80)
+        print("❌ ERROR in Phase 2A analysis")
+        print("=" * 80)
+        print(f"\nError: {str(e)}")
+        print("\nFull traceback:")
+        traceback.print_exc()
+        print("\n" + "=" * 80)
+        sys.exit(1)
 
 if __name__ == "__main__":
     main()

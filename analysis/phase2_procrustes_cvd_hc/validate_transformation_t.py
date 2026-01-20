@@ -43,8 +43,8 @@ else:
     BASE_DIR = Path('/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis')
     BASELINE_DIR = None  # Will need to download data first
 
-RESULTS_DIR = BASE_DIR / 'results/group_level/baseline81_deob_determin'
-OUTPUT_DIR = BASE_DIR / 'results/group_level/transformation_validation'
+RESULTS_DIR = BASE_DIR / 'analysis' / 'comprehensive' / 'results' / 'baseline81_deob_determin'
+OUTPUT_DIR = BASE_DIR / 'analysis' / 'comprehensive' / 'results' / 'transformation_validation'
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # Subject info (matching Option 2D analysis)

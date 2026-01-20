@@ -96,6 +96,7 @@ def main():
     # Note: T1w mask might be in anat/ or func/ depending on fMRIPrep version
     t1w_mask_candidates = [
         anat_dir / f'sub-{args.subject}_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz',
+        anat_dir / f'sub-{args.subject}_acq-mprage_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz',  # fMRIPrep with acq
         func_dir / f'sub-{args.subject}_space-MNI152NLin2009cAsym_res-2_label-brain_mask.nii.gz',
         func_dir / f'sub-{args.subject}_task-rsvp_run-{args.run}_space-MNI152NLin2009cAsym_res-2_label-brain_mask.nii.gz',
     ]

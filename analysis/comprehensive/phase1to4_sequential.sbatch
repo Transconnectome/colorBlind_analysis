@@ -24,13 +24,28 @@ echo "Job ID: ${SLURM_JOB_ID}"
 echo "Start: $(date)"
 echo "================================================================"
 
-# Configuration
-DATASET="original_v3"
-TIMESTAMP="baseline32_original_v3"
+# Configuration - Dataset-Agnostic (accepts arguments)
+DATASET="${1:-original_v3}"
+TIMESTAMP="${2:-baseline32_${DATASET}}"
 SUBJECTS=(01 02 03 04 05 06 07 08 09 10)
 ROIS=(V1 V2 V3 hV4)
 HC_SUBJECTS=(01 02 03 04 05 06 07)
 CVD_SUBJECTS=(08 09 10)
+
+echo "Dataset: ${DATASET}"
+echo "Timestamp: ${TIMESTAMP}"
+
+# Validate dataset
+case $DATASET in
+    original_v3|method3_header_mi|deoblique_v2)
+        echo "✓ Valid dataset: ${DATASET}"
+        ;;
+    *)
+        echo "ERROR: Invalid dataset '${DATASET}'"
+        echo "Valid: original_v3, method3_header_mi, deoblique_v2"
+        exit 1
+        ;;
+esac
 
 # Paths
 BASE_DIR=/scratch/connectome/haba6030/colorBlind

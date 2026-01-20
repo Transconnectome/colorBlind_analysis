@@ -9,6 +9,30 @@
 
 ---
 
+## 📋 TODO List
+
+**Source of truth**: `../../prediction_model_workspace/MASTER_PLAN.md` Phase 2 section
+
+### Research & Planning
+- [ ] **Find SOTA models for fMRI prediction model**
+  - Survey recent literature (2023-2026)
+  - Categories to explore:
+    - Linear encoders (Ridge, Lasso, Elastic Net)
+    - Neural networks (MLP, CNN, Transformers)
+    - Generative models (VAE, Diffusion models)
+    - Hybrid approaches (e.g., linear + non-linear)
+  - Evaluation criteria:
+    - Sample efficiency (works with small n?)
+    - Interpretability
+    - Computational cost
+    - Success in similar fMRI tasks
+  - **Deliverable**: Literature review summary document
+  - **Timeline**: Week 3-4 (during Phase 1 implementation)
+
+See `../../prediction_model_workspace/MASTER_PLAN.md` for complete Phase 2 TODO checklist.
+
+---
+
 ## ⚠️ IMPORTANT: Future Development
 
 **이 phase는 Future Phase 1 완료 후 시작됩니다.**

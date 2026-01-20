@@ -15,9 +15,9 @@ import matplotlib.pyplot as plt
 from datetime import datetime
 
 # 경로 설정
-BASE_DIR = Path("/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis")
-PATTERN_DIR = BASE_DIR / "results/group_level/phase2a_data/patterns"
-OUTPUT_DIR = BASE_DIR / "results/group_level/phase2a_data/models"
+BASE_DIR = Path("/scratch/connectome/haba6030/colorBlind")
+PATTERN_DIR = BASE_DIR / "analysis" / "comprehensive" / "results" / "phase2a_data" / "patterns"
+OUTPUT_DIR = BASE_DIR / "analysis" / "comprehensive" / "results" / "phase2a_data" / "models"
 
 CVD_SUBJECTS = ['08', '09', '10']
 ROIS = ['V1', 'V2']  # 우선 V1, V2만

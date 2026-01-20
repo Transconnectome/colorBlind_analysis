@@ -763,7 +763,7 @@ def main():
     print("=" * 80)
     print(f"\nResults saved to: {output_dir}")
     print("\nDownload with:")
-    print(f"  scp -r haba6030@node2:{output_dir} results/group_level/")
+    print(f"  scp -r haba6030@node2:{output_dir} analysis/comprehensive/results/")
     print()
     print("Key findings to check:")
     print("  1. GROUP-LEVEL: Is CVD common pattern significant?")

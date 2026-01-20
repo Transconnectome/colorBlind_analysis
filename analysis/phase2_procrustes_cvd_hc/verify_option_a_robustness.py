@@ -34,8 +34,8 @@ else:
     BASE_DIR = Path('/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis')
     DATASET_DIR = None
 
-RESULTS_DIR = BASE_DIR / 'results/group_level/baseline81_deob_determin'
-OUTPUT_DIR = BASE_DIR / 'results/group_level/option_a_verification'
+RESULTS_DIR = BASE_DIR / 'analysis' / 'comprehensive' / 'results' / 'baseline81_deob_determin'
+OUTPUT_DIR = BASE_DIR / 'analysis' / 'comprehensive' / 'results' / 'option_a_verification'
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # Subject info
@@ -743,7 +743,7 @@ def main():
     print(f"{'='*60}")
     print(f"\nResults saved to: {OUTPUT_DIR}")
     print("\nDownload results with:")
-    print(f"  scp -r haba6030@node2:{OUTPUT_DIR} results/group_level/")
+    print(f"  scp -r haba6030@node2:{OUTPUT_DIR} analysis/comprehensive/results/")
 
 
 if __name__ == '__main__':

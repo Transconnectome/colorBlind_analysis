@@ -30,11 +30,26 @@ echo "Task ID: ${SLURM_ARRAY_TASK_ID}"
 echo "Start: $(date)"
 echo "================================================================"
 
-# Configuration
-DATASET="original_v3"
-TIMESTAMP="baseline32_original_v3"
+# Configuration - Dataset-Agnostic (accepts arguments)
+DATASET="${1:-original_v3}"
+TIMESTAMP="${2:-baseline32_${DATASET}}"
 ALL_SUBJECTS=(01 02 03 04 05 06 07 08 09 10)
 ROIS=(V1 V2 V3 hV4)
+
+echo "Dataset: ${DATASET}"
+echo "Timestamp: ${TIMESTAMP}"
+
+# Validate dataset
+case $DATASET in
+    original_v3|method3_header_mi|deoblique_v2)
+        echo "✓ Valid dataset: ${DATASET}"
+        ;;
+    *)
+        echo "ERROR: Invalid dataset '${DATASET}'"
+        echo "Valid: original_v3, method3_header_mi, deoblique_v2"
+        exit 1
+        ;;
+esac
 
 # Get subject for this array task
 SUBJECT=${ALL_SUBJECTS[$SLURM_ARRAY_TASK_ID-1]}
@@ -80,10 +95,10 @@ echo "PHASE 0A: ROI Building for sub-${SUBJECT}"
 echo "================================================================"
 echo ""
 
-# Build ROI masks for original_v3 dataset
+# Build ROI masks for specified dataset
 # Output: derivatives/V3_Comprehensive/ROI_mask/sub-${SUBJECT}/roi_pipeline/
-echo "Building ROI masks for sub-${SUBJECT}..."
-python analysis/phase1_preprocess_decoding/roi_pipeline_comprehensive.py $SUBJECT
+echo "Building ROI masks for sub-${SUBJECT} with dataset ${DATASET}..."
+python analysis/phase1_preprocess_decoding/roi_pipeline_selected_1202used.py $SUBJECT --dataset $DATASET
 
 if [ $? -eq 0 ]; then
     echo "✓ ROI masks created for sub-${SUBJECT}"

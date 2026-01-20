@@ -57,6 +57,9 @@ import argparse
 import warnings
 warnings.filterwarnings('ignore')
 
+# Add utils directory to path
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'utils'))
+
 # Import common utilities for color decoding
 from utils_color_decoding import (
     # Constants
@@ -534,6 +537,25 @@ def visualize_results(results_df, f_values, p_values, output_dir, config_name, s
         subject: Subject ID
         roi: ROI name
     """
+    # Check if results_df is empty or missing 'method' column
+    if results_df.empty or 'method' not in results_df.columns:
+        print("⚠️  WARNING: results_df is empty or missing 'method' column")
+        print("  Skipping detailed visualization plots")
+
+        # Create minimal visualization with just F-values
+        fig, ax = plt.subplots(1, 1, figsize=(8, 5))
+        ax.hist(f_values, bins=50, alpha=0.7, edgecolor='black')
+        ax.set_xlabel('F-value', fontsize=12)
+        ax.set_ylabel('Number of Voxels', fontsize=12)
+        ax.set_title(f'F-value Distribution (sub-{subject}, {roi})', fontsize=12, fontweight='bold')
+        ax.grid(alpha=0.3)
+
+        fig_path = Path(output_dir) / f'anova_fvalues_{config_name}_sub-{subject}_{roi}.png'
+        plt.savefig(fig_path, dpi=150, bbox_inches='tight')
+        plt.close()
+        print(f"  ✓ Minimal plot saved: {fig_path}")
+        return
+
     fig, axes = plt.subplots(1, 3, figsize=(18, 5))
 
     # ========================================
@@ -796,6 +818,15 @@ def main():
     # Step 7: Visualizations
     # ========================================
     print(f"\n[Step 7/7] Creating visualizations...")
+
+    # Check if results_df has data and required columns
+    if results_df.empty or 'method' not in results_df.columns:
+        print("⚠️  WARNING: No evaluation results available")
+        print("  Skipping detailed visualizations")
+        print(f"\n{'='*80}")
+        print("✓ Feature selection completed (basic analysis only)")
+        print(f"{'='*80}")
+        return
 
     # Main results plot
     visualize_results(results_df, f_values, p_values, output_dir, CONFIG_NAME, SUBJECT, ROI)

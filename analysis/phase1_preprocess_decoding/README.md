@@ -42,15 +42,35 @@ python fir_reconstruction_BH2009_system_clean.py \
     --dataset deoblique_v2
 ```
 
-**Configuration Options**:
-- Smoothing: 0mm, 3mm, 6mm
-- High-pass filter: Yes/No
-- Motion regression: None, 6params, 24params
-- CompCor: Yes/No
-- Drift terms: polynomial degree
-- Standardization: Yes/No
+**Baseline Decoding Settings (Baseline32)**
+**Current Standard Configuration:**
+```python
+# Baseline32 configuration (determined via systematic review)
+Smoothing:      0mm (no smoothing)
+High-pass:      0.01 Hz
+Motion:         cosine (6 cosine basis functions)
+CompCor:        None
+Drift:          none (handled by high-pass)
+Standardize:    False (preserve raw beta values)
+```
 
-### 2. `grid_search_preprocessing.py`
+**FIR GLM Parameters:**
+```python
+N_DELAYS = 8                    # 8 FIR delays (12s window at TR=1.5s)
+VOXEL_SELECTION = 'top50'       # Top 50% voxels by FIR R²
+HRF_MODEL = 'fir + derivative'  # 2nd-level GLM with HRF + temporal derivative
+```
+
+**Forward Encoding Model:**
+```python
+N_CHANNELS = 6                  # 6 half-wave rectified basis functions
+CHANNEL_CENTERS = [0°, 60°, 120°, 180°, 240°, 300°]  # Equally spaced in hue space
+CHANNEL_WIDTH = 60°             # FWHM of Gaussian basis functions
+CROSS_VALIDATION = 'LORO'       # Leave-One-Run-Out
+CROSS_VALIDATION = 'LOCO'       # Leave-One-Color-Out
+```
+
+### 2. `grid_search_preprocessing.py` : NOT USED - ALREADY DONE
 
 **Purpose**: Systematic evaluation of preprocessing configurations
 

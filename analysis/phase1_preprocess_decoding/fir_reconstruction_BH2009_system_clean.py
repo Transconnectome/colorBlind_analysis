@@ -68,6 +68,10 @@ from scipy import stats
 from scipy.stats import zscore
 from scipy.ndimage import convolve1d
 
+# Import actual stimulus colors from utils module
+sys.path.insert(0, str(Path(__file__).parent.parent / 'utils'))
+from utils_color_decoding import COLOR_LAB, get_stimulus_color_rgb, lab2rgb_accurate
+
 # ============================================================================
 # Configuration
 # ============================================================================
@@ -95,18 +99,7 @@ LABEL2HUE_DEG_TEST = {
     'color_8': 315.0,
 }
 
-# CIELab color definitions for accurate stimulus color representation
-COLOR_LAB = {
-    'color_1': [75, 40.0, 0.0],        # 0°: Red
-    'color_2': [75, 28.28, 28.28],     # 45°: Orange
-    'color_3': [75, 0.0, 40.0],        # 90°: Yellow
-    'color_4': [75, -28.28, 28.28],    # 135°: Green
-    'color_5': [75, -40.0, 0.0],       # 180°: Cyan
-    'color_6': [75, -28.28, -28.28],   # 225°: Blue
-    'color_7': [75, 0.0, -40.0],       # 270°: Violet
-    'color_8': [75, 28.28, -28.28],    # 315°: Pinkish
-    'blank': [75, 0.0, 0.0]            # Neutral Gray
-}
+# Note: COLOR_LAB, lab2rgb_accurate, and get_stimulus_color_rgb are now imported from utils_color_decoding.py
 
 # Experiment parameters
 TR = 1.5
@@ -153,72 +146,7 @@ def circular_mean_deg(angles_deg):
     R = np.hypot(C, S)  # 0~1, higher = more concentrated
     return mean_ang, R
 
-def lab2rgb_accurate(L, a, b, clip=True):
-    """
-    Convert CIELab to RGB using proper color space conversion
-
-    Parameters:
-    -----------
-    L : float
-        Lightness (0-100)
-    a : float
-        Green-Red axis
-    b : float
-        Blue-Yellow axis
-    clip : bool
-        Clip RGB values to [0, 1]
-
-    Returns:
-    --------
-    tuple : (R, G, B) in [0, 1] range
-    """
-    L, a, b = float(L), float(a), float(b)
-
-    # Lab to XYZ
-    y = (L + 16) / 116
-    x = a / 500 + y
-    z = y - b / 200
-
-    xyz = np.array([x, y, z])
-    xyz = np.where(xyz > 0.206893, xyz**3, (xyz - 16/116) / 7.787)
-    xyz *= [0.95047, 1., 1.08883]  # D65 white point
-
-    # XYZ to RGB (sRGB matrix)
-    rgb = np.dot([[3.2406, -1.5372, -0.4986],
-                  [-0.9689, 1.8758, 0.0415],
-                  [0.0557, -0.2040, 1.0570]], xyz)
-
-    # Gamma correction
-    rgb = np.where(rgb <= 0.0031308, 12.92 * rgb, 1.055 * rgb**(1/2.4) - 0.055)
-
-    if clip:
-        rgb = np.clip(rgb, 0, 1)
-
-    return tuple(rgb)
-
-def get_stimulus_color_rgb(color_name):
-    """
-    Get actual stimulus RGB color for visualization
-    Uses COLOR_LAB for accurate color representation
-
-    Parameters:
-    -----------
-    color_name : str
-        Color name (e.g., 'color_1')
-
-    Returns:
-    --------
-    tuple : (R, G, B) in [0, 1] range
-    """
-    if color_name in COLOR_LAB:
-        L, a, b = COLOR_LAB[color_name]
-        return lab2rgb_accurate(L, a, b)
-    else:
-        # Fallback to HSV approximation
-        from matplotlib.colors import hsv_to_rgb
-        hue_deg = LABEL2HUE_DEG[color_name]
-        h = (hue_deg % 360) / 360.0
-        return hsv_to_rgb([h, 0.8, 0.9])
+# Note: lab2rgb_accurate() and get_stimulus_color_rgb() are now imported from utils_color_decoding.py
 
 # ============================================================================
 # Preprocessing Functions (for systematic review)
@@ -564,6 +492,11 @@ DATASET_CONFIGS = {
         'fmriprep': '/storage/connectome/haba6030/fmriprep_out_original_v3',
         'events': '/storage/connectome/haba6030/bids_editted',
         'description': 'v3: Original data with FreeSurfer removed (--fs-no-reconall)'
+    },
+    'method3_header_mi': {
+        'fmriprep': '/storage/connectome/haba6030/fmriprep_out_method3_header_mi',
+        'events': '/storage/connectome/haba6030/bids_editted',
+        'description': 'Method3: Header→MI registration (mri_coreg), MNI152NLin2009cAsym'
     }
 }
 
@@ -634,63 +567,84 @@ if args.roi_mask:
     roi_path = args.roi_mask
     print(f"  Using provided ROI mask: {roi_path}")
 else:
-    # Auto-detect from derivatives directory (deoblique data)
-    roi_pipeline_dir = args.roi_pipeline_dir
+    # Auto-detect from derivatives directory
+    # Priority 1: Check V3_Comprehensive for original_v3 data
+    v3_path = f"derivatives/V3_Comprehensive/ROI_mask/sub-{SUBJECT_ID}/roi_pipeline/{ROI_NAME}_mask_thr50_intnearest_binTrue_maskfunc_gmTrue_subjTrue.nii.gz"
 
-    # Auto-detect roi_config based on roi_pipeline_dir if not provided
-    if args.roi_config is None:
-        # Check if probability or deterministic based on directory name
-        if 'probability' in roi_pipeline_dir:
-            # Probability: binFalse, subjTrue
-            roi_config = 'thr50_intnearest_binFalse_masknone_gmFalse_subjTrue'
-            print(f"  Auto-detected Probability ROI config (binFalse)")
-        else:
-            # Deterministic: binTrue, subjTrue
-            roi_config = 'thr50_intnearest_binTrue_masknone_gmFalse_subjTrue'
-            print(f"  Auto-detected Deterministic ROI config (binTrue)")
+    if os.path.exists(v3_path):
+        roi_path = v3_path
+        print(f"  ✓ Found ROI mask in V3_Comprehensive (original_v3 data)")
+        print(f"  {roi_path}")
     else:
-        roi_config = args.roi_config
-        print(f"  Using provided ROI config: {roi_config}")
+        # Priority 2: Check old deoblique data location
+        roi_pipeline_dir = args.roi_pipeline_dir
 
-    roi_path = f"derivatives/sub-{SUBJECT_ID}/{roi_pipeline_dir}/{ROI_NAME}_mask_{roi_config}.nii.gz"
-    print(f"  Auto-detecting ROI mask from:")
-    print(f"  {roi_path}")
-    print(f"  ROI pipeline dir: {roi_pipeline_dir}")
-    print(f"  ROI config: {roi_config}")
+        # Auto-detect roi_config based on roi_pipeline_dir if not provided
+        if args.roi_config is None:
+            # Check if probability or deterministic based on directory name
+            if 'probability' in roi_pipeline_dir:
+                # Probability: binFalse, subjTrue
+                roi_config = 'thr50_intnearest_binFalse_masknone_gmFalse_subjTrue'
+                print(f"  Auto-detected Probability ROI config (binFalse)")
+            else:
+                # Deterministic: binTrue, subjTrue
+                roi_config = 'thr50_intnearest_binTrue_masknone_gmFalse_subjTrue'
+                print(f"  Auto-detected Deterministic ROI config (binTrue)")
+        else:
+            roi_config = args.roi_config
+            print(f"  Using provided ROI config: {roi_config}")
+
+        roi_path = f"derivatives/sub-{SUBJECT_ID}/{roi_pipeline_dir}/{ROI_NAME}_mask_{roi_config}.nii.gz"
+        print(f"  Auto-detecting ROI mask from deoblique location:")
+        print(f"  {roi_path}")
+        print(f"  ROI pipeline dir: {roi_pipeline_dir}")
+        print(f"  ROI config: {roi_config}")
 
 if not os.path.exists(roi_path):
-    # Try alternative patterns (subjFalse instead of subjTrue)
+    # Try alternative patterns
     print(f"\n⚠️  Primary ROI mask not found: {roi_path}")
     print(f"  Trying alternative patterns...")
 
-    # Alternative 1: subjFalse instead of subjTrue
-    alt_roi_config = roi_config.replace('subjTrue', 'subjFalse')
-    alt_roi_path = f"derivatives/sub-{SUBJECT_ID}/{roi_pipeline_dir}/{ROI_NAME}_mask_{alt_roi_config}.nii.gz"
+    # Alternative 1: Try V3_Comprehensive with glob pattern (any parameter combination)
+    v3_search_pattern = f"derivatives/V3_Comprehensive/ROI_mask/sub-{SUBJECT_ID}/roi_pipeline/{ROI_NAME}_mask_*.nii.gz"
+    v3_matches = glob.glob(v3_search_pattern)
 
-    if os.path.exists(alt_roi_path):
-        print(f"  ✓ Found alternative: {alt_roi_path}")
-        roi_path = alt_roi_path
-        roi_config = alt_roi_config
+    if v3_matches:
+        # Prefer binTrue masks
+        preferred = [f for f in v3_matches if 'binTrue' in f]
+        roi_path = preferred[0] if preferred else v3_matches[0]
+        print(f"  ✓ Found V3_Comprehensive ROI mask: {roi_path}")
     else:
-        # Alternative 2: Try glob pattern to find any matching mask
-        search_pattern = f"derivatives/sub-{SUBJECT_ID}/{roi_pipeline_dir}/{ROI_NAME}_mask_*.nii.gz"
-        matching_files = glob.glob(search_pattern)
+        # Alternative 2: subjFalse instead of subjTrue (old location)
+        alt_roi_config = roi_config.replace('subjTrue', 'subjFalse')
+        alt_roi_path = f"derivatives/sub-{SUBJECT_ID}/{roi_pipeline_dir}/{ROI_NAME}_mask_{alt_roi_config}.nii.gz"
 
-        if matching_files:
-            # Prioritize by binarize setting (binFalse for probability, binTrue for determin)
-            preferred_bin = 'binFalse' if 'probability' in roi_pipeline_dir else 'binTrue'
-            preferred_matches = [f for f in matching_files if preferred_bin in f]
-
-            if preferred_matches:
-                roi_path = preferred_matches[0]
-                print(f"  ✓ Found matching ROI mask: {roi_path}")
-            else:
-                roi_path = matching_files[0]
-                print(f"  ⚠️  Using first available ROI mask: {roi_path}")
-                print(f"  (Note: May not match expected binarize setting)")
+        if os.path.exists(alt_roi_path):
+            print(f"  ✓ Found alternative: {alt_roi_path}")
+            roi_path = alt_roi_path
+            roi_config = alt_roi_config
         else:
-            print(f"\n❌ ERROR: No ROI mask file found!")
-            print(f"  Searched in: derivatives/sub-{SUBJECT_ID}/{roi_pipeline_dir}/")
+            # Alternative 3: Try glob pattern to find any matching mask (old location)
+            search_pattern = f"derivatives/sub-{SUBJECT_ID}/{roi_pipeline_dir}/{ROI_NAME}_mask_*.nii.gz"
+            matching_files = glob.glob(search_pattern)
+
+            if matching_files:
+                # Prioritize by binarize setting (binFalse for probability, binTrue for determin)
+                preferred_bin = 'binFalse' if 'probability' in roi_pipeline_dir else 'binTrue'
+                preferred_matches = [f for f in matching_files if preferred_bin in f]
+
+                if preferred_matches:
+                    roi_path = preferred_matches[0]
+                    print(f"  ✓ Found matching ROI mask: {roi_path}")
+                else:
+                    roi_path = matching_files[0]
+                    print(f"  ⚠️  Using first available ROI mask: {roi_path}")
+                    print(f"  (Note: May not match expected binarize setting)")
+            else:
+                print(f"\n❌ ERROR: No ROI mask file found!")
+                print(f"  Searched in:")
+                print(f"    - derivatives/V3_Comprehensive/ROI_mask/sub-{SUBJECT_ID}/roi_pipeline/")
+                print(f"    - derivatives/sub-{SUBJECT_ID}/{roi_pipeline_dir}/")
             print(f"\n  Please check:")
             print(f"  1. ROI masks have been created with roi_pipeline")
             print(f"  2. Path structure matches expected format")

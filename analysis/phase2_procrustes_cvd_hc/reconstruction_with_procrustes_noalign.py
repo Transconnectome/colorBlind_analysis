@@ -71,7 +71,7 @@ def parse_args():
     parser.add_argument('--cvd-subjects', type=str, nargs='+',
                         default=['08', '09', '10'])
     parser.add_argument('--output-dir', type=str,
-                        default='results/group_level/procrustes_reconstruction/')
+                        default='analysis/comprehensive/results/procrustes_reconstruction/')
     parser.add_argument('--model-path', type=str, default=None)
     return parser.parse_args()
 

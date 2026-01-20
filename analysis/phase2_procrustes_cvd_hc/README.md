@@ -6,6 +6,8 @@
 **Supporting Research Question (SRQ1)**: Can a common decoder be shared across HC and CVD after alignment?
 **정렬 후 정상인과 색맹 간 공통 디코더를 공유할 수 있는가?**
 
+원인: Voxel-wise group analysis 결과 피험자 별 voxel spatial location이 다르다.
+
 **Status**: Completed ✅
 **Scripts**: 12 files
 

@@ -53,8 +53,8 @@ echo ""
 
 # Directories
 BIDS_DIR="/storage/connectome/haba6030/bids_editted"
-OUTPUT_DIR="/scratch/connectome/haba6030/colorBlind/analysis/prep_trials/method2_header_bbr"
-WORK_DIR="/scratch/connectome/haba6030/colorBlind/analysis/prep_trials/work_method2_sub-${SUBJECT_ID}"
+OUTPUT_DIR="/storage/connectome/haba6030/fmriprep_out_method2_header_bbr"
+WORK_DIR="/storage/connectome/haba6030/fmriprep_work_method2_sub-${SUBJECT_ID}"
 
 # Singularity settings
 APPTAINER=/usr/local/bin/singularity
@@ -147,12 +147,12 @@ echo ""
 echo "Starting fMRIPrep..."
 echo ""
 
-"$APPTAINER" run --cleanenv \
+"$APPTAINER" exec --userns --cleanenv \
   -B ${BIDS_DIR}:/data:ro \
   -B ${OUTPUT_DIR}:/out \
   -B ${WORK_DIR}:/work \
   -B ${FS_LICENSE}:/opt/freesurfer/license.txt:ro \
-  "$FMRIprep_IMG" \
+  "$FMRIprep_IMG" fmriprep \
   /data /out participant \
   --participant-label ${SUBJECT_ID} \
   --fs-license-file /opt/freesurfer/license.txt \

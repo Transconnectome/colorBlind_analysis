@@ -13,7 +13,7 @@ import json
 # 경로 설정
 BASE_DIR = Path("/scratch/connectome/haba6030/colorBlind")
 DERIVATIVES_DIR = BASE_DIR / "derivatives/V3_Comprehensive/BH2009_original_v3/baseline32_original_v3"
-OUTPUT_DIR = BASE_DIR / "results/group_level/phase2a_data/patterns"
+OUTPUT_DIR = BASE_DIR / "analysis" / "comprehensive" / "results" / "phase2a_data" / "patterns"
 
 # 피험자 및 ROI 정보
 HC_SUBJECTS = ['01', '02', '03', '04', '05', '06', '07']

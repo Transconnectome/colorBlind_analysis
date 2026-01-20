@@ -62,12 +62,29 @@ def load_subject_amplitudes(subject_id, roi, timestamp, dataset='deoblique_v2'):
 
     return amplitudes, result_dir
 
-def load_all_subjects(subjects, roi, timestamp, dataset):
-    """모든 피험자 데이터 로드"""
+def load_all_subjects(subjects, roi, timestamp, dataset, min_voxels=10):
+    """
+    모든 피험자 데이터 로드
+
+    Args:
+        subjects: 피험자 ID 리스트
+        roi: ROI 이름
+        timestamp: 타임스탬프
+        dataset: 데이터셋 이름
+        min_voxels: 최소 복셀 수 임계값 (기본값: 10)
+                    이보다 적은 복셀을 가진 피험자-ROI 쌍은 제외
+
+    Returns:
+        amplitudes_all: 패턴 리스트
+        subjects_info: 피험자 정보 리스트
+        excluded_subjects: 제외된 피험자 정보 리스트
+    """
     print(f"Loading {roi} data for {len(subjects)} subjects...")
+    print(f"Minimum voxel count threshold: {min_voxels}")
 
     amplitudes_all = []
     subjects_info = []
+    excluded_subjects = []
 
     for subject_id in subjects:
         try:
@@ -75,6 +92,16 @@ def load_all_subjects(subjects, roi, timestamp, dataset):
                 subject_id, roi, timestamp, dataset
             )
             n_runs, n_colors, n_voxels = amplitudes.shape
+
+            # ✅ 복셀 수 체크 - 최소 임계값 미달 시 제외
+            if n_voxels < min_voxels:
+                print(f"  sub-{subject_id}: ⚠️ EXCLUDED - Only {n_voxels} voxels (< {min_voxels} threshold)")
+                excluded_subjects.append({
+                    'subject': subject_id,
+                    'n_voxels': n_voxels,
+                    'reason': f'Insufficient voxels ({n_voxels} < {min_voxels})'
+                })
+                continue
 
             # Run 평균 → (n_colors, n_voxels)
             pattern = amplitudes.mean(axis=0)
@@ -86,19 +113,35 @@ def load_all_subjects(subjects, roi, timestamp, dataset):
                 'n_voxels': n_voxels
             })
 
-            print(f"  sub-{subject_id}: {pattern.shape}")
+            print(f"  sub-{subject_id}: {pattern.shape} ✓")
 
         except FileNotFoundError as e:
             print(f"  sub-{subject_id}: ⚠️ {e}")
+            excluded_subjects.append({
+                'subject': subject_id,
+                'n_voxels': 0,
+                'reason': 'Data not found'
+            })
             continue
 
+    # 제외된 피험자 요약
+    if excluded_subjects:
+        print(f"\n⚠️  Excluded {len(excluded_subjects)} subject(s) from {roi} analysis:")
+        for exc in excluded_subjects:
+            print(f"    sub-{exc['subject']}: {exc['reason']}")
+
     # Voxel 수 통일
+    if len(amplitudes_all) == 0:
+        raise ValueError(f"No valid subjects remaining for {roi} after exclusion")
+
     n_voxels_min = min([info['n_voxels'] for info in subjects_info])
     amplitudes_all = [amp[:, :n_voxels_min] for amp in amplitudes_all]
     for info in subjects_info:
         info['n_voxels'] = n_voxels_min
 
-    return amplitudes_all, subjects_info
+    print(f"\n✓ {len(amplitudes_all)} subjects included, final voxel count: {n_voxels_min}\n")
+
+    return amplitudes_all, subjects_info, excluded_subjects
 
 # ============================================================================
 # Option A: Reference-based Alignment
@@ -138,6 +181,13 @@ def option_a_reference_based(hc_patterns, cvd_patterns, reference_idx=0):
     reference = hc_patterns[reference_idx]
     print(f"Reference: HC subject {reference_idx} (sub-02)")
     print(f"Reference shape: {reference.shape}")
+
+    # Validate reference dimensions
+    if reference.shape[0] == 0 or reference.shape[1] == 0:
+        print(f"⚠️  ERROR: Reference has zero dimension: {reference.shape}")
+        print(f"  Cannot perform Procrustes alignment")
+        return [], reference, [], {'hc_disparities': [], 'cvd_disparities': []}
+
     print()
 
     # HC alignment
@@ -147,6 +197,11 @@ def option_a_reference_based(hc_patterns, cvd_patterns, reference_idx=0):
 
     for i, pattern in enumerate(hc_patterns):
         if i == reference_idx:
+            continue
+
+        # Validate pattern dimensions before Procrustes
+        if pattern.shape[0] == 0 or pattern.shape[1] == 0:
+            print(f"  ⚠️  Skipping HC {i} - zero dimension: {pattern.shape}")
             continue
 
         mtx1, mtx2, disparity = procrustes(reference, pattern)
@@ -167,6 +222,11 @@ def option_a_reference_based(hc_patterns, cvd_patterns, reference_idx=0):
     cvd_disparities = []
 
     for i, pattern in enumerate(cvd_patterns):
+        # Validate pattern dimensions before Procrustes
+        if pattern.shape[0] == 0 or pattern.shape[1] == 0:
+            print(f"  ⚠️  Skipping CVD {i} - zero dimension: {pattern.shape}")
+            continue
+
         mtx1, mtx2, disparity = procrustes(reference, pattern)
         cvd_aligned.append(mtx2)
         cvd_disparities.append(disparity)
@@ -211,6 +271,13 @@ def option_b_iterative_alignment(hc_patterns, cvd_patterns, max_iter=10, tol=1e-
     # 초기 mean
     hc_mean = np.mean(hc_patterns, axis=0)
     print(f"Initial HC mean: {hc_mean.shape}")
+
+    # Validate matrix dimensions
+    if hc_mean.shape[0] == 0 or hc_mean.shape[1] == 0:
+        print(f"⚠️  ERROR: HC mean has zero dimension: {hc_mean.shape}")
+        print(f"  Cannot perform Procrustes alignment")
+        return [], hc_mean, [], {'convergence_history': [], 'hc_disparities': [], 'cvd_disparities': []}
+
     print()
 
     convergence_history = []
@@ -223,6 +290,11 @@ def option_b_iterative_alignment(hc_patterns, cvd_patterns, max_iter=10, tol=1e-
         disparities = []
 
         for i, pattern in enumerate(hc_patterns):
+            # Validate pattern dimensions before Procrustes
+            if pattern.shape[0] == 0 or pattern.shape[1] == 0:
+                print(f"  ⚠️  Skipping HC {i} - zero dimension: {pattern.shape}")
+                continue
+
             mtx1, mtx2, disparity = procrustes(hc_mean, pattern)
             hc_aligned.append(mtx2)
             disparities.append(disparity)
@@ -261,6 +333,11 @@ def option_b_iterative_alignment(hc_patterns, cvd_patterns, max_iter=10, tol=1e-
     cvd_disparities = []
 
     for i, pattern in enumerate(cvd_patterns):
+        # Validate pattern dimensions before Procrustes
+        if pattern.shape[0] == 0 or pattern.shape[1] == 0:
+            print(f"  ⚠️  Skipping CVD {i} - zero dimension: {pattern.shape}")
+            continue
+
         mtx1, mtx2, disparity = procrustes(hc_mean, pattern)
         cvd_aligned.append(mtx2)
         cvd_disparities.append(disparity)
@@ -351,6 +428,22 @@ def option_c_voxel_weighting(hc_patterns, cvd_patterns, reliability_threshold=0.
     print(f"CVD pattern shape (reliable): {cvd_reliable[0].shape}")
     print()
 
+    # Validate sufficient voxels
+    if n_reliable == 0:
+        print(f"⚠️  WARNING: No reliable voxels found (threshold={reliability_threshold})")
+        print(f"  Cannot perform Procrustes alignment - returning empty results")
+        return [], np.array([]), [], {
+            'reliability': reliability,
+            'reliable_mask': reliable_mask,
+            'n_reliable': n_reliable,
+            'convergence_history': [],
+            'hc_disparities': [],
+            'cvd_disparities': []
+        }
+
+    if n_reliable < 10:
+        print(f"⚠️  WARNING: Very few reliable voxels ({n_reliable}), results may be unreliable")
+
     # Iterative alignment on reliable voxels
     print("Iterative alignment on reliable voxels...")
     hc_aligned, hc_mean, cvd_aligned, info = option_b_iterative_alignment(
@@ -383,6 +476,25 @@ def analyze_cvd_differences(hc_mean, cvd_aligned, subjects_info):
     print("=" * 80)
     print("CVD vs HC Difference Analysis")
     print("=" * 80)
+
+    # Validate input dimensions
+    if hc_mean.ndim != 2:
+        print(f"⚠️  ERROR: hc_mean has {hc_mean.ndim} dimensions (expected 2)")
+        print(f"  Shape: {hc_mean.shape}")
+        print(f"  Likely cause: No reliable voxels after selection")
+        return {
+            'error': 'Invalid hc_mean dimensions',
+            'hc_mean_shape': hc_mean.shape,
+            'hc_mean_ndim': hc_mean.ndim
+        }
+
+    if hc_mean.shape[1] == 0:
+        print(f"⚠️  ERROR: hc_mean has 0 voxels")
+        print(f"  Shape: {hc_mean.shape}")
+        return {
+            'error': 'No voxels in hc_mean',
+            'hc_mean_shape': hc_mean.shape
+        }
 
     n_colors, n_voxels = hc_mean.shape
     n_cvd = len(cvd_aligned)
@@ -471,6 +583,20 @@ def plot_difference_maps(hc_mean, cvd_aligned, analysis_results, output_dir, roi
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    # Skip if analysis failed (due to insufficient voxels)
+    if 'error' in analysis_results:
+        print(f"⚠️  Skipping visualization due to analysis error: {analysis_results['error']}")
+        return
+
+    # Validate input dimensions
+    if hc_mean.ndim != 2:
+        print(f"⚠️  Skipping visualization: hc_mean has {hc_mean.ndim} dimensions (expected 2)")
+        return
+
+    if hc_mean.shape[1] == 0:
+        print(f"⚠️  Skipping visualization: hc_mean has 0 voxels")
+        return
+
     n_colors, n_voxels = hc_mean.shape
 
     # 1. Color-specific differences
@@ -538,6 +664,8 @@ def plot_difference_maps(hc_mean, cvd_aligned, analysis_results, output_dir, roi
 
 def run_procrustes_cvd_comparison(args):
     """Procrustes + CVD comparison 실행"""
+    import datetime
+
     print("=" * 80)
     print("Option 2D: Procrustes + CVD Comparison")
     print("=" * 80)
@@ -549,7 +677,32 @@ def run_procrustes_cvd_comparison(args):
 
     # Output directory
     base_dir = Path('/scratch/connectome/haba6030/colorBlind')
-    output_base = base_dir / 'results' / 'group_level' / args.timestamp
+    output_base = base_dir / 'analysis' / 'comprehensive' / 'results' / args.timestamp
+    output_base.mkdir(parents=True, exist_ok=True)
+
+    # Save settings.json (configuration)
+    settings = {
+        'analysis_type': 'procrustes_cvd_comparison',
+        'method': 'option_a_reference_based',
+        'timestamp': args.timestamp,
+        'dataset': args.dataset,
+        'hc_subjects': args.hc_subjects,
+        'cvd_subjects': args.cvd_subjects,
+        'rois': args.rois,
+        'min_voxels_threshold': 10,
+        'procrustes_config': {
+            'method': 'ordinary',
+            'scaling': False,
+            'reference': 'first_hc_subject'
+        },
+        'run_time': datetime.datetime.now().isoformat()
+    }
+
+    with open(output_base / 'settings.json', 'w') as f:
+        json.dump(settings, f, indent=2)
+
+    print(f"✓ Settings saved to {output_base / 'settings.json'}")
+    print()
 
     all_results = {}
 
@@ -559,15 +712,15 @@ def run_procrustes_cvd_comparison(args):
         print("=" * 80)
 
         try:
-            # Load HC data
-            hc_patterns, hc_info = load_all_subjects(
-                args.hc_subjects, roi, args.timestamp, args.dataset
+            # Load HC data (with min_voxels=10 threshold)
+            hc_patterns, hc_info, hc_excluded = load_all_subjects(
+                args.hc_subjects, roi, args.timestamp, args.dataset, min_voxels=10
             )
             print()
 
-            # Load CVD data
-            cvd_patterns, cvd_info = load_all_subjects(
-                args.cvd_subjects, roi, args.timestamp, args.dataset
+            # Load CVD data (with min_voxels=10 threshold)
+            cvd_patterns, cvd_info, cvd_excluded = load_all_subjects(
+                args.cvd_subjects, roi, args.timestamp, args.dataset, min_voxels=10
             )
             print()
 
@@ -582,79 +735,76 @@ def run_procrustes_cvd_comparison(args):
                 cvd_patterns = [pattern[:, :n_voxels_min] for pattern in cvd_patterns]
                 print()
 
-            # Option A
+            # ============================================================================
+            # Option A: Reference-based Alignment (ONLY)
+            # ============================================================================
+            # 논문에서 사용한 방법: Ordinary Procrustes (translation + rotation, no scaling)
+            # Option B (iterative) and Option C (voxel weighting) are experimental methods
+            # not used in the published paper
             print("\n")
             hc_a, hc_mean_a, cvd_a, info_a = option_a_reference_based(
                 hc_patterns, cvd_patterns, reference_idx=0
             )
             analysis_a = analyze_cvd_differences(hc_mean_a, cvd_a, cvd_info)
 
-            # Option B
-            print("\n")
-            hc_b, hc_mean_b, cvd_b, info_b = option_b_iterative_alignment(
-                hc_patterns, cvd_patterns, max_iter=10
-            )
-            analysis_b = analyze_cvd_differences(hc_mean_b, cvd_b, cvd_info)
+            # ============================================================================
+            # Option B & C: DISABLED
+            # ============================================================================
+            # Option B (Iterative alignment): Not used in paper
+            # Option C (Voxel weighting with reliability threshold=0.3): Not applicable
+            #   - Current data: Mean reliability = -0.022 ~ 0.022 (far below 0.3)
+            #   - Result: 0 voxels pass threshold → all analyses fail
+            #   - Paper method: Use all voxels without reliability filtering
+            # print("\n")
+            # hc_b, hc_mean_b, cvd_b, info_b = option_b_iterative_alignment(
+            #     hc_patterns, cvd_patterns, max_iter=10
+            # )
+            # analysis_b = analyze_cvd_differences(hc_mean_b, cvd_b, cvd_info)
+            #
+            # print("\n")
+            # hc_c, hc_mean_c, cvd_c, info_c = option_c_voxel_weighting(
+            #     hc_patterns, cvd_patterns, reliability_threshold=0.3
+            # )
+            # analysis_c = analyze_cvd_differences(hc_mean_c, cvd_c, cvd_info)
 
-            # Option C
-            print("\n")
-            hc_c, hc_mean_c, cvd_c, info_c = option_c_voxel_weighting(
-                hc_patterns, cvd_patterns, reliability_threshold=0.3
-            )
-            analysis_c = analyze_cvd_differences(hc_mean_c, cvd_c, cvd_info)
+            print("\n" + "=" * 80)
+            print("Option B & C: SKIPPED")
+            print("Reason: Paper uses Option A (reference-based Procrustes) only")
+            print("  - Option B (iterative): Experimental, not validated in paper")
+            print("  - Option C (reliability filtering): Inappropriate for current data")
+            print("    * Mean cross-subject reliability: -0.022 to 0.022")
+            print("    * Threshold 0.3 filters out ALL voxels")
+            print("    * Paper method: No reliability filtering")
+            print("=" * 80)
 
             # Save results
             roi_dir = output_base / roi
             roi_dir.mkdir(parents=True, exist_ok=True)
 
-            # Option A figures
+            # Option A figures (ONLY)
             plot_difference_maps(hc_mean_a, cvd_a, analysis_a, roi_dir / 'option_a', roi)
 
-            # Option B figures
-            plot_difference_maps(hc_mean_b, cvd_b, analysis_b, roi_dir / 'option_b', roi)
-
-            # Option C figures
-            plot_difference_maps(hc_mean_c, cvd_c, analysis_c, roi_dir / 'option_c', roi)
-
-            # Save numerical results
+            # Save numerical results (Option A only)
             np.save(roi_dir / 'hc_mean_option_a.npy', hc_mean_a)
-            np.save(roi_dir / 'hc_mean_option_b.npy', hc_mean_b)
-            np.save(roi_dir / 'hc_mean_option_c.npy', hc_mean_c)
-
             np.save(roi_dir / 'cvd_common_diff_option_a.npy', analysis_a['cvd_common_diff'])
-            np.save(roi_dir / 'cvd_common_diff_option_b.npy', analysis_b['cvd_common_diff'])
-            np.save(roi_dir / 'cvd_common_diff_option_c.npy', analysis_c['cvd_common_diff'])
 
-            # Summary
-            summary = {
+            # Results (Option A only)
+            roi_results = {
                 'roi': roi,
                 'n_hc': len(hc_patterns),
                 'n_cvd': len(cvd_patterns),
                 'n_voxels': hc_patterns[0].shape[1],
-                'option_a': {
-                    'hc_mean_disparity': float(np.mean(info_a['hc_disparities'])),
-                    'cvd_mean_disparity': float(np.mean(info_a['cvd_disparities'])),
-                    'cvd_common_magnitude': float(analysis_a['cvd_common_magnitude'])
-                },
-                'option_b': {
-                    'hc_mean_disparity': float(np.mean(info_b['hc_disparities'])),
-                    'cvd_mean_disparity': float(np.mean(info_b['cvd_disparities'])),
-                    'cvd_common_magnitude': float(analysis_b['cvd_common_magnitude']),
-                    'n_iterations': len(info_b['convergence_history'])
-                },
-                'option_c': {
-                    'n_reliable_voxels': int(info_c['n_reliable']),
-                    'reliability_threshold': 0.3,
-                    'hc_mean_disparity': float(np.mean(info_c['hc_disparities'])),
-                    'cvd_mean_disparity': float(np.mean(info_c['cvd_disparities'])),
-                    'cvd_common_magnitude': float(analysis_c['cvd_common_magnitude'])
-                }
+                'hc_excluded': hc_excluded,
+                'cvd_excluded': cvd_excluded,
+                'hc_mean_disparity': float(np.mean(info_a['hc_disparities'])),
+                'cvd_mean_disparity': float(np.mean(info_a['cvd_disparities'])),
+                'cvd_common_magnitude': float(analysis_a['cvd_common_magnitude'])
             }
 
-            with open(roi_dir / 'summary.json', 'w') as f:
-                json.dump(summary, f, indent=2)
+            with open(roi_dir / 'results.json', 'w') as f:
+                json.dump(roi_results, f, indent=2)
 
-            all_results[roi] = summary
+            all_results[roi] = roi_results
 
             print(f"\n✓ Results saved to {roi_dir}/")
 
@@ -664,9 +814,15 @@ def run_procrustes_cvd_comparison(args):
             traceback.print_exc()
             continue
 
-    # Save overall summary
-    with open(output_base / 'procrustes_cvd_comparison_summary.json', 'w') as f:
-        json.dump(all_results, f, indent=2)
+    # Save overall results summary
+    overall_results = {
+        'analysis': 'procrustes_cvd_comparison',
+        'timestamp': args.timestamp,
+        'rois': all_results
+    }
+
+    with open(output_base / 'results.json', 'w') as f:
+        json.dump(overall_results, f, indent=2)
 
     print("\n" + "=" * 80)
     print("Procrustes + CVD Comparison Analysis complete!")

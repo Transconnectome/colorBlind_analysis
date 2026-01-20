@@ -134,36 +134,8 @@ Rationale:
 
 ### Parallel Mode (Production)
 
-Runtime: 10-16 hours (vs 83-131 sequential)
-
-**Upload:**
-```bash
-cd /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis
-
-# Python scripts (11 files)
-scp roi_pipeline_selected_1202used.py haba6030@node2:/scratch/connectome/haba6030/colorBlind/
-scp visualize_roi_overlay.py haba6030@node2:/scratch/connectome/haba6030/colorBlind/
-scp analysis/phase1_preprocess_decoding/fir_reconstruction_BH2009_system_clean.py haba6030@node2:/scratch/connectome/haba6030/colorBlind/
-scp analysis/phase2_baseline_comparing/phase1_rsa.py haba6030@node2:/scratch/connectome/haba6030/colorBlind/
-scp analysis/phase2_procrustes_cvd_hc/option2b_procrustes_alignment.py haba6030@node2:/scratch/connectome/haba6030/colorBlind/
-scp analysis/phase2_procrustes_cvd_hc/reconstruction_with_procrustes.py haba6030@node2:/scratch/connectome/haba6030/colorBlind/
-scp analysis/phase2_procrustes_cvd_hc/option2d_procrustes_cvd_comparison.py haba6030@node2:/scratch/connectome/haba6030/colorBlind/
-scp analysis/phase1_preprocess_decoding/feature_selection/feature_selection_anova.py haba6030@node2:/scratch/connectome/haba6030/colorBlind/
-scp scripts/phase2a_filter_learning/phase2a_extract_patterns.py haba6030@node2:/scratch/connectome/haba6030/colorBlind/
-scp scripts/phase2a_filter_learning/phase2a_train_filter.py haba6030@node2:/scratch/connectome/haba6030/colorBlind/
-scp scripts/phase2a_filter_learning/phase2a_analyze_results.py haba6030@node2:/scratch/connectome/haba6030/colorBlind/
-
-# Execution scripts (3 files)
-scp analysis/phase0_parallel.sbatch haba6030@node2:/scratch/connectome/haba6030/colorBlind/
-scp analysis/phase1to4_sequential.sbatch haba6030@node2:/scratch/connectome/haba6030/colorBlind/
-scp analysis/run_complete_pipeline_parallel.sh haba6030@node2:/scratch/connectome/haba6030/colorBlind/
-```
-
 **Execute:**
 ```bash
-ssh haba6030@node2
-cd /scratch/connectome/haba6030/colorBlind
-chmod +x run_complete_pipeline_parallel.sh
 bash run_complete_pipeline_parallel.sh
 ```
 
@@ -171,25 +143,6 @@ Execution details:
 - Phase 0: 10 array tasks (1 per subject), each processes 4 ROIs (8-12h per task)
 - Phase 1-4: Auto-starts after Phase 0, sequential (2-4h)
 
-**Monitor:**
-```bash
-squeue -u haba6030
-tail -f logs/phase0_v3_sub-1_*.out
-tail -f logs/phase1to4_v3_*.out
-grep -h "Success:\|Failed:" logs/phase0_v3_sub-*_*.out | sort
-```
-
-### Sequential Mode (Debug Only)
-
-Runtime: 83-131 hours
-
-```bash
-scp analysis/comprehensive_first_analysis.sbatch haba6030@node2:/scratch/connectome/haba6030/colorBlind/
-ssh haba6030@node2
-cd /scratch/connectome/haba6030/colorBlind
-sbatch comprehensive_first_analysis.sbatch
-tail -f logs/complete_pipeline_v3_*.out
-```
 
 ## Runtime Breakdown
 
@@ -246,7 +199,7 @@ results/group_level/phase2a_data/
 ### Sequential (Debug)
 - `comprehensive_first_analysis.sbatch`: All phases, 83-131h
 
-### Analysis Scripts (ROOT)
+### Analysis Scripts in each directory
 1. `roi_pipeline_selected_1202used.py`
 2. `visualize_roi_overlay.py`
 3. `fir_reconstruction_BH2009_system_clean.py`
@@ -258,61 +211,6 @@ results/group_level/phase2a_data/
 9. `phase2a_extract_patterns.py`
 10. `phase2a_train_filter.py`
 11. `phase2a_analyze_results.py`
-
-## Troubleshooting
-
-### Common Issues
-
-**ROI generation fails**
-- Check: Brain mask overlap with atlas
-- Solution: Verify Dice scores in preprocessing report
-
-**Baseline fails for subject-ROI**
-- Check: Voxel count ≥100 after thresholding
-- Solution: Use Tier 1 subjects
-
-**Phase 1 RDM fails**
-- Check: Phase 0 completed for all HC subjects
-- Solution: Re-run missing subjects
-
-**Array task fails**
-- Check: `grep "Failed:" logs/phase0_v3_sub-*_*.out`
-- Solution: `sbatch --array=5 phase0_parallel.sbatch` (re-run task 5)
-
-**Phase 1-4 pending**
-- Check: `squeue -u haba6030`
-- Reason: Waiting for all Phase 0 tasks
-- Solution: If some failed, cancel and submit manually:
-  ```bash
-  scancel JOBID
-  sbatch phase1to4_sequential.sbatch
-  ```
-
-**Out of memory**
-- Check: Logs for "killed" or "out of memory"
-- Solution: Edit sbatch `#SBATCH --mem=128GB`
-
-### Log Files
-
-Parallel:
-- `logs/phase0_v3_sub-{1-10}_{JOBID}.out/err`
-- `logs/phase1to4_v3_{JOBID}.out/err`
-
-Sequential:
-- `logs/complete_pipeline_v3_{JOBID}.out/err`
-
-### Progress Check
-
-```bash
-# Phase 0 summary
-grep -h "Success:\|Failed:" logs/phase0_v3_sub-*_*.out | sort
-
-# Completed subjects
-ls -lh derivatives/V3_Comprehensive/BH2009_original_v3/baseline32_original_v3/
-
-# Count ROIs (should be 40)
-find derivatives/V3_Comprehensive/BH2009_original_v3/baseline32_original_v3/ -name "amplitudes_z.npy" | wc -l
-```
 
 ## Version History
 

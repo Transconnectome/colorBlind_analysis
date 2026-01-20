@@ -495,7 +495,7 @@ def main():
     # Paths
     atlas_dir = Path('/scratch/connectome/haba6030/colorBlind/ProbAtlas_v4_2mm/subj_vol_all')
     prep_trials_dir = Path('/scratch/connectome/haba6030/colorBlind/analysis/prep_trials')
-    original_dir = Path('/storage/connectome/haba6030/fmriprep_out_original_v3')
+    original_dir = Path('/storage/connectome/haba6030')
 
     output_dir = prep_trials_dir / 'diagnostics' / f'sub-{args.subject}'
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -507,11 +507,11 @@ def main():
 
     # BOLD files - use mean for consistent comparison across all methods
     bold_files = {
-        'Original_v3': original_dir / f'sub-{args.subject}/func' /
-                       f'sub-{args.subject}_task-rsvp_run-{args.run}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz',
-        'Method2_Header_BBR': prep_trials_dir / 'method2_header_bbr' / f'sub-{args.subject}/func' /
-                              f'sub-{args.subject}_task-rsvp_run-{args.run}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz',
-        'Method3_Header_MI': prep_trials_dir / 'method3_header_mi' / f'sub-{args.subject}/func' /
+        # 'Original_v3': original_dir / 'fmriprep_out_original_v3' / f'sub-{args.subject}/func' /
+        #                f'sub-{args.subject}_task-rsvp_run-{args.run}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz',
+        # 'Method2_Header_BBR': prep_trials_dir / 'method2_header_bbr' / f'sub-{args.subject}/func' /
+        #                       f'sub-{args.subject}_task-rsvp_run-{args.run}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz',
+        'Method3_Header_MI': original_dir / 'fmriprep_out_method3_header_mi' / f'sub-{args.subject}/func' /
                              f'sub-{args.subject}_task-rsvp_run-{args.run}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'
     }
 
@@ -541,11 +541,11 @@ def main():
     print("\nLoading brain masks...")
     brain_masks = {}
     brain_mask_files = {
-        'Original_v3': original_dir / f'sub-{args.subject}/func' /
-                       f'sub-{args.subject}_task-rsvp_run-{args.run}_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz',
-        'Method2_Header_BBR': prep_trials_dir / 'method2_header_bbr' / f'sub-{args.subject}/func' /
-                              f'sub-{args.subject}_task-rsvp_run-{args.run}_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz',
-        'Method3_Header_MI': prep_trials_dir / 'method3_header_mi' / f'sub-{args.subject}/func' /
+        # 'Original_v3': original_dir / 'fmriprep_out_original_v3' / f'sub-{args.subject}/func' /
+        #                f'sub-{args.subject}_task-rsvp_run-{args.run}_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz',
+        # 'Method2_Header_BBR': prep_trials_dir / 'method2_header_bbr' / f'sub-{args.subject}/func' /
+        #                       f'sub-{args.subject}_task-rsvp_run-{args.run}_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz',
+        'Method3_Header_MI': original_dir / 'fmriprep_out_method3_header_mi' / f'sub-{args.subject}/func' /
                              f'sub-{args.subject}_task-rsvp_run-{args.run}_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz'
     }
 
@@ -559,7 +559,7 @@ def main():
 
     # Load event file for GLM
     print("\nLoading event file for GLM...")
-    event_dir = Path('/storage/connectome/haba6030/colorBlind_data_deoblique')
+    event_dir = Path('/storage/connectome/haba6030/bids_editted')
     event_file = event_dir / f'sub-{args.subject}/func' / \
                 f'sub-{args.subject}_task-rsvp_run-{args.run}_events.tsv'
 

@@ -193,8 +193,10 @@ for RUN in 1 2 3 4 5 6; do
     echo "Creating brain mask..."
     BOLD_MASK_T1W="${WORK_DIR}/sub-${SUBJECT_ID}_run-${RUN}_bold_mask_t1w.nii.gz"
 
-    3dAutomask -prefix ${BOLD_MASK_T1W} ${BOLD_IN_T1W} 2>/dev/null || \
-        fslmaths ${BOLD_IN_T1W} -bin ${BOLD_MASK_T1W}
+    if ! 3dAutomask -prefix ${BOLD_MASK_T1W} ${BOLD_IN_T1W} 2>/dev/null; then
+        echo "  3dAutomask failed, using fslmaths with temporal mean..."
+        fslmaths ${BOLD_IN_T1W} -Tmean -bin ${BOLD_MASK_T1W}
+    fi
 
     echo ""
 done
@@ -213,11 +215,15 @@ echo ""
 echo "NOTE: Using FSL FLIRT + FNIRT (nonlinear), matching original_v3 pipeline"
 echo ""
 
-# MNI template
-MNI_TEMPLATE="/usr/local/fsl/data/standard/MNI152_T1_2mm_brain.nii.gz"
+# MNI template (CRITICAL: Must match Original_v3 = MNI152NLin2009cAsym)
+# Original_v3 uses MNI152NLin2009cAsym (97,115,97)
+# FSL default MNI152_T1_2mm is DIFFERENT space (91,109,91) ❌
+MNI_TEMPLATE="/scratch/connectome/haba6030/colorBlind/templates/MNI152NLin2009cAsym_res-2_T1_brain.nii.gz"
 
 if [ ! -f "${MNI_TEMPLATE}" ]; then
     echo "❌ ERROR: MNI template not found: ${MNI_TEMPLATE}"
+    echo "   Run template creation script first:"
+    echo "   python3 /scratch/connectome/haba6030/colorBlind/analysis/prep_trials/scripts/create_mni_template.py"
     exit 1
 fi
 
@@ -250,8 +256,15 @@ echo "  ✅ Linear registration done"
 T1W_TO_MNI_WARP="${OUTPUT_DIR}/sub-${SUBJECT_ID}/transforms/sub-${SUBJECT_ID}_t1w_to_mni_warp.nii.gz"
 T1W_TO_MNI_NONLINEAR="${WORK_DIR}/sub-${SUBJECT_ID}_T1w_in_MNI_nonlinear.nii.gz"
 
-# MNI template (non-brain for FNIRT)
-MNI_TEMPLATE_HEAD="/usr/local/fsl/data/standard/MNI152_T1_2mm.nii.gz"
+# MNI template (full head for FNIRT)
+MNI_TEMPLATE_HEAD="/scratch/connectome/haba6030/colorBlind/templates/MNI152NLin2009cAsym_res-2_T1.nii.gz"
+
+# If full head template doesn't exist, use brain template
+if [ ! -f "${MNI_TEMPLATE_HEAD}" ]; then
+    echo "  ⚠️  Full head template not found, using brain template for FNIRT"
+    MNI_TEMPLATE_HEAD="${MNI_TEMPLATE}"
+fi
+
 MNI_CONFIG="/usr/local/fsl/etc/flirtsch/T1_2_MNI152_2mm.cnf"
 
 # Convert brain.mgz to full head T1w
@@ -331,8 +344,10 @@ for RUN in 1 2 3 4 5 6; do
     # Create mask in MNI space
     MASK_MNI="${OUTPUT_DIR}/sub-${SUBJECT_ID}/func/sub-${SUBJECT_ID}_task-rsvp_run-${RUN}_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz"
 
-    3dAutomask -prefix ${MASK_MNI} ${BOLD_MNI} 2>/dev/null || \
-        fslmaths ${BOLD_MNI} -bin ${MASK_MNI}
+    if ! 3dAutomask -prefix ${MASK_MNI} ${BOLD_MNI} 2>/dev/null; then
+        echo "  3dAutomask failed, using fslmaths with temporal mean..."
+        fslmaths ${BOLD_MNI} -Tmean -bin ${MASK_MNI}
+    fi
 
     echo "  ✅ BOLD in MNI: $(basename ${BOLD_MNI})"
     echo "  ✅ Mask in MNI: $(basename ${MASK_MNI})"

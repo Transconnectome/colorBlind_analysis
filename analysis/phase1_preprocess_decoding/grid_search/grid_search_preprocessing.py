@@ -56,6 +56,9 @@ def parse_args():
                         help='Subject ID (e.g., 01, 02, ..., 10)')
     parser.add_argument('--roi', type=str, required=True,
                         help='ROI name (e.g., V1, V2, V3, hV4)')
+    parser.add_argument('--dataset', type=str, default='method3_header_mi',
+                        choices=['original_v3', 'method3_header_mi', 'deoblique_v2'],
+                        help='Dataset to use (default: method3_header_mi)')
     return parser.parse_args()
 
 def generate_configs():
@@ -79,13 +82,20 @@ def generate_configs():
 
     return configs
 
-def load_and_preprocess_data(config, subject_id, roi_name):
+def load_and_preprocess_data(config, subject_id, roi_name, dataset='method3_header_mi'):
     """Load and preprocess functional data according to config"""
 
     print(f"  Loading data with config {config['id']}...")
 
+    # Dataset configuration
+    dataset_paths = {
+        'original_v3': '/storage/connectome/haba6030/fmriprep_out_original_v3',
+        'method3_header_mi': '/storage/connectome/haba6030/fmriprep_out_method3_header_mi',
+        'deoblique_v2': '/storage/connectome/haba6030/fmriprep_out_deoblique_v2'
+    }
+
     # Set paths
-    fmriprep_dir = f"/storage/connectome/haba6030/fmriprep_out_deoblique_v2/sub-{subject_id}"
+    fmriprep_dir = f"{dataset_paths[dataset]}/sub-{subject_id}"
     events_dir = f"/storage/connectome/haba6030/colorBlind_data_deoblique/sub-{subject_id}/func"
     roi_path = f"derivatives/sub-{subject_id}/roi_pipeline/{roi_name}_mask_thr50_intnearest_binTrue_masknone_gmTrue_subjFalse.nii.gz"
 
@@ -354,7 +364,7 @@ def run_single_config(config, subject_id, roi_name):
 
     try:
         # Load and preprocess
-        func_data_list, events_list, masker = load_and_preprocess_data(config, subject_id, roi_name)
+        func_data_list, events_list, masker = load_and_preprocess_data(config, subject_id, roi_name, dataset=args.dataset)
 
         # Estimate HRF
         print(f"  Estimating HRF...")

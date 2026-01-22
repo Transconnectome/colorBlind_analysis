@@ -1,14 +1,16 @@
 #!/bin/bash
-#SBATCH --job-name=phase0_v3
-#SBATCH --nodelist=node2
+#SBATCH --job-name=phase0_m3
+#SBATCH --nodelist=node2,node4
 #SBATCH --qos=shared
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64GB
 #SBATCH --time=24:00:00
 #SBATCH --array=1-10
-#SBATCH --output=logs/phase0_v3_sub-%a_%A.out
-#SBATCH --error=logs/phase0_v3_sub-%a_%A.err
+#SBATCH --no-requeue
+#SBATCH --open-mode=append
+#SBATCH --output=logs/phase0_m3_sub-%a_%A.out
+#SBATCH --error=logs/phase0_m3_sub-%a_%A.err
 
 # ============================================================================
 # Phase 0: Subject-Parallel Baseline Analysis (Array Job)
@@ -31,7 +33,7 @@ echo "Start: $(date)"
 echo "================================================================"
 
 # Configuration - Dataset-Agnostic (accepts arguments)
-DATASET="${1:-original_v3}"
+DATASET="${1:-method3_header_mi}"
 TIMESTAMP="${2:-baseline32_${DATASET}}"
 ALL_SUBJECTS=(01 02 03 04 05 06 07 08 09 10)
 ROIS=(V1 V2 V3 hV4)

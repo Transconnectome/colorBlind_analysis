@@ -1,50 +1,75 @@
 #!/bin/bash
-#SBATCH --job-name=phase0_m3
+#SBATCH --job-name=phase0_m3_24g
 #SBATCH --nodelist=node2,node4
 #SBATCH --qos=shared
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
-#SBATCH --mem=64GB
+#SBATCH --mem=24GB
 #SBATCH --time=24:00:00
-#SBATCH --array=1-10
+#SBATCH --array=1-10%15
 #SBATCH --no-requeue
 #SBATCH --open-mode=append
-#SBATCH --output=logs/phase0_m3_sub-%a_%A.out
-#SBATCH --error=logs/phase0_m3_sub-%a_%A.err
+#SBATCH --output=logs/phase0_m3_24g_sub-%a_%A.out
+#SBATCH --error=logs/phase0_m3_24g_sub-%a_%A.err
 
 # ============================================================================
-# Phase 0: Subject-Parallel Baseline Analysis (Array Job)
+# Phase 0: Subject-Parallel Baseline Analysis - 24GB Optimized
 # ============================================================================
+#
+# OPTIMIZED VERSION (24GB per task, max 15 concurrent)
+# - Based on memory diagnostic: Single ROI = 6GB peak
+# - 24GB provides 4x safety buffer
+# - Node2: 450GB → max 15 concurrent (360GB) ✓
+# - Node4: 176GB → max 7 concurrent (168GB) ✓
+# - Combined: 15 concurrent safe on both nodes
 #
 # This script runs Phase 0 (ROI building + Baseline analysis) in parallel
 # Each array task processes one subject with 4 ROIs sequentially
 #
+# Memory Profile (from diagnostics):
+#   - ROI Pipeline: 0.29GB
+#   - Single ROI Baseline: 5.99GB peak
+#   - 24GB allocation: 4x safety buffer
+#
 # SLURM Array Variables:
 #   %a = SLURM_ARRAY_TASK_ID (1-10)
 #   %A = SLURM_ARRAY_JOB_ID
+#   %15 = Max 15 tasks run concurrently
 #
-# NODE: node4 (temporary while node2 is unavailable)
 # ============================================================================
+
+# Cleanup function for safe exit
+cleanup() {
+    local exit_code=$1
+    echo "Cleaning up (exit code: $exit_code)..."
+    pkill -P $$ python 2>/dev/null || true
+    exit $exit_code
+}
+
+trap 'cleanup 1' SIGTERM SIGINT SIGKILL
+trap 'cleanup $?' EXIT
 
 echo "================================================================"
 echo "Phase 0: Subject-Parallel Analysis - Array Task ${SLURM_ARRAY_TASK_ID}"
 echo "Job ID: ${SLURM_ARRAY_JOB_ID}"
 echo "Task ID: ${SLURM_ARRAY_TASK_ID}"
+echo "Memory: 24GB per task (max 15 concurrent)"
+echo "Node: $(hostname)"
 echo "Start: $(date)"
 echo "================================================================"
 
 # Configuration
-DATASET="original_v3"
-TIMESTAMP="baseline32_original_v3"
+DATASET="method3_header_mi"
+TIMESTAMP="baseline32_method3_header_mi"
 ALL_SUBJECTS=(01 02 03 04 05 06 07 08 09 10)
 ROIS=(V1 V2 V3 hV4)
 
-# Get subject for this array task
 SUBJECT=${ALL_SUBJECTS[$SLURM_ARRAY_TASK_ID-1]}
 
 echo ""
 echo "Processing Subject: sub-${SUBJECT}"
 echo "ROIs: ${ROIS[@]}"
+echo "Dataset: ${DATASET}"
 echo ""
 
 # Baseline32 preprocessing parameters
@@ -64,15 +89,22 @@ cd $BASE_DIR
 # Create necessary directories
 echo "Creating required directories..."
 mkdir -p logs
-mkdir -p derivatives/V3_Comprehensive/ROI_mask
-mkdir -p derivatives/V3_Comprehensive/BH2009_original_v3
-mkdir -p analysis/phase1_preprocess_decoding
-mkdir -p analysis/utils
+mkdir -p analysis/roi_masks/${DATASET}
+mkdir -p analysis/phase1_preprocess_decoding/${DATASET}/results/baseline_decoding
+mkdir -p analysis/phase1_preprocess_decoding/${DATASET}/logs
 
 # Activate conda environment
 echo "Activating conda environment..."
 source ~/.bashrc
 conda activate nilearn
+
+if [ $? -ne 0 ]; then
+    echo "✗ ERROR: Failed to activate conda environment 'nilearn'"
+    exit 1
+fi
+
+echo "✓ Conda environment activated: $(which python)"
+echo ""
 
 # ============================================================================
 # Phase 0A: ROI Building (per subject)
@@ -83,18 +115,15 @@ echo "PHASE 0A: ROI Building for sub-${SUBJECT}"
 echo "================================================================"
 echo ""
 
-# Build ROI masks for original_v3 dataset
-# Output: derivatives/V3_Comprehensive/ROI_mask/sub-${SUBJECT}/roi_pipeline/
 echo "Building ROI masks for sub-${SUBJECT}..."
-python analysis/phase1_preprocess_decoding/roi_pipeline_comprehensive.py $SUBJECT
+python analysis/phase1_preprocess_decoding/roi_pipeline_selected_1202used.py $SUBJECT --dataset ${DATASET}
 
 if [ $? -eq 0 ]; then
     echo "✓ ROI masks created for sub-${SUBJECT}"
-    echo "  Output: derivatives/V3_Comprehensive/ROI_mask/sub-${SUBJECT}/roi_pipeline/"
+    echo "  Output: analysis/roi_masks/${DATASET}/sub-${SUBJECT}/roi_pipeline/"
 else
     echo "✗ ROI building failed for sub-${SUBJECT}"
     echo "  Baseline analysis will attempt to use existing masks or fail gracefully"
-    # Don't exit - let baseline try to find existing masks
 fi
 
 # ============================================================================
@@ -108,6 +137,7 @@ echo ""
 
 SUCCESS_COUNT=0
 FAIL_COUNT=0
+CONSECUTIVE_FAILS=0
 
 for ROI in "${ROIS[@]}"; do
     echo ""
@@ -134,9 +164,18 @@ for ROI in "${ROIS[@]}"; do
     if [ $EXIT_CODE -eq 0 ]; then
         echo "✓ Success: sub-${SUBJECT}, ROI ${ROI}"
         SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+        CONSECUTIVE_FAILS=0
     else
         echo "✗ Failed: sub-${SUBJECT}, ROI ${ROI} (exit code: ${EXIT_CODE})"
         FAIL_COUNT=$((FAIL_COUNT + 1))
+        CONSECUTIVE_FAILS=$((CONSECUTIVE_FAILS + 1))
+
+        if [ $CONSECUTIVE_FAILS -ge 2 ]; then
+            echo ""
+            echo "✗ ERROR: 2 consecutive ROI failures detected"
+            echo "  Aborting remaining ROIs for sub-${SUBJECT}"
+            break
+        fi
     fi
 done
 
@@ -149,4 +188,12 @@ echo "  Failed: ${FAIL_COUNT}/4 ROIs"
 echo "  Completion time: $(date)"
 echo "================================================================"
 
-exit 0
+if [ $FAIL_COUNT -gt 0 ]; then
+    echo ""
+    echo "⚠️  WARNING: Some ROIs failed for sub-${SUBJECT}"
+    exit 1
+else
+    echo ""
+    echo "✓ All ROIs completed successfully for sub-${SUBJECT}"
+    exit 0
+fi

@@ -6,17 +6,39 @@ Creates visual overlays to check if ROI masks are in the correct location.
 For problem subjects, this will reveal if the alignment is actually correct.
 """
 
+import argparse
 import nibabel as nib
 import numpy as np
 from nilearn import plotting
 import matplotlib.pyplot as plt
 from pathlib import Path
 
+# Parse command-line arguments
+parser = argparse.ArgumentParser(description='Visualize ROI Overlay on Functional Data')
+parser.add_argument('--dataset', type=str, default='method3_header_mi',
+                    choices=['original_v3', 'method3_header_mi', 'deoblique_v2'],
+                    help='Dataset to use (default: method3_header_mi)')
+args = parser.parse_args()
+
+# Dataset configuration
+DATASET_PATHS = {
+    'original_v3': '/storage/connectome/haba6030/fmriprep_out_original_v3',
+    'method3_header_mi': '/storage/connectome/haba6030/fmriprep_out_method3_header_mi',
+    'deoblique_v2': '/storage/connectome/haba6030/fmriprep_out_deoblique_v2'
+}
+
 # Configuration
 BASE_DIR = Path('/scratch/connectome/haba6030/colorBlind')
-FMRIPREP_DIR = Path('/storage/connectome/haba6030/fmriprep_out_original_v3')  # v3: FreeSurfer removed
-DERIVATIVES_DIR = BASE_DIR / 'derivatives'
-OUTPUT_DIR = BASE_DIR / 'logs' / 'alignment_visualizations'
+FMRIPREP_DIR = Path(DATASET_PATHS[args.dataset])
+# ROI masks: shared location
+ROI_MASKS_DIR = BASE_DIR / 'analysis' / 'roi_masks' / args.dataset
+# Visualization outputs: phase-specific logs
+OUTPUT_DIR = BASE_DIR / 'analysis' / 'phase1_preprocess_decoding' / args.dataset / 'logs' / 'alignment_visualizations'
+
+print(f"Dataset: {args.dataset}")
+print(f"fMRIPrep directory: {FMRIPREP_DIR}")
+print(f"ROI masks directory: {ROI_MASKS_DIR}")
+print(f"Output directory: {OUTPUT_DIR}")
 
 # Subjects to check
 PROBLEM_SUBJECTS = ['02', '03', '04', '09', '10']
@@ -31,7 +53,8 @@ def visualize_subject(subject_id, is_problem=False):
     # Paths
     subj_dir = FMRIPREP_DIR / f'sub-{subject_id}'
     func_dir = subj_dir / 'func'
-    deriv_dir = DERIVATIVES_DIR / f'sub-{subject_id}' / 'roi_pipeline'
+    # ROI masks from shared location
+    roi_dir = ROI_MASKS_DIR / f'sub-{subject_id}'
 
     boldref_path = func_dir / f'sub-{subject_id}_task-rsvp_run-1_space-MNI152NLin2009cAsym_res-2_boldref.nii.gz'
     brain_mask_path = func_dir / f'sub-{subject_id}_task-rsvp_run-1_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz'
@@ -52,8 +75,8 @@ def visualize_subject(subject_id, is_problem=False):
     rois = ['V1', 'V2', 'V3', 'hV4']
 
     for roi in rois:
-        roi_mask_none = deriv_dir / f'{roi}_mask_thr50_intnearest_binTrue_masknone_gmTrue_subjFalse.nii.gz'
-        roi_mask_func = deriv_dir / f'{roi}_mask_thr50_intnearest_binTrue_maskfunc_gmTrue_subjFalse.nii.gz'
+        roi_mask_none = roi_dir / f'{roi}_mask_thr50_intnearest_binTrue_masknone_gmTrue_subjFalse.nii.gz'
+        roi_mask_func = roi_dir / f'{roi}_mask_thr50_intnearest_binTrue_maskfunc_gmTrue_subjFalse.nii.gz'
 
         # Check if ROI masks exist
         if not roi_mask_none.exists():

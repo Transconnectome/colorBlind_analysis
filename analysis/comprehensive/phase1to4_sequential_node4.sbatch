@@ -1,13 +1,15 @@
 #!/bin/bash
-#SBATCH --job-name=phase1to4_v3
-#SBATCH --nodelist=node4
+#SBATCH --job-name=phase1to4_m3
+#SBATCH --nodelist=node2,node4
 #SBATCH --qos=shared
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64GB
 #SBATCH --time=24:00:00
-#SBATCH --output=analysis/comprehensive/logs/phase1to4_v3_%j.out
-#SBATCH --error=analysis/comprehensive/logs/phase1to4_v3_%j.err
+#SBATCH --no-requeue
+#SBATCH --open-mode=append
+#SBATCH --output=analysis/comprehensive/logs/phase1to4_m3_%j.out
+#SBATCH --error=analysis/comprehensive/logs/phase1to4_m3_%j.err
 
 # ============================================================================
 # Phase 1-4: Group-level Analyses (Sequential)

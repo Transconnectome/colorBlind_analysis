@@ -1,14 +1,16 @@
 #!/bin/bash
-#SBATCH --job-name=phase0_v3
-#SBATCH --nodelist=node4
+#SBATCH --job-name=phase0_m3_45G
+#SBATCH --nodelist=node2,node4
 #SBATCH --qos=shared
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=45GB
 #SBATCH --time=24:00:00
 #SBATCH --array=1-10
-#SBATCH --output=logs/phase0_v3_sub-%a_%A.out
-#SBATCH --error=logs/phase0_v3_sub-%a_%A.err
+#SBATCH --no-requeue
+#SBATCH --open-mode=append
+#SBATCH --output=logs/phase0_m3_45G_sub-%a_%A.out
+#SBATCH --error=logs/phase0_m3_45G_sub-%a_%A.err
 
 # ============================================================================
 # Phase 0: Subject-Parallel Baseline Analysis (Array Job)

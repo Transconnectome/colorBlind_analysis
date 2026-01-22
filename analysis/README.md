@@ -1,49 +1,40 @@
-# Analysis Pipeline for fMRIPrep original_v3
+# Analysis Pipeline for fMRIPrep method3_header_mi
 
 ## Overview
 
-Complete analysis pipeline for fMRIPrep original_v3 dataset covering three research questions:
+Complete analysis pipeline for fMRIPrep method3_header_mi dataset covering three research questions:
 
 - **RQ1**: Neural Color Discrimination Despite Retinal Deficits
 - **RQ2**: Inter-Individual Heterogeneity in CVD
 - **RQ3**: Neural-Guided Personalized Filter Design
 
-## Dataset: original_v3
+## Dataset: method3_header_mi
 
 ### Data Paths
 
-- **fMRIPrep**: `/storage/connectome/haba6030/fmriprep_out_original_v3`
+- **fMRIPrep**: `/storage/connectome/haba6030/fmriprep_out_method3_header_mi`
   - FreeSurfer removed (`--fs-no-reconall`)
-  - BBR coregistration, MNI152NLin2009cAsym 2mm
+  - MI-based coregistration with header optimization
+  - MNI152NLin2009cAsym 2mm
 - **Events**: `/storage/connectome/haba6030/bids_editted/`
   - 8 colors × 6 runs per subject, RSVP (500ms/stimulus)
 
 ### Quality Metrics
 
-From preprocessing diagnosis (docs/0104_Preprocessing_Report.md):
+From preprocessing diagnosis (analysis/prep_trials/results/):
 
-| Metric | Value | Previous | Improvement |
-|--------|-------|----------|-------------|
-| Dice coefficient (mean) | 0.889 | 0.376 | +136% |
-| Pass rate (≥0.80) | 83.3% | 0.0% | +83pp |
-| ROI failure rate | 0.0% | 45.4% | Resolved |
+- **Registration method**: Mutual Information (MI) cost function with header optimization
+- **Improvement**: Optimized for accurate anatomical-functional alignment
+- **See**: `analysis/prep_trials/README.md` for detailed comparison with previous methods
 
-### Subject Tiers
+### Subject Groups
 
-**Tier 1 (100% pass)**: 01, 03, 04, 08, 09, 10
-- Dice: 0.936-0.954
-- All 24 runs pass
-- Primary analyses
+All 10 subjects should have improved registration quality with MI-based coregistration:
 
-**Tier 2 (83% pass)**: 02, 05
-- Dice: 0.823, 0.916
-- 20/24 runs pass
-- Use with caution
+**Non-CVD subjects**: sub-01, sub-02, sub-03, sub-04, sub-05, sub-06, sub-07 (7 subjects)
+**CVD subjects**: sub-08, sub-09, sub-10 (3 subjects)
 
-**Tier 3 (33% pass)**: 06, 07
-- Dice: 0.730, 0.746
-- 8/24 runs pass
-- Supplementary only
+**Note**: The method3_header_mi dataset uses optimized MI-based registration that should provide more reliable alignment across all subjects compared to BBR-based methods.
 
 ## Preprocessing: Baseline32
 
@@ -162,7 +153,7 @@ derivatives/V3_Comprehensive/
 ├── sub-{01-10}/roi_pipeline/              # ROI masks
 │   ├── V1_mask_*.nii.gz
 │   └── ... (V2, V3, hV4)
-├── BH2009_original_v3/baseline32_original_v3/
+├── BH2009_method3_header_mi/baseline32_method3_header_mi/
 │   ├── sub-01/{V1,V2,V3,hV4}/             # Subject-organized
 │   │   ├── amplitudes_z.npy               # (n_runs, 8, n_voxels)
 │   │   ├── classification_results.txt
@@ -171,7 +162,7 @@ derivatives/V3_Comprehensive/
 │   │   └── figures/
 │   └── ... (sub-02 through sub-10)
 ├── phase1_results/                        # RDM/RSA
-│   └── rdm_analysis_{ROI}_baseline32_original_v3/
+│   └── rdm_analysis_{ROI}_baseline32_method3_header_mi/
 ├── phase2_procrustes/                     # Procrustes
 │   ├── alignment_quality_metrics.txt
 │   ├── hc_common_decoder_{ROI}.npz
@@ -214,6 +205,12 @@ results/group_level/phase2a_data/
 
 ## Version History
 
+**2026-01-22**: Dataset migration to method3_header_mi
+- Updated dataset from original_v3 to method3_header_mi
+- Improved registration: MI-based coregistration with header optimization
+- All scripts and configs updated to use new dataset path
+- Better alignment expected across all subjects
+
 **2026-01-06**: Parallel execution implementation
 - SLURM array jobs (10 subjects simultaneous)
 - Runtime reduction: 83-131h → 10-16h
@@ -222,18 +219,18 @@ results/group_level/phase2a_data/
 - Automatic dependencies: Phase 1-4 auto-starts
 
 **2026-01-05**: Initial planning
-- Dataset: fmriprep_out_original_v3 (Dice 0.889)
 - Config: Baseline32
 - Subjects: 10 (01-10)
 - ROIs: V1, V2, V3, hV4
 
 ## References
 
-- Preprocessing Report: `docs/0104_Preprocessing_Report.md`
+- Registration Comparison: `analysis/prep_trials/README.md`
+- Preprocessing Reports: `analysis/prep_trials/results/`
 - Systematic Review: `docs/SYSTEMATIC_PREPROCESSING_ANALYSIS.md`
 - Project README: `../README.md`
 - Development Guide: `../CLAUDE.md`
 
 ---
 
-Last Updated: 2026-01-06
+Last Updated: 2026-01-22

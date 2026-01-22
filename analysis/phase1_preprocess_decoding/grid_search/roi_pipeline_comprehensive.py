@@ -21,9 +21,9 @@ from datetime import datetime
 # Parse command-line arguments
 parser = argparse.ArgumentParser(description='Comprehensive ROI Pipeline')
 parser.add_argument('subject_id', type=str, help='Subject ID (e.g., 01, 02, ...)')
-parser.add_argument('--dataset', type=str, default='original_v3',
+parser.add_argument('--dataset', type=str, default='method3_header_mi',
                     choices=['original_v3', 'method3_header_mi', 'deoblique_v2'],
-                    help='Dataset to use (default: original_v3)')
+                    help='Dataset to use (default: method3_header_mi)')
 parser.add_argument('--run', type=int, default=1, help='Run ID (default: 1)')
 args = parser.parse_args()
 

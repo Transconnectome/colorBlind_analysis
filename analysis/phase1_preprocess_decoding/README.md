@@ -23,7 +23,7 @@ This phase handles fMRI data preprocessing and region-of-interest (ROI) extracti
 - Color reconstruction and classification
 
 **Input**:
-- fMRIPrep preprocessed BOLD data (`derivatives/fmriprep_out_deoblique_v2/`)
+- fMRIPrep preprocessed BOLD data (`/storage/connectome/haba6030/fmriprep_out_method3_header_mi/`)
 - Event files (stimulus timings)
 - Probabilistic atlas (V1, V2, V3, hV4)
 
@@ -39,7 +39,7 @@ This phase handles fMRI data preprocessing and region-of-interest (ROI) extracti
 python fir_reconstruction_BH2009_system_clean.py \
     --subject 02 \
     --roi V1 \
-    --dataset deoblique_v2
+    --dataset method3_header_mi
 ```
 
 **Baseline Decoding Settings (Baseline32)**

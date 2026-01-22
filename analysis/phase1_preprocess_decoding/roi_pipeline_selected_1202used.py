@@ -25,9 +25,9 @@ from datetime import datetime
 parser = argparse.ArgumentParser(description='Comprehensive ROI Pipeline')
 parser.add_argument('subject_id', type=str, help='Subject ID (e.g., 01, 02, ...)')
 parser.add_argument('--run', type=int, default=1, help='Run ID (default: 1)')
-parser.add_argument('--dataset', type=str, default='original_v3',
+parser.add_argument('--dataset', type=str, default='method3_header_mi',
                     choices=['original_v3', 'method3_header_mi', 'deoblique_v2'],
-                    help='Dataset to use (default: original_v3)')
+                    help='Dataset to use (default: method3_header_mi)')
 args = parser.parse_args()
 
 # Dataset configuration
@@ -40,11 +40,6 @@ DATASET_PATHS = {
 # Configuration
 BASE_DIR = Path('/scratch/connectome/haba6030/colorBlind')
 
-# Environment variables for flexible directory structure
-# Can be overridden in sbatch: export DATASET_VERSION="V4_Test"
-DATASET_VERSION = os.environ.get('DATASET_VERSION', 'V3_Comprehensive')  # Default: V3_Comprehensive
-ANALYSIS_SUBDIR = os.environ.get('ANALYSIS_SUBDIR', 'ROI_mask')  # Default: ROI_mask
-
 # UPDATED 2025-12-12: Use 2mm atlas (pre-converted to match fMRIPrep MNI space)
 # Original 1mm atlas caused alignment issues due to resolution/affine mismatch
 # See: ROI_ALIGNMENT_ISSUES_ANALYSIS.md and convert_wang_atlas_to_2mm.py
@@ -56,9 +51,15 @@ DATA_DIR = Path('/storage/connectome/haba6030/bids_editted')  # Event/stimulus f
 print(f"Dataset: {args.dataset}")
 print(f"fMRIPrep directory: {FMRIPREP_DIR}")
 
-# Output: derivatives/{DATASET_VERSION}/{ANALYSIS_SUBDIR}/sub-XX/roi_pipeline/
-# Default: derivatives/V3_Comprehensive/ROI_mask/sub-XX/roi_pipeline/
-DERIVATIVES_DIR = BASE_DIR / 'derivatives' / DATASET_VERSION / ANALYSIS_SUBDIR
+# Output structure: analysis/roi_masks/{dataset}/sub-XX/  (SHARED RESOURCE)
+# This replaces old: derivatives/V3_Comprehensive/ROI_mask/sub-XX/roi_pipeline/
+DERIVATIVES_DIR = BASE_DIR / 'analysis' / 'roi_masks' / args.dataset
+LOGS_DIR = BASE_DIR / 'analysis' / 'phase1_preprocess_decoding' / args.dataset / 'logs'
+DERIVATIVES_DIR.mkdir(parents=True, exist_ok=True)
+LOGS_DIR.mkdir(parents=True, exist_ok=True)
+
+print(f"ROI masks output: {DERIVATIVES_DIR}/")
+print(f"Logs output: {LOGS_DIR}/")
 
 # Target space (matching pilot preprocessing)
 TARGET_SPACE = 'MNI152NLin2009cAsym'
@@ -164,13 +165,39 @@ class ROIPipelineComprehensive:
         print(f"EPI brain mask: {self.epi_brain_mask}")
 
     def _get_func_ref(self):
-        """Get functional reference image (boldref)"""
-        pattern = f'sub-{self.subject_id}_task-rsvp_run-{self.run_id}_space-{TARGET_SPACE}_res-{TARGET_RES}_boldref.nii.gz'
+        """Get functional reference image (boldref)
 
-        func_file = self.fmriprep_subj_dir / 'func' / pattern
-        if not func_file.exists():
-            raise FileNotFoundError(f"Functional reference not found: {func_file}")
-        return func_file
+        Uses robust glob pattern to handle variable naming conventions:
+        - sub-01_task-rsvp_run-1_space-MNI152NLin2009cAsym_res-2_boldref.nii.gz
+        - sub-01_task-rsvp_run-1_space-MNI152NLin2009cAsym_res-2_desc-preproc_boldref.nii.gz
+        """
+        func_dir = self.fmriprep_subj_dir / 'func'
+        if not func_dir.exists():
+            raise FileNotFoundError(f"Functional directory not found: {func_dir}")
+
+        # Try exact pattern first
+        pattern = f'sub-{self.subject_id}_task-rsvp_run-{self.run_id}_space-{TARGET_SPACE}_res-{TARGET_RES}_boldref.nii.gz'
+        func_file = func_dir / pattern
+
+        if func_file.exists():
+            return func_file
+
+        # Try glob pattern to handle different naming conventions
+        import glob
+        glob_pattern = str(func_dir / f'sub-{self.subject_id}_task-rsvp_run-{self.run_id}_space-{TARGET_SPACE}_res-{TARGET_RES}_*boldref.nii.gz')
+        matches = glob.glob(glob_pattern)
+
+        if matches:
+            print(f"  ✓ Found boldref with glob pattern: {matches[0]}")
+            return Path(matches[0])
+
+        raise FileNotFoundError(
+            f"Functional reference not found.\n"
+            f"  Tried exact: {func_file}\n"
+            f"  Tried glob: {glob_pattern}\n"
+            f"  Available files in {func_dir}:\n" +
+            "\n".join([f"    - {f.name}" for f in func_dir.glob('*boldref.nii.gz')])
+        )
 
     def _get_anat_ref(self):
         """Get anatomical reference image (T1w in MNI space)

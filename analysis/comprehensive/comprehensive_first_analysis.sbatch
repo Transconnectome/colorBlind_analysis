@@ -1,16 +1,18 @@
 #!/bin/bash
-#SBATCH --job-name=pipeline_v3
-#SBATCH --nodelist=node2
+#SBATCH --job-name=pipeline_m3
+#SBATCH --nodelist=node2,node4
 #SBATCH --qos=shared
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=64GB
 #SBATCH --time=72:00:00
-#SBATCH --output=analysis/comprehensive/logs/complete_pipeline_v3_%j.out
-#SBATCH --error=analysis/comprehensive/logs/complete_pipeline_v3_%j.err
+#SBATCH --no-requeue
+#SBATCH --open-mode=append
+#SBATCH --output=analysis/phase1_preprocess_decoding/method3_header_mi/logs/complete_pipeline_%j.out
+#SBATCH --error=analysis/phase1_preprocess_decoding/method3_header_mi/logs/complete_pipeline_%j.err
 
 # ============================================================================
-# Complete Analysis Pipeline for fMRIPrep original_v3 Data
+# Complete Analysis Pipeline for fMRIPrep method3_header_mi Data
 # ============================================================================
 #
 # This script runs the complete colorBlind analysis pipeline:
@@ -20,7 +22,7 @@
 #   Phase 3: ANOVA feature selection (optional voxel refinement)
 #   Phase 4: 3D loss optimization (personalized filter learning)
 #
-# Data: /storage/connectome/haba6030/fmriprep_out_original_v3
+# Data: /storage/connectome/haba6030/fmriprep_out_method3_header_mi
 # Events: /storage/connectome/haba6030/bids_editted
 # Preprocessing: Baseline32 (sm0, hp0.01, cosine motion, PCA30)
 # Subjects: 01-10 (all subjects)
@@ -34,14 +36,14 @@
 # ============================================================================
 
 echo "================================================================"
-echo "Complete Analysis Pipeline - fMRIPrep original_v3"
+echo "Complete Analysis Pipeline - fMRIPrep method3_header_mi"
 echo "Job ID: ${SLURM_JOB_ID}"
 echo "Start: $(date)"
 echo "================================================================"
 
 # Configuration
-DATASET="original_v3"
-TIMESTAMP="baseline32_original_v3"
+DATASET="method3_header_mi"
+TIMESTAMP="baseline32_method3_header_mi"
 SUBJECTS=(01 02 03 04 05 06 07 08 09 10)
 ROIS=(V1 V2 V3 hV4)
 HC_SUBJECTS=(01 02 03 04 05 06 07)
@@ -81,9 +83,9 @@ echo "================================================================"
 echo ""
 
 # Note: roi_pipeline_selected_1202used.py processes all subjects/ROIs
-# It should be updated to use fmriprep_out_original_v3
+# It should be updated to use fmriprep_out_method3_header_mi
 echo "Running ROI pipeline..."
-python roi_pipeline_selected_1202used.py
+python roi_pipeline_selected_1202used.py --dataset $DATASET
 
 if [ $? -eq 0 ]; then
     echo "✓ ROI building complete"
@@ -103,7 +105,7 @@ echo ""
 
 # Note: visualize_roi_overlay.py has hardcoded subjects/ROIs
 echo "Creating ROI overlays..."
-python visualize_roi_overlay.py
+python visualize_roi_overlay.py --dataset $DATASET
 
 if [ $? -eq 0 ]; then
     echo "✓ Overlay visualization complete"

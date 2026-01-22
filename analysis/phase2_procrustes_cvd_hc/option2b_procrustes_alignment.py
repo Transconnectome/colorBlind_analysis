@@ -40,11 +40,15 @@ matplotlib.use('Agg')
 # Data Loading (Option 1과 동일)
 # ============================================================================
 
-def load_subject_amplitudes(subject_id, roi, timestamp, dataset='deoblique_v2'):
+def load_subject_amplitudes(subject_id, roi, timestamp, dataset='method3_header_mi'):
     """피험자 데이터 로드"""
     base_dir = Path('/scratch/connectome/haba6030/colorBlind')
-    # New structure: derivatives/V3_Comprehensive/BH2009_{dataset}/{timestamp}/sub-{subject}/{roi}
-    result_dir = base_dir / 'derivatives' / 'V3_Comprehensive' / f'BH2009_{dataset}' / timestamp / f'sub-{subject_id}' / roi
+    # New structure: analysis/phase1_preprocess_decoding/{dataset}/results/baseline_decoding/{timestamp}/sub-{subject}/{roi}
+    result_dir = base_dir / 'analysis' / 'phase1_preprocess_decoding' / dataset / 'results' / 'baseline_decoding' / timestamp / f'sub-{subject_id}' / roi
+
+    # Backward compatibility: check old location if new location doesn't exist
+    if not result_dir.exists():
+        result_dir = base_dir / 'derivatives' / 'V3_Comprehensive' / f'BH2009_{dataset}' / timestamp / f'sub-{subject_id}' / roi
 
     if not result_dir.exists():
         raise FileNotFoundError(f"No data found for sub-{subject_id}, ROI {roi} at {result_dir}")

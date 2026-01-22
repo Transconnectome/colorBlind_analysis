@@ -393,9 +393,9 @@ def parse_args():
                         help='Subject ID (P01 for pilot, 01-04 for test subjects)')
     parser.add_argument('--roi', type=str, default='V1',
                         help='ROI name (e.g., V1, V2, V3, V4, hV4)')
-    parser.add_argument('--dataset', type=str, default='afni_deoblique_v3',
-                        choices=['afni_deoblique_v3', 'deoblique_v2', 'deoblique', 'original', 'original_v3'],
-                        help='Dataset version (afni_deoblique_v3: AFNI deoblique [NEW STANDARD], deoblique_v2: header-only deoblique [DEPRECATED], deoblique: v1, original: fmriprep_out, original_v3: FreeSurfer removed)')
+    parser.add_argument('--dataset', type=str, default='method3_header_mi',
+                        choices=['afni_deoblique_v3', 'deoblique_v2', 'deoblique', 'original', 'original_v3', 'method3_header_mi'],
+                        help='Dataset version (method3_header_mi: MI-based registration [CURRENT], afni_deoblique_v3: AFNI deoblique, original_v3: FreeSurfer removed, deoblique_v2: header-only [DEPRECATED])')
     parser.add_argument('--roi-mask', type=str, default=None,
                         help='ROI mask file path (if None, auto-detect from derivatives/sub-XX/roi_pipeline/)')
     parser.add_argument('--roi-pipeline-dir', type=str, default='roi_pipeline',
@@ -533,11 +533,15 @@ if args.output_dir:
     fig_dir = str(output_dir) + '/figures_'
 else:
     # Standard mode: organized by subject then ROI
-    # Structure: derivatives/V3_Comprehensive/BH2009_{dataset}/{timestamp}/sub-{subject}/{roi}
-    output_dir = Path(f"derivatives/V3_Comprehensive/BH2009_{DATASET}/{timestamp}/sub-{SUBJECT_ID}/{ROI_NAME}")
+    # Structure: analysis/phase1_preprocess_decoding/{dataset}/results/baseline_decoding/{timestamp}/sub-{subject}/{roi}
+    output_dir = Path(f"analysis/phase1_preprocess_decoding/{DATASET}/results/baseline_decoding/{timestamp}/sub-{SUBJECT_ID}/{ROI_NAME}")
     output_dir.mkdir(parents=True, exist_ok=True)
     output_dir = str(output_dir)
     fig_dir = str(output_dir) + '/figures_'
+
+# Logs directory
+logs_dir = Path(f"analysis/phase1_preprocess_decoding/{DATASET}/logs")
+logs_dir.mkdir(parents=True, exist_ok=True)
 
 print("="*70)
 print("Brouwer & Heeger (2009) Faithful Implementation")
@@ -567,103 +571,122 @@ if args.roi_mask:
     roi_path = args.roi_mask
     print(f"  Using provided ROI mask: {roi_path}")
 else:
-    # Auto-detect from derivatives directory
-    # Priority 1: Check V3_Comprehensive for original_v3 data
-    v3_path = f"derivatives/V3_Comprehensive/ROI_mask/sub-{SUBJECT_ID}/roi_pipeline/{ROI_NAME}_mask_thr50_intnearest_binTrue_maskfunc_gmTrue_subjTrue.nii.gz"
+    # Auto-detect ROI mask
+    # Priority 1: Check new shared location - analysis/roi_masks/{dataset}/sub-{ID}/roi_pipeline/
+    shared_roi_path = f"analysis/roi_masks/{DATASET}/sub-{SUBJECT_ID}/roi_pipeline/{ROI_NAME}_mask_thr50_intnearest_binTrue_maskfunc_gmTrue_subjTrue.nii.gz"
 
-    if os.path.exists(v3_path):
-        roi_path = v3_path
-        print(f"  ✓ Found ROI mask in V3_Comprehensive (original_v3 data)")
+    if os.path.exists(shared_roi_path):
+        roi_path = shared_roi_path
+        print(f"  ✓ Found ROI mask in shared location (analysis/roi_masks/{DATASET}/)")
         print(f"  {roi_path}")
     else:
-        # Priority 2: Check old deoblique data location
-        roi_pipeline_dir = args.roi_pipeline_dir
+        # Priority 2: Check old V3_Comprehensive location (backward compatibility)
+        v3_path = f"derivatives/V3_Comprehensive/ROI_mask/sub-{SUBJECT_ID}/roi_pipeline/{ROI_NAME}_mask_thr50_intnearest_binTrue_maskfunc_gmTrue_subjTrue.nii.gz"
 
-        # Auto-detect roi_config based on roi_pipeline_dir if not provided
-        if args.roi_config is None:
-            # Check if probability or deterministic based on directory name
-            if 'probability' in roi_pipeline_dir:
-                # Probability: binFalse, subjTrue
-                roi_config = 'thr50_intnearest_binFalse_masknone_gmFalse_subjTrue'
-                print(f"  Auto-detected Probability ROI config (binFalse)")
-            else:
-                # Deterministic: binTrue, subjTrue
-                roi_config = 'thr50_intnearest_binTrue_masknone_gmFalse_subjTrue'
-                print(f"  Auto-detected Deterministic ROI config (binTrue)")
+        if os.path.exists(v3_path):
+            roi_path = v3_path
+            print(f"  ✓ Found ROI mask in legacy V3_Comprehensive location")
+            print(f"  {roi_path}")
         else:
-            roi_config = args.roi_config
-            print(f"  Using provided ROI config: {roi_config}")
+            # Priority 3: Check old deoblique data location
+            roi_pipeline_dir = args.roi_pipeline_dir
 
-        roi_path = f"derivatives/sub-{SUBJECT_ID}/{roi_pipeline_dir}/{ROI_NAME}_mask_{roi_config}.nii.gz"
-        print(f"  Auto-detecting ROI mask from deoblique location:")
-        print(f"  {roi_path}")
-        print(f"  ROI pipeline dir: {roi_pipeline_dir}")
-        print(f"  ROI config: {roi_config}")
+            # Auto-detect roi_config based on roi_pipeline_dir if not provided
+            if args.roi_config is None:
+                # Check if probability or deterministic based on directory name
+                if 'probability' in roi_pipeline_dir:
+                    # Probability: binFalse, subjTrue
+                    roi_config = 'thr50_intnearest_binFalse_masknone_gmFalse_subjTrue'
+                    print(f"  Auto-detected Probability ROI config (binFalse)")
+                else:
+                    # Deterministic: binTrue, subjTrue
+                    roi_config = 'thr50_intnearest_binTrue_masknone_gmFalse_subjTrue'
+                    print(f"  Auto-detected Deterministic ROI config (binTrue)")
+            else:
+                roi_config = args.roi_config
+                print(f"  Using provided ROI config: {roi_config}")
+
+            roi_path = f"derivatives/sub-{SUBJECT_ID}/{roi_pipeline_dir}/{ROI_NAME}_mask_{roi_config}.nii.gz"
+            print(f"  Auto-detecting ROI mask from legacy deoblique location:")
+            print(f"  {roi_path}")
+            print(f"  ROI pipeline dir: {roi_pipeline_dir}")
+            print(f"  ROI config: {roi_config}")
 
 if not os.path.exists(roi_path):
     # Try alternative patterns
     print(f"\n⚠️  Primary ROI mask not found: {roi_path}")
     print(f"  Trying alternative patterns...")
 
-    # Alternative 1: Try V3_Comprehensive with glob pattern (any parameter combination)
-    v3_search_pattern = f"derivatives/V3_Comprehensive/ROI_mask/sub-{SUBJECT_ID}/roi_pipeline/{ROI_NAME}_mask_*.nii.gz"
-    v3_matches = glob.glob(v3_search_pattern)
+    # Alternative 1: Try shared location with glob pattern (any parameter combination)
+    shared_search_pattern = f"analysis/roi_masks/{DATASET}/sub-{SUBJECT_ID}/roi_pipeline/{ROI_NAME}_mask_*.nii.gz"
+    shared_matches = glob.glob(shared_search_pattern)
 
-    if v3_matches:
+    if shared_matches:
         # Prefer binTrue masks
-        preferred = [f for f in v3_matches if 'binTrue' in f]
-        roi_path = preferred[0] if preferred else v3_matches[0]
-        print(f"  ✓ Found V3_Comprehensive ROI mask: {roi_path}")
+        preferred = [f for f in shared_matches if 'binTrue' in f]
+        roi_path = preferred[0] if preferred else shared_matches[0]
+        print(f"  ✓ Found shared location ROI mask: {roi_path}")
     else:
-        # Alternative 2: subjFalse instead of subjTrue (old location)
-        alt_roi_config = roi_config.replace('subjTrue', 'subjFalse')
-        alt_roi_path = f"derivatives/sub-{SUBJECT_ID}/{roi_pipeline_dir}/{ROI_NAME}_mask_{alt_roi_config}.nii.gz"
+        # Alternative 2: Try V3_Comprehensive with glob pattern (any parameter combination)
+        v3_search_pattern = f"derivatives/V3_Comprehensive/ROI_mask/sub-{SUBJECT_ID}/roi_pipeline/{ROI_NAME}_mask_*.nii.gz"
+        v3_matches = glob.glob(v3_search_pattern)
 
-        if os.path.exists(alt_roi_path):
-            print(f"  ✓ Found alternative: {alt_roi_path}")
-            roi_path = alt_roi_path
-            roi_config = alt_roi_config
+        if v3_matches:
+            # Prefer binTrue masks
+            preferred = [f for f in v3_matches if 'binTrue' in f]
+            roi_path = preferred[0] if preferred else v3_matches[0]
+            print(f"  ✓ Found legacy V3_Comprehensive ROI mask: {roi_path}")
         else:
-            # Alternative 3: Try glob pattern to find any matching mask (old location)
-            search_pattern = f"derivatives/sub-{SUBJECT_ID}/{roi_pipeline_dir}/{ROI_NAME}_mask_*.nii.gz"
-            matching_files = glob.glob(search_pattern)
+            # Alternative 3: subjFalse instead of subjTrue (old location)
+            alt_roi_config = roi_config.replace('subjTrue', 'subjFalse')
+            alt_roi_path = f"derivatives/sub-{SUBJECT_ID}/{roi_pipeline_dir}/{ROI_NAME}_mask_{alt_roi_config}.nii.gz"
 
-            if matching_files:
-                # Prioritize by binarize setting (binFalse for probability, binTrue for determin)
-                preferred_bin = 'binFalse' if 'probability' in roi_pipeline_dir else 'binTrue'
-                preferred_matches = [f for f in matching_files if preferred_bin in f]
+            if os.path.exists(alt_roi_path):
+                print(f"  ✓ Found alternative: {alt_roi_path}")
+                roi_path = alt_roi_path
+                roi_config = alt_roi_config
+            else:
+                # Alternative 4: Try glob pattern to find any matching mask (old location)
+                search_pattern = f"derivatives/sub-{SUBJECT_ID}/{roi_pipeline_dir}/{ROI_NAME}_mask_*.nii.gz"
+                matching_files = glob.glob(search_pattern)
 
-                if preferred_matches:
-                    roi_path = preferred_matches[0]
-                    print(f"  ✓ Found matching ROI mask: {roi_path}")
+                if matching_files:
+                    # Prioritize by binarize setting (binFalse for probability, binTrue for determin)
+                    preferred_bin = 'binFalse' if 'probability' in roi_pipeline_dir else 'binTrue'
+                    preferred_matches = [f for f in matching_files if preferred_bin in f]
+
+                    if preferred_matches:
+                        roi_path = preferred_matches[0]
+                        print(f"  ✓ Found matching ROI mask: {roi_path}")
+                    else:
+                        roi_path = matching_files[0]
+                        print(f"  ⚠️  Using first available ROI mask: {roi_path}")
+                        print(f"  (Note: May not match expected binarize setting)")
                 else:
-                    roi_path = matching_files[0]
-                    print(f"  ⚠️  Using first available ROI mask: {roi_path}")
-                    print(f"  (Note: May not match expected binarize setting)")
-            else:
-                print(f"\n❌ ERROR: No ROI mask file found!")
-                print(f"  Searched in:")
-                print(f"    - derivatives/V3_Comprehensive/ROI_mask/sub-{SUBJECT_ID}/roi_pipeline/")
-                print(f"    - derivatives/sub-{SUBJECT_ID}/{roi_pipeline_dir}/")
-            print(f"\n  Please check:")
-            print(f"  1. ROI masks have been created with roi_pipeline")
-            print(f"  2. Path structure matches expected format")
-            print(f"  3. ROI name '{ROI_NAME}' is correct")
+                    print(f"\n❌ ERROR: No ROI mask file found!")
+                    print(f"  Searched in:")
+                    print(f"    - analysis/roi_masks/{DATASET}/sub-{SUBJECT_ID}/roi_pipeline/")
+                    print(f"    - derivatives/V3_Comprehensive/ROI_mask/sub-{SUBJECT_ID}/roi_pipeline/")
+                    print(f"    - derivatives/sub-{SUBJECT_ID}/{roi_pipeline_dir}/")
+                    print(f"\n  Please check:")
+                    print(f"  1. ROI masks have been created with roi_pipeline")
+                    print(f"  2. Path structure matches expected format")
+                    print(f"  3. ROI name '{ROI_NAME}' is correct")
 
-            # Try to suggest alternative paths
-            if SUBJECT_ID == 'P01':
-                alt_dir = f"derivatives/pilot/{DERIVATIVE_PREFIX}"
-            else:
-                alt_dir = f"derivatives/{DERIVATIVE_PREFIX}"
+                    # Try to suggest alternative paths
+                    if SUBJECT_ID == 'P01':
+                        alt_dir = f"derivatives/pilot/{DERIVATIVE_PREFIX}"
+                    else:
+                        alt_dir = f"derivatives/{DERIVATIVE_PREFIX}"
 
-            if os.path.exists(alt_dir):
-                print(f"\n  Available files in {alt_dir}:")
-                for root, dirs, files in os.walk(alt_dir):
-                    for file in files:
-                        if ROI_NAME in file and file.endswith('.nii.gz'):
-                            print(f"    {os.path.join(root, file)}")
+                    if os.path.exists(alt_dir):
+                        print(f"\n  Available files in {alt_dir}:")
+                        for root, dirs, files in os.walk(alt_dir):
+                            for file in files:
+                                if ROI_NAME in file and file.endswith('.nii.gz'):
+                                    print(f"    {os.path.join(root, file)}")
 
-            sys.exit(1)
+                    sys.exit(1)
 
 roi_img = nib.load(roi_path)
 roi_data = roi_img.get_fdata()

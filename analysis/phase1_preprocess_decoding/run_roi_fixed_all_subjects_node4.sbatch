@@ -35,7 +35,7 @@ echo "Node: $(hostname)"
 echo "Started: $(date)"
 echo ""
 echo "Script: roi_pipeline_comprehensive.py"
-echo "Dataset: fmriprep_out_original_v3"
+echo "Dataset: fmriprep_out_method3_header_mi"
 echo "Subjects: 01-10 (10 subjects)"
 echo "ROIs per subject: V1, V2, V3, hV4 (4 ROIs)"
 echo "Output: derivatives/V3_Comprehensive/ROI_mask/sub-{ID}/"
@@ -67,8 +67,8 @@ for SUBJECT in "${SUBJECTS[@]}"; do
     echo ""
 
     # Run ROI pipeline for this subject
-    # Builds ROI masks from Wang Atlas for original_v3 data
-    python roi_pipeline_comprehensive.py $SUBJECT
+    # Builds ROI masks from Wang Atlas for method3_header_mi data
+    python roi_pipeline_comprehensive.py $SUBJECT --dataset method3_header_mi
 
     EXIT_CODE=$?
 

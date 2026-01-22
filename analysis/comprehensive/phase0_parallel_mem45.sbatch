@@ -9,8 +9,8 @@
 #SBATCH --array=1-10
 #SBATCH --no-requeue
 #SBATCH --open-mode=append
-#SBATCH --output=logs/phase0_m3_45G_sub-%a_%A.out
-#SBATCH --error=logs/phase0_m3_45G_sub-%a_%A.err
+#SBATCH --output=analysis/comprehensive/logs/phase0_m3_45G_sub-%a_%A.out
+#SBATCH --error=analysis/comprehensive/logs/phase0_m3_45G_sub-%a_%A.err
 
 # ============================================================================
 # Phase 0: Subject-Parallel Baseline Analysis (Array Job)

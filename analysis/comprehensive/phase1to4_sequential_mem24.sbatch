@@ -3,7 +3,7 @@
 #SBATCH --nodelist=node2,node4
 #SBATCH --qos=shared
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=3
 #SBATCH --mem=24GB
 #SBATCH --time=24:00:00
 #SBATCH --no-requeue
@@ -34,9 +34,9 @@ echo "================================================================"
 # Configuration
 DATASET="method3_header_mi"
 TIMESTAMP="baseline32_method3_header_mi"
-SUBJECTS=(01 02 03 04 05 06 07 08 09 10)
+SUBJECTS=(01 02 03 04 05 06 08 09 10)
 ROIS=(V1 V2 V3 hV4)
-HC_SUBJECTS=(01 02 03 04 05 06 07)
+HC_SUBJECTS=(01 02 03 04 05 06)  # Excluding sub-07: too few voxels (6-16 voxels)
 CVD_SUBJECTS=(08 09 10)
 
 # Paths
@@ -85,7 +85,7 @@ for ROI in "${ROIS[@]}"; do
         --roi $ROI \
         --timestamp $TIMESTAMP \
         --dataset $DATASET \
-        --hc-subjects ${HC_SUBJECTS[@]} \
+        --subjects ${HC_SUBJECTS[@]} \
         --output-dir analysis/phase2_baseline_comparing/${DATASET}/results/rdm_analysis
 
     if [ $? -eq 0 ]; then
@@ -103,61 +103,73 @@ echo "✓ Phase 1 complete"
 # ============================================================================
 echo ""
 echo "================================================================"
-echo "PHASE 2: Procrustes Alignment Analysis"
+echo "PHASE 2: Procrustes Alignment Analysis (All ROIs)"
 echo "================================================================"
 echo ""
+echo "HC subjects: ${HC_SUBJECTS[@]}"
+echo "ROIs: ${ROIS[@]}"
+echo ""
+echo "Note: Procrustes script processes all ROIs together"
+echo ""
 
-for ROI in "${ROIS[@]}"; do
+python analysis/phase2_procrustes_cvd_hc/option2b_procrustes_alignment.py \
+    --timestamp $TIMESTAMP \
+    --dataset $DATASET \
+    --hc-subjects ${HC_SUBJECTS[@]} \
+    --rois ${ROIS[@]}
+
+if [ $? -eq 0 ]; then
     echo ""
-    echo "--- Procrustes: ROI ${ROI} ---"
-    echo "HC subjects: ${HC_SUBJECTS[@]}"
-    echo "CVD subjects: ${CVD_SUBJECTS[@]}"
-
-    python analysis/phase2_procrustes_cvd_hc/option2b_procrustes_alignment.py \
-        --roi $ROI \
-        --timestamp $TIMESTAMP \
-        --dataset $DATASET \
-        --hc-subjects ${HC_SUBJECTS[@]} \
-        --cvd-subjects ${CVD_SUBJECTS[@]} \
-        --output-dir analysis/phase2_procrustes_cvd_hc/${DATASET}/results
-
-    if [ $? -eq 0 ]; then
-        echo "✓ Procrustes analysis completed for ${ROI}"
-    else
-        echo "✗ Procrustes analysis failed for ${ROI}"
-    fi
-done
+    echo "✓ Phase 2 (Procrustes) completed for all ROIs"
+else
+    echo ""
+    echo "✗ Phase 2 (Procrustes) failed"
+fi
 
 echo ""
 echo "✓ Phase 2 complete"
 
 # ============================================================================
-# Phase 3: Filter Learning (CVD Transformation)
+# Phase 3: Filter Learning (CVD → HC Transformation)
 # ============================================================================
 echo ""
 echo "================================================================"
 echo "PHASE 3: Filter Learning (CVD → HC Transformation)"
 echo "================================================================"
 echo ""
-
-# Note: Phase 3 implementation depends on your specific filter learning approach
-# This is a placeholder - adjust according to your actual phase3 scripts
-
-echo "Phase 3: Filter learning to be implemented based on Phase 2 results"
-echo "  Input: Procrustes-aligned patterns from Phase 2"
-echo "  Output: Learned transformation filters"
+echo "Learning linear filters for CVD subjects..."
+echo "  Target: HC group template from Phase 2 Procrustes alignment"
+echo "  Method: Least-squares linear transformation (Y = A @ X + b)"
 echo ""
-echo "⚠️  Phase 3 script placeholder - update with actual implementation"
 
-# Placeholder for phase 3
-# python analysis/phase3_filter_learning/learn_cvd_filters.py \
-#     --dataset $DATASET \
-#     --timestamp $TIMESTAMP \
-#     --input-dir analysis/phase2_procrustes_cvd_hc/${DATASET}/results \
-#     --output-dir analysis/phase3_filter_learning/${DATASET}/results
+PHASE3_SUCCESS=0
+PHASE3_TOTAL=0
+
+for ROI in "${ROIS[@]}"; do
+    echo ""
+    echo "--- Training filters for ROI ${ROI} ---"
+
+    python analysis/comprehensive/run_phase3_filter_learning.py \
+        --timestamp $TIMESTAMP \
+        --roi $ROI \
+        --cvd-subjects ${CVD_SUBJECTS[@]} \
+        --hc-subjects ${HC_SUBJECTS[@]} \
+        --dataset $DATASET
+
+    if [ $? -eq 0 ]; then
+        echo "✓ Filter learning completed for ${ROI}"
+        PHASE3_SUCCESS=$((PHASE3_SUCCESS + 1))
+    else
+        echo "✗ Filter learning failed for ${ROI}"
+    fi
+
+    PHASE3_TOTAL=$((PHASE3_TOTAL + 1))
+done
 
 echo ""
-echo "✓ Phase 3 placeholder complete"
+echo "Phase 3 Summary: ${PHASE3_SUCCESS}/${PHASE3_TOTAL} ROIs completed"
+echo ""
+echo "✓ Phase 3 complete"
 
 # ============================================================================
 # Phase 4: Summary and Visualization
@@ -168,17 +180,25 @@ echo "PHASE 4: Summary Statistics and Visualization"
 echo "================================================================"
 echo ""
 
-# Generate summary report
-echo "Generating comprehensive summary..."
+echo "Generating comprehensive summary report..."
+echo ""
 
-# Placeholder for summary generation
-# python analysis/comprehensive/generate_summary.py \
-#     --dataset $DATASET \
-#     --timestamp $TIMESTAMP \
-#     --output analysis/comprehensive/results/summary_${DATASET}.html
+python analysis/comprehensive/generate_phase_summary.py \
+    --dataset $DATASET \
+    --timestamp $TIMESTAMP
+
+PHASE4_EXIT=$?
+
+if [ $PHASE4_EXIT -eq 0 ]; then
+    echo ""
+    echo "✓ Phase 4 (Summary) completed successfully"
+else
+    echo ""
+    echo "✗ Phase 4 (Summary) failed (exit code: ${PHASE4_EXIT})"
+fi
 
 echo ""
-echo "✓ Phase 4 placeholder complete"
+echo "✓ Phase 4 complete"
 
 # ============================================================================
 # Final Summary
@@ -188,10 +208,22 @@ echo "================================================================"
 echo "Pipeline Complete!"
 echo "================================================================"
 echo ""
+echo "Subjects analyzed:"
+echo "  HC: ${HC_SUBJECTS[@]} (6 subjects, sub-07 excluded)"
+echo "  CVD: ${CVD_SUBJECTS[@]} (3 subjects)"
+echo ""
 echo "Results saved to:"
+echo "  Phase 0: analysis/phase1_preprocess_decoding/${DATASET}/results/"
 echo "  Phase 1: analysis/phase2_baseline_comparing/${DATASET}/results/"
-echo "  Phase 2: analysis/phase2_procrustes_cvd_hc/${DATASET}/results/"
-echo "  Phase 3: analysis/phase3_filter_learning/${DATASET}/results/"
+echo "  Phase 2: analysis/comprehensive/results/${TIMESTAMP}/"
+echo "  Phase 3: analysis/comprehensive/results/${TIMESTAMP}/[ROI]/filter_learning/"
+echo "  Phase 4 Summary: analysis/comprehensive/results/COMPREHENSIVE_SUMMARY_${TIMESTAMP}.txt"
+echo ""
+echo "Key outputs:"
+echo "  - Procrustes alignment: analysis/comprehensive/results/${TIMESTAMP}/"
+echo "  - Learned filters: analysis/comprehensive/results/${TIMESTAMP}/[ROI]/filter_learning/"
+echo "  - Summary report: analysis/comprehensive/results/COMPREHENSIVE_SUMMARY_${TIMESTAMP}.txt"
+echo "  - Visualizations: analysis/comprehensive/results/${TIMESTAMP}/*/figures/"
 echo ""
 echo "End time: $(date)"
 echo "================================================================"

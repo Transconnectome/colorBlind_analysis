@@ -118,12 +118,28 @@ def load_subject_amplitudes(subject_id, roi, timestamp, dataset='deoblique_v2'):
     - Phase 1B는 개별 최적 K 복셀 사용 (baseline 분석과 동일)
     - amplitudes_z: z-scored channel response (각 run별로 표준화됨)
     """
-    # New structure: derivatives/V3_Comprehensive/BH2009_{dataset}/{timestamp}/sub-{subject}/{roi}
-    result_dir = Path(f'derivatives/V3_Comprehensive/BH2009_{dataset}/{timestamp}/sub-{subject_id}/{roi}')
+    # Priority 1: New structure - analysis/phase1_preprocess_decoding/{dataset}/results/baseline_decoding/{timestamp}/sub-{subject}/{roi}/
+    new_result_dir = Path(f'analysis/phase1_preprocess_decoding/{dataset}/results/baseline_decoding/{timestamp}/sub-{subject_id}/{roi}')
 
-    if not result_dir.exists():
-        raise FileNotFoundError(f"No results for sub-{subject_id} {roi} at {result_dir}")
+    if new_result_dir.exists():
+        result_dir = new_result_dir
+    else:
+        # Priority 2: Legacy structure - derivatives/V3_Comprehensive/BH2009_{dataset}/{timestamp}/sub-{subject}/{roi}
+        legacy_result_dir = Path(f'derivatives/V3_Comprehensive/BH2009_{dataset}/{timestamp}/sub-{subject_id}/{roi}')
+
+        if legacy_result_dir.exists():
+            result_dir = legacy_result_dir
+        else:
+            raise FileNotFoundError(
+                f"No results for sub-{subject_id} {roi}\n"
+                f"  Tried new: {new_result_dir}\n"
+                f"  Tried legacy: {legacy_result_dir}"
+            )
+
     amp_file = result_dir / 'amplitudes_z.npy'
+
+    if not amp_file.exists():
+        raise FileNotFoundError(f"Amplitudes file not found: {amp_file}")
 
     amplitudes = np.load(amp_file)  # (n_runs, n_colors, n_voxels)
     print(f"  sub-{subject_id}: {amplitudes.shape}")

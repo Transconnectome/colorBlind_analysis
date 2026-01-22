@@ -111,18 +111,19 @@ squeue -w node2    # Check current jobs
 - **Non-CVD subjects (all)**: sub-01, sub-02, sub-03, sub-04, sub-05, sub-06, sub-07 (7 subjects)
 - **CVD subjects (all)**: sub-08, sub-09, sub-10 (3 subjects)
 
-**Data Paths (Current: original_v3 - 2026-01-05):**
+**Data Paths (Current: method3_header_mi - 2026-01-22):**
 ```bash
-FMRIPREP_OUT=/storage/connectome/haba6030/fmriprep_out_original_v3
+FMRIPREP_OUT=/storage/connectome/haba6030/fmriprep_out_method3_header_mi
 EVENT_DIR=/storage/connectome/haba6030/bids_editted
 DERIVATIVES=/scratch/connectome/haba6030/colorBlind/derivatives
 ```
 
-**fMRIPrep original_v3 (CURRENT - USE THIS):**
-- **Location**: `/storage/connectome/haba6030/fmriprep_out_original_v3/sub-{ID}/func/`
+**fMRIPrep method3_header_mi (CURRENT - USE THIS):**
+- **Location**: `/storage/connectome/haba6030/fmriprep_out_method3_header_mi/sub-{ID}/func/`
 - **BOLD files**: `sub-{ID}_task-rsvp_run-X_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz`
 - **Confounds**: `sub-{ID}_task-rsvp_run-X_desc-confounds_timeseries.tsv`
-- **See**: `docs/0104_Preprocessing_Report.md` for quality metrics
+- **Registration method**: MI-based coregistration with header optimization
+- **See**: `analysis/prep_trials/README.md` for registration quality comparison
 
 **Event/Stimulus files:**
 - **Server (BIDS format)**: `/storage/connectome/haba6030/bids_editted/sub-{ID}/func/`

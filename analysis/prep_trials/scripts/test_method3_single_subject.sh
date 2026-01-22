@@ -1,11 +1,20 @@
 #!/bin/bash
 ################################################################################
-# Quick Test Script: Method 3 (Single Subject)
+# Full Test Script: Method 3 (Single Subject)
 #
-# Usage (on server):
+# Usage (on server, interactive mode):
+#   conda activate nilearn  # or appropriate env with FSL/FreeSurfer
 #   bash test_method3_single_subject.sh
 #
-# Purpose: Test Method 3 pipeline on sub-10 only (fast validation)
+# Purpose: Full Method 3 pipeline test on sub-10 (run 1 only)
+#   - Brain extraction
+#   - BOLD → T1w (mri_coreg --regheader)
+#   - T1w → MNI (FLIRT + FNIRT with correct MNI152NLin2009cAsym)
+#   - BOLD → MNI (composed transform)
+#   - 3D mask creation
+#
+# Expected time: ~20-30 minutes
+# Expected memory: ~15-20GB peak
 ################################################################################
 
 set -e  # Exit on error
@@ -156,18 +165,31 @@ echo "✅ BOLD in T1w space: ${BOLD_IN_T1W}"
 echo ""
 
 # =========================================================================
-# Step 3: T1w → MNI (FLIRT only, skip FNIRT for speed)
+# Step 3: T1w → MNI (FLIRT + FNIRT for full test)
 # =========================================================================
 
 echo "================================================================================"
-echo "Step 3: T1w → MNI (FLIRT only - fast test)"
+echo "Step 3: T1w → MNI (FLIRT + FNIRT)"
 echo "================================================================================"
 
-MNI_TEMPLATE="/usr/local/fsl/data/standard/MNI152_T1_2mm_brain.nii.gz"
+# CRITICAL: Use MNI152NLin2009cAsym (matches Original_v3 and Wang atlas)
+MNI_TEMPLATE="/scratch/connectome/haba6030/colorBlind/templates/MNI152NLin2009cAsym_res-2_T1_brain.nii.gz"
+MNI_TEMPLATE_HEAD="/scratch/connectome/haba6030/colorBlind/templates/MNI152NLin2009cAsym_res-2_T1.nii.gz"
+MNI_REFMASK="/scratch/connectome/haba6030/colorBlind/templates/MNI152NLin2009cAsym_res-2_brain_mask.nii.gz"
+
+if [ ! -f "${MNI_TEMPLATE}" ]; then
+    echo "❌ ERROR: MNI template not found: ${MNI_TEMPLATE}"
+    echo "   Run: python3 -c 'from templateflow import api as tflow; ...'"
+    exit 1
+fi
+
 T1W_BRAIN_NII="${WORK_DIR}/sub-${SUBJECT_ID}_T1w_brain.nii.gz"
+T1W_HEAD_NII="${WORK_DIR}/sub-${SUBJECT_ID}_T1w_head.nii.gz"
 T1W_TO_MNI_MAT="${OUTPUT_DIR}/sub-${SUBJECT_ID}/transforms/sub-${SUBJECT_ID}_t1w_to_mni_affine.mat"
+T1W_TO_MNI_WARP="${OUTPUT_DIR}/sub-${SUBJECT_ID}/transforms/sub-${SUBJECT_ID}_t1w_to_mni_warp.nii.gz"
 
 mri_convert ${BRAIN_MGZ} ${T1W_BRAIN_NII}
+mri_convert ${T1W_MGZ} ${T1W_HEAD_NII}
 
 echo "Running FLIRT (linear 12 DOF)..."
 flirt \
@@ -181,10 +203,96 @@ flirt \
     -searchrz -90 90 \
     -dof 12
 
-echo "✅ T1w → MNI linear registration completed"
+echo "✅ FLIRT completed"
+
+echo "Running FNIRT (nonlinear warp)..."
+# Use correct template-matched mask
+if [ ! -f "${MNI_TEMPLATE_HEAD}" ]; then
+    echo "  ⚠️  Full head template not found, using brain template"
+    MNI_TEMPLATE_HEAD="${MNI_TEMPLATE}"
+fi
+
+fnirt \
+    --in=${T1W_HEAD_NII} \
+    --ref=${MNI_TEMPLATE_HEAD} \
+    --aff=${T1W_TO_MNI_MAT} \
+    --refmask=${MNI_REFMASK} \
+    --cout=${T1W_TO_MNI_WARP} \
+    --config=/usr/local/fsl/etc/flirtsch/T1_2_MNI152_2mm.cnf
+
+echo "✅ FNIRT completed"
 echo ""
-echo "NOTE: FNIRT (nonlinear) skipped for quick testing"
-echo "      Full pipeline will include FNIRT"
+
+# =========================================================================
+# Step 4: Apply composed transform (BOLD → MNI)
+# =========================================================================
+
+echo "================================================================================"
+echo "Step 4: Apply composed transform (BOLD → MNI)"
+echo "================================================================================"
+
+# Convert LTA to FSL format
+BOLD_TO_T1W_MAT="${WORK_DIR}/sub-${SUBJECT_ID}_run-${RUN}_bold_to_t1w.mat"
+
+tkregister2 \
+    --mov ${BOLD_REF} \
+    --targ ${T1W_BRAIN_NII} \
+    --reg ${WORK_DIR}/temp_reg.dat \
+    --lta ${OUTPUT_LTA} \
+    --noedit \
+    --fslregout ${BOLD_TO_T1W_MAT}
+
+# Apply composed transform
+BOLD_MNI="${OUTPUT_DIR}/sub-${SUBJECT_ID}/func/sub-${SUBJECT_ID}_task-rsvp_run-${RUN}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz"
+
+echo "Applying composed transform (BOLD → T1w → MNI)..."
+applywarp \
+    --in=${BOLD_FILE} \
+    --ref=${MNI_TEMPLATE} \
+    --out=${BOLD_MNI} \
+    --warp=${T1W_TO_MNI_WARP} \
+    --premat=${BOLD_TO_T1W_MAT} \
+    --interp=trilinear
+
+echo "✅ BOLD in MNI: $(basename ${BOLD_MNI})"
+
+# Create mask in MNI space
+MASK_MNI="${OUTPUT_DIR}/sub-${SUBJECT_ID}/func/sub-${SUBJECT_ID}_task-rsvp_run-${RUN}_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz"
+
+echo "Creating MNI space mask..."
+if ! 3dAutomask -prefix ${MASK_MNI} ${BOLD_MNI} 2>/dev/null; then
+    echo "  3dAutomask failed, using fslmaths with temporal mean..."
+    fslmaths ${BOLD_MNI} -Tmean -bin ${MASK_MNI}
+fi
+
+echo "✅ Mask in MNI: $(basename ${MASK_MNI})"
+
+# Verify shapes
+echo ""
+echo "Verification:"
+python3 << EOF
+import nibabel as nib
+
+bold = nib.load('${BOLD_MNI}')
+mask = nib.load('${MASK_MNI}')
+
+print(f"  BOLD shape: {bold.shape}")
+print(f"  Mask shape: {mask.shape}")
+print(f"  Expected spatial: (97, 115, 97)")
+
+if bold.shape[:3] == (97, 115, 97):
+    print(f"  ✅ BOLD spatial dims correct")
+else:
+    print(f"  ❌ BOLD spatial dims WRONG!")
+
+if mask.shape == (97, 115, 97):
+    print(f"  ✅ Mask is 3D and correct")
+elif len(mask.shape) == 4:
+    print(f"  ❌ Mask is 4D (WRONG!)")
+else:
+    print(f"  ❌ Mask shape unexpected")
+EOF
+
 echo ""
 
 # =========================================================================
@@ -195,14 +303,29 @@ echo "==========================================================================
 echo "Test Completed Successfully!"
 echo "================================================================================"
 echo ""
-echo "Outputs:"
-echo "  Brain: ${BRAIN_MGZ}"
-echo "  BOLD ref: ${BOLD_REF}"
-echo "  Transform: ${OUTPUT_LTA}"
-echo "  BOLD in T1w: ${BOLD_IN_T1W}"
-echo "  T1w → MNI: ${T1W_TO_MNI_MAT}"
+echo "Pipeline Summary:"
+echo "  ✅ Brain extraction (FreeSurfer/FSL)"
+echo "  ✅ BOLD → T1w (mri_coreg --regheader)"
+echo "  ✅ T1w → MNI (FLIRT + FNIRT with MNI152NLin2009cAsym)"
+echo "  ✅ BOLD → MNI (applywarp with composed transforms)"
+echo "  ✅ MNI space mask (3D)"
 echo ""
-echo "Next step: Run full pipeline with sbatch for all subjects and runs"
+echo "Output files:"
+echo "  Brain:       ${BRAIN_MGZ}"
+echo "  BOLD ref:    ${BOLD_REF}"
+echo "  Transform:   ${OUTPUT_LTA}"
+echo "  T1w→MNI:     ${T1W_TO_MNI_WARP}"
+echo "  BOLD in MNI: ${BOLD_MNI}"
+echo "  Mask in MNI: ${MASK_MNI}"
+echo ""
+echo "Template info:"
+echo "  Using: MNI152NLin2009cAsym (97,115,97)"
+echo "  Matches: Original_v3 ✅, Wang Atlas ✅"
+echo ""
+echo "Next steps:"
+echo "  1. If test successful, run full pipeline:"
+echo "     sbatch run_method3_header_mi_all_subjects.sbatch"
+echo "  2. Monitor with: squeue -u \$USER"
 echo ""
 echo "Cleanup (optional):"
 echo "  rm -rf ${WORK_DIR}"

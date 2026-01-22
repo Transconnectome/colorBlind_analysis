@@ -283,51 +283,10 @@ for RUN in 1 2 3 4 5 6; do
 
     echo "✅ BOLD in T1w space: $(basename ${BOLD_IN_T1W})"
 
-    # Create brain mask in T1w space (Robust fallback chain)
-    echo "Creating brain mask..."
-    BOLD_MASK_T1W="${WORK_DIR}/sub-${SUBJECT_ID}_run-${RUN}_bold_mask_t1w.nii.gz"
-
-    # Priority: fslmaths (fast) > 3dAutomask (accurate) > mri_binarize (fallback)
-    MASK_CREATED=false
-
-    if command -v fslmaths &> /dev/null; then
-        echo "  Trying fslmaths..."
-        if fslmaths ${BOLD_IN_T1W} -Tmean -bin ${BOLD_MASK_T1W}; then
-            echo "  ✅ Used fslmaths (FSL)"
-            MASK_CREATED=true
-        else
-            echo "  ⚠️  fslmaths failed, trying next..."
-        fi
-    fi
-
-    if [ "$MASK_CREATED" = false ] && command -v 3dAutomask &> /dev/null; then
-        echo "  Trying 3dAutomask..."
-        if 3dAutomask -prefix ${BOLD_MASK_T1W} ${BOLD_IN_T1W}; then
-            echo "  ✅ Used 3dAutomask (AFNI)"
-            MASK_CREATED=true
-        else
-            echo "  ⚠️  3dAutomask failed, trying next..."
-        fi
-    fi
-
-    if [ "$MASK_CREATED" = false ] && command -v mri_binarize &> /dev/null; then
-        echo "  Trying mri_binarize..."
-        if mri_binarize --i ${BOLD_IN_T1W} --min 0.01 --o ${BOLD_MASK_T1W}; then
-            echo "  ✅ Used mri_binarize (FreeSurfer)"
-            MASK_CREATED=true
-        else
-            echo "  ⚠️  mri_binarize failed"
-        fi
-    fi
-
-    if [ "$MASK_CREATED" = false ]; then
-        echo "  ⚠️  WARNING: All mask tools failed, but continuing..."
-        echo "  Note: Mask may not be critical for registration quality"
-    fi
-
     # Cleanup large intermediate files to prevent OOM
+    # Note: T1w mask not needed (only MNI mask used for analysis/diagnostics)
     echo "Cleaning up intermediate files..."
-    rm -f ${BOLD_IN_T1W} ${BOLD_REF} ${BOLD_MASK_T1W}
+    rm -f ${BOLD_IN_T1W} ${BOLD_REF}
 
     echo ""
 done
@@ -404,12 +363,18 @@ T1W_ORIG_MGZ="${SUBJECTS_DIR}/sub-${SUBJECT_ID}/mri/orig.mgz"
 mri_convert ${T1W_ORIG_MGZ} ${T1W_HEAD_NII}
 
 echo "  FNIRT (nonlinear warp)..."
+
+# Use MNI152NLin2009cAsym mask (matches our template space)
+MNI_REFMASK="/scratch/connectome/haba6030/colorBlind/templates/MNI152NLin2009cAsym_res-2_brain_mask.nii.gz"
+
+# CRITICAL: Override config's default mask with our template-matched mask
 fnirt \
     --in=${T1W_HEAD_NII} \
     --ref=${MNI_TEMPLATE_HEAD} \
     --aff=${T1W_TO_MNI_MAT} \
     --cout=${T1W_TO_MNI_WARP} \
     --iout=${T1W_TO_MNI_NONLINEAR} \
+    --refmask=${MNI_REFMASK} \
     --config=${MNI_CONFIG}
 
 echo "  ✅ Nonlinear registration done"

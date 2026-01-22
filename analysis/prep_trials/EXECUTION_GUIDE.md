@@ -40,7 +40,7 @@ for SUBJECT in 01 03 06; do
             --subject ${SUBJECT} \
             --method method1_flirt_bbr \
             --run ${RUN} \
-            --base_dir /storage/connectome/haba6030/fmriprep_out_original_v3 \
+            --base_dir /storage/connectome/haba6030/fmriprep_out_method3_header_mi \
             --output results/dice_method1_flirt_bbr.csv
     done
 done

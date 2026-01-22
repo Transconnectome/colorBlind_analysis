@@ -6,7 +6,7 @@ Compare registration quality across methods by overlaying Wang atlas ROIs
 on BOLD functional references.
 
 Usage:
-    python diagnose_registration_quality.py --subject 01 --run 1
+    python diagnose_registration_quality.py --subject 01 --run 1 --method method3_header_mi
 """
 
 import argparse
@@ -19,6 +19,8 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import pandas as pd
+import json
+from datetime import datetime
 
 
 # ROI definitions (Wang atlas)
@@ -485,6 +487,8 @@ def main():
     parser = argparse.ArgumentParser(description='Diagnose registration quality with ROI overlay')
     parser.add_argument('--subject', type=str, required=True, help='Subject ID (e.g., 01)')
     parser.add_argument('--run', type=int, default=1, help='Run number (default: 1)')
+    parser.add_argument('--method', type=str, required=True,
+                        help='Method name (e.g., original_v3, method2_header_bbr, method3_header_mi)')
     parser.add_argument('--rois', nargs='+', default=['V1', 'V2', 'V3', 'hV4'],
                         help='ROIs to visualize (default: all)')
     parser.add_argument('--threshold', type=float, default=50,
@@ -497,23 +501,35 @@ def main():
     prep_trials_dir = Path('/scratch/connectome/haba6030/colorBlind/analysis/prep_trials')
     original_dir = Path('/storage/connectome/haba6030')
 
-    output_dir = prep_trials_dir / 'diagnostics' / f'sub-{args.subject}'
+    # Output directory structure: diagnose/Method_{method_name}/sub-{subject}/
+    output_base_dir = prep_trials_dir / 'diagnose' / f'Method_{args.method}'
+    output_dir = output_base_dir / f'sub-{args.subject}'
     output_dir.mkdir(parents=True, exist_ok=True)
 
     print("="*80)
     print(f"Registration Quality Diagnosis - Sub-{args.subject} Run {args.run}")
+    print(f"Method: {args.method}")
     print("="*80)
     print()
 
-    # BOLD files - use mean for consistent comparison across all methods
-    bold_files = {
-        # 'Original_v3': original_dir / 'fmriprep_out_original_v3' / f'sub-{args.subject}/func' /
-        #                f'sub-{args.subject}_task-rsvp_run-{args.run}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz',
-        # 'Method2_Header_BBR': prep_trials_dir / 'method2_header_bbr' / f'sub-{args.subject}/func' /
-        #                       f'sub-{args.subject}_task-rsvp_run-{args.run}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz',
-        'Method3_Header_MI': original_dir / 'fmriprep_out_method3_header_mi' / f'sub-{args.subject}/func' /
-                             f'sub-{args.subject}_task-rsvp_run-{args.run}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'
+    # Map method names to data paths
+    method_paths = {
+        'original_v3': original_dir / 'fmriprep_out_original_v3',
+        'method2_header_bbr': prep_trials_dir / 'method2_header_bbr',
+        'method3_header_mi': original_dir / 'fmriprep_out_method3_header_mi'
     }
+
+    if args.method not in method_paths:
+        print(f"❌ ERROR: Unknown method '{args.method}'")
+        print(f"Available methods: {list(method_paths.keys())}")
+        return
+
+    # Get BOLD file path for the specified method
+    method_data_dir = method_paths[args.method]
+    bold_file = method_data_dir / f'sub-{args.subject}/func' / \
+                f'sub-{args.subject}_task-rsvp_run-{args.run}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz'
+
+    bold_files = {args.method: bold_file}
 
     # Load BOLD data - keep 4D for GLM, compute mean for overlay
     print("Loading BOLD data...")
@@ -537,17 +553,12 @@ def main():
 
     print(f"\n✅ Loaded {len(bold_refs)} method(s)")
 
-    # Load brain masks for each method
+    # Load brain mask for the specified method
     print("\nLoading brain masks...")
     brain_masks = {}
-    brain_mask_files = {
-        # 'Original_v3': original_dir / 'fmriprep_out_original_v3' / f'sub-{args.subject}/func' /
-        #                f'sub-{args.subject}_task-rsvp_run-{args.run}_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz',
-        # 'Method2_Header_BBR': prep_trials_dir / 'method2_header_bbr' / f'sub-{args.subject}/func' /
-        #                       f'sub-{args.subject}_task-rsvp_run-{args.run}_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz',
-        'Method3_Header_MI': original_dir / 'fmriprep_out_method3_header_mi' / f'sub-{args.subject}/func' /
-                             f'sub-{args.subject}_task-rsvp_run-{args.run}_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz'
-    }
+    brain_mask_file = method_data_dir / f'sub-{args.subject}/func' / \
+                      f'sub-{args.subject}_task-rsvp_run-{args.run}_space-MNI152NLin2009cAsym_res-2_desc-brain_mask.nii.gz'
+    brain_mask_files = {args.method: brain_mask_file}
 
     for method_name, mask_file in brain_mask_files.items():
         if method_name in bold_refs:  # Only load if BOLD was loaded
@@ -650,7 +661,7 @@ def main():
 
         print()
 
-    # Save alignment metrics to CSV
+    # Save alignment metrics to CSV (per subject-run)
     if all_metrics:
         df_metrics = pd.DataFrame(all_metrics)
         metrics_csv = output_dir / f'roi_alignment_metrics_run{args.run}.csv'
@@ -669,10 +680,90 @@ def main():
         print(df_metrics[available_cols].to_string(index=False))
         print()
 
+        # Update consolidated results.json at method level
+        method_results_path = output_base_dir / 'results.json'
+
+        # Load existing results or create new
+        if method_results_path.exists():
+            with open(method_results_path, 'r') as f:
+                method_results = json.load(f)
+        else:
+            method_results = {
+                'method': args.method,
+                'timestamp_created': datetime.now().isoformat(),
+                'subjects': {}
+            }
+
+        # Update timestamp
+        method_results['timestamp_updated'] = datetime.now().isoformat()
+
+        # Initialize subject if not exists
+        subject_key = f'sub-{args.subject}'
+        if subject_key not in method_results['subjects']:
+            method_results['subjects'][subject_key] = {
+                'runs': {}
+            }
+
+        # Build run results
+        run_key = f'run-{args.run}'
+        run_results = {
+            'metadata': {
+                'roi_threshold': args.threshold,
+                'rois_analyzed': args.rois,
+                'timestamp': datetime.now().isoformat()
+            },
+            'summary': {
+                'total_rois': len(df_metrics),
+                'mean_roi_coverage_ratio': float(df_metrics['roi_coverage_ratio'].mean()),
+                'mean_signal_ratio_roi_vs_brain': float(df_metrics['signal_ratio_roi_vs_brain'].mean())
+            },
+            'per_roi_metrics': {}
+        }
+
+        # Add GLM summary if available
+        if 'glm_n_valid_voxels' in df_metrics.columns:
+            run_results['summary']['total_glm_roi_voxels'] = int(df_metrics['glm_n_roi_voxels'].sum())
+            run_results['summary']['total_glm_valid_voxels'] = int(df_metrics['glm_n_valid_voxels'].sum())
+            run_results['summary']['mean_glm_valid_ratio'] = float(df_metrics['glm_valid_ratio'].mean())
+            run_results['summary']['mean_glm_amplitude'] = float(df_metrics['glm_mean_amplitude'].mean())
+            run_results['summary']['mean_glm_variance_across_colors'] = float(df_metrics['glm_mean_variance_across_colors'].mean())
+
+        # Per-ROI detailed metrics
+        for _, row in df_metrics.iterrows():
+            roi_name = row['roi']
+            run_results['per_roi_metrics'][roi_name] = {
+                'roi_voxels': int(row['roi_voxels']),
+                'intersection_voxels': int(row['intersection_voxels']),
+                'roi_coverage_ratio': float(row['roi_coverage_ratio']),
+                'bold_in_roi_ratio': float(row['bold_in_roi_ratio']),
+                'mean_signal_in_roi': float(row['mean_signal_in_roi']),
+                'signal_ratio_roi_vs_brain': float(row['signal_ratio_roi_vs_brain'])
+            }
+
+            # Add GLM metrics if available
+            if 'glm_n_valid_voxels' in row:
+                run_results['per_roi_metrics'][roi_name]['glm'] = {
+                    'n_roi_voxels': int(row['glm_n_roi_voxels']),
+                    'n_valid_voxels': int(row['glm_n_valid_voxels']),
+                    'valid_ratio': float(row['glm_valid_ratio']),
+                    'mean_amplitude': float(row['glm_mean_amplitude']),
+                    'std_amplitude': float(row['glm_std_amplitude']),
+                    'mean_variance_across_colors': float(row['glm_mean_variance_across_colors'])
+                }
+
+        # Update the consolidated results
+        method_results['subjects'][subject_key]['runs'][run_key] = run_results
+
+        # Save consolidated results.json
+        with open(method_results_path, 'w') as f:
+            json.dump(method_results, f, indent=2)
+        print(f"✅ Consolidated results updated: {method_results_path}")
+
     print("="*80)
     print("Diagnosis Complete!")
     print("="*80)
     print(f"\nOutput directory: {output_dir}")
+    print(f"Method results: {output_base_dir / 'results.json'}")
     print()
 
 

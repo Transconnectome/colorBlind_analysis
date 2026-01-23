@@ -116,6 +116,7 @@ python analysis/phase2_procrustes_cvd_hc/option2b_procrustes_alignment.py \
     --timestamp $TIMESTAMP \
     --dataset $DATASET \
     --hc-subjects ${HC_SUBJECTS[@]} \
+    --cvd-subjects ${CVD_SUBJECTS[@]} \
     --rois ${ROIS[@]}
 
 if [ $? -eq 0 ]; then

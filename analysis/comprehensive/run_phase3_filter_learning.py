@@ -24,22 +24,34 @@ def load_aligned_patterns(timestamp, roi, dataset='method3_header_mi'):
     if not phase2_dir.exists():
         raise FileNotFoundError(f"Phase 2 results not found: {phase2_dir}")
 
-    # Load aligned patterns
-    aligned_file = phase2_dir / 'aligned_patterns.npz'
+    # Load aligned patterns (saved by Phase 2 as procrustes_results.npz)
+    aligned_file = phase2_dir / 'procrustes_results.npz'
     if not aligned_file.exists():
-        raise FileNotFoundError(f"Aligned patterns not found: {aligned_file}")
+        raise FileNotFoundError(f"Procrustes results not found: {aligned_file}")
 
     data = np.load(aligned_file, allow_pickle=True)
     aligned_patterns = {
         'aligned_patterns': data['aligned_patterns'],
         'group_template': data['group_template'],
-        'disparities': data['disparities']
+        'disparities': data['disparities'],
+        'selected_voxel_indices': data.get('selected_voxel_indices', None)
     }
 
     return aligned_patterns, phase2_dir
 
-def load_cvd_original_patterns(subject_id, roi, timestamp, dataset='method3_header_mi'):
-    """Load original (unaligned) CVD patterns"""
+def load_cvd_original_patterns(subject_id, roi, timestamp, dataset='method3_header_mi', selected_voxel_indices=None):
+    """Load original (unaligned) CVD patterns
+
+    Args:
+        subject_id: CVD subject ID
+        roi: ROI name
+        timestamp: Analysis timestamp
+        dataset: Dataset name
+        selected_voxel_indices: Optional voxel indices to select (from Phase 2 ANOVA)
+
+    Returns:
+        pattern: (n_colors, n_voxels) or (n_colors, n_selected_voxels)
+    """
     base_dir = Path('/scratch/connectome/haba6030/colorBlind')
 
     # Load amplitudes from baseline results
@@ -56,6 +68,10 @@ def load_cvd_original_patterns(subject_id, roi, timestamp, dataset='method3_head
 
     # Average across runs to get (n_colors, n_voxels) pattern
     pattern = amplitudes.mean(axis=0)
+
+    # Apply same voxel selection as HC subjects (from Phase 2 ANOVA)
+    if selected_voxel_indices is not None:
+        pattern = pattern[:, selected_voxel_indices]
 
     return pattern
 
@@ -127,6 +143,13 @@ def run_filter_learning(timestamp, roi, cvd_subjects, hc_subjects, dataset='meth
     group_template = aligned_patterns['group_template']  # (n_colors, n_voxels)
     print(f"  HC group template shape: {group_template.shape}")
 
+    # Get selected voxel indices from Phase 2 ANOVA selection
+    selected_voxel_indices = aligned_patterns.get('selected_voxel_indices', None)
+    if selected_voxel_indices is not None:
+        print(f"  Using ANOVA-selected voxels: {len(selected_voxel_indices)} voxels")
+    else:
+        print(f"  Warning: No voxel selection found, using all voxels")
+
     # Train filter for each CVD subject
     filters = {}
 
@@ -134,16 +157,24 @@ def run_filter_learning(timestamp, roi, cvd_subjects, hc_subjects, dataset='meth
         print(f"\n--- Training filter for CVD sub-{cvd_id} ---")
 
         try:
-            # Load CVD original patterns
-            cvd_pattern = load_cvd_original_patterns(cvd_id, roi, timestamp, dataset)
-            print(f"  Original CVD pattern shape: {cvd_pattern.shape}")
+            # Load CVD original patterns with same voxel selection as HC
+            cvd_pattern = load_cvd_original_patterns(
+                cvd_id, roi, timestamp, dataset,
+                selected_voxel_indices=selected_voxel_indices
+            )
+            print(f"  CVD pattern shape (after voxel selection): {cvd_pattern.shape}")
 
-            # Ensure same number of voxels (truncate to minimum)
-            min_voxels = min(cvd_pattern.shape[1], group_template.shape[1])
-            X_cvd = cvd_pattern[:, :min_voxels]  # (n_colors, n_voxels)
-            Y_target = group_template[:, :min_voxels]
+            # Both patterns should now have same voxels (from Phase 2 ANOVA)
+            X_cvd = cvd_pattern  # (n_colors, n_voxels)
+            Y_target = group_template  # (n_colors, n_voxels)
 
-            print(f"  Training with {min_voxels} voxels, {X_cvd.shape[0]} colors")
+            # Verify shapes match
+            if X_cvd.shape != Y_target.shape:
+                raise ValueError(
+                    f"Shape mismatch: CVD {X_cvd.shape} vs HC template {Y_target.shape}"
+                )
+
+            print(f"  Training with {X_cvd.shape[1]} voxels, {X_cvd.shape[0]} colors")
 
             # Train filter
             A, b, train_error = train_linear_filter(X_cvd, Y_target)
@@ -158,11 +189,13 @@ def run_filter_learning(timestamp, roi, cvd_subjects, hc_subjects, dataset='meth
                 'A': A,
                 'b': b,
                 'train_error': train_error,
-                'n_voxels': min_voxels,
+                'n_voxels': X_cvd.shape[1],
                 'n_colors': X_cvd.shape[0],
                 'cvd_subject': cvd_id,
                 'roi': roi,
-                'timestamp': timestamp
+                'timestamp': timestamp,
+                'selected_voxel_indices': selected_voxel_indices,
+                'used_anova_selection': selected_voxel_indices is not None
             }
 
             filter_file = output_dir / f'filter_cvd-{cvd_id}.npz'
@@ -183,6 +216,8 @@ def run_filter_learning(timestamp, roi, cvd_subjects, hc_subjects, dataset='meth
         'cvd_subjects': cvd_subjects,
         'hc_subjects': hc_subjects,
         'n_filters_trained': len(filters),
+        'used_anova_selection': selected_voxel_indices is not None,
+        'n_selected_voxels': len(selected_voxel_indices) if selected_voxel_indices is not None else None,
         'filters': {
             cvd_id: {
                 'train_error': float(f['train_error']),

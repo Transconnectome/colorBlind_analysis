@@ -929,13 +929,13 @@ for voxel_idx in range(n_voxels_total):
     y_voxel = np.concatenate(y_voxel)
     X_fir_all = np.vstack(X_fir_all)
 
-    # Debug: Check first voxel in detail
+    # Debug: Check first voxel in detail (BEFORE normalization)
     if voxel_idx == 0:
         print(f"\n  Combined Design Matrix Debug (All runs):")
         print(f"    y_voxel shape: {y_voxel.shape} (all runs concatenated)")
         print(f"    X_fir_all shape: {X_fir_all.shape}")
-        print(f"    y_voxel range: [{np.min(y_voxel):.2f}, {np.max(y_voxel):.2f}]")
-        print(f"    y_voxel mean: {np.mean(y_voxel):.2f}, std: {np.std(y_voxel):.2f}")
+        print(f"    y_voxel range (raw): [{np.min(y_voxel):.2f}, {np.max(y_voxel):.2f}]")
+        print(f"    y_voxel mean (raw): {np.mean(y_voxel):.2f}, std: {np.std(y_voxel):.2f}")
         print(f"    X_fir_all non-zero entries: {np.sum(X_fir_all > 0)}/{X_fir_all.size}")
         print(f"    X_fir_all density: {np.sum(X_fir_all > 0) / X_fir_all.size * 100:.2f}%")
 
@@ -946,31 +946,78 @@ for voxel_idx in range(n_voxels_total):
         if rank < X_fir_all.shape[1]:
             print(f"    ⚠️  WARNING: Design matrix is rank deficient!")
 
+    # ============================================================================
+    # Z-SCORE NORMALIZATION (Fix for baseline/scale issues)
+    # ============================================================================
+    # Purpose: Remove voxel-specific baseline and scale differences
+    # This fixes the high correlation but negative R² problem
+    # Reference: https://github.com/anthropics/claude-code/issues/...
+    y_voxel_mean = np.mean(y_voxel)
+    y_voxel_std = np.std(y_voxel)
+
+    if y_voxel_std > 1e-10:  # Avoid division by zero
+        y_voxel_normalized = (y_voxel - y_voxel_mean) / y_voxel_std
+    else:
+        # This voxel has zero variance (constant signal)
+        # Skip normalization, will be filtered later
+        y_voxel_normalized = y_voxel
+
+    # Debug: Check normalization effect
+    if voxel_idx == 0:
+        print(f"\n  Z-score Normalization Applied:")
+        print(f"    y_voxel range (normalized): [{np.min(y_voxel_normalized):.2f}, {np.max(y_voxel_normalized):.2f}]")
+        print(f"    y_voxel mean (normalized): {np.mean(y_voxel_normalized):.4f}, std: {np.std(y_voxel_normalized):.4f}")
+        print(f"    Original baseline: {y_voxel_mean:.2f}")
+        print(f"    Original scale: {y_voxel_std:.2f}")
+
+    # Use normalized data for HRF estimation
+    y_voxel_for_estimation = y_voxel_normalized
+
     # Estimate HRF using pseudo-inverse: beta = pinv(X) @ y
     # beta includes: [FIR_0, ..., FIR_7, linear_drift, constant]
     try:
-        beta_full = np.linalg.pinv(X_fir_all) @ y_voxel
+        beta_full = np.linalg.pinv(X_fir_all) @ y_voxel_for_estimation
 
         # Extract HRF (first 8 elements, excluding drift regressors)
         h_v = beta_full[:len(FIR_DELAYS)]
         HRF_voxel[voxel_idx] = h_v
 
-        # Compute R² using full model (including drift)
+        # Compute R² using full model (including drift) on NORMALIZED data
         y_pred = X_fir_all @ beta_full
-        r2_voxel[voxel_idx] = compute_r2(y_voxel, y_pred)
+        r2_voxel[voxel_idx] = compute_r2(y_voxel_for_estimation, y_pred)
 
         # Debug first voxel R²
         if voxel_idx == 0:
-            ss_res = np.sum((y_voxel - y_pred) ** 2)
-            ss_tot = np.sum((y_voxel - np.mean(y_voxel)) ** 2)
-            # print(f"\n  R² Calculation Debug:")
-            # print(f"    y_pred range: [{np.min(y_pred):.2f}, {np.max(y_pred):.2f}]")
-            # print(f"    y_pred mean: {np.mean(y_pred):.2f}, std: {np.std(y_pred):.2f}")
-            # print(f"    SS_res (residual sum of squares): {ss_res:.2f}")
-            # print(f"    SS_tot (total sum of squares): {ss_tot:.2f}")
-            # print(f"    R² = 1 - (SS_res/SS_tot) = {r2_voxel[voxel_idx]:.4f}")
-            # print(f"    HRF peak value: {np.max(np.abs(h_v)):.4f}")
-            # print(f"    HRF values: {h_v}")
+            ss_res = np.sum((y_voxel_for_estimation - y_pred) ** 2)
+            ss_tot = np.sum((y_voxel_for_estimation - np.mean(y_voxel_for_estimation)) ** 2)
+
+            # Also compute correlation for comparison
+            y_true_centered = y_voxel_for_estimation - np.mean(y_voxel_for_estimation)
+            y_pred_centered = y_pred - np.mean(y_pred)
+            correlation = np.sum(y_true_centered * y_pred_centered) / (
+                np.sqrt(np.sum(y_true_centered**2)) * np.sqrt(np.sum(y_pred_centered**2))
+            )
+
+            print(f"\n  R² Calculation Debug (on normalized data):")
+            print(f"    y_pred range: [{np.min(y_pred):.2f}, {np.max(y_pred):.2f}]")
+            print(f"    y_pred mean: {np.mean(y_pred):.4f}, std: {np.std(y_pred):.4f}")
+            print(f"    SS_res (residual sum of squares): {ss_res:.4f}")
+            print(f"    SS_tot (total sum of squares): {ss_tot:.4f}")
+            print(f"    Ratio (SS_res/SS_tot): {ss_res/ss_tot:.4f}")
+            print(f"    R² = 1 - (SS_res/SS_tot) = {r2_voxel[voxel_idx]:.4f}")
+            print(f"    Correlation (for comparison): {correlation:.4f}")
+            print(f"    R² should ≈ correlation² = {correlation**2:.4f}")
+            print(f"    HRF peak value: {np.max(np.abs(h_v)):.4f}")
+            print(f"    HRF peak delay: {np.argmax(np.abs(h_v))} TRs")
+
+            # Diagnostic: Check design matrix condition
+            cond_number = np.linalg.cond(X_fir_all)
+            print(f"\n  Design Matrix Diagnostics:")
+            print(f"    Condition number: {cond_number:.2f}")
+            if cond_number > 30:
+                print(f"    ⚠️  WARNING: High multicollinearity (>30)")
+            elif cond_number > 100:
+                print(f"    🚨 CRITICAL: Severe multicollinearity (>100)")
     except Exception as e:
         if voxel_idx == 0:
             print(f"    ❌ ERROR in HRF estimation: {e}")
@@ -1438,6 +1485,14 @@ sys.stdout.flush()
 # Storage: (n_runs, n_colors, n_voxels_selected)
 amplitudes_raw = np.zeros((N_RUNS, N_COLORS, n_voxels_selected))
 
+# IMPORTANT: Use ORIGINAL (non-normalized) data for amplitude estimation
+# Reasoning:
+# 1. Step 1 used z-score to estimate HRF *shape* (improved R²: -13 → 0.35)
+# 2. Step 4 needs original data for *absolute* amplitude estimation
+# 3. GLM design matrix includes drift/intercept regressors → handles baseline
+# 4. Normalizing here creates run-specific offsets → destroys run reliability
+# 5. Zero variance (75/284) is due to HRF variability (mean r=0.125), not baseline
+
 for run_idx in range(N_RUNS):
     print(f"  Processing run {run_idx + 1}/{N_RUNS}...")
 
@@ -1451,7 +1506,7 @@ for run_idx in range(N_RUNS):
 
     # Estimate amplitudes per voxel: β = pinv(X) @ y
     X_pinv = np.linalg.pinv(X_2nd)
-    betas = X_pinv @ y_run  # (16, n_voxels_selected) = [8 HRF + 8 deriv]
+    betas = X_pinv @ y_run  # Use ORIGINAL data
 
     # Extract first 8 betas (HRF regressors only, discard derivative betas)
     amplitudes_raw[run_idx] = betas[:N_COLORS, :]

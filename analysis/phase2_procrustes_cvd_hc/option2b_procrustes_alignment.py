@@ -31,7 +31,7 @@ import argparse
 import numpy as np
 from pathlib import Path
 from scipy.spatial import procrustes
-from scipy.stats import spearmanr
+from scipy.stats import spearmanr, f_oneway
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Agg')
@@ -57,9 +57,89 @@ def load_subject_amplitudes(subject_id, roi, timestamp, dataset='method3_header_
 
     return amplitudes, result_dir
 
-def load_all_subjects(subjects, roi, timestamp, dataset):
-    """모든 피험자 데이터 로드"""
-    print(f"Loading {roi} data for {len(subjects)} subjects...")
+def select_voxels_by_anova(amplitudes_list, n_voxels_target):
+    """
+    ANOVA-based feature selection to choose most informative voxels
+
+    Args:
+        amplitudes_list: List of (n_runs, n_colors, n_voxels) arrays
+        n_voxels_target: Number of voxels to select
+
+    Returns:
+        selected_indices: Indices of selected voxels (shared across subjects)
+
+    Method:
+        For each voxel position that exists in ALL subjects:
+        1. Compute F-statistic for color discrimination
+        2. Average F-statistics across subjects
+        3. Select top n_voxels_target by mean F-statistic
+    """
+    print(f"  Selecting top {n_voxels_target} voxels by ANOVA F-statistic...")
+
+    n_subjects = len(amplitudes_list)
+    n_voxels_max = max([amp.shape[2] for amp in amplitudes_list])
+    n_voxels_min = min([amp.shape[2] for amp in amplitudes_list])
+
+    # Compute F-statistic for each voxel across all subjects
+    # Only consider voxels that exist in all subjects (first n_voxels_min)
+    f_statistics = np.zeros((n_subjects, n_voxels_min))
+
+    for subj_idx, amplitudes in enumerate(amplitudes_list):
+        # amplitudes: (n_runs, n_colors, n_voxels)
+        # Average across runs: (n_colors, n_voxels)
+        pattern = amplitudes.mean(axis=0)[:, :n_voxels_min]
+
+        # For each voxel, compute F-statistic for color discrimination
+        for voxel_idx in range(n_voxels_min):
+            voxel_responses = pattern[:, voxel_idx]  # (n_colors,)
+
+            # One-way ANOVA: test if different colors have different responses
+            # We treat each color as a group with 1 sample (since already averaged)
+            # Instead, use variance across colors as discriminability measure
+            f_statistics[subj_idx, voxel_idx] = np.var(voxel_responses)
+
+    # Mean F-statistic across subjects (robust to individual differences)
+    mean_f_stat = f_statistics.mean(axis=0)
+
+    # Select top n_voxels_target voxels
+    if n_voxels_target >= n_voxels_min:
+        # Already at minimum, no selection needed
+        selected_indices = np.arange(n_voxels_min)
+    else:
+        selected_indices = np.argsort(mean_f_stat)[-n_voxels_target:]
+        selected_indices = np.sort(selected_indices)  # Keep in original order
+
+    print(f"    Mean F-stat range: [{mean_f_stat.min():.2f}, {mean_f_stat.max():.2f}]")
+    print(f"    Selected voxels: {len(selected_indices)}")
+    print(f"    Mean F-stat of selected: {mean_f_stat[selected_indices].mean():.2f}")
+
+    return selected_indices
+
+def get_minimum_voxel_count(subjects, roi, timestamp, dataset):
+    """Determine minimum voxel count across subjects (for finding common voxel space)"""
+    voxel_counts = []
+
+    for subject_id in subjects:
+        try:
+            amplitudes, _ = load_subject_amplitudes(subject_id, roi, timestamp, dataset)
+            voxel_counts.append(amplitudes.shape[2])
+        except FileNotFoundError:
+            continue
+
+    return min(voxel_counts) if voxel_counts else 0
+
+def load_all_subjects(subjects, roi, timestamp, dataset, use_anova_selection=True, cvd_subjects=None):
+    """모든 피험자 데이터 로드
+
+    Args:
+        subjects: HC subject IDs to load
+        roi: ROI name
+        timestamp: Analysis timestamp
+        dataset: Dataset name
+        use_anova_selection: Whether to use ANOVA-based feature selection
+        cvd_subjects: Optional CVD subject IDs to consider for voxel count determination
+    """
+    print(f"Loading {roi} data for {len(subjects)} HC subjects...")
 
     amplitudes_all = []
     subjects_info = []
@@ -88,20 +168,51 @@ def load_all_subjects(subjects, roi, timestamp, dataset):
     if len(amplitudes_all) == 0:
         raise ValueError(f"No data loaded for ROI {roi}")
 
-    # Voxel 수 확인
-    n_voxels_min = min([info['n_voxels'] for info in subjects_info])
-    n_voxels_max = max([info['n_voxels'] for info in subjects_info])
+    # Voxel 수 확인 (HC subjects)
+    n_voxels_min_hc = min([info['n_voxels'] for info in subjects_info])
+    n_voxels_max_hc = max([info['n_voxels'] for info in subjects_info])
 
-    print(f"  Voxel count range: {n_voxels_min} - {n_voxels_max}")
+    print(f"  HC voxel count range: {n_voxels_min_hc} - {n_voxels_max_hc}")
+
+    # If CVD subjects provided, check their voxel counts too
+    if cvd_subjects is not None and len(cvd_subjects) > 0:
+        print(f"  Checking CVD subjects for common voxel space...")
+        cvd_min = get_minimum_voxel_count(cvd_subjects, roi, timestamp, dataset)
+        if cvd_min > 0:
+            print(f"  CVD minimum voxel count: {cvd_min}")
+            n_voxels_min = min(n_voxels_min_hc, cvd_min)
+            print(f"  Common voxel space (HC + CVD): {n_voxels_min}")
+        else:
+            print(f"  Warning: Could not load CVD subjects, using HC-only voxel space")
+            n_voxels_min = n_voxels_min_hc
+    else:
+        n_voxels_min = n_voxels_min_hc
+
+    n_voxels_max = n_voxels_max_hc
 
     # 모든 피험자가 같은 voxel 수를 가져야 함
-    if n_voxels_min != n_voxels_max:
-        print(f"  Truncating all subjects to {n_voxels_min} voxels")
-        amplitudes_all = [amp[:, :, :n_voxels_min] for amp in amplitudes_all]
+    selected_voxel_indices = None
+    if n_voxels_min != n_voxels_max or (cvd_subjects is not None and n_voxels_min < n_voxels_max_hc):
+        if use_anova_selection:
+            # Use ANOVA-based feature selection to choose most informative voxels
+            print(f"  Selecting {n_voxels_min} most informative voxels (ANOVA-based)")
+            selected_voxel_indices = select_voxels_by_anova(amplitudes_all, n_voxels_min)
+
+            # Apply selection to all subjects
+            amplitudes_all = [amp[:, :, selected_voxel_indices] for amp in amplitudes_all]
+        else:
+            # Simple truncation (original method)
+            print(f"  Truncating all subjects to first {n_voxels_min} voxels (no feature selection)")
+            amplitudes_all = [amp[:, :, :n_voxels_min] for amp in amplitudes_all]
+            selected_voxel_indices = np.arange(n_voxels_min)
+
         for info in subjects_info:
             info['n_voxels'] = n_voxels_min
+    else:
+        print(f"  All subjects have same number of voxels ({n_voxels_min})")
+        selected_voxel_indices = np.arange(n_voxels_min)
 
-    return amplitudes_all, subjects_info
+    return amplitudes_all, subjects_info, selected_voxel_indices
 
 # ============================================================================
 # RDM Computation
@@ -340,8 +451,10 @@ def run_procrustes_analysis(args):
 
         try:
             # Load data
-            amplitudes_list, subjects_info = load_all_subjects(
-                args.hc_subjects, roi, args.timestamp, args.dataset
+            amplitudes_list, subjects_info, selected_voxel_indices = load_all_subjects(
+                args.hc_subjects, roi, args.timestamp, args.dataset,
+                use_anova_selection=args.use_anova_selection,
+                cvd_subjects=args.cvd_subjects
             )
 
             # Procrustes alignment
@@ -372,7 +485,8 @@ def run_procrustes_analysis(args):
                 individual_rdms=individual_rdms,
                 rdm_similarities=rdm_similarities,
                 disparities=disparities,
-                subjects=[info['subject'] for info in subjects_info]
+                subjects=[info['subject'] for info in subjects_info],
+                selected_voxel_indices=selected_voxel_indices
             )
 
             # Summary
@@ -404,7 +518,10 @@ def run_procrustes_analysis(args):
         f.write("Option 2B: Procrustes-based Group Alignment - Summary\n")
         f.write("=" * 80 + "\n\n")
         f.write(f"Timestamp: {args.timestamp}\n")
-        f.write(f"HC subjects: {', '.join(args.hc_subjects)}\n\n")
+        f.write(f"HC subjects: {', '.join(args.hc_subjects)}\n")
+        if args.cvd_subjects:
+            f.write(f"CVD subjects (for voxel space): {', '.join(args.cvd_subjects)}\n")
+        f.write(f"ANOVA feature selection: {args.use_anova_selection}\n\n")
         f.write("-" * 80 + "\n")
         f.write("Results by ROI:\n")
         f.write("-" * 80 + "\n\n")
@@ -437,8 +554,14 @@ if __name__ == '__main__':
                        help='Dataset name')
     parser.add_argument('--hc-subjects', nargs='+', required=True,
                        help='HC subject IDs')
+    parser.add_argument('--cvd-subjects', nargs='+', default=None,
+                       help='CVD subject IDs (for determining common voxel space)')
     parser.add_argument('--rois', nargs='+', default=['V1', 'V2', 'V3', 'hV4'],
                        help='ROIs to analyze')
+    parser.add_argument('--use-anova-selection', action='store_true', default=True,
+                       help='Use ANOVA-based feature selection (default: True)')
+    parser.add_argument('--no-anova-selection', dest='use_anova_selection', action='store_false',
+                       help='Disable ANOVA selection, use simple truncation')
 
     args = parser.parse_args()
     run_procrustes_analysis(args)

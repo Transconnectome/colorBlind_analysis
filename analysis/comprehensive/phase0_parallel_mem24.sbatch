@@ -1,23 +1,23 @@
 #!/bin/bash
-#SBATCH --job-name=phase0_m3_45G
+#SBATCH --job-name=phase0_m3_24G
 #SBATCH --nodelist=node2,node4
 #SBATCH --qos=shared
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=8
-#SBATCH --mem=45GB
+#SBATCH --cpus-per-task=2
+#SBATCH --mem=24GB
 #SBATCH --time=24:00:00
 #SBATCH --array=1-10
 #SBATCH --no-requeue
 #SBATCH --open-mode=append
-#SBATCH --output=analysis/comprehensive/logs/phase0_m3_45G_sub-%a_%A.out
-#SBATCH --error=analysis/comprehensive/logs/phase0_m3_45G_sub-%a_%A.err
+#SBATCH --output=analysis/comprehensive/logs/phase0_m3_24G_sub-%a_%A.out
+#SBATCH --error=analysis/comprehensive/logs/phase0_m3_24G_sub-%a_%A.err
 
 # ============================================================================
 # Phase 0: Subject-Parallel Baseline Analysis (Array Job)
 # ============================================================================
 #
-# MEMORY OPTIMIZED VERSION (45GB per task)
-# - Total: 45GB × 10 = 450GB < 452GB usable ✓
+# MEMORY OPTIMIZED VERSION (24GB per task)
+# - Total: 24GB × 10 = 240GB < 452GB usable ✓
 # - Prevents memory overcommit that caused "Duplicate jobid" error
 #
 # This script runs Phase 0 (ROI building + Baseline analysis) in parallel
@@ -46,13 +46,15 @@ echo "================================================================"
 echo "Phase 0: Subject-Parallel Analysis - Array Task ${SLURM_ARRAY_TASK_ID}"
 echo "Job ID: ${SLURM_ARRAY_JOB_ID}"
 echo "Task ID: ${SLURM_ARRAY_TASK_ID}"
-echo "Memory: 45GB per task (optimized for node2)"
+echo "Memory: 24GB per task (max 10 concurrent)"
+echo "Node: node2 or node4"
+echo "Dataset: method3_header_mi"
 echo "Start: $(date)"
 echo "================================================================"
 
 # Configuration
-DATASET="original_v3"
-TIMESTAMP="baseline32_original_v3"
+DATASET="method3_header_mi"
+TIMESTAMP="baseline32_method3_header_mi"
 ALL_SUBJECTS=(01 02 03 04 05 06 07 08 09 10)
 ROIS=(V1 V2 V3 hV4)
 
@@ -81,14 +83,16 @@ cd $BASE_DIR
 # Create necessary directories
 echo "Creating required directories..."
 mkdir -p logs
-mkdir -p derivatives/V3_Comprehensive/ROI_mask
-mkdir -p derivatives/V3_Comprehensive/BH2009_original_v3
-mkdir -p analysis/phase1_preprocess_decoding
+mkdir -p analysis/roi_masks/${DATASET}
+mkdir -p analysis/phase1_preprocess_decoding/${DATASET}/results/baseline_decoding
+mkdir -p analysis/phase1_preprocess_decoding/${DATASET}/logs
 mkdir -p analysis/utils
 
 # Activate conda environment
 echo "Activating conda environment..."
-source ~/.bashrc
+
+# Initialize conda for this script (if not already initialized)
+eval "$(conda shell.bash hook)"
 conda activate nilearn
 
 # Verify conda activation
@@ -98,6 +102,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "✓ Conda environment activated: $(which python)"
+echo "Python version: $(python --version)"
 echo ""
 
 # ============================================================================
@@ -109,14 +114,20 @@ echo "PHASE 0A: ROI Building for sub-${SUBJECT}"
 echo "================================================================"
 echo ""
 
-# Build ROI masks for original_v3 dataset
-# Output: derivatives/V3_Comprehensive/ROI_mask/sub-${SUBJECT}/roi_pipeline/
+# Build ROI masks for method3_header_mi dataset
+# Output: analysis/roi_masks/method3_header_mi/sub-${SUBJECT}/roi_pipeline/
 echo "Building ROI masks for sub-${SUBJECT}..."
-python analysis/phase1_preprocess_decoding/roi_pipeline_comprehensive.py $SUBJECT
+echo "Dataset: ${DATASET}"
+echo "fMRIPrep directory: /storage/connectome/haba6030/fmriprep_out_${DATASET}"
+echo "ROI masks output: analysis/roi_masks/${DATASET}/"
+echo "Logs output: analysis/phase1_preprocess_decoding/${DATASET}/logs/"
+echo ""
+
+python analysis/phase1_preprocess_decoding/roi_pipeline_selected_1202used.py $SUBJECT --dataset $DATASET
 
 if [ $? -eq 0 ]; then
     echo "✓ ROI masks created for sub-${SUBJECT}"
-    echo "  Output: derivatives/V3_Comprehensive/ROI_mask/sub-${SUBJECT}/roi_pipeline/"
+    echo "  Output: analysis/roi_masks/${DATASET}/sub-${SUBJECT}/roi_pipeline/"
 else
     echo "✗ ROI building failed for sub-${SUBJECT}"
     echo "  Baseline analysis will attempt to use existing masks or fail gracefully"

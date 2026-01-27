@@ -951,7 +951,6 @@ for voxel_idx in range(n_voxels_total):
     # ============================================================================
     # Purpose: Remove voxel-specific baseline and scale differences
     # This fixes the high correlation but negative R² problem
-    # Reference: https://github.com/anthropics/claude-code/issues/...
     y_voxel_mean = np.mean(y_voxel)
     y_voxel_std = np.std(y_voxel)
 

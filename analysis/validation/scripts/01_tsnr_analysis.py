@@ -121,12 +121,12 @@ def main():
 
     # Paths
     fmriprep_dir = Path('/storage/connectome/haba6030/fmriprep_out_method3_header_mi')
-    baseline_dir = Path('/scratch/connectome/haba6030/colorBlind/analysis/phase1_preprocess_decoding/method3_header_mi/results/baseline_decoding') / args.baseline_timestamp
+    baseline_dir = Path('/scratch/connectome/haba6030/colorBlind/analysis/phase1_preprocess_decoding/method3_header_mi/results/factorial_experiment') / args.baseline_timestamp
     output_dir = Path('/scratch/connectome/haba6030/colorBlind/analysis/validation/results/tsnr')
 
     # Create timestamp for this run
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    run_dir = output_dir / timestamp
+    run_dir = output_dir / (args.baseline_timestamp + '_' + timestamp)
     run_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"Output directory: {run_dir}")

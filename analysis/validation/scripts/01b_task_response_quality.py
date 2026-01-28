@@ -286,7 +286,7 @@ def main():
 
     # Create timestamp for this run
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    run_dir = output_dir / timestamp
+    run_dir = output_dir / (args.baseline_timestamp + '_' + timestamp)
     run_dir.mkdir(parents=True, exist_ok=True)
 
     print(f"Output directory: {run_dir}")

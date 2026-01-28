@@ -2,8 +2,8 @@
 #SBATCH --job-name=rdm_reliability
 #SBATCH --qos=shared
 #SBATCH --nodelist=node2
-#SBATCH --cpus-per-task=4
-#SBATCH --mem=16G
+#SBATCH --cpus-per-task=2
+#SBATCH --mem=2G
 #SBATCH --time=01:00:00
 #SBATCH --output=/scratch/connectome/haba6030/colorBlind/analysis/validation/logs/rdm_reliability_%j.out
 #SBATCH --error=/scratch/connectome/haba6030/colorBlind/analysis/validation/logs/rdm_reliability_%j.err

@@ -16,9 +16,7 @@ conda activate nilearn
 mkdir -p /scratch/connectome/haba6030/colorBlind/analysis/validation/logs
 
 # Set baseline timestamp (passed from run_01_tsnr.sh or manually specified)
-# To find available timestamps manually:
-# ls -td /scratch/connectome/haba6030/colorBlind/analysis/phase1_preprocess_decoding/method3_header_mi/results/baseline_decoding/*/ | head -1
-BASELINE_TIMESTAMP=${1:-"baseline32_method3_header_mi"}  # Default from phase0_parallel_mem24.sbatch
+BASELINE_TIMESTAMP=${1:-"nzNone_moNo"} 
 
 echo "================================================"
 echo "tSNR Validation Analysis"

@@ -52,6 +52,10 @@ import numpy as np
 import pandas as pd
 import nibabel as nib
 from pathlib import Path
+
+# Get absolute paths for robust file access
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(SCRIPT_DIR))  # colorBlind directory
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -161,7 +165,9 @@ def load_motion_confounds(confounds_path, motion_type='none', compcor_n=None):
     confounds_path : str
         Path to fMRIPrep confounds TSV file
     motion_type : str
-        'none', 'cosine', or 'extended'
+        'none', 'cosine', 'standard', or 'extended'
+        - 'cosine': Drift regressors only (Baseline32)
+        - 'standard': Motion (6 DOF) + tissue (WM, CSF) + drift (Method3 recommended)
     compcor_n : int or None
         Number of aCompCor components
 
@@ -180,9 +186,16 @@ def load_motion_confounds(confounds_path, motion_type='none', compcor_n=None):
 
     # Add motion parameters
     if motion_type == 'cosine':
-        # Cosine basis for high-pass filtering
-        cosine_cols = [f'cosine{i:02d}' for i in range(5)]
+        # Cosine basis for high-pass filtering (Baseline32)
+        cosine_cols = [col for col in confounds_df.columns if col.startswith('cosine')]
         all_confound_cols.extend(cosine_cols)
+    elif motion_type == 'standard':
+        # Standard confound regression for Method3 pipeline
+        # Motion (6 DOF) + tissue signals + cosine drift
+        motion_cols = ['trans_x', 'trans_y', 'trans_z', 'rot_x', 'rot_y', 'rot_z']
+        tissue_cols = ['white_matter', 'csf']
+        cosine_cols = [col for col in confounds_df.columns if col.startswith('cosine')]
+        all_confound_cols.extend(motion_cols + tissue_cols + cosine_cols)
     elif motion_type == 'extended':
         # Friston 24 parameters
         motion_cols = ['trans_x', 'trans_y', 'trans_z', 'rot_x', 'rot_y', 'rot_z']
@@ -417,8 +430,8 @@ def parse_args():
     parser.add_argument('--highpass', type=float, default=None,
                         help='High-pass filter cutoff in Hz (None or 0.01)')
     parser.add_argument('--motion', type=str, default='none',
-                        choices=['none', 'cosine', 'extended'],
-                        help='Motion confounds type')
+                        choices=['none', 'cosine', 'standard', 'extended'],
+                        help='Motion confounds: cosine=Baseline32, standard=Method3+confounds')
     parser.add_argument('--compcor', type=int, default=None,
                         help='Number of aCompCor components (None or 5)')
     parser.add_argument('--drift', type=str, default='per_run',
@@ -426,6 +439,9 @@ def parse_args():
                         help='Drift model (per_run or none)')
     parser.add_argument('--standardize', action='store_true',
                         help='Standardize voxels (z-score)')
+    parser.add_argument('--normalize-level', type=str, default='1st_only',
+                        choices=['1st_only', 'both', 'none'],
+                        help='Normalization strategy: 1st_only (original, problematic), both (E1: consistent), none (E2: all original)')
 
     return parser.parse_args()
 
@@ -444,19 +460,21 @@ MOTION_TYPE = args.motion
 COMPCOR_N = args.compcor
 DRIFT_MODEL = args.drift
 STANDARDIZE = args.standardize
+NORMALIZE_LEVEL = args.normalize_level
 
 # Generate config name for figures
-def config_to_name(smooth, highpass, motion, compcor, drift, standardize):
+def config_to_name(smooth, highpass, motion, compcor, drift, standardize, normalize_level):
     """Convert config parameters to initials format"""
     sm = f"sm{smooth}"
     hp = "hpYe" if highpass else "hpNo"
-    mo = {'none': 'moNo', 'cosine': 'moCo', 'extended': 'moEx'}[motion]
+    mo = {'none': 'moNo', 'cosine': 'moCo', 'standard': 'moSt', 'extended': 'moEx'}[motion]
     cc = "ccYe" if compcor else "ccNo"
     dr = "drPr" if drift == 'per_run' else "drNo"
     st = "stTr" if standardize else "stFa"
-    return f"{sm}_{hp}_{mo}_{cc}_{dr}_{st}"
+    nz = {'1st_only': 'nz1st', 'both': 'nzBoth', 'none': 'nzNone'}[normalize_level]
+    return f"{sm}_{hp}_{mo}_{cc}_{dr}_{st}_{nz}"
 
-CONFIG_NAME = config_to_name(SMOOTH_FWHM, HIGHPASS_HZ, MOTION_TYPE, COMPCOR_N, DRIFT_MODEL, STANDARDIZE)
+CONFIG_NAME = config_to_name(SMOOTH_FWHM, HIGHPASS_HZ, MOTION_TYPE, COMPCOR_N, DRIFT_MODEL, STANDARDIZE, NORMALIZE_LEVEL)
 
 # Determine pilot vs test
 IS_PILOT = (SUBJECT_ID == 'P01')
@@ -518,12 +536,8 @@ EVENTS_DIR = f"{EVENT_DIR}/sub-{SUBJECT_ID}/func"
 
 from datetime import datetime
 
-if args.timestamp:
-    timestamp = args.timestamp
-    print(f"Using provided timestamp: {timestamp}")
-else:
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    print(f"Generated new timestamp: {timestamp}")
+# Generate timestamp for settings.json
+timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
 if args.output_dir:
     # Systematic review mode: use provided directory directly (no timestamp)
@@ -532,9 +546,12 @@ if args.output_dir:
     output_dir = str(output_dir)
     fig_dir = str(output_dir) + '/figures_'
 else:
-    # Standard mode: organized by subject then ROI
-    # Structure: analysis/phase1_preprocess_decoding/{dataset}/results/baseline_decoding/{timestamp}/sub-{subject}/{roi}
-    output_dir = Path(f"analysis/phase1_preprocess_decoding/{DATASET}/results/baseline_decoding/{timestamp}/sub-{SUBJECT_ID}/{ROI_NAME}")
+    # Standard mode: organized by normalization level and motion type
+    # Structure: analysis/phase1_preprocess_decoding/{dataset}/results/factorial_experiment/{normalize}_{motion}/sub-{subject}/{roi}
+    nz_short = {'1st_only': 'nz1st', 'both': 'nzBoth', 'none': 'nzNone'}[NORMALIZE_LEVEL]
+    mo_short = {'none': 'moNo', 'cosine': 'moCo', 'standard': 'moSt', 'extended': 'moEx'}[MOTION_TYPE]
+    condition_name = f"{nz_short}_{mo_short}"
+    output_dir = Path(f"analysis/phase1_preprocess_decoding/{DATASET}/results/factorial_experiment/{condition_name}/sub-{SUBJECT_ID}/{ROI_NAME}")
     output_dir.mkdir(parents=True, exist_ok=True)
     output_dir = str(output_dir)
     fig_dir = str(output_dir) + '/figures_'
@@ -553,6 +570,15 @@ print(f"FIR delays: {len(FIR_DELAYS)} (0-{len(FIR_DELAYS)-1}, matching B&H 2009)
 print(f"Use PCA: {USE_PCA}")
 if USE_PCA:
     print(f"PCA components: {N_PCA_COMPONENTS}")
+print()
+print(f"Preprocessing Configuration:")
+print(f"  Smooth FWHM: {SMOOTH_FWHM} mm")
+print(f"  Highpass: {HIGHPASS_HZ} Hz" if HIGHPASS_HZ else "  Highpass: None")
+print(f"  Motion confounds: {MOTION_TYPE}")
+print(f"  CompCor: {COMPCOR_N}" if COMPCOR_N else "  CompCor: None")
+print(f"  Drift model: {DRIFT_MODEL}")
+print(f"  Normalization level: {NORMALIZE_LEVEL} ← FACTORIAL EXPERIMENT")
+print()
 print(f"fMRIPrep: {FMRIPREP_BASE}")
 print(f"Events: {EVENT_DIR}")
 print(f"Output directory: {output_dir}")
@@ -573,14 +599,16 @@ if args.roi_mask:
 else:
     # Auto-detect ROI mask
     # Priority 1: Check new shared location - analysis/roi_masks/{dataset}/sub-{ID}/roi_pipeline/
-    shared_roi_path = f"analysis/roi_masks/{DATASET}/sub-{SUBJECT_ID}/roi_pipeline/{ROI_NAME}_mask_thr50_intnearest_binTrue_maskfunc_gmTrue_subjTrue.nii.gz"
+    shared_roi_path = os.path.join(BASE_DIR, f"analysis/roi_masks/{DATASET}/sub-{SUBJECT_ID}/roi_pipeline/{ROI_NAME}_mask_thr50_intnearest_binTrue_masknone_gmTrue_subjTrue.nii.gz")
+    print(f"  Searching shared ROI path: {shared_roi_path}")
 
     if os.path.exists(shared_roi_path):
         roi_path = shared_roi_path
-        print(f"  ✓ Found ROI mask in shared location (analysis/roi_masks/{DATASET}/)")
+        print(f"  ✓ Found ROI mask in shared location")
         print(f"  {roi_path}")
     else:
         # Priority 2: Check old V3_Comprehensive location (backward compatibility)
+        print("  Shared ROI mask not found, checking legacy V3_Comprehensive location...")
         v3_path = f"derivatives/V3_Comprehensive/ROI_mask/sub-{SUBJECT_ID}/roi_pipeline/{ROI_NAME}_mask_thr50_intnearest_binTrue_maskfunc_gmTrue_subjTrue.nii.gz"
 
         if os.path.exists(v3_path):
@@ -595,19 +623,19 @@ else:
             if args.roi_config is None:
                 # Check if probability or deterministic based on directory name
                 if 'probability' in roi_pipeline_dir:
-                    # Probability: binFalse, subjTrue
-                    roi_config = 'thr50_intnearest_binFalse_masknone_gmFalse_subjTrue'
-                    print(f"  Auto-detected Probability ROI config (binFalse)")
+                    # Probability: binFalse, subjTrue, gmTrue (updated for method3)
+                    roi_config = 'thr50_intnearest_binFalse_masknone_gmTrue_subjTrue'
+                    print(f"  Auto-detected Probability ROI config (binFalse, gmTrue)")
                 else:
-                    # Deterministic: binTrue, subjTrue
-                    roi_config = 'thr50_intnearest_binTrue_masknone_gmFalse_subjTrue'
-                    print(f"  Auto-detected Deterministic ROI config (binTrue)")
+                    # Deterministic: binTrue, subjTrue, gmTrue (updated for method3)
+                    roi_config = 'thr50_intnearest_binTrue_masknone_gmTrue_subjTrue'
+                    print(f"  Auto-detected Deterministic ROI config (binTrue, gmTrue)")
             else:
                 roi_config = args.roi_config
                 print(f"  Using provided ROI config: {roi_config}")
 
             roi_path = f"derivatives/sub-{SUBJECT_ID}/{roi_pipeline_dir}/{ROI_NAME}_mask_{roi_config}.nii.gz"
-            print(f"  Auto-detecting ROI mask from legacy deoblique location:")
+            print(f"  Auto-detecting ROI mask from location:")
             print(f"  {roi_path}")
             print(f"  ROI pipeline dir: {roi_pipeline_dir}")
             print(f"  ROI config: {roi_config}")
@@ -618,7 +646,7 @@ if not os.path.exists(roi_path):
     print(f"  Trying alternative patterns...")
 
     # Alternative 1: Try shared location with glob pattern (any parameter combination)
-    shared_search_pattern = f"analysis/roi_masks/{DATASET}/sub-{SUBJECT_ID}/roi_pipeline/{ROI_NAME}_mask_*.nii.gz"
+    shared_search_pattern = os.path.join(BASE_DIR, f"analysis/roi_masks/{DATASET}/sub-{SUBJECT_ID}/roi_pipeline/{ROI_NAME}_mask_*.nii.gz")
     shared_matches = glob.glob(shared_search_pattern)
 
     if shared_matches:
@@ -894,6 +922,9 @@ n_voxels_total = n_voxels_extracted
 HRF_voxel = np.zeros((n_voxels_total, len(FIR_DELAYS)))
 r2_voxel = np.zeros(n_voxels_total)
 
+# Store normalization statistics for 2nd-level consistency (if NORMALIZE_LEVEL == 'both')
+voxel_norm_stats = {'mean': np.zeros(n_voxels_total), 'std': np.zeros(n_voxels_total)}
+
 for voxel_idx in range(n_voxels_total):
     # Concatenate data across all runs
     y_voxel = []
@@ -947,30 +978,48 @@ for voxel_idx in range(n_voxels_total):
             print(f"    ⚠️  WARNING: Design matrix is rank deficient!")
 
     # ============================================================================
-    # Z-SCORE NORMALIZATION (Fix for baseline/scale issues)
+    # Z-SCORE NORMALIZATION (Conditional on NORMALIZE_LEVEL)
     # ============================================================================
-    # Purpose: Remove voxel-specific baseline and scale differences
-    # This fixes the high correlation but negative R² problem
-    y_voxel_mean = np.mean(y_voxel)
-    y_voxel_std = np.std(y_voxel)
+    # NORMALIZE_LEVEL options:
+    #   'none': No normalization (E2: all original)
+    #   '1st_only': Normalize 1st level only (original, problematic)
+    #   'both': Normalize both levels consistently (E1: consistent)
 
-    if y_voxel_std > 1e-10:  # Avoid division by zero
-        y_voxel_normalized = (y_voxel - y_voxel_mean) / y_voxel_std
+    if NORMALIZE_LEVEL == 'none':
+        # E2: All original - no normalization
+        y_voxel_for_estimation = y_voxel
+        voxel_norm_stats['mean'][voxel_idx] = 0.0  # Not used
+        voxel_norm_stats['std'][voxel_idx] = 1.0   # Not used
+
+        if voxel_idx == 0:
+            print(f"\n  1st-level Normalization: NONE (E2: all original)")
+            print(f"    y_voxel range: [{np.min(y_voxel):.2f}, {np.max(y_voxel):.2f}]")
+            print(f"    y_voxel mean: {np.mean(y_voxel):.2f}, std: {np.std(y_voxel):.2f}")
+
     else:
-        # This voxel has zero variance (constant signal)
-        # Skip normalization, will be filtered later
-        y_voxel_normalized = y_voxel
+        # '1st_only' or 'both': Normalize 1st level
+        y_voxel_mean = np.mean(y_voxel)
+        y_voxel_std = np.std(y_voxel)
 
-    # Debug: Check normalization effect
-    if voxel_idx == 0:
-        print(f"\n  Z-score Normalization Applied:")
-        print(f"    y_voxel range (normalized): [{np.min(y_voxel_normalized):.2f}, {np.max(y_voxel_normalized):.2f}]")
-        print(f"    y_voxel mean (normalized): {np.mean(y_voxel_normalized):.4f}, std: {np.std(y_voxel_normalized):.4f}")
-        print(f"    Original baseline: {y_voxel_mean:.2f}")
-        print(f"    Original scale: {y_voxel_std:.2f}")
+        # Store for potential 2nd-level use
+        voxel_norm_stats['mean'][voxel_idx] = y_voxel_mean
+        voxel_norm_stats['std'][voxel_idx] = y_voxel_std
 
-    # Use normalized data for HRF estimation
-    y_voxel_for_estimation = y_voxel_normalized
+        if y_voxel_std > 1e-10:  # Avoid division by zero
+            y_voxel_normalized = (y_voxel - y_voxel_mean) / y_voxel_std
+        else:
+            # This voxel has zero variance (constant signal)
+            y_voxel_normalized = y_voxel
+
+        y_voxel_for_estimation = y_voxel_normalized
+
+        if voxel_idx == 0:
+            mode_str = "1st-level ONLY (original, scale mismatch)" if NORMALIZE_LEVEL == '1st_only' else "BOTH levels (E1: consistent)"
+            print(f"\n  1st-level Normalization: {mode_str}")
+            print(f"    y_voxel range (normalized): [{np.min(y_voxel_normalized):.2f}, {np.max(y_voxel_normalized):.2f}]")
+            print(f"    y_voxel mean (normalized): {np.mean(y_voxel_normalized):.4f}, std: {np.std(y_voxel_normalized):.4f}")
+            print(f"    Original baseline: {y_voxel_mean:.2f}")
+            print(f"    Original scale: {y_voxel_std:.2f}")
 
     # Estimate HRF using pseudo-inverse: beta = pinv(X) @ y
     # beta includes: [FIR_0, ..., FIR_7, linear_drift, constant]
@@ -1221,6 +1270,10 @@ sys.stdout.flush()
 
 # Average HRF across selected voxels
 ROI_HRF = np.mean(HRF_voxel[selected_voxels_mask], axis=0)
+
+# Filter normalization statistics to selected voxels only (for 2nd-level)
+voxel_norm_mean_selected = voxel_norm_stats['mean'][selected_voxels_mask]
+voxel_norm_std_selected = voxel_norm_stats['std'][selected_voxels_mask]
 
 # Compute numerical derivative
 ROI_HRF_deriv = np.gradient(ROI_HRF)
@@ -1484,13 +1537,20 @@ sys.stdout.flush()
 # Storage: (n_runs, n_colors, n_voxels_selected)
 amplitudes_raw = np.zeros((N_RUNS, N_COLORS, n_voxels_selected))
 
-# IMPORTANT: Use ORIGINAL (non-normalized) data for amplitude estimation
-# Reasoning:
-# 1. Step 1 used z-score to estimate HRF *shape* (improved R²: -13 → 0.35)
-# 2. Step 4 needs original data for *absolute* amplitude estimation
-# 3. GLM design matrix includes drift/intercept regressors → handles baseline
-# 4. Normalizing here creates run-specific offsets → destroys run reliability
-# 5. Zero variance (75/284) is due to HRF variability (mean r=0.125), not baseline
+# NORMALIZE_LEVEL-dependent data preparation:
+#   'none' or '1st_only': Use ORIGINAL data (scale mismatch if 1st_only)
+#   'both': Use NORMALIZED data (consistent with 1st-level)
+
+if NORMALIZE_LEVEL == 'both':
+    print(f"  2nd-level Normalization: BOTH levels (E1: consistent scale)")
+    print(f"    Using same normalization as 1st-level (mean/std from all runs)")
+else:
+    if NORMALIZE_LEVEL == '1st_only':
+        print(f"  2nd-level Normalization: NONE (original code, scale mismatch)")
+    else:
+        print(f"  2nd-level Normalization: NONE (E2: all original)")
+    print(f"    Using ORIGINAL data")
+print()
 
 for run_idx in range(N_RUNS):
     print(f"  Processing run {run_idx + 1}/{N_RUNS}...")
@@ -1499,13 +1559,33 @@ for run_idx in range(N_RUNS):
     y_run = all_func_data[run_idx][:, selected_voxels_mask]  # (n_scans, n_voxels_selected)
     n_scans = y_run.shape[0]
 
+    # Apply normalization if NORMALIZE_LEVEL == 'both'
+    if NORMALIZE_LEVEL == 'both':
+        # Use same mean/std as 1st-level (consistent scale)
+        y_run_normalized = np.zeros_like(y_run)
+        for voxel_idx in range(n_voxels_selected):
+            mean = voxel_norm_mean_selected[voxel_idx]
+            std = voxel_norm_std_selected[voxel_idx]
+            if std > 1e-10:
+                y_run_normalized[:, voxel_idx] = (y_run[:, voxel_idx] - mean) / std
+            else:
+                y_run_normalized[:, voxel_idx] = y_run[:, voxel_idx]
+        y_run_for_amplitude = y_run_normalized
+
+        if run_idx == 0:
+            print(f"    Applied 1st-level normalization to run {run_idx+1}")
+            print(f"      y_run range (normalized): [{np.min(y_run_normalized):.2f}, {np.max(y_run_normalized):.2f}]")
+    else:
+        # Use original data
+        y_run_for_amplitude = y_run
+
     # Build 2nd-level design matrix
     X_2nd = build_2nd_level_design_matrix(events_list[run_idx], n_scans, TR,
                                           ROI_HRF, ROI_HRF_deriv)
 
     # Estimate amplitudes per voxel: β = pinv(X) @ y
     X_pinv = np.linalg.pinv(X_2nd)
-    betas = X_pinv @ y_run  # Use ORIGINAL data
+    betas = X_pinv @ y_run_for_amplitude
 
     # Extract first 8 betas (HRF regressors only, discard derivative betas)
     amplitudes_raw[run_idx] = betas[:N_COLORS, :]
@@ -2137,6 +2217,19 @@ print(f"Saving results to: {output_dir}")
 
 # Summary with enhanced metrics
 results_summary = {
+    # Metadata
+    'timestamp': timestamp,
+    'dataset': DATASET,
+    'config': {
+        'smooth_fwhm': SMOOTH_FWHM,
+        'highpass_hz': HIGHPASS_HZ,
+        'motion_type': MOTION_TYPE,
+        'compcor_n': COMPCOR_N,
+        'drift_model': DRIFT_MODEL,
+        'standardize': STANDARDIZE,
+        'normalize_level': NORMALIZE_LEVEL  # FACTORIAL EXPERIMENT
+    },
+
     # Basic info
     'subject': SUBJECT_ID,
     'roi': ROI_NAME,
@@ -2187,8 +2280,12 @@ results_summary = {
     'reconstruction_error': float(mean_reconstruction_error),
 }
 
-# Save summary
+# Save summary as results.json (main results file)
 import json
+with open(f"{output_dir}/results.json", 'w') as f:
+    json.dump(results_summary, f, indent=2)
+
+# Also save as analysis_summary.json for backward compatibility
 with open(f"{output_dir}/analysis_summary.json", 'w') as f:
     json.dump(results_summary, f, indent=2)
 

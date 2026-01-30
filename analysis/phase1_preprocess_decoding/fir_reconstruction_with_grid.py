@@ -76,6 +76,11 @@ from scipy.ndimage import convolve1d
 sys.path.insert(0, str(Path(__file__).parent.parent / 'utils'))
 from utils_color_decoding import COLOR_LAB, get_stimulus_color_rgb, lab2rgb_accurate
 
+# Import grid resampling utilities (for --grid-resample option)
+sys.path.insert(0, str(Path(__file__).parent / 'utils'))
+from grid_resampling import resample_runs_to_common_grid, resample_mask_to_grid
+from voxel_tracking import extract_voxel_coordinates
+
 # ============================================================================
 # Configuration
 # ============================================================================
@@ -455,6 +460,9 @@ def parse_args():
                         help='Normalization strategy: 1st_only (original, problematic), both (E1: consistent), none (E2: all original)')
     parser.add_argument('--2nd-level-intercept', action='store_true',
                         help='Add intercept to 2nd-level GLM (removes run baseline shifts when highpass=0)')
+    parser.add_argument('--grid-resample', type=str, default='no',
+                        choices=['no', 'yes'],
+                        help='Resample all runs to common grid (run-1 reference) to ensure voxel correspondence')
 
     return parser.parse_args()
 
@@ -475,6 +483,7 @@ DRIFT_MODEL = args.drift
 STANDARDIZE = args.standardize
 NORMALIZE_LEVEL = args.normalize_level
 ADD_2ND_LEVEL_INTERCEPT = args.__dict__['2nd_level_intercept']  # Use __dict__ for hyphenated arg
+GRID_RESAMPLE = args.__dict__['grid_resample']  # Use __dict__ for hyphenated arg
 
 # Generate config name for figures
 def config_to_name(smooth, highpass, motion, compcor, drift, standardize, normalize_level):
@@ -691,6 +700,10 @@ func_imgs = []
 events_list = []
 all_func_data = []  # Store as numpy arrays for voxel-wise processing
 
+# Grid resampling: initialize reference grid variables
+reference_affine = None
+reference_shape = None
+
 for run in range(1, N_RUNS + 1):
     # Functional image
     func_path = f"{FMRIPREP_DIR}/func/{FILE_PREFIX}_task-rsvp_run-{run}_space-MNI152NLin2009cAsym_res-2_desc-preproc_bold.nii.gz"
@@ -707,6 +720,44 @@ for run in range(1, N_RUNS + 1):
 
     if VOLS_TO_DROP > 0:
         func_img = nimg.index_img(func_img, slice(VOLS_TO_DROP, None))
+
+    # GRID RESAMPLING: Ensure all runs use identical voxel grid
+    if GRID_RESAMPLE == 'yes':
+        if run == 1:
+            # First run: save as reference grid
+            reference_affine = func_img.affine.copy()
+            reference_shape = func_img.shape[:3]
+            print(f"  Grid resampling: Using run {run} as reference")
+            print(f"    Reference shape: {reference_shape}")
+            print(f"    Reference affine diagonal: {np.diag(reference_affine)[:3]}")
+
+            # Resample mask to match run-1 BOLD grid
+            roi_img_resampled = resample_mask_to_grid(
+                roi_img,
+                target_affine=reference_affine,
+                target_shape=reference_shape,
+                interpolation='nearest'
+            )
+
+            # Reinitialize masker with resampled mask
+            masker = NiftiMasker(mask_img=roi_img_resampled, standardize=STANDARDIZE)
+            masker.fit()
+            print(f"    Mask resampled and masker reinitialized")
+        else:
+            # Subsequent runs: resample to reference grid
+            print(f"  Grid resampling: Resampling run {run} to reference grid...")
+            func_img_list = [func_img]
+            resampled_list, _, _ = resample_runs_to_common_grid(
+                func_img_list,
+                reference_idx=0,
+                interpolation='continuous'
+            )
+            func_img = resampled_list[0]
+
+            # Verify alignment
+            affine_match = np.allclose(func_img.affine, reference_affine, atol=1e-6)
+            shape_match = func_img.shape[:3] == reference_shape
+            print(f"    Resampled: affine_match={affine_match}, shape_match={shape_match}")
 
     func_imgs.append(func_img)
 
@@ -2296,6 +2347,54 @@ np.save(f"{output_dir}/amplitudes_z.npy", amplitudes_z)
 
 # Save SNR metrics
 np.save(f"{output_dir}/voxel_snr.npy", voxel_snr)
+
+# Save voxel coordinates (for grid resampling verification)
+# Extract indices of selected voxels
+selected_voxels_indices = np.where(selected_voxels_mask)[0]
+
+# Get mask image (resampled if grid_resample=yes)
+mask_for_coords = masker.mask_img_
+
+# Extract MNI coordinates
+voxel_coords, grid_indices = extract_voxel_coordinates(mask_for_coords, selected_voxels_indices)
+np.save(f"{output_dir}/voxel_coords.npy", voxel_coords)
+np.save(f"{output_dir}/grid_index.npy", grid_indices)
+
+# Save reference mask if grid resampling was used
+if GRID_RESAMPLE == 'yes':
+    nib.save(mask_for_coords, f"{output_dir}/roi_mask_ref.nii.gz")
+
+# Save QC metrics including grid resampling info
+qc_metrics = {
+    'settings': {
+        'grid_resample': GRID_RESAMPLE,
+        'highpass': HIGHPASS_HZ,
+        'motion': MOTION_TYPE,
+        'drift': DRIFT_MODEL,
+        'smooth_fwhm': SMOOTH_FWHM,
+        'normalize_level': NORMALIZE_LEVEL,
+        'add_2nd_level_intercept': ADD_2ND_LEVEL_INTERCEPT
+    },
+    'voxel_stats': {
+        'n_voxels_selected': int(n_voxels_selected),
+        'n_voxels_total': int(masker.mask_img_.get_fdata().sum()),
+        'selection_rate': float(n_voxels_selected / masker.mask_img_.get_fdata().sum())
+    },
+    'tsnr': {
+        'mean': float(np.mean(voxel_snr)),
+        'median': float(np.median(voxel_snr)),
+        'std': float(np.std(voxel_snr))
+    }
+}
+
+if GRID_RESAMPLE == 'yes':
+    qc_metrics['grid_resampling'] = {
+        'reference_shape': list(reference_shape),
+        'reference_affine_diag': list(np.diag(reference_affine)[:3])
+    }
+
+with open(f"{output_dir}/qc.json", 'w') as f:
+    json.dump(qc_metrics, f, indent=2)
 
 # Save classification results
 classification_df = pd.DataFrame([{

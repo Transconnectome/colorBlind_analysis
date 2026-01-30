@@ -1,0 +1,436 @@
+{
+  "conditions": [
+    {
+      "id": "c01",
+      "name": "c01_no_hp0_none_none",
+      "params": {
+        "grid_resample": "no",
+        "highpass": 0,
+        "motion": "none",
+        "drift": "none",
+        "add_2nd_intercept": false
+      }
+    },
+    {
+      "id": "c02",
+      "name": "c02_no_hp0_none_per_run",
+      "params": {
+        "grid_resample": "no",
+        "highpass": 0,
+        "motion": "none",
+        "drift": "per_run",
+        "add_2nd_intercept": false
+      }
+    },
+    {
+      "id": "c03",
+      "name": "c03_no_hp0_none_per_run_2nd",
+      "params": {
+        "grid_resample": "no",
+        "highpass": 0,
+        "motion": "none",
+        "drift": "per_run",
+        "add_2nd_intercept": true
+      }
+    },
+    {
+      "id": "c04",
+      "name": "c04_no_hp0_standard_none",
+      "params": {
+        "grid_resample": "no",
+        "highpass": 0,
+        "motion": "standard",
+        "drift": "none",
+        "add_2nd_intercept": false
+      }
+    },
+    {
+      "id": "c05",
+      "name": "c05_no_hp0_standard_per_run",
+      "params": {
+        "grid_resample": "no",
+        "highpass": 0,
+        "motion": "standard",
+        "drift": "per_run",
+        "add_2nd_intercept": false
+      }
+    },
+    {
+      "id": "c06",
+      "name": "c06_no_hp0_standard_per_run_2nd",
+      "params": {
+        "grid_resample": "no",
+        "highpass": 0,
+        "motion": "standard",
+        "drift": "per_run",
+        "add_2nd_intercept": true
+      }
+    },
+    {
+      "id": "c07",
+      "name": "c07_no_hp0_cosine_none",
+      "params": {
+        "grid_resample": "no",
+        "highpass": 0,
+        "motion": "cosine",
+        "drift": "none",
+        "add_2nd_intercept": false
+      }
+    },
+    {
+      "id": "c08",
+      "name": "c08_no_hp0_cosine_per_run",
+      "params": {
+        "grid_resample": "no",
+        "highpass": 0,
+        "motion": "cosine",
+        "drift": "per_run",
+        "add_2nd_intercept": false
+      }
+    },
+    {
+      "id": "c09",
+      "name": "c09_no_hp0_cosine_per_run_2nd",
+      "params": {
+        "grid_resample": "no",
+        "highpass": 0,
+        "motion": "cosine",
+        "drift": "per_run",
+        "add_2nd_intercept": true
+      }
+    },
+    {
+      "id": "c10",
+      "name": "c10_no_hp001_none_none",
+      "params": {
+        "grid_resample": "no",
+        "highpass": 0.01,
+        "motion": "none",
+        "drift": "none",
+        "add_2nd_intercept": false
+      }
+    },
+    {
+      "id": "c11",
+      "name": "c11_no_hp001_none_per_run",
+      "params": {
+        "grid_resample": "no",
+        "highpass": 0.01,
+        "motion": "none",
+        "drift": "per_run",
+        "add_2nd_intercept": false
+      }
+    },
+    {
+      "id": "c12",
+      "name": "c12_no_hp001_none_per_run_2nd",
+      "params": {
+        "grid_resample": "no",
+        "highpass": 0.01,
+        "motion": "none",
+        "drift": "per_run",
+        "add_2nd_intercept": true
+      }
+    },
+    {
+      "id": "c13",
+      "name": "c13_no_hp001_standard_none",
+      "params": {
+        "grid_resample": "no",
+        "highpass": 0.01,
+        "motion": "standard",
+        "drift": "none",
+        "add_2nd_intercept": false
+      }
+    },
+    {
+      "id": "c14",
+      "name": "c14_no_hp001_standard_per_run",
+      "params": {
+        "grid_resample": "no",
+        "highpass": 0.01,
+        "motion": "standard",
+        "drift": "per_run",
+        "add_2nd_intercept": false
+      }
+    },
+    {
+      "id": "c15",
+      "name": "c15_no_hp001_standard_per_run_2nd",
+      "params": {
+        "grid_resample": "no",
+        "highpass": 0.01,
+        "motion": "standard",
+        "drift": "per_run",
+        "add_2nd_intercept": true
+      }
+    },
+    {
+      "id": "c16",
+      "name": "c16_no_hp001_cosine_none",
+      "params": {
+        "grid_resample": "no",
+        "highpass": 0.01,
+        "motion": "cosine",
+        "drift": "none",
+        "add_2nd_intercept": false
+      }
+    },
+    {
+      "id": "c17",
+      "name": "c17_no_hp001_cosine_per_run",
+      "params": {
+        "grid_resample": "no",
+        "highpass": 0.01,
+        "motion": "cosine",
+        "drift": "per_run",
+        "add_2nd_intercept": false
+      }
+    },
+    {
+      "id": "c18",
+      "name": "c18_no_hp001_cosine_per_run_2nd",
+      "params": {
+        "grid_resample": "no",
+        "highpass": 0.01,
+        "motion": "cosine",
+        "drift": "per_run",
+        "add_2nd_intercept": true
+      }
+    },
+    {
+      "id": "c19",
+      "name": "c19_yes_hp0_none_none",
+      "params": {
+        "grid_resample": "yes",
+        "highpass": 0,
+        "motion": "none",
+        "drift": "none",
+        "add_2nd_intercept": false
+      }
+    },
+    {
+      "id": "c20",
+      "name": "c20_yes_hp0_none_per_run",
+      "params": {
+        "grid_resample": "yes",
+        "highpass": 0,
+        "motion": "none",
+        "drift": "per_run",
+        "add_2nd_intercept": false
+      }
+    },
+    {
+      "id": "c21",
+      "name": "c21_yes_hp0_none_per_run_2nd",
+      "params": {
+        "grid_resample": "yes",
+        "highpass": 0,
+        "motion": "none",
+        "drift": "per_run",
+        "add_2nd_intercept": true
+      }
+    },
+    {
+      "id": "c22",
+      "name": "c22_yes_hp0_standard_none",
+      "params": {
+        "grid_resample": "yes",
+        "highpass": 0,
+        "motion": "standard",
+        "drift": "none",
+        "add_2nd_intercept": false
+      }
+    },
+    {
+      "id": "c23",
+      "name": "c23_yes_hp0_standard_per_run",
+      "params": {
+        "grid_resample": "yes",
+        "highpass": 0,
+        "motion": "standard",
+        "drift": "per_run",
+        "add_2nd_intercept": false
+      }
+    },
+    {
+      "id": "c24",
+      "name": "c24_yes_hp0_standard_per_run_2nd",
+      "params": {
+        "grid_resample": "yes",
+        "highpass": 0,
+        "motion": "standard",
+        "drift": "per_run",
+        "add_2nd_intercept": true
+      }
+    },
+    {
+      "id": "c25",
+      "name": "c25_yes_hp0_cosine_none",
+      "params": {
+        "grid_resample": "yes",
+        "highpass": 0,
+        "motion": "cosine",
+        "drift": "none",
+        "add_2nd_intercept": false
+      }
+    },
+    {
+      "id": "c26",
+      "name": "c26_yes_hp0_cosine_per_run",
+      "params": {
+        "grid_resample": "yes",
+        "highpass": 0,
+        "motion": "cosine",
+        "drift": "per_run",
+        "add_2nd_intercept": false
+      }
+    },
+    {
+      "id": "c27",
+      "name": "c27_yes_hp0_cosine_per_run_2nd",
+      "params": {
+        "grid_resample": "yes",
+        "highpass": 0,
+        "motion": "cosine",
+        "drift": "per_run",
+        "add_2nd_intercept": true
+      }
+    },
+    {
+      "id": "c28",
+      "name": "c28_yes_hp001_none_none",
+      "params": {
+        "grid_resample": "yes",
+        "highpass": 0.01,
+        "motion": "none",
+        "drift": "none",
+        "add_2nd_intercept": false
+      }
+    },
+    {
+      "id": "c29",
+      "name": "c29_yes_hp001_none_per_run",
+      "params": {
+        "grid_resample": "yes",
+        "highpass": 0.01,
+        "motion": "none",
+        "drift": "per_run",
+        "add_2nd_intercept": false
+      }
+    },
+    {
+      "id": "c30",
+      "name": "c30_yes_hp001_none_per_run_2nd",
+      "params": {
+        "grid_resample": "yes",
+        "highpass": 0.01,
+        "motion": "none",
+        "drift": "per_run",
+        "add_2nd_intercept": true
+      }
+    },
+    {
+      "id": "c31",
+      "name": "c31_yes_hp001_standard_none",
+      "params": {
+        "grid_resample": "yes",
+        "highpass": 0.01,
+        "motion": "standard",
+        "drift": "none",
+        "add_2nd_intercept": false
+      }
+    },
+    {
+      "id": "c32",
+      "name": "c32_yes_hp001_standard_per_run",
+      "params": {
+        "grid_resample": "yes",
+        "highpass": 0.01,
+        "motion": "standard",
+        "drift": "per_run",
+        "add_2nd_intercept": false
+      }
+    },
+    {
+      "id": "c33",
+      "name": "c33_yes_hp001_standard_per_run_2nd",
+      "params": {
+        "grid_resample": "yes",
+        "highpass": 0.01,
+        "motion": "standard",
+        "drift": "per_run",
+        "add_2nd_intercept": true
+      }
+    },
+    {
+      "id": "c34",
+      "name": "c34_yes_hp001_cosine_none",
+      "params": {
+        "grid_resample": "yes",
+        "highpass": 0.01,
+        "motion": "cosine",
+        "drift": "none",
+        "add_2nd_intercept": false
+      }
+    },
+    {
+      "id": "c35",
+      "name": "c35_yes_hp001_cosine_per_run",
+      "params": {
+        "grid_resample": "yes",
+        "highpass": 0.01,
+        "motion": "cosine",
+        "drift": "per_run",
+        "add_2nd_intercept": false
+      }
+    },
+    {
+      "id": "c36",
+      "name": "c36_yes_hp001_cosine_per_run_2nd",
+      "params": {
+        "grid_resample": "yes",
+        "highpass": 0.01,
+        "motion": "cosine",
+        "drift": "per_run",
+        "add_2nd_intercept": true
+      }
+    }
+  ],
+  "metadata": {
+    "total_conditions": 36,
+    "subject": "01",
+    "roi": "V1",
+    "dataset": "method3_header_mi",
+    "factors": {
+      "grid_resample": [
+        "no",
+        "yes"
+      ],
+      "highpass": [
+        0,
+        0.01
+      ],
+      "motion": [
+        "none",
+        "standard",
+        "cosine"
+      ],
+      "drift": [
+        "none",
+        "per_run",
+        "per_run_2nd"
+      ]
+    },
+    "motion_mapping": {
+      "none": "no motion regressors",
+      "standard": "6 motion parameters (rp)",
+      "cosine": "motion + cosine drift (Baseline32)"
+    },
+    "drift_mapping": {
+      "none": "no drift regressors",
+      "per_run": "per-run linear drift + intercept",
+      "per_run_2nd": "per-run drift + 2nd-level intercept"
+    }
+  }
+}

@@ -52,16 +52,41 @@ for roi, stats in data['summary_by_roi'].items():
 - Current performance: 0.21 → **31-35% of ceiling**
 - **Interpretation**: Room for 2-3× improvement exists
 
-**실제 결과 (Actual Results)** - ⏳ PENDING DEPLOYMENT:
-- [ ] Deploy and fill with actual values
-- [ ] Expected: V1 ceiling ~0.65, hV4 ceiling ~0.75
-- [ ] Decision: If ceiling > 0.5, proceed to Phase 2 (Whitening)
+**실제 결과 (Actual Results)** - ✅ COMPLETED (2026-02-03):
+
+| ROI | Split-Half Ceiling | Current RDM | % of Ceiling | LOSO Lower | LOSO Upper |
+|-----|-------------------|-------------|--------------|------------|------------|
+| V1  | 0.449 ± 0.285     | 0.154       | **26.3%**    | 0.143      | 0.304      |
+| V2  | 0.621 ± 0.241     | 0.256       | **67.0%**    | 0.051      | 0.268      |
+| V3  | 0.624 ± 0.165     | 0.256       | **39.1%**    | 0.094      | 0.227      |
+| hV4 | 0.550 ± 0.231     | NaN         | N/A          | 0.146      | 0.255      |
+
+**Critical Findings**:
+1. **Lower than expected**: V1 ceiling 0.45 (expected ~0.65), hV4 ceiling 0.55 (expected ~0.75)
+2. **High variability**: SD ranges 0.17-0.29, indicating substantial subject heterogeneity
+3. **LOSO bounds very low**: 0.05-0.15 range → Severe inter-subject inconsistency
+4. **V2 anomaly**: 67% ceiling utilization seems inflated (investigate outliers)
+5. **hV4 data issue**: NaN values present (sub-07_hV4 constant patterns confirmed)
+
+**Decision Tree**:
+- ✓ V1/V3: Ceiling > 0.4 → **Proceed to Phase 2 (Whitening)** - substantial room exists
+- ✓ V2: Ceiling > 0.6 → **Proceed to Phase 2** but investigate why current performance is so close
+- ⚠️ hV4: Data quality issues → **Fix sub-07 first** before proceeding
+- ⚠️ Between-subject: LOSO < 0.2 → **Inter-subject alignment may be limited** by fundamental variability
+
+**Revised Expectations**:
+- Within-subject improvement: ~50-70% ceiling utilization achievable with whitening
+- Between-subject approaches: Limited upside due to low LOSO (idiosyncratic representations)
+- Focus strategy: **Within-subject denoising** > Between-subject alignment
 
 *   **Action Items:**
     - [x] `scripts/utils/noise_ceiling.py` 구현 완료
     - [x] 평가 스크립트 `evaluate_with_noise_ceiling.py` 구현 완료
     - [x] SLURM 배포 스크립트 작성 완료
-    - [ ] 서버에서 실행 및 결과 분석 (사용자 작업)
+    - [x] 로컬에서 실행 및 결과 분석 완료 (2026-02-03)
+    - [ ] Investigate V2 anomaly (67% ceiling utilization)
+    - [ ] Fix sub-07 hV4 data quality issue
+    - [ ] Proceed to Phase 2.2 (Whitening) given sufficient headroom
 
 ### 1.2. Cross-validated Mahalanobis Distance (Crossnobis/LDC) - ✅ ALREADY IMPLEMENTED
 

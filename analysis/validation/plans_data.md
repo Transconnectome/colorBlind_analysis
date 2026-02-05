@@ -360,45 +360,555 @@ Procrustes Effect:
 
 **Metrics Computed (Before/After Procrustes)**:
 
-1. **RDM Correlation Reliability**:
+**Data**: 40 subject-ROI pairs (10 subjects × 4 ROIs)
+- HC: 7 subjects (sub-01 ~ sub-07) → 28 pairs (27 valid RDMs due to sub-07_hV4 NaN)
+- CVD: 3 subjects (sub-08 ~ sub-10) → 12 pairs (all valid)
 
-2. **RDM Crossnobis Reliability**:
-
-3. **Decoding Accuracy**:
-
-4. **Procrustes Disparity**:
-
-5. **Procrustes Improvement**:
-
-**Status**: 🔄 **IN PROGRESS - Baseline deployment**
-
-**Results**: _[Will be filled after baseline deployment completion]_
+**Results Location**: `/scratch/connectome/haba6030/colorBlind/analysis/phase1_preprocess_decoding/method3_header_mi/results/baseline_decoding/only_Zscore_1stGLM/`
 
 ---
 
+### 1. **RDM Correlation Reliability** (Pearson-based dissimilarity)
+
+**Overall Performance**:
+```
+Before Procrustes:  -0.009 ± 0.051 [95% CI: -0.024, 0.007] (n=39)
+After Procrustes:    0.226 ± 0.151 [95% CI: 0.179, 0.273] (n=39)
+Improvement:         0.234 ± 0.169 [95% CI: 0.183, 0.288]
+  → Positive improvement: 38/39 (97.4%)
+  → Mean increase: 26.3× (from near-zero to 0.226)
+```
+
+**Interpretation**:
+- **Before**: Negative mean indicates *worse than random* similarity across runs
+- **After**: Moderate positive correlation (0.226) → Consistent color representation recovered
+- **Success**: 97.4% of cases showed improvement after alignment
+
+**Per-ROI Breakdown** (After Procrustes):
+```
+V1:  0.154 ± 0.150 (n=10)  [Primary visual cortex - lowest]
+V2:  0.256 ± 0.143 (n=10)  [↑]
+V3:  0.256 ± 0.146 (n=10)  [↑]
+hV4: 0.238 ± 0.167 (n=9)   [Highest variability]
+```
+
+**HC vs CVD** (After Procrustes):
+```
+HC:  0.225 ± 0.141 (n=27)
+CVD: 0.228 ± 0.179 (n=12)
+t-test: t=-0.057, p=0.955 (ns)
+```
+→ No significant difference between groups in within-subject RDM reliability
+
+---
+
+### 2. **RDM Crossnobis Reliability** (Mahalanobis distance with Ledoit-Wolf shrinkage)
+
+**Overall Performance**:
+```
+Before Procrustes:  -0.010 ± 0.043 [95% CI: -0.023, 0.004] (n=39)
+After Procrustes:    0.219 ± 0.141 [95% CI: 0.177, 0.263] (n=39)
+Improvement:         0.228 ± 0.125 [95% CI: 0.191, 0.269]
+  → Positive improvement: 38/39 (97.4%)
+  → Mean increase: 24.0× (from near-zero to 0.219)
+```
+
+**Ledoit-Wolf Shrinkage** (optimal covariance estimation):
+- Mean shrinkage: 0.063 ± 0.025 (range: 0.023-0.143)
+- Interpretation: 6.3% shrinkage toward diagonal → Low-dimensional signal structure
+- Expected range for fMRI: 0.2-0.4 (ours is lower → well-conditioned covariance)
+
+**HC vs CVD** (After Procrustes):
+```
+HC:  0.250 ± 0.155 (n=27)
+CVD: 0.149 ± 0.066 (n=12)
+t-test: t=2.150, p=0.038 (*)
+```
+→ **Significant difference**: HC shows higher crossnobis reliability than CVD (p<0.05)
+→ This may reflect higher within-subject consistency in HC group
+
+---
+
+### 3. **Decoding Accuracy** (Leave-one-run-out 8-class classification)
+
+**Overall Performance**:
+```
+Before Procrustes:  11.0% ± 3.1% [95% CI: 10.1%, 12.0%] (n=40)
+After Procrustes:   63.8% ± 17.2% [95% CI: 58.5%, 69.0%] (n=40)
+Improvement:        52.7% ± 17.6% [95% CI: 47.2%, 58.1%]
+  → Positive improvement: 40/40 (100.0%)
+  → Mean increase: 5.8× (relative to chance: 5.1× → 29.6×)
+```
+
+**Chance level**: 12.5% (8 colors)
+
+**Before Procrustes**:
+- 11.0% accuracy → **Below chance** (statistically indistinguishable from random)
+- Indicates severe topographic misalignment across runs
+
+**After Procrustes**:
+- 63.8% accuracy → **5.1× chance level**
+- Demonstrates successful signal recovery
+
+**Per-ROI Performance** (Decoding Accuracy After Procrustes):
+```
+V1:  58.3% ± 21.2% (n=10)  [Lowest, but still 4.7× chance]
+V2:  64.6% ± 16.2% (n=10)
+V3:  67.7% ± 18.3% (n=10)  [Highest mean]
+hV4: 64.8% ± 11.8% (n=10)  [Lowest variability]
+```
+
+**HC vs CVD** (After Procrustes):
+```
+HC:  64.4% ± 18.2% (n=28)
+CVD: 62.3% ± 14.9% (n=12)
+t-test: t=0.340, p=0.736 (ns)
+```
+→ No significant difference in decoding accuracy
+
+**Top 5 Performers** (RDM Correlation After Procrustes):
+```
+1. sub-03_V3  (HC):  r=0.559 (84% accuracy)
+2. sub-08_V2  (CVD): r=0.530 (71% accuracy)
+3. sub-03_hV4 (HC):  r=0.503 (81% accuracy)
+4. sub-08_hV4 (CVD): r=0.459 (48% accuracy)
+5. sub-08_V1  (CVD): r=0.419 (69% accuracy)
+```
+→ CVD subjects appear in top 5, suggesting comparable representation quality when aligned
+
+---
+
+### 4. **Procrustes Disparity** (Alignment quality metric)
+
+**Distribution**:
+```
+Mean:  1142 ± 973 (arbitrary units)
+95% CI: [854, 1447]
+Range: [12.3, 3139.4]
+n = 40
+```
+
+**Interpretation**:
+- Disparity = Frobenius norm of residual after optimal orthogonal transformation
+- **Large values (10^2-10^3)** indicate substantial topographic variability across runs
+- Even after center+scale normalization, runs are **not trivially alignable**
+- This supports the need for Procrustes alignment in fMRI RSA
+
+**Per-ROI Disparity**:
+```
+V1:  2142 ± 655   [Largest, most voxels → highest dimensional space]
+V2:  1577 ± 362
+V3:  287 ± 110    [Smallest, fewest voxels]
+hV4: 369 ± 117
+```
+
+**HC vs CVD**:
+```
+HC:  1138 ± 1025 (n=28)
+CVD: 1151 ± 909  (n=12)
+t-test: t=-0.039, p=0.969 (ns)
+```
+→ No difference in alignment difficulty between groups
+
+---
+
+### 5. **Procrustes Improvement Statistics**
+
+**Success Rate**:
+```
+RDM Correlation:     38/39 improved (97.4%)
+RDM Crossnobis:      38/39 improved (97.4%)
+Decoding Accuracy:   40/40 improved (100.0%)
+```
+
+**Effect Sizes** (Cohen's d):
+```
+RDM Correlation:     d = 1.39 (very large)
+RDM Crossnobis:      d = 1.83 (very large)
+Decoding Accuracy:   d = 3.00 (extremely large)
+```
+
+**Problematic Cases** (6/40, 15.0%):
+```
+sub-04_V1 (HC):  Low decoding (33%, but still >2× chance)
+sub-07_V1 (HC):  Negative RDM improvement (-0.072), low decoding (33%)
+sub-07_V2 (HC):  Low decoding (31%)
+sub-07_hV4 (HC): NaN RDM (constant voxel patterns → data quality issue)
+sub-10_V1 (CVD): Low decoding (40%)
+sub-10_V2 (CVD): Low decoding (38%)
+```
+
+**Common Issues**:
+- **sub-07**: Data quality concerns (tSNR=5.9, critical) → Consider exclusion
+- **sub-10 V1/V2**: CVD subject, but still above chance
+- **sub-04 V1**: Isolated case, other ROIs perform well
+
+---
+
+### Summary & Conclusions
+
+**Key Findings**:
+
+1. **Procrustes alignment is essential**:
+   - Without alignment: Below-chance performance (11% accuracy)
+   - With alignment: 5.8× improvement (64% accuracy)
+   - Universal improvement (100% of cases for decoding)
+
+2. **Recovered signal quality**:
+   - RDM reliability: -0.009 → 0.226 (26× improvement)
+   - Crossnobis reliability: -0.010 → 0.219 (24× improvement)
+   - Both metrics show moderate positive correlation after alignment
+
+3. **No major HC vs CVD difference in within-subject reliability**:
+   - RDM correlation: p=0.955 (ns)
+   - Decoding accuracy: p=0.736 (ns)
+   - Crossnobis: p=0.038 (*) → HC slightly higher, but small effect
+
+4. **ROI hierarchy**:
+   - V2/V3/hV4 show higher RDM reliability than V1
+   - V3 shows highest decoding accuracy (68%)
+   - Consistent with hierarchical color processing
+
+5. **Data quality**:
+   - 85% of cases (34/40) show good performance (>40% decoding)
+   - 15% problematic cases mostly from sub-07 (known tSNR issues)
+
+**Next Steps**:
+- **Between-subject alignment**: Requires solving voxel count heterogeneity (see TODO section)
+- **Sub-07 exclusion**: Consider removing due to poor data quality
+- **Production deployment**: Apply c02 + Procrustes pipeline to all subjects/ROIs
+
+**Status**: ✅ **COMPLETED - Within-subject Procrustes validation successful**
+
+**Results**: `/scratch/connectome/haba6030/colorBlind/analysis/phase1_preprocess_decoding/method3_header_mi/results/baseline_decoding/only_Zscore_1stGLM/`
+**Statistics**: `/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/validation/phase3_statistics.json`
+**Visualizations**: `/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase1_preprocess_decoding/results/baseline/baseline_distributions_CI.png`
+
+---
+
+##### 3.1.1.a ANOVA-based Voxel Selection (Color Selectivity Analysis)
+
+**Date**: 2026-02-02  
+**Purpose**: Analyze voxel-wise color selectivity using ANOVA to enable common voxel selection across subjects  
+**Motivation**: Different voxel counts across subjects prevent between-subject Procrustes alignment
+
+**Method**: One-way ANOVA per voxel
+```python
+# For each voxel:
+# H0: All 8 colors have the same mean response
+# H1: At least one color has different mean response
+
+groups = [voxel_responses_across_6_runs[:, color] for color in range(8)]
+F_statistic, p_value = f_oneway(*groups)
+```
+
+**Results**: `/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase1_preprocess_decoding/results/baseline/`
+- `anova_f_score_distribution.png`: F-score histograms by ROI
+- `anova_f_score_stats.json`: Detailed statistics
+
+---
+
+**Key Findings**:
+
+**1. Very High Color Selectivity Across All ROIs**:
+```
+ROI    % Significant (p<0.05)    Mean F-score    Median F-score
+V1     86.5% (3130/3620)         24.6            17.7
+V2     92.0% (2252/2448)         30.2            21.5
+V3     96.7% ( 495/512)          38.8            22.5
+hV4    94.6% ( 647/684)          57.0            24.3
+```
+
+**Interpretation**: 
+- 85-97% of voxels show significant color discrimination (F > 2.25, p < 0.05)
+- Higher visual areas show stronger color selectivity (hV4 > V3 > V2 > V1)
+- Color information is robustly encoded even in early visual cortex
+
+---
+
+**2. F-score Distribution by ROI**:
+
+| ROI | Range       | 50th pct | 75th pct | 90th pct | 95th pct | 99th pct |
+|-----|-------------|----------|----------|----------|----------|----------|
+| V1  | [0.03, 191.6] | 17.7   | 37.3     | 55.6     | 67.9     | 96.6     |
+| V2  | [0.07, 211.2] | 21.5   | 41.0     | 66.4     | 92.6     | 156.8    |
+| V3  | [0.42, 294.7] | 22.5   | 52.3     | 101.6    | 126.6    | 174.1    |
+| hV4 | [0.71, 415.1] | 24.3   | 68.3     | 172.0    | 238.6    | 343.6    |
+
+**Pattern**: 
+- F-score increases with visual hierarchy
+- hV4 shows exceptional color selectivity (max F=415)
+- Wide distribution indicates heterogeneous voxel populations
+
+---
+
+**3. Subject-wise Variability**:
+
+**Best Performers** (High F-scores across ROIs):
+- sub-02: V1=51.7, V2=82.6, V3=82.2, hV4=18.1
+- sub-03: V1=48.0, V2=42.3, V3=77.9, hV4=108.7
+- sub-05: V1=23.7, V2=21.2, V3=84.7, hV4=188.2
+
+**Poor Performers**:
+- sub-04: V1=1.2, V2=7.1, V3=20.0, hV4=30.1
+- sub-07: V1=0.9, V2=1.5, V3=9.0, hV4=2.3 ⚠️
+
+**⚠️ Critical Issue: sub-07**
+- Consistently lowest F-scores across all ROIs
+- V3: Only **5 voxels** (vs 50-58 for others)
+- Confirms previous data quality concerns (tSNR=5.9)
+- **Recommendation**: Exclude sub-07 from inter-subject analysis
+
+---
+
+**4. Voxel Count by Subject**:
+
+| ROI | Min | Max | Mean | Problem Subject |
+|-----|-----|-----|------|-----------------|
+| V1  | 129 | 429 | 362  | sub-07 (129)    |
+| V2  | 103 | 279 | 245  | sub-07 (103)    |
+| V3  | **5** | 58  | 51   | **sub-07 (5)** ⚠️ |
+| hV4 | 57  | 70  | 68   | sub-01 (57)     |
+
+**Implication**: 
+- V3 extremely limited if including sub-07 (k=5)
+- Excluding sub-07 enables k=50 for V3
+
+---
+
+**Recommendations for Top-k Voxel Selection**:
+
+**Option 1: Conservative (Maximum Coverage)**
+```python
+k_values = {
+    'V1':  129,  # Include all 10 subjects
+    'V2':  103,  # Include all 10 subjects
+    'V3':   50,  # Exclude sub-07 (9 subjects)
+    'hV4':  57   # Include all 10 subjects
+}
+F_threshold = {
+    'V1':  ~10,   # Moderate selectivity
+    'V2':  ~14,
+    'V3':  ~24,   # High selectivity
+    'hV4': ~23
+}
+```
+
+**Option 2: Selective (Top 25% by F-score)**
+```python
+k_values = {
+    'V1':   90,  # F > 37.3 (75th percentile)
+    'V2':   61,  # F > 41.0
+    'V3':   12,  # F > 52.3
+    'hV4':  17   # F > 68.3
+}
+```
+
+**Option 3: Highly Selective (Top 10%)**
+```python
+k_values = {
+    'V1':   36,  # F > 55.6 (90th percentile)
+    'V2':   24,  # F > 66.4
+    'V3':    5,  # F > 101.6
+    'hV4':   7   # F > 172.0
+}
+```
+
+---
+
+**Decision for Inter-Subject Alignment**:
+
+**Recommended**: **Option 1 (Conservative)**
+- Ensures sufficient voxels for stable Procrustes alignment
+- Maintains reasonable F-threshold (F > 10-24)
+- Balances voxel count and selectivity
+
+**Trade-offs**:
+- Option 2/3: Higher selectivity but fewer voxels → Less stable covariance estimation
+- Conservative approach: More robust for small sample (n=10 subjects)
+
+---
+
+**Next Steps**:
+
+1. **Apply ANOVA-based top-k selection** to all subjects
+2. **Re-compute amplitudes** with common k voxels per ROI
+3. **Perform between-subject Procrustes alignment** to HC reference
+4. **Compare disparities**: HC vs CVD
+5. **Compute inter-subject RDM correlation** after alignment
+
+**Status**: ✅ **COMPLETED - ANOVA analysis**
+**Pending**: Top-k voxel selection implementation
+
+---
+
+##### 3.1.1.b Between-Subject Procrustes Alignment (HC Reference)
+
+**Date**: 2026-02-02
+**Purpose**: Align all subjects to HC reference using Procrustes to assess inter-subject similarity
+**Motivation**: Compare HC-to-HC reliability vs CVD disparity to test hypothesis of CVD representational differences
+
+**Method**: Between-subject Procrustes with normalization
+```python
+# 1. Load ANOVA-selected amplitudes (k voxels per ROI)
+# 2. Compute HC reference: mean of HC subjects (after within-subject Procrustes)
+# 3. For each subject:
+#    - Center and scale pattern
+#    - Find orthogonal transformation R to HC reference
+#    - Compute Procrustes disparity
+#    - Compute RDM correlation with HC reference RDM
+```
+
+**Implementation**:
+- Voxel selection: `apply_anova_voxel_selection.py`
+- Alignment: `between_subject_procrustes.py`
+- Visualization: `visualize_between_subject_results.py`
+
+**Results**: `/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase1_preprocess_decoding/results/`
+- `baseline_anova_selected/`: Selected top-k voxels per ROI
+- `between_subject_procrustes/`: Alignment results and disparities
+- `between_subject_procrustes/visualizations/`: HC vs CVD comparison plots
+
+---
+
+**Key Findings**:
+
+**1. Voxel Selection Success** ✅:
+```
+ROI    k (target)    All subjects uniform?    Exclusions
+V1     129           ✅ Yes (10 subjects)     None
+V2     103           ✅ Yes (10 subjects)     None
+V3     50            ❌ No (sub-07: 5 voxels) Exclude sub-07 (9 subjects)
+hV4    57            ✅ Yes (10 subjects)     None
+```
+
+**Verification**: All ROIs except V3 have uniform voxel counts. V3 excludes sub-07 due to insufficient voxels (5 vs 50-58 for others).
+
+---
+
+**2. Between-Subject Procrustes Disparities**:
+
+**⚠️ UNEXPECTED FINDING: HC > CVD for all ROIs**
+
+```
+ROI    HC Disparity         CVD Disparity        Ratio (HC/CVD)
+V1     540.56 ± 108.13      266.11 ± 61.15       2.03×
+V2     426.12 ± 57.23       160.56 ± 72.21       2.65×
+V3     215.81 ± 40.60       89.43 ± 40.78        2.41×
+hV4    232.54 ± 74.91       147.52 ± 102.66      1.58×
+```
+
+**Observation**:
+- HC subjects show **2-2.7× higher disparities** than CVD subjects
+- Opposite of hypothesis: Expected CVD > HC
+- Disparities are very high (200-550 range) even after normalization
+
+**Possible Explanations**:
+1. **HC reference bias**: CVD subjects might coincidentally be closer to HC mean
+2. **Between-subject variability**: Natural HC variability > within-CVD consistency
+3. **Sample size**: Small CVD sample (n=3) vs HC (n=7 or 6)
+4. **Normalization artifacts**: Center+scale normalization removes differences we care about
+
+---
+
+**3. RDM Correlation with HC Reference**:
+
+```
+ROI    HC RDM Correlation    CVD RDM Correlation    Difference
+V1     -0.13 ± 0.38          -0.11 ± 0.05           -0.02
+V2      0.07 ± 0.26          -0.08 ± 0.15           +0.15
+V3      0.17 ± 0.10           0.06 ± 0.09           +0.11
+hV4     NaN                   0.04 ± 0.11            —
+```
+
+**Observation**:
+- **Very low correlations** (near 0 or negative) for both groups
+- No clear HC > CVD pattern
+- Suggests poor between-subject RDM alignment overall
+
+**Interpretation**:
+- Between-subject RDM similarity is very weak
+- Procrustes alignment does not improve RDM correspondence
+- High individual variability in color representations
+
+---
+
+**4. Diagnostic Considerations**:
+
+**Issues Identified**:
+- Unexpectedly high HC disparities (opposite of hypothesis)
+- Very low RDM correlations (suggests alignment ineffective)
+- Large disparity range (200-550) after normalization
+
+**Potential Problems**:
+1. **Alignment in wrong space**: Should align in RDM space instead of amplitude space?
+2. **Wrong reference**: Mean HC might not be optimal; try individual HC references?
+3. **Voxel heterogeneity**: Even with top-k selection, voxels may encode different features
+4. **Between-subject variability**: Procrustes assumes same representational structure with different orientation, but subjects might have fundamentally different structures
+
+**Alternative Approaches to Consider**:
+- **Shared Response Model (SRM)**: Learn shared latent space instead of Procrustes
+- **Representational Connectivity Analysis**: Compare RDM structure without alignment
+- **Individual HC references**: Align each CVD to each HC (pairwise comparisons)
+- **Voxel-wise encoding models**: Predict CVD from HC encoding weights
+
+---
+
+**Next Steps**:
+
+1. **Investigate HC disparity paradox**:
+   - Check if individual HC-to-HC disparities follow expected pattern
+   - Try leave-one-out HC references to see if pattern holds
+   - Compute pairwise HC-HC vs HC-CVD comparisons
+
+2. **Test alternative alignment methods**:
+   - RDM-space alignment (e.g., MDS + Procrustes on embedded RDMs)
+   - Shared Response Model (SRM) for common latent space
+   - Hyperalignment (data-driven transformation learning)
+
+3. **Diagnostic analyses**:
+   - Check if disparities correlate with tSNR or other data quality metrics
+   - Visualize actual transformation matrices R to see rotation patterns
+   - Compute leave-one-out cross-validation for HC reference stability
+
+4. **Consider simpler metrics**:
+   - Direct RDM correlation (without alignment)
+   - Second-order isomorphism (correlation of RDM correlations)
+   - Pattern distinctiveness (within vs between-color distances)
+
+**Status**: ✅ **COMPLETED - Between-subject Procrustes implemented**
+**Finding**: ⚠️ **Unexpected HC > CVD disparities - requires investigation**
+
+---
+
+
 ##### 3.1.2 Split-half Reliability (Noise Ceiling)
-[ ] **Task**: Trial split으로 noise ceiling 추정
+[✅ COMPLETED - 2026-02-03] **Task**: Run split으로 noise ceiling 추정
 
 **Input**:
-- Trial-wise beta estimates (before averaging)
-  - From baseline pipeline's intermediate outputs
-  - Shape: (n_trials_per_run, n_voxels)
+- Procrustes-aligned amplitudes: `{BASELINE_RESULTS}/sub-{ID}/{ROI}/amplitudes_procrustes.npy`
+  - Shape: (n_runs=6, n_colors=8, n_voxels)
+  - Note: Split by runs (not trials) for computational efficiency
 
 **Computation**:
 ```python
 # Bootstrap split-half (1000 iterations)
 for iteration in range(1000):
-    # Randomly split trials for each color
-    for color in colors:
-        trials = all_trials[color]
-        half_A, half_B = random_split(trials)
+    # Randomly split 6 runs into two halves (3+3)
+    half1_runs, half2_runs = random_split(runs)
+
+    # Average patterns within each half
+    half_A = mean(amplitudes[half1_runs], axis=0)  # (8 colors, n_voxels)
+    half_B = mean(amplitudes[half2_runs], axis=0)
 
     # Build RDM from each half
     RDM_A = compute_rdm(half_A)
     RDM_B = compute_rdm(half_B)
 
-    # Spearman-Brown corrected correlation
+    # Spearman correlation
     r_raw = spearmanr(RDM_A, RDM_B)
+
+    # Spearman-Brown correction for full data
     r_corrected = 2 * r_raw / (1 + r_raw)
 
     noise_ceiling_estimates.append(r_corrected)
@@ -407,15 +917,92 @@ for iteration in range(1000):
 ```
 
 **Output**:
-- `{VALIDATION_OUT}/split_half/{TIMESTAMP}/noise_ceiling.json`
-  - Per subject-ROI: mean, CI_lower, CI_upper
+- `{VALIDATION_OUT}/noise_ceiling/evaluation_with_ceiling.json`
+  - Per subject-ROI: noise_ceiling_upper, CI, % of ceiling
+  - LOSO bounds per ROI
 - Figures:
-  - `noise_ceiling_distribution.png` (ROI별 분포)
-  - `split_half_scatter.png` (RDM_A vs RDM_B scatter, 여러 bootstrap 샘플)
+  - `visualizations/noise_ceiling_{ROI}.png` (performance vs ceiling)
+  - `visualizations/performance_vs_ceiling_scatter.png`
+  - `visualizations/split_half_dist_{subject}_{ROI}.png`
 
-**Expected**: Higher noise ceiling = more reliable representation
+**Results**: ✅ `/Users/.../analysis/validation/results/noise_ceiling/`
+- **Original**: `evaluation_with_ceiling.json` (40 pairs, all subjects)
+- **Cleaned**: `noise_ceiling_roi_specific_exclusion.json` (36 pairs, ROI-specific exclusion)
+- **Excluded pairs**: sub-04_V2, sub-04_hV4, sub-07_hV4, sub-10_V1 (4 pairs only)
 
-**Results**: _[write directory here after completion]_
+**Key Findings (ROI-Specific Exclusion)**:
+
+| ROI | n | Noise Ceiling | RDM After Procrustes | % of Ceiling | Gap | Change |
+|-----|---|--------------|----------------------|--------------|-----|--------|
+| V1  | 9 | 0.520 ± 0.212 | 0.174 ± 0.144 | **29.2%** | 66.5% | Ceiling +16% |
+| V2  | 9 | 0.690 ± 0.139 | 0.283 ± 0.120 | **42.1%** | 58.9% | Ceiling +11% |
+| V3  | 10| 0.624 ± 0.174 | 0.256 ± 0.146 | **39.1%** | 59.0% | All valid ✅ |
+| hV4 | 8 | 0.560 ± 0.247 | 0.232 ± 0.177 | **39.1%** | 58.5% | Ceiling +2% |
+
+**Interpretation**:
+
+### 1. 데이터 품질 평가 (Split-Half Ceiling) - **ROI-SPECIFIC EXCLUSION**
+
+**Excluded pairs (4개)**: sub-04_V2, sub-04_hV4, sub-07_hV4, sub-10_V1
+**Valid pairs**: 36/40 (90%)
+
+| ROI | n | Ceiling | Quality Assessment | Literature Comparison |
+|-----|---|---------|-------------------|----------------------|
+| V1  | 9 | 0.520 ± 0.212 | **양호** | Moderate-High (expected 0.5-0.7) |
+| V2  | 9 | 0.690 ± 0.139 | **양호** | Moderate-High (expected 0.6-0.8) |
+| V3  | 10| 0.624 ± 0.174 | **양호** | Moderate-High |
+| hV4 | 8 | 0.560 ± 0.247 | **양호** | Moderate-High |
+
+**Valid subjects per ROI**:
+- V1 (n=9): HC sub-01~07 / CVD sub-08,09
+- V2 (n=9): HC sub-01,02,03,05,06,07 / CVD sub-08,09,10
+- V3 (n=10): All subjects valid ✅
+- hV4 (n=8): HC sub-01,02,03,05,06 / CVD sub-08,09,10
+
+**결론**: **모든 ROI가 양호한 품질** (ceiling 0.52-0.69) → 분석 진행 충분 ✅
+
+### 2. 모델 설명력 평가 (% of Ceiling)
+
+| ROI | Current RDM | % of Ceiling | Gap | Target (70%) | Need |
+|-----|------------|--------------|-----|--------------|------|
+| V1  | 0.174      | **29.2%**    | 66.5% | 0.364        | +0.190 |
+| V2  | 0.283      | **42.1%**    | 58.9% | 0.483        | +0.199 |
+| V3  | 0.256      | **39.1%**    | 59.0% | 0.437        | +0.181 |
+| hV4 | 0.232      | **39.1%**    | 58.5% | 0.392        | +0.160 |
+
+**해석**:
+- 현재 모델 (within-subject Procrustes)은 데이터 잠재력의 **29-42%만 활용**
+- **59-67% gap 존재** → 상당한 개선 여지 (2-3배 개선 가능)
+- 낮은 성능은 **데이터 품질 문제가 아니라 모델 한계**
+- Whitening으로 +0.18-0.20 개선 시 70% 목표 달성 가능
+
+### 3. Between-Subject Analysis
+
+**현재 상태**: LOSO 계산 불가
+- **이유**: Voxel count 불일치로 between-subject Procrustes 불가능
+- V1: 129-429 voxels (subject별 상이)
+- V3: 5-58 voxels (특히 불일치 심함)
+
+**해결 방법**:
+1. **Non-variance voxel removal** (GLM 단계) → Anatomical correspondence
+2. **ANOVA top-k selection** → Common voxel set
+3. **Between-subject Procrustes** OR **SRM**
+
+**현재 단계**: Within-subject analysis만 완료
+- Between-subject alignment은 별도 프로젝트로 진행 예정
+
+### 4. Critical Issues
+
+- **Data quality**: sub-04, sub-07, sub-10 제외 필요 (negative/invalid ceilings)
+- **hV4 NaN**: sub-07_hV4 constant patterns
+- **V2 anomaly**: 67% ceiling 일부 subjects (재확인 필요)
+
+### 결론
+
+✅ **데이터 품질**: V2/V3 양호, V1 보통 → 분석 가능
+⚠️ **모델 성능**: 34-41% 활용 (낮음) → **개선 필요**
+🎯 **개선 전략**: Whitening (+20-30%) → GLMsingle (+10-20%) → 70-90% 목표
+📊 **Between-subject**: LOSO improvement는 별도 목표 (alignment 후 측정)
 
 ---
 

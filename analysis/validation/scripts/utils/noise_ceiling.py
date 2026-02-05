@@ -15,7 +15,6 @@ from scipy.stats import spearmanr
 from scipy.spatial.distance import squareform, pdist
 from typing import Dict, Tuple, List
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 
 def compute_rdm_from_amplitudes(amplitudes: np.ndarray, metric='correlation') -> np.ndarray:

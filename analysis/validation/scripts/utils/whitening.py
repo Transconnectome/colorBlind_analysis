@@ -22,12 +22,11 @@ When whitening helps:
 """
 
 import numpy as np
-from typing import Dict, Tuple, Optional
+from typing import Dict, Tuple, Optional, List
 from scipy.stats import spearmanr
 from scipy.spatial.distance import squareform, pdist
 from sklearn.covariance import LedoitWolf
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 
 def estimate_noise_covariance(residuals: np.ndarray,
@@ -464,7 +463,7 @@ def compute_effective_snr(amplitudes: np.ndarray,
 
 def compare_snr_before_after_whitening(amplitudes_raw: np.ndarray,
                                        amplitudes_whitened: np.ndarray,
-                                       residuals: np.ndarray,
+                                       residuals: Optional[np.ndarray],
                                        noise_cov: np.ndarray) -> Dict:
     """
     Comprehensive SNR comparison: raw vs whitened data.
@@ -472,22 +471,25 @@ def compare_snr_before_after_whitening(amplitudes_raw: np.ndarray,
     Args:
         amplitudes_raw: (n_runs, n_colors, n_voxels) - Before whitening
         amplitudes_whitened: (n_runs, n_colors, n_voxels) - After whitening
-        residuals: (n_samples, n_voxels) - GLM residuals
+        residuals: (n_samples, n_voxels) or None - GLM residuals (optional)
         noise_cov: (n_voxels, n_voxels) - Noise covariance
 
     Returns:
         comparison: Dict with SNR metrics before/after and improvements
     """
-    # Pattern SNR
+    # Pattern SNR (always computable)
     pattern_snr_raw = compute_pattern_snr(amplitudes_raw)
     pattern_snr_whitened = compute_pattern_snr(amplitudes_whitened)
 
-    # GLM SNR
-    glm_snr_raw = compute_glm_snr(amplitudes_raw, residuals)
-
-    # For whitened data, residuals should also be whitened
-    # But we use raw residuals as reference
-    glm_snr_whitened = compute_glm_snr(amplitudes_whitened, residuals)
+    # GLM SNR (only if residuals available)
+    if residuals is not None:
+        glm_snr_raw = compute_glm_snr(amplitudes_raw, residuals)
+        # For whitened data, residuals should also be whitened
+        # But we use raw residuals as reference
+        glm_snr_whitened = compute_glm_snr(amplitudes_whitened, residuals)
+    else:
+        glm_snr_raw = None
+        glm_snr_whitened = None
 
     # Effective SNR
     effective_snr_raw = compute_effective_snr(amplitudes_raw, noise_cov)
@@ -504,12 +506,6 @@ def compare_snr_before_after_whitening(amplitudes_raw: np.ndarray,
             'improvement': pattern_snr_whitened['pattern_snr'] - pattern_snr_raw['pattern_snr'],
             'improvement_pct': (pattern_snr_whitened['pattern_snr'] / pattern_snr_raw['pattern_snr'] - 1) * 100
         },
-        'glm_snr': {
-            'raw': glm_snr_raw,
-            'whitened': glm_snr_whitened,
-            'improvement': glm_snr_whitened['glm_snr'] - glm_snr_raw['glm_snr'],
-            'improvement_pct': (glm_snr_whitened['glm_snr'] / glm_snr_raw['glm_snr'] - 1) * 100
-        },
         'effective_snr': {
             'raw': effective_snr_raw,
             'whitened': effective_snr_whitened,
@@ -518,11 +514,23 @@ def compare_snr_before_after_whitening(amplitudes_raw: np.ndarray,
         }
     }
 
+    # Add GLM SNR only if residuals available
+    if glm_snr_raw is not None:
+        comparison['glm_snr'] = {
+            'raw': glm_snr_raw,
+            'whitened': glm_snr_whitened,
+            'improvement': glm_snr_whitened['glm_snr'] - glm_snr_raw['glm_snr'],
+            'improvement_pct': (glm_snr_whitened['glm_snr'] / glm_snr_raw['glm_snr'] - 1) * 100
+        }
+
     print("\n=== SNR Comparison: Raw vs Whitened ===")
     print(f"Pattern SNR:    {pattern_snr_raw['pattern_snr']:.3f} → {pattern_snr_whitened['pattern_snr']:.3f} "
           f"({comparison['pattern_snr']['improvement_pct']:+.1f}%)")
-    print(f"GLM SNR:        {glm_snr_raw['glm_snr']:.3f} → {glm_snr_whitened['glm_snr']:.3f} "
-          f"({comparison['glm_snr']['improvement_pct']:+.1f}%)")
+    if glm_snr_raw is not None:
+        print(f"GLM SNR:        {glm_snr_raw['glm_snr']:.3f} → {glm_snr_whitened['glm_snr']:.3f} "
+              f"({comparison['glm_snr']['improvement_pct']:+.1f}%)")
+    else:
+        print(f"GLM SNR:        N/A (residuals not available)")
     print(f"Effective SNR:  {effective_snr_raw['effective_snr']:.3f} → {effective_snr_whitened['effective_snr']:.3f} "
           f"({comparison['effective_snr']['improvement_pct']:+.1f}%)")
 

@@ -39,11 +39,10 @@ import json
 import sys
 from scipy.stats import spearmanr
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 # Add utils to path
-sys.path.insert(0, str(Path(__file__).parent / 'utils'))
-sys.path.insert(0, str(Path(__file__).parent.parent.parent / 'phase1_preprocess_decoding' / 'utils'))
+script_dir = Path(__file__).resolve().parent
+sys.path.insert(0, str(script_dir / 'utils'))
 
 from noise_ceiling import compute_split_half_reliability, visualize_split_half_distribution
 from whitening import (
@@ -146,35 +145,41 @@ def evaluate_single_roi_whitening(subject, roi, verbose=True):
             print(f"⚠️  Skip: sub-{subject}/{roi} (amplitudes_raw.npy missing)")
         return None
 
-    if not residuals_path.exists():
-        if verbose:
-            print(f"⚠️  Skip: sub-{subject}/{roi} (residuals_2nd_level.npy missing)")
-            print(f"    → Re-run baseline pipeline with residual saving!")
-        return None
-
     try:
         # Load data
         amplitudes_raw = np.load(raw_path)
-
-        # Load residuals
-        residuals = np.load(residuals_path, allow_pickle=True)
-        if isinstance(residuals, np.ndarray) and residuals.dtype == object:
-            residuals = residuals.item()  # Convert to dict
-            residuals = np.vstack([residuals[run] for run in sorted(residuals.keys())])
-
         n_runs, n_colors, n_voxels = amplitudes_raw.shape
+
+        # Load residuals (optional - use amplitudes if not available)
+        use_residuals = residuals_path.exists()
+        if use_residuals:
+            residuals = np.load(residuals_path, allow_pickle=True)
+            if isinstance(residuals, np.ndarray) and residuals.dtype == object:
+                residuals = residuals.item()  # Convert to dict
+                residuals = np.vstack([residuals[run] for run in sorted(residuals.keys())])
+        else:
+            # Fallback: estimate noise from amplitudes themselves
+            # Use run-to-run variability as noise estimate
+            residuals = amplitudes_raw.reshape(-1, n_voxels)
+            if verbose:
+                print(f"⚠️  Residuals not found - using amplitudes for noise estimation")
 
         if verbose:
             print(f"\n{'='*60}")
             print(f"Evaluating: sub-{subject}/{roi}")
             print(f"Shape: {n_runs} runs × {n_colors} colors × {n_voxels} voxels")
-            print(f"Residuals: {residuals.shape}")
+            if use_residuals:
+                print(f"Residuals: {residuals.shape} (from GLM)")
+            else:
+                print(f"Residuals: {residuals.shape} (estimated from amplitudes)")
 
         # ========================================
         # STEP 1: Estimate noise covariance
         # ========================================
         if verbose:
             print(f"\n--- Step 1: Noise Covariance Estimation ---")
+            if not use_residuals:
+                print(f"Note: Using amplitude variability as noise proxy")
 
         noise_cov, shrinkage = estimate_noise_covariance(residuals, method='ledoit_wolf')
 
@@ -221,10 +226,12 @@ def evaluate_single_roi_whitening(subject, roi, verbose=True):
         if verbose:
             print(f"\n--- Step 4: SNR Analysis ---")
 
+        # Pass residuals only if from GLM (not from amplitudes fallback)
+        residuals_for_snr = residuals if use_residuals else None
         snr_comparison = compare_snr_before_after_whitening(
             amplitudes_raw,
             amplitudes_whitened,
-            residuals,
+            residuals_for_snr,
             noise_cov
         )
 

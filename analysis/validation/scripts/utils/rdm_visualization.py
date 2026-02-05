@@ -19,7 +19,6 @@ References:
 import numpy as np
 from typing import List, Tuple, Optional, Dict
 import matplotlib.pyplot as plt
-import seaborn as sns
 from scipy.spatial.distance import squareform, pdist
 from scipy.stats import spearmanr
 from scipy.cluster.hierarchy import dendrogram, linkage

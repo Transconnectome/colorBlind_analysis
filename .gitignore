@@ -103,9 +103,8 @@ qc_runwise_sub-*.tsv
 *.snm
 *.vrb
 
-# Keep paper PDFs
-!docs/paper/*.pdf
-!docs/program_paper/*.pdf
+# Paper and documents
+docs/
 
 # But ignore other PDFs
 *.pdf

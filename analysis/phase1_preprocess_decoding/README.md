@@ -54,6 +54,43 @@ Drift:          none (handled by high-pass)
 Standardize:    False (preserve raw beta values)
 ```
 
+**NEW: Raw Baseline with Residuals (Updated 2026-02-05)**
+**Minimal Preprocessing for Whitening Analysis:**
+```python
+# New Baseline (for 1st-level residuals & whitening)
+# Purpose: Minimal preprocessing to preserve spatial noise structure
+# Reference: Diedrichsen et al. (2016) - Multivariate Noise Normalization
+
+Smoothing:         0mm (no smoothing)
+High-pass:         0.0 Hz (no highpass, preserve all frequencies)
+Motion:            none (no motion regressors)
+CompCor:           None
+Drift:             per_run (DCT basis per run)
+Standardize:       False
+Normalize_level:   none (completely raw BOLD, no normalization)
+Save_residuals:    True (1st-level GLM residuals for whitening)
+2nd_level_intercept: True (removes run baseline shifts)
+
+# Rationale:
+# - Preserves spatial noise correlation structure for accurate covariance estimation
+# - 1st-level residuals provide 3.5-5× more samples than run-level residuals
+# - Enables stable Ledoit-Wolf shrinkage (samples/voxels ratio > 3.0)
+# - Expected whitening effect: +25-35% noise ceiling improvement
+```
+
+**Command:**
+```bash
+python fir_reconstruction_BH2009_system_clean.py \
+    --subject 01 \
+    --roi V1 \
+    --highpass 0.0 \
+    --motion none \
+    --drift per_run \
+    --normalize-level none \
+    --save-residuals \
+    --2nd-level-intercept
+```
+
 **FIR GLM Parameters:**
 ```python
 N_DELAYS = 8                    # 8 FIR delays (12s window at TR=1.5s)

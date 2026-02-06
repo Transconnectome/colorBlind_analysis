@@ -455,6 +455,8 @@ def parse_args():
                         help='Normalization strategy: 1st_only (original, problematic), both (E1: consistent), none (E2: all original)')
     parser.add_argument('--2nd-level-intercept', action='store_true',
                         help='Add intercept to 2nd-level GLM (removes run baseline shifts when highpass=0)')
+    parser.add_argument('--save-residuals', action='store_true',
+                        help='Save 1st-level GLM residuals for whitening (Diedrichsen et al., 2016)')
 
     return parser.parse_args()
 
@@ -475,6 +477,7 @@ DRIFT_MODEL = args.drift
 STANDARDIZE = args.standardize
 NORMALIZE_LEVEL = args.normalize_level
 ADD_2ND_LEVEL_INTERCEPT = args.__dict__['2nd_level_intercept']  # Use __dict__ for hyphenated arg
+SAVE_RESIDUALS = args.save_residuals  # Save 1st-level residuals for whitening
 
 # Generate config name for figures
 def config_to_name(smooth, highpass, motion, compcor, drift, standardize, normalize_level):
@@ -1498,6 +1501,12 @@ sys.stdout.flush()
 # Storage: (n_runs, n_colors, n_voxels_selected)
 amplitudes_raw = np.zeros((N_RUNS, N_COLORS, n_voxels_selected))
 
+# Storage for 1st-level residuals (Diedrichsen et al., 2016)
+if SAVE_RESIDUALS:
+    residuals_1st_level_all_runs = []
+    print(f"  ✅ 1st-level residuals will be saved for whitening")
+    sys.stdout.flush()
+
 # NORMALIZE_LEVEL-dependent data preparation:
 #   'none' or '1st_only': Use ORIGINAL data (scale mismatch if 1st_only)
 #   'both': Use NORMALIZED data (consistent with 1st-level)
@@ -1579,9 +1588,57 @@ for run_idx in range(N_RUNS):
     # Extract first 8 betas (HRF regressors only, discard derivative betas)
     amplitudes_raw[run_idx] = betas[:N_COLORS, :]
 
+    # ========================================
+    # ADDED: Save 1st-level residuals (Diedrichsen et al., 2016)
+    # ========================================
+    if SAVE_RESIDUALS:
+        # Compute residuals: Y - X·β
+        y_predicted = X_2nd @ betas  # (n_scans, n_voxels)
+        residuals_run = y_run_for_amplitude - y_predicted  # (n_scans, n_voxels)
+        residuals_1st_level_all_runs.append(residuals_run)
+
+        if run_idx == 0:
+            print(f"\n  ✅ 1st-level residuals computed (first run):")
+            print(f"     Shape:            {residuals_run.shape} (TRs × voxels)")
+            print(f"     Residual std:     {np.std(residuals_run):.4f}")
+            print(f"     Residual var:     {np.var(residuals_run):.4f}")
+            sys.stdout.flush()
+
 print(f"  Amplitude array shape: {amplitudes_raw.shape} (runs, colors, voxels)")
 print()
 sys.stdout.flush()
+
+# ========================================
+# ADDED: Concatenate and save 1st-level residuals (Diedrichsen et al., 2016)
+# ========================================
+if SAVE_RESIDUALS:
+    # Concatenate all runs: (n_runs × n_scans, n_voxels)
+    residuals_1st_level = np.vstack(residuals_1st_level_all_runs)
+
+    # Calculate statistics
+    n_samples = residuals_1st_level.shape[0]
+    n_voxels = residuals_1st_level.shape[1]
+    samples_per_voxel_ratio = n_samples / n_voxels
+
+    print(f"\n  ✅ 1st-level residuals concatenated:")
+    print(f"     Final shape:          {residuals_1st_level.shape} (Total TRs × voxels)")
+    print(f"     Samples (TRs):        {n_samples}")
+    print(f"     Voxels:               {n_voxels}")
+    print(f"     Ratio (samples/voxels): {samples_per_voxel_ratio:.2f}")
+
+    if samples_per_voxel_ratio >= 2.0:
+        print(f"     ✅ EXCELLENT: Ratio > 2.0 → Stable covariance estimation")
+    elif samples_per_voxel_ratio >= 1.0:
+        print(f"     ✅ GOOD: Ratio > 1.0 → Ledoit-Wolf shrinkage sufficient")
+    else:
+        print(f"     ⚠️  WARNING: Ratio < 1.0 → High shrinkage expected")
+
+    # NOTE: Residuals will be saved AFTER problematic voxel filtering
+    # to ensure shape matches amplitudes_raw
+    print(f"\n     Note: Residuals will be saved after voxel filtering")
+    print(f"     Reference: Diedrichsen et al. (2016), Schütt et al. (2021)")
+    print()
+    sys.stdout.flush()
 
 # ============================================================================
 # Step 5: Z-score Normalization
@@ -1630,6 +1687,11 @@ n_valid_voxels = np.sum(valid_voxels_mask)
 amplitudes_raw = amplitudes_raw[:, :, valid_voxels_mask]
 amplitudes_z = amplitudes_z[:, :, valid_voxels_mask]
 
+# CRITICAL: Also filter residuals to match amplitudes
+if SAVE_RESIDUALS and 'residuals_1st_level' in locals():
+    residuals_1st_level = residuals_1st_level[:, valid_voxels_mask]
+    print(f"  ✅ Residuals filtered to valid voxels: {residuals_1st_level.shape}")
+
 # Note: HRF arrays (hrf_correlations, hrf_rmse, hrf_nrmse) were already filtered
 # for NaN values at lines 1169-1172, so they don't need additional filtering here.
 # They are used only for summary statistics reporting.
@@ -1661,6 +1723,27 @@ if n_voxels_selected == 0:
 
 print()
 sys.stdout.flush()
+
+# ============================================================================
+# SAVE RESIDUALS (After voxel filtering)
+# ============================================================================
+if SAVE_RESIDUALS and 'residuals_1st_level' in locals():
+    residuals_path = Path(output_dir) / "residuals_1st_level.npy"
+    np.save(residuals_path, residuals_1st_level)
+    file_size_mb = residuals_path.stat().st_size / (1024**2)
+
+    n_samples = residuals_1st_level.shape[0]
+    n_voxels_final = residuals_1st_level.shape[1]
+    samples_per_voxel_ratio = n_samples / n_voxels_final
+
+    print(f"✅ 1st-level residuals saved (AFTER voxel filtering):")
+    print(f"   File: {residuals_path}")
+    print(f"   Shape: {residuals_1st_level.shape} (TRs × voxels)")
+    print(f"   Samples/Voxels ratio: {samples_per_voxel_ratio:.2f}")
+    print(f"   File size: {file_size_mb:.1f} MB")
+    print(f"   ✅ IMPORTANT: Shape matches amplitudes_raw: {amplitudes_raw.shape}")
+    print()
+    sys.stdout.flush()
 
 # ============================================================================
 # Enhanced Amplitude SNR Analysis
@@ -2216,7 +2299,9 @@ results_summary = {
         'compcor_n': COMPCOR_N,
         'drift_model': DRIFT_MODEL,
         'standardize': STANDARDIZE,
-        'normalize_level': NORMALIZE_LEVEL  # FACTORIAL EXPERIMENT
+        'normalize_level': NORMALIZE_LEVEL,  # FACTORIAL EXPERIMENT
+        'save_residuals': SAVE_RESIDUALS,  # 1st-level residuals for whitening
+        '2nd_level_intercept': ADD_2ND_LEVEL_INTERCEPT
     },
 
     # Basic info

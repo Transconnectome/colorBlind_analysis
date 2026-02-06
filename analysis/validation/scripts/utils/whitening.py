@@ -614,13 +614,13 @@ def visualize_snr_comparison(snr_comparison: Dict,
 
 
 def load_residuals_from_baseline(baseline_dir: str,
-                                 residual_type: str = '2nd_level') -> np.ndarray:
+                                 residual_type: str = '1st_level') -> np.ndarray:
     """
     Load GLM residuals from baseline reconstruction output.
 
     Args:
         baseline_dir: Path to baseline output directory
-        residual_type: '1st_level' or '2nd_level'
+        residual_type: '1st_level' (default) or '2nd_level'
 
     Returns:
         residuals: (n_samples, n_voxels) - GLM residuals

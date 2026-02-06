@@ -62,19 +62,39 @@ def apply_srm_alignment(amplitudes_dict: Dict[str, np.ndarray],
     if n_subjects < 2:
         raise ValueError(f"SRM requires at least 2 subjects, got {n_subjects}")
 
-    # Get dimensions
-    n_runs, n_colors, n_voxels = amplitudes_dict[subjects[0]].shape
+    # Get dimensions (use first subject for runs/colors, but voxels can vary)
+    first_subj_data = amplitudes_dict[subjects[0]]
+    n_runs, n_colors = first_subj_data.shape[0], first_subj_data.shape[1]
 
     # Prepare data for BrainIAK SRM
     # SRM expects list of (n_features, n_samples) arrays
-    # We'll concatenate runs: (n_voxels, n_runs * n_colors)
+    #
+    # IMPORTANT: Use Beta-based SRM approach (not time-series)
+    # - Average across runs to get stable pattern estimates
+    # - Input: (n_voxels, n_colors) per subject
+    # - This allows k ≤ n_colors (typically k ≤ 8)
+    # - Reduces noise and prevents overfitting with limited samples
 
     srm_input = []
+    voxel_counts = []
+
+    print(f"  Using Beta-based SRM: averaging {n_runs} runs per subject")
+
     for subj in subjects:
-        subj_data = amplitudes_dict[subj]  # (n_runs, n_colors, n_voxels)
-        # Reshape to (n_voxels, n_runs * n_colors)
-        subj_data_reshaped = subj_data.transpose(2, 0, 1).reshape(n_voxels, -1)
+        subj_data = amplitudes_dict[subj]  # (n_runs, n_colors, n_voxels_i)
+        n_voxels_i = subj_data.shape[2]
+        voxel_counts.append(n_voxels_i)
+
+        # Average across runs to get stable beta estimates
+        # (n_runs, n_colors, n_voxels) -> (n_colors, n_voxels)
+        subj_beta = np.mean(subj_data, axis=0)  # (n_colors, n_voxels)
+
+        # Transpose to (n_voxels, n_colors) for BrainIAK
+        subj_data_reshaped = subj_beta.T  # (n_voxels_i, n_colors)
         srm_input.append(subj_data_reshaped)
+
+    print(f"  Subject voxel counts: min={min(voxel_counts)}, max={max(voxel_counts)}, mean={np.mean(voxel_counts):.1f}")
+    print(f"  Input shape per subject: ({voxel_counts[0]}, {n_colors}) - {n_colors} samples (colors)")
 
     # Fit SRM
     print(f"Fitting SRM with {n_features} features on {n_subjects} subjects...")
@@ -93,12 +113,13 @@ def apply_srm_alignment(amplitudes_dict: Dict[str, np.ndarray],
         W_i = srm.w_[i]
         transformations[subj] = W_i
 
-        # Transform amplitudes: (n_runs, n_colors, n_voxels) @ (n_voxels, n_features)
-        #                     -> (n_runs, n_colors, n_features)
+        # Transform original amplitudes (all runs)
+        # (n_runs, n_colors, n_voxels) @ (n_voxels, n_features)
+        # -> (n_runs, n_colors, n_features)
         aligned = amplitudes_dict[subj] @ W_i
         aligned_amplitudes[subj] = aligned
 
-    print(f"SRM alignment completed. Reduced from {n_voxels} to {n_features} features.")
+    print(f"SRM alignment completed. Reduced from {min(voxel_counts)}-{max(voxel_counts)} voxels to {n_features} features.")
 
     return {
         'aligned_amplitudes': aligned_amplitudes,
@@ -106,7 +127,7 @@ def apply_srm_alignment(amplitudes_dict: Dict[str, np.ndarray],
         'transformations': transformations,
         'shared_response': shared_response,
         'n_features': n_features,
-        'n_voxels_original': n_voxels
+        'n_voxels_original': voxel_counts  # List of voxel counts per subject
     }
 
 
@@ -135,12 +156,16 @@ def srm_tune_features(amplitudes_dict: Dict[str, np.ndarray],
         raise ImportError("brainiak is required for SRM")
 
     subjects = list(amplitudes_dict.keys())
-    n_runs, n_colors, n_voxels = amplitudes_dict[subjects[0]].shape
+    first_subj_data = amplitudes_dict[subjects[0]]
+    n_runs, n_colors = first_subj_data.shape[0], first_subj_data.shape[1]
 
-    # Filter invalid k values
-    valid_features = [k for k in feature_range if k <= n_voxels and k >= 2]
+    # Get min voxels across subjects for k validation
+    min_voxels = min(data.shape[2] for data in amplitudes_dict.values())
+
+    # Filter invalid k values (k must be <= minimum voxel count)
+    valid_features = [k for k in feature_range if k <= min_voxels and k >= 2]
     if len(valid_features) == 0:
-        raise ValueError(f"No valid feature counts. Max allowed: {n_voxels}")
+        raise ValueError(f"No valid feature counts. Max allowed: {min_voxels}")
 
     print(f"Testing SRM with k = {valid_features}")
 
@@ -274,8 +299,9 @@ def compare_procrustes_vs_srm(amplitudes_dict: Dict[str, np.ndarray],
     # SRM reliability
     srm_reliability = compute_rdm_reliability(srm_results['aligned_amplitudes'])
 
-    # Dimensionality comparison
-    n_voxels_original = amplitudes_dict[list(amplitudes_dict.keys())[0]].shape[2]
+    # Dimensionality comparison (use mean voxel count)
+    voxel_counts = [data.shape[2] for data in amplitudes_dict.values()]
+    n_voxels_original = int(np.mean(voxel_counts))
 
     comparison = {
         'procrustes': {

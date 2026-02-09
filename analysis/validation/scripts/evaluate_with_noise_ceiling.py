@@ -34,9 +34,11 @@ sys.path.insert(0, str(script_dir / 'utils'))
 
 from noise_ceiling import (
     compute_split_half_reliability,
+    compute_split_half_odd_even,
     compute_loso_noise_ceiling,
     visualize_noise_ceiling,
-    visualize_split_half_distribution
+    visualize_split_half_distribution,
+    visualize_odd_even_rdms
 )
 from crossnobis_ldw import compute_crossnobis_rdms_per_run
 
@@ -197,9 +199,17 @@ def evaluate_single_roi_with_ceiling(subject, roi, verbose=True):
 
         # === NOISE CEILING (Split-Half) ===
         # Compute on Procrustes-aligned data (best estimate)
+
+        # Random split-half (1000 iterations)
         split_half_results = compute_split_half_reliability(
             amplitudes_aligned,
             n_iterations=1000,
+            metric='correlation'
+        )
+
+        # Odd/even split-half (deterministic)
+        odd_even_results = compute_split_half_odd_even(
+            amplitudes_aligned,
             metric='correlation'
         )
 
@@ -243,18 +253,31 @@ def evaluate_single_roi_with_ceiling(subject, roi, verbose=True):
             'rdm_crossnobis_improvement': float(rdm_crossnobis_improvement),
             'decoding_improvement': float(decoding_improvement),
 
-            # Noise Ceiling
+            # Noise Ceiling - Random Split
             'noise_ceiling_upper': float(noise_ceiling_upper),
             'noise_ceiling_ci_lower': float(noise_ceiling_ci_lower),
             'noise_ceiling_ci_upper': float(noise_ceiling_ci_upper),
             'split_half_raw': float(split_half_results['raw']),
+
+            # Noise Ceiling - Odd/Even Split (NEW)
+            'noise_ceiling_odd_even': float(odd_even_results['corrected']),
+            'split_half_odd_even_raw': float(odd_even_results['raw']),
+            'n_odd_runs': int(odd_even_results['n_odd']),
+            'n_even_runs': int(odd_even_results['n_even']),
+            'split_half_method_difference': float(abs(
+                split_half_results['corrected'] - odd_even_results['corrected']
+            )),
 
             # Performance relative to ceiling
             'pct_of_ceiling_before': float(pct_of_ceiling_before),
             'pct_of_ceiling_after': float(pct_of_ceiling_after),
 
             # Split-half correlations for visualization
-            'split_half_correlations': split_half_results['all_correlations']
+            'split_half_correlations': split_half_results['all_correlations'],
+            'odd_even_rdms': {
+                'odd': odd_even_results['rdm_odd'].tolist(),
+                'even': odd_even_results['rdm_even'].tolist()
+            }
         }
 
         if verbose:
@@ -357,14 +380,29 @@ def create_summary_visualizations(all_results, loso_by_roi, output_dir):
 
     # 2. Split-half distribution for representative subject-ROI
     # Pick first available
+    example_plotted = False
     for key, result in all_results.items():
-        if 'split_half_correlations' in result:
+        if 'split_half_correlations' in result and not example_plotted:
+            # Random split-half distribution
             visualize_split_half_distribution(
                 result['split_half_correlations'],
                 result['noise_ceiling_upper'],
                 str(viz_dir / f"split_half_dist_{result['subject']}_{result['roi']}.png")
             )
-            break  # Just one example
+
+            # Odd/even RDM visualization
+            if 'odd_even_rdms' in result:
+                rdm_odd = np.array(result['odd_even_rdms']['odd'])
+                rdm_even = np.array(result['odd_even_rdms']['even'])
+                visualize_odd_even_rdms(
+                    rdm_odd,
+                    rdm_even,
+                    result['split_half_odd_even_raw'],
+                    str(viz_dir / f"odd_even_rdms_{result['subject']}_{result['roi']}.png"),
+                    color_labels=[f'C{i+1}' for i in range(8)]
+                )
+
+            example_plotted = True
 
     # 3. Summary scatter plot: Performance vs Ceiling
     fig, ax = plt.subplots(figsize=(10, 8))
@@ -475,6 +513,18 @@ def main():
                 'mean': float(np.mean([v['noise_ceiling_upper'] for v in roi_results])),
                 'std': float(np.std([v['noise_ceiling_upper'] for v in roi_results]))
             },
+            'noise_ceiling_odd_even': {
+                'mean': float(np.mean([v['noise_ceiling_odd_even'] for v in roi_results])),
+                'std': float(np.std([v['noise_ceiling_odd_even'] for v in roi_results]))
+            },
+            'split_half_method_comparison': {
+                'mean_difference': float(np.mean([v['split_half_method_difference']
+                                                 for v in roi_results])),
+                'max_difference': float(np.max([v['split_half_method_difference']
+                                                for v in roi_results])),
+                'std_difference': float(np.std([v['split_half_method_difference']
+                                                for v in roi_results]))
+            },
             'pct_of_ceiling_after': {
                 'mean': float(np.mean([v['pct_of_ceiling_after'] for v in roi_results])),
                 'std': float(np.std([v['pct_of_ceiling_after'] for v in roi_results]))
@@ -488,7 +538,9 @@ def main():
         print(f"\n{roi}:")
         print(f"  RDM (before): {summary[roi]['rdm_correlation_before']['mean']:.3f} ± {summary[roi]['rdm_correlation_before']['std']:.3f}")
         print(f"  RDM (after):  {summary[roi]['rdm_correlation_after']['mean']:.3f} ± {summary[roi]['rdm_correlation_after']['std']:.3f}")
-        print(f"  Ceiling:      {summary[roi]['noise_ceiling_upper']['mean']:.3f} ± {summary[roi]['noise_ceiling_upper']['std']:.3f}")
+        print(f"  Ceiling (random):  {summary[roi]['noise_ceiling_upper']['mean']:.3f} ± {summary[roi]['noise_ceiling_upper']['std']:.3f}")
+        print(f"  Ceiling (odd/even): {summary[roi]['noise_ceiling_odd_even']['mean']:.3f} ± {summary[roi]['noise_ceiling_odd_even']['std']:.3f}")
+        print(f"  Method difference: {summary[roi]['split_half_method_comparison']['mean_difference']:.3f} ± {summary[roi]['split_half_method_comparison']['std_difference']:.3f}")
         print(f"  % of ceiling: {summary[roi]['pct_of_ceiling_after']['mean']:.1f}% ± {summary[roi]['pct_of_ceiling_after']['std']:.1f}%")
 
         if roi in loso_by_roi:

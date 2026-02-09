@@ -29,19 +29,131 @@ from sklearn.covariance import LedoitWolf
 import matplotlib.pyplot as plt
 
 
+def preprocess_residuals_run_wise(residuals: np.ndarray,
+                                   n_runs: int,
+                                   verbose: bool = True) -> np.ndarray:
+    """
+    Preprocess residuals: Remove run-wise intercepts (mean per run, per voxel).
+
+    Critical for GLM with normalize='none' which leaves non-zero baseline.
+
+    Args:
+        residuals: (n_samples, n_voxels) - Raw GLM residuals
+        n_runs: Number of runs (to split residuals)
+        verbose: Print preprocessing info
+
+    Returns:
+        residuals_centered: (n_samples, n_voxels) - Centered residuals
+    """
+    n_samples, n_voxels = residuals.shape
+    samples_per_run = n_samples // n_runs
+
+    if n_samples % n_runs != 0:
+        print(f"Warning: n_samples ({n_samples}) not divisible by n_runs ({n_runs}). "
+              f"Using samples_per_run = {samples_per_run}")
+
+    residuals_centered = residuals.copy()
+
+    # Remove mean per run, per voxel
+    for run_idx in range(n_runs):
+        start_idx = run_idx * samples_per_run
+        end_idx = start_idx + samples_per_run if run_idx < n_runs - 1 else n_samples
+
+        run_residuals = residuals[start_idx:end_idx]
+        run_mean = run_residuals.mean(axis=0, keepdims=True)
+        residuals_centered[start_idx:end_idx] = run_residuals - run_mean
+
+        if verbose and run_idx == 0:
+            print(f"Run {run_idx+1} residuals mean before: {run_mean.mean():.3f}")
+            print(f"Run {run_idx+1} residuals mean after: {residuals_centered[start_idx:end_idx].mean():.6f}")
+
+    if verbose:
+        print(f"✓ Removed run-wise intercepts: Global mean {residuals.mean():.3f} → {residuals_centered.mean():.6f}")
+
+    return residuals_centered
+
+
+def compute_temporal_autocorrelation(residuals: np.ndarray,
+                                     max_lag: int = 1) -> Dict[str, float]:
+    """
+    Compute temporal autocorrelation (ACF) to estimate effective sample size.
+
+    fMRI residuals are temporally correlated due to:
+    - Hemodynamic response lag (~6s)
+    - Slow scanner drifts
+    - Physiological noise (breathing ~0.3Hz, heartbeat ~1Hz)
+
+    This inflates effective n_samples, leading to underestimated shrinkage.
+
+    Args:
+        residuals: (n_samples, n_voxels) - Preprocessed residuals
+        max_lag: Maximum lag for ACF computation (default=1 for ACF-1 method)
+
+    Returns:
+        acf_metrics: Dict with:
+            - 'acf1_mean': Mean lag-1 autocorrelation across voxels
+            - 'acf1_std': Std of lag-1 autocorrelation
+            - 'n_effective_ratio': Ratio of effective to raw n_samples
+            - 'n_effective': Estimated effective sample size
+    """
+    n_samples, n_voxels = residuals.shape
+
+    # Compute lag-1 autocorrelation per voxel
+    acf1_per_voxel = np.zeros(n_voxels)
+
+    for v in range(n_voxels):
+        ts = residuals[:, v]
+        # Lag-1 correlation: corr(ts[:-1], ts[1:])
+        if n_samples > 1:
+            acf1_per_voxel[v] = np.corrcoef(ts[:-1], ts[1:])[0, 1]
+        else:
+            acf1_per_voxel[v] = 0.0
+
+    # Remove NaN values (constant voxels)
+    acf1_valid = acf1_per_voxel[np.isfinite(acf1_per_voxel)]
+    acf1_mean = np.mean(acf1_valid) if len(acf1_valid) > 0 else 0.0
+    acf1_std = np.std(acf1_valid) if len(acf1_valid) > 0 else 0.0
+
+    # Effective sample size (Walther et al., 2016)
+    # Approximation: n_eff ≈ n / (1 + 2*sum(ACF))
+    # For lag-1 only: n_eff ≈ n / (1 + 4*acf1)
+    if acf1_mean > 0:
+        n_effective = n_samples / (1 + 4 * acf1_mean)
+    else:
+        n_effective = n_samples
+
+    n_effective_ratio = n_effective / n_samples
+
+    return {
+        'acf1_mean': float(acf1_mean),
+        'acf1_std': float(acf1_std),
+        'n_effective_ratio': float(n_effective_ratio),
+        'n_effective': float(n_effective),
+        'n_raw': int(n_samples)
+    }
+
+
 def estimate_noise_covariance(residuals: np.ndarray,
                               method: str = 'ledoit_wolf',
-                              return_shrinkage: bool = True) -> Tuple[np.ndarray, Optional[float]]:
+                              return_shrinkage: bool = True,
+                              apply_acf_correction: bool = True,
+                              use_bootstrap: bool = False,
+                              n_bootstraps: int = 100,
+                              min_shrinkage: float = 0.1) -> Tuple[np.ndarray, Optional[float]]:
     """
     Estimate noise covariance matrix from GLM residuals.
 
     Args:
-        residuals: (n_samples, n_voxels) - GLM residuals
+        residuals: (n_samples, n_voxels) - GLM residuals (should be preprocessed)
         method: Covariance estimation method
             - 'ledoit_wolf': Shrinkage estimator (default, handles n < p)
             - 'empirical': Sample covariance (requires n > p)
             - 'diagonal': Assumes independent voxels (Σ = diag)
         return_shrinkage: Return shrinkage parameter (for ledoit_wolf)
+        apply_acf_correction: Apply temporal autocorrelation correction (ACF-1 method)
+        use_bootstrap: Use bootstrap subsampling with n_effective (Option 1)
+        n_bootstraps: Number of bootstrap iterations (default=100)
+        min_shrinkage: Minimum shrinkage for fMRI data (default=0.1, safety net)
 
     Returns:
         cov_matrix: (n_voxels, n_voxels) - Noise covariance estimate
@@ -50,11 +162,69 @@ def estimate_noise_covariance(residuals: np.ndarray,
     n_samples, n_voxels = residuals.shape
 
     if method == 'ledoit_wolf':
-        # Ledoit-Wolf shrinkage estimator
-        lw = LedoitWolf(assume_centered=False)
-        lw.fit(residuals)
-        cov_matrix = lw.covariance_
-        shrinkage = lw.shrinkage_ if return_shrinkage else None
+        # Compute temporal autocorrelation if requested
+        acf_metrics = None
+        if apply_acf_correction or use_bootstrap:
+            acf_metrics = compute_temporal_autocorrelation(residuals)
+            print(f"Temporal autocorrelation (ACF-1): {acf_metrics['acf1_mean']:.3f} ± {acf_metrics['acf1_std']:.3f}")
+            print(f"Effective sample size: {acf_metrics['n_effective']:.1f} / {acf_metrics['n_raw']} "
+                  f"({acf_metrics['n_effective_ratio']*100:.1f}%)")
+
+        # Option 1: Bootstrap subsampling (naturally increases shrinkage)
+        if use_bootstrap and acf_metrics is not None:
+            n_effective = int(acf_metrics['n_effective'])
+            print(f"\nBootstrap subsampling with n_effective={n_effective} ({n_bootstraps} iterations)")
+
+            cov_estimates = []
+            shrinkage_estimates = []
+
+            for i in range(n_bootstraps):
+                # Random subsample
+                idx = np.random.choice(n_samples, size=n_effective, replace=False)
+                residuals_sub = residuals[idx]
+
+                # Estimate covariance on subsample
+                lw_sub = LedoitWolf(assume_centered=False)
+                lw_sub.fit(residuals_sub)
+                cov_estimates.append(lw_sub.covariance_)
+                shrinkage_estimates.append(lw_sub.shrinkage_)
+
+            # Average bootstrap estimates
+            cov_matrix = np.mean(cov_estimates, axis=0)
+            shrinkage_raw = np.mean(shrinkage_estimates)
+
+            print(f"Bootstrap shrinkage: {shrinkage_raw:.3f} ± {np.std(shrinkage_estimates):.3f}")
+
+        else:
+            # Standard Ledoit-Wolf (no bootstrap)
+            lw = LedoitWolf(assume_centered=False)
+            lw.fit(residuals)
+            cov_matrix = lw.covariance_
+            shrinkage_raw = lw.shrinkage_ if return_shrinkage else None
+
+        # Apply minimum shrinkage (fMRI-specific, Diedrichsen et al. 2016)
+        if shrinkage_raw is not None and min_shrinkage > 0:
+            shrinkage = max(shrinkage_raw, min_shrinkage)
+
+            if shrinkage > shrinkage_raw:
+                print(f"Ledoit-Wolf shrinkage: {shrinkage_raw:.3f} (raw)")
+                print(f"Applied minimum shrinkage: {shrinkage:.3f} (fMRI-adjusted)")
+
+                # Recompute covariance with adjusted shrinkage
+                # Σ_shrunk = (1-λ)*Σ_empirical + λ*μ*I
+                # where μ = trace(Σ_empirical)/p (Ledoit-Wolf target)
+                cov_empirical = np.cov(residuals, rowvar=False)
+
+                # Correct target: scaled identity (NOT diagonal!)
+                mu = np.trace(cov_empirical) / cov_empirical.shape[0]
+                target = mu * np.eye(cov_empirical.shape[0])
+
+                # Apply shrinkage
+                cov_matrix = (1 - shrinkage) * cov_empirical + shrinkage * target
+            else:
+                shrinkage = shrinkage_raw
+        else:
+            shrinkage = shrinkage_raw
 
         print(f"Ledoit-Wolf covariance estimated: shrinkage = {shrinkage:.3f}")
 
@@ -141,6 +311,129 @@ def whiten_amplitudes(amplitudes: np.ndarray,
         raise ValueError(f"Amplitudes must be 2D or 3D, got shape {amplitudes.shape}")
 
     return amplitudes_whitened, whitening_matrix
+
+
+def whiten_amplitudes_crossvalidated(amplitudes: np.ndarray,
+                                     residuals: np.ndarray,
+                                     n_folds: int = 2,
+                                     method: str = 'ledoit_wolf',
+                                     apply_acf_correction: bool = True,
+                                     min_shrinkage: float = 0.1,
+                                     epsilon: float = 1e-8,
+                                     verbose: bool = True) -> Tuple[np.ndarray, Dict]:
+    """
+    Cross-validated whitening to prevent double-dipping.
+
+    CRITICAL: Noise covariance must be estimated from INDEPENDENT data
+    (Walther et al. 2016, Diedrichsen et al. 2016, Schütt et al. 2021)
+
+    Strategy:
+    - n_folds=2: Split runs into halves (e.g., Run 1-3 vs 4-6)
+      * Train on half 1 → whiten half 2
+      * Train on half 2 → whiten half 1
+    - Prevents signal from being absorbed into noise estimate
+
+    Args:
+        amplitudes: (n_runs, n_colors, n_voxels) - Neural patterns
+        residuals: (n_samples, n_voxels) - GLM residuals (all runs)
+        n_folds: Number of cross-validation folds (default=2 for split-half)
+        method: Covariance estimation method
+        apply_acf_correction: Apply ACF-1 correction
+        min_shrinkage: Minimum shrinkage (safety net, default=0.1)
+        epsilon: Regularization for numerical stability
+        verbose: Print progress
+
+    Returns:
+        amplitudes_whitened: (n_runs, n_colors, n_voxels) - Cross-validated whitened
+        cv_info: Dict with fold-wise shrinkage and covariance matrices
+    """
+    n_runs, n_colors, n_voxels = amplitudes.shape
+    n_samples_total = residuals.shape[0]
+    samples_per_run = n_samples_total // n_runs
+
+    if n_samples_total % n_runs != 0:
+        print(f"Warning: n_samples ({n_samples_total}) not divisible by n_runs ({n_runs})")
+
+    # Initialize output
+    amplitudes_whitened = np.zeros_like(amplitudes)
+    cv_info = {
+        'shrinkages': [],
+        'noise_covs': [],
+        'fold_splits': []
+    }
+
+    # Split runs into folds
+    runs_per_fold = n_runs // n_folds
+    fold_assignments = np.array_split(np.arange(n_runs), n_folds)
+
+    if verbose:
+        print(f"\n{'='*60}")
+        print(f"Cross-Validated Whitening ({n_folds}-fold)")
+        print(f"{'='*60}")
+
+    for fold_idx in range(n_folds):
+        # Define train/test splits
+        test_runs = fold_assignments[fold_idx]
+        train_runs = np.concatenate([fold_assignments[i] for i in range(n_folds) if i != fold_idx])
+
+        if verbose:
+            print(f"\nFold {fold_idx+1}/{n_folds}:")
+            print(f"  Train runs: {train_runs + 1}")  # 1-indexed for display
+            print(f"  Test runs:  {test_runs + 1}")
+
+        # Extract train residuals
+        train_indices = []
+        for run in train_runs:
+            start_idx = run * samples_per_run
+            end_idx = start_idx + samples_per_run
+            train_indices.extend(range(start_idx, end_idx))
+
+        residuals_train = residuals[train_indices]
+
+        # Preprocess train residuals
+        residuals_train_preprocessed = preprocess_residuals_run_wise(
+            residuals_train,
+            n_runs=len(train_runs),
+            verbose=False
+        )
+
+        # Estimate noise covariance from TRAIN data only
+        noise_cov_fold, shrinkage_fold = estimate_noise_covariance(
+            residuals_train_preprocessed,
+            method=method,
+            apply_acf_correction=apply_acf_correction,
+            min_shrinkage=min_shrinkage
+        )
+
+        if verbose:
+            print(f"  Shrinkage: {shrinkage_fold:.3f}")
+
+        # Whiten TEST amplitudes only
+        amplitudes_test = amplitudes[test_runs]
+        amplitudes_test_whitened, whitening_matrix = whiten_amplitudes(
+            amplitudes_test,
+            noise_cov_fold,
+            epsilon
+        )
+
+        # Store whitened test data
+        amplitudes_whitened[test_runs] = amplitudes_test_whitened
+
+        # Save fold info
+        cv_info['shrinkages'].append(shrinkage_fold)
+        cv_info['noise_covs'].append(noise_cov_fold)
+        cv_info['fold_splits'].append({
+            'train_runs': train_runs.tolist(),
+            'test_runs': test_runs.tolist()
+        })
+
+    if verbose:
+        print(f"\n{'='*60}")
+        print(f"✓ Cross-validated whitening complete")
+        print(f"  Mean shrinkage: {np.mean(cv_info['shrinkages']):.3f} ± {np.std(cv_info['shrinkages']):.3f}")
+        print(f"{'='*60}")
+
+    return amplitudes_whitened, cv_info
 
 
 def evaluate_whitening_effect(amplitudes_raw: np.ndarray,
@@ -464,7 +757,8 @@ def compute_effective_snr(amplitudes: np.ndarray,
 def compare_snr_before_after_whitening(amplitudes_raw: np.ndarray,
                                        amplitudes_whitened: np.ndarray,
                                        residuals: Optional[np.ndarray],
-                                       noise_cov: np.ndarray) -> Dict:
+                                       noise_cov: np.ndarray,
+                                       whitening_matrix: Optional[np.ndarray] = None) -> Dict:
     """
     Comprehensive SNR comparison: raw vs whitened data.
 
@@ -494,10 +788,27 @@ def compare_snr_before_after_whitening(amplitudes_raw: np.ndarray,
     # Effective SNR
     effective_snr_raw = compute_effective_snr(amplitudes_raw, noise_cov)
 
-    # After whitening, noise should be decorrelated (identity covariance)
-    n_voxels = amplitudes_whitened.shape[2]
-    noise_cov_whitened = np.eye(n_voxels)  # Theoretical identity after whitening
-    effective_snr_whitened = compute_effective_snr(amplitudes_whitened, noise_cov_whitened)
+    # After whitening, compute ACTUAL noise covariance (not theoretical identity)
+    if whitening_matrix is not None and residuals is not None:
+        # Whiten residuals to get actual post-whitening noise structure
+        residuals_whitened = residuals @ whitening_matrix
+
+        # Compute actual whitened noise covariance
+        noise_cov_whitened_actual = np.cov(residuals_whitened, rowvar=False)
+
+        # Check how close to identity (validation)
+        n_voxels = noise_cov_whitened_actual.shape[0]
+        identity_deviation = np.abs(noise_cov_whitened_actual - np.eye(n_voxels)).mean()
+
+        print(f"Whitened noise covariance: Mean deviation from identity = {identity_deviation:.4f}")
+
+        effective_snr_whitened = compute_effective_snr(amplitudes_whitened, noise_cov_whitened_actual)
+    else:
+        # Fallback: Assume theoretical identity (old behavior)
+        n_voxels = amplitudes_whitened.shape[2]
+        noise_cov_whitened = np.eye(n_voxels)
+        effective_snr_whitened = compute_effective_snr(amplitudes_whitened, noise_cov_whitened)
+        print("Warning: Using theoretical identity for whitened noise covariance (no whitening_matrix provided)")
 
     comparison = {
         'pattern_snr': {

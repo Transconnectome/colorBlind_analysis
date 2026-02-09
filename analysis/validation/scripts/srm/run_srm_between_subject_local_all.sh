@@ -8,7 +8,7 @@ echo "SRM Between-Subject - All ROIs"
 echo "=========================================="
 
 # Configuration
-SCRIPT_DIR="/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/validation/scripts"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 OUTPUT_DIR="${SCRIPT_DIR}/results/srm_between_subject/local_$(date +%Y%m%d_%H%M%S)"
 
 # Create output directory

@@ -44,7 +44,9 @@ from scipy.spatial.distance import squareform, pdist
 from itertools import combinations
 
 # Add utils to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'utils'))
+SCRIPT_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(SCRIPT_DIR / 'utils'))
+sys.path.insert(0, str(SCRIPT_DIR.parent / 'utils'))  # For shared utils
 
 try:
     from srm_alignment import apply_srm_alignment, BRAINIAK_AVAILABLE

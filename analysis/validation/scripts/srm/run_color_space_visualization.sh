@@ -8,7 +8,7 @@ echo "Color Space Visualization"
 echo "=========================================="
 
 # Configuration
-SCRIPT_DIR="/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/validation/scripts"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Check if results directory is provided
 if [ $# -eq 0 ]; then

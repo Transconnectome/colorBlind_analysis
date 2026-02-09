@@ -45,14 +45,16 @@ from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 from sklearn.model_selection import LeaveOneOut
 
 # Add utils to path
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'utils'))
+SCRIPT_DIR = Path(__file__).resolve().parent
+sys.path.insert(0, str(SCRIPT_DIR / 'utils'))
+sys.path.insert(0, str(SCRIPT_DIR.parent / 'utils'))  # For shared utils
 
 try:
     from srm_alignment import apply_srm_alignment, srm_tune_features, BRAINIAK_AVAILABLE
     from rdm_visualization import plot_rdm_matrices
 except ImportError as e:
     print(f"Error importing utilities: {e}")
-    print("Make sure utils/srm_alignment.py and utils/rdm_visualization.py exist")
+    print("Make sure utils/srm_alignment.py and ../utils/rdm_visualization.py exist")
     sys.exit(1)
 
 # ============================================================================

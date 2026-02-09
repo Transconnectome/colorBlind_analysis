@@ -50,7 +50,7 @@ echo ""
 BASELINE_RESULTS_DIR="/scratch/connectome/haba6030/colorBlind/analysis/phase1_preprocess_decoding/results/baseline"
 
 # Script paths
-SCRIPT_DIR="/scratch/connectome/haba6030/colorBlind/analysis/validation/scripts"
+SCRIPT_DIR="/scratch/connectome/haba6030/colorBlind/analysis/validation/scripts/srm"
 EVAL_SCRIPT="${SCRIPT_DIR}/evaluate_srm_vs_procrustes.py"
 
 # Output directory

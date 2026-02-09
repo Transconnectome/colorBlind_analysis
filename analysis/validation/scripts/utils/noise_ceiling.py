@@ -127,6 +127,65 @@ def compute_split_half_reliability(amplitudes: np.ndarray,
     }
 
 
+def compute_split_half_odd_even(amplitudes: np.ndarray,
+                                 metric: str = 'correlation') -> Dict[str, float]:
+    """
+    Compute split-half reliability using odd/even run split (Diedrichsen et al. 2016).
+
+    This provides a deterministic alternative to random splits, with balanced
+    temporal distribution that minimizes session effects.
+
+    Args:
+        amplitudes: (n_runs, n_colors, n_voxels) - Neural response patterns
+        metric: Distance metric for RDM computation ('correlation', 'euclidean')
+
+    Returns:
+        results: Dict with keys:
+            - 'corrected': Spearman-Brown corrected reliability
+            - 'raw': Uncorrected correlation between odd and even RDMs
+            - 'rdm_odd': RDM from odd runs (for visualization)
+            - 'rdm_even': RDM from even runs (for visualization)
+            - 'n_odd': Number of odd runs
+            - 'n_even': Number of even runs
+    """
+    n_runs, n_colors, n_voxels = amplitudes.shape
+
+    if n_runs < 4:
+        raise ValueError(f"Need at least 4 runs for split-half, got {n_runs}")
+
+    # Split by index: odd (0,2,4) vs even (1,3,5)
+    odd_indices = np.arange(0, n_runs, 2)
+    even_indices = np.arange(1, n_runs, 2)
+
+    # Average patterns within each group
+    odd_patterns = amplitudes[odd_indices].mean(axis=0)  # (n_colors, n_voxels)
+    even_patterns = amplitudes[even_indices].mean(axis=0)
+
+    # Compute RDMs
+    rdm_odd = compute_rdm_from_amplitudes(odd_patterns, metric=metric)
+    rdm_even = compute_rdm_from_amplitudes(even_patterns, metric=metric)
+
+    # Vectorize upper triangle (excluding diagonal)
+    mask = np.triu(np.ones_like(rdm_odd, dtype=bool), k=1)
+    rdm_odd_vec = rdm_odd[mask]
+    rdm_even_vec = rdm_even[mask]
+
+    # Spearman correlation
+    r_half, _ = spearmanr(rdm_odd_vec, rdm_even_vec)
+
+    # Spearman-Brown correction: r_full = 2*r_half / (1 + r_half)
+    r_corrected = 2 * r_half / (1 + r_half) if r_half < 1 else 1.0
+
+    return {
+        'corrected': r_corrected,
+        'raw': r_half,
+        'rdm_odd': rdm_odd,
+        'rdm_even': rdm_even,
+        'n_odd': len(odd_indices),
+        'n_even': len(even_indices)
+    }
+
+
 def compute_loso_noise_ceiling(amplitudes_dict: Dict[str, np.ndarray],
                                metric: str = 'correlation') -> Dict[str, float]:
     """
@@ -327,6 +386,76 @@ def visualize_split_half_distribution(correlations: List[float],
     plt.close()
 
     print(f"Saved split-half distribution to {output_path}")
+
+
+def visualize_odd_even_rdms(rdm_odd: np.ndarray,
+                            rdm_even: np.ndarray,
+                            correlation: float,
+                            output_path: str,
+                            color_labels: List[str] = None,
+                            figsize: Tuple[int, int] = (14, 5)) -> None:
+    """
+    Visualize odd vs even RDMs side-by-side with scatter plot.
+
+    Args:
+        rdm_odd: (n_colors, n_colors) - RDM from odd runs
+        rdm_even: (n_colors, n_colors) - RDM from even runs
+        correlation: Spearman correlation between RDMs
+        output_path: Path to save figure
+        color_labels: Optional labels for colors (default: C1-C8)
+        figsize: Figure size (width, height)
+    """
+    if color_labels is None:
+        n_colors = rdm_odd.shape[0]
+        color_labels = [f'C{i+1}' for i in range(n_colors)]
+
+    fig, axes = plt.subplots(1, 3, figsize=figsize)
+
+    # 1. Odd RDM
+    im1 = axes[0].imshow(rdm_odd, cmap='viridis', aspect='auto')
+    axes[0].set_title('RDM: Odd Runs [0,2,4]', fontweight='bold')
+    axes[0].set_xticks(range(len(color_labels)))
+    axes[0].set_yticks(range(len(color_labels)))
+    axes[0].set_xticklabels(color_labels, rotation=45)
+    axes[0].set_yticklabels(color_labels)
+    plt.colorbar(im1, ax=axes[0], fraction=0.046)
+
+    # 2. Even RDM
+    im2 = axes[1].imshow(rdm_even, cmap='viridis', aspect='auto')
+    axes[1].set_title('RDM: Even Runs [1,3,5]', fontweight='bold')
+    axes[1].set_xticks(range(len(color_labels)))
+    axes[1].set_yticks(range(len(color_labels)))
+    axes[1].set_xticklabels(color_labels, rotation=45)
+    axes[1].set_yticklabels(color_labels)
+    plt.colorbar(im2, ax=axes[1], fraction=0.046)
+
+    # 3. Scatter plot
+    mask = np.triu(np.ones_like(rdm_odd, dtype=bool), k=1)
+    odd_vec = rdm_odd[mask]
+    even_vec = rdm_even[mask]
+
+    axes[2].scatter(odd_vec, even_vec, alpha=0.6, s=50, color='steelblue')
+
+    # Diagonal line (perfect agreement)
+    max_val = max(odd_vec.max(), even_vec.max())
+    min_val = min(odd_vec.min(), even_vec.min())
+    axes[2].plot([min_val, max_val], [min_val, max_val],
+                 'r--', linewidth=2, label='Perfect agreement')
+
+    axes[2].set_xlabel('RDM: Odd Runs', fontweight='bold')
+    axes[2].set_ylabel('RDM: Even Runs', fontweight='bold')
+    axes[2].set_title(f'Correlation: r = {correlation:.3f}', fontweight='bold')
+    axes[2].legend(loc='upper left')
+    axes[2].grid(alpha=0.3, linestyle=':')
+    axes[2].set_aspect('equal', adjustable='box')
+
+    plt.suptitle('Odd/Even Split-Half (Diedrichsen et al. 2016)',
+                 fontsize=14, fontweight='bold', y=1.02)
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=300, bbox_inches='tight')
+    plt.close()
+
+    print(f"Saved odd/even RDM visualization to {output_path}")
 
 
 def compute_noise_ceiling_comprehensive(amplitudes: np.ndarray,

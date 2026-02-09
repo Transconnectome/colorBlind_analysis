@@ -127,6 +127,130 @@ scp -r haba6030@node2:/scratch/connectome/haba6030/colorBlind/derivatives/whiten
 
 ---
 
+## Methodological Details
+
+### Shrinkage Regularization (λ = 0.25-0.40)
+
+**Why enforce minimum shrinkage = 0.25?**
+
+In fMRI data with thousands of voxels and limited timepoints, Ledoit-Wolf often underestimates shrinkage due to:
+
+1. **Temporal autocorrelation**: fMRI residuals are highly autocorrelated (TR=2s, hemodynamic lag)
+   - Raw n_samples counts each timepoint as independent
+   - Effective n_samples is much lower (typically 20-30% of raw count)
+   - This leads to overfitting without sufficient shrinkage
+
+2. **Empirical evidence** (Diedrichsen et al., 2016):
+   - Tested shrinkage values h ∈ [0, 1] on fMRI multi-voxel pattern data
+   - Found **h ≈ 0.4** maximizes RDM reliability
+   - Lower shrinkage (h < 0.2) leads to overfitting noise structure
+   - Higher shrinkage (h > 0.6) loses spatial correlation information
+
+3. **fMRI-specific constraints**:
+   - Typical: 200-400 timepoints, 50-500 voxels per ROI
+   - Even with n > p, covariance matrix is poorly conditioned
+   - Minimum λ = 0.25 prevents catastrophic overfitting
+
+**Implementation:**
+```python
+# Ledoit-Wolf estimate
+lw = LedoitWolf()
+lw.fit(residuals_centered)
+shrinkage_raw = lw.shrinkage_
+
+# Apply fMRI-specific minimum (Diedrichsen et al., 2016)
+shrinkage = max(shrinkage_raw, 0.25)
+```
+
+**Reference:**
+- Diedrichsen et al. (2016). Comparing representational geometries using whitened unbiased-distance-matrix similarity. *arXiv preprint arXiv:1602.02457*.
+
+### Temporal Autocorrelation Correction (ACF-1 Method)
+
+**Problem**: Treating temporally correlated residuals as independent inflates effective sample size.
+
+**Solution**: ACF-1 correction (Walther et al., 2016)
+```python
+# Compute lag-1 autocorrelation per voxel
+acf1 = mean(corr(residuals[t], residuals[t+1]))
+
+# Effective sample size
+n_effective = n_samples / (1 + 2 * sum(ACF))
+# Approximation for fMRI: n_effective ≈ n_samples / (1 + 4*acf1)
+```
+
+This increases shrinkage appropriately for fMRI data.
+
+### Cross-Validated Whitening (CRITICAL!)
+
+**Problem: Double-Dipping destroys signal**
+
+If you estimate Σ from the same data you whiten, signal variance gets absorbed into noise:
+```python
+# WRONG - Double Dipping:
+residuals = load_all_runs()  # Run 1-6
+noise_cov = estimate(residuals)  # ← Train on all
+whiten(amplitudes_all, noise_cov)  # ← Test on all (SAME data!)
+# Result: Pattern SNR -80~-90% 😱
+```
+
+**Solution: Independent train/test splits** (Walther et al. 2016, Diedrichsen et al. 2016, Schütt et al. 2021)
+
+```python
+# CORRECT - Cross-Validation:
+# Fold 1:
+noise_cov_1 = estimate(residuals_run_1_to_3)  # Train
+whiten(amplitudes_run_4_to_6, noise_cov_1)    # Test
+
+# Fold 2:
+noise_cov_2 = estimate(residuals_run_4_to_6)  # Train
+whiten(amplitudes_run_1_to_3, noise_cov_2)    # Test
+
+# Result: Pattern SNR preserved or improved ✓
+```
+
+**Implementation:**
+```python
+from whitening import whiten_amplitudes_crossvalidated
+
+amplitudes_whitened, cv_info = whiten_amplitudes_crossvalidated(
+    amplitudes_raw,      # (n_runs, n_colors, n_voxels)
+    residuals,           # (n_samples, n_voxels)
+    n_folds=2,           # 2-fold split-half
+    apply_acf_correction=True,
+    min_shrinkage=0.1    # Safety net (lower than before)
+)
+```
+
+**Why n_folds=2?**
+- 6 runs total → 3 runs per fold
+- More training data per fold = better Σ estimation
+- Fewer folds = less variance in whitening transformations
+
+### Residuals Preprocessing
+
+**Critical preprocessing before covariance estimation:**
+
+1. **Run-wise intercept removal** (MANDATORY):
+   ```python
+   # Remove mean per run, per voxel
+   for run in range(n_runs):
+       residuals[run] -= residuals[run].mean(axis=0)
+   ```
+   - GLM with `normalize='none'` leaves non-zero intercept
+   - Must center per run to remove drift/baseline shifts
+
+2. **High-pass filtering** (if still problematic):
+   ```python
+   # Cosine basis HPF (cutoff = 128s, typical for fMRI)
+   from nilearn.glm.first_level import make_first_level_design_matrix
+   # Apply to residuals before covariance estimation
+   ```
+   - Removes slow drifts not captured by GLM
+   - Only needed if shrinkage still < 0.2 after ACF correction
+
+---
+
 ## Validation Checks
 
 The test script includes automatic validation:

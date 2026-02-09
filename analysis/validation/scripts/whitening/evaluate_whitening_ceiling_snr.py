@@ -46,6 +46,8 @@ sys.path.insert(0, str(script_dir / 'utils'))
 
 from noise_ceiling import compute_split_half_reliability, visualize_split_half_distribution
 from whitening import (
+    preprocess_residuals_run_wise,
+    compute_temporal_autocorrelation,
     estimate_noise_covariance,
     whiten_amplitudes,
     compute_pattern_snr,
@@ -215,29 +217,40 @@ def evaluate_single_roi_whitening(subject, roi, verbose=True):
                 print(f"Residuals: {residuals.shape} (estimated from amplitudes)")
 
         # ========================================
-        # STEP 0: Center residuals (CRITICAL for normalize=none)
+        # STEP 0: Residuals Preprocessing (CRITICAL for normalize=none)
         # ========================================
-        # When normalize=none, residuals have non-zero mean which breaks
-        # covariance estimation. Center per voxel before whitening.
-        residuals_mean = residuals.mean(axis=0, keepdims=True)
-        residuals_centered = residuals - residuals_mean
+        # When normalize='none', residuals have non-zero baseline per run
+        # Must remove run-wise intercepts before covariance estimation
 
         if verbose:
-            print(f"\n--- Step 0: Residuals Centering ---")
+            print(f"\n--- Step 0: Residuals Preprocessing ---")
             print(f"Original residuals mean: {residuals.mean():.6f} (global)")
-            print(f"Original residuals mean per voxel: {residuals_mean.mean():.6f}")
-            print(f"Centered residuals mean: {residuals_centered.mean():.6f} (should be ~0)")
-            print(f"✓ Residuals centered for proper covariance estimation")
+
+        # Run-wise intercept removal
+        residuals_preprocessed = preprocess_residuals_run_wise(
+            residuals,
+            n_runs=n_runs,
+            verbose=verbose
+        )
+
+        if verbose:
+            print(f"✓ Residuals preprocessed for proper covariance estimation")
 
         # ========================================
-        # STEP 1: Estimate noise covariance
+        # STEP 1: Noise Covariance Estimation (with ACF correction)
         # ========================================
         if verbose:
             print(f"\n--- Step 1: Noise Covariance Estimation ---")
             if not use_residuals:
                 print(f"Note: Using amplitude variability as noise proxy")
 
-        noise_cov, shrinkage = estimate_noise_covariance(residuals_centered, method='ledoit_wolf')
+        # Estimate with ACF-1 correction and minimum shrinkage
+        noise_cov, shrinkage = estimate_noise_covariance(
+            residuals_preprocessed,
+            method='ledoit_wolf',
+            apply_acf_correction=True,
+            min_shrinkage=0.25  # Diedrichsen et al. 2016
+        )
 
         if verbose:
             print(f"Shrinkage parameter: {shrinkage:.3f}")
@@ -282,13 +295,14 @@ def evaluate_single_roi_whitening(subject, roi, verbose=True):
         if verbose:
             print(f"\n--- Step 4: SNR Analysis ---")
 
-        # Pass residuals only if from GLM (not from amplitudes fallback)
-        residuals_for_snr = residuals if use_residuals else None
+        # Pass preprocessed residuals and whitening matrix for accurate Effective SNR
+        residuals_for_snr = residuals_preprocessed if use_residuals else None
         snr_comparison = compare_snr_before_after_whitening(
             amplitudes_raw,
             amplitudes_whitened,
             residuals_for_snr,
-            noise_cov
+            noise_cov,
+            whitening_matrix=whitening_matrix
         )
 
         # ========================================

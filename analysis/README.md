@@ -36,26 +36,39 @@ All 10 subjects should have improved registration quality with MI-based coregist
 
 **Note**: The method3_header_mi dataset uses optimized MI-based registration that should provide more reliable alignment across all subjects compared to BBR-based methods.
 
-## Preprocessing: Baseline32
+## Preprocessing: C010 + Procrustes (Validated 2026-02-09)
 
-Parameters determined through systematic review (docs/SYSTEMATIC_PREPROCESSING_ANALYSIS.md):
+**IMPORTANT**: Use C010 + Procrustes pipeline (NOT Baseline32). Validation shows nearly doubled performance.
+
+Parameters validated through systematic comparison (analysis/validation/preprocess_Check/compare_with_previous.md):
 
 ```
-Smoothing:      0mm
-High-pass:      0.01 Hz
-Motion:         cosine (6 basis functions)
-CompCor:        None
-Drift:          none
-Standardize:    No
-PCA:            30 components
+Smoothing:          0mm
+High-pass:          None (0.0 Hz)
+Motion confounds:   None
+CompCor:            None
+1st-level drift:    None
+2nd-level drift:    Per-run linear + constant (12 regressors: 6×linear + 6×constant)
+Normalization:      None
+Procrustes:         ESSENTIAL (align runs 1-5 to run 0)
+PCA:                30 components
 ```
 
-Rationale:
-- No smoothing preserves voxel patterns for MVPA
-- High-pass 0.01 Hz removes drift while preserving task signal
-- Cosine motion correction avoids over-correction
-- No CompCor/standardization preserves task-related signal
-- PCA 30 for computational efficiency
+**Performance vs Baseline32**:
+- RDM Reliability: 0.154-0.256 → **0.487** (+90-216%)
+- Noise Ceiling: 0.434-0.609 → **0.613**
+- Ceiling Utilization: 41.3% → **79.4%** (+37.7 pp)
+
+**Rationale**:
+- No smoothing: Preserves voxel patterns for MVPA
+- No high-pass: Redundant with 2nd-level drift regressors
+- No motion/CompCor: Avoids over-correction and signal loss
+- **2nd-level drift** (KEY): Captures session-wide temporal trends across 6 runs
+- No normalization: Drift regressors handle baseline shifts
+- **Procrustes alignment**: Essential for geometric alignment (16.4× improvement)
+- PCA 30: Computational efficiency
+
+**Critical**: 2nd-level drift regressors are the primary factor enabling 79% ceiling utilization. Do NOT use only 1st-level drift for multi-run sessions.
 
 ## Pipeline Structure
 
@@ -70,12 +83,15 @@ Rationale:
 - ROI alignment check on functional data
 
 **0C. Baseline Analysis** (`fir_reconstruction_BH2009_system_clean.py`)
-- FIR-based HRF estimation (8 delays, 12s window)
+- **1st-level GLM**: FIR-based HRF estimation (8 delays, 12s window, NO drift)
 - Voxel selection: Top 50% by FIR R²
-- 2nd-level GLM with HRF + derivative
+- **2nd-level GLM**: HRF + derivative + **2nd-level drift** (12 regressors: 6×linear + 6×constant)
+  - **CRITICAL**: Per-run drift regressors capture session-wide temporal trends
+  - Design matrix: (n_scans_total, 28) = [8 HRF + 8 deriv + 12 drift]
+- **Procrustes alignment**: Align runs 1-5 to run 0 (ESSENTIAL step)
 - Forward encoding (6 half-wave rectified channels, 60° FWHM)
 - Leave-one-run-out cross-validation
-- Outputs: Classification accuracy, reconstruction error, channel amplitudes
+- Outputs: amplitudes_raw.npy, amplitudes_procrustes.npy, classification/reconstruction results
 
 ### Phase 1: RSA
 
@@ -153,16 +169,17 @@ derivatives/V3_Comprehensive/
 ├── sub-{01-10}/roi_pipeline/              # ROI masks
 │   ├── V1_mask_*.nii.gz
 │   └── ... (V2, V3, hV4)
-├── BH2009_method3_header_mi/baseline32_method3_header_mi/
+├── BH2009_method3_header_mi/C010_procrustes_method3_header_mi/
 │   ├── sub-01/{V1,V2,V3,hV4}/             # Subject-organized
-│   │   ├── amplitudes_z.npy               # (n_runs, 8, n_voxels)
+│   │   ├── amplitudes_raw.npy             # (n_runs, 8, n_voxels) - NO z-score
+│   │   ├── amplitudes_procrustes.npy      # After Procrustes alignment
 │   │   ├── classification_results.txt
 │   │   ├── reconstruction_results.txt
 │   │   ├── roi_mask.nii.gz
 │   │   └── figures/
 │   └── ... (sub-02 through sub-10)
 ├── phase1_results/                        # RDM/RSA
-│   └── rdm_analysis_{ROI}_baseline32_method3_header_mi/
+│   └── rdm_analysis_{ROI}_C010_procrustes_method3_header_mi/
 ├── phase2_procrustes/                     # Procrustes
 │   ├── alignment_quality_metrics.txt
 │   ├── hc_common_decoder_{ROI}.npz
@@ -205,6 +222,13 @@ results/group_level/phase2a_data/
 
 ## Version History
 
+**2026-02-09**: Preprocessing validation & C010 adoption (CURRENT)
+- **VALIDATED**: C010 + Procrustes pipeline replaces Baseline32
+- Performance: RDM reliability 0.487 (was 0.154-0.256), 79% ceiling utilization (was 41%)
+- Key change: 2nd-level drift regressors (12 per run) + mandatory Procrustes alignment
+- Evidence: analysis/validation/preprocess_Check/compare_with_previous.md
+- Rationale: Session-wide temporal drift requires 2nd-level modeling for multi-run fMRI
+
 **2026-01-22**: Dataset migration to method3_header_mi
 - Updated dataset from original_v3 to method3_header_mi
 - Improved registration: MI-based coregistration with header optimization
@@ -218,13 +242,14 @@ results/group_level/phase2a_data/
 - Simplified paths: All scripts in ROOT
 - Automatic dependencies: Phase 1-4 auto-starts
 
-**2026-01-05**: Initial planning
-- Config: Baseline32
+**2026-01-05**: Initial planning (DEPRECATED: Use C010 instead of Baseline32)
+- Config: Baseline32 (replaced by C010 on 2026-02-09)
 - Subjects: 10 (01-10)
 - ROIs: V1, V2, V3, hV4
 
 ## References
 
+- **Preprocessing Validation**: `analysis/validation/preprocess_Check/compare_with_previous.md` (C010 vs Baseline32)
 - Registration Comparison: `analysis/prep_trials/README.md`
 - Preprocessing Reports: `analysis/prep_trials/results/`
 - Systematic Review: `docs/SYSTEMATIC_PREPROCESSING_ANALYSIS.md`
@@ -233,4 +258,4 @@ results/group_level/phase2a_data/
 
 ---
 
-Last Updated: 2026-01-22
+Last Updated: 2026-02-09 (C010 + Procrustes validated)

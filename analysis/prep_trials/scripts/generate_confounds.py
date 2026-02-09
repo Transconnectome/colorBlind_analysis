@@ -4,9 +4,16 @@ Generate confounds file for custom preprocessing pipeline
 
 Creates fMRIPrep-compatible confounds file including:
 - Motion parameters (6 DOF from registration)
-- Tissue-based regressors (CSF, WM signals)
+- aCompCor (anatomical Component Correction) - 5 components each from CSF and WM
+- Tissue-based regressors (CSF, WM mean signals)
 - Framewise displacement
 - Cosine drift regressors
+
+Partial FOV handling:
+- Uses ICBM152_2009 tissue probability maps (MNI space)
+- Conservative thresholding (prob > 0.99) to avoid GM contamination
+- Erosion for additional safety
+- Validation and visualization of mask coverage
 
 Usage:
     python generate_confounds.py --subject 01 --run 1 --method method3_header_mi
@@ -18,8 +25,13 @@ import pandas as pd
 import nibabel as nib
 from pathlib import Path
 from scipy import signal as scipy_signal
-from nilearn import image
+from scipy.ndimage import binary_erosion
+from nilearn import image, datasets
 from nilearn.maskers import NiftiMasker
+from sklearn.decomposition import PCA
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 
 def extract_motion_from_lta(lta_file):
@@ -153,19 +165,174 @@ def compute_framewise_displacement(motion_df, radius=50):
     return fd
 
 
-def extract_tissue_signals(bold_4d, brain_mask, method='simple'):
+def load_tissue_probability_maps():
     """
-    Extract CSF and WM signals from BOLD data
+    Load ICBM152_2009 tissue probability maps (MNI space)
+
+    Returns:
+    --------
+    csf_prob_img, wm_prob_img, gm_prob_img : nib.Nifti1Image
+        Tissue probability maps in MNI152NLin2009cAsym space
+    """
+    print("  Fetching ICBM152_2009 tissue probability maps...")
+    try:
+        icbm = datasets.fetch_icbm152_2009()
+        csf_prob_img = nib.load(icbm['csf'])
+        wm_prob_img = nib.load(icbm['wm'])
+        gm_prob_img = nib.load(icbm['gm'])
+        print("  ✅ ICBM tissue maps loaded")
+        return csf_prob_img, wm_prob_img, gm_prob_img
+    except Exception as e:
+        print(f"  ⚠️  Failed to fetch ICBM maps: {e}")
+        return None, None, None
+
+
+def create_conservative_tissue_masks(bold_img, brain_mask, csf_prob_img, wm_prob_img,
+                                     csf_threshold=0.99, wm_threshold=0.99, erode_voxels=1):
+    """
+    Create conservative CSF and WM masks for aCompCor
+
+    Strategy to avoid GM contamination:
+    1. Very high probability threshold (>0.99) - only pure CSF/WM
+    2. Resample to BOLD space
+    3. Morphological erosion (1 voxel) to remove boundaries
+    4. Intersection with brain mask (partial FOV handling)
+
+    Parameters:
+    -----------
+    bold_img : nib.Nifti1Image
+        BOLD image (for target space)
+    brain_mask : nib.Nifti1Image
+        Brain mask (partial FOV)
+    csf_prob_img, wm_prob_img : nib.Nifti1Image
+        Tissue probability maps
+    csf_threshold, wm_threshold : float
+        Probability thresholds (default: 0.99 - very conservative)
+    erode_voxels : int
+        Number of erosion iterations (default: 1)
+
+    Returns:
+    --------
+    csf_mask, wm_mask : np.ndarray (3D boolean)
+        Conservative tissue masks
+    stats : dict
+        Coverage statistics for validation
+    """
+    print(f"  Creating conservative tissue masks (CSF prob > {csf_threshold}, WM prob > {wm_threshold})...")
+
+    # Resample tissue probability maps to BOLD space
+    csf_prob_resampled = image.resample_to_img(csf_prob_img, bold_img, interpolation='continuous')
+    wm_prob_resampled = image.resample_to_img(wm_prob_img, bold_img, interpolation='continuous')
+
+    csf_prob_data = csf_prob_resampled.get_fdata()
+    wm_prob_data = wm_prob_resampled.get_fdata()
+    brain_mask_data = brain_mask.get_fdata()
+
+    # Create high-probability masks
+    csf_mask = (csf_prob_data > csf_threshold) & (brain_mask_data > 0)
+    wm_mask = (wm_prob_data > wm_threshold) & (brain_mask_data > 0)
+
+    # Morphological erosion for additional safety
+    if erode_voxels > 0:
+        csf_mask = binary_erosion(csf_mask, iterations=erode_voxels)
+        wm_mask = binary_erosion(wm_mask, iterations=erode_voxels)
+
+    # Statistics for validation
+    n_brain_voxels = np.sum(brain_mask_data > 0)
+    n_csf_voxels = np.sum(csf_mask)
+    n_wm_voxels = np.sum(wm_mask)
+
+    # Convert numpy types to Python native types for JSON serialization
+    stats = {
+        'n_brain_voxels': int(n_brain_voxels),
+        'n_csf_voxels': int(n_csf_voxels),
+        'n_wm_voxels': int(n_wm_voxels),
+        'csf_coverage': float(n_csf_voxels / n_brain_voxels * 100),
+        'wm_coverage': float(n_wm_voxels / n_brain_voxels * 100)
+    }
+
+    print(f"  ✅ Tissue masks created:")
+    print(f"     CSF: {n_csf_voxels} voxels ({stats['csf_coverage']:.2f}% of brain)")
+    print(f"     WM:  {n_wm_voxels} voxels ({stats['wm_coverage']:.2f}% of brain)")
+
+    if n_csf_voxels == 0:
+        print(f"  ⚠️  WARNING: CSF mask is empty! Partial FOV may not include ventricles.")
+    if n_wm_voxels == 0:
+        print(f"  ⚠️  WARNING: WM mask is empty! Check tissue probability map alignment.")
+
+    return csf_mask, wm_mask, stats
+
+
+def compute_acompcor(bold_4d, tissue_mask, n_components=5, mask_name='tissue'):
+    """
+    Compute aCompCor components from tissue mask
 
     Parameters:
     -----------
     bold_4d : nib.Nifti1Image
         4D BOLD image
-    brain_mask : nib.Nifti1Image
-        Brain mask
-    method : str
-        'simple': Use intensity thresholds
-        'template': Use tissue probability maps (requires additional data)
+    tissue_mask : np.ndarray (3D boolean)
+        Tissue mask (CSF or WM)
+    n_components : int
+        Number of principal components to extract (default: 5)
+    mask_name : str
+        Mask name for logging (e.g., 'CSF', 'WM')
+
+    Returns:
+    --------
+    components : np.ndarray, shape (n_timepoints, n_components)
+        aCompCor components
+    variance_explained : np.ndarray, shape (n_components,)
+        Fraction of variance explained by each component
+    """
+    if not np.any(tissue_mask):
+        print(f"  ⚠️  {mask_name} mask is empty, returning zeros")
+        n_timepoints = bold_4d.shape[3]
+        return np.zeros((n_timepoints, n_components)), np.zeros(n_components)
+
+    # Extract voxel timeseries
+    bold_data = bold_4d.get_fdata()
+    n_timepoints = bold_data.shape[3]
+
+    # Reshape to (n_timepoints, n_voxels)
+    voxel_timeseries = bold_data[tissue_mask].T  # (n_timepoints, n_voxels)
+
+    # Standardize (mean-center and scale)
+    voxel_timeseries = (voxel_timeseries - voxel_timeseries.mean(axis=0)) / (voxel_timeseries.std(axis=0) + 1e-10)
+
+    # PCA to extract top components
+    actual_components = min(n_components, voxel_timeseries.shape[1], n_timepoints)
+
+    if actual_components < n_components:
+        print(f"  ⚠️  {mask_name}: Only {actual_components} components available (requested {n_components})")
+
+    pca = PCA(n_components=actual_components)
+    components = pca.fit_transform(voxel_timeseries)
+
+    # Pad with zeros if needed
+    if actual_components < n_components:
+        padding = np.zeros((n_timepoints, n_components - actual_components))
+        components = np.hstack([components, padding])
+        variance_explained = np.concatenate([pca.explained_variance_ratio_, np.zeros(n_components - actual_components)])
+    else:
+        variance_explained = pca.explained_variance_ratio_
+
+    print(f"  ✅ {mask_name} aCompCor: {actual_components} components extracted")
+    print(f"     Variance explained: {variance_explained[:3].sum()*100:.1f}% (top 3)")
+
+    return components, variance_explained
+
+
+def extract_tissue_signals(bold_4d, csf_mask, wm_mask):
+    """
+    Extract mean CSF and WM signals from BOLD data
+
+    Parameters:
+    -----------
+    bold_4d : nib.Nifti1Image
+        4D BOLD image
+    csf_mask, wm_mask : np.ndarray (3D boolean)
+        Tissue masks
 
     Returns:
     --------
@@ -173,25 +340,8 @@ def extract_tissue_signals(bold_4d, brain_mask, method='simple'):
         Mean signals in CSF and WM compartments
     """
     bold_data = bold_4d.get_fdata()
-    mask_data = brain_mask.get_fdata()
-
-    # Compute mean image
-    mean_img = bold_data.mean(axis=3)
-
-    # Simple tissue segmentation based on intensity
-    # This is a rough approximation - proper segmentation would use T1w
-
-    # CSF: darkest voxels in brain mask (bottom 10% intensity)
-    masked_mean = mean_img[mask_data > 0]
-    csf_threshold = np.percentile(masked_mean, 10)
-    csf_mask = (mean_img < csf_threshold) & (mask_data > 0)
-
-    # WM: brightest voxels (top 20% intensity)
-    wm_threshold = np.percentile(masked_mean, 80)
-    wm_mask = (mean_img > wm_threshold) & (mask_data > 0)
-
-    # Extract mean timeseries
     n_timepoints = bold_data.shape[3]
+
     csf_signal = np.zeros(n_timepoints)
     wm_signal = np.zeros(n_timepoints)
 
@@ -202,6 +352,149 @@ def extract_tissue_signals(bold_4d, brain_mask, method='simple'):
             wm_signal[t] = bold_data[wm_mask, t].mean()
 
     return csf_signal, wm_signal
+
+
+def visualize_tissue_masks(bold_img, brain_mask, csf_mask, wm_mask, output_path):
+    """
+    Visualize tissue masks overlaid on mean BOLD image
+
+    Creates axial slice montage showing:
+    - Brain mask (outline)
+    - CSF mask (blue)
+    - WM mask (red)
+
+    Parameters:
+    -----------
+    bold_img : nib.Nifti1Image
+        4D BOLD image
+    brain_mask : nib.Nifti1Image
+        Brain mask
+    csf_mask, wm_mask : np.ndarray (3D boolean)
+        Tissue masks
+    output_path : Path
+        Output PNG file path
+    """
+    print(f"  Creating mask visualization...")
+
+    # Compute mean BOLD
+    mean_bold = image.mean_img(bold_img)
+    mean_bold_data = mean_bold.get_fdata()
+    brain_mask_data = brain_mask.get_fdata()
+
+    # Find slices with brain coverage
+    brain_slices = np.where(brain_mask_data.sum(axis=(0, 1)) > 100)[0]
+
+    if len(brain_slices) == 0:
+        print(f"  ⚠️  No brain slices found, skipping visualization")
+        return
+
+    # Select 9 evenly spaced slices
+    slice_indices = brain_slices[np.linspace(0, len(brain_slices)-1, 9, dtype=int)]
+
+    # Create figure
+    fig, axes = plt.subplots(3, 3, figsize=(12, 12))
+    axes = axes.flatten()
+
+    for idx, slice_z in enumerate(slice_indices):
+        ax = axes[idx]
+
+        # Plot mean BOLD (grayscale)
+        ax.imshow(mean_bold_data[:, :, slice_z].T, cmap='gray', origin='lower', aspect='auto')
+
+        # Overlay CSF mask (blue)
+        csf_overlay = np.ma.masked_where(~csf_mask[:, :, slice_z], csf_mask[:, :, slice_z])
+        ax.imshow(csf_overlay.T, cmap='Blues', alpha=0.5, origin='lower', aspect='auto')
+
+        # Overlay WM mask (red)
+        wm_overlay = np.ma.masked_where(~wm_mask[:, :, slice_z], wm_mask[:, :, slice_z])
+        ax.imshow(wm_overlay.T, cmap='Reds', alpha=0.5, origin='lower', aspect='auto')
+
+        ax.set_title(f'Slice {slice_z}', fontsize=10)
+        ax.axis('off')
+
+    # Legend
+    from matplotlib.patches import Patch
+    legend_elements = [
+        Patch(facecolor='blue', alpha=0.5, label='CSF mask'),
+        Patch(facecolor='red', alpha=0.5, label='WM mask')
+    ]
+    fig.legend(handles=legend_elements, loc='upper right', fontsize=12)
+
+    plt.suptitle('Tissue Masks for aCompCor (Conservative: prob > 0.99, eroded 1 voxel)', fontsize=14, y=0.98)
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=150, bbox_inches='tight')
+    plt.close()
+
+    print(f"  ✅ Visualization saved: {output_path}")
+
+
+def validate_acompcor_quality(csf_components, wm_components, csf_variance, wm_variance, output_path):
+    """
+    Create quality control plots for aCompCor components
+
+    Plots:
+    1. Component timeseries (first 3 components)
+    2. Variance explained by each component
+
+    Parameters:
+    -----------
+    csf_components, wm_components : np.ndarray (n_timepoints, n_components)
+    csf_variance, wm_variance : np.ndarray (n_components,)
+    output_path : Path
+    """
+    print(f"  Creating aCompCor QC plots...")
+
+    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+
+    n_timepoints = csf_components.shape[0]
+    timepoints = np.arange(n_timepoints)
+
+    # CSF timeseries (top 3 components)
+    ax = axes[0, 0]
+    for i in range(min(3, csf_components.shape[1])):
+        ax.plot(timepoints, csf_components[:, i], label=f'CSF comp {i}', alpha=0.7)
+    ax.set_xlabel('Timepoint')
+    ax.set_ylabel('Signal (standardized)')
+    ax.set_title('CSF aCompCor Components (top 3)')
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+
+    # WM timeseries (top 3 components)
+    ax = axes[0, 1]
+    for i in range(min(3, wm_components.shape[1])):
+        ax.plot(timepoints, wm_components[:, i], label=f'WM comp {i}', alpha=0.7)
+    ax.set_xlabel('Timepoint')
+    ax.set_ylabel('Signal (standardized)')
+    ax.set_title('WM aCompCor Components (top 3)')
+    ax.legend()
+    ax.grid(True, alpha=0.3)
+
+    # CSF variance explained
+    ax = axes[1, 0]
+    n_comp_csf = len(csf_variance)
+    ax.bar(range(n_comp_csf), csf_variance * 100, color='steelblue', alpha=0.7)
+    ax.set_xlabel('Component')
+    ax.set_ylabel('Variance Explained (%)')
+    ax.set_title('CSF aCompCor Variance Explained')
+    ax.set_xticks(range(n_comp_csf))
+    ax.grid(True, alpha=0.3, axis='y')
+
+    # WM variance explained
+    ax = axes[1, 1]
+    n_comp_wm = len(wm_variance)
+    ax.bar(range(n_comp_wm), wm_variance * 100, color='coral', alpha=0.7)
+    ax.set_xlabel('Component')
+    ax.set_ylabel('Variance Explained (%)')
+    ax.set_title('WM aCompCor Variance Explained')
+    ax.set_xticks(range(n_comp_wm))
+    ax.grid(True, alpha=0.3, axis='y')
+
+    plt.suptitle('aCompCor Quality Control', fontsize=14, y=0.995)
+    plt.tight_layout()
+    plt.savefig(output_path, dpi=150, bbox_inches='tight')
+    plt.close()
+
+    print(f"  ✅ QC plots saved: {output_path}")
 
 
 def create_cosine_regressors(n_timepoints, tr, high_pass=0.01):
@@ -314,19 +607,59 @@ def generate_confounds(subject, run, method, tr=1.5, output_dir=None):
     print(f"  ✅ FD computed (mean: {fd.mean():.4f} mm)")
     print()
 
-    # 3. Tissue-based regressors
-    print("Extracting tissue signals...")
-    try:
-        csf_signal, wm_signal = extract_tissue_signals(bold_4d, brain_mask)
-        confounds['csf'] = csf_signal
-        confounds['white_matter'] = wm_signal
-        print(f"  ✅ CSF signal extracted")
-        print(f"  ✅ WM signal extracted")
-    except Exception as e:
-        print(f"  ⚠️  Could not extract tissue signals: {e}")
+    # 3. Tissue probability maps and masks
+    print("[1/2] Loading tissue probability maps...")
+    csf_prob_img, wm_prob_img, gm_prob_img = load_tissue_probability_maps()
+    print()
+
+    if csf_prob_img is None or wm_prob_img is None:
+        print("⚠️  WARNING: Could not load tissue probability maps")
+        print("  Skipping aCompCor, using zeros for tissue signals")
         confounds['csf'] = np.zeros(n_timepoints)
         confounds['white_matter'] = np.zeros(n_timepoints)
-    print()
+        # Skip aCompCor
+        for i in range(5):
+            confounds[f'a_comp_cor_{i:02d}'] = np.zeros(n_timepoints)
+        csf_mask = None
+        wm_mask = None
+        mask_stats = None
+    else:
+        print("[2/2] Creating conservative tissue masks for aCompCor...")
+        csf_mask, wm_mask, mask_stats = create_conservative_tissue_masks(
+            bold_4d, brain_mask, csf_prob_img, wm_prob_img,
+            csf_threshold=0.99, wm_threshold=0.99, erode_voxels=1
+        )
+        print()
+
+        # 3a. Mean tissue signals (for compatibility)
+        print("Computing mean tissue signals...")
+        csf_signal, wm_signal = extract_tissue_signals(bold_4d, csf_mask, wm_mask)
+        confounds['csf'] = csf_signal
+        confounds['white_matter'] = wm_signal
+        print(f"  ✅ CSF mean signal extracted")
+        print(f"  ✅ WM mean signal extracted")
+        print()
+
+        # 3b. aCompCor components (fMRIPrep standard: 5 components each)
+        print("Computing aCompCor components...")
+        csf_components, csf_variance = compute_acompcor(bold_4d, csf_mask, n_components=5, mask_name='CSF')
+        wm_components, wm_variance = compute_acompcor(bold_4d, wm_mask, n_components=5, mask_name='WM')
+
+        # Combine CSF and WM components (total 10 components)
+        # fMRIPrep convention: a_comp_cor_00 ~ a_comp_cor_09
+        for i in range(5):
+            confounds[f'a_comp_cor_{i:02d}'] = csf_components[:, i]  # CSF comp 0-4
+        for i in range(5):
+            confounds[f'a_comp_cor_{i+5:02d}'] = wm_components[:, i]  # WM comp 5-9
+        print()
+
+        # Store variance for QC plots
+        acompcor_variance = {
+            'csf': csf_variance,
+            'wm': wm_variance,
+            'csf_components': csf_components,
+            'wm_components': wm_components
+        }
 
     # 4. Global signal
     print("Computing global signal...")
@@ -366,13 +699,74 @@ def generate_confounds(subject, run, method, tr=1.5, output_dir=None):
     print(f"   Shape: {confounds_df.shape}")
     print()
 
+    # =========================================================================
+    # Quality Control: Visualizations
+    # =========================================================================
+    print("="*80)
+    print("Quality Control: Creating Visualizations")
+    print("="*80)
+    print()
+
+    qc_dir = output_dir.parent.parent / 'qc' / f'sub-{subject}'
+    qc_dir.mkdir(parents=True, exist_ok=True)
+
+    if csf_mask is not None and wm_mask is not None:
+        # 1. Tissue mask visualization
+        print("[1/2] Tissue mask visualization...")
+        mask_viz_file = qc_dir / f'sub-{subject}_run-{run}_tissue_masks.png'
+        visualize_tissue_masks(bold_4d, brain_mask, csf_mask, wm_mask, mask_viz_file)
+        print()
+
+        # 2. aCompCor quality control
+        print("[2/2] aCompCor quality control...")
+        acompcor_qc_file = qc_dir / f'sub-{subject}_run-{run}_acompcor_qc.png'
+        validate_acompcor_quality(
+            acompcor_variance['csf_components'],
+            acompcor_variance['wm_components'],
+            acompcor_variance['csf'],
+            acompcor_variance['wm'],
+            acompcor_qc_file
+        )
+        print()
+
+        # Save mask statistics
+        stats_file = qc_dir / f'sub-{subject}_run-{run}_mask_stats.json'
+        import json
+        with open(stats_file, 'w') as f:
+            json.dump(mask_stats, f, indent=2)
+        print(f"  ✅ Mask statistics saved: {stats_file}")
+        print()
+    else:
+        print("  ⚠️  Skipping visualizations (tissue masks not available)")
+        print()
+
     # Summary statistics
     print("="*80)
     print("Summary Statistics")
     print("="*80)
-    print(f"Mean FD: {fd.mean():.4f} mm")
-    print(f"Max FD: {fd.max():.4f} mm")
-    print(f"Timepoints with FD > 0.5mm: {np.sum(fd > 0.5)} ({np.sum(fd > 0.5)/len(fd)*100:.1f}%)")
+    print(f"Motion:")
+    print(f"  Mean FD: {fd.mean():.4f} mm")
+    print(f"  Max FD: {fd.max():.4f} mm")
+    print(f"  Timepoints with FD > 0.5mm: {np.sum(fd > 0.5)} ({np.sum(fd > 0.5)/len(fd)*100:.1f}%)")
+    print()
+
+    if mask_stats is not None:
+        print(f"Tissue Masks (Partial FOV check):")
+        print(f"  Brain voxels: {mask_stats['n_brain_voxels']}")
+        print(f"  CSF voxels: {mask_stats['n_csf_voxels']} ({mask_stats['csf_coverage']:.2f}%)")
+        print(f"  WM voxels: {mask_stats['n_wm_voxels']} ({mask_stats['wm_coverage']:.2f}%)")
+        print()
+
+        if mask_stats['n_csf_voxels'] == 0:
+            print(f"  ⚠️  WARNING: No CSF voxels found!")
+            print(f"     Partial FOV likely excludes ventricles.")
+            print(f"     CSF aCompCor components will be zero.")
+        if mask_stats['n_wm_voxels'] == 0:
+            print(f"  ⚠️  WARNING: No WM voxels found!")
+            print(f"     Check brain mask and tissue probability map alignment.")
+
+    print()
+    print(f"QC outputs: {qc_dir}/")
     print()
 
     return confounds_df, output_file

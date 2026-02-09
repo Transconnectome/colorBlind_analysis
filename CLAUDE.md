@@ -52,6 +52,12 @@ Therefore, for running a code to check it, follow this procedure:
 - **node2 (CPU)**: --qos=shared 필수
 - **node3 (GPU)**: --qos=shared_interactive 필수
 - **절대 금지**: --partition 지정 (서버가 자동 할당)
+- Set conda as below: 
+```
+source ~/.bashrc
+conda activate nilearn
+```
+- **Don't use seaborn package in server**
 
 **Guideline for Claude:**
 - When suggesting scp commands, ALWAYS combine files going to the same destination

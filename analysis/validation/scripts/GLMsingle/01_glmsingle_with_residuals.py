@@ -323,7 +323,7 @@ def main():
         betas, residuals, results_dict = run_glmsingle_with_residuals(
             design_list=design_list,
             data_list=data_list,
-            trial_labels_list=trial_labels_list,  # Pass labels to handle padding
+            trial_labels_list=trial_labels_list,  # Valid trials only (filtered by build_design_matrices)
             config=config,
             stimdur=STIMDUR,
             tr=TR,

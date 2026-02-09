@@ -96,13 +96,15 @@ def build_design_matrices(
         n_scans_per_run = int(np.ceil(max_onset / tr)) + 10  # +10 for safety buffer
         print(f"Auto-detected n_scans_per_run: {n_scans_per_run} (from max onset {max_onset:.1f}s)")
 
-    # For GLMsingle: Use COLOR-WISE design (not single-trial)
-    # Each color = 1 condition (8 total), not each trial separately
-    # This matches FIR reconstruction approach
+    # For GLMsingle: Use COLOR-WISE design (repeated conditions)
+    # Each color = 1 condition (8 total), repeated multiple times per run
+    # GLMsingle uses repetition info for GLMdenoise, Fracridge, and HRF optimization
+    # Output: GLMsingle automatically returns single-trial betas
     n_conditions = 8  # 8 colors
 
-    print(f"\nDesign matrix approach: COLOR-WISE (not single-trial)")
+    print(f"\nDesign matrix approach: COLOR-WISE (repeated conditions)")
     print(f"  Each run will have {n_conditions} conditions (one per color)")
+    print(f"  GLMsingle will use repetition info and return single-trial betas")
     print()
 
     # Build color-wise design matrices (one column per color)
@@ -120,7 +122,7 @@ def build_design_matrices(
         n_trials = len(events_df)
 
         # Initialize design matrix: (n_scans, n_conditions)
-        # n_conditions = 8 colors (NOT individual trials)
+        # n_conditions = 8 colors (repeated conditions)
         design_matrix = np.zeros((n_scans_per_run, n_conditions))
 
         # Count trials per color for this run
@@ -128,10 +130,24 @@ def build_design_matrices(
 
         # Extract trial labels (which color each trial belongs to)
         # This will be used to reorganize GLMsingle's single-trial betas
+        # IMPORTANT: Only include trials with valid onsets (within run range)
         color_ids = events_df['trial_type'].str.extract(r'color_(\d+)')[0].astype(int)
-        trial_labels = color_ids.values  # (n_trials,) with values 1-8
+        onsets = events_df['onset'].values
 
-        # Process each color (merge all trials of same color)
+        # Filter trials: only keep those with valid onsets
+        valid_trial_mask = []
+        for onset in onsets:
+            scan_idx = int(np.round(onset / tr))
+            valid_trial_mask.append(0 <= scan_idx < n_scans_per_run)
+
+        valid_trial_mask = np.array(valid_trial_mask)
+        trial_labels = color_ids.values[valid_trial_mask]  # Only valid trials
+
+        n_invalid = (~valid_trial_mask).sum()
+        if n_invalid > 0 and verbose:
+            print(f"  Run {run_idx + 1}: {n_invalid} trials excluded (onset outside range)")
+
+        # Process each color (merge all trials of same color into one column)
         for color_idx in range(1, n_conditions + 1):
             color_name = f'color_{color_idx}'
             color_events = events_df[events_df['trial_type'] == color_name]
@@ -143,14 +159,19 @@ def build_design_matrices(
                 scan_idx = int(np.round(onset / tr))
                 if 0 <= scan_idx < n_scans_per_run:
                     design_matrix[scan_idx, color_idx - 1] = 1
-                else:
-                    # Trial outside run range - skip silently
-                    if verbose:
-                        print(f"  Run {run_idx + 1}, {color_name}, onset {onset:.1f}s: "
-                              f"Outside range, skipping")
+                # else: Trial outside run range - already counted above
 
         design_list.append(design_matrix)
         trial_labels_list.append(trial_labels)
+
+        # Check for zero columns (colors with no valid trials)
+        zero_cols = np.where(design_matrix.sum(axis=0) == 0)[0]
+        if len(zero_cols) > 0:
+            zero_colors = [f'color_{i+1}' for i in zero_cols]
+            warnings.warn(
+                f"Run {run_idx + 1}: {len(zero_cols)} colors have no valid trials: {zero_colors}. "
+                f"All onsets were outside [0, {n_scans_per_run * tr:.1f}]s range."
+            )
 
         # Detailed logging
         onset_min = events_df['onset'].min()
@@ -211,7 +232,11 @@ def load_bold_data(
                     f"BOLD shape {bold_data.shape[:3]}"
                 )
             # Extract voxels: (n_scans, n_voxels)
-            bold_masked = bold_data[roi_mask].T
+            # Reshape bold_data to (n_voxels_total, n_scans)
+            n_scans = bold_data.shape[-1]
+            bold_reshaped = bold_data.reshape(-1, n_scans)  # (x*y*z, n_scans)
+            roi_mask_flat = roi_mask.flatten()
+            bold_masked = bold_reshaped[roi_mask_flat, :].T  # (n_scans, n_voxels_in_roi)
         else:
             # Flatten: (n_scans, n_voxels)
             bold_masked = bold_data.reshape(-1, bold_data.shape[-1]).T
@@ -312,7 +337,7 @@ def run_glmsingle_with_residuals(
     Args:
         design_list: List of (n_scans, n_trials) design matrices (may be padded)
         data_list: List of (n_scans, n_voxels) BOLD data
-        trial_labels_list: List of trial labels (1-8 for colors, 0 for padding)
+        trial_labels_list: List of trial labels (1-8 for colors) for valid trials only
         config: GLMsingle configuration dictionary
         stimdur: Stimulus duration in seconds (1.5s)
         tr: Repetition time in seconds (1.5s)
@@ -386,15 +411,57 @@ def run_glmsingle_with_residuals(
         )
 
     # Reshape betas based on GLMsingle output format
-    # GLMsingle returns: (n_voxels, total_trials) in trial time order
-    # We need: (n_runs, n_colors, n_voxels)
+    # NOTE: GLMsingle may return different formats depending on configuration:
+    #   - Single-trial betas: (n_voxels, total_trials) if each repetition is separate
+    #   - Condition betas: (n_voxels, n_conditions) if averaged across repetitions
 
     n_runs = len(design_list)
     n_voxels = data_list[0].shape[1]
 
+    # Debug: print actual shape and expected shapes
+    print(f"\n=== DEBUG: Beta shape analysis ===")
+    print(f"  GLMsingle output shape: {betas_single.shape}")
+    print(f"  Expected n_voxels: {n_voxels}")
+    print(f"  Expected total trials: {sum(len(labels) for labels in trial_labels_list)}")
+
+    # Handle GLMsingle output format
+    # GLMsingle returns 4D array: (n_voxels, 1, 1, n_trials)
+    # We need 2D array: (n_voxels, n_trials)
+    if betas_single.ndim == 4:
+        print(f"  Detected 4D output: {betas_single.shape}")
+        print(f"  Squeezing to 2D...")
+        betas_single = betas_single.squeeze()  # Remove singleton dimensions
+        print(f"  After squeeze: {betas_single.shape}")
+    elif betas_single.ndim == 3:
+        print(f"  Detected 3D output: {betas_single.shape}")
+        print(f"  Squeezing to 2D...")
+        betas_single = betas_single.squeeze()
+        print(f"  After squeeze: {betas_single.shape}")
+    elif betas_single.ndim != 2:
+        raise ValueError(
+            f"Unexpected betas dimensionality: {betas_single.ndim}D. "
+            f"Shape: {betas_single.shape}"
+        )
+
+    # Now betas_single should be 2D: (n_voxels, n_trials)
+    if betas_single.ndim != 2:
+        raise ValueError(
+            f"Failed to reshape betas to 2D. Current shape: {betas_single.shape}"
+        )
+
+    # Verify dimensions
+    actual_n_voxels, actual_n_trials = betas_single.shape
+    print(f"  Final 2D shape: ({actual_n_voxels}, {actual_n_trials})")
+    print(f"  Expected: ({n_voxels}, {sum(len(labels) for labels in trial_labels_list)})")
+
+    if actual_n_voxels != n_voxels:
+        warnings.warn(
+            f"Voxel count mismatch: betas has {actual_n_voxels} voxels, "
+            f"but data has {n_voxels} voxels"
+        )
+
     if verbose:
-        print(f"  Raw betas shape: {betas_single.shape}")
-        print(f"    Expected: ({n_voxels}, total_trials)")
+        print(f"  Betas ready for processing: {betas_single.shape}")
 
     # Transpose to (total_trials, n_voxels)
     betas_all_trials = betas_single.T  # (total_trials, n_voxels)
@@ -403,27 +470,21 @@ def run_glmsingle_with_residuals(
         print(f"  Transposed betas: {betas_all_trials.shape}")
 
     # Now reorganize into (n_runs, n_colors, n_voxels) using trial labels
-    # Get trial labels for each run
-    trial_labels_per_run = []
-    for events_df in events_list:
-        # Filter out blank trials, keep only color trials
-        color_events = events_df[events_df['trial_type'].str.startswith('color_')]
-
-        # Extract color IDs (1-8) from 'color_X'
-        color_ids = color_events['trial_type'].str.extract(r'color_(\d+)')[0].astype(int)
-        trial_labels_per_run.append(color_ids.values)
+    # Use the trial_labels_list that was passed in (already filtered for valid trials)
+    trial_labels_per_run = trial_labels_list
 
     # Verify total trial count
     total_trials = sum(len(labels) for labels in trial_labels_per_run)
     if verbose:
-        print(f"  Total color trials from events: {total_trials}")
+        print(f"  Total valid trials from trial_labels_list: {total_trials}")
         for run_idx, labels in enumerate(trial_labels_per_run):
             print(f"    Run {run_idx + 1}: {len(labels)} trials")
 
     if betas_all_trials.shape[0] != total_trials:
         raise ValueError(
             f"Trial count mismatch: GLMsingle returned {betas_all_trials.shape[0]} trials, "
-            f"but events files have {total_trials} color trials"
+            f"but trial_labels_list has {total_trials} valid trials. "
+            f"This may indicate an issue with design matrix construction."
         )
 
     # Reorganize into (n_runs, n_colors, n_voxels)

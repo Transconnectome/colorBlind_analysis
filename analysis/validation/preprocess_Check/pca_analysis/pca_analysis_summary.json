@@ -1,0 +1,81 @@
+{
+  "overall": {
+    "n_total": 40,
+    "raw": {
+      "rdm_mean": 0.004252452528314598,
+      "rdm_std": 0.19678695702932533,
+      "decoding_mean": 0.13072916666666665,
+      "decoding_std": 0.04947811233694501
+    },
+    "procrustes": {
+      "rdm_mean": 0.38103658793313966,
+      "rdm_std": 0.2779149644927259,
+      "decoding_mean": 0.5916666666666667,
+      "decoding_std": 0.12127644951917585
+    },
+    "pca_configs": {
+      "variance_95": {
+        "rdm_mean": -0.013929939792008749,
+        "rdm_std": 0.1698333634367712,
+        "decoding_mean": 0.125,
+        "decoding_std": 0.045740971428648816,
+        "n_components_mean": 30.95,
+        "n_components_std": 8.31418312437494,
+        "variance_explained_mean": 0.9528628148268297
+      },
+      "variance_90": {
+        "rdm_mean": -0.026313628899835795,
+        "rdm_std": 0.17490296015723097,
+        "decoding_mean": 0.13333333333333333,
+        "decoding_std": 0.039976399732999164,
+        "n_components_mean": 24.9,
+        "n_components_std": 8.050481750197092,
+        "variance_explained_mean": 0.9060703951166399
+      },
+      "variance_85": {
+        "rdm_mean": -0.012753147235905852,
+        "rdm_std": 0.184376360620918,
+        "decoding_mean": 0.1421875,
+        "decoding_std": 0.05034768272704222,
+        "n_components_mean": 20.475,
+        "n_components_std": 7.214613019812014,
+        "variance_explained_mean": 0.8579027659353902
+      },
+      "variance_80": {
+        "rdm_mean": -0.012657361795292824,
+        "rdm_std": 0.17108954001560153,
+        "decoding_mean": 0.13489583333333335,
+        "decoding_std": 0.047175261025764366,
+        "n_components_mean": 17.0,
+        "n_components_std": 6.425110993753438,
+        "variance_explained_mean": 0.8093277122800803
+      }
+    },
+    "best_pca": {
+      "rdm_mean": 0.042952928297755884,
+      "rdm_std": 0.1662286994451541,
+      "decoding_mean": 0.171875,
+      "decoding_std": 0.03677177533840951
+    }
+  },
+  "improvements": {
+    "pca_vs_raw": {
+      "rdm_mean": 0.03682651958514027,
+      "rdm_pct_positive": 70.0,
+      "decoding_mean": 0.04114583333333334,
+      "decoding_pct_positive": 70.0
+    },
+    "procrustes_vs_raw": {
+      "rdm_mean": 0.37678413540482497,
+      "rdm_pct_positive": 82.5,
+      "decoding_mean": 0.4609375,
+      "decoding_pct_positive": 100.0
+    },
+    "procrustes_vs_pca": {
+      "rdm_mean": 0.3399576158196847,
+      "rdm_pct_positive": 82.5,
+      "decoding_mean": 0.4197916666666666,
+      "decoding_pct_positive": 100.0
+    }
+  }
+}

@@ -1,0 +1,57 @@
+================================================================================
+PROCRUSTES DECODING VALIDATION - COMPLETED
+================================================================================
+
+Date: 2026-02-09
+Status: ✅ COMPLETE
+
+Summary:
+--------
+Analyzed C010 full dataset (40 subject-ROI pairs) to validate Procrustes 
+alignment effects on color decoding performance using LORO cross-validation.
+
+Key Results:
+------------
+✅ Universal Decoding Improvement: 100% of cases (40/40)
+✅ Large Effect Size: +0.461 accuracy (3.7× above chance)
+✅ RDM Improvement: 85% of cases (33/39)
+✅ Highly Significant: p < 1e-10 (both metrics)
+
+Group Comparison:
+-----------------
+• HC (n=28): Decoding = 0.552 ± 0.111
+• CVD (n=12): Decoding = 0.684 ± 0.094 (p=0.002)
+⚠️ CVD advantage unexpected, requires replication
+
+ROI Comparison:
+---------------
+• V4: Best performance (RDM=0.541, Decoding=0.613)
+• V3: Strong decoding (0.613) despite moderate RDM
+• V1-V2: Lower performance as expected
+
+Validation:
+-----------
+✓ Replicated on C010_with_residuals dataset (identical results)
+✓ Low Procrustes disparity (median=0.00232)
+✓ Consistent across all subjects, groups, ROIs
+
+Files Generated:
+----------------
+📊 Visualizations (3 PNG files in validation_analysis/)
+📈 Statistics (JSON summary + detailed CSV)
+📝 Documentation (DECODING_VALIDATION_SUMMARY.md)
+🔧 Analysis Scripts (2 Python scripts)
+
+Updated Documentation:
+----------------------
+✓ README.md - Added "Decoding Performance Validation" section
+✓ DECODING_VALIDATION_SUMMARY.md - Comprehensive 500+ line report
+
+Next Steps:
+-----------
+• Use validated C010 + Procrustes pipeline for all analyses
+• Expect ~0.59 decoding accuracy with current settings
+• V4 provides best performance for color decoding
+• Replicate CVD group effects with larger sample
+
+================================================================================

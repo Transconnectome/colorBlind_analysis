@@ -180,3 +180,14 @@ docs/OHBM_abstract/
 .venv/
 venv/
 ENV/
+
+# Result directories (contain subject data - ethical reasons)
+analysis/validation/preprocess_detrend_temp/full_dataset*/
+analysis/validation/preprocess_detrend_temp/*_results/
+analysis/validation/preprocess_detrend_temp/phase2_results/
+
+# Preprocessing validation raw data (do not commit)
+analysis/validation/preprocess_Check/full_dataset*/
+analysis/validation/preprocess_Check/*_results/
+analysis/validation/preprocess_Check/phase2_results/
+analysis/validation/preprocess_Check/visualization/

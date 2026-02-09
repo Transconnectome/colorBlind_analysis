@@ -1,0 +1,52 @@
+{
+  "best_condition": "P3",
+  "best_method_diff": 0.19667967586353532,
+  "target_achieved": false,
+  "improvement_vs_baseline": 34.756184124608794,
+  "n_pairs_below_target": 3,
+  "conditions": {
+    "P0": {
+      "description": "C010 baseline (no confounds)",
+      "method_diff_mean": 0.3014533610958205,
+      "method_diff_std": 0.30628304039246196,
+      "drift_magnitude": 0.0026648539826660475,
+      "rdm_reliability": -0.04022988505747126,
+      "n_pairs_below_target": 1
+    },
+    "P1": {
+      "description": "C010 + Motion/Tissue",
+      "method_diff_mean": 0.2709486421005437,
+      "method_diff_std": 0.25487944098729615,
+      "drift_magnitude": 0.00267793386755244,
+      "rdm_reliability": 0.14792008757525998,
+      "n_pairs_below_target": 1
+    },
+    "P2": {
+      "description": "C010 + WM aCompCor",
+      "method_diff_mean": 0.2907059948331422,
+      "method_diff_std": 0.34088885102048017,
+      "drift_magnitude": 0.002661354604837952,
+      "rdm_reliability": -0.13437328954570335,
+      "n_pairs_below_target": 0
+    },
+    "P3": {
+      "description": "C010 + Motion/Tissue + WM aCompCor",
+      "method_diff_mean": 0.19667967586353532,
+      "method_diff_std": 0.17337213492165401,
+      "drift_magnitude": 0.0026975785358029844,
+      "rdm_reliability": 0.08004926108374383,
+      "n_pairs_below_target": 1
+    }
+  },
+  "main_effects": {
+    "motion_tissue": {
+      "effect": 0.062265518982441814,
+      "p_value": 0.6357891342339166
+    },
+    "wm_acompcor": {
+      "effect": 0.04250816624984333,
+      "p_value": 0.7469999625666351
+    },
+    "interaction": -0.06352159997433007
+  }
+}

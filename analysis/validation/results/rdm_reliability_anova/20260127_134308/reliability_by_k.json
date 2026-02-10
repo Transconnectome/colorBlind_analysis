@@ -1,0 +1,1346 @@
+{
+  "baseline_timestamp": "only_Zscore_1stGLM",
+  "subjects": [
+    "sub-01",
+    "sub-02",
+    "sub-03",
+    "sub-04",
+    "sub-05",
+    "sub-06",
+    "sub-07",
+    "sub-08",
+    "sub-09",
+    "sub-10"
+  ],
+  "rois": [
+    "V1",
+    "V2",
+    "V3",
+    "hV4"
+  ],
+  "k_values": [
+    10,
+    30,
+    50,
+    100,
+    200
+  ],
+  "by_k": {
+    "10": {
+      "sub-01": {
+        "V1": {
+          "n_voxels_total": 284,
+          "n_voxels_selected": 10,
+          "mean_f_value": 2.4236564563823473,
+          "mean_correlation": 0.09538405400474366,
+          "std_correlation": 0.15423741609440605,
+          "median_correlation": 0.15544608648056923
+        },
+        "V2": {
+          "n_voxels_total": 201,
+          "n_voxels_selected": 10,
+          "mean_f_value": 1.3321466730472349,
+          "mean_correlation": -0.07370917715745301,
+          "std_correlation": 0.18928146061339793,
+          "median_correlation": -0.09852216748768472
+        },
+        "V3": {
+          "n_voxels_total": 53,
+          "n_voxels_selected": 10,
+          "mean_f_value": 1.7873289904893632,
+          "mean_correlation": -0.012260536398467432,
+          "std_correlation": 0.16470710377367695,
+          "median_correlation": -0.020251778872468526
+        },
+        "hV4": {
+          "n_voxels_total": 57,
+          "n_voxels_selected": 10,
+          "mean_f_value": 1.6377021487528034,
+          "mean_correlation": -0.019594964422550633,
+          "std_correlation": 0.1769030864466767,
+          "median_correlation": -0.002736726874657909
+        }
+      },
+      "sub-02": {
+        "V1": {
+          "n_voxels_total": 203,
+          "n_voxels_selected": 10,
+          "mean_f_value": 4.231354512351006,
+          "mean_correlation": 0.07969348659003833,
+          "std_correlation": 0.22885685908578027,
+          "median_correlation": 0.10509031198686371
+        },
+        "V2": {
+          "n_voxels_total": 168,
+          "n_voxels_selected": 10,
+          "mean_f_value": 1.6491405541167061,
+          "mean_correlation": 0.07334428024083198,
+          "std_correlation": 0.3324100758590526,
+          "median_correlation": -0.005473453749315818
+        },
+        "V3": {
+          "n_voxels_total": 86,
+          "n_voxels_selected": 10,
+          "mean_f_value": 1.1975125971259888,
+          "mean_correlation": 0.08279511038131729,
+          "std_correlation": 0.218425916625427,
+          "median_correlation": 0.07443897099069512
+        },
+        "hV4": {
+          "n_voxels_total": 67,
+          "n_voxels_selected": 10,
+          "mean_f_value": 1.613925870624951,
+          "mean_correlation": -0.07662835249042145,
+          "std_correlation": 0.2199753755697053,
+          "median_correlation": -0.10509031198686371
+        }
+      },
+      "sub-03": {
+        "V1": {
+          "n_voxels_total": 429,
+          "n_voxels_selected": 10,
+          "mean_f_value": 2.1580297564561723,
+          "mean_correlation": -0.01663929939792008,
+          "std_correlation": 0.19209746481981563,
+          "median_correlation": -0.03940886699507389
+        },
+        "V2": {
+          "n_voxels_total": 279,
+          "n_voxels_selected": 10,
+          "mean_f_value": 1.712945926531275,
+          "mean_correlation": 0.15800036489691663,
+          "std_correlation": 0.19747825346606765,
+          "median_correlation": 0.19047619047619047
+        },
+        "V3": {
+          "n_voxels_total": 58,
+          "n_voxels_selected": 10,
+          "mean_f_value": 3.579187635075086,
+          "mean_correlation": -0.022696588213829583,
+          "std_correlation": 0.1850514048391375,
+          "median_correlation": -0.0016420361247947454
+        },
+        "hV4": {
+          "n_voxels_total": 70,
+          "n_voxels_selected": 10,
+          "mean_f_value": 2.0633881773329334,
+          "mean_correlation": -0.038715562853493896,
+          "std_correlation": 0.20294844830861686,
+          "median_correlation": -0.0810071154898741
+        }
+      },
+      "sub-04": {
+        "V1": {
+          "n_voxels_total": 429,
+          "n_voxels_selected": 10,
+          "mean_f_value": 1.7421972900759877,
+          "mean_correlation": -0.08279511038131729,
+          "std_correlation": 0.23578102769476358,
+          "median_correlation": -0.16420361247947454
+        },
+        "V2": {
+          "n_voxels_total": 279,
+          "n_voxels_selected": 10,
+          "mean_f_value": 1.0052751577906862,
+          "mean_correlation": -0.07516876482393724,
+          "std_correlation": 0.19444942073415425,
+          "median_correlation": -0.11767925561029009
+        },
+        "V3": {
+          "n_voxels_total": 58,
+          "n_voxels_selected": 10,
+          "mean_f_value": 1.3252322605606732,
+          "mean_correlation": 0.0475095785440613,
+          "std_correlation": 0.1492234151257698,
+          "median_correlation": 0.008210180623973728
+        },
+        "hV4": {
+          "n_voxels_total": 70,
+          "n_voxels_selected": 10,
+          "mean_f_value": 0.7663095044843244,
+          "mean_correlation": -0.012442984856777957,
+          "std_correlation": 0.20786881873849444,
+          "median_correlation": -0.0810071154898741
+        }
+      },
+      "sub-05": {
+        "V1": {
+          "n_voxels_total": 429,
+          "n_voxels_selected": 10,
+          "mean_f_value": 1.3270400323075338,
+          "mean_correlation": -0.005473453749315821,
+          "std_correlation": 0.217215536654365,
+          "median_correlation": -0.0016420361247947454
+        },
+        "V2": {
+          "n_voxels_total": 279,
+          "n_voxels_selected": 10,
+          "mean_f_value": 2.33452993329037,
+          "mean_correlation": -0.04466338259441708,
+          "std_correlation": 0.21520450807097088,
+          "median_correlation": -0.06403940886699507
+        },
+        "V3": {
+          "n_voxels_total": 58,
+          "n_voxels_selected": 10,
+          "mean_f_value": 1.2312322415166244,
+          "mean_correlation": -0.039481846378398106,
+          "std_correlation": 0.24642879325428285,
+          "median_correlation": -0.08483853311439518
+        },
+        "hV4": {
+          "n_voxels_total": 70,
+          "n_voxels_selected": 10,
+          "mean_f_value": 1.748873525423004,
+          "mean_correlation": -0.03295019157088122,
+          "std_correlation": 0.25425294991725045,
+          "median_correlation": -0.11767925561029009
+        }
+      },
+      "sub-06": {
+        "V1": {
+          "n_voxels_total": 429,
+          "n_voxels_selected": 10,
+          "mean_f_value": 0.7691220705679237,
+          "mean_correlation": -0.08483853311439517,
+          "std_correlation": 0.21112788652594594,
+          "median_correlation": -0.10290093048713739
+        },
+        "V2": {
+          "n_voxels_total": 279,
+          "n_voxels_selected": 10,
+          "mean_f_value": 1.9560177167573933,
+          "mean_correlation": 0.004451742382776865,
+          "std_correlation": 0.2261419194166235,
+          "median_correlation": -0.01477832512315271
+        },
+        "V3": {
+          "n_voxels_total": 58,
+          "n_voxels_selected": 10,
+          "mean_f_value": 1.783354391602209,
+          "mean_correlation": 0.009049443532202146,
+          "std_correlation": 0.20487694925202848,
+          "median_correlation": 0.020251778872468526
+        },
+        "hV4": {
+          "n_voxels_total": 70,
+          "n_voxels_selected": 10,
+          "mean_f_value": 0.6746315843079581,
+          "mean_correlation": 0.052435686918445544,
+          "std_correlation": 0.19919964983395166,
+          "median_correlation": -0.08319649698960044
+        }
+      },
+      "sub-07": {
+        "V1": {
+          "n_voxels_total": 83,
+          "n_voxels_selected": 10,
+          "mean_f_value": 0.6786187058819093,
+          "mean_correlation": -0.013245758073344282,
+          "std_correlation": 0.26597555269854983,
+          "median_correlation": -0.047619047619047616
+        },
+        "V2": {
+          "n_voxels_total": 73,
+          "n_voxels_selected": 10,
+          "mean_f_value": 0.7231377564043872,
+          "mean_correlation": 0.020835613939062213,
+          "std_correlation": 0.18562702459490604,
+          "median_correlation": -0.030103995621236997
+        },
+        "V3": {
+          "n_voxels_total": 13,
+          "n_voxels_selected": 10,
+          "mean_f_value": 0.5133750198171724,
+          "mean_correlation": -0.011786170406860065,
+          "std_correlation": 0.204840876563944,
+          "median_correlation": -0.044882320744389706
+        },
+        "hV4": {
+          "n_voxels_total": 16,
+          "n_voxels_selected": 10,
+          "mean_f_value": 0.31556236093136936,
+          "mean_correlation": NaN,
+          "std_correlation": NaN,
+          "median_correlation": NaN
+        }
+      },
+      "sub-08": {
+        "V1": {
+          "n_voxels_total": 280,
+          "n_voxels_selected": 10,
+          "mean_f_value": 1.3822177355199794,
+          "mean_correlation": 0.03951833607006021,
+          "std_correlation": 0.20526840067369434,
+          "median_correlation": 0.00930487137383689
+        },
+        "V2": {
+          "n_voxels_total": 200,
+          "n_voxels_selected": 10,
+          "mean_f_value": 1.5320820636829517,
+          "mean_correlation": 0.06327312534209086,
+          "std_correlation": 0.24375929025942358,
+          "median_correlation": 0.06130268199233716
+        },
+        "V3": {
+          "n_voxels_total": 57,
+          "n_voxels_selected": 10,
+          "mean_f_value": 2.2138545171356556,
+          "mean_correlation": -0.07746761539864985,
+          "std_correlation": 0.1854848807534898,
+          "median_correlation": -0.03557744937055282
+        },
+        "hV4": {
+          "n_voxels_total": 70,
+          "n_voxels_selected": 10,
+          "mean_f_value": 1.4907489492540091,
+          "mean_correlation": -0.044772851669403396,
+          "std_correlation": 0.2210531124943328,
+          "median_correlation": -0.11439518336070059
+        }
+      },
+      "sub-09": {
+        "V1": {
+          "n_voxels_total": 346,
+          "n_voxels_selected": 10,
+          "mean_f_value": 1.4520434930470887,
+          "mean_correlation": -0.015289180806422194,
+          "std_correlation": 0.1983954434907394,
+          "median_correlation": 0.013136288998357963
+        },
+        "V2": {
+          "n_voxels_total": 249,
+          "n_voxels_selected": 10,
+          "mean_f_value": 1.3675044044840323,
+          "mean_correlation": -0.013172778690020061,
+          "std_correlation": 0.1902597997291419,
+          "median_correlation": -0.004378762999452655
+        },
+        "V3": {
+          "n_voxels_total": 58,
+          "n_voxels_selected": 10,
+          "mean_f_value": 1.8499081485678155,
+          "mean_correlation": 0.023462871738733806,
+          "std_correlation": 0.18376168869264708,
+          "median_correlation": -0.003284072249589491
+        },
+        "hV4": {
+          "n_voxels_total": 70,
+          "n_voxels_selected": 10,
+          "mean_f_value": 1.6419459106955894,
+          "mean_correlation": -0.0240831964969896,
+          "std_correlation": 0.18114943498971545,
+          "median_correlation": 0.022441160372194853
+        }
+      },
+      "sub-10": {
+        "V1": {
+          "n_voxels_total": 429,
+          "n_voxels_selected": 10,
+          "mean_f_value": 1.1025198618984775,
+          "mean_correlation": -0.0002919175332968593,
+          "std_correlation": 0.22472127357709445,
+          "median_correlation": 0.02736726874657909
+        },
+        "V2": {
+          "n_voxels_total": 279,
+          "n_voxels_selected": 10,
+          "mean_f_value": 0.9680784579686195,
+          "mean_correlation": 0.04229155263638022,
+          "std_correlation": 0.1938412103267853,
+          "median_correlation": 0.028461959496442254
+        },
+        "V3": {
+          "n_voxels_total": 58,
+          "n_voxels_selected": 10,
+          "mean_f_value": 1.0267067974809008,
+          "mean_correlation": 0.06301769750045612,
+          "std_correlation": 0.2172733517892151,
+          "median_correlation": 0.08757525998905309
+        },
+        "hV4": {
+          "n_voxels_total": 70,
+          "n_voxels_selected": 10,
+          "mean_f_value": 1.0330929137670606,
+          "mean_correlation": -0.023937237730341177,
+          "std_correlation": 0.19065451503096814,
+          "median_correlation": -0.034482758620689655
+        }
+      }
+    },
+    "30": {
+      "sub-01": {
+        "V1": {
+          "n_voxels_total": 284,
+          "n_voxels_selected": 30,
+          "mean_f_value": 2.236159252442407,
+          "mean_correlation": 0.14800218938149973,
+          "std_correlation": 0.1197353172783573,
+          "median_correlation": 0.10618500273672687
+        },
+        "V2": {
+          "n_voxels_total": 201,
+          "n_voxels_selected": 30,
+          "mean_f_value": 1.1030477990849072,
+          "mean_correlation": 0.05900383141762452,
+          "std_correlation": 0.15575519630998028,
+          "median_correlation": 0.010399562123700055
+        },
+        "V3": {
+          "n_voxels_total": 53,
+          "n_voxels_selected": 30,
+          "mean_f_value": 1.3805187031304518,
+          "mean_correlation": -0.021382959313993793,
+          "std_correlation": 0.18781646623689136,
+          "median_correlation": -0.0005473453749315818
+        },
+        "hV4": {
+          "n_voxels_total": 57,
+          "n_voxels_selected": 30,
+          "mean_f_value": 1.44557981325634,
+          "mean_correlation": -0.05433315088487501,
+          "std_correlation": 0.1893030693179087,
+          "median_correlation": -0.055281882868089764
+        }
+      },
+      "sub-02": {
+        "V1": {
+          "n_voxels_total": 203,
+          "n_voxels_selected": 30,
+          "mean_f_value": 3.3281985222184374,
+          "mean_correlation": 0.12245940521802592,
+          "std_correlation": 0.1675115881437887,
+          "median_correlation": 0.09523809523809523
+        },
+        "V2": {
+          "n_voxels_total": 168,
+          "n_voxels_selected": 30,
+          "mean_f_value": 1.4613463193195975,
+          "mean_correlation": -0.01693121693121693,
+          "std_correlation": 0.24869553033132735,
+          "median_correlation": -0.052545155993431854
+        },
+        "V3": {
+          "n_voxels_total": 86,
+          "n_voxels_selected": 30,
+          "mean_f_value": 1.156522868253118,
+          "mean_correlation": 0.012953840540047437,
+          "std_correlation": 0.2536869283021209,
+          "median_correlation": 0.02955665024630542
+        },
+        "hV4": {
+          "n_voxels_total": 67,
+          "n_voxels_selected": 30,
+          "mean_f_value": 1.3675707549122016,
+          "mean_correlation": -0.1105637657361795,
+          "std_correlation": 0.17902751601653108,
+          "median_correlation": -0.12972085385878487
+        }
+      },
+      "sub-03": {
+        "V1": {
+          "n_voxels_total": 429,
+          "n_voxels_selected": 30,
+          "mean_f_value": 2.027507663512346,
+          "mean_correlation": -0.02758620689655172,
+          "std_correlation": 0.17454165747396772,
+          "median_correlation": -0.08483853311439518
+        },
+        "V2": {
+          "n_voxels_total": 279,
+          "n_voxels_selected": 30,
+          "mean_f_value": 1.6380668509136,
+          "mean_correlation": 0.06637474913336981,
+          "std_correlation": 0.2650973562802807,
+          "median_correlation": 0.04707170224411604
+        },
+        "V3": {
+          "n_voxels_total": 58,
+          "n_voxels_selected": 30,
+          "mean_f_value": 3.285392425260859,
+          "mean_correlation": 0.00043787629994526125,
+          "std_correlation": 0.20104636639428772,
+          "median_correlation": -0.025177887246852767
+        },
+        "hV4": {
+          "n_voxels_total": 70,
+          "n_voxels_selected": 30,
+          "mean_f_value": 1.5570450788690517,
+          "mean_correlation": -0.04937055281882868,
+          "std_correlation": 0.17866403874207498,
+          "median_correlation": -0.10563765736179528
+        }
+      },
+      "sub-04": {
+        "V1": {
+          "n_voxels_total": 429,
+          "n_voxels_selected": 30,
+          "mean_f_value": 1.4627475058344281,
+          "mean_correlation": -0.0481299033023171,
+          "std_correlation": 0.16800816187567025,
+          "median_correlation": -0.051450465243568694
+        },
+        "V2": {
+          "n_voxels_total": 279,
+          "n_voxels_selected": 30,
+          "mean_f_value": 0.9135678557796356,
+          "mean_correlation": -0.04448093413610655,
+          "std_correlation": 0.17502281271390918,
+          "median_correlation": -0.02079912424740011
+        },
+        "V3": {
+          "n_voxels_total": 58,
+          "n_voxels_selected": 30,
+          "mean_f_value": 0.9543748812005615,
+          "mean_correlation": 0.024995438788542223,
+          "std_correlation": 0.2202052973691281,
+          "median_correlation": -0.02681992337164751
+        },
+        "hV4": {
+          "n_voxels_total": 70,
+          "n_voxels_selected": 30,
+          "mean_f_value": 0.7088399187366611,
+          "mean_correlation": -0.03601532567049808,
+          "std_correlation": 0.20747486769959328,
+          "median_correlation": -0.0996168582375479
+        }
+      },
+      "sub-05": {
+        "V1": {
+          "n_voxels_total": 429,
+          "n_voxels_selected": 30,
+          "mean_f_value": 1.172751479331034,
+          "mean_correlation": 0.008173690932311621,
+          "std_correlation": 0.21280034218880092,
+          "median_correlation": -0.06677613574165298
+        },
+        "V2": {
+          "n_voxels_total": 279,
+          "n_voxels_selected": 30,
+          "mean_f_value": 2.145311236466567,
+          "mean_correlation": 0.006531654807516873,
+          "std_correlation": 0.21595277762040005,
+          "median_correlation": 0.0010946907498631637
+        },
+        "V3": {
+          "n_voxels_total": 58,
+          "n_voxels_selected": 30,
+          "mean_f_value": 1.1455146918966173,
+          "mean_correlation": 0.07819740923189199,
+          "std_correlation": 0.15982633238755248,
+          "median_correlation": 0.12424740010946908
+        },
+        "hV4": {
+          "n_voxels_total": 70,
+          "n_voxels_selected": 30,
+          "mean_f_value": 1.4768623265022325,
+          "mean_correlation": 0.03886152162014231,
+          "std_correlation": 0.19354254227096312,
+          "median_correlation": 0.07006020799124248
+        }
+      },
+      "sub-06": {
+        "V1": {
+          "n_voxels_total": 429,
+          "n_voxels_selected": 30,
+          "mean_f_value": 0.7126456843434695,
+          "mean_correlation": -0.06279875935048349,
+          "std_correlation": 0.16651999525605454,
+          "median_correlation": -0.07662835249042146
+        },
+        "V2": {
+          "n_voxels_total": 279,
+          "n_voxels_selected": 30,
+          "mean_f_value": 1.8904010137686427,
+          "mean_correlation": -0.00043787629994526586,
+          "std_correlation": 0.2267119431275743,
+          "median_correlation": -0.013683634373289545
+        },
+        "V3": {
+          "n_voxels_total": 58,
+          "n_voxels_selected": 30,
+          "mean_f_value": 1.6813579882692926,
+          "mean_correlation": 0.012515964240102163,
+          "std_correlation": 0.24493811463581736,
+          "median_correlation": -0.056376573617952924
+        },
+        "hV4": {
+          "n_voxels_total": 70,
+          "n_voxels_selected": 30,
+          "mean_f_value": 0.6223275096224045,
+          "mean_correlation": -0.01930304688925379,
+          "std_correlation": 0.14520506001335887,
+          "median_correlation": -0.04926108374384236
+        }
+      },
+      "sub-07": {
+        "V1": {
+          "n_voxels_total": 83,
+          "n_voxels_selected": 30,
+          "mean_f_value": 0.6242875478920505,
+          "mean_correlation": -0.06517058930852035,
+          "std_correlation": 0.27972654434469557,
+          "median_correlation": -0.1724137931034483
+        },
+        "V2": {
+          "n_voxels_total": 73,
+          "n_voxels_selected": 30,
+          "mean_f_value": 0.5644637659620314,
+          "mean_correlation": 0.07305236270753511,
+          "std_correlation": 0.1958317681312904,
+          "median_correlation": 0.06075533661740558
+        }
+      },
+      "sub-08": {
+        "V1": {
+          "n_voxels_total": 280,
+          "n_voxels_selected": 30,
+          "mean_f_value": 1.1559831368203841,
+          "mean_correlation": 0.009085933223864263,
+          "std_correlation": 0.19203049616301773,
+          "median_correlation": 0.013683634373289545
+        },
+        "V2": {
+          "n_voxels_total": 200,
+          "n_voxels_selected": 30,
+          "mean_f_value": 1.242830193911668,
+          "mean_correlation": 0.0361247947454844,
+          "std_correlation": 0.23222224400319655,
+          "median_correlation": 0.0240831964969896
+        },
+        "V3": {
+          "n_voxels_total": 57,
+          "n_voxels_selected": 30,
+          "mean_f_value": 1.9936031004887502,
+          "mean_correlation": 0.04134282065316549,
+          "std_correlation": 0.166105012347999,
+          "median_correlation": 0.05309250136836344
+        },
+        "hV4": {
+          "n_voxels_total": 70,
+          "n_voxels_selected": 30,
+          "mean_f_value": 1.096479390533556,
+          "mean_correlation": -0.03911694946177704,
+          "std_correlation": 0.24713742722157336,
+          "median_correlation": -0.0071154898741105635
+        }
+      },
+      "sub-09": {
+        "V1": {
+          "n_voxels_total": 346,
+          "n_voxels_selected": 30,
+          "mean_f_value": 1.4108179497091966,
+          "mean_correlation": -0.04667031563583287,
+          "std_correlation": 0.22675592236521025,
+          "median_correlation": -0.042692939244663386
+        },
+        "V2": {
+          "n_voxels_total": 249,
+          "n_voxels_selected": 30,
+          "mean_f_value": 1.327062409544402,
+          "mean_correlation": -0.031125706987775947,
+          "std_correlation": 0.20341295050538366,
+          "median_correlation": -0.07991242474001095
+        },
+        "V3": {
+          "n_voxels_total": 58,
+          "n_voxels_selected": 30,
+          "mean_f_value": 1.6258491307350091,
+          "mean_correlation": 0.048275862068965524,
+          "std_correlation": 0.1740905024564841,
+          "median_correlation": 0.09852216748768472
+        },
+        "hV4": {
+          "n_voxels_total": 70,
+          "n_voxels_selected": 30,
+          "mean_f_value": 1.4662829479977115,
+          "mean_correlation": -0.027805145046524354,
+          "std_correlation": 0.17348300826456867,
+          "median_correlation": -0.02681992337164751
+        }
+      },
+      "sub-10": {
+        "V1": {
+          "n_voxels_total": 429,
+          "n_voxels_selected": 30,
+          "mean_f_value": 0.9760896556874276,
+          "mean_correlation": -0.09910600255427841,
+          "std_correlation": 0.19171308264275216,
+          "median_correlation": -0.07881773399014778
+        },
+        "V2": {
+          "n_voxels_total": 279,
+          "n_voxels_selected": 30,
+          "mean_f_value": 0.8801456013167552,
+          "mean_correlation": -0.06316365626710453,
+          "std_correlation": 0.17345083898229305,
+          "median_correlation": -0.1116584564860427
+        },
+        "V3": {
+          "n_voxels_total": 58,
+          "n_voxels_selected": 30,
+          "mean_f_value": 0.9435443503813012,
+          "mean_correlation": 0.0489326765188834,
+          "std_correlation": 0.24744045473666715,
+          "median_correlation": 0.03831417624521073
+        },
+        "hV4": {
+          "n_voxels_total": 70,
+          "n_voxels_selected": 30,
+          "mean_f_value": 0.9850965592357607,
+          "mean_correlation": -0.043203794927932866,
+          "std_correlation": 0.1731407761694495,
+          "median_correlation": -0.015873015873015872
+        }
+      }
+    },
+    "50": {
+      "sub-01": {
+        "V1": {
+          "n_voxels_total": 284,
+          "n_voxels_selected": 50,
+          "mean_f_value": 2.1489801728523066,
+          "mean_correlation": 0.17620872103630722,
+          "std_correlation": 0.14543993720884188,
+          "median_correlation": 0.15763546798029557
+        },
+        "V2": {
+          "n_voxels_total": 201,
+          "n_voxels_selected": 50,
+          "mean_f_value": 0.9866194264449826,
+          "mean_correlation": 0.12202152891808063,
+          "std_correlation": 0.13293056946493625,
+          "median_correlation": 0.13738368910782706
+        },
+        "V3": {
+          "n_voxels_total": 53,
+          "n_voxels_selected": 50,
+          "mean_f_value": 1.0456311630796833,
+          "mean_correlation": -0.022222222222222216,
+          "std_correlation": 0.22327056267616144,
+          "median_correlation": 0.0629447181171319
+        },
+        "hV4": {
+          "n_voxels_total": 57,
+          "n_voxels_selected": 50,
+          "mean_f_value": 1.3015117265397884,
+          "mean_correlation": -0.04586754241926656,
+          "std_correlation": 0.1943756109305629,
+          "median_correlation": -0.031746031746031744
+        }
+      },
+      "sub-02": {
+        "V1": {
+          "n_voxels_total": 203,
+          "n_voxels_selected": 50,
+          "mean_f_value": 2.9136947711629775,
+          "mean_correlation": 0.2429483670862981,
+          "std_correlation": 0.1349891547352729,
+          "median_correlation": 0.23645320197044337
+        },
+        "V2": {
+          "n_voxels_total": 168,
+          "n_voxels_selected": 50,
+          "mean_f_value": 1.391778126334594,
+          "mean_correlation": -0.04258347016967708,
+          "std_correlation": 0.2324159515211622,
+          "median_correlation": -0.04050355774493705
+        },
+        "V3": {
+          "n_voxels_total": 86,
+          "n_voxels_selected": 50,
+          "mean_f_value": 1.1255002229276283,
+          "mean_correlation": 0.04017515051997811,
+          "std_correlation": 0.26575398597738586,
+          "median_correlation": 0.02353585112205802
+        },
+        "hV4": {
+          "n_voxels_total": 67,
+          "n_voxels_selected": 50,
+          "mean_f_value": 1.2190833430857704,
+          "mean_correlation": -0.09053092501368364,
+          "std_correlation": 0.18268404421482262,
+          "median_correlation": -0.09578544061302681
+        }
+      },
+      "sub-03": {
+        "V1": {
+          "n_voxels_total": 429,
+          "n_voxels_selected": 50,
+          "mean_f_value": 1.9666560593860274,
+          "mean_correlation": -0.02930122240467068,
+          "std_correlation": 0.2004347441273534,
+          "median_correlation": -0.056376573617952924
+        },
+        "V2": {
+          "n_voxels_total": 279,
+          "n_voxels_selected": 50,
+          "mean_f_value": 1.6003736334868928,
+          "mean_correlation": 0.0655354862251414,
+          "std_correlation": 0.20880696077583036,
+          "median_correlation": 0.051450465243568694
+        },
+        "V3": {
+          "n_voxels_total": 58,
+          "n_voxels_selected": 50,
+          "mean_f_value": 3.1043804660773997,
+          "mean_correlation": -0.011056376573617946,
+          "std_correlation": 0.1796944341191314,
+          "median_correlation": 0.08045977011494251
+        },
+        "hV4": {
+          "n_voxels_total": 70,
+          "n_voxels_selected": 50,
+          "mean_f_value": 1.3532367890459627,
+          "mean_correlation": -0.05714285714285714,
+          "std_correlation": 0.20285359024510471,
+          "median_correlation": -0.08045977011494251
+        }
+      },
+      "sub-04": {
+        "V1": {
+          "n_voxels_total": 429,
+          "n_voxels_selected": 50,
+          "mean_f_value": 1.36719875188677,
+          "mean_correlation": -0.03371647509578544,
+          "std_correlation": 0.14760864626985845,
+          "median_correlation": -0.0049261083743842365
+        },
+        "V2": {
+          "n_voxels_total": 279,
+          "n_voxels_selected": 50,
+          "mean_f_value": 0.8827064769025549,
+          "mean_correlation": -0.05535486225141398,
+          "std_correlation": 0.1854685131203981,
+          "median_correlation": -0.03831417624521073
+        },
+        "V3": {
+          "n_voxels_total": 58,
+          "n_voxels_selected": 50,
+          "mean_f_value": 0.7392227997683004,
+          "mean_correlation": 0.01795292829775589,
+          "std_correlation": 0.13489122161516362,
+          "median_correlation": 0.06458675424192666
+        },
+        "hV4": {
+          "n_voxels_total": 70,
+          "n_voxels_selected": 50,
+          "mean_f_value": 0.6771019309859058,
+          "mean_correlation": -0.02441160372194855,
+          "std_correlation": 0.22838642366331047,
+          "median_correlation": -0.0120415982484948
+        }
+      },
+      "sub-05": {
+        "V1": {
+          "n_voxels_total": 429,
+          "n_voxels_selected": 50,
+          "mean_f_value": 1.1090291480986711,
+          "mean_correlation": 0.09396095602992155,
+          "std_correlation": 0.18568987071688461,
+          "median_correlation": 0.12096332785987958
+        },
+        "V2": {
+          "n_voxels_total": 279,
+          "n_voxels_selected": 50,
+          "mean_f_value": 2.043214747049488,
+          "mean_correlation": -0.03630724320379493,
+          "std_correlation": 0.21542359408347958,
+          "median_correlation": 0.005473453749315818
+        },
+        "V3": {
+          "n_voxels_total": 58,
+          "n_voxels_selected": 50,
+          "mean_f_value": 1.0783825659721369,
+          "mean_correlation": 0.07049808429118774,
+          "std_correlation": 0.20329934940050617,
+          "median_correlation": 0.09085933223864258
+        },
+        "hV4": {
+          "n_voxels_total": 70,
+          "n_voxels_selected": 50,
+          "mean_f_value": 1.3569437599337166,
+          "mean_correlation": 0.05739828498449187,
+          "std_correlation": 0.18801292294545927,
+          "median_correlation": 0.12260536398467432
+        }
+      },
+      "sub-06": {
+        "V1": {
+          "n_voxels_total": 429,
+          "n_voxels_selected": 50,
+          "mean_f_value": 0.689593053001146,
+          "mean_correlation": -0.03309615033752965,
+          "std_correlation": 0.13785917547715615,
+          "median_correlation": -0.06896551724137931
+        },
+        "V2": {
+          "n_voxels_total": 279,
+          "n_voxels_selected": 50,
+          "mean_f_value": 1.8621011985693352,
+          "mean_correlation": -0.03820470717022441,
+          "std_correlation": 0.19862119162913236,
+          "median_correlation": -0.01860974274767378
+        },
+        "V3": {
+          "n_voxels_total": 58,
+          "n_voxels_selected": 50,
+          "mean_f_value": 1.6169701301347885,
+          "mean_correlation": 0.049808429118773936,
+          "std_correlation": 0.17877956764161138,
+          "median_correlation": 0.06951286261631089
+        },
+        "hV4": {
+          "n_voxels_total": 70,
+          "n_voxels_selected": 50,
+          "mean_f_value": 0.5853717066265781,
+          "mean_correlation": -0.042911877394636005,
+          "std_correlation": 0.14727433032098372,
+          "median_correlation": -0.04980842911877395
+        }
+      },
+      "sub-07": {
+        "V1": {
+          "n_voxels_total": 83,
+          "n_voxels_selected": 50,
+          "mean_f_value": 0.5900821490719532,
+          "mean_correlation": -0.04608648056923919,
+          "std_correlation": 0.26404886394533716,
+          "median_correlation": -0.0782703886152162
+        },
+        "V2": {
+          "n_voxels_total": 73,
+          "n_voxels_selected": 50,
+          "mean_f_value": 0.5057473694599679,
+          "mean_correlation": 0.019449005655902202,
+          "std_correlation": 0.20702652875239763,
+          "median_correlation": 0.02463054187192118
+        }
+      },
+      "sub-08": {
+        "V1": {
+          "n_voxels_total": 280,
+          "n_voxels_selected": 50,
+          "mean_f_value": 1.0605402502685985,
+          "mean_correlation": 0.010654989965334791,
+          "std_correlation": 0.1954472022463438,
+          "median_correlation": -0.0240831964969896
+        },
+        "V2": {
+          "n_voxels_total": 200,
+          "n_voxels_selected": 50,
+          "mean_f_value": 1.1214367577684654,
+          "mean_correlation": 0.021930304688925376,
+          "std_correlation": 0.2269915877290614,
+          "median_correlation": 0.010946907498631636
+        },
+        "V3": {
+          "n_voxels_total": 57,
+          "n_voxels_selected": 50,
+          "mean_f_value": 1.82266645830828,
+          "mean_correlation": 0.059478197409231895,
+          "std_correlation": 0.16502533148940773,
+          "median_correlation": 0.09852216748768472
+        },
+        "hV4": {
+          "n_voxels_total": 70,
+          "n_voxels_selected": 50,
+          "mean_f_value": 0.9527836471590185,
+          "mean_correlation": -0.03831417624521072,
+          "std_correlation": 0.22862112464553455,
+          "median_correlation": -0.06513409961685823
+        }
+      },
+      "sub-09": {
+        "V1": {
+          "n_voxels_total": 346,
+          "n_voxels_selected": 50,
+          "mean_f_value": 1.390671051748233,
+          "mean_correlation": -0.044918810436051816,
+          "std_correlation": 0.21468087318207713,
+          "median_correlation": -0.05199781061850027
+        },
+        "V2": {
+          "n_voxels_total": 249,
+          "n_voxels_selected": 50,
+          "mean_f_value": 1.3079330879525555,
+          "mean_correlation": -0.061448640758985595,
+          "std_correlation": 0.16474355872641305,
+          "median_correlation": -0.03667214012041598
+        },
+        "V3": {
+          "n_voxels_total": 58,
+          "n_voxels_selected": 50,
+          "mean_f_value": 1.5082844297029396,
+          "mean_correlation": -0.05280058383506659,
+          "std_correlation": 0.1551735711191022,
+          "median_correlation": -0.09085933223864258
+        },
+        "hV4": {
+          "n_voxels_total": 70,
+          "n_voxels_selected": 50,
+          "mean_f_value": 1.3717661763120506,
+          "mean_correlation": -0.01682174785623062,
+          "std_correlation": 0.15188763037638695,
+          "median_correlation": -0.01860974274767378
+        }
+      },
+      "sub-10": {
+        "V1": {
+          "n_voxels_total": 429,
+          "n_voxels_selected": 50,
+          "mean_f_value": 0.9105342277750583,
+          "mean_correlation": -0.051669403393541334,
+          "std_correlation": 0.16882457361318232,
+          "median_correlation": -0.01532567049808429
+        },
+        "V2": {
+          "n_voxels_total": 279,
+          "n_voxels_selected": 50,
+          "mean_f_value": 0.8341758526103956,
+          "mean_correlation": -0.05980660463419084,
+          "std_correlation": 0.1855495403169994,
+          "median_correlation": -0.028461959496442254
+        },
+        "V3": {
+          "n_voxels_total": 58,
+          "n_voxels_selected": 50,
+          "mean_f_value": 0.8999132851855215,
+          "mean_correlation": 0.024302134646962237,
+          "std_correlation": 0.21793583740291125,
+          "median_correlation": 0.007662835249042145
+        },
+        "hV4": {
+          "n_voxels_total": 70,
+          "n_voxels_selected": 50,
+          "mean_f_value": 0.952844334012036,
+          "mean_correlation": 0.02817004196314541,
+          "std_correlation": 0.20856467171814347,
+          "median_correlation": 0.03503010399562124
+        }
+      }
+    },
+    "100": {
+      "sub-01": {
+        "V1": {
+          "n_voxels_total": 284,
+          "n_voxels_selected": 100,
+          "mean_f_value": 1.9997345044266053,
+          "mean_correlation": 0.093778507571611,
+          "std_correlation": 0.17508900884256517,
+          "median_correlation": 0.06403940886699507
+        },
+        "V2": {
+          "n_voxels_total": 201,
+          "n_voxels_selected": 100,
+          "mean_f_value": 0.8216997353252075,
+          "mean_correlation": 0.13150884875022806,
+          "std_correlation": 0.20980526853351533,
+          "median_correlation": 0.1346469622331691
+        }
+      },
+      "sub-02": {
+        "V1": {
+          "n_voxels_total": 203,
+          "n_voxels_selected": 100,
+          "mean_f_value": 2.3792929710569313,
+          "mean_correlation": 0.046560846560846546,
+          "std_correlation": 0.2308474539377296,
+          "median_correlation": 0.03940886699507389
+        },
+        "V2": {
+          "n_voxels_total": 168,
+          "n_voxels_selected": 100,
+          "mean_f_value": 1.2977318577853338,
+          "mean_correlation": -0.04871373836891077,
+          "std_correlation": 0.14754939703087022,
+          "median_correlation": -0.02463054187192118
+        }
+      },
+      "sub-03": {
+        "V1": {
+          "n_voxels_total": 429,
+          "n_voxels_selected": 100,
+          "mean_f_value": 1.8780490937160146,
+          "mean_correlation": 0.041561758803138095,
+          "std_correlation": 0.1805794581897284,
+          "median_correlation": 0.011494252873563218
+        },
+        "V2": {
+          "n_voxels_total": 279,
+          "n_voxels_selected": 100,
+          "mean_f_value": 1.5427881158939007,
+          "mean_correlation": 0.03214741835431491,
+          "std_correlation": 0.17913251605779387,
+          "median_correlation": -0.030103995621236997
+        }
+      },
+      "sub-04": {
+        "V1": {
+          "n_voxels_total": 429,
+          "n_voxels_selected": 100,
+          "mean_f_value": 1.2582961351243582,
+          "mean_correlation": -0.02645502645502645,
+          "std_correlation": 0.19954090197114382,
+          "median_correlation": -0.0180623973727422
+        },
+        "V2": {
+          "n_voxels_total": 279,
+          "n_voxels_selected": 100,
+          "mean_f_value": 0.8474158321928811,
+          "mean_correlation": -0.05995256340083926,
+          "std_correlation": 0.19825771943219017,
+          "median_correlation": -0.0722495894909688
+        }
+      },
+      "sub-05": {
+        "V1": {
+          "n_voxels_total": 429,
+          "n_voxels_selected": 100,
+          "mean_f_value": 1.0120274961539066,
+          "mean_correlation": 0.1316912972085386,
+          "std_correlation": 0.13723449464438764,
+          "median_correlation": 0.10673234811165844
+        },
+        "V2": {
+          "n_voxels_total": 279,
+          "n_voxels_selected": 100,
+          "mean_f_value": 1.8965759137221465,
+          "mean_correlation": 0.037110016420361255,
+          "std_correlation": 0.20192709606436005,
+          "median_correlation": 0.02353585112205802
+        }
+      },
+      "sub-06": {
+        "V1": {
+          "n_voxels_total": 429,
+          "n_voxels_selected": 100,
+          "mean_f_value": 0.6536330095673114,
+          "mean_correlation": -0.04196314541142127,
+          "std_correlation": 0.1388301619227557,
+          "median_correlation": -0.046524356869184456
+        },
+        "V2": {
+          "n_voxels_total": 279,
+          "n_voxels_selected": 100,
+          "mean_f_value": 1.820139457544206,
+          "mean_correlation": -0.0595511767925561,
+          "std_correlation": 0.20657631439311622,
+          "median_correlation": -0.0071154898741105635
+        }
+      },
+      "sub-07": {},
+      "sub-08": {
+        "V1": {
+          "n_voxels_total": 280,
+          "n_voxels_selected": 100,
+          "mean_f_value": 0.9312753450048251,
+          "mean_correlation": 0.017588031381134833,
+          "std_correlation": 0.19639718849638096,
+          "median_correlation": 0.027914614121510674
+        },
+        "V2": {
+          "n_voxels_total": 200,
+          "n_voxels_selected": 100,
+          "mean_f_value": 0.9643916965690614,
+          "mean_correlation": 0.04517423827768656,
+          "std_correlation": 0.24523995599084913,
+          "median_correlation": 0.0722495894909688
+        }
+      },
+      "sub-09": {
+        "V1": {
+          "n_voxels_total": 346,
+          "n_voxels_selected": 100,
+          "mean_f_value": 1.3639881406954228,
+          "mean_correlation": -0.03601532567049808,
+          "std_correlation": 0.17363019241866934,
+          "median_correlation": -0.03776683087027915
+        },
+        "V2": {
+          "n_voxels_total": 249,
+          "n_voxels_selected": 100,
+          "mean_f_value": 1.2804446610730245,
+          "mean_correlation": -0.02353585112205802,
+          "std_correlation": 0.09310171601835869,
+          "median_correlation": -0.01477832512315271
+        }
+      },
+      "sub-10": {
+        "V1": {
+          "n_voxels_total": 429,
+          "n_voxels_selected": 100,
+          "mean_f_value": 0.815091733883094,
+          "mean_correlation": -0.04112388250319284,
+          "std_correlation": 0.2283513592265508,
+          "median_correlation": -0.10071154898741107
+        },
+        "V2": {
+          "n_voxels_total": 279,
+          "n_voxels_selected": 100,
+          "mean_f_value": 0.7670505077003418,
+          "mean_correlation": -0.013209268381682165,
+          "std_correlation": 0.17216297474996284,
+          "median_correlation": -0.054187192118226604
+        }
+      }
+    },
+    "200": {
+      "sub-01": {
+        "V1": {
+          "n_voxels_total": 284,
+          "n_voxels_selected": 200,
+          "mean_f_value": 1.7741773794369105,
+          "mean_correlation": 0.045685093960956026,
+          "std_correlation": 0.1680334096527631,
+          "median_correlation": 0.03886152162014231
+        },
+        "V2": {
+          "n_voxels_total": 201,
+          "n_voxels_selected": 200,
+          "mean_f_value": 0.6082031648604607,
+          "mean_correlation": 0.165042875387703,
+          "std_correlation": 0.17169284420566938,
+          "median_correlation": 0.12753147235905857
+        }
+      },
+      "sub-02": {
+        "V1": {
+          "n_voxels_total": 203,
+          "n_voxels_selected": 200,
+          "mean_f_value": 1.7040967338093966,
+          "mean_correlation": -0.03521255245393176,
+          "std_correlation": 0.23607318982905187,
+          "median_correlation": -0.03776683087027915
+        }
+      },
+      "sub-03": {
+        "V1": {
+          "n_voxels_total": 429,
+          "n_voxels_selected": 200,
+          "mean_f_value": 1.7817456980435045,
+          "mean_correlation": 0.08659003831417623,
+          "std_correlation": 0.21317728207752346,
+          "median_correlation": 0.04324028461959496
+        },
+        "V2": {
+          "n_voxels_total": 279,
+          "n_voxels_selected": 200,
+          "mean_f_value": 1.4844754007904246,
+          "mean_correlation": 0.06798029556650245,
+          "std_correlation": 0.16102366351351796,
+          "median_correlation": 0.03940886699507389
+        }
+      },
+      "sub-04": {
+        "V1": {
+          "n_voxels_total": 429,
+          "n_voxels_selected": 200,
+          "mean_f_value": 1.1697706682729818,
+          "mean_correlation": -0.01886517058930852,
+          "std_correlation": 0.2204674617942047,
+          "median_correlation": -0.008210180623973728
+        },
+        "V2": {
+          "n_voxels_total": 279,
+          "n_voxels_selected": 200,
+          "mean_f_value": 0.8110721502450864,
+          "mean_correlation": -0.054844006568144504,
+          "std_correlation": 0.19562210482844647,
+          "median_correlation": -0.009852216748768473
+        }
+      },
+      "sub-05": {
+        "V1": {
+          "n_voxels_total": 429,
+          "n_voxels_selected": 200,
+          "mean_f_value": 0.9032774917693109,
+          "mean_correlation": 0.10695128626163107,
+          "std_correlation": 0.12895450838192749,
+          "median_correlation": 0.10454296661193212
+        },
+        "V2": {
+          "n_voxels_total": 279,
+          "n_voxels_selected": 200,
+          "mean_f_value": 1.7272453981821467,
+          "mean_correlation": 0.06918445539135193,
+          "std_correlation": 0.2231460078470017,
+          "median_correlation": 0.058018609742747675
+        }
+      },
+      "sub-06": {
+        "V1": {
+          "n_voxels_total": 429,
+          "n_voxels_selected": 200,
+          "mean_f_value": 0.6150905520275749,
+          "mean_correlation": -0.06538952745849295,
+          "std_correlation": 0.1389337331125606,
+          "median_correlation": -0.010399562123700055
+        },
+        "V2": {
+          "n_voxels_total": 279,
+          "n_voxels_selected": 200,
+          "mean_f_value": 1.7561326015743288,
+          "mean_correlation": -0.08794015690567414,
+          "std_correlation": 0.17817255457018283,
+          "median_correlation": -0.12370005473453749
+        }
+      },
+      "sub-07": {},
+      "sub-08": {
+        "V1": {
+          "n_voxels_total": 280,
+          "n_voxels_selected": 200,
+          "mean_f_value": 0.7935062783163925,
+          "mean_correlation": -0.015909505564677982,
+          "std_correlation": 0.1331968415557076,
+          "median_correlation": -0.012588943623426383
+        },
+        "V2": {
+          "n_voxels_total": 200,
+          "n_voxels_selected": 200,
+          "mean_f_value": 0.7727023273037369,
+          "mean_correlation": 0.026418536763364347,
+          "std_correlation": 0.2377907081313486,
+          "median_correlation": -0.05199781061850027
+        }
+      },
+      "sub-09": {
+        "V1": {
+          "n_voxels_total": 346,
+          "n_voxels_selected": 200,
+          "mean_f_value": 1.332587864409239,
+          "mean_correlation": 0.026017150155081173,
+          "std_correlation": 0.2249537434107255,
+          "median_correlation": 0.0021893814997263274
+        },
+        "V2": {
+          "n_voxels_total": 249,
+          "n_voxels_selected": 200,
+          "mean_f_value": 1.2421269904721002,
+          "mean_correlation": 0.00514504652435687,
+          "std_correlation": 0.1120742372403395,
+          "median_correlation": 0.016420361247947456
+        }
+      },
+      "sub-10": {
+        "V1": {
+          "n_voxels_total": 429,
+          "n_voxels_selected": 200,
+          "mean_f_value": 0.6987568388405176,
+          "mean_correlation": 0.033935413245758064,
+          "std_correlation": 0.17686693198118714,
+          "median_correlation": 0.013683634373289545
+        },
+        "V2": {
+          "n_voxels_total": 279,
+          "n_voxels_selected": 200,
+          "mean_f_value": 0.6866346394977821,
+          "mean_correlation": -0.007224958949096875,
+          "std_correlation": 0.16510658491953029,
+          "median_correlation": -0.02463054187192118
+        }
+      }
+    }
+  }
+}

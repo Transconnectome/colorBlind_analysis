@@ -1,0 +1,30 @@
+{
+  "subject": "sub-06",
+  "roi": "V1",
+  "k_requested": 200,
+  "k_actual": 200,
+  "n_voxels_original": 429,
+  "odd_pattern_shape": [
+    8,
+    200
+  ],
+  "even_pattern_shape": [
+    8,
+    200
+  ],
+  "validation": {
+    "shape_valid": true,
+    "n_voxels_selected": 200,
+    "f_values_positive": true,
+    "f_values_min": 0.46886377725980394,
+    "f_values_max": 0.9044747375350761,
+    "f_values_mean": 0.5481548081044384,
+    "no_nan": true
+  },
+  "f_value_statistics": {
+    "min": 0.46886377725980394,
+    "max": 0.9044747375350761,
+    "mean": 0.5481548081044384,
+    "median": 0.5249774030836145
+  }
+}

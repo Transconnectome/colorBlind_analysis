@@ -1,0 +1,24 @@
+{
+  "hrf_quality": {
+    "peak_time_sec": 4.5,
+    "peak_delay": 3,
+    "peak_sign": "+",
+    "peak_value": 341.4265559506114,
+    "has_undershoot": false,
+    "undershoot_min": null,
+    "hrf_range": 249.70442661704186,
+    "hrf_std": 88.04588778605962,
+    "is_flat": false,
+    "mean_correlation": 0.999652660843688,
+    "median_correlation": 0.9999002504542942,
+    "pct_corr_gt_0.8": 100.0,
+    "pct_corr_gt_0.6": 100.0,
+    "mean_rmse": 70.99568008645575,
+    "warnings": [
+      "\u26a0\ufe0f No undershoot (unusual for canonical HRF)"
+    ]
+  },
+  "design_matrix": {
+    "corr_hrf_deriv": 0.07093199117217755,
+    "condition_number_estimate": 1.0089504014714772,
+    "multicollinearity_warning": 

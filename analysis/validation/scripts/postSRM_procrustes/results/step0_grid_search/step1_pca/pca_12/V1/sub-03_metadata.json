@@ -1,0 +1,31 @@
+{
+  "subject": "sub-03",
+  "roi": "V1",
+  "n_components_requested": 12,
+  "n_components_actual": 12,
+  "n_voxels_original": 300,
+  "odd_pc_shape": [
+    8,
+    12
+  ],
+  "even_pc_shape": [
+    8,
+    12
+  ],
+  "validation": {
+    "shape_valid": true,
+    "n_components_actual": 12,
+    "cumulative_variance": 0.998985263322143,
+    "first_pc_variance": 0.9762782511164964,
+    "variance_threshold_80pct": true,
+    "no_negative_eigenvalues": true
+  },
+  "explained_variance_cumulative": 0.998985263322143,
+  "explained_variance_first5": [
+    0.9762782511164964,
+    0.01081598915779887,
+    0.00267046683665391,
+    0.00161047088089617,
+    0.0013503918067361254
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "subject": "sub-10",
+  "roi": "V1",
+  "method": "pca",
+  "use_shrinkage": true,
+  "shrinkage_lambda": 0.257174446912681,
+  "split_half_reliability": 0.05199781061850027,
+  "validation": {
+    "crossnobis": {
+      "symmetric": true,
+      "diagonal_near_zero": true,
+      "no_nan": true,
+      "no_inf": true,
+      "min_value": 0.0,
+      "max_value": 7.242897432583916
+    },
+    "odd": {
+      "symmetric": true,
+      "diagonal_near_zero": true,
+      "no_nan": true,
+      "no_inf": true,
+      "min_value": 0.0,
+      "max_value": 1.999490528524177
+    },
+    "even": {
+      "symmetric": true,
+      "diagonal_near_zero": true,
+      "no_nan": true,
+      "no_inf": true,
+      "min_value": 0.0,
+      "max_value": 1.9922281337099177
+    }
+  }
+}

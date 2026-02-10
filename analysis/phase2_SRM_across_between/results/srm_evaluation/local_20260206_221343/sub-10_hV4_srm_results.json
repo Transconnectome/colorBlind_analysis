@@ -1,0 +1,95 @@
+{
+  "subject": "sub-10",
+  "roi": "hV4",
+  "timestamp": "2026-02-06T22:15:45.783345",
+  "data_info": {
+    "n_runs": 6,
+    "n_colors": 8,
+    "n_voxels": 70,
+    "noise_ceiling": null
+  },
+  "procrustes_baseline": {
+    "rdm_correlation_mean": 0.03911694946177705,
+    "rdm_correlation_std": 0.1792122621659449,
+    "decoding_accuracy": 0.6666666666666666,
+    "ceiling_utilization_pct": null,
+    "n_features": 70
+  },
+  "srm_tuning": {
+    "k_range_tested": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      8
+    ],
+    "results_by_k": {
+      "2": {
+        "rdm_correlation_mean": -0.03976649454250581,
+        "rdm_correlation_std": 0.11147562245247072,
+        "decoding_accuracy": 0.2916666666666667,
+        "reconstruction_mse": 0.7914641329471828,
+        "variance_explained": 0.20853586705281724,
+        "n_features": 2
+      },
+      "3": {
+        "rdm_correlation_mean": 0.07352672869914251,
+        "rdm_correlation_std": 0.1851048005408749,
+        "decoding_accuracy": 0.5208333333333334,
+        "reconstruction_mse": 0.7835378281839209,
+        "variance_explained": 0.21646217181607907,
+        "n_features": 3
+      },
+      "4": {
+        "rdm_correlation_mean": 0.016128443714650612,
+        "rdm_correlation_std": 0.17151698448064337,
+        "decoding_accuracy": 0.5416666666666666,
+        "reconstruction_mse": 0.7863141020788987,
+        "variance_explained": 0.21368589792110126,
+        "n_features": 4
+      },
+      "5": {
+        "rdm_correlation_mean": 0.04958949096880132,
+        "rdm_correlation_std": 0.1599072799304599,
+        "decoding_accuracy": 0.7291666666666666,
+        "reconstruction_mse": 0.7862283500406845,
+        "variance_explained": 0.21377164995931552,
+        "n_features": 5
+      },
+      "6": {
+        "rdm_correlation_mean": 0.005218025907681083,
+        "rdm_correlation_std": 0.15320415950502064,
+        "decoding_accuracy": 0.7291666666666666,
+        "reconstruction_mse": 0.7851319739583427,
+        "variance_explained": 0.21486802604165733,
+        "n_features": 6
+      },
+      "8": {
+        "rdm_correlation_mean": 0.02211275314723591,
+        "rdm_correlation_std": 0.16445432420170364,
+        "decoding_accuracy": 0.7708333333333334,
+        "reconstruction_mse": 0.7836806179494864,
+        "variance_explained": 0.2163193820505136,
+        "n_features": 8
+      }
+    },
+    "best_k": 3,
+    "best_metrics": {
+      "rdm_correlation_mean": 0.07352672869914251,
+      "rdm_correlation_std": 0.1851048005408749,
+      "decoding_accuracy": 0.5208333333333334,
+      "reconstruction_mse": 0.7835378281839209,
+      "variance_explained": 0.21646217181607907,
+      "n_features": 3
+    }
+  },
+  "comparison": {
+    "rdm_improvement_absolute": 0.034409779237365455,
+    "rdm_improvement_pct": 87.96641791044777,
+    "accuracy_improvement_absolute": -0.14583333333333326,
+    "accuracy_improvement_pct": -21.87499999999999,
+    "srm_ceiling_utilization_pct": null,
+    "winner": "SRM"
+  }
+}

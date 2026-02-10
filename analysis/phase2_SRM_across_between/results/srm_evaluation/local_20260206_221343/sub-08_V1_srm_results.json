@@ -1,0 +1,95 @@
+{
+  "subject": "sub-08",
+  "roi": "V1",
+  "timestamp": "2026-02-06T22:15:12.063287",
+  "data_info": {
+    "n_runs": 6,
+    "n_colors": 8,
+    "n_voxels": 388,
+    "noise_ceiling": null
+  },
+  "procrustes_baseline": {
+    "rdm_correlation_mean": 0.4189381499726327,
+    "rdm_correlation_std": 0.2367896307185139,
+    "decoding_accuracy": 0.5625,
+    "ceiling_utilization_pct": null,
+    "n_features": 388
+  },
+  "srm_tuning": {
+    "k_range_tested": [
+      2,
+      3,
+      4,
+      5,
+      6,
+      8
+    ],
+    "results_by_k": {
+      "2": {
+        "rdm_correlation_mean": -0.0627396415916406,
+        "rdm_correlation_std": 0.11842959421289584,
+        "decoding_accuracy": 0.2916666666666667,
+        "reconstruction_mse": 0.8910659113920634,
+        "variance_explained": 0.10893408860793663,
+        "n_features": 2
+      },
+      "3": {
+        "rdm_correlation_mean": 0.09848567779602263,
+        "rdm_correlation_std": 0.13782173447560722,
+        "decoding_accuracy": 0.3541666666666667,
+        "reconstruction_mse": 0.8715890320123656,
+        "variance_explained": 0.1284109679876344,
+        "n_features": 3
+      },
+      "4": {
+        "rdm_correlation_mean": 0.10848385331143952,
+        "rdm_correlation_std": 0.16920453769604435,
+        "decoding_accuracy": 0.5208333333333334,
+        "reconstruction_mse": 0.8813425490083232,
+        "variance_explained": 0.1186574509916768,
+        "n_features": 4
+      },
+      "5": {
+        "rdm_correlation_mean": 0.07837985769020253,
+        "rdm_correlation_std": 0.18348479980544705,
+        "decoding_accuracy": 0.6875,
+        "reconstruction_mse": 0.8781815331438868,
+        "variance_explained": 0.1218184668561132,
+        "n_features": 5
+      },
+      "6": {
+        "rdm_correlation_mean": 0.02433862433862434,
+        "rdm_correlation_std": 0.16534733552508912,
+        "decoding_accuracy": 0.6666666666666666,
+        "reconstruction_mse": 0.8816828115495053,
+        "variance_explained": 0.11831718845049466,
+        "n_features": 6
+      },
+      "8": {
+        "rdm_correlation_mean": -0.03240284619594965,
+        "rdm_correlation_std": 0.21740111812618568,
+        "decoding_accuracy": 0.8125,
+        "reconstruction_mse": 0.8842119669812047,
+        "variance_explained": 0.11578803301879526,
+        "n_features": 8
+      }
+    },
+    "best_k": 4,
+    "best_metrics": {
+      "rdm_correlation_mean": 0.10848385331143952,
+      "rdm_correlation_std": 0.16920453769604435,
+      "decoding_accuracy": 0.5208333333333334,
+      "reconstruction_mse": 0.8813425490083232,
+      "variance_explained": 0.1186574509916768,
+      "n_features": 4
+    }
+  },
+  "comparison": {
+    "rdm_improvement_absolute": -0.3104542966611932,
+    "rdm_improvement_pct": -74.10504311471126,
+    "accuracy_improvement_absolute": -0.04166666666666663,
+    "accuracy_improvement_pct": -7.407407407407401,
+    "srm_ceiling_utilization_pct": null,
+    "winner": "Procrustes"
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "subject": "sub-03",
+  "roi": "V1",
+  "method": "anova",
+  "use_shrinkage": true,
+  "shrinkage_lambda": 0.17004199927901748,
+  "split_half_reliability": -0.10399562123700054,
+  "validation": {
+    "crossnobis": {
+      "symmetric": true,
+      "diagonal_near_zero": true,
+      "no_nan": true,
+      "no_inf": true,
+      "min_value": 0.0,
+      "max_value": 36.735474147285345
+    },
+    "odd": {
+      "symmetric": true,
+      "diagonal_near_zero": true,
+      "no_nan": true,
+      "no_inf": true,
+      "min_value": 0.0,
+      "max_value": 1.9824704743472648
+    },
+    "even": {
+      "symmetric": true,
+      "diagonal_near_zero": true,
+      "no_nan": true,
+      "no_inf": true,
+      "min_value": 0.0,
+      "max_value": 1.9873101595246838
+    }
+  }
+}

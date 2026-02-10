@@ -4,16 +4,30 @@ Once finished each part, write the directory of result files in this file.
 ## 0. Configuration
 
 **Dataset**: `method3_header_mi` (current standard)
-**Baseline timestamp**: `{TIMESTAMP}` (from phase1 results)
-**ROIs**: V1, V2, V3, hV4
+**Baseline results**: `analysis/phase1_preprocess_decoding/results/full_dataset_C010`
+  - Pipeline: P3 (HRF + time/dispersion derivatives)
+  - Confounds: C010 (6 motion + WM/CSF mean)
+  - Structure: `sub-{ID}/{ROI}/` with:
+    - `amplitudes_raw.npy` (n_runs, n_colors=8, n_voxels)
+    - `amplitudes_procrustes.npy` (aligned)
+    - `metrics.json` (RDM reliability, disparity, etc.)
+    - `config.json` (pipeline settings)
+
+**ROIs**: V1, V2, V3, V4
 **Subjects**:
   - HC (non-CVD): sub-01 ~ sub-07 (7명)
   - CVD: sub-08 ~ sub-10 (3명)
 
-**Base paths**:
+**Local paths**:
+```
+BASELINE_RESULTS=/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase1_preprocess_decoding/results/full_dataset_C010
+VALIDATION_OUT=/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/validation/results
+```
+
+**Server paths** (for running models):
 ```
 FMRIPREP_OUT=/storage/connectome/haba6030/fmriprep_out_method3_header_mi
-BASELINE_RESULTS=/scratch/connectome/haba6030/colorBlind/derivatives/BH2009_method3_header_mi/{TIMESTAMP}
+BASELINE_RESULTS=/scratch/connectome/haba6030/colorBlind/derivatives/phase1_results/full_dataset_C010
 VALIDATION_OUT=/scratch/connectome/haba6030/colorBlind/analysis/validation/results
 ```
 

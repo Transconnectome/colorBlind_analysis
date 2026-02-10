@@ -1,0 +1,83 @@
+
+================================================================================
+SRM Between-Subject Alignment (HC vs CVD)
+================================================================================
+ROI: V3
+SRM features: 3
+Output: /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/validation/scripts/results/srm_between_subject/test_local_20260206_220129
+Baseline results: /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase1_preprocess_decoding/results/baseline
+
+================================================================================
+Between-Subject SRM Evaluation: V3
+================================================================================
+SRM features: 3
+
+[1/6] Loading data...
+  HC subjects: ['sub-01', 'sub-02', 'sub-03', 'sub-04', 'sub-05', 'sub-06'] (n=6)
+  CVD subjects: ['sub-08', 'sub-09', 'sub-10'] (n=3)
+    Loaded sub-01: (6, 8, 52)
+    Loaded sub-02: (6, 8, 50)
+    Loaded sub-03: (6, 8, 57)
+    Loaded sub-04: (6, 8, 58)
+    Loaded sub-05: (6, 8, 58)
+    Loaded sub-06: (6, 8, 58)
+    Loaded sub-08: (6, 8, 58)
+    Loaded sub-09: (6, 8, 58)
+    Loaded sub-10: (6, 8, 58)
+
+  Total: 6 HC + 3 CVD
+
+[2/6] Learning HC shared response space...
+  Using Beta-based SRM: averaging 6 runs per subject
+  Subject voxel counts: min=50, max=58, mean=55.5
+  Input shape per subject: (52, 8) - 8 samples (colors)
+Fitting SRM with 3 features on 6 subjects...
+SRM alignment completed. Reduced from 50-58 voxels to 3 features.
+  HC shared space learned: 3 features
+  Original voxel counts: [52, 50, 57, 58, 58, 58]
+
+[3/6] Projecting CVD subjects to HC space...
+  Using Beta-based SRM: averaging 6 runs per subject
+  Subject voxel counts: min=50, max=58, mean=56.3
+  Input shape per subject: (52, 8) - 8 samples (colors)
+Fitting SRM with 3 features on 9 subjects...
+SRM alignment completed. Reduced from 50-58 voxels to 3 features.
+  CVD subjects projected to 3-D space
+
+[4/6] Computing Procrustes disparities...
+  HC reference shape: (8, 3)
+
+  HC-to-HC disparities: 0.73 ± 0.11 (n=6)
+  CVD-to-HC disparities: 1.15 ± 0.12 (n=3)
+  CVD-to-CVD disparities: 1.19 ± 0.08 (n=3)
+  HC vs CVD t-test: t=-4.688, p=0.0022
+  CVD-CVD vs CVD-HC t-test: t=0.385, p=0.7202
+
+[5/6] Computing inter-subject RDM similarities...
+
+  HC-HC RDM correlation: 0.195 ± 0.216 (n=15)
+  CVD-CVD RDM correlation: -0.098 ± 0.022 (n=3)
+  HC-CVD RDM correlation: 0.068 ± 0.174 (n=18)
+
+[6/6] Saving results...
+  Saved results to /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/validation/scripts/results/srm_between_subject/test_local_20260206_220129/V3_srm_between_subject_results.json
+  Saved aligned amplitudes to /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/validation/scripts/results/srm_between_subject/test_local_20260206_220129/V3_aligned_amplitudes.npy
+
+[Visualizations]
+  Saved disparity plot to /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/validation/scripts/results/srm_between_subject/test_local_20260206_220129/V3_hc_cvd_disparity_comparison.png
+  Saved RDM similarity matrix to /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/validation/scripts/results/srm_between_subject/test_local_20260206_220129/V3_rdm_similarity_matrix.png
+
+================================================================================
+Evaluation completed in 0.8s
+================================================================================
+
+=== SUMMARY ===
+ROI: V3, k=3
+HC disparity: 0.73 ± 0.11
+CVD disparity: 1.15 ± 0.12
+
+ERROR: 'statistical_test'
+Traceback (most recent call last):
+  File "/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/validation/scripts/evaluate_srm_between_subject.py", line 571, in main
+    print(f"Difference significant: {results['disparities']['statistical_test']['significant']}")
+KeyError: 'statistical_test'

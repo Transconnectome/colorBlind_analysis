@@ -1,0 +1,46 @@
+
+================================================================================
+SRM Between-Subject Alignment (HC vs CVD)
+================================================================================
+ROI: V1
+SRM features: 50
+Output: /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/validation/scripts/results/srm_between_subject/test_local_20260206_213204
+Baseline results: /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase1_preprocess_decoding/results/baseline
+
+================================================================================
+Between-Subject SRM Evaluation: V1
+================================================================================
+SRM features: 50
+
+[1/6] Loading data...
+  HC subjects: ['sub-01', 'sub-02', 'sub-03', 'sub-04', 'sub-05', 'sub-06'] (n=6)
+  CVD subjects: ['sub-08', 'sub-09', 'sub-10'] (n=3)
+    Loaded sub-01: (6, 8, 354)
+    Loaded sub-02: (6, 8, 378)
+    Loaded sub-03: (6, 8, 300)
+    Loaded sub-04: (6, 8, 397)
+    Loaded sub-05: (6, 8, 429)
+    Loaded sub-06: (6, 8, 429)
+    Loaded sub-08: (6, 8, 388)
+    Loaded sub-09: (6, 8, 387)
+    Loaded sub-10: (6, 8, 429)
+
+  Total: 6 HC + 3 CVD
+
+[2/6] Learning HC shared response space...
+  Using Beta-based SRM: averaging 6 runs per subject
+  Subject voxel counts: min=300, max=429, mean=381.2
+  Input shape per subject: (354, 8) - 8 samples (colors)
+Fitting SRM with 50 features on 6 subjects...
+
+ERROR: There are not enough samples to train the model with 50 features.
+Traceback (most recent call last):
+  File "/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/validation/scripts/evaluate_srm_between_subject.py", line 515, in main
+    results = evaluate_srm_between_subject(args.roi, args.n_features, output_dir)
+  File "/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/validation/scripts/evaluate_srm_between_subject.py", line 222, in evaluate_srm_between_subject
+    hc_srm_result = apply_srm_alignment(
+  File "/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/validation/scripts/utils/srm_alignment.py", line 102, in apply_srm_alignment
+    srm.fit(srm_input)
+  File "/opt/anaconda3/envs/srm/lib/python3.9/site-packages/brainiak/funcalign/srm.py", line 260, in fit
+    raise ValueError(
+ValueError: There are not enough samples to train the model with 50 features.

@@ -1,0 +1,19 @@
+{
+  "script": "01_tsnr_analysis.py",
+  "baseline_timestamp": "standard",
+  "subjects": [
+    "sub-01",
+    "sub-06",
+    "sub-09"
+  ],
+  "rois": [
+    "V1",
+    "V2",
+    "V3",
+    "hV4"
+  ],
+  "n_runs": 6,
+  "fmriprep_dir": "/storage/connectome/haba6030/fmriprep_out_method3_header_mi",
+  "baseline_dir": "/scratch/connectome/haba6030/colorBlind/analysis/phase1_preprocess_decoding/method3_header_mi/results/baseline_decoding/standard",
+  "timestamp": "20260128_125722"
+}

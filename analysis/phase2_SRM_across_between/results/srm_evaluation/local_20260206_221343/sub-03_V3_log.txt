@@ -1,0 +1,109 @@
+
+================================================================================
+SRM vs Procrustes Evaluation (Within-Subject, Beta-based)
+================================================================================
+Subject: sub-03
+ROI: V3
+Output: /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/validation/scripts/results/srm_evaluation/local_20260206_221343
+Baseline results: /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase1_preprocess_decoding/results/baseline
+
+================================================================================
+Evaluating sub-03 V3
+================================================================================
+
+[1/6] Loading data...
+  Z-scored amplitudes shape: (6, 8, 57)
+  Procrustes baseline shape: (6, 8, 57)
+  Noise ceiling: Not available (will compute from data if needed)
+
+[2/6] Computing Procrustes baseline metrics...
+  Procrustes RDM correlation: 0.558 ± 0.143
+  Procrustes decoding accuracy: 62.5%
+
+[3/6] SRM feature tuning (Beta-based: runs as 'subjects')...
+  Testing k values: [2, 3, 4, 5, 6, 8] (k ≤ 8 colors)
+  Using Beta-based SRM: 6 runs as 'subjects', averaged patterns
+
+  Testing k=2...
+  Using Beta-based SRM: averaging 1 runs per subject
+  Subject voxel counts: min=57, max=57, mean=57.0
+  Input shape per subject: (57, 8) - 8 samples (colors)
+Fitting SRM with 2 features on 6 subjects...
+SRM alignment completed. Reduced from 57-57 voxels to 2 features.
+    RDM correlation: 0.096
+    Decoding accuracy: 27.1%
+    Variance explained: 51.0%
+
+  Testing k=3...
+  Using Beta-based SRM: averaging 1 runs per subject
+  Subject voxel counts: min=57, max=57, mean=57.0
+  Input shape per subject: (57, 8) - 8 samples (colors)
+Fitting SRM with 3 features on 6 subjects...
+SRM alignment completed. Reduced from 57-57 voxels to 3 features.
+    RDM correlation: 0.127
+    Decoding accuracy: 35.4%
+    Variance explained: 44.4%
+
+  Testing k=4...
+  Using Beta-based SRM: averaging 1 runs per subject
+  Subject voxel counts: min=57, max=57, mean=57.0
+  Input shape per subject: (57, 8) - 8 samples (colors)
+Fitting SRM with 4 features on 6 subjects...
+SRM alignment completed. Reduced from 57-57 voxels to 4 features.
+    RDM correlation: 0.051
+    Decoding accuracy: 43.8%
+    Variance explained: 46.5%
+
+  Testing k=5...
+  Using Beta-based SRM: averaging 1 runs per subject
+  Subject voxel counts: min=57, max=57, mean=57.0
+  Input shape per subject: (57, 8) - 8 samples (colors)
+Fitting SRM with 5 features on 6 subjects...
+SRM alignment completed. Reduced from 57-57 voxels to 5 features.
+    RDM correlation: 0.065
+    Decoding accuracy: 62.5%
+    Variance explained: 49.4%
+
+  Testing k=6...
+  Using Beta-based SRM: averaging 1 runs per subject
+  Subject voxel counts: min=57, max=57, mean=57.0
+  Input shape per subject: (57, 8) - 8 samples (colors)
+Fitting SRM with 6 features on 6 subjects...
+SRM alignment completed. Reduced from 57-57 voxels to 6 features.
+    RDM correlation: 0.070
+    Decoding accuracy: 72.9%
+    Variance explained: 44.2%
+
+  Testing k=8...
+  Using Beta-based SRM: averaging 1 runs per subject
+  Subject voxel counts: min=57, max=57, mean=57.0
+  Input shape per subject: (57, 8) - 8 samples (colors)
+Fitting SRM with 8 features on 6 subjects...
+SRM alignment completed. Reduced from 57-57 voxels to 8 features.
+    RDM correlation: 0.079
+    Decoding accuracy: 89.6%
+    Variance explained: 38.9%
+
+[4/6] Selecting best k...
+  Best k: 3
+  Best RDM correlation: 0.127
+
+[5/6] Computing improvements over Procrustes...
+  RDM correlation improvement: -0.431 (-77.3%)
+  Decoding accuracy improvement: -0.271 (-43.3%)
+  Winner: Procrustes
+
+[6/6] Saving results...
+  Saved results to /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/validation/scripts/results/srm_evaluation/local_20260206_221343/sub-03_V3_srm_results.json
+  Saved tuning plot to /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/validation/scripts/results/srm_evaluation/local_20260206_221343/sub-03_V3_srm_k_tuning.png
+
+================================================================================
+Evaluation completed in 0.5s
+================================================================================
+
+=== SUMMARY ===
+Subject: sub-03 V3
+Procrustes: r=0.558, acc=62.5%
+SRM (k=3): r=0.127, acc=35.4%
+Improvement: -77.3% RDM, -43.3% accuracy
+Winner: Procrustes

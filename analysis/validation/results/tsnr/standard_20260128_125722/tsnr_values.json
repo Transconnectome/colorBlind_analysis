@@ -1,0 +1,622 @@
+{
+  "subjects": [
+    "sub-01",
+    "sub-06",
+    "sub-09"
+  ],
+  "rois": [
+    "V1",
+    "V2",
+    "V3",
+    "hV4"
+  ],
+  "n_runs": 6,
+  "values": {
+    "sub-01": {
+      "V1": {
+        "run-1": {
+          "tsnr_median": 23.678974162543703,
+          "drift_ratio": 5.666294276800239e-05,
+          "drift_direction": "stable",
+          "percent_change": -1.6610823021131642,
+          "mean_signal": 603.3240536971831,
+          "slope": -0.03418611632520269
+        },
+        "run-2": {
+          "tsnr_median": 22.61870015068787,
+          "drift_ratio": 3.3770675343538264e-05,
+          "drift_direction": "stable",
+          "percent_change": 1.7694825978016284,
+          "mean_signal": 580.738593016432,
+          "slope": -0.019611934484221123
+        },
+        "run-3": {
+          "tsnr_median": 23.590684443195865,
+          "drift_ratio": 5.73796664156607e-05,
+          "drift_direction": "stable",
+          "percent_change": -1.2270361778167898,
+          "mean_signal": 560.426698210094,
+          "slope": -0.03215709699372534
+        },
+        "run-4": {
+          "tsnr_median": 20.63257847470143,
+          "drift_ratio": 7.161298257354697e-05,
+          "drift_direction": "stable",
+          "percent_change": -1.3052990335982448,
+          "mean_signal": 551.1655724276212,
+          "slope": -0.03947061053339828
+        },
+        "run-5": {
+          "tsnr_median": 22.650274376346772,
+          "drift_ratio": 8.76460341532721e-06,
+          "drift_direction": "stable",
+          "percent_change": 2.655869905694956,
+          "mean_signal": 533.7635404440532,
+          "slope": 0.004678225749553093
+        },
+        "run-6": {
+          "tsnr_median": 23.715631219884166,
+          "drift_ratio": 4.587160651597811e-05,
+          "drift_direction": "stable",
+          "percent_change": 2.5473088748815815,
+          "mean_signal": 516.5362076975742,
+          "slope": 0.02369434567075867
+        }
+      },
+      "V2": {
+        "run-1": {
+          "tsnr_median": 22.41488691644406,
+          "drift_ratio": 3.889002659862553e-05,
+          "drift_direction": "stable",
+          "percent_change": -1.7788451669848362,
+          "mean_signal": 600.7943183388611,
+          "slope": -0.023364907020501403
+        },
+        "run-2": {
+          "tsnr_median": 22.628161092778406,
+          "drift_ratio": 2.867704571733198e-05,
+          "drift_direction": "stable",
+          "percent_change": 0.5729258241169208,
+          "mean_signal": 583.5374516307352,
+          "slope": -0.01673413017818999
+        },
+        "run-3": {
+          "tsnr_median": 23.378958883428687,
+          "drift_ratio": 4.684413871190908e-05,
+          "drift_direction": "stable",
+          "percent_change": -1.2037037037036937,
+          "mean_signal": 574.7894986871199,
+          "slope": -0.02692551900664813
+        },
+        "run-4": {
+          "tsnr_median": 22.067643195259052,
+          "drift_ratio": 6.026354686677341e-05,
+          "drift_direction": "stable",
+          "percent_change": -1.732859432952686,
+          "mean_signal": 574.628299474848,
+          "slope": -0.03462913945637681
+        },
+        "run-5": {
+          "tsnr_median": 22.758920633158542,
+          "drift_ratio": 2.1707992244904175e-05,
+          "drift_direction": "stable",
+          "percent_change": 1.1606049322345058,
+          "mean_signal": 557.070057697623,
+          "slope": 0.012092872492368322
+        },
+        "run-6": {
+          "tsnr_median": 23.75552008060464,
+          "drift_ratio": 3.2292666964501974e-05,
+          "drift_direction": "stable",
+          "percent_change": 2.5236983102074455,
+          "mean_signal": 548.6874827252626,
+          "slope": 0.017718582147237837
+        }
+      },
+      "V3": {
+        "run-1": {
+          "tsnr_median": 26.580403846915353,
+          "drift_ratio": 3.728160502079713e-05,
+          "drift_direction": "stable",
+          "percent_change": -0.38524112103630664,
+          "mean_signal": 619.171481918239,
+          "slope": -0.02308370662901742
+        },
+        "run-2": {
+          "tsnr_median": 26.592189958326014,
+          "drift_ratio": 1.3820808292585092e-05,
+          "drift_direction": "stable",
+          "percent_change": 1.8834936024795368,
+          "mean_signal": 598.1372510482181,
+          "slope": -0.008266740279391263
+        },
+        "run-3": {
+          "tsnr_median": 27.179823039526916,
+          "drift_ratio": 1.408739589316251e-05,
+          "drift_direction": "stable",
+          "percent_change": -1.1524473762929555,
+          "mean_signal": 596.6212657232704,
+          "slope": -0.008404839968523418
+        },
+        "run-4": {
+          "tsnr_median": 25.454569981847335,
+          "drift_ratio": 2.3578723707261403e-05,
+          "drift_direction": "stable",
+          "percent_change": 0.9539670477145155,
+          "mean_signal": 588.8371331236898,
+          "slope": -0.013884028070499384
+        },
+        "run-5": {
+          "tsnr_median": 25.34460900059114,
+          "drift_ratio": 2.588099680979366e-05,
+          "drift_direction": "stable",
+          "percent_change": 3.0518259064668727,
+          "mean_signal": 584.7604494234802,
+          "slope": 0.015134183326022597
+        },
+        "run-6": {
+          "tsnr_median": 26.70013432179441,
+          "drift_ratio": 4.293267148349581e-05,
+          "drift_direction": "stable",
+          "percent_change": 4.817204301075277,
+          "mean_signal": 578.4255110062893,
+          "slope": 0.024833352441706206
+        }
+      },
+      "hV4": {
+        "run-1": {
+          "tsnr_median": 27.15752222772235,
+          "drift_ratio": 4.510273425625734e-05,
+          "drift_direction": "stable",
+          "percent_change": -2.0460994673171684,
+          "mean_signal": 567.893005952381,
+          "slope": -0.02561352733345741
+        },
+        "run-2": {
+          "tsnr_median": 28.135585520516635,
+          "drift_ratio": 5.265904452960721e-05,
+          "drift_direction": "stable",
+          "percent_change": -1.349955924946478,
+          "mean_signal": 561.0087797619049,
+          "slope": -0.02954218631498275
+        },
+        "run-3": {
+          "tsnr_median": 26.335646210599464,
+          "drift_ratio": 9.067959964935756e-05,
+          "drift_direction": "stable",
+          "percent_change": -2.8682485646054476,
+          "mean_signal": 552.3383432539682,
+          "slope": -0.05008581983725927
+        },
+        "run-4": {
+          "tsnr_median": 28.002334253410574,
+          "drift_ratio": 7.314977020473353e-05,
+          "drift_direction": "stable",
+          "percent_change": -2.675396055609446,
+          "mean_signal": 526.0659722222222,
+          "slope": -0.03848160498058528
+        },
+        "run-5": {
+          "tsnr_median": 29.55321905601682,
+          "drift_ratio": 3.211469069411659e-05,
+          "drift_direction": "stable",
+          "percent_change": 0.8674029954316759,
+          "mean_signal": 499.7280257936508,
+          "slope": 0.016048610979544613
+        },
+        "run-6": {
+          "tsnr_median": 30.5141478766245,
+          "drift_ratio": 4.1835617198105465e-05,
+          "drift_direction": "stable",
+          "percent_change": -0.2618032063538816,
+          "mean_signal": 485.10372023809515,
+          "slope": 0.020294613541257795
+        }
+      }
+    },
+    "sub-06": {
+      "V1": {
+        "run-1": {
+          "tsnr_median": 26.91217478180619,
+          "drift_ratio": 3.6695613866405957e-05,
+          "drift_direction": "stable",
+          "percent_change": -1.1096621654560597,
+          "mean_signal": 571.5364977488265,
+          "slope": -0.020972882631948932
+        },
+        "run-2": {
+          "tsnr_median": 27.736023410270658,
+          "drift_ratio": 2.3564694437506665e-05,
+          "drift_direction": "stable",
+          "percent_change": 2.871089425909839,
+          "mean_signal": 550.1004961473712,
+          "slope": 0.012962950101633616
+        },
+        "run-3": {
+          "tsnr_median": 26.80462693466697,
+          "drift_ratio": 1.300922590182132e-05,
+          "drift_direction": "stable",
+          "percent_change": -1.6028155987855404,
+          "mean_signal": 556.7768903470958,
+          "slope": -0.007243236343438967
+        },
+        "run-4": {
+          "tsnr_median": 24.08624132035549,
+          "drift_ratio": 5.112774111528437e-05,
+          "drift_direction": "stable",
+          "percent_change": -2.7950099571566303,
+          "mean_signal": 544.9661964193214,
+          "slope": -0.027862890607108275
+        },
+        "run-5": {
+          "tsnr_median": 24.26995626671486,
+          "drift_ratio": 2.2871972554545637e-05,
+          "drift_direction": "stable",
+          "percent_change": 0.8593531628357656,
+          "mean_signal": 552.1021351333852,
+          "slope": 0.012627664882076834
+        },
+        "run-6": {
+          "tsnr_median": 27.210367636241298,
+          "drift_ratio": 2.8401506299477388e-05,
+          "drift_direction": "stable",
+          "percent_change": -1.0930995828822212,
+          "mean_signal": 543.0688738344988,
+          "slope": -0.01542397404126061
+        }
+      },
+      "V2": {
+        "run-1": {
+          "tsnr_median": 26.117272533165846,
+          "drift_ratio": 3.1041151114011986e-05,
+          "drift_direction": "stable",
+          "percent_change": -0.7108437108219322,
+          "mean_signal": 576.0539214480706,
+          "slope": -0.017881376825488748
+        },
+        "run-2": {
+          "tsnr_median": 28.29719878685306,
+          "drift_ratio": 2.526624728322748e-06,
+          "drift_direction": "stable",
+          "percent_change": 0.9284976361126005,
+          "mean_signal": 562.5680730101735,
+          "slope": -0.0014213984046323816
+        },
+        "run-3": {
+          "tsnr_median": 27.54940833508477,
+          "drift_ratio": 1.2332276271536621e-05,
+          "drift_direction": "stable",
+          "percent_change": -0.6165547012695035,
+          "mean_signal": 565.7158579474188,
+          "slope": -0.006976564251396936
+        },
+        "run-4": {
+          "tsnr_median": 25.17332187715652,
+          "drift_ratio": 4.831981320889811e-05,
+          "drift_direction": "stable",
+          "percent_change": -1.0003248862897998,
+          "mean_signal": 554.4844092858568,
+          "slope": -0.026792583083938813
+        },
+        "run-5": {
+          "tsnr_median": 24.852556373017592,
+          "drift_ratio": 1.2199334594334733e-05,
+          "drift_direction": "stable",
+          "percent_change": 0.43724789526507224,
+          "mean_signal": 560.521082685019,
+          "slope": 0.006837984234853311
+        },
+        "run-6": {
+          "tsnr_median": 28.301718418062134,
+          "drift_ratio": 1.941325436593912e-05,
+          "drift_direction": "stable",
+          "percent_change": 0.5271590934943557,
+          "mean_signal": 556.3127742868542,
+          "slope": -0.010799841394251976
+        }
+      },
+      "V3": {
+        "run-1": {
+          "tsnr_median": 30.649620915239453,
+          "drift_ratio": 1.0707485332278165e-05,
+          "drift_direction": "stable",
+          "percent_change": 1.4134655227980684,
+          "mean_signal": 572.3561643835617,
+          "slope": -0.006128495234975977
+        },
+        "run-2": {
+          "tsnr_median": 29.829712206026574,
+          "drift_ratio": 2.0053873526877354e-06,
+          "drift_direction": "stable",
+          "percent_change": 2.9318684922521765,
+          "mean_signal": 537.8413949275363,
+          "slope": -0.0010785803311396107
+        },
+        "run-3": {
+          "tsnr_median": 29.75134489762057,
+          "drift_ratio": 5.3736163618972505e-05,
+          "drift_direction": "stable",
+          "percent_change": -2.1810038459665857,
+          "mean_signal": 534.4499702203693,
+          "slope": -0.02871929104591675
+        },
+        "run-4": {
+          "tsnr_median": 28.661046287978706,
+          "drift_ratio": 0.00011485307428897759,
+          "drift_direction": "stable",
+          "percent_change": -2.109954446034172,
+          "mean_signal": 528.1540157004831,
+          "slope": -0.06066011240126942
+        },
+        "run-5": {
+          "tsnr_median": 30.20302823430597,
+          "drift_ratio": 4.351178375619092e-05,
+          "drift_direction": "stable",
+          "percent_change": 0.46590625779107864,
+          "mean_signal": 556.7897644927536,
+          "slope": -0.024226915830269164
+        },
+        "run-6": {
+          "tsnr_median": 31.632433183415007,
+          "drift_ratio": 8.057025987137233e-05,
+          "drift_direction": "stable",
+          "percent_change": -2.241238793806042,
+          "mean_signal": 527.7022946859902,
+          "slope": -0.04251711101756973
+        }
+      },
+      "hV4": {
+        "run-1": {
+          "tsnr_median": 39.49629472626753,
+          "drift_ratio": 4.638792745142887e-05,
+          "drift_direction": "stable",
+          "percent_change": -0.32891433162598094,
+          "mean_signal": 568.1812622309197,
+          "slope": -0.026356751171629188
+        },
+        "run-2": {
+          "tsnr_median": 37.2967432964251,
+          "drift_ratio": 1.4251236909343139e-05,
+          "drift_direction": "stable",
+          "percent_change": 3.031053848695072,
+          "mean_signal": 531.3960317460319,
+          "slope": -0.007573050741097528
+        },
+        "run-3": {
+          "tsnr_median": 31.994194824868387,
+          "drift_ratio": 0.00010395375611247637,
+          "drift_direction": "stable",
+          "percent_change": -4.31920008742214,
+          "mean_signal": 518.6090998043053,
+          "slope": -0.05391136387876767
+        },
+        "run-4": {
+          "tsnr_median": 28.296607854489874,
+          "drift_ratio": 0.00028249732894217107,
+          "drift_direction": "stable",
+          "percent_change": -6.771574453837785,
+          "mean_signal": 499.8004464285714,
+          "slope": -0.1411922911201761
+        },
+        "run-5": {
+          "tsnr_median": 37.707845127256206,
+          "drift_ratio": 3.0162656996620936e-05,
+          "drift_direction": "stable",
+          "percent_change": -0.19956975870202312,
+          "mean_signal": 550.4287698412697,
+          "slope": -0.01660239418579423
+        },
+        "run-6": {
+          "tsnr_median": 34.113467301231196,
+          "drift_ratio": 0.00019492574532542644,
+          "drift_direction": "stable",
+          "percent_change": -5.72027553159629,
+          "mean_signal": 505.1331349206349,
+          "slope": -0.09846345281297396
+        }
+      }
+    },
+    "sub-09": {
+      "V1": {
+        "run-1": {
+          "tsnr_median": 25.02656930946013,
+          "drift_ratio": 2.805929910543177e-05,
+          "drift_direction": "stable",
+          "percent_change": -0.9964634605907784,
+          "mean_signal": 593.6322600760155,
+          "slope": -0.016656905144106383
+        },
+        "run-2": {
+          "tsnr_median": 25.372607771715654,
+          "drift_ratio": 6.821442194193413e-05,
+          "drift_direction": "stable",
+          "percent_change": 2.62373715279742,
+          "mean_signal": 571.0573217726396,
+          "slope": 0.03895434510042969
+        },
+        "run-3": {
+          "tsnr_median": 26.22482146634881,
+          "drift_ratio": 4.681953115507825e-05,
+          "drift_direction": "stable",
+          "percent_change": 2.8354924802728805,
+          "mean_signal": 558.2190296143797,
+          "slope": 0.026135553248387997
+        },
+        "run-4": {
+          "tsnr_median": 26.478782233389417,
+          "drift_ratio": 5.5480343030595476e-05,
+          "drift_direction": "stable",
+          "percent_change": 4.306732532765717,
+          "mean_signal": 550.0596449502248,
+          "slope": 0.030517497789126026
+        },
+        "run-5": {
+          "tsnr_median": 27.555781218392504,
+          "drift_ratio": 0.00011641200200254853,
+          "drift_direction": "stable",
+          "percent_change": 5.214591980712057,
+          "mean_signal": 546.4099831406552,
+          "slope": 0.06360868005158246
+        },
+        "run-6": {
+          "tsnr_median": 23.072742880610722,
+          "drift_ratio": 2.4368425774304635e-05,
+          "drift_direction": "stable",
+          "percent_change": -0.17263338806451045,
+          "mean_signal": 556.3856625321131,
+          "slope": -0.013558242719301106
+        }
+      },
+      "V2": {
+        "run-1": {
+          "tsnr_median": 25.516047197189266,
+          "drift_ratio": 1.6825014363352168e-05,
+          "drift_direction": "stable",
+          "percent_change": -1.0545882174424448,
+          "mean_signal": 580.8144014413818,
+          "slope": -0.009772210646693041
+        },
+        "run-2": {
+          "tsnr_median": 24.93894429001415,
+          "drift_ratio": 6.678634241047974e-05,
+          "drift_direction": "stable",
+          "percent_change": 4.915877337723529,
+          "mean_signal": 557.631672523427,
+          "slope": 0.0372421798200781
+        },
+        "run-3": {
+          "tsnr_median": 26.96134178737133,
+          "drift_ratio": 3.492127101640505e-05,
+          "drift_direction": "stable",
+          "percent_change": 2.576768924212225,
+          "mean_signal": 540.8574365956979,
+          "slope": 0.018887429124596476
+        },
+        "run-4": {
+          "tsnr_median": 27.123476583937116,
+          "drift_ratio": 4.577283786809145e-05,
+          "drift_direction": "stable",
+          "percent_change": 3.397408099592835,
+          "mean_signal": 532.0866730812137,
+          "slope": 0.024355117018718574
+        },
+        "run-5": {
+          "tsnr_median": 28.09751511460499,
+          "drift_ratio": 0.00013600027360777917,
+          "drift_direction": "stable",
+          "percent_change": 5.852203454031075,
+          "mean_signal": 528.2176692882642,
+          "slope": 0.07183774754766735
+        },
+        "run-6": {
+          "tsnr_median": 23.19410261432943,
+          "drift_ratio": 6.911099444709004e-05,
+          "drift_direction": "stable",
+          "percent_change": -0.9106081456973031,
+          "mean_signal": 541.5087781682284,
+          "slope": -0.03742421016103495
+        }
+      },
+      "V3": {
+        "run-1": {
+          "tsnr_median": 27.915200540282243,
+          "drift_ratio": 1.4223398846965406e-05,
+          "drift_direction": "stable",
+          "percent_change": -1.4665546271780416,
+          "mean_signal": 543.7285288862417,
+          "slope": -0.007733667730822767
+        },
+        "run-2": {
+          "tsnr_median": 28.04620293826796,
+          "drift_ratio": 0.00010243171100131449,
+          "drift_direction": "stable",
+          "percent_change": 4.56773247090988,
+          "mean_signal": 537.5648550724638,
+          "slope": 0.05506368787924612
+        },
+        "run-3": {
+          "tsnr_median": 28.327736675982337,
+          "drift_ratio": 5.8641335334487354e-05,
+          "drift_direction": "stable",
+          "percent_change": 1.916521855366941,
+          "mean_signal": 525.3688505062537,
+          "slope": 0.030808330936831378
+        },
+        "run-4": {
+          "tsnr_median": 27.777745815690146,
+          "drift_ratio": 9.359808149190678e-05,
+          "drift_direction": "stable",
+          "percent_change": 3.4671926015545993,
+          "mean_signal": 528.571618357488,
+          "slope": 0.04947328940933321
+        },
+        "run-5": {
+          "tsnr_median": 24.872892201793483,
+          "drift_ratio": 0.00023008392731804634,
+          "drift_direction": "stable",
+          "percent_change": 8.451638814675128,
+          "mean_signal": 522.7039855072463,
+          "slope": 0.12026578581030241
+        },
+        "run-6": {
+          "tsnr_median": 25.512380528463225,
+          "drift_ratio": 0.00014351723342796258,
+          "drift_direction": "stable",
+          "percent_change": -1.4188623333118529,
+          "mean_signal": 532.9412439613527,
+          "slope": -0.0764862529129902
+        }
+      },
+      "hV4": {
+        "run-1": {
+          "tsnr_median": 30.3739960923389,
+          "drift_ratio": 5.689594624472846e-05,
+          "drift_direction": "stable",
+          "percent_change": 2.900759347329131,
+          "mean_signal": 554.8494618395304,
+          "slope": 0.031568685154738436
+        },
+        "run-2": {
+          "tsnr_median": 29.663309907123143,
+          "drift_ratio": 0.0001144532469911542,
+          "drift_direction": "stable",
+          "percent_change": 3.832161047780737,
+          "mean_signal": 547.3039682539683,
+          "slope": 0.06264071625781024
+        },
+        "run-3": {
+          "tsnr_median": 31.348872730022386,
+          "drift_ratio": 4.742029041100945e-05,
+          "drift_direction": "stable",
+          "percent_change": 3.9867476532302493,
+          "mean_signal": 530.0302348336595,
+          "slope": 0.025134187662427674
+        },
+        "run-4": {
+          "tsnr_median": 31.5235368769537,
+          "drift_ratio": 5.857810753957088e-05,
+          "drift_direction": "stable",
+          "percent_change": 3.447994783175732,
+          "mean_signal": 531.8981150793651,
+          "slope": 0.031157584985214093
+        },
+        "run-5": {
+          "tsnr_median": 29.297463026781944,
+          "drift_ratio": 0.00031129508471253897,
+          "drift_direction": "stable",
+          "percent_change": 11.089039495209168,
+          "mean_signal": 522.6573412698413,
+          "slope": 0.16270066132622563
+        },
+        "run-6": {
+          "tsnr_median": 28.874098770942343,
+          "drift_ratio": 0.0001641452203275784,
+          "drift_direction": "stable",
+          "percent_change": -2.264964946971043,
+          "mean_signal": 540.1433531746031,
+          "slope": -0.08866194971532222
+        }
+      }
+    }
+  }
+}

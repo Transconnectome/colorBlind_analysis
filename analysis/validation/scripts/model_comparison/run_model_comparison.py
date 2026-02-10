@@ -1,0 +1,694 @@
+#!/usr/bin/env python3
+"""
+Extended Decoder Model Comparison - 6 Models
+
+Compares 6 decoding models on full_dataset_C010:
+1. LDA (Linear Discriminant Analysis) - Current baseline
+2. Ridge Regression - Linear with circular encoding
+3. Kernel Ridge - Non-linear with RBF
+4. SVM - Support Vector Machine
+5. MLP - Multi-Layer Perceptron
+6. Forward Encoding - 6-channel model
+
+Protocol:
+- LORO (Leave-One-Run-Out) cross-validation
+- Nested hyperparameter tuning
+- Before/After Procrustes alignment comparison
+"""
+
+import os
+import sys
+import json
+import argparse
+from pathlib import Path
+import numpy as np
+import warnings
+from datetime import datetime
+
+# ML libraries
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+from sklearn.linear_model import Ridge
+from sklearn.kernel_ridge import KernelRidge as SKLearnKernelRidge
+from sklearn.svm import SVC
+from sklearn.neural_network import MLPClassifier
+from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import accuracy_score
+from scipy.stats import pearsonr
+
+# Add project root to path
+project_root = Path(__file__).resolve().parents[4]
+sys.path.insert(0, str(project_root / "analysis"))
+
+from utils.utils_color_decoding import (
+    create_basis_functions,
+    circular_diff_deg
+)
+
+warnings.filterwarnings('ignore')
+
+
+# ============================================================================
+# Configuration
+# ============================================================================
+
+HC_SUBJECTS = [f"{i:02d}" for i in range(1, 8)]   # sub-01 ~ sub-07
+CVD_SUBJECTS = [f"{i:02d}" for i in range(8, 11)]  # sub-08 ~ sub-10
+ALL_SUBJECTS = HC_SUBJECTS + CVD_SUBJECTS
+
+ROIS = ['V1', 'V2', 'V3', 'V4']
+
+# Color mapping (8 colors, 45° spacing)
+LABEL2HUE_DEG = {
+    'color_1': 0,      # Red
+    'color_2': 45,     # Orange
+    'color_3': 90,     # Yellow
+    'color_4': 135,    # Green
+    'color_5': 180,    # Cyan
+    'color_6': 225,    # Blue
+    'color_7': 270,    # Purple
+    'color_8': 315     # Magenta
+}
+
+HUE_ANGLES = [LABEL2HUE_DEG[f'color_{i+1}'] for i in range(8)]
+
+
+# ============================================================================
+# Data Loading
+# ============================================================================
+
+def load_amplitudes(baseline_dir, subject, roi, alignment='raw'):
+    """
+    Load amplitudes from full_dataset_C010 structure
+
+    Args:
+        baseline_dir: Path to full_dataset_C010
+        subject: Subject ID (e.g., '01')
+        roi: ROI name (e.g., 'V1')
+        alignment: 'raw' or 'procrustes'
+
+    Returns:
+        amplitudes: (n_runs=6, n_colors=8, n_voxels) array
+    """
+    subject_roi_dir = Path(baseline_dir) / f"sub-{subject}" / roi
+
+    if alignment == 'raw':
+        amp_path = subject_roi_dir / "amplitudes_raw.npy"
+    elif alignment == 'procrustes':
+        amp_path = subject_roi_dir / "amplitudes_procrustes.npy"
+    else:
+        raise ValueError(f"Unknown alignment: {alignment}")
+
+    if not amp_path.exists():
+        raise FileNotFoundError(f"Amplitudes not found: {amp_path}")
+
+    amplitudes = np.load(amp_path)
+    return amplitudes
+
+
+# ============================================================================
+# Decoder Models
+# ============================================================================
+
+class LDADecoder:
+    """Linear Discriminant Analysis - Current baseline"""
+
+    def __init__(self, solver='lsqr', shrinkage='auto'):
+        self.solver = solver
+        self.shrinkage = shrinkage
+        self.model = None
+
+    def fit(self, X, y_labels):
+        """
+        Args:
+            X: (n_samples, n_voxels) brain patterns
+            y_labels: (n_samples,) color labels (0-7)
+        """
+        # Adjust shrinkage for solver
+        if self.solver == 'svd':
+            shrinkage = None
+        else:
+            shrinkage = self.shrinkage
+
+        self.model = LinearDiscriminantAnalysis(
+            solver=self.solver,
+            shrinkage=shrinkage
+        )
+        self.model.fit(X, y_labels)
+
+    def predict(self, X):
+        """Returns: (n_samples,) predicted labels (0-7)"""
+        if self.model is None:
+            raise RuntimeError("Model not fitted yet")
+        return self.model.predict(X)
+
+    @staticmethod
+    def get_param_grid():
+        return {
+            'solver': ['svd', 'lsqr'],
+            'shrinkage': [None, 'auto', 0.5]
+        }
+
+
+class RidgeDecoder:
+    """Ridge Regression with circular hue encoding"""
+
+    def __init__(self, alpha=1.0):
+        self.alpha = alpha
+        self.model = None
+
+    def fit(self, X, y_hue):
+        """
+        Args:
+            X: (n_samples, n_voxels)
+            y_hue: (n_samples,) hue angles in degrees
+        """
+        # Convert to sin/cos for continuity
+        y_sin = np.sin(np.deg2rad(y_hue))
+        y_cos = np.cos(np.deg2rad(y_hue))
+        y_circular = np.column_stack([y_sin, y_cos])
+
+        self.model = Ridge(alpha=self.alpha)
+        self.model.fit(X, y_circular)
+
+    def predict(self, X):
+        """Returns: (n_samples,) predicted hue angles"""
+        if self.model is None:
+            raise RuntimeError("Model not fitted yet")
+
+        y_pred_circular = self.model.predict(X)
+        y_pred_hue = np.rad2deg(np.arctan2(y_pred_circular[:, 0], y_pred_circular[:, 1]))
+        y_pred_hue = np.mod(y_pred_hue, 360)
+
+        return y_pred_hue
+
+    @staticmethod
+    def get_param_grid():
+        return {'alpha': [0.01, 0.1, 1, 10, 100]}
+
+
+class KernelRidgeDecoder:
+    """Kernel Ridge with RBF kernel"""
+
+    def __init__(self, alpha=1.0, gamma=0.01):
+        self.alpha = alpha
+        self.gamma = gamma
+        self.model = None
+
+    def fit(self, X, y_hue):
+        """
+        Args:
+            X: (n_samples, n_voxels)
+            y_hue: (n_samples,) hue angles
+        """
+        # Convert to sin/cos
+        y_sin = np.sin(np.deg2rad(y_hue))
+        y_cos = np.cos(np.deg2rad(y_hue))
+        y_circular = np.column_stack([y_sin, y_cos])
+
+        self.model = SKLearnKernelRidge(
+            alpha=self.alpha,
+            gamma=self.gamma,
+            kernel='rbf'
+        )
+        self.model.fit(X, y_circular)
+
+    def predict(self, X):
+        """Returns: (n_samples,) predicted hue angles"""
+        if self.model is None:
+            raise RuntimeError("Model not fitted yet")
+
+        y_pred_circular = self.model.predict(X)
+        y_pred_hue = np.rad2deg(np.arctan2(y_pred_circular[:, 0], y_pred_circular[:, 1]))
+        y_pred_hue = np.mod(y_pred_hue, 360)
+
+        return y_pred_hue
+
+    @staticmethod
+    def get_param_grid():
+        return {
+            'alpha': [0.1, 1, 10],
+            'gamma': [0.001, 0.01, 0.1]
+        }
+
+
+class SVMDecoder:
+    """Support Vector Machine with RBF kernel"""
+
+    def __init__(self, C=1.0, gamma=0.01):
+        self.C = C
+        self.gamma = gamma
+        self.model = None
+
+    def fit(self, X, y_labels):
+        """
+        Args:
+            X: (n_samples, n_voxels)
+            y_labels: (n_samples,) color labels (0-7)
+        """
+        self.model = SVC(
+            C=self.C,
+            gamma=self.gamma,
+            kernel='rbf',
+            probability=True,
+            random_state=42
+        )
+        self.model.fit(X, y_labels)
+
+    def predict(self, X):
+        """Returns: (n_samples,) predicted labels (0-7)"""
+        if self.model is None:
+            raise RuntimeError("Model not fitted yet")
+        return self.model.predict(X)
+
+    @staticmethod
+    def get_param_grid():
+        return {
+            'C': [0.1, 1, 10],
+            'gamma': [0.001, 0.01, 0.1]
+        }
+
+
+class MLPDecoder:
+    """Multi-Layer Perceptron for classification"""
+
+    def __init__(self, hidden_layer_sizes=(64,), alpha=0.1):
+        self.hidden_layer_sizes = hidden_layer_sizes
+        self.alpha = alpha
+        self.model = None
+
+    def fit(self, X, y_labels):
+        """
+        Args:
+            X: (n_samples, n_voxels)
+            y_labels: (n_samples,) color labels (0-7)
+        """
+        self.model = MLPClassifier(
+            hidden_layer_sizes=self.hidden_layer_sizes,
+            alpha=self.alpha,
+            activation='relu',
+            solver='adam',
+            learning_rate='adaptive',
+            max_iter=500,
+            early_stopping=True,
+            validation_fraction=0.2,
+            random_state=42,
+            verbose=False
+        )
+        self.model.fit(X, y_labels)
+
+    def predict(self, X):
+        """Returns: (n_samples,) predicted labels (0-7)"""
+        if self.model is None:
+            raise RuntimeError("Model not fitted yet")
+        return self.model.predict(X)
+
+    @staticmethod
+    def get_param_grid():
+        return {
+            'hidden_layer_sizes': [(64,), (64, 32)],
+            'alpha': [0.01, 0.1]
+        }
+
+
+class ForwardEncodingDecoder:
+    """6-channel forward encoding model"""
+
+    def __init__(self, alpha=0, n_channels=6):
+        self.alpha = alpha
+        self.n_channels = n_channels
+        self.weights = None
+        self.basis_functions = None
+
+    def fit(self, X, y_labels):
+        """
+        Args:
+            X: (n_samples, n_voxels)
+            y_labels: (n_samples,) color labels (0-7)
+        """
+        n_colors = 8
+        n_runs = len(X) // n_colors
+        n_voxels = X.shape[1]
+
+        if len(X) % n_colors != 0:
+            raise ValueError(f"X length {len(X)} not divisible by n_colors")
+
+        # Reshape to (n_runs, n_colors, n_voxels)
+        amplitudes_train = X.reshape(n_runs, n_colors, n_voxels)
+
+        # Create basis functions
+        self.basis_functions = create_basis_functions(HUE_ANGLES, n_channels=self.n_channels)
+
+        # Average over runs
+        mean_patterns = amplitudes_train.mean(axis=0)  # (n_colors, n_voxels)
+
+        # Encoding weights: W = (C^T C + αI)^-1 C^T B
+        C = self.basis_functions
+        B = mean_patterns
+
+        if self.alpha > 0:
+            self.weights = np.linalg.solve(
+                C.T @ C + self.alpha * np.eye(self.n_channels),
+                C.T @ B
+            )
+        else:
+            self.weights = np.linalg.pinv(C) @ B
+
+    def predict(self, X):
+        """Returns: (n_samples,) predicted labels (0-7)"""
+        if self.weights is None:
+            raise RuntimeError("Model not fitted yet")
+
+        # Predict channel responses
+        channel_responses = self.weights @ X.T  # (n_channels, n_samples)
+
+        # Find best matching color
+        n_samples = X.shape[0]
+        y_pred_labels = np.zeros(n_samples, dtype=int)
+
+        for i in range(n_samples):
+            predicted_response = channel_responses[:, i]
+            correlations = self.basis_functions @ predicted_response
+            y_pred_labels[i] = np.argmax(correlations)
+
+        return y_pred_labels
+
+    @staticmethod
+    def get_param_grid():
+        return {'alpha': [0, 10, 50]}
+
+
+# ============================================================================
+# Metrics
+# ============================================================================
+
+def labels_to_hue(labels):
+    """Convert labels (0-7) to hue angles (0-360)"""
+    return np.array([HUE_ANGLES[int(l)] for l in labels])
+
+
+def hue_to_labels(hue_angles):
+    """Convert hue angles to nearest labels (0-7)"""
+    labels = []
+    for hue in hue_angles:
+        # Find nearest color
+        diffs = [abs(circular_diff_deg(hue, target_hue)) for target_hue in HUE_ANGLES]
+        labels.append(np.argmin(diffs))
+    return np.array(labels)
+
+
+def compute_classification_metrics(y_true_labels, y_pred_labels):
+    """
+    Compute classification accuracy at different thresholds
+
+    Args:
+        y_true_labels: (n_samples,) true labels (0-7)
+        y_pred_labels: (n_samples,) predicted labels (0-7)
+
+    Returns:
+        metrics: Dict with acc_exact, acc_45, acc_90
+    """
+    # Convert to hue for circular distance
+    y_true_hue = labels_to_hue(y_true_labels)
+    y_pred_hue = labels_to_hue(y_pred_labels)
+
+    errors = np.abs(circular_diff_deg(y_true_hue, y_pred_hue))
+
+    metrics = {
+        'acc_exact': float(np.mean(y_true_labels == y_pred_labels)),
+        'acc_45': float(np.mean(errors <= 45)),
+        'acc_90': float(np.mean(errors <= 90)),
+        'mae': float(np.mean(errors)),
+        'medae': float(np.median(errors))
+    }
+
+    return metrics
+
+
+# ============================================================================
+# LORO Cross-Validation
+# ============================================================================
+
+def loro_cv_generic(amplitudes, model_class, model_name, param_grid=None):
+    """
+    Generic LORO CV for any decoder model
+
+    Args:
+        amplitudes: (n_runs, n_colors, n_voxels) array
+        model_class: Decoder class
+        model_name: Model name string
+        param_grid: Optional parameter grid for tuning
+
+    Returns:
+        fold_results: List of dicts with performance per fold
+    """
+    n_runs, n_colors, n_voxels = amplitudes.shape
+    labels = np.arange(n_colors)
+    hue_angles = labels_to_hue(labels)
+
+    fold_results = []
+
+    # Determine if model uses labels or hue
+    uses_labels = model_name in ['LDA', 'SVM', 'MLP', 'ForwardEncoding']
+
+    for test_run in range(n_runs):
+        # Split train/test
+        train_runs = [r for r in range(n_runs) if r != test_run]
+        X_train = amplitudes[train_runs].reshape(-1, n_voxels)
+        X_test = amplitudes[test_run]
+
+        if uses_labels:
+            y_train = np.tile(labels, len(train_runs))
+            y_test = labels
+        else:
+            y_train = np.tile(hue_angles, len(train_runs))
+            y_test = hue_angles
+
+        # Hyperparameter tuning (simple grid search)
+        best_params = {}
+        best_score = -np.inf
+
+        if param_grid is not None and len(train_runs) >= 3:
+            # Simple inner CV: leave-one-out on train runs
+            for params in _generate_param_combinations(param_grid):
+                tune_scores = []
+
+                for tune_run in train_runs:
+                    tune_train_runs = [r for r in train_runs if r != tune_run]
+                    X_tune_train = amplitudes[tune_train_runs].reshape(-1, n_voxels)
+                    X_tune_test = amplitudes[tune_run]
+
+                    if uses_labels:
+                        y_tune_train = np.tile(labels, len(tune_train_runs))
+                        y_tune_test = labels
+                    else:
+                        y_tune_train = np.tile(hue_angles, len(tune_train_runs))
+                        y_tune_test = hue_angles
+
+                    # Train and evaluate
+                    model_tune = model_class(**params)
+                    model_tune.fit(X_tune_train, y_tune_train)
+                    y_tune_pred = model_tune.predict(X_tune_test)
+
+                    # Score (accuracy for label-based, MAE for hue-based)
+                    if uses_labels:
+                        score = accuracy_score(y_tune_test, y_tune_pred)
+                    else:
+                        y_tune_pred_labels = hue_to_labels(y_tune_pred)
+                        score = accuracy_score(y_tune_test, hue_to_labels(y_tune_test))
+
+                    tune_scores.append(score)
+
+                mean_score = np.mean(tune_scores)
+                if mean_score > best_score:
+                    best_score = mean_score
+                    best_params = params
+
+        # Train final model with best params
+        model = model_class(**best_params) if best_params else model_class()
+        model.fit(X_train, y_train)
+
+        # Test on held-out run
+        y_pred = model.predict(X_test)
+
+        # Convert predictions to labels if needed
+        if uses_labels:
+            y_pred_labels = y_pred
+        else:
+            y_pred_labels = hue_to_labels(y_pred)
+
+        # Compute metrics
+        metrics = compute_classification_metrics(labels, y_pred_labels)
+
+        fold_results.append({
+            'test_run': test_run,
+            'best_params': best_params,
+            **metrics
+        })
+
+    return fold_results
+
+
+def _generate_param_combinations(param_grid):
+    """Generate all combinations of parameters from grid"""
+    from itertools import product
+
+    keys = list(param_grid.keys())
+    values = [param_grid[k] for k in keys]
+
+    for combo in product(*values):
+        yield dict(zip(keys, combo))
+
+
+# ============================================================================
+# Main Comparison
+# ============================================================================
+
+def run_single_subject_roi(baseline_dir, subject, roi, alignment, models):
+    """
+    Run model comparison for a single subject-ROI pair
+
+    Args:
+        baseline_dir: Path to full_dataset_C010
+        subject: Subject ID (e.g., '01')
+        roi: ROI name (e.g., 'V1')
+        alignment: 'raw' or 'procrustes'
+        models: List of model names to compare
+
+    Returns:
+        results: Dict with results per model
+    """
+    print(f"\n{'='*60}")
+    print(f"Subject: sub-{subject} | ROI: {roi} | Alignment: {alignment}")
+    print(f"{'='*60}")
+
+    # Load amplitudes
+    try:
+        amplitudes = load_amplitudes(baseline_dir, subject, roi, alignment)
+        print(f"Loaded amplitudes: {amplitudes.shape}")
+    except FileNotFoundError as e:
+        print(f"ERROR: {e}")
+        return None
+
+    results = {}
+
+    # Model mapping
+    model_map = {
+        'LDA': (LDADecoder, LDADecoder.get_param_grid()),
+        'Ridge': (RidgeDecoder, RidgeDecoder.get_param_grid()),
+        'KernelRidge': (KernelRidgeDecoder, KernelRidgeDecoder.get_param_grid()),
+        'SVM': (SVMDecoder, SVMDecoder.get_param_grid()),
+        'MLP': (MLPDecoder, MLPDecoder.get_param_grid()),
+        'ForwardEncoding': (ForwardEncodingDecoder, ForwardEncodingDecoder.get_param_grid())
+    }
+
+    # Run each model
+    for model_name in models:
+        if model_name not in model_map:
+            print(f"Unknown model: {model_name}")
+            continue
+
+        print(f"\n--- Running {model_name} ---")
+
+        try:
+            model_class, param_grid = model_map[model_name]
+            fold_results = loro_cv_generic(amplitudes, model_class, model_name, param_grid)
+
+            results[model_name] = fold_results
+
+            # Print summary
+            acc_45_values = [f['acc_45'] for f in fold_results]
+            mae_values = [f['mae'] for f in fold_results]
+
+            print(f"  Accuracy (45°): {np.mean(acc_45_values):.3f} ± {np.std(acc_45_values):.3f}")
+            print(f"  MAE: {np.mean(mae_values):.2f}° ± {np.std(mae_values):.2f}°")
+
+        except Exception as e:
+            print(f"ERROR in {model_name}: {e}")
+            import traceback
+            traceback.print_exc()
+            continue
+
+    return results
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Extended decoder model comparison (6 models)"
+    )
+    parser.add_argument('--baseline_dir', type=str, required=True,
+                       help='Path to full_dataset_C010')
+    parser.add_argument('--output_dir', type=str, required=True,
+                       help='Output directory')
+    parser.add_argument('--subject', type=str, required=True,
+                       help='Subject ID (e.g., 01)')
+    parser.add_argument('--rois', nargs='+', default=['V1', 'V2', 'V3', 'V4'],
+                       help='ROI names')
+    parser.add_argument('--models', nargs='+',
+                       default=['LDA', 'Ridge', 'KernelRidge', 'SVM', 'MLP', 'ForwardEncoding'],
+                       help='Models to compare')
+    parser.add_argument('--alignment', type=str, default='both',
+                       choices=['raw', 'procrustes', 'both'],
+                       help='Alignment condition')
+
+    args = parser.parse_args()
+
+    # Create output directory
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    output_path = Path(args.output_dir) / timestamp
+    output_path.mkdir(parents=True, exist_ok=True)
+
+    print(f"\n{'='*80}")
+    print(f"Extended Decoder Model Comparison")
+    print(f"{'='*80}")
+    print(f"Baseline: {args.baseline_dir}")
+    print(f"Subject: sub-{args.subject}")
+    print(f"ROIs: {args.rois}")
+    print(f"Models: {args.models}")
+    print(f"Alignment: {args.alignment}")
+    print(f"Output: {output_path}")
+    print(f"{'='*80}\n")
+
+    # Determine alignments to test
+    alignments = ['raw', 'procrustes'] if args.alignment == 'both' else [args.alignment]
+
+    # Run for each alignment and ROI
+    all_results = {}
+
+    for alignment in alignments:
+        all_results[alignment] = {}
+
+        for roi in args.rois:
+            results = run_single_subject_roi(
+                args.baseline_dir,
+                args.subject,
+                roi,
+                alignment,
+                args.models
+            )
+
+            if results is not None:
+                all_results[alignment][roi] = results
+
+    # Save results
+    output_file = output_path / f"sub-{args.subject}_performance_raw.json"
+
+    results_data = {
+        'subject': args.subject,
+        'rois': args.rois,
+        'models': args.models,
+        'alignments': alignments,
+        'results': all_results,
+        'timestamp': timestamp,
+        'datetime': datetime.now().isoformat()
+    }
+
+    with open(output_file, 'w') as f:
+        json.dump(results_data, f, indent=2)
+
+    print(f"\n{'='*80}")
+    print(f"Results saved: {output_file}")
+    print(f"{'='*80}\n")
+
+
+if __name__ == '__main__':
+    main()

@@ -57,7 +57,23 @@ VALIDATION_OUT=/scratch/connectome/haba6030/colorBlind/analysis/validation/resul
 
 ---
 
-**Model 1: Ridge Regression (Linear Baseline)**
+**Model 1: Linear Discriminant Analysis (LDA) - Current Baseline**
+```python
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+
+model = LinearDiscriminantAnalysis(solver='lsqr', shrinkage='auto')
+model.fit(X_train, y_train)  # X: voxels, y: color labels (0-7)
+```
+
+**Hyperparameters**:
+- solver ∈ {'svd', 'lsqr', 'eigen'}
+- shrinkage ∈ {'auto', None, 0.1, 0.5, 0.9} (for 'lsqr' or 'eigen')
+
+**Note**: This is the model used in `analyze_c010_residuals_procrustes_effects.py` for baseline validation.
+
+---
+
+**Model 2: Ridge Regression (Linear Baseline)**
 ```python
 from sklearn.linear_model import Ridge
 
@@ -69,7 +85,7 @@ model.fit(X_train, y_train)  # X: voxels, y: color labels or hue angles
 
 ---
 
-**Model 2: Kernel Ridge Regression (Non-linear, Stable)**
+**Model 3: Kernel Ridge Regression (Non-linear, Stable)**
 ```python
 from sklearn.kernel_ridge import KernelRidge
 
@@ -84,7 +100,7 @@ model = KernelRidge(kernel='rbf', alpha=alpha, gamma=gamma)
 
 ---
 
-**Model 3: SVM/SVR (Non-linear Boundary)**
+**Model 4: SVM/SVR (Non-linear Boundary)**
 
 **For classification**:
 ```python
@@ -106,7 +122,7 @@ model = SVR(kernel='rbf', C=C, gamma=gamma, epsilon=0.1)
 
 ---
 
-**Model 4: MLP (Small Neural Network)**
+**Model 5: MLP (Small Neural Network)**
 ```python
 from sklearn.neural_network import MLPRegressor
 
@@ -128,7 +144,7 @@ model = MLPRegressor(
 
 ---
 
-**Model 5: Current Forward Encoding (Baseline)**
+**Model 6: Forward Encoding Model (6-channel, from phase1)**
 
 **For comparison**: 현재 phase1에서 사용 중인 방법
 ```python
@@ -165,6 +181,52 @@ for test_run in range(6):
 ```
 
 **Important**: 하이퍼파라미터 튜닝은 train set 내에서만 (test set leakage 방지)
+
+---
+
+#### 5.3 Procrustes Alignment Comparison
+
+[ ] **Task**: Evaluate all models Before vs After Procrustes alignment
+
+**Purpose**: "정렬이 각 모델 타입(선형/비선형)에 얼마나 도움이 되는가?"
+
+**Data sources**:
+- Before: `amplitudes_raw.npy` (from `full_dataset_C010`)
+- After: `amplitudes_procrustes.npy` (from `full_dataset_C010`)
+
+**Method**: Train and test each model on both conditions
+```python
+for model_type in [LDA, Ridge, KernelRidge, SVM, MLP, ForwardEncoding]:
+    for alignment in ['raw', 'procrustes']:
+        # Load amplitudes
+        amplitudes = load_amplitudes(subject, roi, alignment)  # (n_runs=6, n_colors=8, n_voxels)
+
+        # LORO cross-validation
+        accuracy = loro_decode(amplitudes, labels, model_type)
+
+        results[model_type][alignment] = accuracy
+
+# Compute improvement per model
+improvement[model_type] = results[model_type]['procrustes'] - results[model_type]['raw']
+```
+
+**Statistical test**: Paired t-test (before vs after, per model)
+```python
+# Across all subject-ROI pairs
+t_stat, p_value = ttest_rel(
+    [acc_before for all pairs],
+    [acc_after for all pairs]
+)
+```
+
+**Output**:
+- `{VALIDATION_OUT}/model_comparison/{TIMESTAMP}/procrustes_comparison.json`
+  - Per model: mean_before, mean_after, mean_improvement, t_stat, p_value
+  - Per subject-ROI: individual improvements
+
+**Visualization**: See Section 7.4 (Alignment Effect 2×2 plot)
+
+**Results**: _[write directory here after completion]_
 
 ---
 
@@ -234,7 +296,63 @@ MedAE = median(error)
 
 ---
 
-#### 6.2 Test-Retest Reliability
+#### 6.2 Permutation Test (Label Shuffle)
+
+[ ] **Task**: Test if decoding performance is above chance
+
+**Purpose**: "이 디코딩 성능이 진짜 신호인가, 우연인가?"
+
+**Method**: Permutation test with label shuffling
+```python
+# Observed performance (for each subject-ROI, each model)
+observed_acc = loro_decode(amplitudes, labels, model)
+
+# Null distribution (1000 permutations)
+null_distribution = []
+for iteration in range(1000):
+    # CRITICAL: Shuffle labels WITHIN each run (preserve trial structure)
+    shuffled_labels = []
+    for run in range(n_runs):
+        run_labels = labels.copy()  # [0, 1, 2, 3, 4, 5, 6, 7]
+        np.random.shuffle(run_labels)  # Shuffle within this run
+        shuffled_labels.append(run_labels)
+
+    # Decode with shuffled labels
+    null_acc = loro_decode(amplitudes, shuffled_labels, model)
+    null_distribution.append(null_acc)
+
+# P-value: proportion of null ≥ observed
+p_value = (np.array(null_distribution) >= observed_acc).sum() / 1000
+
+# Effect size (Z-score)
+z_score = (observed_acc - np.mean(null_distribution)) / np.std(null_distribution)
+```
+
+**Why shuffle within runs?**
+- Preserves temporal structure and run-specific variance
+- Tests if cross-run generalization is meaningful (not just memorization)
+
+**Output**:
+- `{VALIDATION_OUT}/model_comparison/{TIMESTAMP}/permutation_test.json`
+  - Per model, per subject-ROI: observed_acc, null_mean, null_std, p_value, z_score
+  - Overall statistics: % significant (p < 0.05), mean z-score
+
+**Visualization**:
+```
+Figure: Permutation test results (per model)
+- Histogram of null distribution (gray)
+- Red line: Observed accuracy
+- Annotation: p-value, z-score
+- One panel per model type
+```
+
+**Output figure**: `{VALIDATION_OUT}/model_comparison/{TIMESTAMP}/figures/permutation_test.png`
+
+**Results**: _[write directory here after completion]_
+
+---
+
+#### 6.3 Test-Retest Reliability
 [ ] **Task**: 성능 자체의 재현성 검증
 
 **Purpose**: "이 모델의 성능이 안정적으로 재현되는가?"
@@ -310,7 +428,7 @@ CI_upper = percentile(bootstrap_distribution, 97.5)
 
 **Figure A: Classification Performance**
 ```
-Models: [Ridge, KernelRidge, SVM, MLP, ForwardEncoding]
+Models: [LDA, Ridge, KernelRidge, SVM, MLP, ForwardEncoding]
 Metrics: acc_45, acc_90, acc_exact
 
 Bar plot (grouped):
@@ -404,7 +522,7 @@ Conditions:
 - Axis 1 (X): Alignment (Before, After)
 - Axis 2 (Color): Model type (Linear, Non-linear)
 
-Linear models: Ridge, ForwardEncoding
+Linear models: LDA, Ridge, ForwardEncoding
 Non-linear models: KernelRidge, SVM, MLP
 
 Expected pattern:
@@ -433,3 +551,373 @@ F_interaction, p_interaction = rm_anova(...)
 **Results**: _[write directory here after completion]_
 
 ---
+#### 7.5 Permutation Test Results
+
+[ ] **Task**: Visualize null distributions vs observed performance
+
+**Figure**: Multi-panel permutation test results
+```
+Layout: 2×3 grid (6 models: LDA, Ridge, KernelRidge, SVM, MLP, ForwardEncoding)
+
+Per panel (one model):
+- Histogram: Null distribution (1000 permutations), gray bars
+- Red vertical line: Observed accuracy (mean across subject-ROI pairs)
+- Shaded region: 95th percentile of null (chance level threshold)
+- Annotation: p-value, z-score, % significant pairs
+
+X-axis: Accuracy
+Y-axis: Count
+```
+
+**Statistical summary annotation**:
+```python
+# Per model
+n_significant = (p_values < 0.05).sum()
+pct_significant = 100 * n_significant / n_total
+mean_z_score = np.mean(z_scores)
+
+# Annotate on figure
+text = f"p < 0.05: {pct_significant:.1f}%\nZ = {mean_z_score:.2f}"
+```
+
+**Output**: `{VALIDATION_OUT}/model_comparison/{TIMESTAMP}/figures/permutation_test_panels.png`
+
+**Results**: _[write directory here after completion]_
+
+---
+
+#### 7.6 Fold-Level Performance Distribution
+
+[ ] **Task**: Visualize within-subject variability across LORO folds
+
+**Figure**: Fold accuracy distribution
+```
+Violin plot:
+- X-axis: Model type [LDA, Ridge, KernelRidge, SVM, MLP, ForwardEncoding]
+- Y-axis: Accuracy (per LORO fold)
+- Violin: Distribution of fold accuracies (all subject-ROI pairs, all folds)
+- Scatter: Individual fold results (semi-transparent)
+- Boxplot overlay: Median, quartiles
+
+Color coding:
+- Linear models: Blue shades
+- Non-linear models: Orange shades
+```
+
+**Statistics annotation**:
+```python
+# Per model
+fold_mean = np.mean(all_fold_accuracies)
+fold_std = np.std(all_fold_accuracies)
+fold_cv = fold_std / fold_mean  # Coefficient of variation
+
+# Show on figure
+text = f"CV = {fold_cv:.2f}"  # Lower CV = more stable
+```
+
+**Output**: `{VALIDATION_OUT}/model_comparison/{TIMESTAMP}/figures/fold_distributions.png`
+
+**Results**: _[write directory here after completion]_
+
+---
+
+#### 7.7 Cross-Subject Generalization
+
+[ ] **Task**: Compare HC→HC vs HC→CVD performance
+
+**Figure A**: Barplot comparison
+```
+Grouped bar plot:
+- X-axis: Model type [LDA, Ridge, KernelRidge, SVM, MLP, ForwardEncoding]
+- Y-axis: Accuracy
+- 2 bars per model:
+  - Blue bar: HC→HC (within-group)
+  - Red bar: HC→CVD (cross-group)
+- Error bars: 95% CI (bootstrap)
+- Individual subject points overlaid (semi-transparent)
+
+Statistical annotation per model:
+- Difference: Δ = HC→HC - HC→CVD
+- 95% CI for difference
+- p-value (Mann-Whitney U or bootstrap test)
+- Mark significance: * (p<0.05), ** (p<0.01), *** (p<0.001), ns (not significant)
+```
+
+**Figure B**: Per-subject breakdown
+```
+Heatmap:
+- Rows: Test subjects (7 HC for HC→HC, 3 CVD for HC→CVD)
+- Columns: Models
+- Color: Accuracy (0-1, viridis colormap)
+- Annotations: Accuracy values in each cell
+
+Shows individual variability in generalization
+```
+
+**Output**:
+- `{VALIDATION_OUT}/model_comparison/{TIMESTAMP}/figures/cross_subject_generalization_barplot.png`
+- `{VALIDATION_OUT}/model_comparison/{TIMESTAMP}/figures/cross_subject_generalization_heatmap.png`
+
+**Results**: _[write directory here after completion]_
+
+---
+
+#### 7.8 Comprehensive Summary Figure
+
+[ ] **Task**: All-in-one validation summary
+
+**Figure**: 6-panel comprehensive summary (for publication)
+```
+Panel A: Model Performance Comparison
+  - Barplot: Classification accuracy per model (after Procrustes)
+  - Error bars: 95% CI
+  - Chance line
+
+Panel B: Procrustes Alignment Effect (2×2)
+  - Linear vs Non-linear models
+  - Before vs After alignment
+  - Interaction effect annotation
+
+Panel C: Permutation Test
+  - Boxplot: Z-scores per model
+  - Dashed line: Z=2 (significance threshold)
+  - % significant annotation
+
+Panel D: Test-Retest Reliability
+  - Barplot: Split-half correlation per model
+  - Error bars: 95% CI
+  - Threshold lines: r=0.6 (good), r=0.8 (excellent)
+
+Panel E: Fold-Level Variability
+  - Violin plot: Within-subject CV per model
+  - Lower CV = more stable
+
+Panel F: Cross-Subject Generalization
+  - Barplot: HC→HC vs HC→CVD
+  - Statistical annotation
+  - Highlight if no significant difference (common mapping!)
+```
+
+**Layout**: 2 rows × 3 columns, figsize=(18, 12)
+
+**Output**: `{VALIDATION_OUT}/model_comparison/{TIMESTAMP}/figures/comprehensive_validation_summary.png`
+
+**Results**: _[write directory here after completion]_
+
+---
+
+---
+
+## IMPLEMENTATION STATUS (2026-02-11)
+
+### ✅ IMPLEMENTATION COMPLETE
+
+**Location**: `analysis/validation/scripts/model_comparison/`
+
+**Status**: All phases complete and ready for testing
+
+---
+
+### Files Created
+
+1. **`run_model_comparison.py`** - Phase 1: Model Comparison ✅
+   - 6 models: LDA, Ridge, KernelRidge, SVM, MLP, ForwardEncoding
+   - LORO cross-validation with nested hyperparameter tuning
+   - Support for `amplitudes_raw.npy` and `amplitudes_procrustes.npy`
+   - Comprehensive metrics: acc_exact, acc_45, acc_90, MAE, MedAE
+   - Output: `{timestamp}/sub-{ID}_performance_raw.json`
+
+2. **`run_validation_tests.py`** - Phase 2: Validation Tests ✅
+   - Permutation test (1000 permutations, within-run shuffle)
+   - Bootstrap CI (subject-level, 1000 iterations)
+   - Test-retest reliability (split-half, Spearman-Brown correction)
+   - Cross-subject generalization (HC→HC, HC→CVD)
+   - Outputs:
+     - `permutation_test.json`
+     - `bootstrap_ci.json`
+     - `reliability.json`
+     - `cross_subject_generalization.json`
+
+3. **`visualize_comprehensive.py`** - Phase 3: Visualization ✅
+   - Section 7.5: Permutation test panels (2×3 grid)
+   - Section 7.6: Fold distribution violin plots
+   - Section 7.7: Cross-subject generalization barplot
+   - Section 7.8: Comprehensive 6-panel summary (publication-ready)
+   - Output: `{timestamp}/figures/*.png`
+
+4. **`utils.py`** - Shared Utilities ✅
+   - Circular math, data loading, statistics
+   - Model classification, chance levels, summary stats
+
+5. **`config.py`** - Configuration ✅
+   - Paths, subjects, ROIs, hyperparameters
+   - Model colors, constants
+
+6. **`decoder_comparison_base.py`** - Original implementation (archived)
+7. **`visualization_base.py`** - Original visualization (archived)
+
+---
+
+### Implementation Summary
+
+#### ✅ Models (6/6) - Section 5.1
+
+| Model | Type | Encoding | Hyperparameters | Status |
+|-------|------|----------|-----------------|--------|
+| **LDA** | Linear | Labels (0-7) | solver, shrinkage | ✅ |
+| **Ridge** | Linear | Circular (sin/cos) | alpha | ✅ |
+| **KernelRidge** | Non-linear | Circular (sin/cos) | alpha, gamma | ✅ |
+| **SVM** | Non-linear | Labels (0-7) | C, gamma | ✅ |
+| **MLP** | Non-linear | Labels (0-7) | hidden_layers, alpha | ✅ |
+| **Forward Encoding** | Linear | 6-channel basis | alpha | ✅ |
+
+#### ✅ Validation Tests (4/4)
+
+| Test | Section | Key Metrics | Status |
+|------|---------|-------------|--------|
+| **Permutation Test** | 6.2 | p-value, z-score | ✅ |
+| **Bootstrap CI** | 6.4 | 95% CI (subject-level) | ✅ |
+| **Test-Retest Reliability** | 6.3 | Split-half r (Spearman-Brown) | ✅ |
+| **Cross-Subject Generalization** | 6.5 | HC→HC vs HC→CVD | ✅ |
+
+#### ✅ Visualizations (4/4)
+
+| Figure | Section | Description | Status |
+|--------|---------|-------------|--------|
+| Permutation Test Panels | 7.5 | 2×3 grid, null distributions | ✅ |
+| Fold Distribution | 7.6 | Violin plots, within-subject CV | ✅ |
+| Cross-Subject Generalization | 7.7 | Barplot with significance | ✅ |
+| Comprehensive Summary | 7.8 | 6-panel publication figure | ✅ |
+
+---
+
+### Data Requirements
+
+**Input**: `full_dataset_C010/` directory
+```
+full_dataset_C010/
+├── sub-01/
+│   ├── V1/
+│   │   ├── amplitudes_raw.npy          # (6 runs, 8 colors, n_voxels)
+│   │   ├── amplitudes_procrustes.npy   # (6 runs, 8 colors, n_voxels)
+│   │   ├── metrics.json
+│   │   └── config.json
+│   ├── V2/
+│   ├── V3/
+│   └── V4/
+...
+└── sub-10/
+```
+
+**Output Structure**:
+```
+{timestamp}/
+├── sub-01_performance_raw.json
+├── sub-02_performance_raw.json
+...
+├── sub-10_performance_raw.json
+├── permutation_test.json
+├── bootstrap_ci.json
+├── reliability.json
+├── cross_subject_generalization.json
+└── figures/
+    ├── permutation_test_panels.png
+    ├── fold_distributions.png
+    ├── cross_subject_generalization_barplot.png
+    └── comprehensive_validation_summary.png
+```
+
+---
+
+### Workflow
+
+#### Step 1: Run Model Comparison
+```bash
+# Single subject (local test)
+python run_model_comparison.py \
+    --baseline_dir /path/to/full_dataset_C010 \
+    --output_dir ./results \
+    --subject 01 \
+    --rois V1 V2 V3 V4 \
+    --models LDA Ridge KernelRidge SVM MLP ForwardEncoding \
+    --alignment both
+
+# All subjects (server, SLURM array)
+sbatch run_model_comparison.sbatch  # Array job, one subject per task
+```
+
+#### Step 2: Run Validation Tests
+```bash
+python run_validation_tests.py \
+    --baseline_dir /path/to/full_dataset_C010 \
+    --performance_dir ./results/{timestamp} \
+    --output_dir ./results/{timestamp} \
+    --alignment procrustes \
+    --tests permutation bootstrap reliability generalization
+```
+
+#### Step 3: Generate Visualizations
+```bash
+python visualize_comprehensive.py \
+    --results_dir ./results/{timestamp} \
+    --output_dir ./results/{timestamp}/figures \
+    --alignment procrustes
+```
+
+---
+
+### Key Findings (Expected)
+
+#### Research Questions Answered
+
+**SRQ1 (Validation)**: ✅
+- **Q1.1**: Which decoder model is best? → Compare 6 models
+- **Q1.2**: Is performance above chance? → Permutation test
+- **Q1.3**: Is performance reliable? → Split-half reliability
+- **Q1.4**: Does Procrustes help linear models? → Before/After comparison
+- **Q1.5**: Is mapping common across groups? → HC→HC vs HC→CVD
+
+#### Critical Test: Cross-Subject Generalization
+
+**Expected Outcome**:
+- If **HC→CVD ≈ HC→HC**: ✅ Voxel-to-color mapping is common → Filter learning valid
+- If **HC→CVD << HC→HC**: ⚠️ Mapping differs → More complex transformation needed
+
+**Interpretation**:
+- No significant difference → Filter approach is justified
+- Significant difference → CVD has fundamentally different representation
+
+---
+
+### Next Steps
+
+1. **Local Testing** (single subject, quick models):
+   ```bash
+   python run_model_comparison.py --subject 01 --rois V1 --models LDA Ridge
+   ```
+
+2. **Server Deployment**:
+   - Upload scripts to server
+   - Create SLURM batch scripts
+   - Run array job for all subjects
+
+3. **Analysis**:
+   - Run validation tests on complete performance data
+   - Generate all figures
+   - Interpret cross-subject generalization results
+
+4. **Documentation**:
+   - Update with actual results
+   - Write interpretation section
+   - Prepare for manuscript figures
+
+---
+
+**Status**: ✅ READY FOR EXECUTION
+
+**Implementation Date**: 2026-02-11
+
+**Next Action**: Local testing with single subject
+
+---
+

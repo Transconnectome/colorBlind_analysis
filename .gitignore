@@ -53,7 +53,6 @@ data/derivatives/
 
 ## Analysis outputs
 derivatives/
-results/
 output/
 pilot/
 hrf_test_outputs/
@@ -62,6 +61,8 @@ native_roi_report/
 sub01_roi_figures/
 prepfigs/
 preps/
+
+# Note: results/ pattern is more specific below for phase1
 
 ## Intermediate results
 results_summary.csv
@@ -191,3 +192,20 @@ analysis/validation/preprocess_Check/full_dataset*/
 analysis/validation/preprocess_Check/*_results/
 analysis/validation/preprocess_Check/phase2_results/
 analysis/validation/preprocess_Check/visualization/
+
+# ============================================
+# Phase1 Results (Do not commit large data)
+# ============================================
+
+# Past experimental results (historical experiments - too large)
+analysis/phase1_preprocess_decoding/results/past/
+
+# Validated data directories (subject data - ethical/privacy, too large)
+analysis/phase1_preprocess_decoding/results/validated/full_dataset_C010/
+analysis/phase1_preprocess_decoding/results/validated/visualization/
+analysis/phase1_preprocess_decoding/results/validated/HRF_visualization/
+
+# Keep summaries and documentation
+!analysis/phase1_preprocess_decoding/results/validated/README.md
+!analysis/phase1_preprocess_decoding/results/validated/analysis/
+!analysis/phase1_preprocess_decoding/results/past/README_ARCHIVE.md

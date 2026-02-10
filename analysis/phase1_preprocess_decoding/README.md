@@ -1,193 +1,145 @@
-# Phase 0: Preprocessing & ROI Extraction
+# Phase 1: Preprocessing & Baseline Decoding
 
-**Status**: Completed ✅
-**Scripts**: 2 files
+**Status**: ✅ Validated (2026-02-09)
+**Pipeline**: C010 (2nd-level drift) + Procrustes alignment
+**Performance**: RDM reliability 0.487, Noise ceiling 0.613, 79% utilization
 
----
+## Quick Start
 
-## Overview
+### Validated Pipeline (Use This)
 
-This phase handles fMRI data preprocessing and region-of-interest (ROI) extraction using the forward encoding model framework from Brouwer & Heeger (2009).
+```python
+# 1. C010 preprocessing
+python run_full_dataset_C010.py --subject 01 --roi V1
+
+# 2. Procrustes alignment
+python apply_procrustes_baseline.py --input results/validated/full_dataset_C010/
+
+# Expected performance:
+#   - RDM reliability: ~0.487
+#   - Noise ceiling: ~0.613
+#   - Ceiling utilization: ~79%
+```
+
+## Core Configuration
+
+### C010 Preprocessing
+**Key Settings:**
+- **1st-level GLM**: FIR basis (8 delays, 0-12s), no drift
+- **2nd-level GLM**: 8 HRF + 8 HRF derivative + 12 per-run drift (linear + constant)
+- **NO confounds**: No motion/tissue/WM regression
+- **NO high-pass**: Drift regressors handle slow trends
+
+**Rationale:**
+- 2nd-level drift essential for session-wide trends
+- Confounds remove signal (RDM -60% with C010+P3)
+- HPF redundant with drift regressors
+
+### Procrustes Alignment
+**Essential step:** 16.4× improvement over raw data
+
+**How it works:**
+- Orthogonal transformation (rotation + reflection, no scaling)
+- Aligns runs 1-5 to run 0 reference
+- Removes geometric variance between runs
+
+**Why essential:**
+- Geometric variance 16× larger than signal
+- Transforms negative noise ceilings to positive
+- 100% of subject-ROI pairs improve
+
+## Capabilities
+
+- **Procrustes Alignment**: Remove geometric variance between runs
+- **RDM Analysis**: Representational dissimilarity matrices
+- **Noise Ceiling**: Upper bound on achievable performance
+- **Forward Encoding**: 6-channel color-selective model
+- **Cross-Validation**: LORO (Leave-One-Run-Out)
 
 ## Key Scripts
 
-### 1. `fir_reconstruction_BH2009_system_clean.py`
+### Main Pipeline (Currently Used)
+- `roi_pipeline_selected_1202used.py`: ROI extraction and preprocessing
+- `apply_procrustes_baseline.py`: Procrustes alignment (Phase 2)
+- `visualize_roi_overlay.py`: ROI visualization
+- `create_permuted_amplitudes.py`: Permutation analysis
 
-**Purpose**: Main preprocessing and forward encoding model pipeline
+### Validation Tools
+- `run_full_dataset_C010.py`: Run C010 on full dataset
+- `analyze_c010_procrustes_effects.py`: Procrustes effect analysis
+- `compute_noise_ceiling_analysis.py`: Noise ceiling computation
+- `test_procrustes_improvement.py`: Validation testing
+- `test_whitening_before_procrustes.py`: Four-way comparison
 
-**Features**:
-- FIR (Finite Impulse Response) basis GLM for trial-wise beta estimation
-- ROI extraction using Wang et al. (2015) probabilistic atlas
-- Forward encoding with color-selective channels
-- Leave-one-run-out cross-validation
-- Color reconstruction and classification
+See EXECUTION_GUIDE.md for detailed usage.
 
-**Input**:
-- fMRIPrep preprocessed BOLD data (`/storage/connectome/haba6030/fmriprep_out_method3_header_mi/`)
-- Event files (stimulus timings)
-- Probabilistic atlas (V1, V2, V3, hV4)
+## Performance Metrics
 
-**Output**:
-- Beta maps (trial-wise voxel activations)
-- Channel weights (W matrix)
-- Classification accuracy
-- Reconstruction error
-- ROI masks
+### Raw vs Procrustes
 
-**Usage**:
-```bash
-python fir_reconstruction_BH2009_system_clean.py \
-    --subject 02 \
-    --roi V1 \
-    --dataset method3_header_mi
+| Metric | Raw C010 | C010 + Procrustes | Improvement |
+|--------|----------|-------------------|-------------|
+| RDM Reliability | 0.028 | **0.487** | +1644% |
+| Noise Ceiling | -0.038 | **0.613** | Negative→Good |
+| Ceiling Utilization | N/A | **79%** | Excellent |
+| Positive Pairs | 52.5% | **100%** | All positive |
+
+### Comparison with Original Baseline32
+- Original: 41% ceiling utilization
+- Current: **79% ceiling utilization**
+- **Improvement: +37.7 percentage points (nearly doubled)**
+
+## Key Findings (Summary)
+
+1. **C010 wins**: 2nd-level drift only, no confounds (RDM 0.039 vs -0.021 with confounds)
+2. **Procrustes essential**: 16.4× improvement, 100% positive effect
+3. **Whitening harmful**: -47% to -92% degradation regardless of order
+4. **HPF redundant**: Zero benefit over drift regressors
+5. **79% ceiling utilization**: Near-optimal performance
+
+## Directory Structure
+
+```
+phase1_preprocess_decoding/
+├── Main Scripts (currently used)
+├── Validation Scripts (from preprocess_Check)
+├── utils/validation/ (validation utilities)
+├── scripts/past/ (archived old code)
+├── results/
+│   ├── validated/ (C010 + Procrustes - USE THIS)
+│   └── past/ (historical experiments - reference only)
+└── Detailed docs: preprocess_tests.md, updated_noise_procrustes.md
 ```
 
-**Baseline Decoding Settings (Baseline32)**
-**Current Standard Configuration:**
-```python
-# Baseline32 configuration (determined via systematic review)
-Smoothing:      0mm (no smoothing)
-High-pass:      0.01 Hz
-Motion:         cosine (6 cosine basis functions)
-CompCor:        None
-Drift:          none (handled by high-pass)
-Standardize:    False (preserve raw beta values)
-```
+## Detailed Documentation
 
-**NEW: Raw Baseline with Residuals (Updated 2026-02-05)**
-**Minimal Preprocessing for Whitening Analysis:**
-```python
-# New Baseline (for 1st-level residuals & whitening)
-# Purpose: Minimal preprocessing to preserve spatial noise structure
-# Reference: Diedrichsen et al. (2016) - Multivariate Noise Normalization
+**For comprehensive details, see:**
+- **preprocess_tests.md**: HPF/drift systematic tests, three-way confound comparison
+- **updated_noise_procrustes.md**: Procrustes validation (16.4×), whitening tests
+- **NOISE_CEILING_C010_PROCRUSTES.md**: Noise ceiling analysis
+- **compare_with_previous.md**: Historical context, Baseline32 comparison
 
-Smoothing:         0mm (no smoothing)
-High-pass:         0.0 Hz (no highpass, preserve all frequencies)
-Motion:            none (no motion regressors)
-CompCor:           None
-Drift:             per_run (DCT basis per run)
-Standardize:       False
-Normalize_level:   none (completely raw BOLD, no normalization)
-Save_residuals:    True (1st-level GLM residuals for whitening)
-2nd_level_intercept: True (removes run baseline shifts)
+## What NOT to Do
 
-# Rationale:
-# - Preserves spatial noise correlation structure for accurate covariance estimation
-# - 1st-level residuals provide 3.5-5× more samples than run-level residuals
-# - Enables stable Ledoit-Wolf shrinkage (samples/voxels ratio > 3.0)
-# - Expected whitening effect: +25-35% noise ceiling improvement
-```
+1. ❌ **Use C010+P3**: Confounds degrade signal (-60%)
+2. ❌ **Apply whitening**: Harmful regardless of order (-47% to -92%)
+3. ❌ **Skip Procrustes**: Essential, 16× improvement
+4. ❌ **Use high-pass filtering**: Zero benefit over drift regressors
 
-**Command:**
-```bash
-python fir_reconstruction_BH2009_system_clean.py \
-    --subject 01 \
-    --roi V1 \
-    --highpass 0.0 \
-    --motion none \
-    --drift per_run \
-    --normalize-level none \
-    --save-residuals \
-    --2nd-level-intercept
-```
+## GLM Design
 
-**FIR GLM Parameters:**
-```python
-N_DELAYS = 8                    # 8 FIR delays (12s window at TR=1.5s)
-VOXEL_SELECTION = 'top50'       # Top 50% voxels by FIR R²
-HRF_MODEL = 'fir + derivative'  # 2nd-level GLM with HRF + temporal derivative
-```
+### FIR Basis Functions
+- **N_DELAYS**: 8 time points (0-12s post-stimulus at TR=1.5s)
+- **Voxel Selection**: Top 50% by FIR R²
+- **HRF Model**: 2nd-level GLM with HRF + temporal derivative
 
-**Forward Encoding Model:**
+### Forward Encoding Model
 ```python
 N_CHANNELS = 6                  # 6 half-wave rectified basis functions
 CHANNEL_CENTERS = [0°, 60°, 120°, 180°, 240°, 300°]  # Equally spaced in hue space
 CHANNEL_WIDTH = 60°             # FWHM of Gaussian basis functions
 CROSS_VALIDATION = 'LORO'       # Leave-One-Run-Out
-CROSS_VALIDATION = 'LOCO'       # Leave-One-Color-Out
 ```
-
-### 2. `grid_search_preprocessing.py` : NOT USED - ALREADY DONE
-
-**Purpose**: Systematic evaluation of preprocessing configurations
-
-**Features**:
-- Grid search over 144 configurations (3×2×3×2×2×2)
-- Cross-subject consistency analysis
-- Optimal configuration selection
-
-**Evaluated Parameters**:
-- Smoothing FWHM: {0, 3, 6} mm
-- High-pass filtering: {True, False}
-- Motion regressors: {None, basic6, full24}
-- CompCor: {True, False}
-- Drift terms: {0, 2}
-- Standardization: {True, False}
-
-**Recommended Configuration** (from systematic analysis):
-- Smoothing: 6mm FWHM
-- High-pass: Yes (128s)
-- Motion: 6 basic parameters
-- CompCor: No
-- Drift: 0 (trend removed by high-pass)
-- Standardization: Yes (trial-wise)
-
----
-
-## Methods
-
-### GLM Design
-
-**FIR Basis Functions**:
-- 7 time points (0-14s post-stimulus)
-- Captures full hemodynamic response
-- No assumption about HRF shape
-
-**Confound Regression**:
-- Motion parameters (6 or 24)
-- CompCor components (optional)
-- Polynomial drift terms
-
-### Forward Encoding Model
-
-**Channel Response Functions**:
-```python
-# 8 color-selective channels (half-wave rectified)
-def channel_response(color_angle, channel_center):
-    angle_diff = circular_distance(color_angle, channel_center)
-    response = max(0, cos(angle_diff))^7  # Raised cosine (exponent=7)
-    return response
-```
-
-**Training**:
-```
-C = channel_response_matrix  # (n_trials, n_channels)
-B = beta_matrix              # (n_trials, n_voxels)
-W = (C^T C)^-1 C^T B        # Weight matrix (n_channels, n_voxels)
-```
-
-**Testing**:
-```
-C_test = test_channel_matrix
-B_predicted = C_test @ W
-decoded_color = argmax(correlation(B_predicted, B_test))
-```
-
----
-
-## Quality Control
-
-**Metrics**:
-- Classification accuracy (chance: 12.5%)
-- Reconstruction error (chance: 90°)
-- Cross-run stability
-- Voxel count per ROI
-
-**Typical Results**:
-- HC participants: 60-80% accuracy, 25-40° error
-- CVD participants: 55-75% accuracy, 30-50° error
-
----
 
 ## Output Structure
 
@@ -204,8 +156,6 @@ derivatives/BH2009_{dataset}/{timestamp}/
         ├── channel_tuning.png
         └── reconstruction_wheel.png
 ```
-
----
 
 ## References
 

@@ -1,0 +1,92 @@
+================================================================================
+Test 1A: HC-only Training Verification (Consistency Check)
+================================================================================
+Timestamp: 20260216_163108
+HC subjects (n=7): ['sub-01', 'sub-02', 'sub-03', 'sub-04', 'sub-05', 'sub-06', 'sub-07']
+CVD subjects (n=3): ['sub-08', 'sub-09', 'sub-10']
+
+
+================================================================================
+ROI: V1
+================================================================================
+  ✅ File found: V1_procrustes_srm_results.json
+  ✅ Valid result structure
+  ✅ Correct subjects (HC: 7, CVD: 3)
+  ✅ CVD-HC (0.5733) > HC-HC (0.3898), ratio=1.47x
+  ✅ Statistical tests:
+     t-test: t=2.772, p=0.0242
+     Mann-Whitney: U=20.0, p=0.0167
+
+  ✅ ALL CHECKS PASSED
+
+================================================================================
+ROI: V2
+================================================================================
+  ✅ File found: V2_procrustes_srm_results.json
+  ✅ Valid result structure
+  ✅ Correct subjects (HC: 7, CVD: 3)
+  ✅ CVD-HC (0.5489) > HC-HC (0.3998), ratio=1.37x
+  ✅ Statistical tests:
+     t-test: t=2.743, p=0.0253
+     Mann-Whitney: U=19.0, p=0.0333
+
+  ✅ ALL CHECKS PASSED
+
+================================================================================
+ROI: V3
+================================================================================
+  ✅ File found: V3_procrustes_srm_results.json
+  ✅ Valid result structure
+  ✅ Correct subjects (HC: 7, CVD: 3)
+  ✅ CVD-HC (0.5094) > HC-HC (0.4435), ratio=1.15x
+  ✅ Statistical tests:
+     t-test: t=0.806, p=0.4434
+     Mann-Whitney: U=13.0, p=0.3333
+
+  ✅ ALL CHECKS PASSED
+
+================================================================================
+ROI: hV4
+================================================================================
+  ✅ File found: V4_procrustes_srm_results.json
+  ✅ Valid result structure
+  ✅ Correct subjects (HC: 7, CVD: 3)
+  ✅ CVD-HC (0.6413) > HC-HC (0.5749), ratio=1.12x
+  ✅ Statistical tests:
+     t-test: t=0.717, p=0.4938
+     Mann-Whitney: U=13.0, p=0.3333
+
+  ✅ ALL CHECKS PASSED
+
+================================================================================
+OVERALL SUMMARY
+================================================================================
+ROIs passed: 4/4
+
+✅ ALL VERIFICATION CHECKS PASSED
+   Results are internally consistent and follow expected patterns
+   HC-only training implementation appears CORRECT
+
+================================================================================
+KEY FINDINGS
+================================================================================
+
+V1:
+  HC-HC disparity: 0.3898 (n=7)
+  CVD-HC disparity: 0.5733 (n=3)
+  CVD/HC ratio: 1.47x
+
+V2:
+  HC-HC disparity: 0.3998 (n=7)
+  CVD-HC disparity: 0.5489 (n=3)
+  CVD/HC ratio: 1.37x
+
+V3:
+  HC-HC disparity: 0.4435 (n=7)
+  CVD-HC disparity: 0.5094 (n=3)
+  CVD/HC ratio: 1.15x
+
+hV4:
+  HC-HC disparity: 0.5749 (n=7)
+  CVD-HC disparity: 0.6413 (n=3)
+  CVD/HC ratio: 1.12x

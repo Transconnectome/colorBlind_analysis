@@ -1,0 +1,42 @@
+================================================================================
+Test 1D (CORRECTED): Color Label Permutation Test
+================================================================================
+Timestamp: 20260216_171219
+Permutations: 1,000
+
+Purpose: Test if patterns depend on true color labels
+Method: Shuffle color labels (1-8) within each subject
+Expected: Shuffled labels → lower disparity difference & RDM correlations
+
+
+================================================================================
+ROI: V1
+================================================================================
+  ⚠️  Aligned amplitudes not found
+
+================================================================================
+ROI: V2
+================================================================================
+  ⚠️  Aligned amplitudes not found
+
+================================================================================
+ROI: V3
+================================================================================
+  ⚠️  Aligned amplitudes not found
+
+================================================================================
+ROI: hV4
+================================================================================
+  ⚠️  Aligned amplitudes not found
+
+================================================================================
+OVERALL SUMMARY
+================================================================================
+
+ROIs with significant color label dependency: 0/0
+
+Interpretation:
+  - p < 0.05: Observed patterns REQUIRE true color labels
+  - p > 0.05: Patterns may be model structure artifact
+
+⚠️  VALIDATION UNCLEAR: Some ROIs may show artifacts

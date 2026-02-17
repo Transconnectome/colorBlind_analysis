@@ -9,7 +9,8 @@ Before running any Python code, activate the nilearn conda environment:
 conda activate nilearn
 ```
 
-Most of the files are being ran in the remote server and directory named: haba6030@node2:/scratch/connectome/haba6030/colorBlind
+Most of the files are being ran in the remote server and directory named: haba6030@node3:/scratch/connectome/haba6030/colorBlind
+(Note: Use `node3` for SSH/SCP access. SLURM jobs run on node2/node4 via sbatch.)
 Also, most of the code is ran by using SLURM.
 Therefore, for running a code to check it, follow this procedure:
 1. suggest code and sbatch modification & bash file for required checking in interactive mode

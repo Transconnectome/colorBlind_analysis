@@ -42,6 +42,10 @@ build/
 *.nii.gz
 *.mgz
 
+## NumPy arrays (large data)
+*.npy
+*.npz
+
 ## Atlases and reference data
 ProbAtlas_v4/
 probatlas_v4.zip
@@ -212,3 +216,15 @@ analysis/phase1_preprocess_decoding/results/validated/HRF_visualization/
 !analysis/phase1_preprocess_decoding/results/validated/README.md
 !analysis/phase1_preprocess_decoding/results/validated/analysis/
 !analysis/phase1_preprocess_decoding/results/past/README_ARCHIVE.md
+
+# Phase1 validation data (contains .npy arrays)
+analysis/phase1_preprocess_decoding/validation/drift_validation/
+analysis/phase1_preprocess_decoding/validation/onset_validation/
+
+# ============================================
+# Phase2 Results (large binary data)
+# ============================================
+analysis/phase2_SRM_across_between/results/c010/
+analysis/phase2_SRM_across_between/results/pastData/
+analysis/phase2_SRM_across_between/results/brain_surface_visualization/
+analysis/phase2_SRM_across_between/results/srm_brain_visualization/

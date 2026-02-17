@@ -1,0 +1,102 @@
+================================================================================
+Test 1D (CORRECTED): Color Label Permutation Test
+================================================================================
+Timestamp: 20260216_172542
+Permutations: 1,000
+
+Purpose: Test if patterns depend on true color labels
+Method: Shuffle color labels (1-8) within each subject
+Expected: Shuffled labels → lower disparity difference & RDM correlations
+
+
+================================================================================
+ROI: V1
+================================================================================
+
+Observed Metrics:
+  CVD-HC disparity difference: 0.1835
+  HC RDM correlation: 0.447
+  CVD RDM correlation: 0.297
+
+Null Distribution (Permuted Color Labels):
+  Disparity difference: mean=0.0821, std=0.0680
+  HC RDM correlation: mean=-0.000, std=0.044
+  CVD RDM correlation: mean=0.006, std=0.126
+
+Permutation Test Results:
+  Disparity difference: p=0.0600 (94.0%ile)
+  HC RDM correlation: p=0.0000 (100.0%ile)
+  CVD RDM correlation: p=0.0220 (97.8%ile)
+  ⚠️  WARNING: Patterns may be model artifact
+
+================================================================================
+ROI: V2
+================================================================================
+
+Observed Metrics:
+  CVD-HC disparity difference: 0.1491
+  HC RDM correlation: 0.517
+  CVD RDM correlation: 0.591
+
+Null Distribution (Permuted Color Labels):
+  Disparity difference: mean=0.1009, std=0.0696
+  HC RDM correlation: mean=-0.001, std=0.041
+  CVD RDM correlation: mean=0.002, std=0.120
+
+Permutation Test Results:
+  Disparity difference: p=0.2470 (75.3%ile)
+  HC RDM correlation: p=0.0000 (100.0%ile)
+  CVD RDM correlation: p=0.0000 (100.0%ile)
+  ⚠️  WARNING: Patterns may be model artifact
+
+================================================================================
+ROI: V3
+================================================================================
+
+Observed Metrics:
+  CVD-HC disparity difference: 0.0658
+  HC RDM correlation: 0.385
+  CVD RDM correlation: 0.591
+
+Null Distribution (Permuted Color Labels):
+  Disparity difference: mean=0.1055, std=0.0817
+  HC RDM correlation: mean=-0.001, std=0.042
+  CVD RDM correlation: mean=0.004, std=0.125
+
+Permutation Test Results:
+  Disparity difference: p=0.6940 (30.6%ile)
+  HC RDM correlation: p=0.0000 (100.0%ile)
+  CVD RDM correlation: p=0.0010 (99.9%ile)
+  ⚠️  WARNING: Patterns may be model artifact
+
+================================================================================
+ROI: hV4
+================================================================================
+
+Observed Metrics:
+  CVD-HC disparity difference: 0.0664
+  HC RDM correlation: 0.158
+  CVD RDM correlation: 0.276
+
+Null Distribution (Permuted Color Labels):
+  Disparity difference: mean=0.1049, std=0.0756
+  HC RDM correlation: mean=0.001, std=0.044
+  CVD RDM correlation: mean=0.002, std=0.111
+
+Permutation Test Results:
+  Disparity difference: p=0.6900 (31.0%ile)
+  HC RDM correlation: p=0.0050 (99.5%ile)
+  CVD RDM correlation: p=0.0150 (98.5%ile)
+  ⚠️  WARNING: Patterns may be model artifact
+
+================================================================================
+OVERALL SUMMARY
+================================================================================
+
+ROIs with significant color label dependency: 0/4
+
+Interpretation:
+  - p < 0.05: Observed patterns REQUIRE true color labels
+  - p > 0.05: Patterns may be model structure artifact
+
+⚠️  VALIDATION UNCLEAR: Some ROIs may show artifacts

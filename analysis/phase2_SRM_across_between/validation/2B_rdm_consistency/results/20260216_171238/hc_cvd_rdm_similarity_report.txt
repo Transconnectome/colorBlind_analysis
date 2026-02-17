@@ -1,0 +1,81 @@
+================================================================================
+Test 2B (CORRECTED): HC-CVD RDM Similarity
+================================================================================
+Timestamp: 20260216_171238
+
+CRITICAL TEST: HC-CVD RDM correlation should be HIGH
+               (validates 'parallel' = same relational structure)
+
+
+================================================================================
+ROI: V1
+================================================================================
+
+RDM Similarity Statistics:
+  HC-HC (n=21): 0.082 ± 0.172
+  CVD-CVD (n=3): 0.195 ± 0.154
+  HC-CVD (n=21): 0.041 ± 0.218
+
+Critical Comparison (HC-CVD vs HC-HC):
+  Difference: -0.041
+  t-test: t=-0.665, p=0.5097
+  ❌ WARNING: HC-CVD similarity LOW (0.041 < 0.4)
+              'Parallel' pattern NOT validated
+
+================================================================================
+ROI: V2
+================================================================================
+
+RDM Similarity Statistics:
+  HC-HC (n=21): 0.058 ± 0.235
+  CVD-CVD (n=3): 0.392 ± 0.138
+  HC-CVD (n=21): 0.117 ± 0.285
+
+Critical Comparison (HC-CVD vs HC-HC):
+  Difference: +0.059
+  t-test: t=0.709, p=0.4825
+  ❌ WARNING: HC-CVD similarity LOW (0.117 < 0.4)
+              'Parallel' pattern NOT validated
+
+================================================================================
+ROI: V3
+================================================================================
+
+RDM Similarity Statistics:
+  HC-HC (n=21): 0.065 ± 0.150
+  CVD-CVD (n=3): 0.253 ± 0.154
+  HC-CVD (n=21): 0.133 ± 0.214
+
+Critical Comparison (HC-CVD vs HC-HC):
+  Difference: +0.069
+  t-test: t=1.173, p=0.2477
+  ℹ️  Note: V3 not critical for validation
+
+================================================================================
+ROI: hV4
+================================================================================
+
+RDM Similarity Statistics:
+  HC-HC (n=21): 0.021 ± 0.222
+  CVD-CVD (n=3): 0.099 ± 0.085
+  HC-CVD (n=21): 0.108 ± 0.213
+
+Critical Comparison (HC-CVD vs HC-HC):
+  Difference: +0.087
+  t-test: t=1.263, p=0.2140
+  ℹ️  Note: hV4 not critical for validation
+
+================================================================================
+OVERALL SUMMARY
+================================================================================
+
+Critical ROIs (V1/V2) with HC-CVD similarity validated: 0/2
+  ❌ V1: HC-CVD=0.041 (low or < HC-HC=0.082)
+  ❌ V2: HC-CVD=0.117 (low or < HC-HC=0.058)
+
+Interpretation:
+  - High HC-CVD correlation: CVD preserves HC's relational color structure
+  - Low HC-CVD correlation: CVD uses different color structure
+
+❌ VALIDATION FAILED: 'Parallel' pattern NOT confirmed
+   CVD may use different color structure than HC

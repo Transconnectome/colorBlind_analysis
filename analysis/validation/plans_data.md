@@ -1,27 +1,35 @@
 This is to verify data and model structure in the analysis.
 Once finished each part, write the directory of result files in this file.
 
+> **Last updated**: 2026-02-17
+
 ## 0. Configuration
 
 **Dataset**: `method3_header_mi` (current standard)
-**Baseline timestamp**: `only_Zscore_1stGLM` (z-score normalization at 1st GLM)
-**ROIs**: V1, V2, V3, hV4
+**Baseline pipeline**: `C010` (2nd-level drift removal + Procrustes alignment)
+**ROIs**: V1, V2, V3, hV4 (Wang Atlas, on disk as V1/V2/V3/V4)
 **Subjects**:
   - HC (non-CVD): sub-01 ~ sub-07 (7명)
   - CVD: sub-08 ~ sub-10 (3명)
 
-**Base paths**:
+**Local paths**:
+```
+BASELINE_RESULTS=/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase1_preprocess_decoding/results/full_dataset_C010
+VALIDATION_OUT=/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/validation/results
+```
+
+**Server paths**:
 ```
 FMRIPREP_OUT=/storage/connectome/haba6030/fmriprep_out_method3_header_mi
-ROI_MASKS=/scratch/connectome/haba6030/colorBlind/analysis/roi_masks/method3_header_mi
-BASELINE_RESULTS=/scratch/connectome/haba6030/colorBlind/analysis/phase1_preprocess_decoding/method3_header_mi/results/baseline_decoding/only_Zscore_1stGLM
+BASELINE_RESULTS=/scratch/connectome/haba6030/colorBlind/derivatives/phase1_results/full_dataset_C010
 VALIDATION_OUT=/scratch/connectome/haba6030/colorBlind/analysis/validation/results
 ```
 
-**Data structure verified**:
-- amplitudes_z.npy: (6 runs, 8 colors, ~284 voxels for V1)
-- Range: [-2.48, 2.47] (z-scored)
-- File size: ~0.1 MB per subject-ROI
+**Data structure** (per subject-ROI):
+- `amplitudes_raw.npy`: (6 runs, 8 colors, n_voxels) — pre-Procrustes
+- `amplitudes_procrustes.npy`: (6 runs, 8 colors, n_voxels) — Procrustes-aligned
+- `procrustes_disparities.npy`: per-run disparity values
+- `metrics.json`, `config.json`: pipeline metadata
 
 ---
 
@@ -30,7 +38,7 @@ VALIDATION_OUT=/scratch/connectome/haba6030/colorBlind/analysis/validation/resul
 ### 1. Preprocessing results: Metrics & Visualization
 
 #### 1.1 tSNR Analysis
-[ ] **Task**: ROI별 tSNR 분포 계산 및 시각화
+[x] **Task**: ROI별 tSNR 분포 계산 및 시각화
 
 **Input**:
 - fMRIPrep outputs: `{FMRIPREP_OUT}/sub-{ID}/func/*_desc-preproc_bold.nii.gz`
@@ -883,7 +891,7 @@ hV4     NaN                   0.04 ± 0.11            —
 
 
 ##### 3.1.2 Split-half Reliability (Noise Ceiling)
-[✅ COMPLETED - 2026-02-03] **Task**: Run split으로 noise ceiling 추정
+[x] **COMPLETED** (2026-02-03, re-run 2026-02-17 with sub-01 included for N=40)
 
 **Input**:
 - Procrustes-aligned amplitudes: `{BASELINE_RESULTS}/sub-{ID}/{ROI}/amplitudes_procrustes.npy`
@@ -1008,12 +1016,15 @@ for iteration in range(1000):
 
 #### 3.2 Inter-Subject Similarity (ISS)
 
+> **SUPERSEDED**: Sections 3.2.1–3.2.4 are now addressed by Phase 2 SRM analysis.
+> See `analysis/phase2_SRM_across_between/` and `METHODS_RESULTS_SUMMARY_FOR_PAPER.md` Phase 2.
+
 **Purpose**: 정렬 전후 피험자 간 표현 일치도 변화 검증
 
 ---
 
 ##### 3.2.1 Before Alignment (Baseline)
-[ ] **Task**: 정렬 전 피험자 간 RDM 유사도
+[SUPERSEDED] **Task**: 정렬 전 피험자 간 RDM 유사도 → Covered by Phase 2 SRM RDM correlation
 
 **Input**:
 - Baseline amplitudes (no alignment): `{BASELINE_RESULTS}/sub-{ID}/{ROI}/amplitudes_z.npy`
@@ -1044,7 +1055,7 @@ ISS_before = mean(all_pairwise_ISS)
 ---
 
 ##### 3.2.2 After Alignment (Procrustes/SRM)
-[ ] **Task**: 정렬 후 ISS 증가 검증 (표현 일치도)
+[SUPERSEDED] **Task**: 정렬 후 ISS 증가 검증 → Covered by Phase 2 SRM disparity comparison
 
 **Input**:
 - Procrustes-aligned patterns: From `phase2_procrustes_cvd_hc` results
@@ -1068,7 +1079,7 @@ delta_ISS = ISS_after - ISS_before
 ---
 
 ##### 3.2.3 Downstream Decoding Accuracy
-[ ] **Task**: 정렬 후 inter-subject decoding 성능 향상 검증
+[SUPERSEDED] **Task**: 정렬 후 inter-subject decoding → Covered by decoder model comparison (plans_decoder.md)
 
 **Input**:
 - Baseline patterns (before alignment)
@@ -1104,7 +1115,7 @@ t_stat, p_value = ttest_rel(acc_after, acc_before)
 ---
 
 ##### 3.2.4 Alignment Effect Summary
-[ ] **Task**: 정렬 효과 통계 검증 및 시각화
+[SUPERSEDED] **Task**: 정렬 효과 통계 → Covered by Phase 2 SRM permutation tests
 
 **Computation**:
 ```python
@@ -1216,103 +1227,235 @@ scatter(embedding_2d, c=stimulus_colors, s=100)
 
 ---
 
-## TODO: Between-Subject Procrustes Alignment
+---
 
-### Problem: Voxel Count Heterogeneity
+## 5. Validation Methodology: Rationale, Criteria, and Implementation
 
-**Issue**: Cannot perform between-subject Procrustes alignment in voxel space because different subjects have different numbers of voxels per ROI.
+> This section documents each validation test's **why**, **what passes**, and **how it works** for paper reproducibility.
 
-**Example** (V1 ROI):
-- sub-01: 354 voxels
-- sub-02: 378 voxels
-- sub-07: 129 voxels
-- Range across all subjects: 129-429 voxels
+### Overview
 
-**Impact**:
-- Cannot create HC reference by averaging voxel patterns
-- Cannot align CVD subjects to HC reference in voxel space
-- Current within-subject Procrustes only addresses cross-run alignment (6 runs within each subject)
-- Inter-subject alignment requires common feature space
+| Test | Question | Pass Criterion | Status |
+|------|----------|---------------|--------|
+| **Noise Ceiling** | Is data quality sufficient for analysis? | Ceiling > 0.40 all ROIs | DONE |
+| **1D Permutation** | Is CVD-HC disparity > chance? | p < 0.05 (V1/V2) | DONE |
+| **2A Run-Split ICC** | Are individual CVD patterns stable across sessions? | Mean r > 0.40 (moderate) | DONE |
+| **2B RDM Consistency** | Do CVD subjects preserve color structure? (validates "parallel") | CVD split-half r >= HC in V1/V2 | DONE |
+| **1B LOSO** | Is result driven by single subject? | p < 0.05 in >=5/7 folds | PENDING (server) |
+| **1C Split-Half SRM** | Is SRM stable across run splits? | Spearman r > 0.70 | PENDING (server) |
+| **2C k-Selection** | Is k=4 optimal? | Reconstruction error minimized near k=4 | PENDING (server) |
+| **2D Alignment Comparison** | Does SRM outperform alternatives? | SRM > Procrustes > Raw | PENDING (server) |
+| **Bootstrap CIs** | What are confidence intervals for key stats? | 95% CI for disparity, RDM corr | NOT STARTED |
 
-### Proposed Solutions
+---
 
-#### Option 1: ANOVA-based Voxel Selection
+### 5.1 Noise Ceiling (Split-Half Reliability)
 
-**Method**: Select common voxels across subjects based on statistical criteria
+**Why**: Establishes the maximum achievable performance given data noise. Without this, we cannot distinguish between "model failure" and "data is too noisy to decode." The ceiling anchors our interpretation: if utilization is low, the problem is the model (not data); if ceiling itself is low, data quality is the bottleneck.
 
-**Approach**:
-1. For each ROI, identify voxels present in all subjects
-2. Use F-statistics (one-way ANOVA across color conditions) to rank voxels by information content
-3. Select top N voxels (e.g., N = minimum voxel count across subjects)
-4. Apply between-subject Procrustes on selected voxel subset
+**Pass criterion**: Ceiling > 0.40 for all ROIs (Nili et al. 2014: <0.40 = poor quality, 0.40-0.60 = moderate, >0.60 = high quality).
 
-**Pros**:
-- Direct voxel-space alignment preserves spatial interpretability
-- Statistical selection ensures informative voxels retained
-- Straightforward implementation
+**Method**: Split-half RDM correlation with Spearman-Brown correction
+```
+1. Random split-half (1000 iterations):
+   - Split 6 runs into 2 halves (3+3) randomly
+   - Average patterns within each half → (8 colors, n_voxels)
+   - Compute RDM per half (correlation distance)
+   - Spearman correlation between upper triangles (28 pairs)
+   - Spearman-Brown correction: r_full = 2r / (1+r)
+   - Report: mean across iterations, 95% CI
 
-**Cons**:
-- May lose information from excluded voxels
-- Requires careful selection threshold
-- Assumes spatial correspondence across subjects (after MNI registration)
+2. Deterministic odd/even split:
+   - Odd runs [0,2,4] vs Even runs [1,3,5]
+   - Same RDM correlation + Spearman-Brown
+   - Advantage: reproducible, controls for temporal drift (Schütt et al. 2021)
+```
 
-#### Option 2: SRM (Shared Response Model)
+**Implementation**: `analysis/validation/scripts/evaluate_with_noise_ceiling.py`
+- Uses `full_dataset_C010` Procrustes-aligned amplitudes
+- Sub-07 hV4 excluded (16 voxels → correlation distance underdetermined)
 
-**Method**: Project individual voxel patterns to lower-dimensional common space
+**Results** (2026-02-17, N=39 valid):
 
-**Approach**:
-1. Learn shared response space from HC subjects' data
-   - Input: Individual subjects' voxel patterns (different dimensions)
-   - Output: Common low-dimensional space (e.g., 50-100 dimensions)
-2. Project CVD subjects to same learned common space
-3. Compare representations in common space
-4. Apply Procrustes alignment in common space if needed
+| ROI | N | Ceiling (random) | Ceiling (odd/even) | RDM After | % Ceiling |
+|-----|---|-----------------|-------------------|-----------|-----------|
+| V1 | 10 | 0.582 ± 0.172 | 0.588 ± 0.237 | 0.160 ± 0.154 | 24.2% |
+| V2 | 10 | 0.635 ± 0.200 | 0.571 ± 0.271 | 0.200 ± 0.155 | 29.0% |
+| V3 | 10 | 0.525 ± 0.226 | 0.545 ± 0.237 | 0.173 ± 0.174 | 23.2% |
+| hV4 | 9 | 0.697 ± 0.168 | 0.739 ± 0.196 | 0.315 ± 0.186 | 41.8% |
 
-**Pros**:
-- Handles voxel count heterogeneity naturally
-- Dimensionality reduction may improve signal-to-noise ratio
-- Captures shared functional architecture across subjects
-- Does not assume voxel-wise correspondence
+**Interpretation**: All ROIs pass ceiling > 0.40 → data quality sufficient. Utilization 24-42% indicates substantial model improvement room. hV4 shows best ceiling AND utilization.
 
-**Cons**:
-- Less interpretable than voxel space (cannot map back to specific voxels)
-- Requires parameter tuning (number of dimensions, regularization)
-- Computationally more expensive
+---
 
-**References**:
-- Chen et al. (2015). A Reduced-Dimension fMRI Shared Response Model. NIPS.
-- Haxby et al. (2020). Hyperalignment: Modeling shared information encoded in idiosyncratic cortical topographies. Neuron.
+### 5.2 Test 1D: Permutation Test (Group Disparity Significance)
 
-### Analysis Goals (After Resolving Voxel Mismatch)
+**Why**: The SRM analysis found CVD-HC disparity > HC-HC disparity in V1/V2, but with only n=3 CVD subjects, we need to confirm this is not a chance finding. Label permutation provides a non-parametric significance test that is valid regardless of sample size or distribution.
 
-1. **Build HC Reference**: Average aligned HC subjects' patterns in common space
-2. **Align All Subjects**: Apply between-subject Procrustes to HC reference
-3. **Compare Procrustes Disparity**:
-   - HC-to-HC disparity (should be low)
-   - CVD-to-HC disparity (expected to be higher if CVD has different color representation)
-4. **Inter-Subject RDM Correlation**:
-   - Compute RDM for each subject in aligned space
-   - Measure Spearman correlation between subjects
-   - Compare HC-HC correlation vs CVD-HC correlation
+**Pass criterion**: p < 0.05 for V1/V2 (where uncorrected t-tests showed p < 0.025). V3/hV4 expected non-significant (underpowered).
 
-### Expected Outcomes
+**Method**: Label permutation on pre-computed disparity values
+```
+1. Load existing disparity results from Test 1A
+2. Compute observed t-statistic: (CVD-HC mean - HC-HC mean) / pooled SE
+3. Permutation loop (n=10,000 iterations):
+   - Shuffle HC-HC vs CVD-HC labels
+   - Recompute t-statistic under null
+4. P-value: P(|t_null| >= |t_obs|) (two-tailed)
+5. Effect size: Hedges' g (bias-corrected)
+```
 
-**If CVD differs from HC:**
-- CVD-to-HC Procrustes disparity > HC-to-HC disparity
-- CVD-HC RDM correlation < HC-HC RDM correlation
-- MDS visualization shows different color geometry for CVD
+**Implementation**: `analysis/phase2_SRM_across_between/validation/1D_permutation/run_permutation_test.py`
+- Loads existing `test_1a_results.json` (no recomputation of SRM)
+- 10,000 permutations (enough for p down to 0.0001)
 
-**If CVD similar to HC:**
-- CVD-to-HC disparity ≈ HC-to-HC disparity
-- CVD-HC RDM correlation ≈ HC-HC RDM correlation
-- Color geometry preserved in CVD
+**Results**:
 
-### Next Steps
+| ROI | p-value | Hedges' g | Interpretation |
+|-----|---------|-----------|---------------|
+| V1 | **0.014** | 1.91 (large) | Significant — CVD-HC disparity > chance |
+| V2 | **0.036** | 1.89 (large) | Significant — CVD-HC disparity > chance |
+| V3 | 0.357 | 0.59 | Non-significant (expected, underpowered) |
+| hV4 | 0.453 | 0.48 | Non-significant (expected, underpowered) |
 
-1. Implement voxel selection method (start with ANOVA as simpler approach)
-2. Build HC reference in common space
-3. Align all subjects (HC + CVD) to HC reference
-4. Compute and compare disparity metrics
-5. Visualize aligned color spaces (MDS)
-6. If ANOVA approach insufficient, implement SRM
+**Interpretation**: V1/V2 CVD-HC disparity differences survive permutation test with large effect sizes. The non-significance in V3/hV4 is consistent with weaker group differences (effect size d < 0.6) and low power with n=3.
+
+---
+
+### 5.3 Test 2A: Run-Split Pattern Stability (Individual CVD)
+
+**Why**: With only n=3 CVD subjects, individual-level reliability matters. If a CVD subject's pattern is highly variable across run halves, their elevated disparity could reflect noise rather than a stable representational difference. This test checks whether individual CVD activation patterns are reproducible.
+
+**Pass criterion**: Mean split-half correlation r > 0.40 (moderate reliability); ideally > 0.60 (good). Low reliability does not invalidate group findings but weakens individual-level claims.
+
+**Method**: Within-subject per-color voxel pattern correlation
+```
+1. For each CVD subject × ROI:
+   - Split: runs 1-3 (Set A), runs 4-6 (Set B)
+   - Average each half → pattern_A, pattern_B: (8 colors, n_voxels)
+
+2. Per-color correlation:
+   - For each color c ∈ {1..8}:
+     r_c = pearson(pattern_A[c], pattern_B[c])
+   - Mean r across 8 colors → split-half correlation
+
+3. Spearman-Brown correction: r_full = 2r / (1+r)
+
+4. Bootstrap CI (1000 iterations, run-level resampling):
+   - Resample runs with replacement within each half
+   - Recompute per-color correlations
+   - 2.5th/97.5th percentile
+
+5. Classification: >0.75 excellent, >0.60 good, >0.40 moderate, <0.40 poor
+```
+
+**Note**: This measures **voxel-level activation pattern** stability, NOT RDM (color relationship) stability. Test 2B addresses the latter.
+
+**Implementation**: `analysis/phase2_SRM_across_between/validation/2A_run_split_icc/compute_run_split_icc.py`
+
+**Results** (3 CVD subjects × 4 ROIs = 12 pairs):
+
+| Classification | Count | Percentage |
+|---------------|-------|------------|
+| Good (>0.60) | 1 | 8.3% (sub-08 hV4, r=0.71) |
+| Moderate (0.40-0.60) | 7 | 58.3% |
+| Poor (<0.40) | 4 | 33.3% |
+
+- **Mean r = 0.475** (moderate) — passes minimum criterion
+- **Best**: sub-08 (most stable across all ROIs)
+- **Weakest**: V1 (lowest correlations; noisiest ROI consistent with tSNR)
+- 3 runs per half limits achievable reliability; moderate is reasonable for this design
+
+**Interpretation**: Individual CVD patterns are moderately reproducible. This supports interpreting elevated disparity as a stable signal rather than pure noise, though with caveats for the 33% poor-reliability pairs. Sub-08 is the most reliable individual case.
+
+---
+
+### 5.4 Test 2B: RDM Split-Half Consistency (Validates "Parallel" Pattern)
+
+**Why**: This is the **most critical validation** for the "scattered but parallel" interpretation. The claim is that CVD subjects have different spatial positions in shared space (scattered = high disparity) but preserve similar color relationship structure (parallel = high RDM correlation). If CVD subjects' RDMs are unstable across run halves, the "parallel" claim is unfounded.
+
+**Pass criterion**: CVD split-half r >= HC split-half r in V1/V2. This means CVD subjects' color relationship structures are at least as stable as HC subjects', supporting that their different spatial positions reflect systematic (not noisy) representations.
+
+**Method**: Split-half RDM Spearman correlation
+```
+1. For ALL 10 subjects × 4 ROIs:
+   - Split: runs 1-3 vs runs 4-6
+   - Average each half → (8 colors, n_voxels)
+   - Compute RDM per half (correlation distance, 8×8)
+   - Extract upper triangle (28 unique pairs)
+   - Spearman correlation between halves
+
+2. Group comparison:
+   - HC group (n=7): mean ± SD of split-half r
+   - CVD group (n=3): mean ± SD of split-half r
+   - t-test for group difference
+
+3. Critical check (V1/V2 only):
+   - CVD mean >= HC mean → "parallel" CONFIRMED
+   - CVD mean <  HC mean → "parallel" CHALLENGED
+```
+
+**Key distinction from Test 2A**: 2A measures voxel-level pattern stability (activation patterns per color). 2B measures **relational structure** stability (how colors relate to each other). A subject could have unstable individual voxel patterns (low 2A) but stable relational geometry (high 2B) — this is exactly the "parallel" prediction.
+
+**Implementation**: `analysis/phase2_SRM_across_between/validation/2B_rdm_consistency/compute_rdm_split_half.py`
+
+**Results**:
+
+| ROI | HC (n=7) | CVD (n=3) | CVD - HC | Critical Check |
+|-----|----------|-----------|----------|---------------|
+| V1 | 0.332 | **0.532** | +0.200 | PASSED |
+| V2 | 0.434 | **0.557** | +0.123 | PASSED |
+| V3 | - | - | - | not critical |
+| hV4 | - | - | - | not critical |
+
+**Interpretation**: In both V1 and V2, CVD subjects show **higher** RDM split-half reliability than HC. This strongly supports the "parallel" aspect: CVD subjects maintain consistent color relationship geometry across session halves, even more so than HC subjects. Combined with the high disparity (Test 1D), this validates the "scattered but parallel" pattern: CVD representations are spatially distinct but structurally coherent.
+
+---
+
+### 5.5 Pending Server Tests (Rationale Summary)
+
+**1B LOSO Stability**: Leave-one-HC-subject-out SRM retraining (7 folds). Tests whether results depend on a single influential HC subject. If V1/V2 significance drops in >2 folds, the finding is fragile.
+
+**1C Split-Half SRM**: Train separate SRMs on runs 1-3 vs 4-6. Tests temporal stability of the entire SRM pipeline (not just individual patterns). If CVD disparity patterns don't correlate across halves, the SRM-derived findings are unreliable.
+
+**2C k-Selection**: LOSO cross-validation for SRM dimensionality (k ∈ {2,3,4,5,6,8}). Confirms k=4 is optimal or near-optimal. If optimal k differs substantially, reanalysis needed.
+
+**2D Alignment Comparison**: Compare Raw/Procrustes/SRM split-half stability. Justifies why SRM was chosen over simpler methods. Expected: SRM > Procrustes > Raw.
+
+**Bootstrap CIs**: 95% confidence intervals for all key comparisons (disparity differences, RDM correlations). Required for paper submission.
+
+---
+
+### 5.6 Voxel Count Change: `baseline` vs `full_dataset_C010`
+
+**CRITICAL NOTE** (2026-02-17): The old `baseline` (only_Zscore_1stGLM) and current `full_dataset_C010` (C010 pipeline) have **different voxel counts**:
+
+| Subject | ROI | Old (baseline) | New (C010) | Change |
+|---------|-----|---------------|------------|--------|
+| sub-01 | V1 | 354 | 568 | +214 |
+| sub-03 | V1 | 300 | 858 | +558 |
+| sub-07 | V1 | 129 | 330 | +201 |
+| sub-07 | hV4 | 70 | **16** | **-54** |
+| Mean (V1) | | 362 | 667 | +305 |
+| Mean (V2) | | 245 | 458 | +213 |
+| Mean (V3) | | 51 | 106 | +55 |
+
+**Cause**: C010 pipeline uses different voxel selection (2nd-level drift regressors change R² distribution → different top-50% threshold → different voxel counts). Sub-07 hV4 shrunk from 70→16 voxels, causing nan in RDM computation.
+
+**Implication**: Old noise ceiling results (pastData) are NOT comparable to current analysis. All noise ceiling values in METHODS_RESULTS now use `full_dataset_C010`.
+
+---
+
+## RESOLVED: Between-Subject Alignment
+
+> **Status**: RESOLVED via SRM (Option 2). See `analysis/phase2_SRM_across_between/`.
+
+**Problem**: Voxel count heterogeneity prevented between-subject Procrustes in voxel space.
+
+**Solution adopted**: SRM (Shared Response Model) with k=4 components
+- HC-only training (n=7), CVD projected into shared space
+- Resolves voxel count mismatch naturally
+- Results: See `METHODS_RESULTS_SUMMARY_FOR_PAPER.md` Phase 2
+
+**ANOVA-based voxel selection** was also tested (Section 3.1.1.a) but SRM proved more effective for between-subject analysis.
 

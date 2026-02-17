@@ -25,9 +25,9 @@ Test if these findings are robust against:
 | **1A** | Verify HC-only Training | ✅ COMPLETE | All checks passed, CVD/HC ratio 1.12-1.47× |
 | **1B** | LOSO Stability | 🚧 READY (server) | Test fold-wise consistency |
 | **1C** | Split-Half Reliability | 🚧 READY (server) | Test run-split stability |
-| **1D** | Permutation Test | 🚧 READY (local) | Test against null distribution |
-| **2A** | Individual ICC | 🚧 READY (local) | Test subject-level stability |
-| **2B** | RDM Consistency | 🚧 READY (local) | Verify "parallel" pattern |
+| **1D** | Permutation Test | ✅ COMPLETE | V1 p=0.014, V2 p=0.036 significant; V3/hV4 n.s. as expected |
+| **2A** | Individual ICC | ✅ COMPLETE | Mean r=0.475; 58% moderate, sub-08 best (hV4 r=0.71) |
+| **2B** | RDM Consistency | ✅ COMPLETE | CVD ≥ HC in V1/V2 — "parallel" pattern CONFIRMED |
 | **2C** | Optimal k Selection | 🚧 READY (server) | Cross-validate SRM dimensionality |
 | **2D** | Alignment Comparison | 🚧 READY (server) | Compare Raw/Procrustes/SRM |
 
@@ -329,15 +329,15 @@ scp -r haba6030@node2:/scratch/connectome/haba6030/colorBlind/analysis/phase2_SR
 
 **High CVD-CVD RDM correlation** (Tests 1C, 2B):
 - [ ] Test 1C: >0.5 in BOTH run splits for V1/V2
-- [ ] Test 2B: CVD reliability ≥ HC reliability in V1/V2
+- ✅ Test 2B: CVD ≥ HC in V1 (+0.200) and V2 (+0.123) — "parallel" CONFIRMED
 
 **Statistical robustness** (Tests 1B, 1D):
 - [ ] Test 1B: All 7 folds show p<0.05 for V1/V2
-- [ ] Test 1D: Survives permutation test (p<0.05)
+- ✅ Test 1D: V1 p=0.014, V2 p=0.036 — survives permutation test
 
 **Individual stability** (Tests 2A, 2B):
-- [ ] Test 2A: ICC > 0.6 for most subjects
-- [ ] Test 2B: High within-subject consistency
+- ⚠️ Test 2A: Mean r=0.475 (moderate); 1/12 good, 7/12 moderate, 4/12 poor — sub-08 strongest
+- ✅ Test 2B: High within-subject consistency (CVD r=0.53-0.71 across ROIs)
 
 **Methodological validation** (Tests 2C, 2D):
 - [ ] Test 2C: Optimal k matches current choices
@@ -358,4 +358,4 @@ scp -r haba6030@node2:/scratch/connectome/haba6030/colorBlind/analysis/phase2_SR
 
 ---
 
-Last updated: 2026-02-16 (Test 1A completed)
+Last updated: 2026-02-17 (Tests 1D, 2A, 2B completed locally)

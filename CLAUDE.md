@@ -29,30 +29,32 @@ Therefore, for running a code to check it, follow this procedure:
 
 **CPU Jobs (node2) - 기본 배치 작업:**
 ```bash
-#SBATCH --qos=shared               # ⚠️ REQUIRED: 노드 공유 필수!
 #SBATCH --nodelist=node2
+# ⚠️ --qos 지정하지 않음 (서버 기본값 사용)
 ```
 
 **GPU Jobs (node3) - GPU 필요한 작업:**
 ```bash
-#SBATCH --qos=shared_interactive   # ⚠️ CRITICAL: interactive 아님!
 #SBATCH --nodelist=node3
 #SBATCH --gres=gpu:1
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
+# ⚠️ --qos 지정하지 않음 (서버 기본값 사용)
 ```
 
 **NEVER include:**
 ```bash
 #SBATCH --partition=normal         # ❌ Invalid partition error!
 #SBATCH --partition=shared         # ❌ Invalid partition error!
-#SBATCH --qos=interactive          # ❌ node3에서는 shared_interactive 사용!
+#SBATCH --qos=shared               # ❌ 사용 금지!
+#SBATCH --qos=shared_interactive   # ❌ 사용 금지!
+#SBATCH --qos=interactive          # ❌ 사용 금지!
+#SBATCH --qos=debug                # ❌ sbatch에서 qos 지정 금지!
 ```
 
 **핵심 규칙:**
-- **node2 (CPU)**: --qos=shared 필수
-- **node3 (GPU)**: --qos=shared_interactive 필수
-- **절대 금지**: --partition 지정 (서버가 자동 할당)
+- **sbatch에서 --qos 지정하지 않음** (서버 기본값 자동 적용)
+- **절대 금지**: --partition 지정, --qos 지정
 - Set conda as below: 
 ```
 source ~/.bashrc

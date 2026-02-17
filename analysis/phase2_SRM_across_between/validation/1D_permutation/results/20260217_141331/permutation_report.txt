@@ -1,0 +1,93 @@
+================================================================================
+Test 1D: Label Permutation Test
+================================================================================
+Timestamp: 20260217_141331
+Permutations: 10,000
+Seed: 42
+
+
+================================================================================
+ROI: V1
+================================================================================
+
+Observed Statistics:
+  HC-HC disparity: 0.3898 ± 0.0259 (n=7)
+  CVD-HC disparity: 0.5733 ± 0.0869 (n=3)
+  Mean difference: 0.1835
+  Observed t-statistic: 2.772
+  Cohen's d: 1.913
+
+Permutation Test Results:
+  Null distribution: mean=0.051, std=1.110
+  Observed t percentile: 99.2%
+  P-value: 0.0139
+  ✅ SIGNIFICANT (p < 0.05)
+
+================================================================================
+ROI: V2
+================================================================================
+
+Observed Statistics:
+  HC-HC disparity: 0.3998 ± 0.0303 (n=7)
+  CVD-HC disparity: 0.5489 ± 0.0432 (n=3)
+  Mean difference: 0.1491
+  Observed t-statistic: 2.743
+  Cohen's d: 1.893
+
+Permutation Test Results:
+  Null distribution: mean=0.014, std=1.136
+  Observed t percentile: 96.5%
+  P-value: 0.0359
+  ✅ SIGNIFICANT (p < 0.05)
+
+================================================================================
+ROI: V3
+================================================================================
+
+Observed Statistics:
+  HC-HC disparity: 0.4435 ± 0.0388 (n=7)
+  CVD-HC disparity: 0.5094 ± 0.0901 (n=3)
+  Mean difference: 0.0658
+  Observed t-statistic: 0.806
+  Cohen's d: 0.556
+
+Permutation Test Results:
+  Null distribution: mean=0.025, std=1.145
+  Observed t percentile: 56.8%
+  P-value: 0.4339
+  ❌ NOT SIGNIFICANT (p ≥ 0.05)
+
+================================================================================
+ROI: hV4
+================================================================================
+
+Observed Statistics:
+  HC-HC disparity: 0.5749 ± 0.0360 (n=7)
+  CVD-HC disparity: 0.6413 ± 0.1221 (n=3)
+  Mean difference: 0.0664
+  Observed t-statistic: 0.717
+  Cohen's d: 0.495
+
+Permutation Test Results:
+  Null distribution: mean=0.031, std=1.173
+  Observed t percentile: 50.3%
+  P-value: 0.5011
+  ❌ NOT SIGNIFICANT (p ≥ 0.05)
+
+================================================================================
+OVERALL SUMMARY
+================================================================================
+
+Significant ROIs (p < 0.05): 2/4
+  - V1: p=0.0139, Cohen's d=1.91
+  - V2: p=0.0359, Cohen's d=1.89
+
+Expected Results:
+  V1/V2: Should survive permutation test (p < 0.05)
+  V3/hV4: May not survive (underpowered with n_CVD=3)
+
+Observed Results:
+  V1: p=0.0139 ✅ PASS ✅
+  V2: p=0.0359 ✅ PASS ✅
+  V3: p=0.4339 ❌ FAIL ✅
+  hV4: p=0.5011 ❌ FAIL ✅

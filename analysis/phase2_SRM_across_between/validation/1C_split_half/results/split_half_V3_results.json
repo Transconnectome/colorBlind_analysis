@@ -1,0 +1,103 @@
+{
+  "config": {
+    "test": "1C_split_half",
+    "data_dir": "/scratch/connectome/haba6030/colorBlind/derivatives/full_dataset_C010",
+    "dataset": "full_dataset_C010",
+    "input_file": "amplitudes_procrustes.npy",
+    "hc_subjects": [
+      "sub-01",
+      "sub-02",
+      "sub-03",
+      "sub-04",
+      "sub-05",
+      "sub-06",
+      "sub-07"
+    ],
+    "cvd_subjects": [
+      "sub-08",
+      "sub-09",
+      "sub-10"
+    ],
+    "k_values": {
+      "V1": 4,
+      "V2": 4,
+      "V3": 3,
+      "hV4": 4
+    },
+    "srm_n_iter": 10,
+    "set_a_runs": [
+      1,
+      2,
+      3
+    ],
+    "set_b_runs": [
+      4,
+      5,
+      6
+    ],
+    "training": "HC-only (CVD projected via pseudo-inverse)"
+  },
+  "settings": {
+    "rois": [
+      "V3"
+    ],
+    "timestamp": "20260217_205811",
+    "elapsed": 0.5602736473083496
+  },
+  "results": {
+    "V3": {
+      "roi": "V3",
+      "k": 3,
+      "set_a": {
+        "hc_disparities": {
+          "sub-01": 0.3652343715330704,
+          "sub-02": 0.3491423493232568,
+          "sub-03": 0.6223235464252544,
+          "sub-04": 0.31469679055395106,
+          "sub-05": 0.3094389197430542,
+          "sub-06": 0.3770479930944931,
+          "sub-07": 0.3041742164145371
+        },
+        "cvd_disparities": {
+          "sub-08": 0.5585540448962618,
+          "sub-09": 0.438407580526458,
+          "sub-10": 0.4647695565575972
+        },
+        "hc_mean": 0.3774368838696596,
+        "cvd_mean": 0.4872437273267723,
+        "separation": 0.10980684345711267,
+        "t_statistic": 1.5639099416408175,
+        "p_value": 0.15646765642259072,
+        "significant": false,
+        "cvd_cvd_rdm_correlation": 0.26345557380040135
+      },
+      "set_b": {
+        "hc_disparities": {
+          "sub-01": 0.4997587141148552,
+          "sub-02": 0.4876400417416639,
+          "sub-03": 0.5299484018974703,
+          "sub-04": 0.358327948428299,
+          "sub-05": 0.5370848337854625,
+          "sub-06": 0.5594886125771378,
+          "sub-07": 0.47132572062033634
+        },
+        "cvd_disparities": {
+          "sub-08": 0.8202264037676669,
+          "sub-09": 0.6359567097260402,
+          "sub-10": 0.4673715806034832
+        },
+        "hc_mean": 0.4919391818807465,
+        "cvd_mean": 0.6411848980323968,
+        "separation": 0.14924571615165028,
+        "t_statistic": 2.054013122200678,
+        "p_value": 0.07404530817365847,
+        "significant": false,
+        "cvd_cvd_rdm_correlation": 0.27659186279875936
+      },
+      "cross_half_correlation": 0.43030303030303024,
+      "cross_half_p_value": 0.21449233253280775,
+      "both_significant": false,
+      "both_cvd_rdm_above_05": false
+    }
+  }
+}

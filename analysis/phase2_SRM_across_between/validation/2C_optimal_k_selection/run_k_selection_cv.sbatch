@@ -1,12 +1,12 @@
 #!/bin/bash
 #SBATCH --job-name=2C_ksel
-#SBATCH --qos=shared
 #SBATCH --nodelist=node2
-#SBATCH --array=0-27%8
-#SBATCH --cpus-per-task=2
-#SBATCH --mem=8G
-#SBATCH --time=02:00:00
+#SBATCH --array=0-27%14
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=2G
+#SBATCH --time=00:10:00
 #SBATCH --no-requeue
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase2_SRM_across_between/validation/2C_optimal_k_selection
 #SBATCH --output=logs/k_selection_%a_%j.out
 #SBATCH --error=logs/k_selection_%a_%j.err
 
@@ -34,7 +34,7 @@ echo "Start: $(date)"
 done) &
 MEM_PID=$!
 
-python ${SCRIPT_DIR}/run_k_selection_cv.py --fold ${FOLD} --roi ${ROI}
+mpirun -np 1 python ${SCRIPT_DIR}/run_k_selection_cv.py --fold ${FOLD} --roi ${ROI}
 
 EXIT_CODE=$?
 kill $MEM_PID 2>/dev/null

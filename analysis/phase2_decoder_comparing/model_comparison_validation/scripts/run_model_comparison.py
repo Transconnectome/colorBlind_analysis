@@ -49,6 +49,10 @@ circular_diff_deg = _mod.circular_diff_deg
 
 warnings.filterwarnings('ignore')
 
+# Import logging helpers from local utils
+from utils import (get_model_architecture, aggregate_best_params,
+                   get_subject_group)
+
 
 # ============================================================================
 # Configuration
@@ -678,11 +682,40 @@ def main():
     # Save results
     output_file = output_path / f"sub-{args.subject}_performance_raw.json"
 
+    # Build enhanced logging: hyperparameters and architectures
+    hyperparameters = {}
+    model_architectures = {}
+    for model_name in args.models:
+        model_architectures[model_name] = get_model_architecture(model_name)
+
+        # Aggregate HP selections from procrustes results (or first alignment)
+        hp_alignment = 'procrustes' if 'procrustes' in all_results else alignments[0]
+        model_hp = {}
+        for roi in args.rois:
+            roi_results = all_results.get(hp_alignment, {}).get(roi, {})
+            fold_list = roi_results.get(model_name, [])
+            if fold_list:
+                model_hp[roi] = aggregate_best_params(fold_list)
+        if model_hp:
+            hyperparameters[model_name] = model_hp
+
     results_data = {
         'subject': args.subject,
+        'subject_group': get_subject_group(args.subject),
         'rois': args.rois,
         'models': args.models,
         'alignments': alignments,
+        'settings': {
+            'baseline_dir': str(args.baseline_dir),
+            'dataset_name': Path(args.baseline_dir).name,
+            'n_runs': 6,
+            'n_colors': 8,
+            'cv_method': 'LORO (Leave-One-Run-Out)',
+            'hp_tuning': True,
+            'hp_tuning_method': 'nested CV (inner LORO on train runs)'
+        },
+        'hyperparameters': hyperparameters,
+        'model_architectures': model_architectures,
         'results': all_results,
         'timestamp': timestamp,
         'datetime': datetime.now().isoformat()

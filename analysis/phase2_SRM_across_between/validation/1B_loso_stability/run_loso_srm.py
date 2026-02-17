@@ -26,9 +26,6 @@ from scipy.stats import spearmanr, ttest_ind
 from scipy.linalg import orthogonal_procrustes
 
 try:
-    import mpi4py
-    mpi4py.rc.initialize = False
-    mpi4py.rc.finalize = False
     from brainiak.funcalign.srm import SRM
 except ImportError:
     print("ERROR: brainiak not installed. Run: pip install brainiak")
@@ -213,8 +210,7 @@ def main():
 
     rois = [args.roi] if args.roi else ROIS
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    output_dir = OUTPUT_BASE / timestamp
-    output_dir.mkdir(parents=True, exist_ok=True)
+    OUTPUT_BASE.mkdir(parents=True, exist_ok=True)
 
     print(f"{'='*80}")
     print(f"Test 1B: LOSO SRM Stability — Fold {args.fold}")
@@ -237,18 +233,28 @@ def main():
             traceback.print_exc()
 
     # Save
+    config = {
+        'test': '1B_loso_stability',
+        'data_dir': str(DATA_DIR),
+        'dataset': 'full_dataset_C010',
+        'input_file': 'amplitudes_procrustes.npy',
+        'hc_subjects': HC_SUBJECTS,
+        'cvd_subjects': CVD_SUBJECTS,
+        'k_values': K_VALUES,
+        'srm_n_iter': 10,
+        'training': 'HC-only LOSO (6 HC train, 1 HC left out, 3 CVD projected)',
+    }
     settings = {
         'fold_idx': args.fold,
         'left_out': HC_SUBJECTS[args.fold],
         'rois': rois,
-        'data_dir': str(DATA_DIR),
         'timestamp': timestamp,
         'elapsed_seconds': time.time() - start
     }
 
-    out_file = output_dir / f"loso_fold{args.fold}_results.json"
+    out_file = OUTPUT_BASE / f"loso_fold{args.fold}_results.json"
     with open(out_file, 'w') as f:
-        json.dump({'settings': settings, 'results': all_results}, f, indent=2)
+        json.dump({'config': config, 'settings': settings, 'results': all_results}, f, indent=2)
 
     print(f"\nResults saved: {out_file}")
     print(f"Elapsed: {time.time() - start:.1f}s")

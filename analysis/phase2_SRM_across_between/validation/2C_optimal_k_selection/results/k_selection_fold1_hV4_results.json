@@ -1,0 +1,97 @@
+{
+  "config": {
+    "test": "2C_optimal_k_selection",
+    "data_dir": "/scratch/connectome/haba6030/colorBlind/derivatives/full_dataset_C010",
+    "dataset": "full_dataset_C010",
+    "input_file": "amplitudes_procrustes.npy",
+    "hc_subjects": [
+      "sub-01",
+      "sub-02",
+      "sub-03",
+      "sub-04",
+      "sub-05",
+      "sub-06",
+      "sub-07"
+    ],
+    "k_candidates": [
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "srm_n_iter": 10,
+    "method": "LOSO CV (HC only)",
+    "metrics": [
+      "reconstruction_error",
+      "rdm_reliability",
+      "cross_subject_rdm_corr"
+    ]
+  },
+  "settings": {
+    "fold": 1,
+    "rois": [
+      "hV4"
+    ],
+    "k_candidates": [
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "timestamp": "20260217_205812",
+    "elapsed": 1.5748484134674072
+  },
+  "results": {
+    "hV4": {
+      "roi": "hV4",
+      "fold_idx": 1,
+      "left_out": "sub-02",
+      "results_by_k": {
+        "2": {
+          "k": 2,
+          "fold_idx": 1,
+          "left_out": "sub-02",
+          "reconstruction_error": 6.331057333279194e-05,
+          "rdm_reliability": -0.033778929268444294,
+          "cross_subject_rdm_corr": 0.1960266620119714
+        },
+        "3": {
+          "k": 3,
+          "fold_idx": 1,
+          "left_out": "sub-02",
+          "reconstruction_error": 5.3838867047276446e-05,
+          "rdm_reliability": 0.6509760992519614,
+          "cross_subject_rdm_corr": 0.2884510125889437
+        },
+        "4": {
+          "k": 4,
+          "fold_idx": 1,
+          "left_out": "sub-02",
+          "reconstruction_error": 5.265656373343114e-05,
+          "rdm_reliability": 0.5320561941251597,
+          "cross_subject_rdm_corr": 0.2348111658456486
+        },
+        "5": {
+          "k": 5,
+          "fold_idx": 1,
+          "left_out": "sub-02",
+          "reconstruction_error": 4.8104498368238976e-05,
+          "rdm_reliability": 0.4905309250136837,
+          "cross_subject_rdm_corr": 0.26327312534209085
+        },
+        "6": {
+          "k": 6,
+          "fold_idx": 1,
+          "left_out": "sub-02",
+          "reconstruction_error": 4.6377040415880576e-05,
+          "rdm_reliability": 0.3780332056194125,
+          "cross_subject_rdm_corr": 0.4865900383141762
+        }
+      },
+      "best_k_rdm": 3,
+      "best_k_recon": 6
+    }
+  }
+}

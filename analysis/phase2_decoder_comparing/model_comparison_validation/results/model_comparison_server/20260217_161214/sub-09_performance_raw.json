@@ -1,0 +1,3603 @@
+{
+  "subject": "09",
+  "rois": [
+    "V1",
+    "V2",
+    "V3",
+    "V4"
+  ],
+  "models": [
+    "LDA",
+    "Ridge",
+    "KernelRidge",
+    "SVM",
+    "MLP",
+    "ForwardEncoding"
+  ],
+  "alignments": [
+    "raw",
+    "procrustes"
+  ],
+  "results": {
+    "raw": {
+      "V1": {
+        "LDA": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "solver": "svd",
+              "shrinkage": null
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.75,
+            "acc_90": 0.875,
+            "mae": 50.625,
+            "medae": 45.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "solver": "svd",
+              "shrinkage": null
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.25,
+            "acc_90": 0.625,
+            "mae": 101.25,
+            "medae": 90.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": "auto"
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.25,
+            "acc_90": 0.375,
+            "mae": 118.125,
+            "medae": 135.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "solver": "svd",
+              "shrinkage": null
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.625,
+            "acc_90": 1.0,
+            "mae": 56.25,
+            "medae": 45.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "solver": "svd",
+              "shrinkage": null
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.625,
+            "acc_90": 1.0,
+            "mae": 50.625,
+            "medae": 45.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": null
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.5,
+            "acc_90": 0.75,
+            "mae": 73.125,
+            "medae": 67.5
+          }
+        ],
+        "Ridge": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 10
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.375,
+            "acc_90": 0.5,
+            "mae": 90.0,
+            "medae": 112.5
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 1
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.625,
+            "acc_90": 0.75,
+            "mae": 73.125,
+            "medae": 45.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.5,
+            "mae": 95.625,
+            "medae": 112.5
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.5,
+            "mae": 101.25,
+            "medae": 112.5
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 100
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.5,
+            "acc_90": 0.875,
+            "mae": 78.75,
+            "medae": 67.5
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.625,
+            "acc_90": 0.875,
+            "mae": 61.875,
+            "medae": 45.0
+          }
+        ],
+        "KernelRidge": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.5,
+            "mae": 95.625,
+            "medae": 112.5
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.625,
+            "acc_90": 0.875,
+            "mae": 61.875,
+            "medae": 45.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.01
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.25,
+            "acc_90": 0.5,
+            "mae": 112.5,
+            "medae": 112.5
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 10,
+              "gamma": 0.1
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.5,
+            "acc_90": 0.75,
+            "mae": 73.125,
+            "medae": 67.5
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.5,
+            "acc_90": 0.875,
+            "mae": 78.75,
+            "medae": 67.5
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.5,
+            "mae": 90.0,
+            "medae": 112.5
+          }
+        ],
+        "SVM": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.1
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.25,
+            "acc_90": 0.375,
+            "mae": 112.5,
+            "medae": 135.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.5,
+            "acc_90": 0.75,
+            "mae": 78.75,
+            "medae": 67.5
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.25,
+            "acc_90": 0.5,
+            "mae": 106.875,
+            "medae": 112.5
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.5,
+            "acc_90": 0.5,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.5,
+            "acc_90": 0.875,
+            "mae": 67.5,
+            "medae": 67.5
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.5,
+            "acc_90": 0.625,
+            "mae": 84.375,
+            "medae": 67.5
+          }
+        ],
+        "MLP": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          }
+        ],
+        "ForwardEncoding": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 10
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.25,
+            "acc_90": 0.5,
+            "mae": 106.875,
+            "medae": 112.5
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 10
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.625,
+            "acc_90": 0.875,
+            "mae": 56.25,
+            "medae": 45.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 10
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.25,
+            "acc_90": 0.5,
+            "mae": 101.25,
+            "medae": 112.5
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 10
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.5,
+            "acc_90": 0.5,
+            "mae": 84.375,
+            "medae": 90.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.5,
+            "acc_90": 0.75,
+            "mae": 73.125,
+            "medae": 67.5
+          }
+        ]
+      },
+      "V2": {
+        "LDA": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": null
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.5,
+            "acc_90": 0.75,
+            "mae": 90.0,
+            "medae": 67.5
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": "auto"
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.5,
+            "acc_90": 0.625,
+            "mae": 84.375,
+            "medae": 67.5
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": "auto"
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.25,
+            "acc_90": 0.375,
+            "mae": 112.5,
+            "medae": 135.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": "auto"
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": "auto"
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.75,
+            "mae": 84.375,
+            "medae": 90.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": null
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.5,
+            "acc_90": 0.75,
+            "mae": 67.5,
+            "medae": 67.5
+          }
+        ],
+        "Ridge": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.5,
+            "acc_90": 0.75,
+            "mae": 78.75,
+            "medae": 67.5
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 0.1
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.5,
+            "acc_90": 0.625,
+            "mae": 84.375,
+            "medae": 67.5
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 1
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.375,
+            "acc_90": 0.5,
+            "mae": 106.875,
+            "medae": 112.5
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.5,
+            "mae": 95.625,
+            "medae": 112.5
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 1
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.75,
+            "mae": 84.375,
+            "medae": 90.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.25,
+            "acc_90": 0.5,
+            "mae": 112.5,
+            "medae": 112.5
+          }
+        ],
+        "KernelRidge": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.25,
+            "acc_90": 0.625,
+            "mae": 101.25,
+            "medae": 90.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.625,
+            "acc_90": 0.75,
+            "mae": 67.5,
+            "medae": 45.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 10,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.375,
+            "acc_90": 0.375,
+            "mae": 112.5,
+            "medae": 135.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.375,
+            "acc_90": 0.75,
+            "mae": 73.125,
+            "medae": 90.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.75,
+            "mae": 84.375,
+            "medae": 90.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.1
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.5,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 67.5
+          }
+        ],
+        "SVM": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.1
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.25,
+            "acc_90": 0.25,
+            "mae": 112.5,
+            "medae": 135.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.625,
+            "acc_90": 0.75,
+            "mae": 73.125,
+            "medae": 45.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.25,
+            "acc_90": 0.25,
+            "mae": 118.125,
+            "medae": 135.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.5,
+            "acc_90": 0.5,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.25,
+            "acc_90": 0.5,
+            "mae": 123.75,
+            "medae": 135.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.5,
+            "acc_90": 0.5,
+            "mae": 78.75,
+            "medae": 90.0
+          }
+        ],
+        "MLP": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          }
+        ],
+        "ForwardEncoding": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.375,
+            "acc_90": 0.5,
+            "mae": 95.625,
+            "medae": 112.5
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.375,
+            "acc_90": 0.75,
+            "mae": 73.125,
+            "medae": 90.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.25,
+            "acc_90": 0.5,
+            "mae": 101.25,
+            "medae": 112.5
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.5,
+            "acc_90": 0.625,
+            "mae": 95.625,
+            "medae": 67.5
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 10
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.25,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.5,
+            "acc_90": 0.75,
+            "mae": 67.5,
+            "medae": 67.5
+          }
+        ]
+      },
+      "V3": {
+        "LDA": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": null
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.125,
+            "acc_90": 0.125,
+            "mae": 140.625,
+            "medae": 135.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": null
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.5,
+            "mae": 90.0,
+            "medae": 112.5
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "solver": "svd",
+              "shrinkage": null
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.375,
+            "acc_90": 0.5,
+            "mae": 95.625,
+            "medae": 112.5
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "solver": "svd",
+              "shrinkage": null
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.25,
+            "acc_90": 0.625,
+            "mae": 95.625,
+            "medae": 90.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "solver": "svd",
+              "shrinkage": null
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.0,
+            "acc_90": 0.5,
+            "mae": 118.125,
+            "medae": 112.5
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "solver": "svd",
+              "shrinkage": null
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.5,
+            "acc_90": 0.5,
+            "mae": 78.75,
+            "medae": 90.0
+          }
+        ],
+        "Ridge": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 0.1
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.5,
+            "acc_90": 0.625,
+            "mae": 78.75,
+            "medae": 67.5
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 0.1
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 1
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 1
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.625,
+            "acc_90": 0.75,
+            "mae": 61.875,
+            "medae": 45.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 1
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.25,
+            "acc_90": 0.625,
+            "mae": 95.625,
+            "medae": 90.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0.1
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.625,
+            "acc_90": 0.75,
+            "mae": 73.125,
+            "medae": 45.0
+          }
+        ],
+        "KernelRidge": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 84.375,
+            "medae": 90.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.5,
+            "acc_90": 0.75,
+            "mae": 73.125,
+            "medae": 67.5
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.625,
+            "acc_90": 0.75,
+            "mae": 61.875,
+            "medae": 45.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.1
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.75,
+            "acc_90": 0.75,
+            "mae": 56.25,
+            "medae": 45.0
+          }
+        ],
+        "SVM": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.625,
+            "acc_90": 0.875,
+            "mae": 61.875,
+            "medae": 45.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.625,
+            "acc_90": 0.75,
+            "mae": 84.375,
+            "medae": 45.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.25,
+            "acc_90": 0.75,
+            "mae": 84.375,
+            "medae": 90.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.5,
+            "acc_90": 0.75,
+            "mae": 73.125,
+            "medae": 67.5
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.5,
+            "acc_90": 0.75,
+            "mae": 73.125,
+            "medae": 67.5
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.75,
+            "acc_90": 0.875,
+            "mae": 45.0,
+            "medae": 45.0
+          }
+        ],
+        "MLP": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          }
+        ],
+        "ForwardEncoding": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 10
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.75,
+            "mae": 78.75,
+            "medae": 90.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 10
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.625,
+            "acc_90": 0.75,
+            "mae": 67.5,
+            "medae": 45.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 95.625,
+            "medae": 90.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 10
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.625,
+            "acc_90": 0.75,
+            "mae": 73.125,
+            "medae": 45.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.5,
+            "acc_90": 0.5,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 10
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.625,
+            "acc_90": 0.875,
+            "mae": 50.625,
+            "medae": 45.0
+          }
+        ]
+      },
+      "V4": {
+        "LDA": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": 0.5
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.125,
+            "acc_90": 0.5,
+            "mae": 118.125,
+            "medae": 112.5
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": null
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.5,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 67.5
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "solver": "svd",
+              "shrinkage": null
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.5,
+            "acc_90": 0.625,
+            "mae": 95.625,
+            "medae": 67.5
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": null
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.25,
+            "acc_90": 0.625,
+            "mae": 95.625,
+            "medae": 90.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "solver": "svd",
+              "shrinkage": null
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.125,
+            "acc_90": 0.25,
+            "mae": 123.75,
+            "medae": 135.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": "auto"
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 84.375,
+            "medae": 90.0
+          }
+        ],
+        "Ridge": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 0.1
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 95.625,
+            "medae": 90.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 1
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.5,
+            "acc_90": 0.875,
+            "mae": 61.875,
+            "medae": 67.5
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 1
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.375,
+            "acc_90": 0.5,
+            "mae": 90.0,
+            "medae": 112.5
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.5,
+            "acc_90": 0.625,
+            "mae": 84.375,
+            "medae": 67.5
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 1
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.375,
+            "acc_90": 0.5,
+            "mae": 101.25,
+            "medae": 112.5
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0.1
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.5,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 67.5
+          }
+        ],
+        "KernelRidge": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 10,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.25,
+            "acc_90": 0.625,
+            "mae": 95.625,
+            "medae": 90.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.1
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.5,
+            "acc_90": 0.875,
+            "mae": 61.875,
+            "medae": 67.5
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.375,
+            "acc_90": 0.5,
+            "mae": 90.0,
+            "medae": 112.5
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 10,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.5,
+            "acc_90": 0.5,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.375,
+            "acc_90": 0.5,
+            "mae": 101.25,
+            "medae": 112.5
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 10,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.5,
+            "acc_90": 0.625,
+            "mae": 95.625,
+            "medae": 67.5
+          }
+        ],
+        "SVM": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.125,
+            "acc_90": 0.375,
+            "mae": 118.125,
+            "medae": 135.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.375,
+            "acc_90": 0.75,
+            "mae": 84.375,
+            "medae": 90.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.5,
+            "mae": 101.25,
+            "medae": 112.5
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.5,
+            "acc_90": 0.75,
+            "mae": 73.125,
+            "medae": 67.5
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.25,
+            "acc_90": 0.375,
+            "mae": 106.875,
+            "medae": 135.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.25,
+            "acc_90": 0.5,
+            "mae": 95.625,
+            "medae": 112.5
+          }
+        ],
+        "MLP": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          }
+        ],
+        "ForwardEncoding": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.625,
+            "acc_90": 0.75,
+            "mae": 61.875,
+            "medae": 45.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 10
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.625,
+            "acc_90": 0.75,
+            "mae": 61.875,
+            "medae": 45.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.25,
+            "acc_90": 0.5,
+            "mae": 95.625,
+            "medae": 112.5
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 95.625,
+            "medae": 90.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.5,
+            "acc_90": 0.625,
+            "mae": 84.375,
+            "medae": 67.5
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 78.75,
+            "medae": 90.0
+          }
+        ]
+      }
+    },
+    "procrustes": {
+      "V1": {
+        "LDA": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": "auto"
+            },
+            "acc_exact": 1.0,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 0.0,
+            "medae": 0.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": "auto"
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.75,
+            "acc_90": 0.75,
+            "mae": 45.0,
+            "medae": 22.5
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": 0.5
+            },
+            "acc_exact": 0.75,
+            "acc_45": 0.75,
+            "acc_90": 0.75,
+            "mae": 33.75,
+            "medae": 0.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": "auto"
+            },
+            "acc_exact": 0.75,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 22.5,
+            "medae": 0.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": 0.5
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.5,
+            "acc_90": 0.5,
+            "mae": 78.75,
+            "medae": 67.5
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "solver": "svd",
+              "shrinkage": null
+            },
+            "acc_exact": 0.75,
+            "acc_45": 0.875,
+            "acc_90": 1.0,
+            "mae": 16.875,
+            "medae": 0.0
+          }
+        ],
+        "Ridge": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 100
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.75,
+            "acc_90": 0.875,
+            "mae": 45.0,
+            "medae": 45.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 0.01
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.625,
+            "acc_90": 0.625,
+            "mae": 73.125,
+            "medae": 45.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 0.1
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.75,
+            "acc_90": 0.875,
+            "mae": 56.25,
+            "medae": 45.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 0.1
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.75,
+            "acc_90": 1.0,
+            "mae": 39.375,
+            "medae": 45.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 0.1
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.625,
+            "acc_90": 0.625,
+            "mae": 78.75,
+            "medae": 45.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0.1
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.75,
+            "acc_90": 0.75,
+            "mae": 56.25,
+            "medae": 45.0
+          }
+        ],
+        "KernelRidge": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.75,
+            "acc_90": 0.875,
+            "mae": 45.0,
+            "medae": 45.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 10,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.875,
+            "mae": 78.75,
+            "medae": 90.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.1
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.75,
+            "acc_90": 0.875,
+            "mae": 56.25,
+            "medae": 45.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.625,
+            "acc_90": 0.75,
+            "mae": 56.25,
+            "medae": 45.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.1
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.625,
+            "acc_90": 0.625,
+            "mae": 84.375,
+            "medae": 45.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.5,
+            "acc_90": 0.875,
+            "mae": 61.875,
+            "medae": 67.5
+          }
+        ],
+        "SVM": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.75,
+            "acc_90": 0.875,
+            "mae": 33.75,
+            "medae": 0.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 28.125,
+            "medae": 0.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.875,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 16.875,
+            "medae": 0.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.75,
+            "acc_45": 0.875,
+            "acc_90": 1.0,
+            "mae": 16.875,
+            "medae": 0.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.75,
+            "acc_90": 0.75,
+            "mae": 39.375,
+            "medae": 0.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.875,
+            "acc_90": 1.0,
+            "mae": 22.5,
+            "medae": 0.0
+          }
+        ],
+        "MLP": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          }
+        ],
+        "ForwardEncoding": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.75,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 22.5,
+            "medae": 0.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.75,
+            "acc_90": 0.75,
+            "mae": 45.0,
+            "medae": 22.5
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 39.375,
+            "medae": 22.5
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.75,
+            "acc_90": 0.75,
+            "mae": 50.625,
+            "medae": 0.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.75,
+            "acc_90": 0.75,
+            "mae": 56.25,
+            "medae": 22.5
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.625,
+            "acc_90": 0.625,
+            "mae": 67.5,
+            "medae": 22.5
+          }
+        ]
+      },
+      "V2": {
+        "LDA": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": 0.5
+            },
+            "acc_exact": 1.0,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 0.0,
+            "medae": 0.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": "auto"
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.5,
+            "acc_90": 0.5,
+            "mae": 73.125,
+            "medae": 90.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": 0.5
+            },
+            "acc_exact": 0.875,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 5.625,
+            "medae": 0.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": 0.5
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.5,
+            "acc_90": 0.625,
+            "mae": 67.5,
+            "medae": 45.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": "auto"
+            },
+            "acc_exact": 0.75,
+            "acc_45": 0.75,
+            "acc_90": 0.75,
+            "mae": 33.75,
+            "medae": 0.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": 0.5
+            },
+            "acc_exact": 0.75,
+            "acc_45": 0.875,
+            "acc_90": 1.0,
+            "mae": 16.875,
+            "medae": 0.0
+          }
+        ],
+        "Ridge": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 0.1
+            },
+            "acc_exact": 0.75,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 11.25,
+            "medae": 0.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 0.01
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.75,
+            "acc_90": 0.875,
+            "mae": 50.625,
+            "medae": 45.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 1
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.75,
+            "acc_90": 0.875,
+            "mae": 56.25,
+            "medae": 45.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 0.1
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.875,
+            "acc_90": 1.0,
+            "mae": 50.625,
+            "medae": 45.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 0.1
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.875,
+            "acc_90": 1.0,
+            "mae": 33.75,
+            "medae": 45.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0.1
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.75,
+            "acc_90": 1.0,
+            "mae": 45.0,
+            "medae": 45.0
+          }
+        ],
+        "KernelRidge": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.875,
+            "acc_90": 1.0,
+            "mae": 39.375,
+            "medae": 45.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.625,
+            "acc_90": 0.75,
+            "mae": 61.875,
+            "medae": 45.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.1
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 45.0,
+            "medae": 45.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.625,
+            "acc_90": 1.0,
+            "mae": 45.0,
+            "medae": 45.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.1
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.875,
+            "acc_90": 1.0,
+            "mae": 28.125,
+            "medae": 22.5
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.01
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.75,
+            "acc_90": 0.875,
+            "mae": 50.625,
+            "medae": 45.0
+          }
+        ],
+        "SVM": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.875,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 16.875,
+            "medae": 0.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.75,
+            "acc_90": 0.875,
+            "mae": 33.75,
+            "medae": 0.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.75,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 11.25,
+            "medae": 0.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.625,
+            "acc_90": 0.625,
+            "mae": 50.625,
+            "medae": 0.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.625,
+            "acc_90": 0.75,
+            "mae": 50.625,
+            "medae": 22.5
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.75,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 22.5,
+            "medae": 0.0
+          }
+        ],
+        "MLP": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          }
+        ],
+        "ForwardEncoding": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.75,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 11.25,
+            "medae": 0.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.75,
+            "acc_90": 0.75,
+            "mae": 45.0,
+            "medae": 0.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.75,
+            "acc_90": 0.875,
+            "mae": 45.0,
+            "medae": 22.5
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.875,
+            "acc_90": 1.0,
+            "mae": 22.5,
+            "medae": 0.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.5,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 22.5,
+            "medae": 22.5
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.5,
+            "acc_90": 0.75,
+            "mae": 67.5,
+            "medae": 67.5
+          }
+        ]
+      },
+      "V3": {
+        "LDA": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": 0.5
+            },
+            "acc_exact": 1.0,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 0.0,
+            "medae": 0.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": "auto"
+            },
+            "acc_exact": 0.875,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 5.625,
+            "medae": 0.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": "auto"
+            },
+            "acc_exact": 1.0,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 0.0,
+            "medae": 0.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": 0.5
+            },
+            "acc_exact": 0.75,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 22.5,
+            "medae": 0.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": "auto"
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.625,
+            "acc_90": 0.75,
+            "mae": 50.625,
+            "medae": 0.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": "auto"
+            },
+            "acc_exact": 0.75,
+            "acc_45": 0.875,
+            "acc_90": 1.0,
+            "mae": 16.875,
+            "medae": 0.0
+          }
+        ],
+        "Ridge": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 0.1
+            },
+            "acc_exact": 0.375,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 28.125,
+            "medae": 45.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 0.1
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.625,
+            "acc_90": 1.0,
+            "mae": 56.25,
+            "medae": 45.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 0.01
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.75,
+            "acc_90": 0.875,
+            "mae": 39.375,
+            "medae": 22.5
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 100
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.5,
+            "acc_90": 0.75,
+            "mae": 61.875,
+            "medae": 67.5
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 0.01
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.875,
+            "acc_90": 1.0,
+            "mae": 28.125,
+            "medae": 22.5
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0.1
+            },
+            "acc_exact": 0.375,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 28.125,
+            "medae": 45.0
+          }
+        ],
+        "KernelRidge": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.1
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.875,
+            "acc_90": 1.0,
+            "mae": 28.125,
+            "medae": 22.5
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.625,
+            "acc_90": 0.875,
+            "mae": 56.25,
+            "medae": 45.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 10,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.375,
+            "acc_90": 0.75,
+            "mae": 73.125,
+            "medae": 90.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.5,
+            "acc_90": 0.75,
+            "mae": 61.875,
+            "medae": 67.5
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.875,
+            "acc_90": 1.0,
+            "mae": 33.75,
+            "medae": 45.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.5,
+            "acc_90": 1.0,
+            "mae": 50.625,
+            "medae": 67.5
+          }
+        ],
+        "SVM": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.75,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 22.5,
+            "medae": 0.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.75,
+            "acc_90": 0.875,
+            "mae": 33.75,
+            "medae": 0.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.75,
+            "acc_45": 0.75,
+            "acc_90": 0.875,
+            "mae": 28.125,
+            "medae": 0.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.875,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 5.625,
+            "medae": 0.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.75,
+            "acc_45": 0.875,
+            "acc_90": 1.0,
+            "mae": 16.875,
+            "medae": 0.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.75,
+            "acc_45": 0.875,
+            "acc_90": 1.0,
+            "mae": 16.875,
+            "medae": 0.0
+          }
+        ],
+        "MLP": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 95.625,
+            "medae": 90.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64
+              ],
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          }
+        ],
+        "ForwardEncoding": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.75,
+            "acc_90": 0.875,
+            "mae": 33.75,
+            "medae": 0.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.5,
+            "acc_90": 0.75,
+            "mae": 61.875,
+            "medae": 67.5
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.625,
+            "acc_90": 0.75,
+            "mae": 50.625,
+            "medae": 22.5
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.625,
+            "acc_90": 0.75,
+            "mae": 56.25,
+            "medae": 45.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.875,
+            "acc_90": 1.0,
+            "mae": 33.75,
+            "medae": 45.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.75,
+            "acc_90": 0.875,
+            "mae": 39.375,
+            "medae": 22.5
+          }
+        ]
+      },
+      "V4": {
+        "LDA": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": "auto"
+            },
+            "acc_exact": 0.875,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 16.875,
+            "medae": 0.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": 0.5
+            },
+            "acc_exact": 0.875,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 5.625,
+            "medae": 0.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": "auto"
+            },
+            "acc_exact": 1.0,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 0.0,
+            "medae": 0.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": 0.5
+            },
+            "acc_exact": 0.875,
+            "acc_45": 0.875,
+            "acc_90": 1.0,
+            "mae": 11.25,
+            "medae": 0.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": 0.5
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.625,
+            "acc_90": 0.875,
+            "mae": 39.375,
+            "medae": 0.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "solver": "lsqr",
+              "shrinkage": "auto"
+            },
+            "acc_exact": 1.0,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 0.0,
+            "medae": 0.0
+          }
+        ],
+        "Ridge": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 0.1
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.875,
+            "acc_90": 1.0,
+            "mae": 28.125,
+            "medae": 22.5
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 0.1
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.75,
+            "acc_90": 1.0,
+            "mae": 50.625,
+            "medae": 45.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 0.01
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.625,
+            "acc_90": 0.875,
+            "mae": 56.25,
+            "medae": 45.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.75,
+            "acc_90": 0.875,
+            "mae": 56.25,
+            "medae": 45.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.625,
+            "acc_90": 0.75,
+            "mae": 67.5,
+            "medae": 45.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.625,
+            "acc_90": 0.875,
+            "mae": 61.875,
+            "medae": 45.0
+          }
+        ],
+        "KernelRidge": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.75,
+            "acc_90": 1.0,
+            "mae": 39.375,
+            "medae": 45.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.1
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.5,
+            "acc_90": 0.875,
+            "mae": 67.5,
+            "medae": 67.5
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.5,
+            "acc_90": 0.875,
+            "mae": 61.875,
+            "medae": 67.5
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.75,
+            "acc_90": 1.0,
+            "mae": 45.0,
+            "medae": 45.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.375,
+            "acc_90": 0.75,
+            "mae": 78.75,
+            "medae": 90.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0.1,
+              "gamma": 0.1
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.875,
+            "mae": 73.125,
+            "medae": 90.0
+          }
+        ],
+        "SVM": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.75,
+            "acc_45": 0.75,
+            "acc_90": 0.75,
+            "mae": 39.375,
+            "medae": 0.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.75,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 11.25,
+            "medae": 0.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.875,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 5.625,
+            "medae": 0.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.625,
+            "acc_90": 0.875,
+            "mae": 39.375,
+            "medae": 0.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.625,
+            "acc_90": 0.75,
+            "mae": 50.625,
+            "medae": 0.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "C": 0.1,
+              "gamma": 0.001
+            },
+            "acc_exact": 0.875,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 16.875,
+            "medae": 0.0
+          }
+        ],
+        "MLP": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64,
+                32
+              ],
+              "alpha": 0.1
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.5,
+            "acc_90": 0.5,
+            "mae": 84.375,
+            "medae": 90.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64,
+                32
+              ],
+              "alpha": 0.1
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.5,
+            "acc_90": 0.625,
+            "mae": 78.75,
+            "medae": 67.5
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64,
+                32
+              ],
+              "alpha": 0.1
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 84.375,
+            "medae": 90.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64,
+                32
+              ],
+              "alpha": 0.1
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.375,
+            "acc_90": 0.75,
+            "mae": 78.75,
+            "medae": 90.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64,
+                32
+              ],
+              "alpha": 0.1
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "hidden_layer_sizes": [
+                64,
+                32
+              ],
+              "alpha": 0.1
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.375,
+            "acc_90": 0.5,
+            "mae": 90.0,
+            "medae": 112.5
+          }
+        ],
+        "ForwardEncoding": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 28.125,
+            "medae": 0.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.625,
+            "acc_90": 0.625,
+            "mae": 67.5,
+            "medae": 45.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.5,
+            "acc_90": 0.625,
+            "mae": 84.375,
+            "medae": 67.5
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.625,
+            "acc_90": 0.75,
+            "mae": 67.5,
+            "medae": 45.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.625,
+            "acc_90": 0.625,
+            "mae": 67.5,
+            "medae": 45.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.625,
+            "acc_90": 0.625,
+            "mae": 73.125,
+            "medae": 45.0
+          }
+        ]
+      }
+    }
+  },
+  "timestamp": "20260217_161214",
+  "datetime": "2026-02-17T16:14:33.625418"
+}

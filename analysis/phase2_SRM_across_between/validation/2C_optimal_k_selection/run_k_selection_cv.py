@@ -23,9 +23,6 @@ from scipy.stats import spearmanr
 from scipy.linalg import orthogonal_procrustes
 
 try:
-    import mpi4py
-    mpi4py.rc.initialize = False
-    mpi4py.rc.finalize = False
     from brainiak.funcalign.srm import SRM
 except ImportError:
     print("ERROR: brainiak not installed")
@@ -193,8 +190,7 @@ def main():
 
     rois = [args.roi] if args.roi else ROIS
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    output_dir = OUTPUT_BASE / timestamp
-    output_dir.mkdir(parents=True, exist_ok=True)
+    OUTPUT_BASE.mkdir(parents=True, exist_ok=True)
 
     start = time.time()
     all_results = {}
@@ -207,9 +203,21 @@ def main():
             import traceback
             traceback.print_exc()
 
-    out_file = output_dir / f"k_selection_fold{args.fold}_results.json"
+    roi_tag = args.roi if args.roi else "all"
+    out_file = OUTPUT_BASE / f"k_selection_fold{args.fold}_{roi_tag}_results.json"
     with open(out_file, 'w') as f:
         json.dump({
+            'config': {
+                'test': '2C_optimal_k_selection',
+                'data_dir': str(DATA_DIR),
+                'dataset': 'full_dataset_C010',
+                'input_file': 'amplitudes_procrustes.npy',
+                'hc_subjects': HC_SUBJECTS,
+                'k_candidates': K_CANDIDATES,
+                'srm_n_iter': 10,
+                'method': 'LOSO CV (HC only)',
+                'metrics': ['reconstruction_error', 'rdm_reliability', 'cross_subject_rdm_corr'],
+            },
             'settings': {'fold': args.fold, 'rois': rois, 'k_candidates': K_CANDIDATES,
                          'timestamp': timestamp, 'elapsed': time.time() - start},
             'results': all_results

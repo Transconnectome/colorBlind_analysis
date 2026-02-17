@@ -24,9 +24,6 @@ from scipy.stats import spearmanr, ttest_ind
 from scipy.linalg import orthogonal_procrustes
 
 try:
-    import mpi4py
-    mpi4py.rc.initialize = False
-    mpi4py.rc.finalize = False
     from brainiak.funcalign.srm import SRM
 except ImportError:
     print("ERROR: brainiak not installed")
@@ -205,8 +202,7 @@ def main():
 
     rois = [args.roi] if args.roi else ROIS
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    output_dir = OUTPUT_BASE / timestamp
-    output_dir.mkdir(parents=True, exist_ok=True)
+    OUTPUT_BASE.mkdir(parents=True, exist_ok=True)
 
     print(f"{'='*80}")
     print(f"Test 1C: Split-Half SRM Reliability")
@@ -224,9 +220,23 @@ def main():
             import traceback
             traceback.print_exc()
 
-    out_file = output_dir / "split_half_results.json"
+    roi_tag = args.roi if args.roi else "all"
+    out_file = OUTPUT_BASE / f"split_half_{roi_tag}_results.json"
     with open(out_file, 'w') as f:
         json.dump({
+            'config': {
+                'test': '1C_split_half',
+                'data_dir': str(DATA_DIR),
+                'dataset': 'full_dataset_C010',
+                'input_file': 'amplitudes_procrustes.npy',
+                'hc_subjects': HC_SUBJECTS,
+                'cvd_subjects': CVD_SUBJECTS,
+                'k_values': K_VALUES,
+                'srm_n_iter': 10,
+                'set_a_runs': [1, 2, 3],
+                'set_b_runs': [4, 5, 6],
+                'training': 'HC-only (CVD projected via pseudo-inverse)',
+            },
             'settings': {'rois': rois, 'timestamp': timestamp, 'elapsed': time.time() - start},
             'results': all_results
         }, f, indent=2)

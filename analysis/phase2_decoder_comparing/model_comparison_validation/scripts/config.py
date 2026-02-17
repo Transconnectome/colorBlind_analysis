@@ -14,12 +14,12 @@ from pathlib import Path
 # Local paths (for development and analysis)
 LOCAL_BASE = Path("/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis")
 LOCAL_BASELINE_DIR = LOCAL_BASE / "analysis/phase1_preprocess_decoding/results/full_dataset_C010"
-LOCAL_OUTPUT_DIR = LOCAL_BASE / "analysis/validation/results/model_comparison"
+LOCAL_OUTPUT_DIR = LOCAL_BASE / "analysis/phase2_decoder_comparing/model_comparison_validation/results"
 
 # Server paths (for SLURM jobs)
 SERVER_BASE = Path("/scratch/connectome/haba6030/colorBlind")
 SERVER_BASELINE_DIR = SERVER_BASE / "derivatives/phase1_results/full_dataset_C010"
-SERVER_OUTPUT_DIR = SERVER_BASE / "analysis/validation/results/model_comparison"
+SERVER_OUTPUT_DIR = SERVER_BASE / "analysis/phase2_decoder_comparing/model_comparison_validation/results"
 
 # ============================================================================
 # Subjects and ROIs

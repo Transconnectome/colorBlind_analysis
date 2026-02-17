@@ -261,6 +261,142 @@ def filter_by_group(subjects, group):
         return subjects
 
 
+# ============================================================================
+# Model Architecture & Logging Helpers
+# ============================================================================
+
+def get_model_architecture(model_name):
+    """
+    Return architecture metadata for a given model.
+
+    Args:
+        model_name: One of 'LDA', 'Ridge', 'KernelRidge', 'SVM', 'MLP', 'ForwardEncoding'
+
+    Returns:
+        dict with type, target, description, linearity
+    """
+    architectures = {
+        'LDA': {
+            'type': 'classifier',
+            'target': 'labels (0-7)',
+            'linearity': 'linear',
+            'description': 'Linear Discriminant Analysis with shrinkage. '
+                           'Finds linear projection maximizing between-class variance.'
+        },
+        'Ridge': {
+            'type': 'regression',
+            'target': 'circular hue (sin/cos encoding)',
+            'linearity': 'linear',
+            'description': 'Ridge regression predicting sin(hue) and cos(hue). '
+                           'L2 regularization controls overfitting.'
+        },
+        'KernelRidge': {
+            'type': 'regression',
+            'target': 'circular hue (sin/cos encoding)',
+            'linearity': 'nonlinear',
+            'description': 'Kernel Ridge with RBF kernel. '
+                           'Non-linear extension of Ridge via kernel trick.'
+        },
+        'SVM': {
+            'type': 'classifier',
+            'target': 'labels (0-7)',
+            'linearity': 'nonlinear',
+            'description': 'Support Vector Machine with RBF kernel. '
+                           'Non-linear decision boundaries in voxel space.'
+        },
+        'MLP': {
+            'type': 'classifier',
+            'target': 'labels (0-7)',
+            'linearity': 'nonlinear',
+            'description': 'Multi-Layer Perceptron with ReLU activation, '
+                           'early stopping, and L2 regularization.'
+        },
+        'ForwardEncoding': {
+            'type': 'encoding_model',
+            'target': 'labels (0-7) via 6-channel basis',
+            'linearity': 'linear',
+            'description': 'Brouwer & Heeger 2009 forward encoding model. '
+                           '6 idealized color channels, analytical solution.'
+        }
+    }
+    return architectures.get(model_name, {'type': 'unknown', 'target': 'unknown',
+                                           'linearity': 'unknown', 'description': ''})
+
+
+def get_model_defaults(model_name):
+    """
+    Return default hyperparameters used in LOCO (no HP tuning).
+
+    Args:
+        model_name: Model name string
+
+    Returns:
+        dict with default param values and rationale
+    """
+    defaults = {
+        'LDA': {
+            'params': {'solver': 'lsqr', 'shrinkage': 'auto'},
+            'rationale': 'Ledoit-Wolf automatic shrinkage; robust for small samples.'
+        },
+        'Ridge': {
+            'params': {'alpha': 1.0},
+            'rationale': 'Moderate regularization; standard default.'
+        },
+        'KernelRidge': {
+            'params': {'alpha': 1.0, 'gamma': 0.01},
+            'rationale': 'Conservative gamma to avoid overfitting in high-dim voxel space.'
+        },
+        'SVM': {
+            'params': {'C': 1.0, 'gamma': 0.01},
+            'rationale': 'Default C=1; conservative gamma for fMRI dimensionality.'
+        },
+        'MLP': {
+            'params': {'hidden_layer_sizes': (64,), 'alpha': 0.1},
+            'rationale': 'Single hidden layer; strong L2 to prevent overfitting with n=42.'
+        },
+        'ForwardEncoding': {
+            'params': {'alpha': 0, 'n_channels': 6},
+            'rationale': 'Pseudoinverse solution (alpha=0); 6 channels per B&H 2009.'
+        }
+    }
+    return defaults.get(model_name, {'params': {}, 'rationale': 'unknown model'})
+
+
+def aggregate_best_params(fold_results):
+    """
+    Aggregate hyperparameter selections across LORO folds.
+
+    Args:
+        fold_results: List of dicts, each with 'best_params' key
+
+    Returns:
+        dict with per-param selection counts and most-frequent choice
+    """
+    from collections import Counter
+
+    if not fold_results or 'best_params' not in fold_results[0]:
+        return {}
+
+    # Collect all param keys
+    all_params = {}
+    for fold in fold_results:
+        bp = fold.get('best_params', {})
+        for k, v in bp.items():
+            all_params.setdefault(k, []).append(str(v))
+
+    summary = {}
+    for param_name, values in all_params.items():
+        counts = Counter(values)
+        most_common = counts.most_common(1)[0] if counts else (None, 0)
+        summary[param_name] = {
+            'selection_counts': dict(counts),
+            'most_frequent': most_common[0],
+            'n_folds': len(values)
+        }
+
+    return summary
+
+
 if __name__ == '__main__':
     # Test utilities
     print("Utility Functions Test")

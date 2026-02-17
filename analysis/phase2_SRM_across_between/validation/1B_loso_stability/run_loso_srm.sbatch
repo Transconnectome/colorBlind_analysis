@@ -1,12 +1,12 @@
 #!/bin/bash
 #SBATCH --job-name=1B_loso
-#SBATCH --qos=shared
 #SBATCH --nodelist=node2
-#SBATCH --array=0-6%4
-#SBATCH --cpus-per-task=2
-#SBATCH --mem=8G
-#SBATCH --time=01:00:00
+#SBATCH --array=0-6%7
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=2G
+#SBATCH --time=00:10:00
 #SBATCH --no-requeue
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase2_SRM_across_between/validation/1B_loso_stability
 #SBATCH --output=logs/loso_fold%a_%j.out
 #SBATCH --error=logs/loso_fold%a_%j.err
 
@@ -30,7 +30,7 @@ echo "Start: $(date)"
 done) &
 MEM_PID=$!
 
-python ${SCRIPT_DIR}/run_loso_srm.py --fold ${SLURM_ARRAY_TASK_ID}
+mpirun -np 1 python ${SCRIPT_DIR}/run_loso_srm.py --fold ${SLURM_ARRAY_TASK_ID}
 
 EXIT_CODE=$?
 kill $MEM_PID 2>/dev/null

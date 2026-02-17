@@ -1,12 +1,12 @@
 #!/bin/bash
 #SBATCH --job-name=2D_align
-#SBATCH --qos=shared
 #SBATCH --nodelist=node2
 #SBATCH --array=0-3%4
-#SBATCH --cpus-per-task=2
-#SBATCH --mem=8G
-#SBATCH --time=01:00:00
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=2G
+#SBATCH --time=00:10:00
 #SBATCH --no-requeue
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase2_SRM_across_between/validation/2D_alignment_comparison
 #SBATCH --output=logs/alignment_comp_%a_%j.out
 #SBATCH --error=logs/alignment_comp_%a_%j.err
 
@@ -30,7 +30,7 @@ echo "Start: $(date)"
 done) &
 MEM_PID=$!
 
-python ${SCRIPT_DIR}/compare_alignment_stability.py --roi ${ROI}
+mpirun -np 1 python ${SCRIPT_DIR}/compare_alignment_stability.py --roi ${ROI}
 
 EXIT_CODE=$?
 kill $MEM_PID 2>/dev/null

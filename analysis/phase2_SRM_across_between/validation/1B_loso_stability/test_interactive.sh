@@ -12,7 +12,7 @@ SCRIPT_DIR=/scratch/connectome/haba6030/colorBlind/analysis/phase2_SRM_across_be
 echo "=== Test 1B Interactive: Single fold test ==="
 echo "Testing fold=0 (leave out sub-01), ROI=V1"
 
-/usr/bin/time -v python ${SCRIPT_DIR}/run_loso_srm.py --fold 0 --roi V1 2>&1 | tee test_interactive_output.log
+/usr/bin/time -v mpirun -np 1 python ${SCRIPT_DIR}/run_loso_srm.py --fold 0 --roi V1 2>&1 | tee test_interactive_output.log
 
 echo ""
 echo "=== Check output ==="

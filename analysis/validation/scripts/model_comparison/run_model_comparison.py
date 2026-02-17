@@ -35,14 +35,17 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score
 from scipy.stats import pearsonr
 
-# Add project root to path
+# Import from project utils (avoid shadowing by local utils.py)
 project_root = Path(__file__).resolve().parents[4]
-sys.path.insert(0, str(project_root / "analysis"))
-
-from utils.utils_color_decoding import (
-    create_basis_functions,
-    circular_diff_deg
+import importlib.util
+_spec = importlib.util.spec_from_file_location(
+    "utils_color_decoding",
+    project_root / "analysis" / "utils" / "utils_color_decoding.py"
 )
+_mod = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_mod)
+create_basis_functions = _mod.create_basis_functions
+circular_diff_deg = _mod.circular_diff_deg
 
 warnings.filterwarnings('ignore')
 
@@ -335,8 +338,9 @@ class ForwardEncodingDecoder:
         # Reshape to (n_runs, n_colors, n_voxels)
         amplitudes_train = X.reshape(n_runs, n_colors, n_voxels)
 
-        # Create basis functions
-        self.basis_functions = create_basis_functions(HUE_ANGLES, n_channels=self.n_channels)
+        # Create basis functions: (360, n_channels) full, then sample at stimulus hues
+        basis_full = create_basis_functions(n_channels=self.n_channels)  # (360, n_channels)
+        self.basis_functions = basis_full[HUE_ANGLES]  # (8, n_channels)
 
         # Average over runs
         mean_patterns = amplitudes_train.mean(axis=0)  # (n_colors, n_voxels)
@@ -366,8 +370,9 @@ class ForwardEncodingDecoder:
         y_pred_labels = np.zeros(n_samples, dtype=int)
 
         for i in range(n_samples):
-            predicted_response = channel_responses[:, i]
-            correlations = self.basis_functions @ predicted_response
+            predicted_response = channel_responses[:, i]  # (n_channels,)
+            # Dot product with each color's channel template → (n_colors,)
+            correlations = self.basis_functions @ predicted_response  # (8, n_channels) @ (n_channels,) = (8,)
             y_pred_labels[i] = np.argmax(correlations)
 
         return y_pred_labels
@@ -494,7 +499,8 @@ def loro_cv_generic(amplitudes, model_class, model_name, param_grid=None):
                         score = accuracy_score(y_tune_test, y_tune_pred)
                     else:
                         y_tune_pred_labels = hue_to_labels(y_tune_pred)
-                        score = accuracy_score(y_tune_test, hue_to_labels(y_tune_test))
+                        y_tune_test_labels = hue_to_labels(y_tune_test)
+                        score = accuracy_score(y_tune_test_labels, y_tune_pred_labels)
 
                     tune_scores.append(score)
 

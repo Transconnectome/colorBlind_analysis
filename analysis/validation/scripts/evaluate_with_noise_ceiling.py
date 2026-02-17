@@ -45,7 +45,9 @@ from crossnobis_ldw import compute_crossnobis_rdms_per_run
 # Configuration
 SUBJECTS = [f"{i:02d}" for i in range(1, 11)]
 ROIS = ['V1', 'V2', 'V3', 'hV4']
-BASE_DIR = Path(__file__).parent.parent.parent / "phase1_preprocess_decoding" / "results" / "baseline"
+# Map display ROI names to on-disk directory names
+ROI_DIR_MAP = {'V1': 'V1', 'V2': 'V2', 'V3': 'V3', 'hV4': 'V4'}
+BASE_DIR = Path(__file__).parent.parent.parent / "phase1_preprocess_decoding" / "results" / "full_dataset_C010"
 OUTPUT_DIR = Path(__file__).parent / "results" / "noise_ceiling"
 
 
@@ -148,7 +150,8 @@ def evaluate_single_roi_with_ceiling(subject, roi, verbose=True):
     Returns:
         dict or None: Metrics if successful, None if failed
     """
-    result_dir = BASE_DIR / f"sub-{subject}" / roi
+    roi_dir = ROI_DIR_MAP.get(roi, roi)
+    result_dir = BASE_DIR / f"sub-{subject}" / roi_dir
 
     # Check files exist
     raw_path = result_dir / "amplitudes_raw.npy"
@@ -314,7 +317,8 @@ def compute_group_loso_ceiling(all_results, roi):
             continue
 
         # Load amplitudes
-        result_dir = BASE_DIR / f"sub-{subject}" / roi
+        roi_dir = ROI_DIR_MAP.get(roi, roi)
+        result_dir = BASE_DIR / f"sub-{subject}" / roi_dir
         procrustes_path = result_dir / "amplitudes_procrustes.npy"
 
         if procrustes_path.exists():

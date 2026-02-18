@@ -799,6 +799,7 @@ All results: LORO CV, `full_dataset_C010`, 10 subjects × 4 ROIs, voxel space. *
 | ~~Hybrid decoder (FE+MLP, FE+SVM)~~ | Phase 2b | **DONE** | ~~High~~ | FE_SVM ≈ FE (0.779 vs 0.784); linear readout sufficient |
 | ~~Bootstrap 95% CIs (SRM disparity)~~ | Phase 2 | **DONE** | ~~High~~ | V1/V2 separation CIs exclude zero; RDM CIs for all ROI-group pairs (10,000 iter) |
 | LOCO results consolidation | Phase 2b | Blocked (RT-4) | Medium | Group-level LOCO analysis after server run |
+| **Filter pre-diagnosis** | Phase 3 | Not started | **High** | Pair-level permutation test, LORO CV for filter, low-rank constraint, baseline comparison (filter_design_plan.md Criticism #4) |
 | Dimensionality reduction + LOCO | Phase 2b | Not started | Medium | SRM/PCA + 6 models + LOCO re-experiment |
 | ~~Formal k aggregation~~ | Phase 2 | **DONE** | ~~Low~~ | V1=4, V2=4, V3=3, hV4=3 (hV4 revised from 4→3 via mean rank) |
 

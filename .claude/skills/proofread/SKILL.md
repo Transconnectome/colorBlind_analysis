@@ -1,7 +1,10 @@
 ---
 name: proofread
 description: fMRI/CVD 색 표상 연구에 특화된 학술 검토를 수행합니다. "proofread", "논문 교정", "방법론 검토", "review methods", "통계 검토", "reviewer feedback" 요청 시 사용.
+recommended-model: sonnet
 ---
+
+> **Model hint**: Use `model: "sonnet"` when spawning subagents for this skill (analytical task: 6-dimension academic review + cross-checking).
 
 # 논문 교정 (proofread)
 

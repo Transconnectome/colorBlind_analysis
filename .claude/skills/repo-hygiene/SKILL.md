@@ -1,7 +1,10 @@
 ---
 name: repo-hygiene
 description: "중복 코드/대형 산출물/추적 불필요 파일을 찾아 .gitignore/구조 개선을 제안 (삭제 실행 금지)."
+recommended-model: haiku
 ---
+
+> **Model hint**: Use `model: "haiku"` when spawning subagents for this skill (mechanical task: file scanning + gitignore suggestions).
 
 Inputs to read (project-local):
 - .claude/memory/repo_policy.md

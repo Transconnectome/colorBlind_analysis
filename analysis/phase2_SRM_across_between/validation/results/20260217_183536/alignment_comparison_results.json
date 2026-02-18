@@ -1,0 +1,58 @@
+{
+  "settings": {
+    "rois": [
+      "V1"
+    ],
+    "timestamp": "20260217_183536",
+    "elapsed": 0.10996460914611816
+  },
+  "results": {
+    "V1": {
+      "roi": "V1",
+      "k": 4,
+      "methods": {
+        "raw": {
+          "error": "setting an array element with a sequence. The requested array has an inhomogeneous shape after 2 dimensions. The detected shape was (7, 8) + inhomogeneous part."
+        },
+        "procrustes": {
+          "error": "setting an array element with a sequence. The requested array has an inhomogeneous shape after 2 dimensions. The detected shape was (7, 8) + inhomogeneous part."
+        },
+        "srm": {
+          "within_subject_rdm_corr": {
+            "sub-01": 0.37766830870279144,
+            "sub-02": 0.2785987958401751,
+            "sub-03": 0.10016420361247948,
+            "sub-04": 0.13081554460864805,
+            "sub-05": 0.4991789819376027,
+            "sub-06": 0.5747126436781609,
+            "sub-07": 0.16310892172961136,
+            "sub-08": 0.43076081007115485,
+            "sub-09": 0.30268199233716475,
+            "sub-10": 0.2227695675971538
+          },
+          "within_subject_rdm_corr_mean": 0.3080459770114942,
+          "hc_within_mean": 0.3034639143013527,
+          "cvd_within_mean": 0.3187374566684911,
+          "between_subject_rdm_agreement_a": 0.5382594417077176,
+          "hc_disparities_a": {
+            "sub-01": 0.2658069431248961,
+            "sub-02": 0.30710970748462985,
+            "sub-03": 0.38736470867676465,
+            "sub-04": 0.43030227165980106,
+            "sub-05": 0.24501594861334286,
+            "sub-06": 0.3941366333897849,
+            "sub-07": 0.3201053461453495
+          },
+          "cvd_disparities_a": {
+            "sub-08": 0.45682134076211517,
+            "sub-09": 0.5603605819697751,
+            "sub-10": 0.35298918277406505
+          },
+          "hc_mean_disp": 0.3356916512992242,
+          "cvd_mean_disp": 0.45672370183531846,
+          "separation": 0.12103205053609428
+        }
+      }
+    }
+  }
+}

@@ -33,7 +33,10 @@ from sklearn.svm import SVC
 from sklearn.neural_network import MLPClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import accuracy_score
+from sklearn.feature_selection import f_classif
+from sklearn.decomposition import PCA
 from scipy.stats import pearsonr
+from scipy.linalg import orthogonal_procrustes
 
 # Import from project utils (avoid shadowing by local utils.py)
 project_root = Path(__file__).resolve().parents[4]
@@ -110,6 +113,57 @@ def load_amplitudes(baseline_dir, subject, roi, alignment='raw'):
 
     amplitudes = np.load(amp_path)
     return amplitudes
+
+
+def _normalize_run(pattern):
+    """Center and scale a single run pattern (n_colors, n_voxels)."""
+    centered = pattern - pattern.mean()
+    scale = np.std(centered)
+    if scale > 1e-10:
+        return centered / scale
+    return centered
+
+
+def procrustes_nested_fold(amplitudes_raw, train_indices, test_index):
+    """Fit Procrustes on train runs only, apply to test run.
+
+    1. Normalize each train run (center + scale by std)
+    2. Compute train reference = mean of normalized train runs
+    3. Align each train run to reference via orthogonal_procrustes
+    4. Normalize test run (center + scale by its own stats)
+    5. Align test run to train reference via orthogonal_procrustes
+
+    Args:
+        amplitudes_raw: (n_runs, n_colors, n_voxels) raw amplitudes
+        train_indices: list of train run indices
+        test_index: single test run index
+
+    Returns:
+        train_aligned: (len(train_indices), n_colors, n_voxels)
+        test_aligned: (n_colors, n_voxels)
+    """
+    n_colors, n_voxels = amplitudes_raw.shape[1], amplitudes_raw.shape[2]
+
+    # Normalize train runs
+    train_normalized = np.zeros((len(train_indices), n_colors, n_voxels))
+    for i, r in enumerate(train_indices):
+        train_normalized[i] = _normalize_run(amplitudes_raw[r])
+
+    # Train reference = mean of normalized train runs
+    train_ref = train_normalized.mean(axis=0)  # (n_colors, n_voxels)
+
+    # Align each train run to reference
+    train_aligned = np.zeros_like(train_normalized)
+    for i in range(len(train_indices)):
+        R, _ = orthogonal_procrustes(train_normalized[i].T, train_ref.T)
+        train_aligned[i] = (train_normalized[i].T @ R).T
+
+    # Normalize and align test run
+    test_normalized = _normalize_run(amplitudes_raw[test_index])
+    R_test, _ = orthogonal_procrustes(test_normalized.T, train_ref.T)
+    test_aligned = (test_normalized.T @ R_test).T
+
+    return train_aligned, test_aligned
 
 
 # ============================================================================
@@ -234,7 +288,7 @@ class KernelRidgeDecoder:
     def get_param_grid():
         return {
             'alpha': [0.1, 1, 10],
-            'gamma': [0.001, 0.01, 0.1]
+            'gamma': [0.0001, 0.001, 0.01, 0.1]
         }
 
 
@@ -386,6 +440,122 @@ class ForwardEncodingDecoder:
         return {'alpha': [0, 10, 50]}
 
 
+class FEMLPHybridDecoder:
+    """ForwardEncoding (6-channel) + MLP readout.
+
+    Stage 1: ForwardEncoding extracts 6 channel responses (stable, interpretable)
+    Stage 2: MLP classifies from 6-dim channel space (can capture nonlinearity)
+
+    With only 6 features, MLP cannot overfit (sample/feature = 40/6 ≈ 6.7:1).
+    """
+
+    def __init__(self, fe_alpha=0, n_channels=6,
+                 hidden_layer_sizes=(16,), mlp_alpha=0.01):
+        self.fe_alpha = fe_alpha
+        self.n_channels = n_channels
+        self.hidden_layer_sizes = hidden_layer_sizes
+        self.mlp_alpha = mlp_alpha
+        self.fe_model = None
+        self.mlp_model = None
+
+    def fit(self, X, y_labels):
+        """
+        Args:
+            X: (n_samples, n_voxels)
+            y_labels: (n_samples,) color labels (0-7)
+        """
+        # Stage 1: Fit ForwardEncoding to get W
+        self.fe_model = ForwardEncodingDecoder(
+            alpha=self.fe_alpha, n_channels=self.n_channels)
+        self.fe_model.fit(X, y_labels)
+
+        # Extract channel responses for training data
+        C_train = self.fe_model.weights @ X.T  # (n_channels, n_samples)
+
+        # Stage 2: MLP on channel responses
+        self.mlp_model = MLPClassifier(
+            hidden_layer_sizes=self.hidden_layer_sizes,
+            alpha=self.mlp_alpha,
+            activation='relu',
+            solver='adam',
+            max_iter=500,
+            early_stopping=True,
+            validation_fraction=0.2,
+            random_state=42,
+            verbose=False
+        )
+        self.mlp_model.fit(C_train.T, y_labels)
+
+    def predict(self, X):
+        """Returns: (n_samples,) predicted labels (0-7)"""
+        if self.fe_model is None or self.mlp_model is None:
+            raise RuntimeError("Model not fitted yet")
+
+        C_test = self.fe_model.weights @ X.T  # (n_channels, n_samples)
+        return self.mlp_model.predict(C_test.T)
+
+    @staticmethod
+    def get_param_grid():
+        return {
+            'fe_alpha': [0, 10],
+            'hidden_layer_sizes': [(16,), (16, 8)],
+            'mlp_alpha': [0.01, 0.1]
+        }
+
+
+class FESVMHybridDecoder:
+    """ForwardEncoding (6-channel) + SVM readout.
+
+    Stage 1: ForwardEncoding extracts 6 channel responses
+    Stage 2: SVM with RBF kernel classifies from 6-dim channel space
+    """
+
+    def __init__(self, fe_alpha=0, n_channels=6, C=1.0, gamma='scale'):
+        self.fe_alpha = fe_alpha
+        self.n_channels = n_channels
+        self.C_param = C
+        self.gamma = gamma
+        self.fe_model = None
+        self.svm_model = None
+
+    def fit(self, X, y_labels):
+        """
+        Args:
+            X: (n_samples, n_voxels)
+            y_labels: (n_samples,) color labels (0-7)
+        """
+        # Stage 1: Fit ForwardEncoding
+        self.fe_model = ForwardEncodingDecoder(
+            alpha=self.fe_alpha, n_channels=self.n_channels)
+        self.fe_model.fit(X, y_labels)
+
+        # Extract channel responses
+        C_train = self.fe_model.weights @ X.T  # (n_channels, n_samples)
+
+        # Stage 2: SVM on channel responses
+        self.svm_model = SVC(
+            C=self.C_param, gamma=self.gamma,
+            kernel='rbf', random_state=42
+        )
+        self.svm_model.fit(C_train.T, y_labels)
+
+    def predict(self, X):
+        """Returns: (n_samples,) predicted labels (0-7)"""
+        if self.fe_model is None or self.svm_model is None:
+            raise RuntimeError("Model not fitted yet")
+
+        C_test = self.fe_model.weights @ X.T
+        return self.svm_model.predict(C_test.T)
+
+    @staticmethod
+    def get_param_grid():
+        return {
+            'fe_alpha': [0, 10],
+            'C': [0.1, 1, 10],
+            'gamma': ['scale', 0.1, 1.0]
+        }
+
+
 # ============================================================================
 # Metrics
 # ============================================================================
@@ -437,7 +607,40 @@ def compute_classification_metrics(y_true_labels, y_pred_labels):
 # LORO Cross-Validation
 # ============================================================================
 
-def loro_cv_generic(amplitudes, model_class, model_name, param_grid=None):
+def _apply_dim_reduction_fit(X_train, y_train_labels, dim_reduction, dim_k, n_colors):
+    """Fit dimensionality reduction on training data.
+
+    Returns:
+        X_train_reduced, reducer_state (tuple for applying to test)
+    """
+    if dim_reduction == 'anova' and dim_k is not None:
+        labels_anova = y_train_labels if y_train_labels is not None else np.tile(np.arange(n_colors), len(X_train) // n_colors)
+        f_scores, _ = f_classif(X_train, labels_anova)
+        k_actual = min(dim_k, X_train.shape[1])  # guard: can't select more than available
+        top_k_idx = np.sort(np.argsort(f_scores)[::-1][:k_actual])
+        return X_train[:, top_k_idx], ('anova', top_k_idx)
+    elif dim_reduction == 'pca' and dim_k is not None:
+        k_actual = min(dim_k, X_train.shape[1], X_train.shape[0])
+        pca = PCA(n_components=k_actual)
+        X_reduced = pca.fit_transform(X_train)
+        return X_reduced, ('pca', pca)
+    return X_train, None
+
+
+def _apply_dim_reduction_transform(X_test, reducer_state):
+    """Apply fitted dim reduction to test data."""
+    if reducer_state is None:
+        return X_test
+    method, obj = reducer_state
+    if method == 'anova':
+        return X_test[:, obj]
+    elif method == 'pca':
+        return obj.transform(X_test)
+    return X_test
+
+
+def loro_cv_generic(amplitudes, model_class, model_name, param_grid=None,
+                    alignment='preloaded', dim_reduction=None, dim_k=None):
     """
     Generic LORO CV for any decoder model
 
@@ -446,6 +649,9 @@ def loro_cv_generic(amplitudes, model_class, model_name, param_grid=None):
         model_class: Decoder class
         model_name: Model name string
         param_grid: Optional parameter grid for tuning
+        alignment: 'preloaded' (use as-is) or 'nested_procrustes' (fit per fold)
+        dim_reduction: None, 'anova', or 'pca'
+        dim_k: Number of features/components for dim reduction
 
     Returns:
         fold_results: List of dicts with performance per fold
@@ -457,13 +663,24 @@ def loro_cv_generic(amplitudes, model_class, model_name, param_grid=None):
     fold_results = []
 
     # Determine if model uses labels or hue
-    uses_labels = model_name in ['LDA', 'SVM', 'MLP', 'ForwardEncoding']
+    uses_labels = model_name in ['LDA', 'SVM', 'MLP', 'ForwardEncoding',
+                                  'FE_MLP', 'FE_SVM']
 
     for test_run in range(n_runs):
         # Split train/test
         train_runs = [r for r in range(n_runs) if r != test_run]
-        X_train = amplitudes[train_runs].reshape(-1, n_voxels)
-        X_test = amplitudes[test_run]
+
+        # --- RT-2: Nested Procrustes ---
+        if alignment == 'nested_procrustes':
+            train_aligned, test_aligned = procrustes_nested_fold(
+                amplitudes, train_runs, test_run)
+        else:
+            train_aligned = amplitudes[train_runs]
+            test_aligned = amplitudes[test_run]
+
+        n_features = train_aligned.shape[-1]
+        X_train = train_aligned.reshape(-1, n_features)
+        X_test = test_aligned  # (n_colors, n_features)
 
         if uses_labels:
             y_train = np.tile(labels, len(train_runs))
@@ -471,6 +688,12 @@ def loro_cv_generic(amplitudes, model_class, model_name, param_grid=None):
         else:
             y_train = np.tile(hue_angles, len(train_runs))
             y_test = hue_angles
+
+        # --- RT-3: Dimensionality reduction (within fold) ---
+        y_train_labels = np.tile(labels, len(train_runs))
+        X_train, reducer_state = _apply_dim_reduction_fit(
+            X_train, y_train_labels, dim_reduction, dim_k, n_colors)
+        X_test = _apply_dim_reduction_transform(X_test, reducer_state)
 
         # Hyperparameter tuning (simple grid search)
         best_params = {}
@@ -481,17 +704,36 @@ def loro_cv_generic(amplitudes, model_class, model_name, param_grid=None):
             for params in _generate_param_combinations(param_grid):
                 tune_scores = []
 
-                for tune_run in train_runs:
-                    tune_train_runs = [r for r in train_runs if r != tune_run]
-                    X_tune_train = amplitudes[tune_train_runs].reshape(-1, n_voxels)
-                    X_tune_test = amplitudes[tune_run]
+                # Inner loop uses train_aligned with relative indexing (0..4)
+                for inner_test_idx in range(len(train_runs)):
+                    inner_train_idx = [i for i in range(len(train_runs)) if i != inner_test_idx]
+
+                    if alignment == 'nested_procrustes':
+                        # Re-do nested Procrustes for inner fold
+                        inner_train_abs = [train_runs[i] for i in inner_train_idx]
+                        inner_test_abs = train_runs[inner_test_idx]
+                        inner_train_al, inner_test_al = procrustes_nested_fold(
+                            amplitudes, inner_train_abs, inner_test_abs)
+                    else:
+                        inner_train_al = train_aligned[inner_train_idx]
+                        inner_test_al = train_aligned[inner_test_idx]
+
+                    n_feat_inner = inner_train_al.shape[-1]
+                    X_tune_train = inner_train_al.reshape(-1, n_feat_inner)
+                    X_tune_test = inner_test_al
 
                     if uses_labels:
-                        y_tune_train = np.tile(labels, len(tune_train_runs))
+                        y_tune_train = np.tile(labels, len(inner_train_idx))
                         y_tune_test = labels
                     else:
-                        y_tune_train = np.tile(hue_angles, len(tune_train_runs))
+                        y_tune_train = np.tile(hue_angles, len(inner_train_idx))
                         y_tune_test = hue_angles
+
+                    # Apply dim reduction inside inner loop
+                    y_tune_train_labels = np.tile(labels, len(inner_train_idx))
+                    X_tune_train, inner_reducer = _apply_dim_reduction_fit(
+                        X_tune_train, y_tune_train_labels, dim_reduction, dim_k, n_colors)
+                    X_tune_test = _apply_dim_reduction_transform(X_tune_test, inner_reducer)
 
                     # Train and evaluate
                     model_tune = model_class(**params)
@@ -553,7 +795,8 @@ def _generate_param_combinations(param_grid):
 # Main Comparison
 # ============================================================================
 
-def run_single_subject_roi(baseline_dir, subject, roi, alignment, models):
+def run_single_subject_roi(baseline_dir, subject, roi, alignment, models,
+                           dim_reduction=None, dim_k=None):
     """
     Run model comparison for a single subject-ROI pair
 
@@ -561,19 +804,29 @@ def run_single_subject_roi(baseline_dir, subject, roi, alignment, models):
         baseline_dir: Path to full_dataset_C010
         subject: Subject ID (e.g., '01')
         roi: ROI name (e.g., 'V1')
-        alignment: 'raw' or 'procrustes'
+        alignment: 'raw', 'procrustes', or 'nested_procrustes'
         models: List of model names to compare
+        dim_reduction: None, 'anova', or 'pca'
+        dim_k: Number of features/components for dim reduction
 
     Returns:
         results: Dict with results per model
     """
     print(f"\n{'='*60}")
     print(f"Subject: sub-{subject} | ROI: {roi} | Alignment: {alignment}")
+    if dim_reduction:
+        print(f"  Dim reduction: {dim_reduction} (k={dim_k})")
     print(f"{'='*60}")
 
     # Load amplitudes
     try:
-        amplitudes = load_amplitudes(baseline_dir, subject, roi, alignment)
+        if alignment == 'nested_procrustes':
+            # Load raw data — Procrustes will be applied per fold
+            amplitudes = load_amplitudes(baseline_dir, subject, roi, 'raw')
+            loro_alignment = 'nested_procrustes'
+        else:
+            amplitudes = load_amplitudes(baseline_dir, subject, roi, alignment)
+            loro_alignment = 'preloaded'
         print(f"Loaded amplitudes: {amplitudes.shape}")
     except FileNotFoundError as e:
         print(f"ERROR: {e}")
@@ -588,7 +841,9 @@ def run_single_subject_roi(baseline_dir, subject, roi, alignment, models):
         'KernelRidge': (KernelRidgeDecoder, KernelRidgeDecoder.get_param_grid()),
         'SVM': (SVMDecoder, SVMDecoder.get_param_grid()),
         'MLP': (MLPDecoder, MLPDecoder.get_param_grid()),
-        'ForwardEncoding': (ForwardEncodingDecoder, ForwardEncodingDecoder.get_param_grid())
+        'ForwardEncoding': (ForwardEncodingDecoder, ForwardEncodingDecoder.get_param_grid()),
+        'FE_MLP': (FEMLPHybridDecoder, FEMLPHybridDecoder.get_param_grid()),
+        'FE_SVM': (FESVMHybridDecoder, FESVMHybridDecoder.get_param_grid())
     }
 
     # Run each model
@@ -601,7 +856,12 @@ def run_single_subject_roi(baseline_dir, subject, roi, alignment, models):
 
         try:
             model_class, param_grid = model_map[model_name]
-            fold_results = loro_cv_generic(amplitudes, model_class, model_name, param_grid)
+            fold_results = loro_cv_generic(
+                amplitudes, model_class, model_name, param_grid,
+                alignment=loro_alignment,
+                dim_reduction=dim_reduction,
+                dim_k=dim_k
+            )
 
             results[model_name] = fold_results
 
@@ -634,17 +894,23 @@ def main():
     parser.add_argument('--rois', nargs='+', default=['V1', 'V2', 'V3', 'V4'],
                        help='ROI names')
     parser.add_argument('--models', nargs='+',
-                       default=['LDA', 'Ridge', 'KernelRidge', 'SVM', 'MLP', 'ForwardEncoding'],
+                       default=['LDA', 'Ridge', 'KernelRidge', 'SVM', 'MLP',
+                                'ForwardEncoding', 'FE_MLP', 'FE_SVM'],
                        help='Models to compare')
     parser.add_argument('--alignment', type=str, default='both',
-                       choices=['raw', 'procrustes', 'both'],
+                       choices=['raw', 'procrustes', 'nested_procrustes', 'both'],
                        help='Alignment condition')
+    parser.add_argument('--dim_reduction', type=str, default=None,
+                       choices=['anova', 'pca'],
+                       help='Dimensionality reduction method (within fold)')
+    parser.add_argument('--dim_k', type=int, default=None,
+                       help='Number of features (ANOVA) or components (PCA)')
 
     args = parser.parse_args()
 
-    # Create output directory
+    # Create output directory (flat — no timestamp subdirs)
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    output_path = Path(args.output_dir) / timestamp
+    output_path = Path(args.output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
 
     print(f"\n{'='*80}")
@@ -673,7 +939,9 @@ def main():
                 args.subject,
                 roi,
                 alignment,
-                args.models
+                args.models,
+                dim_reduction=args.dim_reduction,
+                dim_k=args.dim_k
             )
 
             if results is not None:
@@ -712,7 +980,9 @@ def main():
             'n_colors': 8,
             'cv_method': 'LORO (Leave-One-Run-Out)',
             'hp_tuning': True,
-            'hp_tuning_method': 'nested CV (inner LORO on train runs)'
+            'hp_tuning_method': 'nested CV (inner LORO on train runs)',
+            'dim_reduction': args.dim_reduction,
+            'dim_k': args.dim_k
         },
         'hyperparameters': hyperparameters,
         'model_architectures': model_architectures,
@@ -724,8 +994,29 @@ def main():
     with open(output_file, 'w') as f:
         json.dump(results_data, f, indent=2)
 
+    # Save config.json (one per output_dir, safe to overwrite — identical across subjects)
+    config_file = output_path / 'config.json'
+    config_data = {
+        'description': 'LORO model comparison',
+        'baseline_dir': str(args.baseline_dir),
+        'dataset_name': Path(args.baseline_dir).name,
+        'alignments': alignments,
+        'models': args.models,
+        'rois': args.rois,
+        'dim_reduction': args.dim_reduction,
+        'dim_k': args.dim_k,
+        'cv_method': 'LORO (Leave-One-Run-Out)',
+        'hp_tuning': True,
+        'n_runs': 6,
+        'n_colors': 8,
+        'created': datetime.now().isoformat()
+    }
+    with open(config_file, 'w') as f:
+        json.dump(config_data, f, indent=2)
+
     print(f"\n{'='*80}")
     print(f"Results saved: {output_file}")
+    print(f"Config saved: {config_file}")
     print(f"{'='*80}\n")
 
 

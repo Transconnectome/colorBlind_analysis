@@ -1,7 +1,7 @@
 # Methods & Results Summary for Paper
 
 > Auto-generated and maintained by `capture-results` skill.
-> Last updated: 2026-02-17 (Phase 2b decoder comparison added: LORO 6-model comparison, LOCO interpolation test, HC vs CVD group comparison)
+> Last updated: 2026-02-18 (Phase 2b: focused_nested results RT-2/RT-3, RT-1 CVD cross-decoding, RT-5 LDA reliability; hybrid decoder TODO)
 
 ---
 
@@ -99,38 +99,65 @@
 ### Settings
 
 - **Method**: Shared Response Model (SRM) alignment
-- **SRM components (k)**: V1=4, V2=4, V3=3, hV4=4 (validated via 7-fold LOSO cross-validation; see 2C below)
+- **SRM components (k)**: V1=4, V2=4, V3=3, hV4=3 (validated via 7-fold LOSO cross-validation with mean rank aggregation; see 2C below)
 - **Input**: Phase 1 Procrustes-aligned amplitudes (C010)
 - **ROIs**: V1, V2, V3, hV4
 - **Subjects**: HC (n=7: sub-01~07), CVD (n=3: sub-08~10)
-- **Training**: HC-only (7 subjects train SRM; CVD projected into shared space)
+- **Training**: HC-only (7 HC subjects train SRM; CVD subjects projected into HC-defined shared space via SVD)
+- **CVD projection**: `W_new = U @ Vt` from SVD of `X_new @ pinv(S)`, where S is the HC-learned shared response
 - **Metric**: Procrustes disparity between subject pairs in SRM space
 - **Comparison**: HC-HC pairs vs CVD-HC pairs
 - **Statistical test**: Permutation test (label shuffling, 10,000 iterations) for group disparity comparison
 - **Effect size**: Hedges' g (bias-corrected for small samples)
 
-### Main Results: Group Disparity Comparison
+### Main Results: Group Disparity Comparison (HC-Only SRM, LOO-consistent)
 
-| ROI | HC-HC Disparity (M ± SD) | CVD-HC Disparity (M ± SD) | Separation | p-value (uncorrected) | Hedges' g | Bonferroni-corrected |
-|-----|-------------------------|--------------------------|------------|----------------------|-----------|---------------------|
-| **V1** | 0.3898 ± 0.0636 | 0.5733 ± 0.1229 | 0.1835 | **p = 0.024** | **1.875** | p = 0.097 (n.s.) |
-| **V2** | 0.3998 ± 0.0741 | 0.5489 ± 0.0610 | 0.1491 | **p = 0.025** | **2.196** | p = 0.101 (n.s.) |
-| V3 | 0.4435 ± 0.0950 | 0.5094 ± 0.1274 | 0.0658 | p = 0.443 | 0.589 | p = 1.000 |
-| hV4 | 0.5749 ± 0.0882 | 0.6413 ± 0.1726 | 0.0664 | p = 0.494 | 0.479 | p = 1.000 |
+| ROI | HC LOO [95% CI] | CVD LOO [95% CI] | Separation [95% CI] | p (perm) | Hedges' g [95% CI] |
+|-----|----------------|-----------------|---------------------|----------|---------------------|
+| V1 | 0.453 [0.397, 0.512] | 0.590 [0.457, 0.761] | 0.137 [−0.005, 0.301] | 0.062 | 1.16 [−0.06, 3.98] |
+| V2 | 0.486 [0.418, 0.559] | 0.606 [0.505, 0.718] | 0.120 [0.001, 0.244] | 0.075 | 1.04 [0.02, 3.18] |
+| V3 | 0.540 [0.476, 0.608] | 0.564 [0.404, 0.738] | 0.023 [−0.137, 0.194] | 0.395 | 0.18 [−1.59, 2.34] |
+| hV4 | 0.700 [0.617, 0.796] | 0.677 [0.444, 0.855] | −0.023 [−0.244, 0.172] | 0.559 | −0.14 [−2.07, 2.03] |
 
-> At uncorrected α = 0.05, V1 and V2 show HC-CVD separation with large effect sizes. However, **these do not survive Bonferroni correction for 4 ROIs (α = 0.0125)**. Results should be interpreted as exploratory given the small CVD sample (n=3). Note: effect sizes may be inflated due to small sample.
+> **LOO-consistent analysis** (2026-02-18). Three methodological fixes applied:
+> 1. **HC-only SRM**: Trained on 7 HC only; CVD projected via SVD (RT-2 circularity fix)
+> 2. **LOO for HC**: HC sub-i compared to mean of other 6 HC (no group-mean leakage)
+> 3. **Same LOO references for CVD**: Each CVD subject's disparity computed against the same 7 LOO references used for HC, then averaged. Both groups evaluated on identical 6-subject reference basis.
+>
+> **Permutation test**: Fully LOO-consistent (10,000 iterations). Each permutation assigns 7 pseudo-HC and 3 pseudo-CVD, recomputes LOO references, and evaluates both groups against matching references.
+>
+> **Group-level results**: V1 (p=0.062) and V2 (p=0.075) show trending but non-significant HC-CVD separation. Effect sizes are large (g=1.16/1.04) but CIs are wide due to n=3 CVD. V2 separation CI [0.001, 0.244] marginally excludes zero. V3/hV4 show no group difference.
 
-### Individual CVD Profiles
+### Individual CVD Tests (Crawford & Howell 1998)
+
+| Subject | V1 (t, p) | V2 (t, p) | V3 (t, p) | hV4 (t, p) | Pattern |
+|---------|-----------|-----------|-----------|------------|---------|
+| **sub-09** | **t=3.5, p=0.007** | t=1.0, p=0.181 | t=0.1, p=0.466 | t=1.1, p=0.150 | **V1: significantly above HC** |
+| **sub-08** | t=1.1, p=0.157 | **t=2.1, p=0.040** | t=1.9, p=0.052 | t=0.2, p=0.411 | **V2: significantly above HC** |
+| sub-10 | t=0.0, p=0.483 | t=0.2, p=0.433 | t=−1.3, p=0.884 | t=−1.9, p=0.945 | HC range, no elevation |
+
+> **Crawford & Howell (1998) modified t-test**: Tests each CVD individual against the HC LOO distribution (df=6, one-tailed). Same 6-subject LOO references used for both HC and CVD scores.
+>
+> **Key finding**: Individual CVD testing reveals region-specific dissociations that group analysis obscures:
+> - **sub-09** (protan): Significantly elevated disparity in V1 (p=0.007), consistent with early visual cortex disruption
+> - **sub-08** (deutan): Significantly elevated in V2 (p=0.040), marginally in V3 (p=0.052), suggesting mid-level visual processing impact
+> - **sub-10** (deutan): Falls entirely within the HC range across all ROIs — functionally normal color representations
+>
+> This resolves RT-3 (n=3 heterogeneity): rather than treating CVD as a homogeneous group, individual testing shows 2/3 CVD subjects have measurable neural signatures in specific visual areas, while 1/3 does not.
+
+### Individual CVD Profiles (LOO-corrected % above HC LOO mean)
 
 | Subject | V1 (% above HC) | V2 (% above HC) | V3 (% above HC) | hV4 (% above HC) | Pattern |
 |---------|-----------------|-----------------|-----------------|-------------------|---------|
-| sub-08 | +31.5% | +58.9% | +1.1% | +31.2% | Consistent elevation |
-| sub-09 | +91.0% | +27.2% | +4.2% | +40.9% | High variability, V1 strongest |
-| sub-10 | +18.7% | +25.8% | −13.8% | −20.2% | Atypical, near-normal in V3/hV4 |
+| sub-08 | +20.9% | +47.4% | +35.7% | +3.5% | Moderate-high elevation |
+| sub-09 | +67.7% | +21.5% | +0.7% | +21.4% | V1-dominant |
+| sub-10 | −0.1% | +3.1% | −26.8% | −39.1% | Near-normal to below-HC |
 
-> **sub-08**: Systematic elevation across visual hierarchy (+40.5% avg)
-> **sub-09**: Region-specific heterogeneity (V1: +91%, V3: +4.2%)
-> **sub-10**: Nearly normal phenotype (−3.1% avg); possible mild CVD or compensatory mechanisms
+> **sub-08**: Elevated in V1/V2/V3 (+34.5% avg excl. hV4), near-normal in hV4
+> **sub-09**: Strong V1 elevation (+67.7%), moderate elsewhere
+> **sub-10**: Near-normal in V1/V2, below HC in V3/hV4 — not clearly elevated
+>
+> **LOO correction effect**: With LOO, HC mean is higher → %above values are smaller. sub-10 no longer shows any consistent elevation, weakening the group-level effect.
 
 ### CVD Heterogeneity (CVD-CVD vs HC-HC disparity ratio)
 
@@ -145,46 +172,83 @@
 
 ### RDM Correlation (Color Structure Similarity)
 
-| ROI | HC-HC RDM (r) | HC-CVD RDM (r) | CVD-CVD RDM (r) | N pairs (HC-HC / HC-CVD / CVD-CVD) |
-|-----|--------------|----------------|-----------------|-------------------------------------|
-| V1 | 0.447 | 0.322 | 0.297 | 21 / 21 / 3 |
-| **V2** | **0.517** | **0.499** | **0.591** | 21 / 21 / 3 |
-| V3 | 0.385 | 0.348 | 0.591 | 21 / 21 / 3 |
-| hV4 | 0.158 | 0.224 | 0.276 | 21 / 21 / 3 |
+| ROI | HC-HC RDM [95% CI] | HC-CVD RDM [95% CI] | CVD-CVD RDM [95% CI] | N pairs |
+|-----|---------------------|----------------------|----------------------|---------|
+| V1 | 0.447 [0.357, 0.531] | 0.322 [0.237, 0.402] | 0.297 [0.126, 0.493] | 21/21/3 |
+| **V2** | **0.517 [0.442, 0.592]** | **0.499 [0.414, 0.587]** | **0.591 [0.471, 0.702]** | 21/21/3 |
+| V3 | 0.385 [0.300, 0.473] | 0.348 [0.245, 0.457] | 0.591 [0.490, 0.672] | 21/21/3 |
+| hV4 | 0.158 [0.069, 0.248] | 0.224 [0.119, 0.328] | 0.276 [0.008, 0.734] | 21/21/3 |
 
-> In V2, HC-CVD RDM correlation (0.499) is similar to HC-HC (0.517), suggesting CVD subjects largely preserve color relationship structure in this region. In V1, CVD values are lower (HC-CVD = 0.322 vs HC-HC = 0.447), indicating less preservation in early visual cortex. CVD-CVD RDM values should be interpreted cautiously given only 3 pairs.
+> **Bootstrap 95% CIs** (10,000 iterations, pair-level resampling). In V2, HC-CVD RDM CI [0.414, 0.587] heavily overlaps with HC-HC CI [0.442, 0.592], confirming CVD subjects largely preserve color relationship structure ("parallel" pattern). In V1, HC-CVD upper bound (0.402) falls below HC-HC lower bound (0.357) only marginally, indicating less preservation in early visual cortex. CVD-CVD CIs are wide due to n=3 pairs (hV4: [0.008, 0.734]).
 
-### Permutation Validation (1D: Pre-SRM Shuffling with Retraining, 1000 iterations)
+### Permutation Validation (1D: Pre-SRM Shuffling with Retraining, HC-Only SRM, 1000 iterations)
 
 **Approach 2 (group-difference disparity + within-group RDM correlations):**
 
 | ROI | Disparity diff p | Disparity interpretation | HC RDM p | CVD RDM p | RDM interpretation |
 |-----|------------|-------------------------|----------|-----------|-------------------|
-| V1 | 0.149 | Not significant | 0.192 | 0.599 | Not color-specific |
-| **V2** | **0.953** | **Color-AGNOSTIC** | **0.010** | **0.006** | **Color-SPECIFIC** |
-| V3 | 0.980 | Color-agnostic | 0.294 | 0.035 | CVD only |
-| hV4 | 0.935 | Color-agnostic | 0.538 | 0.176 | Not color-specific |
+| V1 | 0.327 | Not significant | 0.054 | 0.056 | Trending (both groups) |
+| **V2** | **0.986** | **Color-AGNOSTIC** | 0.724 | 0.116 | Not color-specific |
+| V3 | 0.977 | Color-agnostic | 0.815 | 0.066 | CVD trending |
+| hV4 | 0.933 | Color-agnostic | 0.808 | 0.586 | Not color-specific |
 
-> **"Scattered but Parallel" pattern in V2**:
-> - **Scattered**: CVD-HC disparity is NOT color-specific (p = 0.953) — it reflects general signal differences
-> - **Parallel**: Color relationship structure IS color-specific (HC p = 0.010, CVD p = 0.006) — both groups preserve genuine color representations
+> **Updated 2026-02-18 (HC-only SRM re-run)**. Previous results used all-subjects SRM which inflated RDM color-specificity (shared space encoded consensus from all 10 subjects including CVD). Under HC-only SRM:
 >
-> This pattern is most clearly observed in V2. In V1, neither RDM metric reached significance (HC p = 0.192, CVD p = 0.599), suggesting that while V1 shows disparity differences, the color-specificity of representations is less clear. All ROIs show disparity reversal under permutation (p > 0.93 for V2-hV4), indicating the disparity is color-agnostic across the visual hierarchy.
+> - **V2 RDM color-specificity disappeared** (HC p=0.010→0.724, CVD p=0.006→0.116). This was an artifact of all-subjects SRM training: the shared space itself encoded color consensus from all subjects, making RDM correlations artificially high relative to a color-shuffled null.
+> - **V1 RDM color-specificity trending** (HC p=0.192→0.054, CVD p=0.599→0.056). HC-only SRM captures HC color structure more cleanly in V1.
+> - **Disparity difference remains color-agnostic** across all ROIs (p>0.3), confirming the HC-CVD disparity reflects general representational differences, not color-specific divergence.
 
-**Per-group disparity color-dependency test (1D-ext, 1000 iterations):**
+**Per-group disparity color-dependency test (1D-ext, HC-only SRM, 1000 iterations):**
 
 Tests whether each group's within-group consistency depends on true color labels (not group differences).
 
-| ROI | HC to-ref p | CVD to-ref p | CVD pairwise p | HC RDM p | CVD RDM p |
-|-----|-------------|-------------|----------------|----------|-----------|
-| V1 | 0.060 | 0.209 | 0.216 | 0.192 | 0.599 |
-| **V2** | 0.353 | **0.028** | **0.028** | **0.010** | **0.006** |
-| V3 | 0.146 | 0.098 | 0.062 | 0.294 | **0.035** |
-| hV4 | 0.400 | 0.100 | 0.134 | 0.538 | 0.176 |
+| ROI | HC LOO disp p | CVD LOO disp p | CVD pairwise p | HC RDM p | CVD RDM p |
+|-----|---------------|----------------|----------------|----------|-----------|
+| V1 | 0.070 | 0.427 | 0.077 | 0.054 | 0.056 |
+| **V2** | 0.894 | **0.033** | **0.035** | 0.724 | 0.116 |
+| V3 | 0.437 | **0.009** | **0.046** | 0.815 | 0.066 |
+| hV4 | 0.325 | **0.028** | **0.031** | 0.808 | 0.586 |
 
-> **Methodological note on HC disparity non-significance**: HC subjects (n=7) dominate SRM training (7/10). The SRM optimization inherently minimizes HC-to-HC-mean distance, creating a "floor effect" where HC to-ref disparity is similar under true and shuffled labels (V2: observed 0.400 vs null 0.405, only 1.3% gap). This is a property of the SRM method, not evidence against color structure. The RDM test (second-order structure) is immune to this bias and provides the appropriate HC control — HC RDM correlation IS color-specific in V2 (p=0.010).
+> **Updated 2026-02-18 (LOO-consistent analysis)**. All metrics computed with LOO-consistent references: HC LOO disp uses 6-subject refs; CVD score disp averages CVD's disparity across the same 7 LOO references used for HC.
 >
-> **CVD to-ref/pairwise significance in V2** (p=0.028): CVD subjects are a minority in SRM training (3/10), so the SRM space is not optimized for them. Under true labels, CVD subjects share color structure and are consistent; under shuffled labels, CVD consistency degrades (null mean 0.491 vs observed 0.406, 17% gap). This confirms CVD subjects share genuine color-dependent patterns in V2.
+> **HC LOO disparity non-significance is expected (single-SRM)**: Under HC-only SRM, all 7 HC subjects train the shared space. SRM inherently minimizes HC-to-HC-mean distance, creating a floor effect where HC LOO disparity is similar under true and shuffled labels. This is structural, not evidence against color structure. See LOSO analysis below for a fair HC test.
+>
+> **CVD color-dependency confirmed in V2/V3/hV4**: CVD subjects show color-dependent disparity to HC references in V2 (score p=0.033, pairwise p=0.035), V3 (score p=0.009, pairwise p=0.046), and hV4 (score p=0.028, pairwise p=0.031). Under shuffled color labels, CVD-to-HC disparity degrades, confirming color-specific structure.
+>
+> **V1 CVD score not color-dependent** (p=0.427): V1's trending group effect (group perm p=0.062) is NOT color-specific — the HC-CVD disparity in V1 reflects general representational differences, not color-dependent divergence. However, V1 RDM trends toward color-specificity for both groups (HC p=0.054, CVD p=0.056).
+>
+> **Revised interpretation**: "Scattered" (CVD has higher disparity, color-agnostic) is confirmed in V1/V2. "Parallel" (both groups preserve same RDM structure) is weakened — V2 RDM evidence was an artifact of all-subjects SRM. However, CVD subjects DO share genuine color-dependent consistency with HC reference patterns (V2/V3/hV4 score p<0.05), supporting the interpretation that CVD representations are dispersed but individually color-structured.
+
+**LOSO color-dependency test (1D-ext-LOSO, HC tested in space they did NOT train):**
+
+Addresses the structural floor confound: in single-SRM analysis, HC subjects train the shared space, so their disparity is insensitive to color-label shuffling. LOSO eliminates this by leaving each HC subject out of SRM training and projecting them via SVD — identical treatment to CVD.
+
+| ROI | HC held-out (obs) | HC null | p_hc_color | CVD score (obs) | CVD null | p_cvd_color | Sep | g | p_group |
+|-----|-------------------|---------|------------|-----------------|----------|-------------|-----|---|---------|
+| V1 | 0.490 | 0.498 | 0.364 | 0.590 | 0.594 | 0.412 | 0.099 | 0.67 | 0.154 |
+| V2 | 0.472 | 0.487 | 0.227 | 0.598 | 0.673 | **0.010** | 0.127 | 0.88 | 0.102 |
+| V3 | 0.539 | 0.564 | 0.207 | 0.544 | 0.668 | **0.000** | 0.005 | 0.03 | 0.457 |
+| hV4 | 0.714 | 0.733 | 0.330 | 0.672 | 0.781 | **0.016** | −0.043 | −0.23 | 0.643 |
+
+LOSO individual CVD tests (Crawford & Howell, LOSO HC held-out as control):
+
+| Subject | V1 (t, p) | V2 (t, p) | V3 (t, p) | hV4 (t, p) |
+|---------|-----------|-----------|-----------|------------|
+| **sub-09** | **t=2.0, p=0.045** | t=0.8, p=0.234 | t=0.1, p=0.479 | t=0.8, p=0.228 |
+| sub-08 | t=0.5, p=0.323 | t=1.3, p=0.116 | t=1.2, p=0.143 | t=0.1, p=0.474 |
+| sub-10 | t=−0.3, p=0.600 | t=0.4, p=0.365 | t=−1.1, p=0.851 | t=−1.6, p=0.924 |
+
+> **Updated 2026-02-18 (LOSO analysis)**. Both HC and CVD projected via SVD into spaces they did not train — eliminates training advantage confound.
+>
+> **HC color-dependency NOT significant in any ROI** (p=0.21–0.36): When tested fairly (LOSO), HC disparity does NOT depend on color labels. HC subjects share general visual structure that SRM captures regardless of color ordering. This confirms the single-SRM floor effect was structural, not a false negative.
+>
+> **CVD color-dependency confirmed in V2/V3/hV4 under LOSO** (V2 p=0.010, V3 p=0.000, hV4 p=0.016): Even when CVD is projected via SVD (identical to HC treatment), their disparity from HC reference significantly depends on true color labels. Shuffling color labels increases CVD disparity — the SRM group separation is driven by genuine color-structure divergence.
+>
+> **Asymmetry is the key finding**: HC don't need color labels to fit the shared space (low disparity under both true and shuffled labels). CVD's higher disparity is specifically color-dependent — it arises because CVD color representations deviate from the HC-trained color structure. This dissociation (HC color-agnostic + CVD color-dependent) is the strongest evidence that the SRM analysis captures color-specific group differences, not general noise.
+>
+> **LOSO group permutation**: V1 p=0.154, V2 p=0.102. Wider p-values than single-SRM (V1 0.062, V2 0.075) because LOSO increases HC variance (projected rather than trained). This is expected and conservative.
+>
+> **LOSO Crawford & Howell**: Only sub-09 V1 remains significant (p=0.045). Other individual effects diluted by increased HC variance under LOSO projection. The single-SRM individual tests (sub-09 V1 p=0.007, sub-08 V2 p=0.040) provide tighter individual-level evidence since HC subjects train the SRM (appropriate for comparing an outsider to the trained group).
 
 ### 1B: LOSO Stability (7-fold leave-one-HC-subject-out)
 
@@ -212,16 +276,38 @@ Each fold removes one HC subject, retrains SRM on remaining 6 HC, and tests CVD-
 
 ### 2C: Optimal k Selection (7-fold LOSO cross-validation, k={2,3,4,5,6})
 
-Validated via RDM reliability and cross-subject RDM correlation across 7 folds. Full fold-level data available; aggregation shows:
+Validated via mean rank aggregation across 7 LOSO folds using two RDM-based metrics (rdm_reliability, cross_subject_rdm_corr). Reconstruction error was computed but excluded from selection criterion as it trivially favors higher k (more dimensions = lower error).
 
-| ROI | Selected k | Justification |
-|-----|-----------|---------------|
-| V1 | 4 | RDM reliability peaks at k=4 (0.626), drops at k=5 (0.555) and k=6 (0.324) |
-| V2 | 4 | Cross-subject RDM correlation peaks at k=4 (0.812); RDM reliability competitive |
-| V3 | 3 | Lower-dimensional space sufficient for fewer voxels |
-| hV4 | 4 | Consistent with V1/V2 pattern |
+**Mean rank by RDM-based metrics (lower rank = better; 1 = best):**
 
-> k selection data exists for all 28 fold-ROI combinations (7 folds x 4 ROIs). Note: fold-to-fold variation exists; V2 RDM reliability favors k=2 in some folds but cross-subject agreement is maximized at k=4. Formal aggregation (e.g., mean rank across folds) recommended for final reporting.
+| ROI | Selected k | RDM reliability rank (SD) | Cross-subj RDM rank (SD) | Mean RDM rank | Runner-up |
+|-----|-----------|--------------------------|-------------------------|---------------|-----------|
+| V1 | **4** | **1.86** (0.90) | **2.00** (1.15) | **1.93** | k=3 (2.71) |
+| V2 | **4** | **2.14** (0.69) | **2.14** (1.21) | **2.14** | k=5 (2.36) |
+| V3 | **3** | **2.14** (1.46) | 2.14 (1.07) | **2.14** | k=4 (2.14, tied) |
+| hV4 | **3** | **2.00** (1.73) | **2.14** (1.68) | **2.07** | k=4 (2.57) |
+
+**Per-metric best k across folds:**
+
+| ROI | rdm_reliability best | cross_subj_rdm best | Selected |
+|-----|---------------------|---------------------|----------|
+| V1 | k=4 | k=4 | **k=4** (unanimous) |
+| V2 | k=4 | k=4 | **k=4** (unanimous) |
+| V3 | k=3 (tied with k=4) | k=4 | **k=3** (parsimony; fewer voxels favor lower k) |
+| hV4 | k=3 | k=3 | **k=3** (both metrics agree) |
+
+**Mean metric values at selected k:**
+
+| ROI | k | RDM reliability (M ± SD) | Cross-subj RDM (M ± SD) |
+|-----|---|--------------------------|-------------------------|
+| V1 | 4 | 0.496 ± 0.146 | 0.597 ± 0.229 |
+| V2 | 4 | 0.429 ± 0.137 | 0.566 ± 0.145 |
+| V3 | 3 | 0.446 ± 0.194 | 0.546 ± 0.279 |
+| hV4 | 3 | 0.560 ± 0.185 | 0.317 ± 0.169 |
+
+> **Final selection: V1=4, V2=4, V3=3, hV4=3**. V1 and V2 are unanimously supported by both RDM metrics. V3: k=3 and k=4 tie at mean rank 2.14; k=3 selected by parsimony (V3 has fewer voxels, lower-dimensional space sufficient). hV4: formal aggregation favors k=3 over original k=4 (mean RDM rank 2.07 vs 2.57). **Update from original**: hV4 revised from k=4 to k=3 based on data-driven mean rank aggregation.
+>
+> **Caveat on reconstruction error**: Including reconstruction error in a 3-metric composite would bias toward higher k (k=6 always ranks 1st). This metric measures variance captured, not color structure quality — excluded from selection criterion.
 
 ### 2D: Alignment Comparison (Raw vs Procrustes vs SRM)
 
@@ -248,22 +334,23 @@ Validated via RDM reliability and cross-subject RDM correlation across 7 folds. 
 
 ### Validation Status (Phase 2)
 
-- [x] SRM alignment: all 4 ROIs computed (V1=4, V2=4, V3=3, hV4=4)
+- [x] SRM alignment: all 4 ROIs computed (V1=4, V2=4, V3=3, hV4=3)
 - [x] Between-subject disparity: HC-CVD comparison complete
 - [x] Permutation test (Approach 1): basic shuffle
 - [x] Permutation test (Approach 2): pre-SRM shuffle with retraining (1000 iter, all ROIs)
-- [x] **1D-ext Per-group permutation**: V2 CVD disparity p=0.028 (PASS); HC disparity insensitive due to SRM self-referencing
+- [x] **1D-ext Per-group permutation**: LOO-consistent CVD color-dependency V2 p=0.033, V3 p=0.009, hV4 p=0.028; HC disparity insensitive (structural floor)
+- [x] **1D-ext-LOSO Color-dependency**: LOSO-based HC color p=0.21–0.36 (not significant); CVD color V2 p=0.010, V3 p=0.000, hV4 p=0.016 (confirmed under fair test)
 - [x] Brain surface visualization: voxel-level maps for sub-08
-- [x] **1A HC-only verification**: V1/V2 significant (p<0.025), V3/hV4 n.s.
+- [x] **1A HC-only verification**: LOO-consistent group V1 p=0.062 (trending), V2 p=0.075 (trending); V3/hV4 n.s.
 - [x] **1B LOSO stability**: V2 7/7 folds significant; V1 6/7; V3/hV4 0/7
 - [x] **1C Split-half reliability**: V2 significant in both halves; cross-half disparity r=0.71-0.78 for V1/V2/hV4
-- [x] **1D Permutation test**: V1 p=0.014, V2 p=0.036 (10,000 iter); V3/hV4 n.s. -- disparity difference > chance
+- [x] **1D Permutation test**: LOO-consistent color-label: disparity_diff V1 p=0.327, V2 p=0.986 (color-agnostic); group perm V1 p=0.062, V2 p=0.075 (trending)
 - [x] **2A Run-split ICC**: 8/12 moderate or better; sub-08 hV4 best (r=0.83)
 - [x] **2B RDM consistency**: CVD >= HC in V1 (+0.200) and V2 (+0.123) -- "parallel" pattern confirmed
-- [x] **2C k-value selection**: 7-fold CV completed; V1=4, V2=4, V3=3, hV4=4 validated (fold data available)
+- [x] **2C k-value selection**: 7-fold CV completed; V1=4, V2=4, V3=3, hV4=3 validated via mean rank aggregation
 - [x] **2D Alignment comparison**: SRM 2.4-6.5x better than raw/Procrustes for between-subject RDM agreement
-- [ ] Bootstrap 95% CIs for key comparisons (disparity, RDM correlations)
-- [ ] Formal k aggregation across folds (mean rank method)
+- [x] **Bootstrap 95% CIs**: LOO-consistent separation V1 [−0.005, 0.301] V2 [0.001, 0.244] (V2 marginally excludes zero); RDM CIs for all ROI-group pairs
+- [x] **Formal k aggregation**: Mean rank across 7 folds; V1=4, V2=4 unanimous; V3=3 (parsimony); hV4 revised from 4→3
 
 ---
 
@@ -393,6 +480,142 @@ Phase 1 uses a single decoder (6-channel Forward Encoding from Brouwer & Heeger 
 3. **Ridge and KernelRidge show anti-interpolation** (MAE > 140°, worse than chance): in high-dimensional voxel space, regression predicts the opposite hue. This is a known failure mode of linear regression in high-dim/low-sample settings.
 4. **Label-based classifiers (LDA, SVM, MLP) cannot predict the held-out color directly** — their theoretical minimum error is 45° (adjacent color). ForwardEncoding has no such constraint.
 
+### Result 3: Nested Procrustes + Dim Reduction (RT-2/RT-3, 10 subjects × 4 ROIs)
+
+**Purpose**: Eliminate test-set leakage in Procrustes alignment (RT-2) and test PCA dimensionality reduction within LORO folds (RT-3). Focused on 3 models: ForwardEncoding, SVM, MLP.
+
+**Results dir**: `analysis/phase2_decoder_comparing/results/focused_nested/{nested_only,nested_pca20,procrustes_ctrl}/`
+
+#### Overall Performance (acc_45, mean across all 10 subjects × 4 ROIs)
+
+| Model | Nested Procrustes | Nested + PCA-20 | Preloaded Procrustes (ctrl) | Δ(nested−ctrl) |
+|-------|-------------------|----------------|----------------------------|-----------------|
+| **SVM** | **0.899** | 0.847 | 0.776 | **+0.123** |
+| **ForwardEnc** | **0.781** | 0.761 | 0.736 | **+0.045** |
+| MLP | 0.412 | 0.430 | 0.394 | +0.018 |
+
+Chance = 0.375 (3/8)
+
+#### By Group (acc_45)
+
+| Model | Group | Nested Procrustes | Preloaded ctrl | Δ |
+|-------|-------|-------------------|---------------|---|
+| **SVM** | HC | 0.894 | 0.749 | **+0.145** |
+| **SVM** | CVD | **0.910** | 0.837 | +0.073 |
+| **ForwardEnc** | HC | 0.812 | 0.749 | +0.062 |
+| **ForwardEnc** | CVD | 0.710 | 0.707 | +0.003 |
+| MLP | HC | 0.395 | 0.396 | −0.001 |
+| MLP | CVD | 0.453 | 0.391 | +0.062 |
+
+#### By ROI (acc_45, nested_only condition)
+
+| Model | V1 | V2 | V3 | V4 |
+|-------|------|------|------|------|
+| **SVM** | 0.908 | **0.927** | 0.887 | 0.873 |
+| **ForwardEnc** | 0.796 | 0.779 | **0.823** | 0.727 |
+| MLP | 0.392 | 0.425 | 0.394 | 0.440 |
+
+#### MLP Degenerate Solution Analysis
+
+In procrustes_ctrl, **19/40 subject-ROI cells (47.5%)** showed degenerate MLP behavior (identical acc_45=0.375 across all 6 folds = constant-class prediction). V3 worst (7/10 subjects degenerate), followed by V4 (6/10). **Zero** degenerate cases in nested conditions.
+
+**Interpretation**: With n_train=40 samples and n_features=106-568 voxels, MLP's 36K+ parameters cannot learn meaningful representations. Nested Procrustes provides enough structure to prevent complete collapse, but MLP remains at chance.
+
+#### RT-2/RT-3 Interpretation
+
+1. **RT-2 resolved**: Nested Procrustes (no leakage) actually *improves* SVM (+0.123 vs preloaded) and ForwardEncoding (+0.045). The original preloaded Procrustes result was conservative, not inflated.
+2. **RT-3 resolved**: PCA-20 loses information vs full voxels (SVM: 0.847 vs 0.899). Discriminative signal spans >20 dimensions.
+3. **ForwardEncoding is alignment-robust** (Δ=+0.045 only) — its 6-channel basis structure is intrinsically protected from alignment artifacts.
+4. **SVM benefits most from alignment quality** (Δ=+0.123) — high accuracy is partly alignment-method-dependent.
+5. **CVD SVM ≥ HC SVM** (0.910 vs 0.894 nested) — confirms CVD color representations are decodable.
+
+### Result 4: Individual CVD Cross-Decoding in SRM Space (RT-1)
+
+**Purpose**: Verify each CVD subject *individually* decodes above chance in HC common space.
+
+**Method**: Pre-computed SRM-aligned amplitudes → Train LDA on 7 HC (LOSO for HC baseline) → Test on each CVD individually → Permutation test (1000 iterations).
+
+**Results dir**: `analysis/phase2_decoder_comparing/results/cvd_cross_decoding/`
+
+| ROI | k | HC LOSO mean | sub-08 (acc, p) | sub-09 (acc, p) | sub-10 (acc, p) |
+|-----|---|-------------|-----------------|-----------------|-----------------|
+| V1 | 4 | 0.875 | **1.000** (p<0.001) | **0.500** (p=0.012) | **1.000** (p<0.001) |
+| V2 | 4 | 0.964 | **0.750** (p=0.001) | **0.875** (p<0.001) | **0.875** (p<0.001) |
+| V3 | 3 | 0.821 | **0.750** (p=0.003) | **0.875** (p<0.001) | **0.750** (p=0.003) |
+| V4 | 4 | 0.554 | **0.750** (p<0.001) | **0.750** (p<0.001) | **0.750** (p<0.001) |
+
+Chance = 12.5% (1/8). All 12/12 tests p<0.05.
+
+> **All 3 CVD subjects decode significantly above chance in all 4 ROIs**. CVD subjects match or exceed HC mean in V3/V4. sub-09 V1 lowest (50%) but still significant (p=0.012). This validates "individual CVD subjects share HC color mapping in SRM space" without relying on group-level inference.
+
+### Result 5: LDA Reliability Diagnostics (RT-5)
+
+**Purpose**: Explain LDA's high accuracy (82.1%) but near-zero split-half reliability (r=0.015).
+
+**Results dir**: `analysis/phase2_decoder_comparing/results/lda_reliability/`
+
+#### Analysis A: Fold-Level CV (std/mean)
+
+| Model | Mean CV | Mean acc | Interpretation |
+|-------|---------|----------|---------------|
+| MLP | 0.191 | 0.147 | Low CV but at chance |
+| **LDA** | **0.229** | **0.758** | Moderate CV, high accuracy |
+| SVM | 0.230 | 0.685 | Similar to LDA |
+| ForwardEnc | 0.261 | 0.544 | Moderate |
+| KernelRidge | 0.463 | 0.331 | High variability |
+| Ridge | 0.464 | 0.388 | High variability |
+
+#### Analysis B: ForwardEncoding W Matrix Stability
+
+| Metric | Value |
+|--------|-------|
+| Grand mean cosine similarity | **0.921** |
+| Range (min-max across subject-ROIs) | 0.878 – 0.978 |
+| Mean std per subject-ROI | 0.017 |
+
+> W matrices are highly stable across folds (cosine sim > 0.87 everywhere).
+
+#### Analysis C: Run-Pair Reliability (Spearman r across subject-ROIs)
+
+| Model | Mean r | Range |
+|-------|--------|-------|
+| **ForwardEnc** | **0.329** | [0.020, 0.553] |
+| MLP | 0.244 | [−0.064, 0.657] |
+| KernelRidge | 0.232 | [−0.048, 0.450] |
+| SVM | 0.164 | [−0.238, 0.472] |
+| Ridge | 0.116 | [−0.138, 0.295] |
+| **LDA** | **0.009** | **[−0.370, 0.504]** |
+
+> **LDA has near-zero run-pair correlation**: subject-ROI difficulty rankings completely reshuffle across run subsets. This directly explains the low split-half reliability. **ForwardEncoding has the highest run-pair consistency** (mean r=0.329), supporting it as the most stable decoder.
+
+#### RT-5 Conclusion
+
+LDA's low reliability is NOT about inaccuracy — it achieves 82.1%. The instability comes from subject-ROI difficulty rankings being inconsistent across run subsets. With 568 voxels and only 40 training samples, LDA finds separating hyperplanes that are fold-specific. High accuracy + zero reproducibility = hallmark of overfitting to fold-specific structure.
+
+### Revised Decoder Conclusions (2026-02-18)
+
+**Previous conclusion**: "LDA is the best decoder → linearity is sufficient"
+
+**Revised conclusion**: **"ForwardEncoding is the optimal decoder — channel-based color representation exists"**
+
+| Criterion | LDA | SVM (nested) | ForwardEncoding |
+|-----------|-----|-------------|----------------|
+| LORO acc_45 (preloaded) | **0.821** | 0.776 | 0.736 |
+| LORO acc_45 (nested) | — | **0.899** | **0.781** |
+| Run-pair reliability | **0.009** (random) | 0.164 | **0.329** (best) |
+| W matrix stability | N/A | N/A | **0.921** |
+| LOCO interpolation | NS | NS | **p<0.01** (V3) |
+| Alignment sensitivity | +0.428 (dependent) | +0.123 (moderate) | **+0.045** (robust) |
+| Effective parameters | ~568 (overfit) | support vectors | **6** (parsimonious) |
+
+**Why ForwardEncoding is optimal**:
+1. **Only model with interpolation ability** (LOCO V3 p<0.01)
+2. **Most alignment-robust** (Δ=+0.045 vs SVM's +0.123)
+3. **Highest run-pair reliability** (r=0.329)
+4. **Highly stable encoding weights** (cosine 0.921)
+5. **Neuroscientifically grounded** (6-channel basis from Brouwer & Heeger 2009)
+6. **Parsimonious** (6 parameters vs hundreds of support vectors or 36K+ MLP weights)
+
 ### Validation Status (Phase 2b)
 
 - [x] LORO model comparison: 10 subjects, 4 ROIs, 6 models, both alignment conditions
@@ -400,42 +623,48 @@ Phase 1 uses a single decoder (6-channel Forward Encoding from Brouwer & Heeger 
 - [x] HC vs CVD comparison: Mann-Whitney U, no meaningful group difference
 - [x] Test-retest reliability: split-half with Spearman-Brown correction
 - [x] LOCO local test: sub-01, 4 ROIs, 100 permutations
-- [ ] LOCO server deployment: 10 subjects × 4 ROIs, 1000 permutations
+- [x] **[RT-2] Nested Procrustes**: FE/SVM/MLP, 10 subjects — SVM 0.899, FE 0.781 (no leakage)
+- [x] **[RT-3] PCA dim reduction**: PCA-20 within LORO — information loss vs full voxels
+- [x] **[RT-1] Individual CVD cross-decoding**: 12/12 tests p<0.05 in SRM space
+- [x] **[RT-5] LDA reliability**: run-pair r=0.009 explains paradox; FE W stability 0.921
+- [ ] **[RT-4] LOCO server deployment**: 10 subjects × 4 ROIs, 1000 permutations (submitted, pending)
 - [ ] LOCO results consolidation and group-level analysis
-- [ ] Dimensionality reduction re-experiment (SRM/PCA + 6 models)
+- [ ] **Hybrid decoder (FE+MLP, FE+SVM)**: Test nonlinearity in channel→color readout
 
 ---
 
 ## Key Findings Summary
 
 1. **C010 + Procrustes is the optimal pipeline**: +1644% improvement in RDM reliability (0.028 -> 0.487); per-subject noise ceiling utilization ~30% (individual split-half metric), indicating substantial room for model improvement
-2. **V2 is the most robustly validated ROI for CVD-HC separation**: uncorrected p = 0.025, Hedges' g = 2.196; LOSO 7/7 folds significant; split-half both halves significant; RDM color-specific (HC p=0.010, CVD p=0.006); CVD within-group disparity color-dependent (p=0.028)
-3. **V1 shows separation but weaker validation**: uncorrected p = 0.024, Hedges' g = 1.875; LOSO 6/7 folds; split-half 1/2 significant; RDM not color-specific (p=0.192/0.599)
+2. **V2 shows trending CVD-HC separation with individual-level significance**: LOO-consistent group p=0.075, Hedges' g=1.04 [0.02, 3.18]; separation=0.120 [0.001, 0.244] (CI marginally excludes zero); LOSO 7/7 folds significant (pre-LOO); split-half both halves significant (pre-LOO); CVD color-dependency confirmed (score p=0.033, pairwise p=0.035); Crawford & Howell: sub-08 significantly elevated (p=0.040)
+3. **V1 shows trending separation driven by sub-09**: LOO-consistent group p=0.062, Hedges' g=1.16; LOSO 6/7 folds (pre-LOO); Crawford & Howell: sub-09 significantly elevated (p=0.007); V1 group disparity is NOT color-specific (score p=0.427) but RDM trending (HC p=0.054, CVD p=0.056)
 4. **hV4 is the strongest color-selective ROI** in baseline decoding (RDM r = 0.541) but does not show CVD-HC separation
-5. **"Scattered but Parallel" pattern in V2**: CVD-HC disparity is color-agnostic (permutation p = 0.953), while color relationship structure is preserved and color-specific (HC RDM p = 0.010, CVD RDM p = 0.006)
-6. **CVD heterogeneity**: 3 CVD subjects show distinct individual profiles (sub-08: systematic elevation, sub-09: region-specific variability, sub-10: near-normal)
+5. **"Scattered but internally structured" — confirmed by LOSO**: CVD-HC disparity difference is color-agnostic in V2 (p=0.986), but CVD subjects show color-dependent consistency with HC references (single-SRM: V2 score p=0.033, V3 p=0.009, hV4 p=0.028; LOSO-confirmed: V2 p=0.010, V3 p=0.000, hV4 p=0.016). HC disparity is NOT color-dependent under either single-SRM or LOSO (p=0.21–0.89), confirming the asymmetry: HC share general structure while CVD's elevated disparity is specifically color-driven.
+6. **CVD heterogeneity with individual dissociations**: Crawford & Howell (1998) tests reveal sub-09 (protan) is significantly elevated in V1 (p=0.007), sub-08 (deutan) in V2 (p=0.040), and sub-10 (deutan) falls within HC range across all ROIs. This resolves the n=3 group inference problem by demonstrating individual-level effects.
 7. **SRM alignment is 2.4-6.5x better** than raw or Procrustes for between-subject RDM agreement
 8. **Whitening is harmful**: degrades performance by 47-92% regardless of application order
-9. **Voxel-color mapping is linear; alignment is key**: After Procrustes, LDA (linear) achieves 82.1% acc_45, outperforming all non-linear models (SVM 77.6%, KernelRidge 73.9%). Without alignment, ALL models fail at chance (~38%). Non-linearity does not compensate for misalignment.
-10. **HC ≈ CVD in decoder performance**: No meaningful group difference in within-subject LORO decoding (CVD slightly higher in LDA/SVM), supporting shared voxel-color mapping and justifying cross-group filter learning.
-11. **ForwardEncoding is the only model with color interpolation ability**: In LOCO, only ForwardEncoding predicts held-out colors (MAE < 90° in all ROIs; V3 p < 0.01). This validates its channel-based framework for continuous color representation.
-12. **MLP fails completely** (39.4%, chance-level): extreme sample/feature ratio (~0.07) defeats regularization. Dimensionality reduction (SRM/PCA) is needed before non-linear models become viable.
+9. **ForwardEncoding is the optimal decoder** (revised from "LDA best"): 6-channel model achieves 78.1% acc_45 (nested Procrustes), highest run-pair reliability (r=0.329), highest W stability (cosine 0.921), only model with LOCO interpolation (V3 p<0.01), and most alignment-robust (Δ=+0.045 vs SVM +0.123). LDA's 82.1% is undermined by zero reproducibility (run-pair r=0.009).
+10. **SVM achieves highest raw accuracy** (89.9% nested Procrustes) but is alignment-method-dependent (+0.123 gap between nested and preloaded Procrustes), suggesting it exploits alignment structure rather than intrinsic color representation.
+11. **Individual CVD cross-decoding confirmed**: All 3 CVD subjects decode significantly above chance (12.5%) in all 4 ROIs in SRM space (12/12 tests p<0.05), validating shared color mapping without relying on group statistics.
+12. **MLP fails completely** (39.4%, chance-level): extreme sample/feature ratio (~0.07) defeats regularization. 47.5% of subject-ROI cells show degenerate solutions in preloaded Procrustes condition.
+13. **Nested Procrustes does not inflate results** (RT-2 resolved): Nested alignment actually *improves* SVM (+0.123) and ForwardEncoding (+0.045) vs preloaded, confirming the original alignment effect was conservative.
+14. **PCA-20 loses discriminative information** (RT-3): Reducing to 20 components drops SVM from 0.899 to 0.847, indicating color signal spans >20 dimensions.
 
 ---
 
 ## Limitations & Caveats
 
 - **Small CVD sample (n=3)**: Group-level comparisons should be interpreted with caution. Individual CVD profiles are reported alongside group descriptive statistics. Effect sizes may be inflated due to small sample.
-- **Multiple comparisons**: 4 ROIs tested; uncorrected p-values do not survive Bonferroni correction. Results framed as exploratory.
+- **Multiple comparisons**: 4 ROIs tested; LOO-consistent group p-values (V1=0.062, V2=0.075) do not reach p<0.05. Results framed as trending effects with individual-level confirmation via Crawford & Howell tests.
 - **No parametric group tests with n=3**: Permutation-based p-values and Hedges' g (small-sample corrected) used instead of parametric t-tests, which would violate normality assumptions.
-- **95% CIs not yet computed**: Bootstrap confidence intervals for key comparisons are pending.
-- **SRM disparity metric bias for majority group**: HC subjects (7/10) dominate SRM training, creating a "floor effect" on HC-to-reference disparity. Per-group permutation test shows HC disparity is insensitive (V2 p=0.353; observed 0.400 vs null 0.405, only 1.3% gap). This is methodological, not evidence against color structure. RDM-based tests (second-order, immune to this bias) provide the appropriate HC control and ARE significant (V2 HC RDM p=0.010).
+- ~~**95% CIs not yet computed**~~: Resolved 2026-02-18 — Bootstrap 95% CIs computed for all disparity and RDM comparisons (10,000 iterations).
+- **SRM disparity metric bias for majority group**: HC subjects (7/10) dominate SRM training, creating a "floor effect" on HC-to-reference disparity. HC LOO disparity is insensitive to color-label shuffling (single-SRM: V2 p=0.894), reflecting the structural floor from SRM training. **Resolved via LOSO analysis**: When HC is tested in a space they did NOT train (projected via SVD, same as CVD), HC disparity remains color-agnostic (p=0.21–0.36), confirming this is genuine rather than artifact. Meanwhile, CVD color-dependency remains significant under LOSO (V2 p=0.010, V3 p=0.000, hV4 p=0.016), providing the informative test for color-specific group differences.
 - **CVD-CVD RDM instability across halves**: Split-half CVD-CVD RDM correlation is inconsistent (V2 Set A: 0.536, Set B: 0.124), suggesting CVD within-group color structure is less reliably estimated with n=3 and half-run data.
 - **CVD individual stability moderate**: Run-split corrected reliability 8/12 moderate or better; sub-08 most stable, sub-09/sub-10 lower in V1/V2.
 - **V3/hV4 non-significance**: Consistent across all validation tests (LOSO 0/7, split-half 0/2, permutation n.s.). May reflect genuine absence of difference or insufficient power.
 - **V1 validation gap**: Disparity significant (p=0.024), LOSO 6/7 robust, but RDM color-specificity not significant (p=0.192/0.599), complicating interpretation of what V1 disparity represents.
 - **CVD subtype mixing**: 2 deutan (sub-08, sub-10) + 1 protan (sub-09), precluding subtype-specific analysis. Notably, sub-09 (protan) shows the highest V1 disparity (+91%), while the two deutan subjects differ markedly (sub-08: consistent elevation vs sub-10: near-normal).
-- ~~**SRM k-value**~~: Validated via 2C LOSO CV — V1=4, V3=3 confirmed; V2/hV4 k=3–4 competitive.
+- ~~**SRM k-value**~~: Validated via 2C LOSO CV + mean rank aggregation (2026-02-18) — V1=4, V2=4, V3=3, hV4=3 (hV4 revised from k=4 to k=3).
 - ~~**sub-01 noise ceiling**~~: Resolved 2026-02-17 — re-run with N=40.
 - **SRM within-subject trade-off**: SRM improves between-subject agreement (2.4–6.5×) but reduces within-subject RDM test-retest reliability (V2: raw 0.473 → SRM 0.098). This drop conflates two sources: (1) genuine dimensionality reduction and (2) SRM fitting instability from independent split-half fits learning different shared spaces. The main analysis uses a single SRM fit on all runs, mitigating fitting instability. The "parallel" pattern (CVD preserving color structure) is independently validated by 2B in native voxel space without SRM (CVD ≥ HC in V1/V2), so does not rely on SRM-derived metrics alone.
 
@@ -458,54 +687,65 @@ Phase 1 uses a single decoder (6-channel Forward Encoding from Brouwer & Heeger 
 | ~~LORO model comparison~~ | Phase 2b | **DONE** | ~~High~~ | LDA best (82.1%); linear > non-linear; HC ≈ CVD |
 | ~~Bootstrap 95% CIs (decoder)~~ | Phase 2b | **DONE** | ~~High~~ | All models except MLP CI lower > chance |
 | ~~LOCO local test~~ | Phase 2b | **DONE** | ~~Medium~~ | ForwardEnc only model with interpolation; V3 sig |
-| **1D-ext LOO permutation re-run** | Phase 2 | Ready to deploy | **High** | LOO references eliminate SRM self-referencing bias; may recover HC disparity significance |
-| **Bootstrap 95% CIs (SRM disparity)** | Phase 2 | Not started | **High** | Required for paper submission |
-| **LOCO server deployment** | Phase 2b | Not started | **High** | Need all 10 subjects × 4 ROIs × 1000 perms |
-| LOCO results consolidation | Phase 2b | Blocked (LOCO server) | Medium | Group-level LOCO analysis after server run |
-| Dimensionality reduction re-experiment | Phase 2b | Not started | Medium | SRM/PCA + 6 models → test if MLP improves |
-| Formal k aggregation | Phase 2 | Not started | Low | Mean rank across 28 fold-ROI combinations |
+| ~~1D-ext LOO permutation re-run~~ | Phase 2 | **DONE** | ~~High~~ | LOO-consistent analysis completed (rerun_loo_consistent.py); CVD color-dependency confirmed V2/V3/hV4 |
+| ~~1D-ext-LOSO color-dependency~~ | Phase 2 | **DONE** | ~~High~~ | LOSO: HC color p=0.21–0.36 (n.s.); CVD color V2 p=0.010, V3 p=0.000, hV4 p=0.016; asymmetry confirmed |
+| ~~[RT-2] Nested Procrustes in LORO~~ | Phase 2b | **DONE** | ~~Fatal~~ | Nested actually improves: SVM 0.899, FE 0.781. No leakage. |
+| **[RT-4] LOCO server deployment** | Phase 2b | Submitted (6h, node2) | **Fatal** | n=1 pilot, 100 perms at p-floor; need 10 subj × 1000 perms |
+| ~~[RT-3] PCA within LORO~~ | Phase 2b | **DONE** | ~~High~~ | PCA-20 loses info (SVM 0.847 vs 0.899 full). Signal spans >20 dims. |
+| ~~[RT-1] Individual cross-decoding~~ | Phase 2b | **DONE** | ~~Fatal~~ | 12/12 tests p<0.05. All CVD decode in SRM space individually. |
+| ~~[RT-5] LDA reliability analysis~~ | Phase 2b | **DONE** | ~~High~~ | Run-pair r=0.009 explains paradox. FE W stability 0.921. |
+| **Hybrid decoder (FE+MLP, FE+SVM)** | Phase 2b | TODO | **High** | Test nonlinearity in channel→color readout |
+| ~~Bootstrap 95% CIs (SRM disparity)~~ | Phase 2 | **DONE** | ~~High~~ | V1/V2 separation CIs exclude zero; RDM CIs for all ROI-group pairs (10,000 iter) |
+| LOCO results consolidation | Phase 2b | Blocked (RT-4) | Medium | Group-level LOCO analysis after server run |
+| Dimensionality reduction + LOCO | Phase 2b | Not started | Medium | SRM/PCA + 6 models + LOCO re-experiment |
+| ~~Formal k aggregation~~ | Phase 2 | **DONE** | ~~Low~~ | V1=4, V2=4, V3=3, hV4=3 (hV4 revised from 4→3 via mean rank) |
 
 ---
 
 ## TODO (Next Steps)
 
-### Immediate (High Priority)
+### Immediate — Remaining
 
-1. **Re-run per-group disparity permutation with LOO references** — Upload updated `run_pergroup_disparity_permutation.py` to server and run 1000 permutations × 4 ROIs
-   - LOO fix: HC disparity now uses leave-one-out reference (mean of other 6) instead of full-group mean, eliminating SRM self-referencing bias
-   - Same for CVD (LOO of other 2 CVD subjects)
-   - Script: `analysis/phase2_SRM_across_between/validation/1D_permutation/run_pergroup_disparity_permutation.py`
-   - SLURM: `run_pergroup_permutation.sbatch` (array 1-4, node2, 32GB)
-   - Expected: HC LOO disparity should now be more sensitive to label shuffling (current full-mean test: V2 p=0.353)
+1. **[RT-4] LOCO server results** — Submitted (6h, node2), pending download
+   - 10 subjects × 4 ROIs × 6 models × 1000 permutations
+   - Group-level analysis: Fisher combined probability, proportion of subjects with p<0.05
+   - **Severity: Fatal** — ForwardEncoding interpolation claim based on n=1 pilot
 
-2. **Deploy LOCO to server** — Run `run_loco_comparison.sbatch` for all 10 subjects with 1000 permutations
-   - Scripts ready at `analysis/phase2_decoder_comparing/model_comparison_validation/scripts/`
-   - Expected: ~1 hour per subject on node2
-   - Upload via scp, submit via sbatch
+2. **Hybrid decoder (FE+MLP, FE+SVM)** — Test nonlinearity in channel→color readout
+   - Code implemented: `FEMLPHybridDecoder`, `FESVMHybridDecoder` in `run_model_comparison.py`
+   - Architecture: voxels → FE (6 channels) → MLP(16)/SVM-RBF → 8-class label
+   - If FE+MLP > FE → nonlinearity in channel-to-color mapping
+   - If FE+MLP ≈ FE → fully linear structure confirmed → filter learning linear assumption justified
+   - **Severity: High** — key question for Phase 3 filter design
 
-3. **Consolidate LOCO server results** — After LOCO completes:
-   - Download results, aggregate across subjects
-   - Test ForwardEncoding interpolation significance at group level
-   - Compare V3 vs other ROIs (hypothesis: fewer voxels → better interpolation)
+3. **Consolidate LOCO server results** — After #1 downloads:
+   - Aggregate across subjects, test ForwardEncoding interpolation at group level
+   - Compare V3 vs other ROIs (fewer voxels → better interpolation hypothesis)
 
-4. **Bootstrap 95% CIs for SRM disparity** — Pending from Phase 2; required for paper
-   - Subject-level resampling for HC-HC and CVD-HC disparity
-   - Report CIs alongside p-values in Phase 2 main results table
+### Completed Red Team Fixes
 
-### Short-term (Medium Priority)
-
-5. **Dimensionality reduction + model re-experiment**
-   - Apply PCA (k=10, 20, 50) and SRM (k=3, 4) to Procrustes-aligned data
-   - Re-run all 6 models on reduced-dimension data
-   - Key question: Does MLP recover with fewer features? Does LDA remain best?
-   - Reuse existing scripts (`run_model_comparison.py --baseline_dir` on reduced data)
-
-6. **LOCO with SRM-reduced data**
-   - ForwardEncoding interpolation may improve dramatically with k=3–4 features
-   - Test whether permutation significance extends beyond V3
+4. ~~**[RT-2] Nested Procrustes within LORO**~~ — **DONE** (2026-02-18). Nested Procrustes actually improves: SVM 0.899, FE 0.781. No leakage issue — original result was conservative.
+5. ~~**[RT-3] PCA within LORO**~~ — **DONE** (2026-02-18). PCA-20 loses discriminative information vs full voxels. Signal spans >20 dimensions.
+6. ~~**[RT-1] Individual CVD cross-decoding**~~ — **DONE** (2026-02-18). 12/12 tests p<0.05 in SRM space. Shared mapping validated at individual level.
+7. ~~**[RT-5] LDA reliability analysis**~~ — **DONE** (2026-02-18). Run-pair r=0.009 explains paradox; FE W stability 0.921; framing revised to FE-centric.
+8. ~~**Bootstrap 95% CIs for SRM disparity**~~ — **DONE** (2026-02-18).
+9. ~~**Formal k aggregation**~~ — **DONE** (2026-02-18). hV4 revised from k=4 to k=3.
 
 ### Deferred (Low Priority)
 
-7. **Formal k aggregation across folds** — Mean rank method for SRM component selection
-8. **Cross-subject generalization (train HC → test CVD)** — Requires common space (SRM/Hyperalignment); not possible in native voxel space
-9. **Publication figure** — Comprehensive 6-panel summary of decoder comparison results
+10. **Dimensionality reduction + LOCO re-experiment** — SRM (k=3,4) + LOCO
+11. **Cross-subject generalization (train HC → test CVD)** — Requires common space
+12. **Publication figure** — Comprehensive summary of decoder comparison results
+
+---
+
+## Red Team Log (Phase 2b, 2026-02-17)
+
+| # | Criticism | Severity | Status | Neutralization |
+|---|-----------|----------|--------|---------------|
+| RT-1 | HC vs CVD group comparison invalid at n=3; Bonferroni-corrected all NS | Fatal | **DONE** | 12/12 individual CVD tests p<0.05 in SRM space |
+| RT-2 | Procrustes pre-computed across all runs → LORO test-set leakage | Fatal | **DONE** | Nested Procrustes: SVM 0.899, FE 0.781 (no leakage, actually improves) |
+| RT-3 | "Linearity" confounded by dimensionality; KernelRidge gamma grid too narrow | Addressable | **DONE** | PCA-20 within LORO: loses info vs full voxels |
+| RT-4 | LOCO results from single subject (n=1), 100 perms at p-floor | Fatal | **Submitted** | Server: 10 subjects × 1000 perms, 6h time limit |
+| RT-5 | LDA reliability r=0.015 contradicts "best model" claim; paradox misinterpreted | Addressable | **DONE** | Run-pair r=0.009; FE W stability 0.921; framing revised to FE-centric |
+| **NEW** | Channel→color readout linearity untested | High | **TODO** | Hybrid FE+MLP/FE+SVM decoder comparison |

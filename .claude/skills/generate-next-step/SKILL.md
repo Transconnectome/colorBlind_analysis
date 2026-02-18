@@ -1,7 +1,10 @@
 ---
 name: generate-next-step
 description: 다음 분석 단계의 Python 스크립트, SLURM sbatch, SCP 명령을 생성합니다. "다음 단계 생성", "create sbatch", "sbatch 만들어", "next analysis phase" 요청 시 사용.
+recommended-model: sonnet
 ---
+
+> **Model hint**: Use `model: "sonnet"` when spawning subagents for this skill (strategic task: pipeline analysis + SLURM script generation).
 
 # 다음 단계 생성 (generate-next-step)
 

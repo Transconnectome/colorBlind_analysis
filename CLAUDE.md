@@ -181,24 +181,12 @@ Analysis creates:
 - `derivatives/phase2_procrustes/`: Procrustes alignment and CVD-HC comparison
 - `derivatives/phase3_filters/`: Learned transformation filters
 
-All directories should: 
-- Structure: `{date}_{job_id}/`
-- Files (inside `{date}_{job_id}/`): 
-  - `settings.json`: recorded settings 
-    1. Reconstruction: dataset, preprocessing, feature selection info
-    2. Procrustes: standard, 
-    3. Filter: epoch, loss fuction, 
-    4. Hyperalignment: 
-    5. Prediction Model: 
-
-  - `results.json`: summary of results in a file 
-    1. Reconstruction: accuracy, mean error (overall, per color)
-    2. Procrustes: reliability, disparity, 
-    3. Filter: loss value, checkpoints, final loss
-    4. Hyperalignment: 
-    5. Prediction Model: 
-
-  - `main_log.json`: order by key metric (if not set, time ordered)
+**Output Convention (CRITICAL — no timestamp subdirectories):**
+- Save results **directly** into `--output_dir` (flat structure, no `{date_time}/` subdirs)
+- Per-subject files: `sub-{ID}_*.json` (e.g., `sub-01_performance_raw.json`, `sub-01_loco.json`)
+- **`config.json`**: One per output_dir. Records date, parameters, data paths, settings. Safe to overwrite (identical across subjects in same batch).
+- Manage result grouping via directory names (e.g., `results/loco/`, `results/nested_procrustes/raw_ctrl/`)
+- **WHY**: SLURM array jobs start simultaneously → identical timestamps → overwrites and data loss
 
 ## 7. Future Phases Development (SRQ2-4)
 

@@ -1,7 +1,10 @@
 ---
 name: daily-checkin
 description: "논문 요약 파일 기반 daily summary 생성. Pending Validations에서 내일 할 일 추출, Phase별 진행률 계산, git diff로 오늘 변경분 감지. results/daily/YYYY-MM-DD.md로 저장."
+recommended-model: haiku
 ---
+
+> **Model hint**: Use `model: "haiku"` when spawning subagents for this skill (mechanical task: git diff parsing + template filling).
 
 Inputs to read (project-local):
 - analysis/METHODS_RESULTS_SUMMARY_FOR_PAPER.md  (primary source)

@@ -1,7 +1,10 @@
 ---
 name: slurm-monitor
 description: SLURM 작업 상태 확인 및 에러 진단을 수행합니다. "check job status", "작업 상태 확인", "debug SLURM error", "SLURM 에러", "job failed", "OOM error" 요청 시 사용.
+recommended-model: haiku
 ---
+
+> **Model hint**: Use `model: "haiku"` when spawning subagents for this skill (mechanical task: SSH command generation + error pattern matching).
 
 # SLURM 모니터 (slurm-monitor)
 

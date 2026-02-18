@@ -1,0 +1,26 @@
+{
+  "description": "LORO model comparison",
+  "baseline_dir": "/scratch/connectome/haba6030/colorBlind/derivatives/full_dataset_C010",
+  "dataset_name": "full_dataset_C010",
+  "alignments": [
+    "procrustes"
+  ],
+  "models": [
+    "ForwardEncoding",
+    "SVM",
+    "MLP"
+  ],
+  "rois": [
+    "V1",
+    "V2",
+    "V3",
+    "V4"
+  ],
+  "dim_reduction": null,
+  "dim_k": null,
+  "cv_method": "LORO (Leave-One-Run-Out)",
+  "hp_tuning": true,
+  "n_runs": 6,
+  "n_colors": 8,
+  "created": "2026-02-18T16:30:43.441629"
+}

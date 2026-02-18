@@ -163,13 +163,13 @@ def is_linear_model(model_name):
 
 def is_nonlinear_model(model_name):
     """Check if model is non-linear"""
-    nonlinear_models = ['KernelRidge', 'SVM', 'MLP']
+    nonlinear_models = ['KernelRidge', 'SVM', 'MLP', 'FE_MLP', 'FE_SVM']
     return model_name in nonlinear_models
 
 
 def uses_labels(model_name):
     """Check if model uses discrete labels (vs continuous hue)"""
-    label_models = ['LDA', 'SVM', 'MLP', 'ForwardEncoding']
+    label_models = ['LDA', 'SVM', 'MLP', 'ForwardEncoding', 'FE_MLP', 'FE_SVM']
     return model_name in label_models
 
 
@@ -317,6 +317,21 @@ def get_model_architecture(model_name):
             'linearity': 'linear',
             'description': 'Brouwer & Heeger 2009 forward encoding model. '
                            '6 idealized color channels, analytical solution.'
+        },
+        'FE_MLP': {
+            'type': 'hybrid',
+            'target': 'labels (0-7) via 6-channel + MLP',
+            'linearity': 'nonlinear readout',
+            'description': 'Stage 1: ForwardEncoding extracts 6 channel responses. '
+                           'Stage 2: MLP classifies from 6-dim channel space. '
+                           'Tests nonlinearity in channel-to-color mapping.'
+        },
+        'FE_SVM': {
+            'type': 'hybrid',
+            'target': 'labels (0-7) via 6-channel + SVM',
+            'linearity': 'nonlinear readout',
+            'description': 'Stage 1: ForwardEncoding extracts 6 channel responses. '
+                           'Stage 2: SVM-RBF classifies from 6-dim channel space.'
         }
     }
     return architectures.get(model_name, {'type': 'unknown', 'target': 'unknown',
@@ -357,6 +372,15 @@ def get_model_defaults(model_name):
         'ForwardEncoding': {
             'params': {'alpha': 0, 'n_channels': 6},
             'rationale': 'Pseudoinverse solution (alpha=0); 6 channels per B&H 2009.'
+        },
+        'FE_MLP': {
+            'params': {'fe_alpha': 0, 'n_channels': 6,
+                       'hidden_layer_sizes': (16,), 'mlp_alpha': 0.01},
+            'rationale': 'FE stage 1 (alpha=0) + MLP stage 2 (16 units, mild L2).'
+        },
+        'FE_SVM': {
+            'params': {'fe_alpha': 0, 'n_channels': 6, 'C': 1.0, 'gamma': 'scale'},
+            'rationale': 'FE stage 1 (alpha=0) + SVM-RBF stage 2 (auto-scaled gamma).'
         }
     }
     return defaults.get(model_name, {'params': {}, 'rationale': 'unknown model'})

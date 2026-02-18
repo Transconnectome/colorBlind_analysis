@@ -1,7 +1,10 @@
 ---
 name: github-update
 description: 뇌영상 프로젝트에 맞는 안전한 git commit/push를 수행합니다. "commit", "push", "커밋", "깃 업데이트", "git update" 요청 시 사용.
+recommended-model: haiku
 ---
+
+> **Model hint**: Use `model: "haiku"` when spawning subagents for this skill (mechanical task: git staging + commit).
 
 # GitHub 업데이트 (github-update)
 

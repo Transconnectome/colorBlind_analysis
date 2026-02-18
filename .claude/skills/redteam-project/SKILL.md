@@ -1,7 +1,10 @@
 ---
 name: redteam-project
 description: "현재 프로젝트 산출물/주장/분석을 Nature/NeurIPS reviewer #2 관점에서 공격적으로 비판하고 중화 실험 제안."
+recommended-model: opus
 ---
+
+> **Model hint**: Use `model: "opus"` when spawning subagents for this skill (deep reasoning task: critical analysis + neutralization experiments).
 
 Inputs to read (project-local):
 - .claude/memory/project_brief.md

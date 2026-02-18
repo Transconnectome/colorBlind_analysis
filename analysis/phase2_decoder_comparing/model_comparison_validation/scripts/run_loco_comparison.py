@@ -388,7 +388,7 @@ def main():
     args = parser.parse_args()
 
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    output_path = Path(args.output_dir) / timestamp
+    output_path = Path(args.output_dir)
     output_path.mkdir(parents=True, exist_ok=True)
 
     print(f"\n{'='*80}")
@@ -449,8 +449,28 @@ def main():
     with open(output_file, 'w') as f:
         json.dump(save_data, f, indent=2)
 
+    # Save config.json (one per output_dir, safe to overwrite — identical across subjects)
+    config_file = output_path / 'config.json'
+    config_data = {
+        'description': 'LOCO decoder comparison',
+        'baseline_dir': str(args.baseline_dir),
+        'dataset_name': Path(args.baseline_dir).name,
+        'alignment': args.alignment,
+        'models': args.models,
+        'rois': args.rois,
+        'n_permutations': args.permutations,
+        'cv_method': 'LOCO (Leave-One-Color-Out)',
+        'hp_tuning': False,
+        'n_runs': 6,
+        'n_colors': 8,
+        'created': datetime.now().isoformat()
+    }
+    with open(config_file, 'w') as f:
+        json.dump(config_data, f, indent=2)
+
     print(f"\n{'='*80}")
     print(f"Saved: {output_file}")
+    print(f"Config: {config_file}")
     print(f"{'='*80}\n")
 
 

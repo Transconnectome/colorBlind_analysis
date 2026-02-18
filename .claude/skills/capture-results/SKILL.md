@@ -1,7 +1,10 @@
 ---
 name: capture-results
 description: fMRI 분석 결과를 파싱하여 논문용 요약을 생성합니다. "capture results", "결과 정리", "결과 요약", "update paper summary", "논문 결과 업데이트" 요청 시 사용.
+recommended-model: sonnet
 ---
+
+> **Model hint**: Use `model: "sonnet"` when spawning subagents for this skill (analytical task: metric parsing + ROI comparison + paper summary).
 
 # 결과 캡처 (capture-results)
 

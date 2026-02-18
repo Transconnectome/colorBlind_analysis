@@ -4,10 +4,11 @@
 #SBATCH --array=1-10%5
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=4G
-#SBATCH --time=01:00:00
+#SBATCH --time=06:00:00
 #SBATCH --no-requeue
-#SBATCH --output=/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation/logs/loco_cmp_%a_%j.out
-#SBATCH --error=/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation/logs/loco_cmp_%a_%j.err
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation
+#SBATCH --output=logs/loco_cmp_%a_%j.out
+#SBATCH --error=logs/loco_cmp_%a_%j.err
 
 # Environment
 source ~/.bashrc

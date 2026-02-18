@@ -24,6 +24,7 @@ import numpy as np
 import warnings
 from datetime import datetime
 from scipy import stats
+from sklearn.metrics.pairwise import cosine_similarity
 
 # Add project root
 project_root = Path(__file__).resolve().parents[4]
@@ -676,6 +677,269 @@ def cross_subject_generalization(baseline_dir, alignment='procrustes'):
 
 
 # ============================================================================
+# 5. LDA Reliability Diagnostics (RT-5)
+# ============================================================================
+
+def compute_fold_cv(performance_data, alignment='procrustes'):
+    """
+    Analysis A: Within-subject fold-level coefficient of variation.
+
+    For each subject-ROI-model: CV = std(fold_accs) / mean(fold_accs).
+    High CV indicates unstable performance across folds.
+
+    Args:
+        performance_data: List of performance dicts
+        alignment: Which alignment to analyze
+
+    Returns:
+        cv_results: Dict with CV per model, subject, ROI
+    """
+    print(f"\n{'='*80}")
+    print(f"Fold-Level CV Analysis (Alignment: {alignment})")
+    print(f"{'='*80}\n")
+
+    cv_results = {}
+
+    for perf_dict in performance_data:
+        subject = perf_dict['subject']
+
+        for roi in perf_dict['rois']:
+            for model in perf_dict['models']:
+                try:
+                    fold_results = perf_dict['results'][alignment][roi][model]
+                    fold_accs = [f['acc_exact'] for f in fold_results]
+
+                    if len(fold_accs) != 6:
+                        continue
+
+                    mean_acc = np.mean(fold_accs)
+                    std_acc = np.std(fold_accs)
+                    cv = std_acc / mean_acc if mean_acc > 0 else float('inf')
+
+                    if model not in cv_results:
+                        cv_results[model] = []
+
+                    cv_results[model].append({
+                        'subject': subject,
+                        'roi': roi,
+                        'mean_acc': float(mean_acc),
+                        'std_acc': float(std_acc),
+                        'cv': float(cv),
+                        'fold_accs': fold_accs
+                    })
+
+                except KeyError:
+                    continue
+
+    # Print summary per model
+    summary = {}
+    for model, entries in cv_results.items():
+        cvs = [e['cv'] for e in entries]
+        means = [e['mean_acc'] for e in entries]
+        summary[model] = {
+            'mean_cv': float(np.mean(cvs)),
+            'std_cv': float(np.std(cvs)),
+            'mean_acc': float(np.mean(means)),
+            'n_entries': len(entries),
+            'entries': entries
+        }
+        print(f"  {model}: CV={np.mean(cvs):.3f} +/- {np.std(cvs):.3f}, "
+              f"mean_acc={np.mean(means):.3f}")
+
+    return summary
+
+
+def forward_encoding_weight_stability(baseline_dir, subjects, rois, alignment='procrustes'):
+    """
+    Analysis B: ForwardEncoding W matrix stability across LORO folds.
+
+    Runs ForwardEncoding LORO independently to extract model.weights per fold.
+    Computes pairwise cosine similarity across 6 folds (15 pairs from C(6,2)).
+
+    Args:
+        baseline_dir: Path to full_dataset_C010
+        subjects: List of subject IDs
+        rois: List of ROI names
+        alignment: Which alignment
+
+    Returns:
+        stability_results: Dict with cosine similarity per subject-ROI
+    """
+    print(f"\n{'='*80}")
+    print(f"ForwardEncoding W Stability (Alignment: {alignment})")
+    print(f"{'='*80}\n")
+
+    from run_model_comparison import ForwardEncodingDecoder, load_amplitudes as mc_load_amplitudes
+
+    stability_results = {}
+
+    for subject in subjects:
+        stability_results[subject] = {}
+
+        for roi in rois:
+            try:
+                amplitudes = mc_load_amplitudes(baseline_dir, subject, roi, alignment)
+            except FileNotFoundError:
+                continue
+
+            n_runs, n_colors, n_voxels = amplitudes.shape
+            labels = np.arange(n_colors)
+
+            # Collect W matrices per fold
+            W_per_fold = []
+
+            for test_run in range(n_runs):
+                train_runs = [r for r in range(n_runs) if r != test_run]
+                X_train = amplitudes[train_runs].reshape(-1, n_voxels)
+                y_train = np.tile(labels, len(train_runs))
+
+                model = ForwardEncodingDecoder(alpha=0, n_channels=6)
+                model.fit(X_train, y_train)
+
+                W_per_fold.append(model.weights.flatten())
+
+            # Compute pairwise cosine similarity (15 pairs from 6 folds)
+            W_matrix = np.array(W_per_fold)  # (6, n_channels * n_voxels)
+            sim_matrix = cosine_similarity(W_matrix)
+
+            # Extract upper triangle (15 pairs)
+            triu_indices = np.triu_indices(n_runs, k=1)
+            pairwise_sims = sim_matrix[triu_indices]
+
+            stability_results[subject][roi] = {
+                'mean_cosine_sim': float(np.mean(pairwise_sims)),
+                'std_cosine_sim': float(np.std(pairwise_sims)),
+                'min_cosine_sim': float(np.min(pairwise_sims)),
+                'max_cosine_sim': float(np.max(pairwise_sims)),
+                'pairwise_sims': pairwise_sims.tolist(),
+                'n_pairs': len(pairwise_sims)
+            }
+
+            print(f"  sub-{subject} {roi}: cosine_sim = "
+                  f"{np.mean(pairwise_sims):.3f} +/- {np.std(pairwise_sims):.3f}")
+
+    return stability_results
+
+
+def run_pair_reliability(performance_data, alignment='procrustes'):
+    """
+    Analysis C: Run-pair reliability.
+
+    For all 15 run pairs (i,j): correlate acc_on_run_i vs acc_on_run_j
+    across subject-ROIs. Reveals whether specific run combinations drive instability.
+
+    Args:
+        performance_data: List of performance dicts
+        alignment: Which alignment
+
+    Returns:
+        pair_results: Dict with correlations per run pair per model
+    """
+    print(f"\n{'='*80}")
+    print(f"Run-Pair Reliability (Alignment: {alignment})")
+    print(f"{'='*80}\n")
+
+    # Collect fold-wise accuracies per model
+    model_data = {}  # model -> list of 6-element arrays
+
+    for perf_dict in performance_data:
+        subject = perf_dict['subject']
+
+        for roi in perf_dict['rois']:
+            for model in perf_dict['models']:
+                try:
+                    fold_results = perf_dict['results'][alignment][roi][model]
+                    fold_accs = [f['acc_exact'] for f in fold_results]
+
+                    if len(fold_accs) != 6:
+                        continue
+
+                    if model not in model_data:
+                        model_data[model] = []
+
+                    model_data[model].append({
+                        'subject': subject,
+                        'roi': roi,
+                        'fold_accs': np.array(fold_accs)
+                    })
+
+                except KeyError:
+                    continue
+
+    pair_results = {}
+
+    for model, data_list in model_data.items():
+        if len(data_list) < 3:
+            continue
+
+        # For all 15 run pairs (i, j)
+        n_runs = 6
+        pair_correlations = {}
+
+        for i in range(n_runs):
+            for j in range(i + 1, n_runs):
+                accs_i = [d['fold_accs'][i] for d in data_list]
+                accs_j = [d['fold_accs'][j] for d in data_list]
+
+                if np.std(accs_i) > 0 and np.std(accs_j) > 0:
+                    r, p = stats.spearmanr(accs_i, accs_j)
+                else:
+                    r, p = 0.0, 1.0
+
+                pair_correlations[f"run_{i}_vs_{j}"] = {
+                    'r': float(r),
+                    'p': float(p)
+                }
+
+        # Summary
+        all_rs = [v['r'] for v in pair_correlations.values()]
+        pair_results[model] = {
+            'mean_r': float(np.mean(all_rs)),
+            'std_r': float(np.std(all_rs)),
+            'min_r': float(np.min(all_rs)),
+            'max_r': float(np.max(all_rs)),
+            'pairs': pair_correlations
+        }
+
+        print(f"  {model}: mean_r = {np.mean(all_rs):.3f} "
+              f"[{np.min(all_rs):.3f}, {np.max(all_rs):.3f}]")
+
+    return pair_results
+
+
+def run_lda_reliability(baseline_dir, performance_data, alignment='procrustes'):
+    """
+    Run all 3 LDA reliability analyses (RT-5).
+
+    Args:
+        baseline_dir: Path to full_dataset_C010
+        performance_data: List of performance dicts
+        alignment: Which alignment
+
+    Returns:
+        results: Dict with all 3 analyses
+    """
+    print(f"\n{'='*80}")
+    print(f"LDA Reliability Diagnostics (RT-5)")
+    print(f"{'='*80}\n")
+
+    results = {}
+
+    # Analysis A: Fold-level CV
+    results['fold_cv'] = compute_fold_cv(performance_data, alignment)
+
+    # Analysis B: ForwardEncoding W stability
+    subjects = ALL_SUBJECTS
+    results['w_stability'] = forward_encoding_weight_stability(
+        baseline_dir, subjects, ROIS, alignment)
+
+    # Analysis C: Run-pair reliability
+    results['run_pair_reliability'] = run_pair_reliability(performance_data, alignment)
+
+    return results
+
+
+# ============================================================================
 # Main
 # ============================================================================
 
@@ -694,7 +958,7 @@ def main():
                        help='Which alignment to test')
     parser.add_argument('--tests', nargs='+',
                        default=['permutation', 'bootstrap', 'reliability', 'generalization'],
-                       help='Which tests to run')
+                       help='Which tests to run (permutation, bootstrap, reliability, generalization, lda_reliability)')
 
     args = parser.parse_args()
 
@@ -773,6 +1037,19 @@ def main():
         output_file = output_path / 'cross_subject_generalization.json'
         with open(output_file, 'w') as f:
             json.dump(results['cross_subject_generalization'], f, indent=2)
+        print(f"\nSaved: {output_file}")
+
+    if 'lda_reliability' in args.tests:
+        results['lda_reliability'] = run_lda_reliability(
+            args.baseline_dir,
+            performance_data,
+            args.alignment
+        )
+
+        # Save
+        output_file = output_path / 'lda_reliability.json'
+        with open(output_file, 'w') as f:
+            json.dump(results['lda_reliability'], f, indent=2)
         print(f"\nSaved: {output_file}")
 
     print(f"\n{'='*80}")

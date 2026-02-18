@@ -1,7 +1,10 @@
 ---
 name: server-sync
 description: 로컬-서버 간 파일 전송 명령(SCP/rsync)을 생성합니다. "upload to server", "서버 업로드", "download results", "결과 다운로드", "scp", "rsync" 요청 시 사용.
+recommended-model: haiku
 ---
+
+> **Model hint**: Use `model: "haiku"` when spawning subagents for this skill (mechanical task: SCP/rsync command assembly).
 
 # 서버 파일 동기화 (server-sync)
 

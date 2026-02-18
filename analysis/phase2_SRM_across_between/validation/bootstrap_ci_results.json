@@ -1,0 +1,186 @@
+{
+  "config": {
+    "n_bootstrap": 10000,
+    "seed": 42,
+    "ci_level": 95,
+    "source": "/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase2_SRM_across_between/results/c010/combined_20260209"
+  },
+  "results": {
+    "V1": {
+      "disparity": {
+        "hc_mean": {
+          "observed": 0.38979782936520213,
+          "ci_lower": 0.3426574454016861,
+          "ci_upper": 0.4374758353776046
+        },
+        "cvd_mean": {
+          "observed": 0.5732583561466114,
+          "ci_lower": 0.46256850953707324,
+          "ci_upper": 0.7446855759072144
+        },
+        "separation": {
+          "observed": 0.18346052678140923,
+          "ci_lower": 0.058829123532578444,
+          "ci_upper": 0.34039023806440577
+        },
+        "hedges_g": {
+          "observed": 1.7275356117423084,
+          "ci_lower": 0.9300881022659415,
+          "ci_upper": 5.522267060107673
+        }
+      },
+      "rdm_correlations": {
+        "hc_hc_rdm": {
+          "observed": 0.446529569682279,
+          "ci_lower": 0.35668412959053347,
+          "ci_upper": 0.5309530325540178,
+          "n_pairs": 21
+        },
+        "hc_cvd_rdm": {
+          "observed": 0.32163056793598666,
+          "ci_lower": 0.23689629108348323,
+          "ci_upper": 0.4019104959991659,
+          "n_pairs": 21
+        },
+        "cvd_cvd_rdm": {
+          "observed": 0.29666119321291734,
+          "ci_lower": 0.12643678160919541,
+          "ci_upper": 0.49261083743842365,
+          "n_pairs": 3
+        }
+      }
+    },
+    "V2": {
+      "disparity": {
+        "hc_mean": {
+          "observed": 0.399787437136882,
+          "ci_lower": 0.34664100103522255,
+          "ci_upper": 0.45549103532167035
+        },
+        "cvd_mean": {
+          "observed": 0.5488635924285511,
+          "ci_lower": 0.5030193185394359,
+          "ci_upper": 0.6351205808632688
+        },
+        "separation": {
+          "observed": 0.14907615529166912,
+          "ci_lower": 0.06622824275878428,
+          "ci_upper": 0.23839891782884662
+        },
+        "hedges_g": {
+          "observed": 1.7097603559965542,
+          "ci_lower": 0.9151639049003994,
+          "ci_upper": 3.947210922852633
+        }
+      },
+      "rdm_correlations": {
+        "hc_hc_rdm": {
+          "observed": 0.5172674433758176,
+          "ci_lower": 0.44217621914666244,
+          "ci_upper": 0.5921240910157166,
+          "n_pairs": 21
+        },
+        "hc_cvd_rdm": {
+          "observed": 0.49860557249719806,
+          "ci_lower": 0.41428115307425656,
+          "ci_upper": 0.5865476842077826,
+          "n_pairs": 21
+        },
+        "cvd_cvd_rdm": {
+          "observed": 0.5905856595511768,
+          "ci_lower": 0.47071702244116037,
+          "ci_upper": 0.7022441160372196,
+          "n_pairs": 3
+        }
+      }
+    },
+    "V3": {
+      "disparity": {
+        "hc_mean": {
+          "observed": 0.4435490245008653,
+          "ci_lower": 0.37361314535180723,
+          "ci_upper": 0.5128274788303231
+        },
+        "cvd_mean": {
+          "observed": 0.5093595070263596,
+          "ci_lower": 0.3823937904506891,
+          "ci_upper": 0.6834919414669113
+        },
+        "separation": {
+          "observed": 0.06581048252549426,
+          "ci_lower": -0.08038505468209675,
+          "ci_upper": 0.22948349945553354
+        },
+        "hedges_g": {
+          "observed": 0.502582766499396,
+          "ci_lower": -0.9165476754720207,
+          "ci_upper": 2.4442635322565414
+        }
+      },
+      "rdm_correlations": {
+        "hc_hc_rdm": {
+          "observed": 0.38543540021372535,
+          "ci_lower": 0.3000990434487971,
+          "ci_upper": 0.4730680011468188,
+          "n_pairs": 21
+        },
+        "hc_cvd_rdm": {
+          "observed": 0.34753824901608155,
+          "ci_lower": 0.24460408684546617,
+          "ci_upper": 0.4573474600568196,
+          "n_pairs": 21
+        },
+        "cvd_cvd_rdm": {
+          "observed": 0.5911330049261084,
+          "ci_lower": 0.4898741105637658,
+          "ci_upper": 0.671592775041051,
+          "n_pairs": 3
+        }
+      }
+    },
+    "hV4": {
+      "disparity": {
+        "hc_mean": {
+          "observed": 0.5749251778351127,
+          "ci_lower": 0.5167877592164593,
+          "ci_upper": 0.6420305292112551
+        },
+        "cvd_mean": {
+          "observed": 0.6412875028215983,
+          "ci_lower": 0.40405168299525385,
+          "ci_upper": 0.8099035512417979
+        },
+        "separation": {
+          "observed": 0.06636232498648564,
+          "ci_lower": -0.1544083208714478,
+          "ci_upper": 0.2459293904909881
+        },
+        "hedges_g": {
+          "observed": 0.44686830797618765,
+          "ci_lower": -1.8073913188117168,
+          "ci_upper": 4.259667368449978
+        }
+      },
+      "rdm_correlations": {
+        "hc_hc_rdm": {
+          "observed": 0.15773972424218727,
+          "ci_lower": 0.0694073031511455,
+          "ci_upper": 0.24826022362968173,
+          "n_pairs": 21
+        },
+        "hc_cvd_rdm": {
+          "observed": 0.22360361769228765,
+          "ci_lower": 0.11913754007350066,
+          "ci_upper": 0.32786053118565434,
+          "n_pairs": 21
+        },
+        "cvd_cvd_rdm": {
+          "observed": 0.27604451742382774,
+          "ci_lower": 0.007662835249042145,
+          "ci_upper": 0.7339901477832512,
+          "n_pairs": 3
+        }
+      }
+    }
+  }
+}

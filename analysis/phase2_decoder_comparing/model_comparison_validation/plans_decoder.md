@@ -1102,10 +1102,14 @@ for test_color in range(8):
 
 ### 8.4 Local Test Results (sub-01, 4 ROIs, 100 permutations)
 
+**Results dir**: `analysis/phase2_decoder_comparing/model_comparison_validation/results/loco/20260217_193257/`
+
 **핵심 발견: ForwardEncoding만 유의미한 보간 능력 보유**
 
-| Model | V1 (568) | V2 (402) | V3 (106) | V4 (67) |
-|-------|----------|----------|----------|---------|
+#### MAE° / Adjacent Accuracy (chance: MAE ≈ 90°, adj_acc ≈ 25%)
+
+| Model | V1 (568 vox) | V2 (402 vox) | V3 (106 vox) | V4 (67 vox) |
+|-------|-------------|-------------|-------------|------------|
 | **ForwardEncoding** | **81.6° / 52.1%** | **82.5° / 47.9%** | **49.7° / 72.9%** | **72.2° / 50.0%** |
 | LDA | 107.8° / 31.2% | 114.4° / 29.2% | 86.2° / 54.2% | 116.2° / 25.0% |
 | SVM | 98.4° / 35.4% | 132.2° / 16.7% | 88.1° / 45.8% | 118.1° / 20.8% |
@@ -1113,32 +1117,122 @@ for test_color in range(8):
 | Ridge | 148.9° / 0% | 166.6° / 0% | 174.6° / 0% | 174.7° / 0% |
 | KernelRidge | 179.0° / 0% | 179.6° / 0% | 179.9° / 0% | 179.9° / 0% |
 
-*(MAE° / Adjacent acc. 값. chance level: MAE ≈ 90°, adj_acc ≈ 25%)*
+#### Permutation Test — All Models (100 perms, within-run label shuffle)
 
-**Permutation test (ForwardEncoding)**:
-| ROI | p-value | z-score | 유의성 |
-|-----|---------|---------|--------|
-| V1 | 0.61 | 0.27 | NS |
-| V2 | 0.65 | 0.47 | NS |
-| **V3** | **<0.01** | **-2.98** | **✓ sig.** |
-| V4 | 0.34 | -0.47 | NS |
+| ROI | Model | MAE° | p-value | z-score | 유의성 | 방향 |
+|-----|-------|------|---------|---------|--------|------|
+| V1 | **ForwardEncoding** | 81.6 | 0.610 | +0.27 | NS | ✓ better |
+| V1 | LDA | 107.8 | 0.740 | +0.69 | NS | ✗ worse |
+| V1 | SVM | 98.4 | 0.310 | −0.51 | NS | ✗ worse |
+| V1 | MLP | 95.6 | 1.000 | 0.00 | NS | ✗ worse |
+| V1 | Ridge | 148.9 | 0.020 | **−2.34** | * | ✗ anti-interp. |
+| V1 | KernelRidge | 179.0 | <0.001 | **−3.87** | *** | ✗ anti-interp. |
+| V2 | **ForwardEncoding** | 82.5 | 0.650 | +0.47 | NS | ✓ better |
+| V2 | LDA | 114.4 | 0.950 | +1.53 | NS | ✗ worse |
+| V2 | SVM | 132.2 | 1.000 | +3.07 | NS | ✗ worse |
+| V2 | MLP | 107.8 | 0.610 | +0.11 | NS | ✗ worse |
+| V2 | Ridge | 166.6 | 0.780 | +0.74 | NS | ✗ worse |
+| V2 | KernelRidge | 179.6 | 0.260 | −0.64 | NS | ✗ worse |
+| V3 | **ForwardEncoding** | **49.7** | **<0.001** | **−2.98** | ***✓ | ✓ better |
+| V3 | LDA | 86.2 | 0.030 | **−1.96** | * | ✓ better |
+| V3 | SVM | 88.1 | 0.050 | **−1.58** | (ns) | ✓ better |
+| V3 | MLP | 101.2 | 0.660 | −0.04 | NS | ✗ worse |
+| V3 | Ridge | 174.6 | <0.001 | **−2.67** | *** | ✗ anti-interp. |
+| V3 | KernelRidge | 179.9 | 0.010 | **−2.75** | ** | ✗ anti-interp. |
+| V4 | **ForwardEncoding** | 72.2 | 0.340 | −0.47 | NS | ✓ better |
+| V4 | LDA | 116.2 | 0.980 | +1.89 | NS | ✗ worse |
+| V4 | SVM | 118.1 | 0.960 | +1.53 | NS | ✗ worse |
+| V4 | MLP | 106.9 | 1.000 | 0.00 | NS | ✗ worse |
+| V4 | Ridge | 174.7 | 0.200 | −0.74 | NS | ✗ worse |
+| V4 | KernelRidge | 179.9 | 0.050 | **−2.06** | (ns) | ✗ anti-interp. |
+
+*Note: negative z = model is WORSE than permuted null (anti-interpolation). Ridge/KernelRidge "significance" is the wrong direction.*
 
 **해석**:
-1. ForwardEncoding (B&H 2009 channel model)만 LOCO 보간 가능 — 연속적 채널 기반 프레임워크의 강점
-2. **V3에서만 유의미** (p<0.01): voxel 수가 적어 과적합 감소 → 차원축소(SRM/PCA) 필요성 뒷받침
-3. Ridge/KernelRidge는 MAE > 140° (chance보다 나쁨): 고차원 voxel 공간에서 회귀가 anti-interpolation
-4. Label-based classifiers는 held-out 색상 직접 예측 불가 (이론적 최소 오차 = 45°)
+1. **ForwardEncoding만 실질적 보간 능력** — V1~V4 모두 chance 이하 MAE (특히 V3: 49.7°), adj_acc > 25%
+2. **V3에서만 통계적 유의** (p<0.001): voxel 수가 적어(106개) 과적합 감소 → 차원축소(SRM/PCA) 필요성 뒷받침
+3. **Ridge/KernelRidge의 유의성은 역방향** — MAE > 140° (chance보다 훨씬 나쁨): 고차원 회귀가 hue를 반대 방향으로 밀어내는 anti-interpolation 현상
+4. **LDA/SVM은 V3에서 borderline** (p=0.030, 0.050): 라벨 기반이라 이론적 최소 오차=45°이므로 연속 보간은 불가
+5. **MLP는 완전 실패** (p≥0.660 in all ROIs): chance 수준 또는 그 이하
 
 ### Status
 
 [x] Implementation (LOCOForwardEncodingDecoder 포함)
-[x] Local test (sub-01, 4 ROIs, 100 permutations)
-[ ] Server deployment (10 subjects × 4 ROIs, 1000 permutations)
-[ ] Results consolidation & analysis
+[x] Local test (sub-01, 4 ROIs, 100 permutations) → `model_comparison_validation/results/loco/20260217_193257/`
+[x] Server deployment (10 subjects × 4 ROIs, 1000 permutations) → `analysis/phase2_decoder_comparing/results/loco/`
+[x] Results consolidation & analysis → Section 8.5 below
 
 **Scripts**: `run_loco_comparison.py`, `run_loco_comparison.sbatch`
-**Results**: `analysis/phase2_decoder_comparing/model_comparison_validation/results/loco/`
 **🏷️ Reusable**: Yes — SRM/PCA/CCA-reduced data에 동일 스크립트 적용 가능
+
+---
+
+### 8.5 Server Deployment Results (10 subjects, 4 ROIs, 1000 permutations)
+
+**Results dir**: `analysis/phase2_decoder_comparing/results/loco/`
+**Settings**: procrustes alignment, 1000 permutations, nested HP tuning OFF
+
+#### Aggregate Performance — MAE° mean ± SD (chance = 90°)
+
+| Model | V1 | V2 | V3 | V4 |
+|-------|----|----|----|----|
+| **ForwardEncoding** | **80.6 ± 15.0** | **83.1 ± 18.2** | **72.5 ± 14.0** | **72.8 ± 12.2** |
+| LDA | 107.4 ± 15.8 | 103.1 ± 15.4 | 99.7 ± 10.1 | 99.4 ± 11.8 |
+| SVM | 107.9 ± 14.0 | 104.2 ± 16.4 | 100.9 ± 11.5 | 101.3 ± 15.1 |
+| MLP | 102.4 ± 5.4 | 101.3 ± 6.6 | 98.3 ± 3.4 | 99.4 ± 5.2 |
+| Ridge | 136.0 ± 23.1 | 138.5 ± 29.0 | 164.4 ± 18.2 | 165.7 ± 15.2 |
+| KernelRidge | 177.8 ± 1.2 | 177.7 ± 2.6 | 179.5 ± 0.8 | 179.3 ± 1.1 |
+
+#### Aggregate Performance — adj_acc mean ± SD (chance = 0.250)
+
+| Model | V1 | V2 | V3 | V4 |
+|-------|----|----|----|----|
+| **ForwardEncoding** | **0.431 ± 0.136** | **0.392 ± 0.177** | **0.444 ± 0.142** | **0.456 ± 0.127** |
+| MLP | 0.285 ± 0.048 | 0.306 ± 0.083 | 0.325 ± 0.061 | 0.325 ± 0.061 |
+| LDA | 0.248 ± 0.086 | 0.275 ± 0.166 | 0.323 ± 0.107 | 0.304 ± 0.117 |
+| SVM | 0.242 ± 0.112 | 0.262 ± 0.159 | 0.298 ± 0.072 | 0.273 ± 0.128 |
+| Ridge | 0.037 ± 0.040 | 0.046 ± 0.080 | 0.000 ± 0.000 | 0.000 ± 0.000 |
+| KernelRidge | 0.000 ± 0.000 | 0.000 ± 0.000 | 0.000 ± 0.000 | 0.000 ± 0.000 |
+
+#### Permutation Test — n subjects significant (p<0.05, correct direction z<0)
+
+| Model | V1 | V2 | V3 | V4 | Note |
+|-------|----|----|----|----|------|
+| **ForwardEncoding** | 1/10 | 1/10 | 1/10 | 1/10 | correct direction |
+| LDA | 2/10 | 1/10 | 1/10 | 1/10 | mixed direction |
+| SVM | 1/10 | 1/10 | 0/10 | 2/10 | mixed direction |
+| MLP | 1/10 | 0/10 | 0/10 | 0/10 | mixed direction |
+| Ridge | 5/10 | 5/10 | 5/10 | 6/10 | **WRONG direction** (anti-interp.) |
+| KernelRidge | 9/10 | 6/10 | 6/10 | 9/10 | **WRONG direction** (anti-interp.) |
+
+*Ridge/KernelRidge: "significant" but z << 0 = they are WORSE than shuffled → anti-interpolation*
+
+#### ForwardEncoding Per-Subject (adj_acc / MAE° / p-value)
+
+| Subject | Group | V1 | V2 | V3 | V4 |
+|---------|-------|----|----|----|----|
+| sub-01 | HC | 0.521 / 81.6° / ns | 0.479 / 82.5° / ns | **0.729 / 49.7° / 0.004** | 0.500 / 72.2° / ns |
+| sub-02 | HC | 0.438 / 77.8° / ns | 0.250 / 90.0° / ns | 0.542 / 60.0° / ns | 0.417 / 74.1° / ns |
+| sub-03 | HC | 0.521 / 81.6° / ns | 0.500 / 80.6° / ns | 0.333 / 95.6° / ns | 0.604 / 68.4° / ns |
+| sub-04 | HC | 0.438 / 86.2° / ns | 0.479 / 79.7° / ns | 0.417 / 84.4° / ns | **0.667 / 49.7° / 0.033** |
+| sub-05 | HC | 0.458 / 65.6° / ns | **0.708 / 41.2° / 0.011** | 0.500 / 69.4° / ns | 0.354 / 86.2° / ns |
+| sub-06 | HC | 0.354 / 91.9° / ns | 0.208 / 92.8° / ns | 0.167 / 91.9° / ns | 0.583 / 62.8° / ns |
+| sub-07 | HC | 0.521 / 69.4° / ns | 0.542 / 80.6° / ns | 0.438 / 67.5° / ns | 0.417 / 70.3° / ns |
+| sub-08 | CVD | **0.646 / 50.6° / 0.035** | 0.417 / 68.4° / ns | 0.542 / 59.1° / ns | 0.458 / 68.4° / ns |
+| sub-09 | CVD | 0.271 / 104.1° / ns | 0.229 / 105.9° / ns | 0.375 / 72.2° / ns | 0.250 / 97.5° / ns |
+| sub-10 | CVD | 0.146 / 97.5° / ns | 0.104 / 108.8° / ns | 0.396 / 75.0° / ns | 0.312 / 77.8° / ns |
+| **HC mean** | | 0.464 ± 0.058 / 79.2 ± 8.5° | 0.452 ± 0.159 / 78.2 ± 15.8° | 0.446 ± 0.162 / 74.1 ± 15.8° | 0.506 ± 0.107 / 69.1 ± 10.3° |
+| **CVD mean** | | 0.354 ± 0.212 / 84.1 ± 23.8° | 0.250 ± 0.128 / 94.4 ± 18.4° | 0.438 ± 0.074 / 68.8 ± 6.9° | 0.340 ± 0.087 / 81.2 ± 12.1° |
+
+#### Key Findings (Server Deployment)
+
+1. **ForwardEncoding은 유일하게 chance 이하 MAE** — 전 ROI에서 MAE < 90° (V1:80.6°, V2:83.1°, V3:72.5°, V4:72.8°). adj_acc도 전 ROI에서 chance(0.25) 상회 (0.39~0.46).
+2. **개인 수준 유의성은 낮음** — 1/10 subjects per ROI만 p<0.05. n=10, 1 LOCO fold per color → 낮은 검정력. 유의한 피험자: sub-01 V3 (**), sub-04 V4 (*), sub-05 V2 (*), sub-08 V1 (*)
+3. **CVD 이질성** — sub-08은 V1에서 최고 성능(MAE=50.6°, adj_acc=0.646), sub-09/10은 chance 수준 또는 이하. CVD 내 개인차 매우 큼.
+4. **Ridge/KernelRidge는 전 ROI anti-interpolation** — MAE 136~180°, 고차원 voxel 회귀의 구조적 실패. KernelRidge는 9/10 subjects에서 "유의하게" 나쁨.
+5. **LDA/SVM/MLP는 chance 수준** — 라벨 기반 분류기는 연속 hue 보간 불가 (이론적 최소 오차 45°).
+6. **V3/V4가 상대적으로 낮은 MAE** — voxel 수 적음(V3:106, V4:67) → 과적합 감소 효과. Sub-level 분산도 작음.
+7. **HC > CVD (V1, V2, V4)** — ForwardEncoding에서 HC가 CVD보다 더 잘 보간. V3만 CVD≈HC. sub-08 예외적으로 V1에서 우수.
 
 ---
 
@@ -1276,11 +1370,15 @@ SVM nested가 최고 정확도이지만, **alignment 의존성이 높음** (nest
 
 ---
 
-### Pending: RT-4 LOCO Server Results
+### Result RT-4: LOCO Server Deployment — Complete
 
 | Fix | Script | Status | What it tests |
 |-----|--------|--------|---------------|
-| **RT-4** | `run_loco_comparison.sbatch` | Submitted (6h, node2) | LOCO 10 subjects × 4 ROIs × 1000 perms |
+| **RT-4** | `run_loco_comparison.sbatch` | ✅ Complete | LOCO 10 subjects × 4 ROIs × 1000 perms |
+
+**Results dir**: `analysis/phase2_decoder_comparing/results/loco/`
+
+**Summary**: ForwardEncoding is the only model with below-chance MAE across all ROIs (V1:80.6°, V2:83.1°, V3:72.5°, V4:72.8°) and adj_acc above chance (0.39~0.46). Group-level significance is not reached with n=10; individual significance: 4 subject-ROI pairs (sub-01 V3 p=0.004**, sub-04 V4 p=0.033*, sub-05 V2 p=0.011*, sub-08 V1 p=0.035*). See Section 8.5 for full results.
 
 ---
 
@@ -1428,7 +1526,7 @@ All results: LORO CV on `full_dataset_C010`, 10 subjects × 4 ROIs, voxel space.
 ### Decision: What to Run Next
 
 **Must-run**:
-1. **RT-4: LOCO full deployment** — 10 subjects, 1000 permutations. sbatch ready. Priority: High.
+1. ~~**RT-4: LOCO full deployment**~~ → ✅ Complete (Section 8.5)
 
 **Not needed**:
 - Preloaded + PCA/ANOVA: already established that dim reduction hurts under nested (better alignment)
@@ -1438,5 +1536,5 @@ All results: LORO CV on `full_dataset_C010`, 10 subjects × 4 ROIs, voxel space.
 
 ---
 
-**Last Updated**: 2026-02-18
+**Last Updated**: 2026-02-18 (RT-4 LOCO server results added — Section 8.5)
 

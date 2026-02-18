@@ -1367,5 +1367,76 @@ This supports the linear assumption for Phase 3 filter design: if the channel→
 
 ---
 
+## Systematic Results Matrix — acc_45 (2026-02-18)
+
+### Full Matrix: Alignment Condition × Model
+
+All results: LORO CV on `full_dataset_C010`, 10 subjects × 4 ROIs, voxel space. Chance = 0.375.
+
+| Alignment Condition | LDA | Ridge | FE (B&H) | KernelRidge | SVM | MLP | FE+MLP | FE+SVM |
+|---------------------|-----|-------|-----------|-------------|-----|-----|--------|--------|
+| **Raw** (no alignment) | 0.393 | 0.375 | 0.367 | 0.380 | 0.382 | 0.370 | — | — |
+| **Raw + ANOVA-100** | 0.394 | 0.364 | 0.367 | 0.370 | 0.394 | 0.371 | — | — |
+| **Preloaded Procrustes** | 0.821 | 0.783 | 0.736 | 0.739 | 0.776 | 0.394 | 0.375 | 0.747 |
+| **Nested Procrustes** | **0.892** | **0.823** | **0.781** | **0.810** | **0.899** | 0.412 | 0.380 | **0.777** |
+| **Nested + PCA-20** | 0.881 | 0.802 | 0.761 | 0.791 | 0.849 | 0.429 | — | — |
+| **Nested + ANOVA-100** | 0.810 | 0.753 | 0.731 | 0.794 | 0.849 | 0.447 | — | — |
+
+### HC vs CVD (Nested Procrustes)
+
+| Model | HC (n=7) | CVD (n=3) | Δ(HC−CVD) | Direction |
+|-------|----------|-----------|-----------|-----------|
+| SVM | 0.894 | **0.910** | −0.015 | CVD ≥ HC |
+| LDA | 0.888 | **0.903** | −0.015 | CVD ≥ HC |
+| Ridge | 0.822 | 0.825 | −0.002 | ≈ |
+| KernelRidge | 0.806 | **0.819** | −0.014 | CVD ≥ HC |
+| FE (B&H) | **0.812** | 0.710 | +0.102 | HC > CVD |
+| FE+SVM | 0.766 | **0.802** | −0.036 | CVD > HC |
+| MLP | 0.395 | 0.453 | −0.058 | Both ≈ chance |
+| FE+MLP | 0.379 | 0.382 | −0.002 | Both = chance |
+
+### Full Matrix: MAE in degrees [95% CI] (chance = 90.0°)
+
+| Alignment | LDA | Ridge | FE (B&H) | KernelRidge | SVM | MLP | FE+MLP | FE+SVM |
+|-----------|-----|-------|-----------|-------------|-----|-----|--------|--------|
+| Raw | 89.0 [87,90] | 89.8 [86,94] | 91.4 [87,96] | 89.6 [86,94] | 90.6 [87,94] | 90.6 [89,92] | — | — |
+| Raw+ANOVA-100 | 88.5 [86,91] | 90.3 [86,95] | 91.4 [87,96] | 90.2 [85,95] | 89.2 [85,94] | 90.6 [90,91] | — | — |
+| Preloaded Proc | **25.6** [23,28] | 41.8 [38,45] | 43.5 [39,47] | 47.9 [44,52] | 32.9 [27,39] | 87.1 [85,89] | 90.0 [90,90] | 38.7 [32,45] |
+| **Nested Proc** | **16.1** [14,18] | 39.3 [36,42] | 39.4 [32,47] | 36.1 [33,39] | **14.6** [12,18] | 84.9 [81,88] | 89.8 [88,92] | **35.0** [31,39] |
+| Nested+PCA-20 | 17.2 [14,20] | 41.3 [39,44] | 42.8 [36,50] | 38.9 [35,42] | 22.6 [20,26] | 83.4 [80,87] | — | — |
+| Nested+ANOVA-100 | 28.2 [25,32] | 47.3 [45,50] | 47.1 [39,55] | 38.0 [34,41] | 22.4 [20,25] | 80.4 [76,84] | — | — |
+### Key Observations from Matrix
+
+1. **Raw = chance**: Without any alignment, ALL models perform at chance (~0.37-0.39). ANOVA-100 feature selection on raw data provides zero benefit.
+2. **Alignment is the dominant factor**: Preloaded Procrustes lifts LDA from 0.393→0.821 (+0.428). Nested Procrustes further to 0.892 (+0.071).
+3. **Nested > Preloaded for all models**: Every model benefits from nested Procrustes. SVM gains most (+0.123), LDA next (+0.071).
+4. **Dim reduction hurts**: PCA-20 reduces SVM by −0.050, ANOVA-100 reduces LDA by −0.082. Full voxel space is optimal.
+5. **MLP always fails**: MLP ≈ chance in ALL conditions (0.37–0.45). Not a viable decoder for this sample size.
+6. **FE+SVM ≈ FE**: Nonlinear readout on 6 channels provides no benefit (0.777 vs 0.781).
+7. **HC ≈ CVD**: Under nested Procrustes, CVD matches or exceeds HC for 6/8 models. Only FE shows HC > CVD (+0.102).
+
+### Missing Experiments (gaps in matrix)
+
+| Gap | What's Missing | Priority | Justification |
+|-----|---------------|----------|---------------|
+| **Preloaded + PCA-20** | LDA, Ridge, FE, KR, SVM, MLP under preloaded Procrustes + PCA-20 | Low | Nested + PCA already tested and hurts; preloaded + PCA unlikely better |
+| **Preloaded + ANOVA-100** | Same with ANOVA feature selection | Low | Same reasoning |
+| **FE+MLP/FE+SVM other conditions** | Raw, PCA, ANOVA conditions for hybrid models | **Skip** | FE+MLP is 100% degenerate; FE+SVM ≈ FE already established |
+| **SRM space decoding** | All models in SRM common space | **Medium** | SRM is a cross-subject alignment method (k=3-4 features). Within-subject LORO in SRM space conflates between-subject and within-subject variance. CVD cross-decoding (RT-1) already tests SRM decoding in the relevant paradigm. |
+| **LOCO 10-subject (RT-4)** | Full LOCO with 10 subjects × 4 ROIs × 6 models × 1000 perms | **High** | Currently only sub-01 with 100 perms. Needed for publication-ready interpolation evidence. |
+
+### Decision: What to Run Next
+
+**Must-run**:
+1. **RT-4: LOCO full deployment** — 10 subjects, 1000 permutations. sbatch ready. Priority: High.
+
+**Not needed**:
+- Preloaded + PCA/ANOVA: already established that dim reduction hurts under nested (better alignment)
+- Raw + PCA: raw = chance regardless of feature selection
+- SRM × decoders: SRM reduces to k=3-4 features (fundamentally different paradigm from voxel-space LORO). The CVD cross-decoding result (RT-1) already validates SRM-space decoding.
+- More hybrid conditions: FE+MLP is broken, FE+SVM = FE already shown
+
+---
+
 **Last Updated**: 2026-02-18
 

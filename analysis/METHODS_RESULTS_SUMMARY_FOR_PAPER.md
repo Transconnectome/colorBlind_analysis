@@ -662,6 +662,37 @@ LDA's low reliability is NOT about inaccuracy — it achieves 82.1%. The instabi
 
 **Conclusion**: The channel-to-color mapping is adequately linear. B&H 2009 template matching captures the full predictive structure of the 6-channel representation. This validates the linear assumption for Phase 3 filter design.
 
+### Systematic Results Matrix: Alignment × Model (2026-02-18)
+
+All results: LORO CV, `full_dataset_C010`, 10 subjects × 4 ROIs, voxel space. **acc_45** (chance = 0.375).
+
+| Alignment | LDA | Ridge | FE (B&H) | KernelRidge | SVM | MLP | FE+MLP | FE+SVM |
+|-----------|-----|-------|-----------|-------------|-----|-----|--------|--------|
+| Raw | 0.393 | 0.375 | 0.367 | 0.380 | 0.382 | 0.370 | — | — |
+| Raw+ANOVA-100 | 0.394 | 0.364 | 0.367 | 0.370 | 0.394 | 0.371 | — | — |
+| Preloaded Procrustes | 0.821 | 0.783 | 0.736 | 0.739 | 0.776 | 0.394 | 0.375 | 0.747 |
+| **Nested Procrustes** | **0.892** | **0.823** | **0.781** | **0.810** | **0.899** | 0.412 | 0.380 | **0.777** |
+| Nested+PCA-20 | 0.881 | 0.802 | 0.761 | 0.791 | 0.849 | 0.429 | — | — |
+| Nested+ANOVA-100 | 0.810 | 0.753 | 0.731 | 0.794 | 0.849 | 0.447 | — | — |
+
+**MAE in degrees** (chance = 90.0°):
+
+| Alignment | LDA | Ridge | FE (B&H) | KernelRidge | SVM | MLP | FE+MLP | FE+SVM |
+|-----------|-----|-------|-----------|-------------|-----|-----|--------|--------|
+| Raw | 89.0 [87,90] | 89.8 [86,94] | 91.4 [87,96] | 89.6 [86,94] | 90.6 [87,94] | 90.6 [89,92] | — | — |
+| Raw+ANOVA-100 | 88.5 [86,91] | 90.3 [86,95] | 91.4 [87,96] | 90.2 [85,95] | 89.2 [85,94] | 90.6 [90,91] | — | — |
+| Preloaded Procrustes | **25.6** [23,28] | 41.8 [38,45] | 43.5 [39,47] | 47.9 [44,52] | 32.9 [27,39] | 87.1 [85,89] | 90.0 [90,90] | 38.7 [32,45] |
+| **Nested Procrustes** | **16.1** [14,18] | 39.3 [36,42] | 39.4 [32,47] | 36.1 [33,39] | **14.6** [12,18] | 84.9 [81,88] | 89.8 [88,92] | **35.0** [31,39] |
+| Nested+PCA-20 | 17.2 [14,20] | 41.3 [39,44] | 42.8 [36,50] | 38.9 [35,42] | 22.6 [20,26] | 83.4 [80,87] | — | — |
+| Nested+ANOVA-100 | 28.2 [25,32] | 47.3 [45,50] | 47.1 [39,55] | 38.0 [34,41] | 22.4 [20,25] | 80.4 [76,84] | — | — |
+
+**Key patterns**:
+1. Raw = chance for ALL models → alignment is prerequisite
+2. Nested Procrustes > Preloaded for ALL models → no leakage inflation
+3. Dim reduction (PCA-20, ANOVA-100) uniformly hurts → full voxels optimal
+4. SVM peaks at 0.899 (nested) but FE is more robust/reliable (see multi-criteria below)
+5. SRM space decoding: TBD (SRM W_i per-run projection needed for LORO)
+
 ### Revised Decoder Conclusions (2026-02-18)
 
 **Previous conclusion**: "LDA is the best decoder → linearity is sufficient"

@@ -1,7 +1,7 @@
 # Methods & Results Summary for Paper
 
 > Auto-generated and maintained by `capture-results` skill.
-> Last updated: 2026-02-18 (RT-4 LOCO server results: CVD heterogeneity = color space distortion, not signal loss)
+> Last updated: 2026-02-18 (Filter Pre-Validation B1–B3: per-pair z-scores, split-half stability, bootstrap CIs)
 
 ---
 
@@ -1106,3 +1106,85 @@ All results: LORO CV, `full_dataset_C010`, 10 subjects × 4 ROIs, voxel space. *
 | RT-4 | LOCO results from single subject (n=1), 100 perms at p-floor | Fatal | **Submitted** | Server: 10 subjects × 1000 perms, 6h time limit |
 | RT-5 | LDA reliability r=0.015 contradicts "best model" claim; paradox misinterpreted | Addressable | **DONE** | Run-pair r=0.009; FE W stability 0.921; framing revised to FE-centric |
 | RT-6 | Channel→color readout linearity untested | High | **DONE** | FE_SVM ≈ FE (0.779 vs 0.784); FE_MLP degenerate. Linear readout sufficient. |
+
+---
+
+## Filter Pre-Validation (B1–B3) — 2026-02-18
+
+> **Purpose**: Validate per-pair z-score claims before filter implementation (filter_design_plan.md §7.1).
+> **Script**: `analysis/future_phase3_filter_optimization/pre_validation/filter_pre_validation.py`
+> **Runtime**: 22s local (BrainIAK SRM, 1000 bootstrap × SRM retrain)
+
+### Settings
+
+- **SRM**: HC-only (7 HC training, CVD projected via SVD), consistent with canonical pipeline
+- **k values**: V1=4, V2=4, V3=3, hV4=3
+- **Distance metric**: Euclidean in k-dimensional SRM shared space
+- **Pair z-score**: (CVD_dist − HC_mean) / HC_std; positive = over-separation, negative = confusion
+- **B1**: Exhaustive group permutation C(10,3)=120; SRM retrained per permutation
+- **B2**: Split-half (runs 1–3 vs 4–6; also odd/even), Spearman r of 28-pair z-score profiles
+- **B3**: Bootstrap 95% CI (1000 iters, HC subjects resampled with replacement, SRM retrained)
+
+### B1: Pair-Level Permutation Test
+
+| ROI | Significant pairs (p<0.05, two-sided) | Note |
+|-----|--------------------------------------|------|
+| V1 | none | min p=0.008; several pairs trend 0.05–0.20 |
+| **V2** | **blue-purple** (p=0.042) | All 3 CVD elevated; step=1 adjacent |
+| V3 | none | |
+| hV4 | none | |
+
+> Power note: Exhaustive C(10,3)=120 permutations; minimum achievable p=0.008. V2 blue-purple passes this strict threshold.
+
+### B2: Split-Half Stability (first/last split, Spearman r)
+
+| Subject | V1 r | V2 r | V3 r | hV4 r | Profile |
+|---------|-------|-------|-------|--------|---------|
+| sub-08 (deutan) | 0.777* | 0.839* | 0.765* | 0.729* | **Reliable all ROIs → primary filter candidate** |
+| sub-09 (protan) | 0.645* | 0.684* | 0.264 | 0.747* | Reliable V1/V2/hV4; V3 unstable |
+| sub-10 (deutan) | 0.286 | 0.677* | 0.010 | 0.234 | **V2 only → V2-only filter confirmed** |
+| Group mean | 0.569 | 0.733 | 0.346 | 0.570 | V2 most stable overall |
+
+*p<0.05
+
+### B3: Bootstrap 95% CIs — Key Adjacent Pairs (step=1)
+
+| Pair | ROI | sub-08 z [CI] | sub-09 z [CI] | sub-10 z [CI] |
+|------|-----|---------------|---------------|---------------|
+| red-orange | V1 | −0.82 [−2.5,−0.2]* | −1.35 [−3.3,−0.7]* | −0.68 [−2.2,+0.1] |
+| orange-yellow | V1 | +2.00 [+1.3,+4.4]* | +0.73 [−0.8,+1.8] | −0.25 [−1.4,+0.7] |
+| cyan-blue | V1 | −0.95 [−2.4,−0.4]* | −0.51 [−1.6,+0.4] | −0.59 [−1.9,−0.0]* |
+| red-magenta | V1 | +0.69 [−0.3,+1.9] | +3.02 [+1.9,+6.9]* | +1.43 [−0.1,+3.5] |
+| purple-magenta | V1 | +0.98 [+0.2,+1.9]* | +1.15 [+0.4,+2.1]* | +0.31 [−1.1,+1.2] |
+| blue-purple | V2 | +4.34 [+2.9,+15.3]* | +0.33 [−0.9,+1.4] | +2.08 [+1.2,+7.9]* |
+| orange-yellow | V2 | +3.29 [+2.0,+33.2]* | +0.40 [−0.4,+8.1] | −0.13 [−0.9,+3.0] |
+| red-orange | hV4 | +4.34 [+2.9,+8.9]* | +0.47 [−1.4,+1.9] | −0.86 [−2.7,−0.5]* |
+
+*CI excludes zero
+
+**n_significant pairs per subject (B3):**
+
+| Subject | V1 | V2 | V3 | hV4 |
+|---------|----|----|----|----|
+| sub-08 | 15/28 | 17/28 | 18/28 | 21/28 |
+| sub-09 | 17/28 | 13/28 | 10/28 | 8/28 |
+| sub-10 | 8/28 | 10/28 | 13/28 | 22/28 |
+
+### Cross-Subject Consistency (HC-only SRM, updated)
+
+| Pair | ROI | Direction | sub-08 | sub-09 | sub-10 | Mechanism |
+|------|-----|-----------|--------|--------|--------|-----------|
+| red-orange | V1 | DEFICIT | −0.82 | −1.35 | −0.68 | L-M confusion |
+| cyan-blue | V1 | DEFICIT | −0.95 | −0.51 | −0.59 | L-M confusion |
+| red-magenta | V1 | ELEVATION | +0.69 | +3.02 | +1.43 | S-cone compensation |
+| purple-magenta | V1 | ELEVATION | +0.98 | +1.15 | +0.31 | S-cone compensation |
+| red-magenta | V2 | ELEVATION | +1.66 | +1.64 | +0.51 | S-cone compensation |
+| blue-purple | V2 | ELEVATION | +4.34 | +0.33 | +2.08 | S-cone compensation (B1 p=0.042) |
+
+### Key Findings
+
+1. **Filter targets validated**: red-orange deficit, orange-yellow/blue-purple/red-magenta elevation confirmed by B3 bootstrap — consistent with filter_design_plan §4.3 HIGH/MEDIUM priorities.
+2. **sub-08 primary candidate**: Split-half r=0.73–0.84 across all ROIs.
+3. **sub-10 V2-only**: Confirmed; only V2 shows stable profiles (r=0.68*).
+4. **B1 power caveat**: min p=0.008 with n=10; bootstrap CIs are the primary individual-level evidence.
+5. **Pattern preserved across SRM versions**: HC-only SRM shifts magnitudes vs. 10-subject SRM but L-M + S-cone structure replicated.

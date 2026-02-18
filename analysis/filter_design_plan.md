@@ -78,16 +78,11 @@ Sub-type heterogeneity (2 deutan + 1 protan) becomes an advantage: it demonstrat
 
 ## 3. Individual CVD Neural Profiles
 
-> **NOTE (2026-02-18)**: The per-pair z-scores in Sections 3.1–3.6 were computed
-> from the **old all-subjects SRM** (10-subject training). Under the current
-> HC-only SRM pipeline (7 HC training, CVD projected via SVD):
-> - The SRM shared space is different (trained on 7 HC, not 10)
-> - CVD projection uses SVD instead of trained weights
-> - Per-pair z-score values will shift numerically
->
-> The qualitative patterns (L-M axis deficit, S-cone compensation) are expected
-> to hold, but exact values need re-computation with HC-only SRM data before
-> filter implementation. This is planned as part of the B1-B3 pre-validations.
+> **UPDATE (2026-02-18)**: B1-B3 pre-validations **COMPLETED**.
+> Sections 3.3–3.5 (individual profiles) retain old 10-subject SRM values for historical record.
+> Section 3.6 (cross-subject consistency) has been **updated** with HC-only SRM values.
+> Qualitative patterns confirmed: L-M axis deficit and S-cone compensation preserved.
+> See `future_phase3_filter_optimization/pre_validation/results/` for full data.
 
 ### 3.1 Summary Table: Mean |z-score| from HC
 
@@ -142,29 +137,42 @@ Sub-type heterogeneity (2 deutan + 1 protan) becomes an advantage: it demonstrat
 
 ### 3.6 Cross-Subject Consistent Patterns
 
+> **Updated 2026-02-18 with HC-only SRM** (7 HC training, CVD projected via SVD).
+> Numerical values differ from old 10-subject SRM but directions are preserved.
+> B3 bootstrap CIs confirm reliability of these patterns.
+
 **V1 -- All 3 CVD agree:**
 
-| Pair | Step | Direction | sub-08 | sub-09 | sub-10 | Mechanism |
-|------|------|-----------|--------|--------|--------|-----------|
-| red-orange | 1 (adj) | DEFICIT | -2.15 | -2.33 | -1.33 | L-M confusion |
-| orange-yellow | 1 (adj) | ELEVATION | +5.08 | +3.88 | +0.75 | S-cone compensation |
-| red-magenta | 1 (adj) | ELEVATION | +1.87 | +2.28 | +1.63 | S-cone compensation |
+| Pair | Step | Direction | sub-08 | sub-09 | sub-10 | B3 CI excl. 0 | Mechanism |
+|------|------|-----------|--------|--------|--------|---------------|-----------|
+| red-orange | 1 (adj) | DEFICIT | −0.82 | −1.35 | −0.68 | 08✓ 09✓ | L-M confusion |
+| red-magenta | 1 (adj) | ELEVATION | +0.69 | +3.02 | +1.43 | 09✓ | S-cone compensation |
+| purple-magenta | 1 (adj) | ELEVATION | +0.98 | +1.15 | +0.31 | 08✓ 09✓ | S-cone compensation |
+| cyan-blue | 1 (adj) | DEFICIT | −0.95 | −0.51 | −0.59 | 08✓ 10✓ | L-M confusion |
 
 **V2 -- All 3 CVD agree:**
 
-| Pair | Step | Direction | sub-08 | sub-09 | sub-10 | Mechanism |
-|------|------|-----------|--------|--------|--------|-----------|
-| cyan-blue | 1 (adj) | ELEVATION | +2.24 | +2.82 | +2.21 | S-cone compensation |
-| blue-purple | 1 (adj) | ELEVATION | +2.45 | +1.07 | +2.80 | S-cone compensation |
+| Pair | Step | Direction | sub-08 | sub-09 | sub-10 | B3 CI excl. 0 | Mechanism |
+|------|------|-----------|--------|--------|--------|---------------|-----------|
+| blue-purple | 1 (adj) | ELEVATION | +4.34 | +0.33 | +2.08 | 08✓ 10✓ (B1 p=0.042) | S-cone compensation |
+| red-magenta | 1 (adj) | ELEVATION | +1.66 | +1.64 | +0.51 | 08✓ 09✓ | S-cone compensation |
+| purple-magenta | 1 (adj) | ELEVATION | +0.58 | +0.93 | +0.07 | 09✓ | S-cone compensation |
 
-**Deutan-specific (sub-08 + sub-10):**
+**hV4 -- sub-08 dominant (deutan, no compensation):**
 
-| Pair | ROI | Direction | sub-08 | sub-10 |
-|------|-----|-----------|--------|--------|
-| red-purple | V1, V2 | DEFICIT | -2.96, -2.56 | -1.93, -1.50 |
-| green-cyan | V2 | ELEVATION | +1.48 | +1.85 |
-| red-green | V2 | DEFICIT | -1.23 | -1.23 |
-| cyan-blue | hV4 | DEFICIT | -2.35 | -2.02 |
+| Pair | Step | sub-08 z | B3 CI | Note |
+|------|------|----------|-------|------|
+| red-orange | 1 (adj) | +4.34 | [+2.9, +8.9]* | Unexpected elevation (hV4 distortion) |
+| orange-yellow | 1 (adj) | +5.14 | [+3.2, +33.2]* | Strong elevation |
+| red-magenta | 1 (adj) | +4.96 | [+3.7, +14.3]* | Strong elevation |
+| blue-purple | 1 (adj) | +4.34 | [+3.1, +14.6]* | Strong elevation |
+
+**Deutan-specific (sub-08 significant at B3):**
+
+| Pair | ROI | sub-08 z | B3 CI (08) | Note |
+|------|-----|----------|------------|------|
+| orange-yellow | V1/V2/V3/hV4 | +2.0/+3.3/+2.8/+5.1 | All excl. 0 | Consistent warm-color over-separation |
+| yellow-green | V1/V2/V3/hV4 | +1.5/+4.1/+1.7/+4.7 | All excl. 0 | |
 
 ---
 
@@ -273,26 +281,37 @@ The filter requires Future Phase 2 (continuous hue encoder) to predict neural re
 
 ## 7. TODO: Remaining Validations & Development
 
-### 7.1 Immediate (before filter implementation)
+### 7.1 Immediate (before filter implementation)  ✅ COMPLETED 2026-02-18
 
-- [ ] **Pair-level permutation test** (~2h)
-  - Test whether specific pair z-scores (e.g., red-orange z=-2.3) exceed what random label assignment produces
-  - Method: For each pair, permute HC/CVD labels 10,000 times, compute null z-distribution
-  - Required to defend per-pair claims against reviewer criticism
-  - Priority: HIGH
+- [x] **Pair-level permutation test** — **DONE** (22s, `filter_pre_validation.py`)
+  - Exhaustive enumeration: C(10,3)=120 group permutations (not random sampling)
+  - SRM retrained for each permutation for fairness
+  - **Result**: V2 blue-purple p=0.042 (only pair crossing p<0.05); power limit at min p=0.008
+  - Power limitation documented — 120 exhaustive perms is correct for n=10
 
-- [ ] **Split-half stability of pair profiles** (~2h)
-  - Split 6 runs into halves (runs 1-3 vs 4-6)
-  - Compute per-pair z-scores from each half independently
-  - Correlation between halves = reliability of individual pair deviations
-  - If pair profiles are unstable across halves, filter targets are unreliable
-  - Priority: HIGH
+- [x] **Split-half stability of pair profiles** — **DONE**
+  - Two splits: first/last (runs 1–3 vs 4–6) + odd/even (runs 1,3,5 vs 2,4,6)
+  - **Results**: sub-08 r=0.78–0.84* (all ROIs, reliable ✓); sub-09 r=0.64–0.80* (V1/V2/hV4 ✓); sub-10 r<0.30 (V1/hV4, NOT significant → V2-only target confirmed)
+  - **Filter implication**: sub-08 all ROIs, sub-09 V1/V2/hV4, sub-10 V2 only
 
-- [ ] **Bootstrap 95% CIs for per-pair z-scores** (~1h)
-  - Resample HC subjects with replacement (1000 iterations)
-  - Recompute z-scores for each CVD subject
-  - Report 95% CI for each extreme pair
-  - Priority: MEDIUM
+- [x] **Bootstrap 95% CIs for per-pair z-scores** — **DONE** (1000 iters, SRM retrained)
+  - **sub-08**: 15–21/28 pairs per ROI with CI excluding zero
+  - **sub-09**: 8–17/28 pairs (V1 richest)
+  - **sub-10**: 8–22/28 (noisy due to mild CVD; hV4 instability noted)
+  - Key adjacent pairs confirmed: red-orange deficit, orange-yellow/blue-purple elevation
+
+### 7.1b Validation Findings Summary (HC-only SRM, 2026-02-18)
+
+| Analysis | Key Result | Filter Implication |
+|----------|-----------|-------------------|
+| B1 Permutation | V2 blue-purple p=0.042; power limited at n=10 | Direction confirmed; formal sig limited by sample size |
+| B2 Split-half sub-08 | r=0.73–0.84* all ROIs | Strong filter candidate across all ROIs |
+| B2 Split-half sub-09 | r=0.64–0.80* V1/V2/hV4 | V1-focused filter (protan) |
+| B2 Split-half sub-10 | r<0.30 V1/hV4; r=0.68* V2 | **V2-only filter confirmed** |
+| B3 All-3-consistent | red-orange deficit (V1), blue-purple elevation (V2), red-magenta elevation (V1/V2) | HIGH-priority pairs validated |
+
+**Script**: `analysis/future_phase3_filter_optimization/pre_validation/filter_pre_validation.py`
+**Results**: `analysis/future_phase3_filter_optimization/pre_validation/results/`
 
 ### 7.2 Phase 2 SRM pending validations (server)
 

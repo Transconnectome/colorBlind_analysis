@@ -3,25 +3,25 @@
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-> **Decoding and correcting color perception in color vision deficiency (CVD) using fMRI-based forward encoding models**
+> **Decoding and characterizing color perception in color vision deficiency (CVD) using fMRI-based forward encoding models and Shared Response Model (SRM) group comparison**
 
 ## Table of Contents
 
 - [Overview](#overview)
 - [Research Questions](#research-questions)
 - [Current Status](#current-status)
-- [Paper & Publications](#paper--publications)
 - [Project Phases](#project-phases)
-  - [Phase 1: Baseline Analysis ✅](#phase-1-baseline-analysis-)
-  - [Phase 2A: Linear Filter Learning 🔄](#phase-2a-linear-filter-learning-)
-  - [Phase 2B: Forward Encoding Model 📋](#phase-2b-forward-encoding-model-)
-  - [Phase 3: Inverse Transformation 🎯](#phase-3-inverse-transformation-)
-  - [Phase 4: Deep Learning Filter 🚀](#phase-4-deep-learning-filter-)
+  - [Phase 1: Preprocessing & Baseline Decoding ✅](#phase-1-preprocessing--baseline-decoding-)
+  - [Phase 2: SRM Between-Subject Group Comparison ✅](#phase-2-srm-between-subject-group-comparison-)
+  - [Phase 2b: Decoder Model Validation ✅](#phase-2b-decoder-model-validation-)
+- [Future Directions](#future-directions)
+  - [Phase 1: Hyperalignment for HC Common Space 📋](#phase-1-hyperalignment-for-hc-common-space-)
+  - [Phase 2: Continuous Hue Interpolation Model 📋](#phase-2-continuous-hue-interpolation-model-)
+  - [Phase 3: CVD Filter Optimization via 360° Search 🎯](#phase-3-cvd-filter-optimization-via-360-search-)
 - [Installation](#installation)
 - [Usage](#usage)
 - [Project Structure](#project-structure)
 - [Data](#data)
-- [Contributors](#contributors)
 - [References](#references)
 
 ---
@@ -37,113 +37,81 @@
 
 - ✅ **Answer**: Yes! All CVD participants showed successful color decoding
   - **답변**: 예! 모든 색맹 참가자가 성공적인 색 디코딩을 보임
-  - Classification accuracy: V1 (76%), V2 (71%), V3 (69%), hV4 (68%)
-  - Reconstruction error: 32-48° (random baseline: 90°)
-  - **Supporting evidence**: RDM structural preservation >90% in V1-V2
-  - **근거**: V1-V2에서 RDM 구조적 보존 >90%
+  - Mean decoding accuracy: **0.592 ± 0.121** across 40 subject-ROI pairs (C010 + Procrustes pipeline)
+  - hV4 shows strongest selectivity: **0.613 ± 0.092** (decoding), **0.541 ± 0.283** (RDM correlation)
+  - RDM correlation after Procrustes: **0.381 ± 0.278** (100% positive pairs, up from 52.5% pre-alignment)
+  - CVD group: **0.684 ± 0.094** (numerically higher than HC 0.552 ± 0.111)
+  - **Supporting evidence**: Noise ceiling utilization 79.4% (C010 pipeline); all subjects p < 0.001 vs chance
 
 #### RQ2: Inter-Individual Heterogeneity in CVD
 **Does CVD show inter-individual heterogeneity in neural color representations, necessitating personalized approaches?**
 
 **색맹은 신경 색 표상에서 개인 간 이질성을 보이는가? 개인화된 접근이 필요한가?**
 
-- ✅ **Answer**: Yes, substantial individual heterogeneity even within same CVD type
-  - **답변**: 예, 동일한 색맹 유형 내에서도 상당한 개인차 존재
-  - **Three-dimensional characterization** (3차원 특성화):
-    - **Magnitude** (크기): L2 norm ratios 0.66-1.21 (±30% variation)
-    - **Sign/Baseline** (부호/기준선): Directional biases -0.41 to +0.32
-    - **Structure** (구조): RDM differences 0.118-0.505
-  - **Key finding**: Identical genotype (deuteranopia) → Opposite neural phenotypes (Sub-08 vs Sub-09)
-  - **핵심 발견**: 동일 유전형(녹색맹) → 정반대 신경 표현형 (Sub-08 vs Sub-09)
+- ✅ **Answer**: Yes, substantial individual heterogeneity confirmed via SRM group comparison
+  - **답변**: 예, SRM 그룹 비교를 통해 상당한 개인차 확인
+  - **SRM LOO-consistent group disparity** (HC-only SRM, LOO references):
+    - V1: p=0.062 (g=1.16), V2: p=0.075 (g=1.04) — trending with large effects
+    - V3/hV4: not significant
+  - **Individual CVD tests** (Crawford & Howell 1998):
+    - **sub-09** (protan): V1 p=0.007* — early visual cortex disruption
+    - **sub-08** (deutan): V2 p=0.040* — mid-level visual processing impact
+    - **sub-10** (deutan): falls within HC range — functionally normal representations
+  - **LOSO color-dependency** (CVD color-specific, HC color-agnostic):
+    - CVD: V2 p=0.010, V3 p=0.000, hV4 p=0.016
+    - HC: p=0.21–0.36 (not significant)
+  - **CVD heterogeneity**: 1.4–1.6× more dispersed than HC across all ROIs
+  - **Key finding**: Identical genotype (deuteranopia) → Opposite neural phenotypes (sub-08 vs sub-10)
+  - **Robustness**: Convergent validity with SRM-independent metrics (crossnobis r=0.486**, PCA r=0.742***)
 
 #### RQ3: Neural-Guided Personalized Filter Design
 **Can three-dimensional neural profiles (magnitude, sign, structure) inform individual-specific display filter design?**
 
 **3차원 신경 프로파일(크기, 부호, 구조)이 개인별 맞춤형 디스플레이 필터 설계에 활용될 수 있는가?**
 
-- ✅ **Feasibility demonstrated** (가능성 입증 완료): Subject-specific linear transformations successfully mapped CVD → HC-like patterns
-  - **결과**: 개인별 선형 변환이 색맹 패턴을 정상인 유사 패턴으로 성공적 매핑
-  - **Geometric alignment**: 97.2% Procrustes disparity reduction
-  - **기하학적 정렬**: 97.2% Procrustes 불일치도 감소
-  - **Structural recovery**: RDM correlation ≥0.999 with HC
-  - **구조적 복원**: HC와 RDM 상관 ≥0.999
-  - **Individual optimization**: Loss weights ($\lambda_{\text{mag}}$, $\lambda_{\text{base}}$, $\lambda_{\text{struct}}$) tailored to each CVD profile
-  - **개인 최적화**: 각 색맹 프로파일에 맞춘 손실 가중치 조정
-  - ⚠️ **Limitation**: Retrospective validation only; prospective behavioral testing pending
-  - ⚠️ **한계**: 회고적 검증만 완료; 전향적 행동 검증 미실시
+- 📋 **Planned** — Rigorous pipeline under development
+  - **결과**: 체계적 파이프라인 개발 중
+  - Retrospective Procrustes-based filter showed feasibility (97.2% disparity reduction, RDM ≥ 0.999)
+  - ⚠️ **Limitation**: Previous results were retrospective; prospective pipeline requires hyperalignment → continuous encoder → optimization
+  - Development workspace: `prediction_model_workspace/MASTER_PLAN.md`
 
 ---
 
-### Next Research Questions (이후 연구 질문)
+### Sub-Research Questions (이후 연구 질문)
 
 These questions address methodological foundations for the 3-phase neural-guided filter development pipeline (MASTER_PLAN.md).
 
-**이 질문들은 3단계 신경 기반 필터 개발 파이프라인(MASTER_PLAN.md)의 방법론적 기반을 다룹니다.**
-
 #### SRQ1: Shared Decoder Validation
-**Can a common color channel-to-voxel decoder (W matrix) be successfully applied across HC and CVD participants after alignment?**
+**Can a common color decoder be successfully applied across HC and CVD participants after alignment?**
 
-**정렬 후 정상인과 색맹 참가자 간에 공통 색 채널-복셀 디코더(W 행렬)를 성공적으로 적용할 수 있는가?**
-
-- ✅ **Answer**: Yes, after Procrustes alignment
-  - **답변**: 예, Procrustes 정렬 후 가능
-  - HC common W applied to aligned CVD: 5-10° reconstruction error (matches HC performance)
-  - CVD without alignment: 84-96° error (chance level)
-  - **Implication**: Linear transformation (Procrustes) sufficient for decoder sharing
-  - **함의**: 선형 변환(Procrustes)만으로 디코더 공유 가능
+- ✅ **Answer**: Yes — SRM enables shared decoding; Procrustes alignment is essential
+  - Decoder validation (`phase2_decoder_comparing/`): LDA achieves acc_45 = 0.821 with Procrustes
+  - Without alignment: ALL models perform at chance (~37–39%)
+  - HC ≈ CVD performance (LDA: HC 0.805, CVD 0.859) → shared voxel-color mapping confirmed
+  - ForwardEncoding is the only model with interpolation ability (LOCO: MAE 72–83° vs 90° chance)
 
 #### SRQ2: Hyperalignment for Common Space
 **Can trial-aligned Generalized Procrustes Analysis (GPA) create a stable HC common space for robust encoder learning?**
 
-**시행별 정렬 일반화 Procrustes 분석(GPA)이 견고한 인코더 학습을 위한 안정적인 HC 공통 공간을 생성할 수 있는가?**
-
-- 🔄 **In progress** (Phase 1 of MASTER_PLAN.md)
-  - **진행 중** (MASTER_PLAN.md의 Phase 1)
-  - **Goal**: Align HC participants' trial-wise voxel patterns (~384 trials/subject) into shared representational space
-  - **목표**: HC 참가자의 시행별 복셀 패턴(~384 trials/subject)을 공유 표현 공간으로 정렬
+- 📋 **Planned** (Future Phase 1)
+  - **Goal**: Align HC participants' trial-wise voxel patterns into shared representational space
   - **Method**: Trial-aligned GPA with full voxel space (NO PCA) to preserve geographic features
-  - **방법**: 지리적 특징 보존을 위한 전체 복셀 공간 GPA (PCA 사용 안 함)
   - **Success criteria**: Procrustes disparity <0.10, split-half stability >0.80
-  - **성공 기준**: Procrustes 불일치도 <0.10, 분할-반복 안정성 >0.80
 
 #### SRQ3: Continuous Hue Interpolation
-**Can a channel-based forward encoding model predict brain responses for any hue angle in 360° circular space, interpolating between 8 measured colors?**
+**Can a channel-based forward encoding model predict brain responses for any hue angle in 360° circular space?**
 
-**채널 기반 순방향 인코딩 모델이 8개 측정 색상 사이를 보간하여 360° 원형 공간의 임의 색조 각도에 대한 뇌 반응을 예측할 수 있는가?**
-
-- 📋 **Planned** (Phase 2 of MASTER_PLAN.md)
-  - **계획 중** (MASTER_PLAN.md의 Phase 2)
+- 📋 **Planned** (Future Phase 2)
   - **Goal**: Develop continuous hue encoder (0-360°) using 6 half-wave rectified basis channels
-  - **목표**: 6개 반파 정류 기저 채널을 사용한 연속 색조 인코더(0-360°) 개발
-  - **Validation strategy** (검증 전략):
-    - **Direct**: Leave-One-Color-Out (LOCO) CV - train on 7 colors, predict held-out 8th
-    - **직접**: LOCO CV - 7색 학습, 8번째 색 예측
-    - **Indirect**: RDM smoothness, inter-encoder consistency across HC subjects
-    - **간접**: RDM 부드러움, HC 참가자 간 인코더 일관성
-  - **Success criteria**: LOCO error <50° (chance: 90°, baseline: 32°)
-  - **성공 기준**: LOCO 오차 <50° (우연 수준: 90°, 기준선: 32°)
+  - **Validation**: Leave-One-Color-Out (LOCO) CV — train on 7 colors, predict held-out 8th
+  - **Success criteria**: LOCO error <50° (chance: 90°)
 
 #### SRQ4: CVD Filter Optimization via 360° Search
-**Can optimization-based filter discovery across continuous hue space find display colors that make CVD brain responses match HC responses for original colors?**
+**Can optimization-based filter discovery find display colors that make CVD brain responses match HC responses?**
 
-**연속 색조 공간에서 최적화 기반 필터 탐색이 색맹 뇌 반응을 원래 색상에 대한 정상인 반응과 일치시키는 디스플레이 색상을 찾을 수 있는가?**
-
-- 🎯 **Planned** (Phase 3 of MASTER_PLAN.md)
-  - **계획 중** (MASTER_PLAN.md의 Phase 3)
+- 🎯 **Planned** (Future Phase 3)
   - **Goal**: For each original color θ_orig, optimize display color θ_display using dual-constraint loss
-  - **목표**: 각 원래 색상 θ_orig에 대해 이중 제약 손실을 사용하여 디스플레이 색상 θ_display 최적화
-  - **Dual constraints** (이중 제약):
-    - **Loss 1 (Voxel matching)**: ||Ŷ_cvd(θ) - Ŷ_hc(θ_orig)||² - brain pattern alignment
-    - **손실 1 (복셀 매칭)**: 뇌 패턴 정렬
-    - **Loss 2 (Reconstruction)**: ||Decode(Ŷ_cvd(θ)) - θ_orig||² - perceptual accuracy
-    - **손실 2 (재구성)**: 지각 정확도
-  - **Ablation study** (절제 연구): 4 scenarios (Loss1 only, Loss2 only, Equal weight, Optuna optimization)
-  - **Success criteria** (성공 기준):
-    - Filter smoothness <2.0°/deg (필터 부드러움)
-    - Reconstruction error ≤baseline 32° (재구성 오차)
-    - Inter-CVD consistency <10° (색맹 간 일관성)
-  - ⚠️ **Current scope**: In-silico validation only; empirical validation with actual filtered stimuli deferred
-  - ⚠️ **현재 범위**: 실리코 검증만; 실제 필터링된 자극 실증 검증은 추후
+  - **Success criteria**: Voxel pattern similarity >50% reduction, reconstruction error >30% reduction
 
 ---
 
@@ -151,10 +119,16 @@ These questions address methodological foundations for the 3-phase neural-guided
 
 - **Participants**: 10 subjects (7 HC, 3 CVD: 2 deuteranopia, 1 protanomaly)
 - **Paradigm**: Rapid serial visual presentation (RSVP) of 8 isoluminant colors
+- **Runs**: 6 runs per subject
 - **ROIs**: V1, V2, V3, hV4 (defined using Wang et al. 2015 probabilistic atlas)
-- **Analysis**: Forward encoding models (Brouwer & Heeger, 2009)
-- **Preprocessing**: fMRIPrep v23.2.1 with careful quality control
-
+- **Space**: MNI152NLin2009cAsym, res-2
+- **Preprocessing**: fMRIPrep v23.2.3 with MI-based coregistration
+- **Pipeline**: C010 (2nd-level drift removal) + Procrustes alignment (validated 2026-02-09)
+- **Analysis methods**:
+  - Forward encoding models (Brouwer & Heeger, 2009)
+  - Shared Response Model (SRM; BrainIAK) for between-subject alignment
+  - Crawford & Howell (1998) modified t-test for single-case inference
+  - Crossnobis distance (Walther et al., 2016) for SRM-independent validation
 
 ---
 
@@ -162,93 +136,103 @@ These questions address methodological foundations for the 3-phase neural-guided
 
 ### Completed ✅
 
-- **Preprocessing pipeline**: Optimized fMRIPrep workflow with fieldmap correction
-- **ROI definition**: Native-space probabilistic atlas transformation
-- **Phase 1 analysis**: Baseline decoding and Procrustes analysis
-  - Individual-level classification (6 HC, 3 CVD)
-  - HC super-participant construction
-  - CVD-HC comparison with significance testing
+- **Phase 1**: C010 + Procrustes baseline decoding (validated 2026-02-09)
+  - Mean decoding accuracy 0.592, RDM correlation 0.381, noise ceiling utilization 79.4%
+- **Phase 2**: SRM between-subject group comparison (HC-only SRM, LOO-consistent)
+  - Group: V1 p=0.062, V2 p=0.075; Individual: sub-09 V1 p=0.007*, sub-08 V2 p=0.040*
+  - LOSO color-dependency: CVD V2/V3/hV4 significant, HC not significant
+- **Phase 2b**: Decoder model comparison and cross-validation
+  - LDA best (acc_45=0.821); Procrustes essential; HC ≈ CVD performance
+  - ForwardEncoding: only model with interpolation ability (LOCO)
+- **Robustness triangulation** (A3/A4/A5):
+  - A3 Variance Explained: CVD VE ≥ HC (V2 g=−1.68)
+  - A4 Crossnobis RDM: SRM-independent convergent r=0.486**
+  - A5 PCA-CCA replication: convergent r=0.742***
 
 ### In Progress 🔄
 
-- **Phase 2A**: Linear filter learning
-  - Subject-specific transformation matrices
-  - RDM-based loss optimization
-  - Filter validation on held-out runs
+- **Prediction model pipeline** planning (`prediction_model_workspace/`)
 
 ### Planned 📋
 
-- **Phase 2B**: Forward encoding model development
-- **Phase 3**: Inverse transformation (brain → stimulus space)
-- **Phase 4**: Deep learning end-to-end filter
-- **Psychophysical validation**: Behavioral testing with corrected images
+- **Future Phase 1**: Hyperalignment — HC common space via trial-aligned GPA
+- **Future Phase 2**: Continuous hue encoder — 360° forward model
+- **Future Phase 3**: Filter optimization — neural-guided personalized display filters
 
 ---
 
 ## Project Phases
 
-### Phase 1: Baseline Analysis ✅
+### Phase 1: Preprocessing & Baseline Decoding ✅
 
-**Goal**: Establish baseline decoding performance and quantify CVD-HC differences
+**Goal**: Establish baseline decoding performance and quantify color representation quality
 
-**Methods**:
-- Forward encoding model with channel response functions
-- Leave-one-run-out cross-validation
-- Procrustes analysis for pattern comparison
-- Permutation testing for significance
+**Pipeline** (C010 + Procrustes, validated 2026-02-09):
+- 1st-level GLM: FIR basis (8 delays, 0–12s)
+- Voxel selection: Top 50% by FIR R²
+- 2nd-level GLM: 8 HRF + 8 derivative + 12 per-run drift regressors
+- Procrustes alignment: runs 1–5 aligned to run 0
+- Forward encoding: 6 half-wave rectified channels, LORO cross-validation
 
 **Key Results**:
-- **HC super-participant**: Mean accuracy 72% across ROIs (significantly above chance)
-- **CVD individuals**: Comparable decoding accuracy (68-76%)
-- **CVD-HC differences**: Significant in all CVD subjects (T = 0.10-0.18, p < 0.001)
 
-**Documents**:
-- `docs/methods/PHASE1_RESULTS_ANALYSIS.md`
-- `docs/results/BASELINE_RESULTS_SUMMARY.md`
+| ROI | N | RDM Correlation (M ± SD) | Decoding Accuracy (M ± SD) |
+|-----|---|--------------------------|---------------------------|
+| V1 | 10 | 0.313 ± 0.215 | 0.560 ± 0.138 |
+| V2 | 10 | 0.370 ± 0.256 | 0.581 ± 0.131 |
+| V3 | 10 | 0.316 ± 0.328 | 0.613 ± 0.130 |
+| hV4 | 10 | **0.541 ± 0.283** | **0.613 ± 0.092** |
+
+**Documents**: `analysis/phase1_preprocess_decoding/README.md`, `analysis/METHODS_RESULTS_SUMMARY_FOR_PAPER.md`
 
 ---
 
-### Phase 2A: Linear Filter Learning 🔄
+### Phase 2: SRM Between-Subject Group Comparison ✅
 
-**Goal**: Learn linear transformations to map CVD patterns to HC-like patterns
+**Goal**: Quantify HC-CVD representational differences in SRM shared space
 
-**Hypothesis**: A personalized linear filter F can transform CVD brain patterns Y to match HC patterns H:
+**Method**: HC-only SRM (BrainIAK) with LOO-consistent disparity analysis
+- SRM trained on 7 HC subjects only; CVD projected via SVD
+- LOO references: HC sub-i vs mean of other 6 HC; CVD vs same LOO references
+- Three bias fixes: (1) HC-only training, (2) LOO for HC, (3) same LOO refs for CVD
+- Crawford & Howell (1998) for individual CVD inference
+- 10,000 permutation iterations (LOO-consistent)
 
-```
-F = Y @ A + b
-```
+**Canonical script**: `analysis/phase2_SRM_across_between/rerun_loo_consistent.py`
 
-where A is a transformation matrix and b is a bias vector.
+**Key Results**:
 
-**Loss Function**:
-```python
-L_total = λ_rdm * L_rdm + λ_proc * L_procrustes + λ_reg * L_regularization
-```
+| ROI | HC LOO | CVD LOO | Separation | p (perm) | Hedges' g |
+|-----|--------|---------|------------|----------|-----------|
+| V1 | 0.453 | 0.590 | 0.137 | 0.062 | 1.16 |
+| V2 | 0.486 | 0.606 | 0.120 | 0.075 | 1.04 |
+| V3 | 0.540 | 0.564 | 0.023 | 0.395 | 0.18 |
+| hV4 | 0.700 | 0.677 | −0.023 | 0.559 | −0.14 |
 
-- **L_rdm**: RDM (Representational Dissimilarity Matrix) similarity loss
-- **L_procrustes**: Procrustes disparity loss
-- **L_regularization**: Identity preservation + smoothness
+**Individual CVD** (Crawford & Howell):
+- sub-09 (protan): **V1 p=0.007*** — early visual cortex
+- sub-08 (deutan): **V2 p=0.040*** — mid-level processing
+- sub-10 (deutan): HC range — functionally normal
 
-**Methods**:
-- Subject-specific filter optimization
-- PyTorch-based gradient descent
-- Train on 7 runs, validate on 1 held-out run
-- Metrics: RDM correlation, Procrustes disparity, reconstruction accuracy
+**Validation** (12+ tests): LOSO stability (V2 7/7), split-half (V2 both halves sig), permutation, ICC, RDM consistency, alignment comparison, crossnobis, PCA-CCA, variance explained
 
-**Implementation**:
-- `scripts/phase2a_filter_learning/phase2a_train_filter.py`
-- `scripts/phase2a_filter_learning/apply_filter_with_reconstruction.py`
+**Documents**: `analysis/phase2_SRM_across_between/README.md`, `analysis/phase2_SRM_across_between/validation/`
 
-**Expected Outcomes**:
-- Reduced Procrustes disparity (T → 0)
-- Increased RDM similarity (r → 1.0)
-- Validation for stimulus-space correction feasibility
+---
 
-**Documents**:
-- `docs/methods/PHASE2A_FILTER_METHODS.md`
-- `docs/methods/FILTER_APPLICATION_METHOD.md`
+### Phase 2b: Decoder Model Validation ✅
 
-**Status**: Training infrastructure complete, optimization in progress
+**Goal**: Validate decoder assumptions — linearity, alignment necessity, group comparability, interpolation
+
+**Methods**: 6 models (LDA, Ridge, ForwardEncoding, KernelRidge, SVM, MLP) compared with LORO and LOCO CV
+
+**Key Findings**:
+1. **LDA is the best decoder** (acc_45 = 0.821, MAE = 25.6°)
+2. **Procrustes alignment is essential**: Without it, ALL models perform at chance (~37–39%)
+3. **HC ≈ CVD**: Shared voxel-color mapping confirmed (justifies filter learning)
+4. **ForwardEncoding is the only model with interpolation ability** (LOCO MAE 72–83° vs 90° chance)
+
+**Documents**: `analysis/phase2_decoder_comparing/model_comparison_validation/`, `analysis/METHODS_RESULTS_SUMMARY_FOR_PAPER.md`
 
 ---
 
@@ -260,9 +244,9 @@ L_total = λ_rdm * L_rdm + λ_proc * L_procrustes + λ_reg * L_regularization
 
 Our future work follows a systematic 3-phase approach to develop personalized, neural-guided color correction filters:
 
-1. **Phase 1**: Hyperalignment - Create common neural space across individuals
-2. **Phase 2**: Forward Model - Learn continuous hue → brain response mapping
-3. **Phase 3**: Filter Optimization - Find optimal display colors via 360° search
+1. **Phase 1**: Hyperalignment — Create common neural space across individuals
+2. **Phase 2**: Forward Model — Learn continuous hue → brain response mapping
+3. **Phase 3**: Filter Optimization — Find optimal display colors via 360° search
 
 ---
 
@@ -272,35 +256,15 @@ Our future work follows a systematic 3-phase approach to develop personalized, n
 
 **Goal**: Align HC participants' brain responses into a common representational space
 
-**Motivation**: Current analysis shows HC individuals have similar color structures (high Procrustes stability: 0.91/0.88) but use different coordinate systems (low RDM correlation: 0.26/0.24). Hyperalignment creates a shared space for stable encoder learning.
+**Motivation**: Phase 2 SRM results show that between-subject alignment substantially improves analysis (2.4–6.5× over raw). Hyperalignment with trial-level data will create a more refined common space for encoder learning.
 
 **Method**: Trial-aligned Generalized Procrustes Analysis (GPA)
-
-**Implementation**:
-
-1. **Extract trial-wise patterns** using Least Squares-Separate (LS-S) GLM
-   - Input: 384 trials per subject (8 colors × 8 trials × 6 runs)
-   - Output: Single-trial voxel patterns
-
-2. **Perform hyperalignment** across HC participants
-   - Optimize orthogonal transformations to align trial responses
-   - Preserve within-subject geometry while maximizing between-subject alignment
-
-3. **Validate alignment quality** (2-tier strategy)
-   - **Tier 1 (Trial-level)**: Inter-subject correlation (ISC), LOSO decoding
-   - **Tier 2 (Color-level)**: Procrustes disparity, RDM correlation, run-split stability
-
-4. **Relearn common encoder** in aligned space
-   - Fit shared weight matrix W across all HC data
-   - Compare reconstruction accuracy to baseline
 
 **Success Criteria**:
 - Trial-level ISC > 0.30
 - LOSO decoding > 25% (chance: 12.5%)
 - Procrustes disparity < 0.08 (baseline: 0.089)
 - RDM correlation > 0.30 (baseline: 0.26)
-
-**Expected Outcome**: Stable common space enabling robust encoder learning for Phase 2
 
 **Documents**: `prediction_model_workspace/docs/PHASE1_HYPERALIGNMENT.md`
 
@@ -310,44 +274,13 @@ Our future work follows a systematic 3-phase approach to develop personalized, n
 
 ![Phase 2 Pipeline](prediction_model_workspace/docs/phase2.png)
 
-**Goal**: Develop a continuous hue encoder that predicts brain responses for any color in 360° space
+**Goal**: Develop a continuous hue encoder predicting brain responses for any color in 360° space
 
-**Motivation**: Our experiment measured responses to only 8 discrete colors (45° spacing). To optimize CVD filters across all possible display colors, we need a model that interpolates between measured points.
+**Motivation**: Our experiment measured responses to only 8 discrete colors (45° spacing). Phase 2b LOCO results confirm ForwardEncoding can interpolate between measured points. A full continuous encoder enables filter optimization across all possible display colors.
 
 **Method**: Channel-based forward encoding (Brouwer & Heeger 2009)
 
-**Hypothesis**: *Circular basis functions spanning 360° hue space enable interpolation between measured colors*
-
-**Implementation**:
-
-1. **Define channel response functions**
-   ```python
-   # 8 color-selective channels (45° spacing)
-   def channel_response(stimulus_hue, channel_center, bandwidth=60):
-       return exp(-((stimulus_hue - channel_center)**2) / (2 * bandwidth**2))
-   ```
-
-2. **Train encoder in HC common space** (from Phase 1)
-   ```
-   Y_predicted = C(θ) @ W_enc
-   ```
-   where C(θ) is the channel activation vector for hue angle θ
-
-3. **Validate interpolation** (2-tier)
-   - **Direct**: Leave-One-Color-Out (LOCO) cross-validation
-     - Train on 7 colors, predict held-out 8th color
-     - Success: reconstruction error < 60° (chance: 90°, baseline: 32°)
-
-   - **Indirect**: Quality metrics for unmeasured angles
-     - RDM smoothness (gradual change across hues)
-     - Inter-encoder consistency (similar predictions across voxels)
-
-4. **Compare common vs individual encoders**
-   - Assess whether personalized encoders improve predictions
-
-**Phase 3 Dependency**: This encoder enables filter optimization across 360° hue space (not just 8 measured colors!)
-
-**Expected Outcome**: Validated continuous encoder: `Ŷ_hc(θ) = C(θ) @ W_enc` for any θ ∈ [0°, 360°]
+**Validation**: Leave-One-Color-Out (LOCO) CV — train on 7 colors, predict held-out 8th
 
 **Documents**: `prediction_model_workspace/docs/PHASE2_PREDICTION_MODEL.md`
 
@@ -361,11 +294,7 @@ Our future work follows a systematic 3-phase approach to develop personalized, n
 
 **Core Innovation**: Optimization-based filter discovery (not direct voxel transformation)
 
-**Method**: Dual-constraint optimization across continuous hue space
-
 **Mathematical Framework**:
-
-For each original color θ_orig, solve:
 
 ```python
 θ_display = argmin_θ [
@@ -374,50 +303,6 @@ For each original color θ_orig, solve:
 ]
 ```
 
-where:
-- **Ŷ_hc(θ_orig)**: HC target pattern (from Phase 2 encoder)
-- **Ŷ_cvd(θ)**: CVD predicted pattern for display color θ
-- **Decode()**: Inverse mapping from voxel pattern → perceived color
-
-**Why this works**:
-1. ✅ **360° optimization**: Phase 2 encoder predicts responses for any display color
-2. ✅ **Personalized**: Uses individual CVD's actual response patterns
-3. ✅ **Dual objectives**: Matches both neural geometry AND perceptual accuracy
-4. ✅ **Theoretically grounded**: CVD brain → HC brain alignment
-
-**Implementation**:
-
-1. **Collect CVD data**
-   - Measure responses to 8 colors (existing data: sub-08, 09, 10)
-   - Project CVD data into HC common space (from Phase 1)
-
-2. **Learn CVD encoder**
-   - Option A: Individual CVD encoder
-   - Option B: Apply HC common encoder to CVD data
-
-3. **Run optimization** for each θ_orig ∈ [0°, 360°]
-   - Grid search or gradient-based optimization
-   - Constrain search to perceptually valid range
-
-4. **Generate lookup table**
-   - Original color → Display color mapping
-   - Option: Fit parametric function (e.g., polynomial) for smoothness
-
-5. **Validate filter**
-   - **In silico**: Apply filter to training data, check brain pattern alignment
-   - **Psychophysical**: Behavioral color discrimination with filtered stimuli
-   - **fMRI validation**: Scan CVD with filtered images, verify HC-like responses
-
-**Success Criteria**:
-- Voxel pattern similarity: Procrustes disparity reduction > 50%
-- Reconstruction accuracy: Error reduction > 30%
-- Perceptual validation: Improved discrimination in Farnsworth-Munsell 100 Hue test
-
-**Expected Outcome**:
-- Personalized color lookup tables for each CVD subject
-- Proof-of-concept real-time image filter
-- Data for psychophysical validation study
-
 **Documents**: `prediction_model_workspace/docs/PHASE3_CVD_FILTER_OPTIMIZATION.md`
 
 ---
@@ -425,29 +310,25 @@ where:
 ## Legacy Plans (For Reference)
 
 <details>
-<summary><b>Original Phase 2B-4 Plans (Click to expand)</b></summary>
+<summary><b>Original Phase Plans (Click to expand)</b></summary>
 
-These were the original phase plans, now superseded by the 3-phase neural-guided approach above.
+These were the original phase plans, now superseded by the SRM-based approach (Phase 2) and the 3-phase neural-guided pipeline above.
+
+### Original Phase 2A: Linear Filter Learning
+- Goal: Learn linear transformations to map CVD patterns to HC-like patterns
+- Status: Superseded by SRM group comparison approach
 
 ### Original Phase 2B: Forward Encoding Model
-
-**Goal**: Learn the explicit mapping from stimulus space → brain space
-
-**Documents**: `docs/methods/NEXT_STEPS_FORWARD_MODEL.md`
+- Goal: Learn explicit stimulus → brain mapping
+- Status: Addressed in Phase 2b decoder comparison
 
 ### Original Phase 3: Inverse Transformation
-
-**Goal**: Compute stimulus-level color corrections from brain-space differences
-
-**Method**: Regularized least squares inversion of forward model
+- Goal: Compute stimulus-level color corrections
+- Status: Incorporated into future Phase 3 filter optimization
 
 ### Original Phase 4: Deep Learning Filter
-
-**Goal**: End-to-end neural network for optimal CVD color correction
-
-**Architecture**: U-Net style encoder-decoder with multi-objective loss
-
-**Timeline**: Long-term goal (Year 2-3)
+- Goal: End-to-end neural network for CVD color correction
+- Status: Deferred pending rigorous forward model pipeline
 
 </details>
 
@@ -472,7 +353,8 @@ These were the original phase plans, now superseded by the 3-phase neural-guided
 2. **Create conda environment**
    ```bash
    conda env create -f environment.yml
-   conda activate nilearn
+   # Server: conda activate nilearn
+   # Local (SRM analysis): conda activate srm
    ```
 
 3. **Verify installation**
@@ -484,41 +366,30 @@ These were the original phase plans, now superseded by the 3-phase neural-guided
 
 ## Usage
 
-### Quick Start
-
-See `docs/guides/QUICK_START_*.md` for phase-specific tutorials.
-
-### Example: Running Phase 1 Baseline Analysis
+### Phase 1: Baseline Decoding
 
 ```bash
-# 1. Preprocess fMRI data (on SLURM cluster)
-sbatch slurm_jobs/preprocessing/run_fmriprep_v2.sbatch
-
-# 2. Extract ROI data and run forward encoding model
+# Run forward encoding model for a single subject-ROI
 conda activate nilearn
-python analysis/preprocessing/fir_reconstruction_BH2009_system_clean.py \
+python analysis/phase1_preprocess_decoding/fir_reconstruction_BH2009_system_clean.py \
     --subject 02 \
     --roi V1 \
-    --dataset deoblique_v2
-
-# 3. Analyze results
-python scripts/diagnostics/diagnose_qc_results.py
+    --dataset full_dataset_C010
 ```
 
-### Example: Phase 2A Filter Learning
+### Phase 2: SRM Group Comparison
 
 ```bash
-# Train filter for CVD subject
-python scripts/phase2a_filter_learning/phase2a_train_filter.py \
-    --cvd_subject 08 \
-    --roi V1 \
-    --lambda_rdm 1.0 \
-    --lambda_proc 0.5
+# Run canonical LOO-consistent SRM analysis
+conda activate srm
+mpirun -np 1 python analysis/phase2_SRM_across_between/rerun_loo_consistent.py
+```
 
-# Apply filter and visualize results
-python scripts/phase2a_filter_learning/apply_filter_with_reconstruction.py \
-    --cvd_subject 08 \
-    --roi V1
+### Phase 2b: Decoder Comparison
+
+```bash
+# Run model comparison (LORO + LOCO)
+python analysis/phase2_decoder_comparing/model_comparison_validation/scripts/run_comparison.py
 ```
 
 ---
@@ -527,160 +398,69 @@ python scripts/phase2a_filter_learning/apply_filter_with_reconstruction.py \
 
 ```
 colorBlind_analysis/
-├── README.md                          # This file
-├── CLAUDE.md                          # Development guide for Claude Code
-├── REORGANIZATION_PLAN.md             # Reorganization plan document
-├── .gitignore                         # Git ignore rules
+├── README.md                              # This file
+├── CLAUDE.md                              # Development guide for Claude Code
 │
-├── analysis/                          # Core analysis code (organized by research phases)
-│   ├── phase0_preprocessing/         # Preprocessing & ROI extraction (RQ setup)
-│   │   ├── fir_reconstruction_BH2009_system_clean.py
-│   │   ├── grid_search_preprocessing.py
-│   │   └── README.md                 # FIR GLM, forward encoding model
+├── analysis/                              # Core analysis code
+│   ├── README.md                          # Master analysis overview
+│   ├── METHODS_RESULTS_SUMMARY_FOR_PAPER.md  # Exact statistics for all phases
+│   ├── filter_design_plan.md              # Filter design planning
 │   │
-│   ├── phase1_baseline_decoding/     # RQ1: Neural color discrimination in CVD
-│   │   ├── phase1_baseline32_*.py
-│   │   ├── phase1_cross_subject_loso.py
-│   │   ├── phase1_rsa.py
-│   │   └── README.md                 # Classification, reconstruction, RSA
+│   ├── prep_trials/                       # Registration quality comparison
+│   ├── roi_masks/                         # ROI mask files
 │   │
-│   ├── phase2_procrustes_cvd_hc/     # RQ2: Individual heterogeneity (3D characterization)
-│   │   ├── option2b_procrustes_alignment.py    # SRQ1: Shared decoder validation
-│   │   ├── option2d_procrustes_cvd_comparison.py
-│   │   ├── reconstruction_with_procrustes*.py
-│   │   ├── visualize_*disparity*.py
-│   │   └── README.md                 # Procrustes analysis, magnitude/sign/structure
+│   ├── phase1_preprocess_decoding/        # Phase 1: Baseline (C010 + Procrustes) ✅
+│   │   ├── fir_reconstruction_BH2009_system_clean.py  # Main analysis script
+│   │   └── results/full_dataset_C010/     # Per-subject per-ROI results
 │   │
-│   ├── phase3_procrustes_filter/     # RQ3: Neural-guided personalized filter design
-│   │   └── README.md                 # Current filter work (retrospective validation)
-│   │                                 # Main code in scripts/phase2a_filter_learning/
+│   ├── phase2_SRM_across_between/         # Phase 2: SRM group comparison ✅
+│   │   ├── rerun_loo_consistent.py        # Canonical LOO-consistent analysis
+│   │   ├── validation/                    # 12+ validation tests (A3/A4/A5, 1A-2D)
+│   │   └── results/
 │   │
-│   ├── future_phase1_hyperalignment/ # SRQ2: HC common space via trial-aligned GPA
-│   │   └── README.md                 # Planned: Trial-wise pattern extraction & hyperalignment
+│   ├── phase2_decoder_comparing/          # Phase 2b: Decoder cross-validation ✅
+│   │   ├── model_comparison_validation/   # 6-model LORO + LOCO comparison
+│   │   └── results/
 │   │
-│   ├── future_phase2_forward_model/  # SRQ3: Continuous hue interpolation (0-360°)
-│   │   └── README.md                 # Planned: Channel-based encoder, LOCO validation
+│   ├── phase2_procrustes_cvd_hc/          # Legacy: Procrustes-based comparison
+│   ├── phase3_procrustes_filter/          # Legacy: Exploratory filter learning
 │   │
-│   ├── future_phase3_filter_optimization/  # SRQ4: 360° filter search
-│   │   └── README.md                 # Planned: Dual-constraint optimization, LUT generation
+│   ├── future_phase1_hyperalignment/      # SRQ2: HC common space (planned)
+│   ├── future_phase2_forward_model/       # SRQ3: 360° encoder (planned)
+│   ├── future_phase3_filter_optimization/ # SRQ4: Filter optimization (planned)
 │   │
-│   ├── feature_selection/            # Feature selection methods
-│   │   ├── feature_selection_anova.py
-│   │   ├── feature_selection_rfe.py
-│   │   └── feature_selection_pca.py
-│   │
-│   ├── group_level/                  # Legacy group-level analysis scripts
-│   ├── utils/                        # Shared utilities
-│   └── visualization/                # Visualization tools
+│   ├── comprehensive/                     # Cross-phase analyses
+│   ├── validation/                        # Cross-pipeline validation
+│   └── utils/                             # Shared utilities
 │
-├── scripts/                           # Phase-specific analysis scripts
-│   ├── phase2a_filter_learning/      # Phase 3 (RQ3) filter optimization scripts
-│   │   ├── phase2a_train_filter.py
-│   │   ├── apply_filter_with_reconstruction.py
-│   │   ├── visualize_rdm_*.py
-│   │   └── ... (28 files total)
-│   │
-│   ├── diagnostics/                  # QC and diagnosis scripts
-│   │   ├── diagnose_qc_results.py
-│   │   ├── check_roi_quality_comparison.py
-│   │   └── ... (10 files total)
-│   │
-│   └── phase1_baseline/              # (Empty - for future baseline scripts)
+├── prediction_model_workspace/            # Future phases dev workspace
+│   ├── MASTER_PLAN.md                     # 3-phase development plan
+│   ├── docs/                              # Detailed documentation + pipeline diagrams
+│   ├── scripts/                           # Experimental scripts
+│   └── final/                             # Completed code staging area
 │
-├── slurm_jobs/                        # SLURM batch scripts for server execution
-│   ├── preprocessing/                # fMRIPrep, ROI extraction jobs
-│   │   └── run_fmriprep*.sbatch (19 files)
-│   ├── analysis/                     # Analysis jobs
-│   │   └── run_procrustes*.sbatch
-│   └── qc/                           # Quality control jobs
-│       └── qc_runwise*.sh (4 files)
+├── docs/                                  # Documentation
+│   ├── program_paper/                     # Manuscript (main.tex, main_kr.tex)
+│   ├── methods/                           # Methodology docs
+│   ├── results/                           # Result summaries
+│   └── technical/                         # Technical reports
 │
-├── docs/                              # Documentation
-│   ├── guides/                       # User guides (6 files)
-│   │   ├── QC_EXECUTION_GUIDE.md
-│   │   ├── QUICK_REFERENCE.md
-│   │   └── PROCRUSTES_RECONSTRUCTION_QUICKSTART.md
-│   │
-│   ├── methods/                      # Methodology documents (existing)
-│   │   ├── PHASE1_RESULTS_ANALYSIS.md
-│   │   ├── PHASE2A_FILTER_METHODS.md
-│   │   ├── PROCRUSTES_ANALYSIS_GUIDE.md
-│   │   └── ROBUSTNESS_VALIDATION_METHODS.md
-│   │
-│   ├── technical/                    # Technical reports (1+ files)
-│   │   ├── FMRIPREP_VERSION_COMPARISON.md
-│   │   └── MNI_DIAGNOSIS_FINAL_REPORT.md
-│   │
-│   ├── results/                      # Results summaries (5 files)
-│   │   ├── BASELINE_RESULTS_SUMMARY.md
-│   │   ├── CVD_ANALYSIS_FINAL.md
-│   │   └── FINAL_REPORT_WITH_VISUALIZATION.md
-│   │
-│   ├── program_paper/                # Paper manuscript
-│   │   ├── main.tex                  # English version
-│   │   ├── main_kr.tex               # Korean version
-│   │   └── figure/
-│   │
-│   └── archive/                      # Outdated/legacy documents
-│       ├── trial_options/
-│       └── OHBM_abstract/
-│
-├── prediction_model_workspace/        # ⚠️ ACTIVE WORKSPACE (Experimental)
-│   ├── README.md                     # Workspace usage rules
-│   ├── MASTER_PLAN.md                # 3-phase development plan
-│   ├── docs/                         # Detailed documentation (work-in-progress)
-│   │   ├── PHASE1_HYPERALIGNMENT.md
-│   │   ├── PHASE2_PREDICTION_MODEL.md
-│   │   ├── PHASE3_CVD_FILTER_OPTIMIZATION.md
-│   │   ├── overall.png, phase1-3.png  # Pipeline diagrams
-│   │   └── PROGRESS_LOG.md           # Development log
-│   ├── scripts/                      # Experimental scripts
-│   ├── final/                        # Completed code (ready for analysis/)
-│   │   ├── phase1/                   # → ../analysis/phase1_hyperalignment/
-│   │   ├── phase2/                   # → ../analysis/phase2_forward_model/
-│   │   └── phase3/                   # → ../analysis/phase3_filter_optimization/
-│   └── results/                      # Intermediate results (gitignored)
-│
-├── materials/                         # Stimuli and atlases
-├── papers/                            # Reference papers
-│
-├── results/                           # Analysis outputs (gitignored)
-├── derivatives/                       # Processed fMRI data (gitignored)
-└── logs/                              # Log files (gitignored)
+├── data/                                  # Local data
+├── ProbAtlas_v4/                          # Wang Atlas (2015)
+├── papers/                                # Reference papers
+├── results/                               # Analysis outputs (gitignored)
+└── derivatives/                           # Processed fMRI data (gitignored)
 ```
 
 ### Key Directories
 
-**analysis/** - Organized by research phases (RQ1→RQ2→RQ3→Future SRQ1-4)
+**`analysis/`** — Organized by research phases (Phase 1 → Phase 2 → Phase 2b → Future Phases 1-3)
 - Each phase has its own README explaining methods, results, and connections
-- Phase 0-3: Completed research questions
-- Future Phase 1-3: Planned (currently in development in `prediction_model_workspace/`)
+- `METHODS_RESULTS_SUMMARY_FOR_PAPER.md`: Authoritative source for all statistics
 
-**prediction_model_workspace/** - ⚠️ **ACTIVE EXPERIMENTAL WORKSPACE**
-- **Role**: Development and experimentation for Future Phase 1-3
-- **NOT final analysis**: Work-in-progress scripts, intermediate results
-- **Migration rule**: Completed phases move from `workspace/final/phase*/` → `analysis/phase*/`
-- **Documentation**: Full details in `prediction_model_workspace/README.md`
-
-**scripts/** - Executable analysis scripts organized by function
-**slurm_jobs/** - Server batch scripts for preprocessing and analysis
-**docs/** - Comprehensive documentation organized by type
-
-### Important Notes
-
-**⚠️ For collaborators working on Future Phases 1-3:**
-- Primary workspace: `prediction_model_workspace/`
-- Track progress: `prediction_model_workspace/docs/PROGRESS_LOG.md`
-- Final code staging: `prediction_model_workspace/final/phase*/`
-- Do NOT directly modify `analysis/future_phase*/` (minimal planning READMEs only)
-
-**When a Future Phase is completed:**
-1. Finalize code in `workspace/final/phase*/`
-2. Copy to `analysis/future_phase*/`
-3. Rename `analysis/future_phase*` → `analysis/phase*` (remove "future_" prefix)
-4. Update README with final results
-
-See individual phase READMEs in `analysis/phase*/README.md` for detailed methodology.
+**`prediction_model_workspace/`** — Development workspace for Future Phases 1-3
+- Work-in-progress scripts and intermediate results
+- Migration rule: Completed phases move from `workspace/final/phase*/` → `analysis/future_phase*/`
 
 ---
 
@@ -700,7 +480,7 @@ colorBlind_data/
 │   ├── func/
 │   │   ├── sub-01_task-rsvp_run-1_bold.nii.gz
 │   │   ├── sub-01_task-rsvp_run-1_events.tsv
-│   │   └── ... (8 runs total)
+│   │   └── ... (6 runs total)
 │   └── fmap/
 │       └── sub-01_fieldmap.nii.gz
 └── ... (sub-02 through sub-10)
@@ -710,10 +490,16 @@ colorBlind_data/
 
 - **Colors**: 8 isoluminant colors equally spaced in CIELAB (L*=70)
 - **Presentation**: RSVP at 2 Hz (500ms/stimulus)
-- **Runs**: 8 runs × 60 trials/color = 480 trials per color
+- **Runs**: 6 runs per subject
 - **Duration**: ~25 min per run
 
 See `materials/` for stimulus generation code.
+
+---
+
+## Contributors
+
+- **Jin-il Kim** — Principal investigator
 
 ---
 
@@ -724,8 +510,20 @@ See `materials/` for stimulus generation code.
 1. **Brouwer, G. J., & Heeger, D. J. (2009).** Decoding and reconstructing color from responses in human visual cortex. *Journal of Neuroscience*, 29(44), 13992-14003.
    - Foundation for our forward encoding model approach
 
-2. **Haxby, J. V., Connolly, A. C., & Guntupalli, J. S. (2014).** Decoding neural representational spaces using multivariate pattern analysis. *Annual Review of Neuroscience*, 37, 435-456.
+2. **Chen, P.-H. C., Chen, J., Yeshurun, Y., Hasson, U., Haxby, J., & Ramadge, P. J. (2015).** A reduced-dimension fMRI shared response model. *Advances in Neural Information Processing Systems*, 28, 460-468.
+   - BrainIAK Shared Response Model (SRM) for between-subject alignment
+
+3. **Crawford, J. R., & Howell, D. C. (1998).** Comparing an individual's test score against norms derived from small samples. *The Clinical Neuropsychologist*, 12(4), 482-486.
+   - Single-case inference for individual CVD testing
+
+4. **Walther, A., Nili, H., Ejaz, N., Alink, A., Kriegeskorte, N., & Diedrichsen, J. (2016).** Reliability of dissimilarity measures for multi-voxel pattern analysis. *NeuroImage*, 137, 188-200.
+   - Cross-validated Mahalanobis distance (crossnobis) for RDM computation
+
+5. **Haxby, J. V., Connolly, A. C., & Guntupalli, J. S. (2014).** Decoding neural representational spaces using multivariate pattern analysis. *Annual Review of Neuroscience*, 37, 435-456.
    - Theoretical framework for MVPA
+
+6. **Wang, L., Mruczek, R. E., Arcaro, M. J., & Bhatt, M. (2015).** Probabilistic maps of visual topography in human cortex. *Cerebral Cortex*, 25(10), 3911-3931.
+   - ROI definition atlas
 
 ### Additional References
 
@@ -734,4 +532,4 @@ See `materials/` for stimulus generation code.
 
 ---
 
-**Last Updated**: 2026-01-04
+**Last Updated**: 2026-02-18

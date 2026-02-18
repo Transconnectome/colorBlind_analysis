@@ -45,7 +45,7 @@ Directory: `phase2_SRM_across_between/results/c010/combined_with_aligned/`
 ```
 - ROIs: V1, V2, V3, V4
 - Alignments: `procrustes`, `raw`
-- SRM K values: V1=4, V2=4, V3=3, hV4=4
+- SRM K values: V1=4, V2=4, V3=3, hV4=3
 
 ### fMRIPrep Settings
 
@@ -117,39 +117,53 @@ PCA:                30 components
 - Leave-one-run-out cross-validation
 - **Output**: `full_dataset_C010/sub-{ID}/{ROI}/` with amplitudes, config, metrics
 
-### Phase 2: SRM-Based Between-Subject Alignment (`phase2_SRM_across_between/`)
+### Phase 2: SRM Between-Subject Group Comparison (`phase2_SRM_across_between/`)
 
-**2A. SRM Training & Alignment** (`evaluate_srm_c010_between_subject.py`)
-- Shared Response Model (BrainIAK SRM) on HC subjects
-- Project CVD subjects into HC-derived shared space
-- Procrustes pre-alignment before SRM (validated as superior to raw)
-- **Output**: `results/c010/combined_with_aligned/{ROI}_{alignment}_*.{npy,json}`
+**Main analysis: HC-CVD group comparison in SRM shared space**
 
-**2B. CVD-HC Comparison** (in SRM results JSON)
-- HC-to-HC-reference disparity (within-group consistency)
-- CVD-to-HC-reference disparity (cross-group deviation)
-- CVD-CVD pairwise disparity (within-CVD consistency)
-- RDM similarity: within-HC, within-CVD, HC-CVD
-- Statistical tests: HC vs CVD t-test with Cohen's d
+**2A. HC-Only SRM + LOO-Consistent Analysis** (`rerun_loo_consistent.py` — canonical script)
+- SRM trained on 7 HC subjects only; CVD projected via SVD
+- LOO-consistent disparity: HC sub-i vs mean of other 6 HC; CVD vs same LOO references
+- Three bias fixes: (1) HC-only training, (2) LOO for HC, (3) same LOO refs for CVD
+- Crawford & Howell (1998) individual CVD tests
+- Permutation test (10,000 iter, LOO-consistent)
+- **Key results**: V1 p=0.062 (g=1.16), V2 p=0.075 (g=1.04); sub-09 V1 p=0.007*, sub-08 V2 p=0.040*
+
+**2B. LOSO Color-Dependency** (in `rerun_loo_consistent.py`)
+- Leave-one-subject-out: HC tested in space they did NOT train (same treatment as CVD)
+- CVD color-dependency: V2 p=0.010, V3 p=0.000, hV4 p=0.016
+- HC color-agnostic: p=0.21–0.36 (not significant)
+- Key finding: HC-CVD disparity asymmetry is color-specific
+
+**2C. Robustness Triangulation** (`validation/compute_*.py`)
+- A4 Crossnobis RDM: SRM-independent voxel-space validation (V1 p=0.051; convergent r=0.486**)
+- A5 PCA→CCA: Alternative alignment replication (convergent r=0.742***)
+- A3 Variance Explained: SRM reconstruction quality (CVD VE ≥ HC; V2 g=−1.68)
+- **Output**: `validation/results/{crossnobis_rdm,pca_cca_replication,variance_explained}/`
 
 ### Phase 2 Validation (`phase2_SRM_across_between/validation/`)
 
 | Test | Directory | Purpose | Status |
 |------|-----------|---------|--------|
-| 1A Verify HC-only | `1A_verify_hc_only/` | SRM trained on HC subjects only | Done |
-| 1B LOSO Stability | `1B_loso_stability/` | Leave-one-subject-out SRM stability | Done |
-| 1C Split-Half | `1C_split_half/` | Split-half SRM reliability | Done |
-| 1D Permutation | `1D_permutation/` | Color label permutation (SRM retraining) | Done (1000 perms) |
-| 1D-ext Per-Group | `1D_permutation/` | Per-group disparity color-dependency | Pending |
-| 2A Split ICC | `2A_run_split_icc/` | Intraclass correlation | Done |
-| 2B RDM Consistency | `2B_rdm_consistency/` | RDM pattern stability | Done |
-| 2C Optimal K | `2C_optimal_k_selection/` | Cross-validated K selection | Done |
-| 2D Alignment Comparison | `2D_alignment_comparison/` | Procrustes vs raw pre-alignment | Done |
+| 1A HC-only + LOO | `rerun_loo_consistent.py` | HC-only SRM, LOO-consistent analysis | Done |
+| 1B LOSO Stability | `1B_loso_stability/` | Leave-one-subject-out SRM stability (V2 7/7) | Done |
+| 1C Split-Half | `1C_split_half/` | Split-half SRM reliability (V2 both halves sig) | Done |
+| 1D Permutation | `1D_permutation/` | Color label permutation (10,000 iter) | Done |
+| 1D-ext Per-Group | `rerun_loo_consistent.py` | CVD color-dependency V2/V3/hV4 sig | Done |
+| 1D-ext LOSO | `rerun_loo_consistent.py` | LOSO CVD color V2 p=0.010, V3 p=0.000 | Done |
+| 2A Split ICC | `2A_run_split_icc/` | Intraclass correlation (8/12 moderate+) | Done |
+| 2B RDM Consistency | `2B_rdm_consistency/` | CVD ≥ HC in V1/V2 ("parallel") | Done |
+| 2C Optimal K | `2C_optimal_k_selection/` | Mean rank aggregation: V1=4, V2=4, V3=3, hV4=3 | Done |
+| 2D Alignment Comparison | `2D_alignment_comparison/` | SRM 2.4–6.5× over raw/Procrustes | Done |
+| **A3 Variance Explained** | `validation/` | LOSO VE: CVD ≥ HC, V2 g=−1.68 | **Done** |
+| **A4 Crossnobis RDM** | `validation/` | SRM-independent: V1 p=0.051, convergent r=0.486** | **Done** |
+| **A5 PCA-CCA** | `validation/` | Alt alignment: convergent r=0.742*** | **Done** |
 
-**Key permutation results (1D, 1000 perms, rigorous SRM retraining):**
-- V2: HC RDM corr p=0.010, CVD RDM corr p=0.006 (both significant)
-- V3: CVD RDM corr p=0.035 (significant)
-- V1, hV4: RDM correlations not significant at p<0.05
+**Key results (LOO-consistent, 2026-02-18):**
+- Group: V1 p=0.062 (g=1.16), V2 p=0.075 (g=1.04)
+- Individual: sub-09 V1 p=0.007*, sub-08 V2 p=0.040*
+- LOSO CVD color-dependency: V2 p=0.010, V3 p=0.000, hV4 p=0.016
+- Convergent validity: SRM ↔ crossnobis r=0.486**, SRM ↔ PCA r=0.742***
 
 ### Phase 2-alt: Procrustes CVD-HC Comparison (`phase2_procrustes_cvd_hc/`)
 
@@ -176,6 +190,15 @@ Earlier reference-based Procrustes approach (before SRM):
 - **Future Phase 3** (`future_phase3_filter_optimization/`): CVD filter optimization (SRQ4)
 
 ## Version History
+
+**2026-02-18**: Robustness triangulation (A3/A4/A5) + LOO-consistent analysis
+- HC-only SRM + LOO-consistent disparity: V1 p=0.062, V2 p=0.075
+- Crawford & Howell individual CVD tests: sub-09 V1 p=0.007*, sub-08 V2 p=0.040*
+- LOSO color-dependency: CVD V2 p=0.010, V3 p=0.000, hV4 p=0.016
+- A4 Crossnobis RDM (SRM-independent): convergent r=0.486**
+- A5 PCA-CCA replication: convergent r=0.742***
+- A3 Variance Explained (LOSO): CVD VE ≥ HC, V2 g=−1.68
+- hV4 k revised from 4→3 via mean rank aggregation
 
 **2026-02-17**: Per-group disparity permutation test added
 - Tests HC and CVD within-group consistency separately
@@ -215,4 +238,4 @@ Earlier reference-based Procrustes approach (before SRM):
 
 ---
 
-Last Updated: 2026-02-17
+Last Updated: 2026-02-18

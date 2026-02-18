@@ -49,6 +49,14 @@ This maps directly to known CVD psychophysics (L-M confusion axis) and provides 
 | 4 | Filter overparameterized (training r=0.999) | Addressable | **TODO** -- LORO CV, low-rank constraint, baseline comparison |
 | 5 | Local separability hypothesis untested | Addressable | **DONE** -- Check 5 analysis completed, hypothesis revised |
 
+### 2.1b RT Resolution Status (2026-02-18)
+
+RT-1 through RT-7 have been resolved through the LOO-consistent SRM pipeline
+with Crawford & Howell individual testing, LOSO color-dependency tests, and
+comprehensive validation (split-half, LOCO, permutation). RT-6 (LOCO decoder)
+and RT-8 (alternative alignment) are addressed by the robustness metrics
+(A3-A5: variance explained, crossnobis RDM, PCA→CCA replication).
+
 ### 2.2 Resolution of Criticism 1 (Permutation vs. Filter)
 
 The permutation test evaluates **total disparity** (global signal + color pattern mixed). The total distance is dominated by global signal differences (SNR, magnitude), so shuffling color labels does not change it (p=0.953).
@@ -69,6 +77,17 @@ Sub-type heterogeneity (2 deutan + 1 protan) becomes an advantage: it demonstrat
 ---
 
 ## 3. Individual CVD Neural Profiles
+
+> **NOTE (2026-02-18)**: The per-pair z-scores in Sections 3.1–3.6 were computed
+> from the **old all-subjects SRM** (10-subject training). Under the current
+> HC-only SRM pipeline (7 HC training, CVD projected via SVD):
+> - The SRM shared space is different (trained on 7 HC, not 10)
+> - CVD projection uses SVD instead of trained weights
+> - Per-pair z-score values will shift numerically
+>
+> The qualitative patterns (L-M axis deficit, S-cone compensation) are expected
+> to hold, but exact values need re-computation with HC-only SRM data before
+> filter implementation. This is planned as part of the B1-B3 pre-validations.
 
 ### 3.1 Summary Table: Mean |z-score| from HC
 

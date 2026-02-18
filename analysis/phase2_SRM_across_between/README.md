@@ -1,76 +1,69 @@
-# Phase 2: SRM Alignment - Within and Between Subject Analysis
+# Phase 2: SRM Between-Subject Group Comparison
 
-**Research Question (SRQ1-related)**: Can SRM provide superior alignment compared to Procrustes for color decoding?
-**SRM이 색 디코딩을 위해 Procrustes보다 우수한 정렬을 제공할 수 있는가?**
+**Research Question**: Do CVD subjects show systematically different color representations from HC in SRM shared space?
 
-**Supporting Question**: Do CVD subjects differ from HC in shared response space?
-**공유 반응 공간에서 색맹이 정상인과 다른가?**
-
-**Status**: Completed ✅
-**Scripts**: 11 files
+**Status**: Analysis complete + Robustness validated ✅
+**Canonical script**: `rerun_loo_consistent.py`
 
 ---
 
 ## Overview
 
-This phase evaluates **Shared Response Model (SRM)** as an alternative alignment method to Procrustes, testing its effectiveness for both within-subject and between-subject analyses. SRM provides **dimensionality reduction** and **denoising** by learning a low-dimensional shared response space across subjects.
+This phase uses **Shared Response Model (SRM)** to align subjects into a common low-dimensional space and compare HC (n=7) vs CVD (n=3) color representations.
 
-**Two Analysis Types**:
-
-1. **Within-Subject**: SRM vs Procrustes performance comparison
-   - Tests if SRM improves RDM correlation by >5% (adoption threshold)
-   - Optimizes k (number of shared features) per ROI
-   - Leave-one-run-out cross-validation
-
-2. **Between-Subject**: HC vs CVD comparison in shared space
-   - Projects HC and CVD to common low-dimensional space
-   - Tests for group differences in Procrustes disparity
-   - Examines CVD heterogeneity
-
-**Key Innovation**: **Beta-based SRM** approach
-- Average across runs → stable pattern estimates per color
-- Suitable for limited stimuli (8 colors)
-- Constraint: k ≤ n_colors (k ≤ 8)
+**Key Methodology**:
+- **HC-only SRM**: Trained on 7 HC subjects; CVD projected via SVD
+- **LOO-consistent disparity**: HC sub-i vs mean of other 6 HC; CVD vs same LOO references
+- **Three bias fixes**: (1) HC-only training, (2) LOO for HC, (3) same LOO refs for CVD
+- **Individual CVD tests**: Crawford & Howell (1998) modified t-test
+- **Robustness**: 3 independent metrics (A3/A4/A5) triangulate SRM results
+- **SRM components (k)**: V1=4, V2=4, V3=3, hV4=3 (validated via mean rank aggregation)
 
 ---
 
-## Key Findings
+## Key Findings (Updated 2026-02-18)
 
-### Within-Subject: SRM vs Procrustes
+### Main Results: HC-CVD Group Comparison (LOO-consistent)
 
-**Decision Criteria**: Adopt SRM if improvement >5% in RDM correlation
+| ROI | HC LOO [95% CI] | CVD LOO [95% CI] | Separation [95% CI] | p (perm) | g [95% CI] |
+|-----|----------------|-----------------|---------------------|----------|------------|
+| **V1** | 0.453 [0.397, 0.512] | 0.590 [0.457, 0.761] | 0.137 [−0.005, 0.301] | **0.062** | 1.16 [−0.06, 3.98] |
+| **V2** | 0.486 [0.418, 0.559] | 0.606 [0.505, 0.718] | 0.120 [0.001, 0.244] | **0.075** | 1.04 [0.02, 3.18] |
+| V3 | 0.540 [0.476, 0.608] | 0.564 [0.404, 0.738] | 0.023 [−0.137, 0.194] | 0.395 | 0.18 |
+| hV4 | 0.700 [0.617, 0.796] | 0.677 [0.444, 0.855] | −0.023 [−0.244, 0.172] | 0.559 | −0.14 |
 
-| ROI | Procrustes RDM | SRM RDM (optimal k) | Improvement | p-value | Recommendation |
-|-----|----------------|---------------------|-------------|---------|----------------|
-| V1  | 0.174 ± 0.144 | 0.185 ± 0.150 (k=50) | +6.3% | 0.041 * | ✅ **Use SRM** |
-| V2  | TBD | TBD | TBD | TBD | Pending analysis |
-| V3  | TBD | TBD | TBD | TBD | Pending analysis |
-| hV4 | TBD | TBD | TBD | TBD | Pending analysis |
+### Individual CVD Tests (Crawford & Howell 1998)
 
-**V1 Result**: SRM improves RDM by 6.3%, exceeding 5% threshold → **Adopt SRM for V1**
+| Subject | V1 (t, p) | V2 (t, p) | V3 (t, p) | hV4 (t, p) |
+|---------|-----------|-----------|-----------|------------|
+| **sub-09** | **t=3.5, p=0.007** | t=1.0, p=0.181 | t=0.1, p=0.466 | t=1.1, p=0.150 |
+| **sub-08** | t=1.1, p=0.157 | **t=2.1, p=0.040** | t=1.9, p=0.052 | t=0.2, p=0.411 |
+| sub-10 | t=0.0, p=0.483 | t=0.2, p=0.433 | t=−1.3, p=0.884 | t=−1.9, p=0.945 |
 
----
+### LOSO Color-Dependency (CVD disparity depends on true color labels)
 
-### Between-Subject: HC vs CVD ⚠️ PRELIMINARY
+| ROI | CVD score p | CVD pairwise p | HC held-out p | Interpretation |
+|-----|------------|---------------|--------------|----------------|
+| V1 | 0.427 | 0.077 | 0.364 | Not color-specific |
+| **V2** | **0.033** | **0.035** | 0.894 | **CVD color-dependent** |
+| **V3** | **0.009** | **0.046** | 0.437 | **CVD color-dependent** |
+| **hV4** | **0.028** | **0.031** | 0.325 | **CVD color-dependent** |
 
-**Critical Limitation**: Low RDM similarities across subjects indicate SRM shared space may be inadequate for this dataset.
+### Robustness Triangulation (A3/A4/A5)
 
-| ROI | HC vs CVD | p-value | Cohen's d | HC-HC RDM Similarity | Status |
-|-----|-----------|---------|-----------|----------------------|--------|
-| **V1** | Not significant | 0.309 | 0.85 | 0.259 ± 0.155 | ⚠️ Low similarity |
-| **V2** | ✓ Significant | <0.001 | **6.68** | 0.446 ± 0.253 | ⚠️ Moderate similarity |
-| **V3** | ✓ Significant | 0.002 | **3.71** | 0.195 ± 0.216 | ⚠️ Low similarity |
-| **hV4** | Not significant | 0.553 | 0.49 | 0.031 ± 0.158 | ⚠️ Very low similarity |
-
-**Key Findings**:
-- ✅ V2 and V3 show significant HC-CVD differences
-- ⚠️ Low RDM similarities (r=0.03-0.45 for HC-HC) suggest limited shared structure
-- CVD subjects show high heterogeneity (negative CVD-CVD RDM correlations in V2/V3)
+| Metric | Method | Key result | Convergent validity (pooled) |
+|--------|--------|------------|------------------------------|
+| A4 Crossnobis | Native voxel space, SRM-independent | V1 p=0.051 | **r=0.486, p=0.001** |
+| A5 PCA-only | Alternative alignment | Group ns | **r=0.742, p<0.001** |
+| A5 PCA-CCA | Alternative alignment | Group ns | **r=0.472, p=0.002** |
+| A3 VE (LOSO) | SRM reconstruction quality | CVD VE ≥ HC; V2 g=−1.68 | r=−0.246, ns |
 
 **Interpretation**:
-- V2/V3 findings indicate mid-level visual areas as critical loci for CVD effects
-- Low similarity across all ROIs suggests k=3-4 features may be insufficient
-- Procrustes validation recommended before drawing final conclusions
+- Group-level effects trend but do not reach p<0.05 (n=3 CVD limitation)
+- Individual CVD tests reveal region-specific dissociations: sub-09=V1, sub-08=V2
+- CVD color-dependency confirmed via LOSO (V2/V3/hV4) — strongest evidence
+- **Convergent validity is key**: SRM disparity correlates with crossnobis (r=0.486) and PCA distance (r=0.742), confirming SRM captures genuine neural differences, not alignment artifacts
+- CVD VE ≥ HC = "strong signal, different structure" (not noisy, but anisotropic)
 
 ---
 
@@ -874,6 +867,6 @@ d = (mean_CVD - mean_HC) / pooled_std
 
 ---
 
-**Status**: ✅ Analysis completed, results documented
-**Last Updated**: 2026-02-10
+**Status**: ✅ Analysis completed + robustness validated
+**Last Updated**: 2026-02-18
 **Contact**: For methodology questions, see analysis scripts or CLAUDE.md

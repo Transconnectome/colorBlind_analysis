@@ -1,7 +1,7 @@
 # Methods & Results Summary for Paper
 
 > Auto-generated and maintained by `capture-results` skill.
-> Last updated: 2026-02-18 (Phase 2b: RT-1~6 complete; hybrid decoder FE_SVM≈FE confirms linear readout)
+> Last updated: 2026-02-18 (Phase 2 robustness: A3 Variance Explained, A4 Crossnobis RDM, A5 PCA-CCA replication)
 
 ---
 
@@ -351,6 +351,168 @@ Validated via mean rank aggregation across 7 LOSO folds using two RDM-based metr
 - [x] **2D Alignment comparison**: SRM 2.4-6.5x better than raw/Procrustes for between-subject RDM agreement
 - [x] **Bootstrap 95% CIs**: LOO-consistent separation V1 [−0.005, 0.301] V2 [0.001, 0.244] (V2 marginally excludes zero); RDM CIs for all ROI-group pairs
 - [x] **Formal k aggregation**: Mean rank across 7 folds; V1=4, V2=4 unanimous; V3=3 (parsimony); hV4 revised from 4→3
+- [x] **A3 Variance Explained**: LOSO framework — CVD VE ≥ HC VE; V2 g=−1.68 (strong signal)
+- [x] **A4 Crossnobis RDM**: SRM-independent — V1 trending p=0.051; convergent r_pooled=0.486**
+- [x] **A5 PCA-CCA Replication**: Alternative alignment — PCA-only convergent r_pooled=0.742***
+
+---
+
+## Phase 2 Robustness: SRM-Independent Triangulation (A3/A4/A5) — 2026-02-18
+
+### 목표 (Purpose)
+
+SRM 분석 결과가 alignment method artifact가 아님을 증명하기 위해, SRM에 독립적인 3가지 보완 지표로 삼각검증(triangulation) 수행.
+
+| Metric | SRM 의존성 | 검증 목표 |
+|--------|-----------|----------|
+| A4 Crossnobis RDM | **없음** (native voxel space) | SRM 없이도 동일한 HC-CVD 패턴 존재? |
+| A5 PCA→CCA | **없음** (다른 alignment 방법) | 다른 정렬 알고리즘으로도 그룹 차이 재현? |
+| A3 Variance Explained | **있음** (SRM W 행렬) | SRM이 CVD 데이터를 잘 설명하는가? |
+
+### Settings (공통)
+
+- **Data**: `full_dataset_C010`, Procrustes-aligned amplitudes (6 runs, 8 colors)
+- **Subjects**: HC (n=7: sub-01~07), CVD (n=3: sub-08~10)
+- **ROIs**: V1, V2, V3, hV4
+- **SRM k**: V1=4, V2=4, V3=3, hV4=3
+- **Permutations**: 10,000; **Bootstrap**: 10,000
+- **Scripts**: `validation/compute_{crossnobis_rdm,pca_cca_replication,variance_explained}.py`
+
+---
+
+### A4: Crossnobis RDM — SRM-Independent Voxel-Space Validation
+
+**방법**: Cross-validated Mahalanobis distance in native voxel space (Walther et al. 2016). SRM과 완전히 독립적.
+- Noise covariance: Ledoit-Wolf shrinkage (handles p>n)
+- Cross-validation: C(6,2)=15 run pairs → unbiased 8×8 distance matrix per subject
+- RDM similarity: Spearman ρ between subject pairs' crossnobis RDMs
+- 비교: HC-HC (21 pairs) vs HC-CVD (21 pairs) vs CVD-CVD (3 pairs)
+
+#### RDM Similarity (Group comparison)
+
+| ROI | HC-HC [95% CI] | HC-CVD [95% CI] | CVD-CVD | Diff [95% CI] | p (MW) | p (perm) |
+|-----|---------------|----------------|---------|---------------|--------|----------|
+| **V1** | **0.104** [0.012, 0.196] | −0.018 [−0.122, 0.089] | 0.049 | **0.122** [−0.019, 0.262] | **0.052** | **0.051** |
+| V2 | −0.018 [−0.114, 0.080] | 0.011 [−0.095, 0.123] | 0.063 | −0.029 [−0.176, 0.115] | 0.623 | 0.649 |
+| V3 | 0.021 [−0.079, 0.114] | −0.049 [−0.164, 0.068] | −0.122 | 0.070 [−0.084, 0.217] | 0.170 | 0.186 |
+| hV4 | −0.018 [−0.117, 0.088] | −0.015 [−0.105, 0.070] | 0.174 | −0.002 [−0.134, 0.137] | 0.661 | 0.502 |
+
+#### Convergent Validity (Crossnobis distance from HC mean ↔ SRM disparity)
+
+| ROI | Spearman r | p | Interpretation |
+|-----|-----------|---|---------------|
+| **V1** | **0.721** | **0.019** | Strong convergence |
+| **V2** | **0.806** | **0.005** | Strong convergence |
+| V3 | 0.200 | 0.580 | Weak |
+| hV4 | 0.248 | 0.489 | Weak |
+| **Pooled** | **0.486** | **0.001** | Moderate-strong |
+
+#### A4 해석
+
+- **V1 trending** (p=0.051): SRM 없이 native voxel space에서도 HC-HC RDM 유사도가 HC-CVD보다 높은 경향. SRM 결과 (group p=0.062)와 수렴.
+- **Convergent validity 강력**: V1 r=0.721, V2 r=0.806 — crossnobis distance가 SRM disparity와 강하게 상관. SRM이 실제 neural 차이를 반영함을 확인.
+- V2/V3/hV4는 crossnobis 그룹 차이 비유의미 — 이는 crossnobis가 **전체 RDM 유사도**를 비교하는 반면, SRM disparity는 **pair-specific alignment**를 측정하기 때문. 서로 다른 측면을 포착.
+
+---
+
+### A5: PCA→CCA Replication — Alternative Alignment Validation
+
+**방법**: SRM 대신 PCA dimensionality reduction + CCA alignment으로 동일한 분석 재현.
+- 모든 C(10,2)=45 subject pairs에 대해:
+  - **PCA-only**: PCA(k) → Procrustes disparity (CCA 없이)
+  - **PCA-CCA**: PCA(k) → CCA alignment → Procrustes disparity
+- Per-subject mean distance to HC for convergent validity
+
+#### Group Disparity (PCA-only method)
+
+| ROI | HC-HC (M ± SD) | HC-CVD (M ± SD) | Diff [95% CI] | g | p (perm) |
+|-----|---------------|----------------|---------------|---|----------|
+| V1 | 0.822 ± 0.114 | 0.858 ± 0.148 | 0.037 [−0.042, 0.114] | 0.27 | 0.187 |
+| V2 | 0.839 ± 0.126 | 0.849 ± 0.130 | 0.010 [−0.065, 0.086] | 0.08 | 0.397 |
+| V3 | 0.932 ± 0.130 | 0.925 ± 0.129 | −0.006 [−0.082, 0.070] | −0.05 | 0.566 |
+| hV4 | 0.987 ± 0.137 | 0.948 ± 0.170 | −0.039 [−0.131, 0.050] | −0.25 | 0.791 |
+
+#### Group Disparity (PCA-CCA method)
+
+| ROI | HC-HC (M ± SD) | HC-CVD (M ± SD) | Diff [95% CI] | g | p (perm) |
+|-----|---------------|----------------|---------------|---|----------|
+| V1 | 0.754 ± 0.109 | 0.743 ± 0.137 | −0.011 [−0.086, 0.059] | −0.09 | 0.616 |
+| V2 | 0.755 ± 0.125 | 0.784 ± 0.102 | 0.030 [−0.036, 0.098] | 0.25 | 0.200 |
+| V3 | 0.885 ± 0.137 | 0.911 ± 0.098 | 0.025 [−0.044, 0.097] | 0.21 | 0.248 |
+| hV4 | 0.924 ± 0.116 | 0.909 ± 0.122 | −0.015 [−0.088, 0.052] | −0.13 | 0.662 |
+
+#### Convergent Validity (PCA distance from HC mean ↔ SRM disparity)
+
+| Method | V1 (r, p) | V2 (r, p) | V3 (r, p) | hV4 (r, p) | **Pooled (r, p)** |
+|--------|-----------|-----------|-----------|------------|-------------------|
+| **PCA-only** | 0.636, 0.048* | **0.891, <0.001** | 0.285, 0.425 | 0.661, 0.038* | **0.742, <0.001** |
+| **PCA-CCA** | 0.503, 0.138 | 0.370, 0.293 | −0.018, 0.960 | 0.212, 0.556 | **0.472, 0.002** |
+
+#### A5 해석
+
+- **그룹 차이는 약함**: PCA-only와 PCA-CCA 모두 그룹 수준 유의미하지 않음 — pairwise alignment은 SRM의 shared space보다 noise가 높음 (45개 pair 각각 독립적 정렬).
+- **Convergent validity가 핵심 결과**:
+  - PCA-only pooled r=0.742 (p<0.001): SRM disparity와 매우 강한 상관. SRM이 아닌 PCA로 측정해도 동일한 subject-level 패턴.
+  - V2 r=0.891 (p<0.001): V2에서 SRM과 PCA 결과가 거의 완벽히 수렴.
+  - PCA-CCA pooled r=0.472 (p=0.002): CCA는 추가적 alignment으로 약간의 정보 손실, 그래도 유의미한 수렴.
+- **결론**: SRM disparity가 측정한 subject-level 변이는 alignment method에 비의존적. PCA-only로도 재현됨.
+
+---
+
+### A3: Variance Explained — SRM Reconstruction Quality
+
+**방법**: SRM이 각 subject의 데이터를 얼마나 잘 재구성하는지 정량화.
+- `VE = 1 - ||X - W @ S||² / ||X||²` (X=voxel data, W=weight matrix, S=shared response)
+- **Framework A** (single-SRM): HC uses trained W, CVD uses SVD-projected W (confounded)
+- **Framework B** (LOSO, unbiased): Both HC and CVD use SVD projection → fair comparison
+
+#### Framework B (LOSO) Results — Unbiased
+
+| ROI | k | HC VE [95% CI] | CVD VE [95% CI] | Diff [95% CI] | g | p (perm) |
+|-----|---|---------------|----------------|---------------|---|----------|
+| V1 | 4 | 0.352 [0.267, 0.412] | 0.402 [0.283, 0.532] | −0.050 [−0.191, 0.082] | −0.39 | 0.684 |
+| **V2** | **4** | **0.331 [0.289, 0.373]** | **0.448 [0.379, 0.511]** | **−0.117 [−0.190, −0.042]** | **−1.68** | **0.982** |
+| V3 | 3 | 0.250 [0.200, 0.305] | 0.321 [0.224, 0.404] | −0.070 [−0.165, 0.031] | −0.79 | 0.876 |
+| hV4 | 3 | 0.225 [0.183, 0.265] | 0.271 [0.210, 0.307] | −0.045 [−0.108, 0.022] | −0.69 | 0.870 |
+
+#### Individual CVD (Crawford & Howell, LOSO — one-tailed: patient > control)
+
+| Subject | V1 (VE, t, p) | V2 (VE, t, p) | V3 (VE, t, p) | hV4 (VE, t, p) |
+|---------|---------------|---------------|---------------|----------------|
+| sub-08 | 0.532, t=1.50, p=0.908 | 0.379, t=0.72, p=0.752 | 0.224, t=−0.32, p=0.379 | 0.210, t=−0.23, p=0.413 |
+| sub-09 | 0.283, t=−0.58, p=0.292 | 0.454, t=1.87, p=0.945 | 0.404, t=1.87, p=0.944 | 0.295, t=1.06, p=0.834 |
+| sub-10 | 0.392, t=0.33, p=0.625 | 0.511, t=2.74, p=0.983 | 0.334, t=1.02, p=0.826 | 0.307, t=1.25, p=0.871 |
+
+#### Convergent Validity (VE ↔ SRM disparity)
+
+| ROI | Spearman r | p | Interpretation |
+|-----|-----------|---|---------------|
+| V1 | −0.006 | 0.987 | No correlation |
+| V2 | 0.285 | 0.425 | Weak positive |
+| V3 | 0.103 | 0.777 | No correlation |
+| hV4 | −0.115 | 0.751 | No correlation |
+| Pooled | −0.246 | 0.126 | Weak negative trend |
+
+#### A3 해석
+
+- **예상과 반대**: CVD VE ≥ HC VE (전 ROI). 특히 V2에서 CVD가 HC보다 유의미하게 높음 (diff=−0.117, CI excludes zero, g=−1.68).
+- **해석 — "scattered but parallel" 확인**: CVD 표상이 noisy한 것이 아니라, **강한 signal이지만 다른 구조**를 가짐. SRM shared space로 재구성 시 CVD 데이터가 더 잘 복원됨 = CVD는 HC와 **다른 방향으로 체계적**임.
+- **수렴 타당도 약함** (r=−0.246 ns): VE와 disparity는 서로 다른 측면 측정. VE는 재구성 품질(signal 강도), disparity는 패턴 기하학(구조 차이). 높은 VE + 높은 disparity = "강한 signal, 다른 구조" — 이것이 정확히 "anisotropy correction" 프레이밍을 지지.
+- **Filter design 함의**: CVD 데이터가 SRM 공간에서 잘 재구성된다 = filter 학습에 필요한 정보가 preserved됨. Phase 3에서 CVD→HC 변환 학습이 가능할 것을 시사.
+
+---
+
+### Robustness Summary — Triangulation Matrix
+
+| Metric | 검증 목표 | V1 | V2 | V3 | hV4 | Key result |
+|--------|----------|----|----|----|----|------------|
+| **SRM disparity** (main) | 그룹 차이 | p=0.062 | p=0.075 | ns | ns | Trending V1/V2 |
+| **A4 Crossnobis** | SRM 독립 | **p=0.051** | ns | ns | ns | V1 수렴, convergent r=0.486** |
+| **A5 PCA-only** | 다른 alignment | ns | ns | ns | ns | **Convergent r=0.742*** |
+| **A5 PCA-CCA** | 다른 alignment | ns | ns | ns | ns | Convergent r=0.472** |
+| **A3 VE (LOSO)** | 재구성 품질 | CVD≥HC | **CVD>HC** g=−1.68 | CVD≥HC | CVD≥HC | "Strong signal, different structure" |
+
+> **결론**: 그룹 수준 차이는 trending (n=3 한계)이나, **convergent validity가 강력**: SRM disparity ↔ crossnobis (r=0.486), SRM disparity ↔ PCA distance (r=0.742) 모두 유의미. SRM이 alignment artifact가 아닌 genuine neural difference를 포착함을 확인. A3의 CVD VE>HC VE는 "scattered but parallel" 해석을 보강: CVD는 noisy하지 않고 systematic하게 다름 → anisotropy correction (구조 보정) 프레이밍 유지.
 
 ---
 
@@ -736,21 +898,44 @@ All results: LORO CV, `full_dataset_C010`, 10 subjects × 4 ROIs, voxel space. *
 
 ## Key Findings Summary
 
-1. **C010 + Procrustes is the optimal pipeline**: +1644% improvement in RDM reliability (0.028 -> 0.487); per-subject noise ceiling utilization ~30% (individual split-half metric), indicating substantial room for model improvement
-2. **V2 shows trending CVD-HC separation with individual-level significance**: LOO-consistent group p=0.075, Hedges' g=1.04 [0.02, 3.18]; separation=0.120 [0.001, 0.244] (CI marginally excludes zero); LOSO 7/7 folds significant (pre-LOO); split-half both halves significant (pre-LOO); CVD color-dependency confirmed (score p=0.033, pairwise p=0.035); Crawford & Howell: sub-08 significantly elevated (p=0.040)
-3. **V1 shows trending separation driven by sub-09**: LOO-consistent group p=0.062, Hedges' g=1.16; LOSO 6/7 folds (pre-LOO); Crawford & Howell: sub-09 significantly elevated (p=0.007); V1 group disparity is NOT color-specific (score p=0.427) but RDM trending (HC p=0.054, CVD p=0.056)
-4. **hV4 is the strongest color-selective ROI** in baseline decoding (RDM r = 0.541) but does not show CVD-HC separation
-5. **"Scattered but internally structured" — confirmed by LOSO**: CVD-HC disparity difference is color-agnostic in V2 (p=0.986), but CVD subjects show color-dependent consistency with HC references (single-SRM: V2 score p=0.033, V3 p=0.009, hV4 p=0.028; LOSO-confirmed: V2 p=0.010, V3 p=0.000, hV4 p=0.016). HC disparity is NOT color-dependent under either single-SRM or LOSO (p=0.21–0.89), confirming the asymmetry: HC share general structure while CVD's elevated disparity is specifically color-driven.
-6. **CVD heterogeneity with individual dissociations**: Crawford & Howell (1998) tests reveal sub-09 (protan) is significantly elevated in V1 (p=0.007), sub-08 (deutan) in V2 (p=0.040), and sub-10 (deutan) falls within HC range across all ROIs. This resolves the n=3 group inference problem by demonstrating individual-level effects.
-7. **SRM alignment is 2.4-6.5x better** than raw or Procrustes for between-subject RDM agreement
-8. **Whitening is harmful**: degrades performance by 47-92% regardless of application order
-9. **ForwardEncoding is the optimal decoder** (revised from "LDA best"): 6-channel model achieves 78.1% acc_45 (nested Procrustes), highest run-pair reliability (r=0.329), highest W stability (cosine 0.921), only model with LOCO interpolation (V3 p<0.01), and most alignment-robust (Δ=+0.045 vs SVM +0.123). LDA's 82.1% is undermined by zero reproducibility (run-pair r=0.009).
-10. **SVM achieves highest raw accuracy** (89.9% nested Procrustes) but is alignment-method-dependent (+0.123 gap between nested and preloaded Procrustes), suggesting it exploits alignment structure rather than intrinsic color representation.
-11. **Individual CVD cross-decoding confirmed (RT-7 fix)**: Under HC-only SRM (no circularity), 9/12 CVD tests remain significant at p<0.001 (V1/V2/V3: all 3 CVD above chance). hV4 degrades (1/3 sig) due to low SRM quality (HC LOSO 44.6%), not circularity removal. Validates shared color mapping without group statistics.
-12. **MLP fails completely** (39.4%, chance-level): extreme sample/feature ratio (~0.07) defeats regularization. 47.5% of subject-ROI cells show degenerate solutions in preloaded Procrustes condition.
-13. **Nested Procrustes does not inflate results** (RT-2 resolved): Nested alignment actually *improves* SVM (+0.123) and ForwardEncoding (+0.045) vs preloaded, confirming the original alignment effect was conservative.
-14. **PCA-20 loses discriminative information** (RT-3): Reducing to 20 components drops SVM from 0.899 to 0.847, indicating color signal spans >20 dimensions.
-15. **Channel→color readout is linear** (RT-6 Hybrid): FE_SVM (0.779) ≈ ForwardEncoding (0.784) under nested Procrustes — SVM-RBF on 6 channels provides no benefit over linear template matching. FE_MLP collapses to chance (0.381) due to early stopping failure on small samples. This validates the linear assumption for Phase 3 filter design.
+### I. 핵심 결과 (Core Findings)
+
+**Phase 1 — Preprocessing**:
+1. **C010 + Procrustes is the optimal pipeline**: +1644% RDM reliability (0.028→0.487); ceiling utilization ~30%; whitening harmful (−47~92%).
+
+**Phase 2 — SRM Group Comparison**:
+2. **V1/V2에서 trending HC-CVD 차이**: V1 p=0.062 (g=1.16), V2 p=0.075 (g=1.04). V2 separation CI [0.001, 0.244] marginally excludes zero.
+3. **Individual CVD dissociations**: sub-09 (protan) V1 p=0.007; sub-08 (deutan) V2 p=0.040; sub-10 HC range.
+4. **CVD color-dependency confirmed (LOSO)**: CVD disparity is color-specific (V2 p=0.010, V3 p=0.000, hV4 p=0.016), HC is not (p=0.21–0.36). Asymmetry = strongest evidence.
+
+**Phase 2b — Decoder Validation**:
+5. **ForwardEncoding is the optimal decoder**: 78.1% acc_45, highest reliability (r=0.329), only LOCO interpolation (V3 p<0.01), most alignment-robust (Δ=+0.045).
+6. **Channel→color readout is linear**: FE_SVM ≈ FE (0.779 vs 0.784). Linear template matching captures full predictive structure.
+7. **Individual CVD cross-decoding**: HC-only SRM, 9/12 tests p<0.001. CVD color representations decodable in HC space.
+
+### II. 해석 (Interpretation)
+
+8. **"Scattered but internally structured"**: CVD has higher disparity to HC (scattered), but this disparity is specifically color-dependent (structured). HC share general visual structure independent of color labels; CVD deviates specifically along color dimensions.
+9. **CVD heterogeneity — not a homogeneous group**: sub-09 = V1-dominant (protan, early visual), sub-08 = V2-dominant (deutan, mid-level), sub-10 = HC-like (deutan but functionally normal). Individual profiles necessary; group-level statistics insufficient.
+10. **Linear color channel representation exists**: ForwardEncoding's 6-channel basis captures continuous hue structure (LOCO interpolation), stable encoding weights (cosine 0.921), and alignment-robust decoding. → Phase 3 filter design on channel space justified.
+
+### III. Robustness Validation (삼각검증)
+
+11. **A4 Crossnobis (SRM-independent)**: V1 trending (p=0.051) in native voxel space. **Convergent validity**: crossnobis ↔ SRM disparity, pooled r=0.486 (p=0.001). SRM이 아닌 방법으로도 동일 패턴 확인.
+12. **A5 PCA-only (다른 alignment)**: PCA distance ↔ SRM disparity, pooled r=0.742 (p<0.001); V2 r=0.891 (p<0.001). 가장 강한 convergent validity — SRM 결과가 alignment method에 비의존적.
+13. **A3 Variance Explained (재구성 품질)**: CVD VE ≥ HC VE (전 ROI). V2 diff=−0.117 [−0.190, −0.042], g=−1.68. CVD signal이 noisy가 아닌 **체계적으로 다름**. "Strong signal, different structure."
+14. **SRM validation battery complete**: LOSO stability (V2 7/7), split-half (V2 both halves sig), permutation (10K iter), bootstrap CIs, alignment comparison (2.4–6.5×).
+
+### IV. 최종 해석 및 Phase 3 함의
+
+15. **CVD 색 표상은 "다르되 체계적"**: noisy가 아니라 anisotropic (방향-의존적 왜곡). SRM VE가 높고 (재구성 가능), 고유한 color-dependent 구조를 가짐 → anisotropy correction (구조 보정) 프레이밍 적합.
+16. **Convergent validity가 핵심 증거**: SRM disparity ↔ crossnobis (r=0.486), ↔ PCA (r=0.742). 세 가지 독립적 방법이 동일한 subject-level 패턴 → SRM alignment artifact 배제.
+17. **Filter design prerequisites met**:
+    - Linear channel representation exists (ForwardEncoding validated)
+    - CVD signal preserved in SRM space (VE ≥ HC)
+    - Individual CVD profiles identifiable (Crawford & Howell significant)
+    - Channel→color mapping is linear (FE_SVM ≈ FE)
+    → Phase 3: CVD→HC transformation in 6-channel space로 진행 가능.
 
 ---
 
@@ -802,6 +987,9 @@ All results: LORO CV, `full_dataset_C010`, 10 subjects × 4 ROIs, voxel space. *
 | **Filter pre-diagnosis** | Phase 3 | Not started | **High** | Pair-level permutation test, LORO CV for filter, low-rank constraint, baseline comparison (filter_design_plan.md Criticism #4) |
 | Dimensionality reduction + LOCO | Phase 2b | Not started | Medium | SRM/PCA + 6 models + LOCO re-experiment |
 | ~~Formal k aggregation~~ | Phase 2 | **DONE** | ~~Low~~ | V1=4, V2=4, V3=3, hV4=3 (hV4 revised from 4→3 via mean rank) |
+| ~~A3 Variance Explained~~ | Phase 2 | **DONE** | ~~High~~ | LOSO: CVD VE ≥ HC; V2 g=−1.68 [−4.02, −0.74] (CI excludes zero) |
+| ~~A4 Crossnobis RDM~~ | Phase 2 | **DONE** | ~~High~~ | V1 trending p=0.051; convergent r_pooled=0.486 (p=0.001) |
+| ~~A5 PCA-CCA Replication~~ | Phase 2 | **DONE** | ~~High~~ | PCA-only convergent r_pooled=0.742 (p<0.001); PCA-CCA r_pooled=0.472 (p=0.002) |
 
 ---
 

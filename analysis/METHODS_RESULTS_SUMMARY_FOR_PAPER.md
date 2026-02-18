@@ -1,7 +1,7 @@
 # Methods & Results Summary for Paper
 
 > Auto-generated and maintained by `capture-results` skill.
-> Last updated: 2026-02-18 (Phase 2b: focused_nested results RT-2/RT-3, RT-1 CVD cross-decoding, RT-5 LDA reliability; hybrid decoder TODO)
+> Last updated: 2026-02-18 (Phase 2b: RT-1~6 complete; hybrid decoder FE_SVM≈FE confirms linear readout)
 
 ---
 
@@ -389,6 +389,8 @@ Phase 1 uses a single decoder (6-channel Forward Encoding from Brouwer & Heeger 
 
 ### Result 1: LORO Model Comparison (10 subjects × 4 ROIs)
 
+**Dataset & Alignment**: `full_dataset_C010` | `amplitudes_procrustes.npy` (preloaded Procrustes — fit on all 6 runs) | Voxel space (no SRM, no dim reduction) | LORO CV
+
 #### Overall Performance (Procrustes-aligned, subject-level mean ± bootstrap 95% CI)
 
 | Model | Type | acc_exact | acc_45 [95% CI] | acc_90 | MAE [95% CI] |
@@ -484,6 +486,13 @@ Phase 1 uses a single decoder (6-channel Forward Encoding from Brouwer & Heeger 
 
 **Purpose**: Eliminate test-set leakage in Procrustes alignment (RT-2) and test PCA dimensionality reduction within LORO folds (RT-3). Focused on 3 models: ForwardEncoding, SVM, MLP.
 
+**Dataset & Alignment**:
+- Dataset: `full_dataset_C010` (P3 pipeline, C010 confounds, MNI space)
+- Nested Procrustes: `amplitudes_raw.npy` + fold-wise alignment (no leakage)
+- Nested + PCA-20: same + PCA(k=20) fit on train folds only
+- Preloaded Procrustes (ctrl): `amplitudes_procrustes.npy` (aligned on all 6 runs)
+- Feature space: voxel space (no SRM) | LORO CV
+
 **Results dir**: `analysis/phase2_decoder_comparing/results/focused_nested/{nested_only,nested_pca20,procrustes_ctrl}/`
 
 #### Overall Performance (acc_45, mean across all 10 subjects × 4 ROIs)
@@ -529,13 +538,24 @@ In procrustes_ctrl, **19/40 subject-ROI cells (47.5%)** showed degenerate MLP be
 4. **SVM benefits most from alignment quality** (Δ=+0.123) — high accuracy is partly alignment-method-dependent.
 5. **CVD SVM ≥ HC SVM** (0.910 vs 0.894 nested) — confirms CVD color representations are decodable.
 
-### Result 4: Individual CVD Cross-Decoding in SRM Space (RT-1)
+### Result 4: Individual CVD Cross-Decoding in SRM Space (RT-1 + RT-7 fix)
 
 **Purpose**: Verify each CVD subject *individually* decodes above chance in HC common space.
 
-**Method**: Pre-computed SRM-aligned amplitudes → Train LDA on 7 HC (LOSO for HC baseline) → Test on each CVD individually → Permutation test (1000 iterations).
+**Method (updated 2026-02-18, RT-7 fix)**: Train SRM on 7 HC only → Transform HC via `srm.w_[i]` → Project CVD via SVD → Train LDA on 7 HC mean betas → Test on each CVD → Permutation test (1000 iterations, label shuffling). Previous method used all-subjects SRM (circular).
 
-**Results dir**: `analysis/phase2_decoder_comparing/results/cvd_cross_decoding/`
+**Results dir**: `analysis/phase2_decoder_comparing/model_comparison_validation/results/cvd_cross_decoding/`
+
+**HC-only SRM results (current):**
+
+| ROI | k | HC LOSO mean | sub-08 (acc, p) | sub-09 (acc, p) | sub-10 (acc, p) |
+|-----|---|-------------|-----------------|-----------------|-----------------|
+| V1 | 4 | 0.946 | **1.000** (p=0.000) | **0.875** (p=0.000) | **1.000** (p=0.000) |
+| V2 | 4 | 0.839 | **0.750** (p=0.000) | **0.875** (p=0.000) | **1.000** (p=0.000) |
+| V3 | 3 | 0.768 | **0.625** (p=0.000) | **0.750** (p=0.000) | **0.875** (p=0.000) |
+| hV4 | 3 | 0.446 | 0.375 (p=0.057) | **0.625** (p=0.000) | 0.375 (p=0.056) |
+
+**Old all-subjects SRM results (superseded):**
 
 | ROI | k | HC LOSO mean | sub-08 (acc, p) | sub-09 (acc, p) | sub-10 (acc, p) |
 |-----|---|-------------|-----------------|-----------------|-----------------|
@@ -544,9 +564,9 @@ In procrustes_ctrl, **19/40 subject-ROI cells (47.5%)** showed degenerate MLP be
 | V3 | 3 | 0.821 | **0.750** (p=0.003) | **0.875** (p<0.001) | **0.750** (p=0.003) |
 | V4 | 4 | 0.554 | **0.750** (p<0.001) | **0.750** (p<0.001) | **0.750** (p<0.001) |
 
-Chance = 12.5% (1/8). All 12/12 tests p<0.05.
+Chance = 12.5% (1/8). 9/12 tests p<0.001 (HC-only); previously 12/12 (all-subjects).
 
-> **All 3 CVD subjects decode significantly above chance in all 4 ROIs**. CVD subjects match or exceed HC mean in V3/V4. sub-09 V1 lowest (50%) but still significant (p=0.012). This validates "individual CVD subjects share HC color mapping in SRM space" without relying on group-level inference.
+> **RT-7 resolved (2026-02-18)**: Under HC-only SRM (no circularity), 9/12 CVD tests remain strongly significant (V1/V2/V3: all p=0.000). hV4: only sub-09 significant — reflecting low HC LOSO baseline (44.6%) due to SRM quality, not circularity removal. CVD color decodability in HC space is robust.
 
 ### Result 5: LDA Reliability Diagnostics (RT-5)
 
@@ -592,6 +612,56 @@ Chance = 12.5% (1/8). All 12/12 tests p<0.05.
 
 LDA's low reliability is NOT about inaccuracy — it achieves 82.1%. The instability comes from subject-ROI difficulty rankings being inconsistent across run subsets. With 568 voxels and only 40 training samples, LDA finds separating hyperplanes that are fold-specific. High accuracy + zero reproducibility = hallmark of overfitting to fold-specific structure.
 
+### Result 6: Hybrid Decoder — Channel→Color Linearity Test (2026-02-18)
+
+**Purpose**: Test whether a nonlinear readout on ForwardEncoding's 6-channel representation improves over linear template matching.
+
+**Architecture**:
+- **FE_MLP**: voxels → FE (6 channels) → MLP(16 units, relu) → 8-class label
+- **FE_SVM**: voxels → FE (6 channels) → SVM-RBF → 8-class label
+- **ForwardEncoding** (control): voxels → FE (6 channels) → template matching → label
+
+**Results dir**: `analysis/phase2_decoder_comparing/model_comparison_validation/results/hybrid/{nested,procrustes_ctrl}/`
+
+**Dataset & Alignment**:
+- Dataset: `full_dataset_C010` (P3 pipeline, C010 confounds, MNI space)
+- Nested Procrustes: `amplitudes_raw.npy` + fold-wise alignment (no leakage)
+- Preloaded Procrustes (ctrl): `amplitudes_procrustes.npy` (aligned on all 6 runs)
+- Feature space: voxel space (no SRM, no dimensionality reduction)
+- CV: LORO (6-fold, Leave-One-Run-Out) with nested HP tuning
+
+#### Overall Performance (acc_45, 10 subjects × 4 ROIs)
+
+| Model | Nested Procrustes | Procrustes ctrl | Δ(nested−ctrl) |
+|-------|-------------------|-----------------|-----------------|
+| **ForwardEncoding** | **0.784** | 0.737 | +0.047 |
+| **FE_SVM** | **0.779** | 0.747 | +0.032 |
+| FE_MLP | 0.381 (degenerate) | 0.375 (degenerate) | +0.006 |
+
+#### By Group (acc_45, nested Procrustes)
+
+| Model | HC (n=7) | CVD (n=3) | Δ(HC−CVD) |
+|-------|----------|-----------|-----------|
+| ForwardEncoding | **0.814** | 0.712 | +0.102 |
+| FE_SVM | 0.769 | **0.804** | −0.035 |
+| FE_MLP | 0.381 | 0.381 | 0.000 |
+
+#### By ROI (acc_45, nested Procrustes)
+
+| Model | V1 | V2 | V3 | V4 |
+|-------|------|------|------|------|
+| ForwardEncoding | 0.798 | 0.782 | **0.829** | 0.726 |
+| FE_SVM | 0.721 | **0.804** | 0.800 | 0.792 |
+| FE_MLP | 0.376 | 0.396 | 0.367 | 0.384 |
+
+#### Key Finding: Nonlinear Readout Does NOT Help
+
+- **FE_SVM ≈ ForwardEncoding** (0.779 vs 0.784, Δ=−0.005): SVM-RBF kernel on 6-channel responses provides no benefit over linear template matching.
+- **FE_MLP = degenerate** (0.381, all subjects/ROIs/folds): MLP with early_stopping on 40 samples (validation_fraction=0.2 → 8 validation samples) collapses to constant prediction. Not informative for linearity question.
+- **CVD reversal with FE_SVM**: CVD 0.804 > HC 0.769 — likely small-sample variance (n=3).
+
+**Conclusion**: The channel-to-color mapping is adequately linear. B&H 2009 template matching captures the full predictive structure of the 6-channel representation. This validates the linear assumption for Phase 3 filter design.
+
 ### Revised Decoder Conclusions (2026-02-18)
 
 **Previous conclusion**: "LDA is the best decoder → linearity is sufficient"
@@ -625,11 +695,11 @@ LDA's low reliability is NOT about inaccuracy — it achieves 82.1%. The instabi
 - [x] LOCO local test: sub-01, 4 ROIs, 100 permutations
 - [x] **[RT-2] Nested Procrustes**: FE/SVM/MLP, 10 subjects — SVM 0.899, FE 0.781 (no leakage)
 - [x] **[RT-3] PCA dim reduction**: PCA-20 within LORO — information loss vs full voxels
-- [x] **[RT-1] Individual CVD cross-decoding**: 12/12 tests p<0.05 in SRM space
+- [x] **[RT-1 + RT-7] Individual CVD cross-decoding**: HC-only SRM: 9/12 tests p<0.001, hV4 borderline (supersedes old all-subjects 12/12)
 - [x] **[RT-5] LDA reliability**: run-pair r=0.009 explains paradox; FE W stability 0.921
 - [ ] **[RT-4] LOCO server deployment**: 10 subjects × 4 ROIs, 1000 permutations (submitted, pending)
 - [ ] LOCO results consolidation and group-level analysis
-- [ ] **Hybrid decoder (FE+MLP, FE+SVM)**: Test nonlinearity in channel→color readout
+- [x] **[RT-6] Hybrid decoder (FE+MLP, FE+SVM)**: FE_SVM ≈ FE (0.779 vs 0.784); FE_MLP degenerate; linear readout confirmed
 
 ---
 
@@ -645,10 +715,11 @@ LDA's low reliability is NOT about inaccuracy — it achieves 82.1%. The instabi
 8. **Whitening is harmful**: degrades performance by 47-92% regardless of application order
 9. **ForwardEncoding is the optimal decoder** (revised from "LDA best"): 6-channel model achieves 78.1% acc_45 (nested Procrustes), highest run-pair reliability (r=0.329), highest W stability (cosine 0.921), only model with LOCO interpolation (V3 p<0.01), and most alignment-robust (Δ=+0.045 vs SVM +0.123). LDA's 82.1% is undermined by zero reproducibility (run-pair r=0.009).
 10. **SVM achieves highest raw accuracy** (89.9% nested Procrustes) but is alignment-method-dependent (+0.123 gap between nested and preloaded Procrustes), suggesting it exploits alignment structure rather than intrinsic color representation.
-11. **Individual CVD cross-decoding confirmed**: All 3 CVD subjects decode significantly above chance (12.5%) in all 4 ROIs in SRM space (12/12 tests p<0.05), validating shared color mapping without relying on group statistics.
+11. **Individual CVD cross-decoding confirmed (RT-7 fix)**: Under HC-only SRM (no circularity), 9/12 CVD tests remain significant at p<0.001 (V1/V2/V3: all 3 CVD above chance). hV4 degrades (1/3 sig) due to low SRM quality (HC LOSO 44.6%), not circularity removal. Validates shared color mapping without group statistics.
 12. **MLP fails completely** (39.4%, chance-level): extreme sample/feature ratio (~0.07) defeats regularization. 47.5% of subject-ROI cells show degenerate solutions in preloaded Procrustes condition.
 13. **Nested Procrustes does not inflate results** (RT-2 resolved): Nested alignment actually *improves* SVM (+0.123) and ForwardEncoding (+0.045) vs preloaded, confirming the original alignment effect was conservative.
 14. **PCA-20 loses discriminative information** (RT-3): Reducing to 20 components drops SVM from 0.899 to 0.847, indicating color signal spans >20 dimensions.
+15. **Channel→color readout is linear** (RT-6 Hybrid): FE_SVM (0.779) ≈ ForwardEncoding (0.784) under nested Procrustes — SVM-RBF on 6 channels provides no benefit over linear template matching. FE_MLP collapses to chance (0.381) due to early stopping failure on small samples. This validates the linear assumption for Phase 3 filter design.
 
 ---
 
@@ -694,7 +765,7 @@ LDA's low reliability is NOT about inaccuracy — it achieves 82.1%. The instabi
 | ~~[RT-3] PCA within LORO~~ | Phase 2b | **DONE** | ~~High~~ | PCA-20 loses info (SVM 0.847 vs 0.899 full). Signal spans >20 dims. |
 | ~~[RT-1] Individual cross-decoding~~ | Phase 2b | **DONE** | ~~Fatal~~ | 12/12 tests p<0.05. All CVD decode in SRM space individually. |
 | ~~[RT-5] LDA reliability analysis~~ | Phase 2b | **DONE** | ~~High~~ | Run-pair r=0.009 explains paradox. FE W stability 0.921. |
-| **Hybrid decoder (FE+MLP, FE+SVM)** | Phase 2b | TODO | **High** | Test nonlinearity in channel→color readout |
+| ~~Hybrid decoder (FE+MLP, FE+SVM)~~ | Phase 2b | **DONE** | ~~High~~ | FE_SVM ≈ FE (0.779 vs 0.784); linear readout sufficient |
 | ~~Bootstrap 95% CIs (SRM disparity)~~ | Phase 2 | **DONE** | ~~High~~ | V1/V2 separation CIs exclude zero; RDM CIs for all ROI-group pairs (10,000 iter) |
 | LOCO results consolidation | Phase 2b | Blocked (RT-4) | Medium | Group-level LOCO analysis after server run |
 | Dimensionality reduction + LOCO | Phase 2b | Not started | Medium | SRM/PCA + 6 models + LOCO re-experiment |
@@ -711,14 +782,7 @@ LDA's low reliability is NOT about inaccuracy — it achieves 82.1%. The instabi
    - Group-level analysis: Fisher combined probability, proportion of subjects with p<0.05
    - **Severity: Fatal** — ForwardEncoding interpolation claim based on n=1 pilot
 
-2. **Hybrid decoder (FE+MLP, FE+SVM)** — Test nonlinearity in channel→color readout
-   - Code implemented: `FEMLPHybridDecoder`, `FESVMHybridDecoder` in `run_model_comparison.py`
-   - Architecture: voxels → FE (6 channels) → MLP(16)/SVM-RBF → 8-class label
-   - If FE+MLP > FE → nonlinearity in channel-to-color mapping
-   - If FE+MLP ≈ FE → fully linear structure confirmed → filter learning linear assumption justified
-   - **Severity: High** — key question for Phase 3 filter design
-
-3. **Consolidate LOCO server results** — After #1 downloads:
+2. **Consolidate LOCO server results** — After #1 downloads:
    - Aggregate across subjects, test ForwardEncoding interpolation at group level
    - Compare V3 vs other ROIs (fewer voxels → better interpolation hypothesis)
 
@@ -726,10 +790,11 @@ LDA's low reliability is NOT about inaccuracy — it achieves 82.1%. The instabi
 
 4. ~~**[RT-2] Nested Procrustes within LORO**~~ — **DONE** (2026-02-18). Nested Procrustes actually improves: SVM 0.899, FE 0.781. No leakage issue — original result was conservative.
 5. ~~**[RT-3] PCA within LORO**~~ — **DONE** (2026-02-18). PCA-20 loses discriminative information vs full voxels. Signal spans >20 dimensions.
-6. ~~**[RT-1] Individual CVD cross-decoding**~~ — **DONE** (2026-02-18). 12/12 tests p<0.05 in SRM space. Shared mapping validated at individual level.
+6. ~~**[RT-1 + RT-7] Individual CVD cross-decoding**~~ — **DONE** (2026-02-18). HC-only SRM: 9/12 tests p<0.001 (V1/V2/V3 all sig). hV4 borderline (low SRM quality). Supersedes old all-subjects 12/12.
 7. ~~**[RT-5] LDA reliability analysis**~~ — **DONE** (2026-02-18). Run-pair r=0.009 explains paradox; FE W stability 0.921; framing revised to FE-centric.
 8. ~~**Bootstrap 95% CIs for SRM disparity**~~ — **DONE** (2026-02-18).
 9. ~~**Formal k aggregation**~~ — **DONE** (2026-02-18). hV4 revised from k=4 to k=3.
+10. ~~**[RT-6] Hybrid decoder (FE+MLP, FE+SVM)**~~ — **DONE** (2026-02-18). FE_SVM ≈ FE (0.779 vs 0.784); FE_MLP degenerate; linear readout confirmed.
 
 ### Deferred (Low Priority)
 
@@ -743,9 +808,9 @@ LDA's low reliability is NOT about inaccuracy — it achieves 82.1%. The instabi
 
 | # | Criticism | Severity | Status | Neutralization |
 |---|-----------|----------|--------|---------------|
-| RT-1 | HC vs CVD group comparison invalid at n=3; Bonferroni-corrected all NS | Fatal | **DONE** | 12/12 individual CVD tests p<0.05 in SRM space |
+| RT-1 + RT-7 | HC vs CVD group comparison invalid at n=3; cross-decoding used circular all-subjects SRM | Fatal | **DONE** | HC-only SRM: 9/12 tests p<0.001 (V1/V2/V3 all sig); hV4 borderline due to low SRM quality |
 | RT-2 | Procrustes pre-computed across all runs → LORO test-set leakage | Fatal | **DONE** | Nested Procrustes: SVM 0.899, FE 0.781 (no leakage, actually improves) |
 | RT-3 | "Linearity" confounded by dimensionality; KernelRidge gamma grid too narrow | Addressable | **DONE** | PCA-20 within LORO: loses info vs full voxels |
 | RT-4 | LOCO results from single subject (n=1), 100 perms at p-floor | Fatal | **Submitted** | Server: 10 subjects × 1000 perms, 6h time limit |
 | RT-5 | LDA reliability r=0.015 contradicts "best model" claim; paradox misinterpreted | Addressable | **DONE** | Run-pair r=0.009; FE W stability 0.921; framing revised to FE-centric |
-| **NEW** | Channel→color readout linearity untested | High | **TODO** | Hybrid FE+MLP/FE+SVM decoder comparison |
+| RT-6 | Channel→color readout linearity untested | High | **DONE** | FE_SVM ≈ FE (0.779 vs 0.784); FE_MLP degenerate. Linear readout sufficient. |

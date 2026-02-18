@@ -1299,7 +1299,71 @@ FE+SVM: voxels → FE (6 channels) → SVM-RBF → 8-class label
 
 **기대**: FE+MLP > FE → channel readout에 비선형성 존재; FE+MLP ≈ FE → 완전 선형 구조 확인
 
-코드 구현 완료 (FEMLPHybridDecoder, FESVMHybridDecoder in run_model_comparison.py). 서버 배포 대기 중.
+코드 구현 완료 (FEMLPHybridDecoder, FESVMHybridDecoder in run_model_comparison.py).
+
+### Result: Hybrid Decoder (FE+MLP, FE+SVM) — 2026-02-18
+
+**Results dir**: `analysis/phase2_decoder_comparing/model_comparison_validation/results/hybrid/{nested,procrustes_ctrl}/`
+
+#### Dataset & Alignment Conditions
+
+| Condition | Input File | Procrustes Fitting | Leakage? |
+|-----------|-----------|-------------------|----------|
+| **Nested Procrustes** | `amplitudes_raw.npy` | Fit on 5 train runs per LORO fold | No |
+| **Preloaded Procrustes (ctrl)** | `amplitudes_procrustes.npy` | Pre-fit on all 6 runs | Yes (minor) |
+
+- **Dataset**: `full_dataset_C010` (P3 pipeline, C010 confounds, MNI space)
+- **CV**: LORO (Leave-One-Run-Out, 6-fold)
+- **Feature space**: Voxel space (no SRM, no dimensionality reduction)
+- **ROIs**: V1, V2, V3, V4(=hV4) — independently per ROI
+
+#### Overall Performance (acc_45, 10 subjects × 4 ROIs)
+
+| Model | Nested Procrustes | Procrustes ctrl | Δ(nested−ctrl) |
+|-------|-------------------|-----------------|-----------------|
+| **ForwardEncoding** | **0.784** | 0.737 | +0.047 |
+| **FE_SVM** | **0.779** | 0.747 | +0.032 |
+| FE_MLP | 0.381 (degenerate) | 0.375 (degenerate) | +0.006 |
+
+Chance = 0.375
+
+#### By Group (acc_45, nested Procrustes)
+
+| Model | HC (n=7) | CVD (n=3) | Δ(HC−CVD) |
+|-------|----------|-----------|-----------|
+| ForwardEncoding | **0.814** | 0.712 | +0.102 |
+| FE_SVM | 0.769 | **0.804** | −0.035 |
+| FE_MLP | 0.381 | 0.381 | 0.000 |
+
+#### By ROI (acc_45, nested Procrustes)
+
+| Model | V1 | V2 | V3 | V4 | Mean |
+|-------|------|------|------|------|------|
+| **ForwardEncoding** | 0.798 | 0.782 | **0.829** | 0.726 | **0.784** |
+| **FE_SVM** | 0.721 | **0.804** | 0.800 | 0.792 | **0.779** |
+| FE_MLP | 0.376 | 0.396 | 0.367 | 0.384 | 0.381 |
+
+#### HP Params Summary
+
+- **ForwardEncoding**: alpha=0 dominant (no regularization)
+- **FE_SVM**: fe_alpha=0/10 (50/50), C=10 dominant, gamma='scale' universal
+- **FE_MLP**: fe_alpha=0, hidden=(16,), mlp_alpha=0.01 — but all degenerate regardless
+
+#### Degenerate Solution Analysis
+
+**FE_MLP is 100% degenerate** across ALL conditions, subjects, ROIs. Every single fold produces acc_45=0.375, MAE=90.0°, medAE=90.0°. Root cause: MLP with early_stopping (validation_fraction=0.2) on 40 training samples → 8 validation samples → collapse to constant prediction. The 6-dimensional channel input is insufficient to rescue MLP from the early stopping failure mode.
+
+#### Key Finding: Nonlinear Readout Does NOT Help
+
+| Comparison | Result | Implication |
+|-----------|--------|-------------|
+| FE_SVM vs FE | 0.779 ≈ 0.784 (−0.005) | SVM-RBF on 6 channels ≈ template matching |
+| FE_MLP vs FE | 0.381 << 0.784 | MLP fails due to early stopping, not informative |
+| FE_SVM (ctrl) vs FE (ctrl) | 0.747 > 0.737 (+0.010) | Tiny benefit in ctrl, not reliable |
+
+**Conclusion**: The channel-to-color mapping captured by ForwardEncoding's 6 basis functions is **adequately linear**. Adding nonlinear readout (SVM-RBF) on the 6-channel representation does not improve performance. The linear template matching in B&H 2009 is sufficient.
+
+This supports the linear assumption for Phase 3 filter design: if the channel→color readout is linear, then a linear filter in channel space can capture CVD-HC differences.
 
 ---
 

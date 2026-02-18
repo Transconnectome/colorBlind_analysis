@@ -1,0 +1,1282 @@
+{
+  "subject": "02",
+  "subject_group": "HC",
+  "rois": [
+    "V1",
+    "V2",
+    "V3",
+    "V4"
+  ],
+  "models": [
+    "ForwardEncoding",
+    "FE_MLP",
+    "FE_SVM"
+  ],
+  "alignments": [
+    "nested_procrustes"
+  ],
+  "settings": {
+    "baseline_dir": "/scratch/connectome/haba6030/colorBlind/derivatives/full_dataset_C010",
+    "dataset_name": "full_dataset_C010",
+    "n_runs": 6,
+    "n_colors": 8,
+    "cv_method": "LORO (Leave-One-Run-Out)",
+    "hp_tuning": true,
+    "hp_tuning_method": "nested CV (inner LORO on train runs)",
+    "dim_reduction": null,
+    "dim_k": null
+  },
+  "hyperparameters": {
+    "ForwardEncoding": {
+      "V1": {
+        "alpha": {
+          "selection_counts": {
+            "0": 5,
+            "10": 1
+          },
+          "most_frequent": "0",
+          "n_folds": 6
+        }
+      },
+      "V2": {
+        "alpha": {
+          "selection_counts": {
+            "0": 6
+          },
+          "most_frequent": "0",
+          "n_folds": 6
+        }
+      },
+      "V3": {
+        "alpha": {
+          "selection_counts": {
+            "0": 6
+          },
+          "most_frequent": "0",
+          "n_folds": 6
+        }
+      },
+      "V4": {
+        "alpha": {
+          "selection_counts": {
+            "0": 6
+          },
+          "most_frequent": "0",
+          "n_folds": 6
+        }
+      }
+    },
+    "FE_MLP": {
+      "V1": {
+        "fe_alpha": {
+          "selection_counts": {
+            "10": 6
+          },
+          "most_frequent": "10",
+          "n_folds": 6
+        },
+        "hidden_layer_sizes": {
+          "selection_counts": {
+            "(16, 8)": 6
+          },
+          "most_frequent": "(16, 8)",
+          "n_folds": 6
+        },
+        "mlp_alpha": {
+          "selection_counts": {
+            "0.01": 6
+          },
+          "most_frequent": "0.01",
+          "n_folds": 6
+        }
+      },
+      "V2": {
+        "fe_alpha": {
+          "selection_counts": {
+            "10": 4,
+            "0": 2
+          },
+          "most_frequent": "10",
+          "n_folds": 6
+        },
+        "hidden_layer_sizes": {
+          "selection_counts": {
+            "(16, 8)": 3,
+            "(16,)": 3
+          },
+          "most_frequent": "(16, 8)",
+          "n_folds": 6
+        },
+        "mlp_alpha": {
+          "selection_counts": {
+            "0.01": 6
+          },
+          "most_frequent": "0.01",
+          "n_folds": 6
+        }
+      },
+      "V3": {
+        "fe_alpha": {
+          "selection_counts": {
+            "10": 4,
+            "0": 2
+          },
+          "most_frequent": "10",
+          "n_folds": 6
+        },
+        "hidden_layer_sizes": {
+          "selection_counts": {
+            "(16, 8)": 6
+          },
+          "most_frequent": "(16, 8)",
+          "n_folds": 6
+        },
+        "mlp_alpha": {
+          "selection_counts": {
+            "0.01": 6
+          },
+          "most_frequent": "0.01",
+          "n_folds": 6
+        }
+      },
+      "V4": {
+        "fe_alpha": {
+          "selection_counts": {
+            "10": 6
+          },
+          "most_frequent": "10",
+          "n_folds": 6
+        },
+        "hidden_layer_sizes": {
+          "selection_counts": {
+            "(16,)": 2,
+            "(16, 8)": 4
+          },
+          "most_frequent": "(16, 8)",
+          "n_folds": 6
+        },
+        "mlp_alpha": {
+          "selection_counts": {
+            "0.01": 6
+          },
+          "most_frequent": "0.01",
+          "n_folds": 6
+        }
+      }
+    },
+    "FE_SVM": {
+      "V1": {
+        "fe_alpha": {
+          "selection_counts": {
+            "0": 6
+          },
+          "most_frequent": "0",
+          "n_folds": 6
+        },
+        "C": {
+          "selection_counts": {
+            "0.1": 4,
+            "1": 2
+          },
+          "most_frequent": "0.1",
+          "n_folds": 6
+        },
+        "gamma": {
+          "selection_counts": {
+            "scale": 6
+          },
+          "most_frequent": "scale",
+          "n_folds": 6
+        }
+      },
+      "V2": {
+        "fe_alpha": {
+          "selection_counts": {
+            "0": 6
+          },
+          "most_frequent": "0",
+          "n_folds": 6
+        },
+        "C": {
+          "selection_counts": {
+            "0.1": 5,
+            "1": 1
+          },
+          "most_frequent": "0.1",
+          "n_folds": 6
+        },
+        "gamma": {
+          "selection_counts": {
+            "scale": 6
+          },
+          "most_frequent": "scale",
+          "n_folds": 6
+        }
+      },
+      "V3": {
+        "fe_alpha": {
+          "selection_counts": {
+            "0": 6
+          },
+          "most_frequent": "0",
+          "n_folds": 6
+        },
+        "C": {
+          "selection_counts": {
+            "0.1": 2,
+            "10": 4
+          },
+          "most_frequent": "10",
+          "n_folds": 6
+        },
+        "gamma": {
+          "selection_counts": {
+            "scale": 5,
+            "1.0": 1
+          },
+          "most_frequent": "scale",
+          "n_folds": 6
+        }
+      },
+      "V4": {
+        "fe_alpha": {
+          "selection_counts": {
+            "0": 6
+          },
+          "most_frequent": "0",
+          "n_folds": 6
+        },
+        "C": {
+          "selection_counts": {
+            "0.1": 2,
+            "1": 1,
+            "10": 3
+          },
+          "most_frequent": "10",
+          "n_folds": 6
+        },
+        "gamma": {
+          "selection_counts": {
+            "1.0": 2,
+            "scale": 4
+          },
+          "most_frequent": "scale",
+          "n_folds": 6
+        }
+      }
+    }
+  },
+  "model_architectures": {
+    "ForwardEncoding": {
+      "type": "encoding_model",
+      "target": "labels (0-7) via 6-channel basis",
+      "linearity": "linear",
+      "description": "Brouwer & Heeger 2009 forward encoding model. 6 idealized color channels, analytical solution."
+    },
+    "FE_MLP": {
+      "type": "hybrid",
+      "target": "labels (0-7) via 6-channel + MLP",
+      "linearity": "nonlinear readout",
+      "description": "Stage 1: ForwardEncoding extracts 6 channel responses. Stage 2: MLP classifies from 6-dim channel space. Tests nonlinearity in channel-to-color mapping."
+    },
+    "FE_SVM": {
+      "type": "hybrid",
+      "target": "labels (0-7) via 6-channel + SVM",
+      "linearity": "nonlinear readout",
+      "description": "Stage 1: ForwardEncoding extracts 6 channel responses. Stage 2: SVM-RBF classifies from 6-dim channel space."
+    }
+  },
+  "results": {
+    "nested_procrustes": {
+      "V1": {
+        "ForwardEncoding": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.75,
+            "acc_90": 0.75,
+            "mae": 56.25,
+            "medae": 22.5
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.75,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 11.25,
+            "medae": 0.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 10
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.75,
+            "acc_90": 0.875,
+            "mae": 39.375,
+            "medae": 22.5
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.75,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 22.5,
+            "medae": 0.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.75,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 11.25,
+            "medae": 0.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 33.75,
+            "medae": 22.5
+          }
+        ],
+        "FE_MLP": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "fe_alpha": 10,
+              "hidden_layer_sizes": [
+                16,
+                8
+              ],
+              "mlp_alpha": 0.01
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.5,
+            "acc_90": 0.625,
+            "mae": 78.75,
+            "medae": 67.5
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "fe_alpha": 10,
+              "hidden_layer_sizes": [
+                16,
+                8
+              ],
+              "mlp_alpha": 0.01
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.5,
+            "acc_90": 0.875,
+            "mae": 67.5,
+            "medae": 67.5
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "fe_alpha": 10,
+              "hidden_layer_sizes": [
+                16,
+                8
+              ],
+              "mlp_alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "fe_alpha": 10,
+              "hidden_layer_sizes": [
+                16,
+                8
+              ],
+              "mlp_alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.5,
+            "mae": 95.625,
+            "medae": 112.5
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "fe_alpha": 10,
+              "hidden_layer_sizes": [
+                16,
+                8
+              ],
+              "mlp_alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.25,
+            "acc_90": 0.625,
+            "mae": 95.625,
+            "medae": 90.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "fe_alpha": 10,
+              "hidden_layer_sizes": [
+                16,
+                8
+              ],
+              "mlp_alpha": 0.01
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.5,
+            "acc_90": 0.75,
+            "mae": 73.125,
+            "medae": 67.5
+          }
+        ],
+        "FE_SVM": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "fe_alpha": 0,
+              "C": 0.1,
+              "gamma": "scale"
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.75,
+            "acc_90": 0.75,
+            "mae": 45.0,
+            "medae": 0.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "fe_alpha": 0,
+              "C": 1,
+              "gamma": "scale"
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.625,
+            "acc_90": 0.625,
+            "mae": 61.875,
+            "medae": 22.5
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "fe_alpha": 0,
+              "C": 0.1,
+              "gamma": "scale"
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.625,
+            "acc_90": 0.75,
+            "mae": 45.0,
+            "medae": 0.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "fe_alpha": 0,
+              "C": 1,
+              "gamma": "scale"
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.75,
+            "acc_90": 0.75,
+            "mae": 45.0,
+            "medae": 0.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "fe_alpha": 0,
+              "C": 0.1,
+              "gamma": "scale"
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 28.125,
+            "medae": 0.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "fe_alpha": 0,
+              "C": 0.1,
+              "gamma": "scale"
+            },
+            "acc_exact": 0.75,
+            "acc_45": 0.75,
+            "acc_90": 1.0,
+            "mae": 22.5,
+            "medae": 0.0
+          }
+        ]
+      },
+      "V2": {
+        "ForwardEncoding": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.75,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 11.25,
+            "medae": 0.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.75,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 22.5,
+            "medae": 0.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.875,
+            "acc_90": 1.0,
+            "mae": 22.5,
+            "medae": 0.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 28.125,
+            "medae": 0.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.75,
+            "acc_90": 0.875,
+            "mae": 39.375,
+            "medae": 22.5
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.625,
+            "acc_90": 0.875,
+            "mae": 39.375,
+            "medae": 0.0
+          }
+        ],
+        "FE_MLP": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "fe_alpha": 10,
+              "hidden_layer_sizes": [
+                16,
+                8
+              ],
+              "mlp_alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.75,
+            "mae": 84.375,
+            "medae": 90.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "fe_alpha": 0,
+              "hidden_layer_sizes": [
+                16
+              ],
+              "mlp_alpha": 0.01
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.25,
+            "acc_90": 0.5,
+            "mae": 101.25,
+            "medae": 112.5
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "fe_alpha": 10,
+              "hidden_layer_sizes": [
+                16,
+                8
+              ],
+              "mlp_alpha": 0.01
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.5,
+            "acc_90": 0.75,
+            "mae": 73.125,
+            "medae": 67.5
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "fe_alpha": 0,
+              "hidden_layer_sizes": [
+                16
+              ],
+              "mlp_alpha": 0.01
+            },
+            "acc_exact": 0.25,
+            "acc_45": 0.625,
+            "acc_90": 0.75,
+            "mae": 67.5,
+            "medae": 45.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "fe_alpha": 10,
+              "hidden_layer_sizes": [
+                16,
+                8
+              ],
+              "mlp_alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.75,
+            "mae": 84.375,
+            "medae": 90.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "fe_alpha": 10,
+              "hidden_layer_sizes": [
+                16
+              ],
+              "mlp_alpha": 0.01
+            },
+            "acc_exact": 0.0,
+            "acc_45": 0.25,
+            "acc_90": 0.75,
+            "mae": 95.625,
+            "medae": 90.0
+          }
+        ],
+        "FE_SVM": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "fe_alpha": 0,
+              "C": 0.1,
+              "gamma": "scale"
+            },
+            "acc_exact": 0.75,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 28.125,
+            "medae": 0.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "fe_alpha": 0,
+              "C": 1,
+              "gamma": "scale"
+            },
+            "acc_exact": 0.875,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 5.625,
+            "medae": 0.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "fe_alpha": 0,
+              "C": 0.1,
+              "gamma": "scale"
+            },
+            "acc_exact": 0.75,
+            "acc_45": 0.75,
+            "acc_90": 0.75,
+            "mae": 33.75,
+            "medae": 0.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "fe_alpha": 0,
+              "C": 0.1,
+              "gamma": "scale"
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.75,
+            "acc_90": 0.75,
+            "mae": 50.625,
+            "medae": 22.5
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "fe_alpha": 0,
+              "C": 0.1,
+              "gamma": "scale"
+            },
+            "acc_exact": 0.75,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 11.25,
+            "medae": 0.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "fe_alpha": 0,
+              "C": 0.1,
+              "gamma": "scale"
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 39.375,
+            "medae": 22.5
+          }
+        ]
+      },
+      "V3": {
+        "ForwardEncoding": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.875,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 16.875,
+            "medae": 0.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 39.375,
+            "medae": 45.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 45.0,
+            "medae": 45.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.75,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 11.25,
+            "medae": 0.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.625,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 16.875,
+            "medae": 0.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 33.75,
+            "medae": 0.0
+          }
+        ],
+        "FE_MLP": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "fe_alpha": 10,
+              "hidden_layer_sizes": [
+                16,
+                8
+              ],
+              "mlp_alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "fe_alpha": 0,
+              "hidden_layer_sizes": [
+                16,
+                8
+              ],
+              "mlp_alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "fe_alpha": 0,
+              "hidden_layer_sizes": [
+                16,
+                8
+              ],
+              "mlp_alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.5,
+            "acc_90": 0.625,
+            "mae": 84.375,
+            "medae": 67.5
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "fe_alpha": 10,
+              "hidden_layer_sizes": [
+                16,
+                8
+              ],
+              "mlp_alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "fe_alpha": 10,
+              "hidden_layer_sizes": [
+                16,
+                8
+              ],
+              "mlp_alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "fe_alpha": 10,
+              "hidden_layer_sizes": [
+                16,
+                8
+              ],
+              "mlp_alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          }
+        ],
+        "FE_SVM": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "fe_alpha": 0,
+              "C": 0.1,
+              "gamma": "scale"
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.875,
+            "acc_90": 1.0,
+            "mae": 22.5,
+            "medae": 0.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "fe_alpha": 0,
+              "C": 10,
+              "gamma": "scale"
+            },
+            "acc_exact": 0.875,
+            "acc_45": 0.875,
+            "acc_90": 1.0,
+            "mae": 11.25,
+            "medae": 0.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "fe_alpha": 0,
+              "C": 10,
+              "gamma": "scale"
+            },
+            "acc_exact": 0.875,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 16.875,
+            "medae": 0.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "fe_alpha": 0,
+              "C": 10,
+              "gamma": "scale"
+            },
+            "acc_exact": 0.75,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 22.5,
+            "medae": 0.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "fe_alpha": 0,
+              "C": 10,
+              "gamma": "scale"
+            },
+            "acc_exact": 0.75,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 11.25,
+            "medae": 0.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "fe_alpha": 0,
+              "C": 0.1,
+              "gamma": 1.0
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.625,
+            "acc_90": 0.75,
+            "mae": 56.25,
+            "medae": 22.5
+          }
+        ]
+      },
+      "V4": {
+        "ForwardEncoding": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.75,
+            "acc_90": 0.75,
+            "mae": 39.375,
+            "medae": 0.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.75,
+            "acc_90": 0.875,
+            "mae": 39.375,
+            "medae": 0.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.75,
+            "acc_90": 0.75,
+            "mae": 45.0,
+            "medae": 22.5
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.625,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 16.875,
+            "medae": 0.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.75,
+            "acc_90": 1.0,
+            "mae": 33.75,
+            "medae": 22.5
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "alpha": 0
+            },
+            "acc_exact": 0.75,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 28.125,
+            "medae": 0.0
+          }
+        ],
+        "FE_MLP": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "fe_alpha": 10,
+              "hidden_layer_sizes": [
+                16
+              ],
+              "mlp_alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.25,
+            "acc_90": 0.5,
+            "mae": 106.875,
+            "medae": 112.5
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "fe_alpha": 10,
+              "hidden_layer_sizes": [
+                16,
+                8
+              ],
+              "mlp_alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "fe_alpha": 10,
+              "hidden_layer_sizes": [
+                16,
+                8
+              ],
+              "mlp_alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 90.0,
+            "medae": 90.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "fe_alpha": 10,
+              "hidden_layer_sizes": [
+                16
+              ],
+              "mlp_alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.25,
+            "acc_90": 0.5,
+            "mae": 106.875,
+            "medae": 112.5
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "fe_alpha": 10,
+              "hidden_layer_sizes": [
+                16,
+                8
+              ],
+              "mlp_alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.625,
+            "mae": 84.375,
+            "medae": 90.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "fe_alpha": 10,
+              "hidden_layer_sizes": [
+                16,
+                8
+              ],
+              "mlp_alpha": 0.01
+            },
+            "acc_exact": 0.125,
+            "acc_45": 0.375,
+            "acc_90": 0.75,
+            "mae": 84.375,
+            "medae": 90.0
+          }
+        ],
+        "FE_SVM": [
+          {
+            "test_run": 0,
+            "best_params": {
+              "fe_alpha": 0,
+              "C": 0.1,
+              "gamma": 1.0
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.625,
+            "acc_90": 0.625,
+            "mae": 67.5,
+            "medae": 45.0
+          },
+          {
+            "test_run": 1,
+            "best_params": {
+              "fe_alpha": 0,
+              "C": 0.1,
+              "gamma": "scale"
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.75,
+            "acc_90": 0.75,
+            "mae": 45.0,
+            "medae": 0.0
+          },
+          {
+            "test_run": 2,
+            "best_params": {
+              "fe_alpha": 0,
+              "C": 1,
+              "gamma": 1.0
+            },
+            "acc_exact": 0.375,
+            "acc_45": 0.75,
+            "acc_90": 0.875,
+            "mae": 45.0,
+            "medae": 45.0
+          },
+          {
+            "test_run": 3,
+            "best_params": {
+              "fe_alpha": 0,
+              "C": 10,
+              "gamma": "scale"
+            },
+            "acc_exact": 0.625,
+            "acc_45": 1.0,
+            "acc_90": 1.0,
+            "mae": 16.875,
+            "medae": 0.0
+          },
+          {
+            "test_run": 4,
+            "best_params": {
+              "fe_alpha": 0,
+              "C": 10,
+              "gamma": "scale"
+            },
+            "acc_exact": 0.625,
+            "acc_45": 0.875,
+            "acc_90": 0.875,
+            "mae": 33.75,
+            "medae": 0.0
+          },
+          {
+            "test_run": 5,
+            "best_params": {
+              "fe_alpha": 0,
+              "C": 10,
+              "gamma": "scale"
+            },
+            "acc_exact": 0.5,
+            "acc_45": 0.625,
+            "acc_90": 0.75,
+            "mae": 50.625,
+            "medae": 22.5
+          }
+        ]
+      }
+    }
+  },
+  "timestamp": "20260218_170807",
+  "datetime": "2026-02-18T17:08:41.739754"
+}

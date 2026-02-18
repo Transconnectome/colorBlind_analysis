@@ -1,0 +1,239 @@
+{
+  "method": "hc_only_srm_svd_projection",
+  "description": "HC-only SRM training, CVD projected via SVD (RT-7 fix)",
+  "k_values": {
+    "V1": 4,
+    "V2": 4,
+    "V3": 3,
+    "hV4": 3
+  },
+  "n_permutations": 1000,
+  "data_dir": "/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase1_preprocess_decoding/results/full_dataset_C010",
+  "timestamp": "2026-02-18T17:38:09.503353",
+  "results": {
+    "V1": {
+      "k": 4,
+      "hc_loso_mean_betas": {
+        "sub-01": 1.0,
+        "sub-02": 0.75,
+        "sub-03": 1.0,
+        "sub-04": 1.0,
+        "sub-05": 1.0,
+        "sub-06": 0.875,
+        "sub-07": 1.0
+      },
+      "hc_loso_allruns": {
+        "sub-01": 1.0,
+        "sub-02": 0.875,
+        "sub-03": 1.0,
+        "sub-04": 1.0,
+        "sub-05": 1.0,
+        "sub-06": 0.875,
+        "sub-07": 1.0
+      },
+      "hc_mean_acc_mean_betas": 0.9464285714285714,
+      "hc_mean_acc_allruns": 0.9642857142857143,
+      "cvd_cross_mean_betas": {
+        "sub-08": 1.0,
+        "sub-09": 0.875,
+        "sub-10": 1.0
+      },
+      "cvd_cross_allruns": {
+        "sub-08": 1.0,
+        "sub-09": 0.875,
+        "sub-10": 1.0
+      },
+      "cvd_permutation": {
+        "sub-08": {
+          "observed_acc": 1.0,
+          "p_value": 0.0,
+          "null_mean": 0.12425,
+          "null_std": 0.11884627676120108
+        },
+        "sub-09": {
+          "observed_acc": 0.875,
+          "p_value": 0.0,
+          "null_mean": 0.124,
+          "null_std": 0.12054148663427043
+        },
+        "sub-10": {
+          "observed_acc": 1.0,
+          "p_value": 0.0,
+          "null_mean": 0.125375,
+          "null_std": 0.11799039950351893
+        }
+      },
+      "chance": 0.125,
+      "n_hc": 7,
+      "n_cvd": 3
+    },
+    "V2": {
+      "k": 4,
+      "hc_loso_mean_betas": {
+        "sub-01": 1.0,
+        "sub-02": 1.0,
+        "sub-03": 0.625,
+        "sub-04": 0.875,
+        "sub-05": 0.75,
+        "sub-06": 0.875,
+        "sub-07": 0.75
+      },
+      "hc_loso_allruns": {
+        "sub-01": 1.0,
+        "sub-02": 1.0,
+        "sub-03": 0.625,
+        "sub-04": 0.875,
+        "sub-05": 0.875,
+        "sub-06": 0.875,
+        "sub-07": 0.875
+      },
+      "hc_mean_acc_mean_betas": 0.8392857142857143,
+      "hc_mean_acc_allruns": 0.875,
+      "cvd_cross_mean_betas": {
+        "sub-08": 0.75,
+        "sub-09": 0.875,
+        "sub-10": 1.0
+      },
+      "cvd_cross_allruns": {
+        "sub-08": 0.75,
+        "sub-09": 0.875,
+        "sub-10": 1.0
+      },
+      "cvd_permutation": {
+        "sub-08": {
+          "observed_acc": 0.75,
+          "p_value": 0.0,
+          "null_mean": 0.12675,
+          "null_std": 0.11234739649853931
+        },
+        "sub-09": {
+          "observed_acc": 0.875,
+          "p_value": 0.0,
+          "null_mean": 0.122875,
+          "null_std": 0.12085056629987298
+        },
+        "sub-10": {
+          "observed_acc": 1.0,
+          "p_value": 0.0,
+          "null_mean": 0.125125,
+          "null_std": 0.11531200880654192
+        }
+      },
+      "chance": 0.125,
+      "n_hc": 7,
+      "n_cvd": 3
+    },
+    "V3": {
+      "k": 3,
+      "hc_loso_mean_betas": {
+        "sub-01": 0.875,
+        "sub-02": 0.75,
+        "sub-03": 0.625,
+        "sub-04": 0.875,
+        "sub-05": 0.875,
+        "sub-06": 0.875,
+        "sub-07": 0.5
+      },
+      "hc_loso_allruns": {
+        "sub-01": 0.875,
+        "sub-02": 0.875,
+        "sub-03": 0.75,
+        "sub-04": 0.75,
+        "sub-05": 0.875,
+        "sub-06": 0.75,
+        "sub-07": 0.5
+      },
+      "hc_mean_acc_mean_betas": 0.7678571428571429,
+      "hc_mean_acc_allruns": 0.7678571428571429,
+      "cvd_cross_mean_betas": {
+        "sub-08": 0.625,
+        "sub-09": 0.75,
+        "sub-10": 0.875
+      },
+      "cvd_cross_allruns": {
+        "sub-08": 0.5,
+        "sub-09": 0.875,
+        "sub-10": 0.875
+      },
+      "cvd_permutation": {
+        "sub-08": {
+          "observed_acc": 0.625,
+          "p_value": 0.0,
+          "null_mean": 0.12125,
+          "null_std": 0.10629410849148695
+        },
+        "sub-09": {
+          "observed_acc": 0.75,
+          "p_value": 0.0,
+          "null_mean": 0.125125,
+          "null_std": 0.11799092920644366
+        },
+        "sub-10": {
+          "observed_acc": 0.875,
+          "p_value": 0.0,
+          "null_mean": 0.124625,
+          "null_std": 0.1155821542237382
+        }
+      },
+      "chance": 0.125,
+      "n_hc": 7,
+      "n_cvd": 3
+    },
+    "hV4": {
+      "k": 3,
+      "hc_loso_mean_betas": {
+        "sub-01": 0.375,
+        "sub-02": 0.5,
+        "sub-03": 0.375,
+        "sub-04": 0.5,
+        "sub-05": 0.375,
+        "sub-06": 0.375,
+        "sub-07": 0.625
+      },
+      "hc_loso_allruns": {
+        "sub-01": 0.375,
+        "sub-02": 0.5,
+        "sub-03": 0.375,
+        "sub-04": 0.5,
+        "sub-05": 0.625,
+        "sub-06": 0.25,
+        "sub-07": 0.625
+      },
+      "hc_mean_acc_mean_betas": 0.44642857142857145,
+      "hc_mean_acc_allruns": 0.4642857142857143,
+      "cvd_cross_mean_betas": {
+        "sub-08": 0.375,
+        "sub-09": 0.625,
+        "sub-10": 0.375
+      },
+      "cvd_cross_allruns": {
+        "sub-08": 0.5,
+        "sub-09": 0.625,
+        "sub-10": 0.375
+      },
+      "cvd_permutation": {
+        "sub-08": {
+          "observed_acc": 0.375,
+          "p_value": 0.057,
+          "null_mean": 0.121875,
+          "null_std": 0.11112879633560331
+        },
+        "sub-09": {
+          "observed_acc": 0.625,
+          "p_value": 0.0,
+          "null_mean": 0.12425,
+          "null_std": 0.10925629272495017
+        },
+        "sub-10": {
+          "observed_acc": 0.375,
+          "p_value": 0.056,
+          "null_mean": 0.125,
+          "null_std": 0.11497282287566919
+        }
+      },
+      "chance": 0.125,
+      "n_hc": 7,
+      "n_cvd": 3
+    }
+  }
+}

@@ -100,8 +100,8 @@ class LOCOForwardEncodingDecoder:
         train_hues = np.array([HUE_ANGLES[l] for l in unique_labels])
         self.train_basis = basis_full[train_hues]  # (n_train_colors, n_channels)
 
-        # For prediction: use ALL 8 colors so we can predict held-out
-        self.predict_basis = basis_full[HUE_ANGLES]  # (8, n_channels)
+        # For prediction: use ALL 360 hues for continuous reconstruction
+        self.predict_basis = basis_full  # (360, n_channels) - CONTINUOUS RECONSTRUCTION!
 
         # Encoding weights: W = (C^T C + αI)^-1 C^T B
         C = self.train_basis
@@ -116,22 +116,38 @@ class LOCOForwardEncodingDecoder:
             self.weights = np.linalg.pinv(C) @ B
 
     def predict(self, X):
-        """Returns: (n_samples,) predicted labels (0-7) using all 8 templates"""
+        """Returns: (n_samples,) predicted HUE ANGLES (0-359°) using 360 templates"""
         if self.weights is None:
             raise RuntimeError("Model not fitted yet")
 
         channel_responses = self.weights @ X.T  # (n_channels, n_samples)
 
         n_samples = X.shape[0]
-        y_pred_labels = np.zeros(n_samples, dtype=int)
+        y_pred_hues = np.zeros(n_samples, dtype=float)
 
         for i in range(n_samples):
             predicted_response = channel_responses[:, i]
-            # Compare against ALL 8 colors (including held-out)
-            correlations = self.predict_basis @ predicted_response
-            y_pred_labels[i] = np.argmax(correlations)
 
-        return y_pred_labels
+            # Compare against ALL 360 hues (continuous reconstruction)
+            # Use correlation as similarity metric (Brouwer & Heeger 2009)
+            correlations = []
+            for hue in range(360):
+                template = self.predict_basis[hue]
+                # Safe correlation calculation
+                corr_matrix = np.corrcoef(predicted_response, template)
+                if corr_matrix.shape == (2, 2):
+                    corr = corr_matrix[0, 1]
+                else:
+                    # Fallback to dot product if correlation fails
+                    corr = np.dot(predicted_response, template) / (
+                        np.linalg.norm(predicted_response) * np.linalg.norm(template) + 1e-10
+                    )
+                correlations.append(corr)
+
+            # Select best matching hue (0-359°)
+            y_pred_hues[i] = np.argmax(correlations)
+
+        return y_pred_hues  # Continuous hues (0-359°), not discrete labels!
 
 
 # ============================================================================
@@ -180,8 +196,12 @@ def loco_cv(amplitudes, model_class, model_name):
 
         # Convert to hue for evaluation
         if uses_label:
-            # Model predicts one of the 7 training labels
-            pred_hues = labels_to_hue(y_pred)
+            # ForwardEncoding now returns continuous hues (0-359°)
+            # Other models (LDA, SVM, MLP) still return discrete labels
+            if model_name == 'ForwardEncoding':
+                pred_hues = y_pred  # Already continuous hues!
+            else:
+                pred_hues = labels_to_hue(y_pred)  # Discrete labels → 8 hues
         else:
             pred_hues = y_pred
 
@@ -268,7 +288,11 @@ def loco_permutation_test(amplitudes, model_class, model_name,
             y_pred = model.predict(X_test)
 
             if uses_label:
-                pred_hues = labels_to_hue(y_pred)
+                # ForwardEncoding now returns continuous hues
+                if model_name == 'ForwardEncoding':
+                    pred_hues = y_pred  # Already continuous hues!
+                else:
+                    pred_hues = labels_to_hue(y_pred)
             else:
                 pred_hues = y_pred
 

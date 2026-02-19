@@ -149,7 +149,66 @@ reconstruction_error = circular_distance(predicted_hue, true_hue)
 
 ## Visualization
 
-**Key Figures**:
+### 1. LOCO Color Wheel Plots (NEW - 2026-02-19) ✓ RECOMMENDED
+
+**Script**: `visualization/visualize_loco_color_wheel.py`
+
+**Purpose**: Color wheel visualization showing true vs predicted hue angles for LOCO (Leave-One-Color-Out) results. Shows actual color representation accuracy using the utils_color_decoding.py framework.
+
+**Run**:
+```bash
+cd visualization
+python3 visualize_loco_color_wheel.py
+```
+
+**Outputs** (in `results/loco/color_wheel_plots/`):
+- **Per subject-ROI**: 6 run plots + 1 average plot (total: 10 subjects × 4 ROIs × 7 plots = 280 files)
+- **Group comparisons**: 4 files (one per ROI showing HC vs CVD)
+- **Total**: 284 PNG files (300 DPI)
+
+**Plot structure**:
+- **Left panel**: Color wheel (polar plot)
+  - Large dots (outer circle): True hue positions
+  - Small dots (inner circle): Predicted hues (angle = prediction, color = truth)
+  - 0° at right (East), anticlockwise direction
+- **Right panel**: Statistics summary
+  - Per-color errors
+  - Mean error vs chance level (90°)
+
+**Features**:
+- **Per-run plots**: Each of 6 runs separately (shows run-to-run variability)
+- **Average plot**: All runs combined (shows all predictions as jittered dots)
+- **True colors**: Accurate CIELab → RGB conversion for stimulus colors
+- **Circular error**: Proper circular distance calculation (0-180°)
+
+**Interpretation**:
+- **Tight clustering**: Good predictions close to true hue
+- **Dispersed dots**: High variability across runs
+- **Systematic bias**: Predictions consistently off in one direction
+- **Adjacent confusions**: Predictions shift to neighboring colors
+
+**Key Results** (V1 ForwardEncoding):
+- HC: 67-88° MAE (mean ~75°)
+- CVD: 62-84° MAE (similar to HC, some individual variation)
+- Chance level: 90°
+
+---
+
+### 2. LOCO Circular Performance Plots (Alternative view)
+
+**Script**: `visualization/visualize_loco_circular.py`
+
+**Purpose**: Polar plot showing per-color MAE aggregated across runs (different from color wheel above).
+
+**Outputs** (in `results/loco/circular_plots/`):
+- Individual ROI plots + combined 2×2 grid
+- Shows MAE radial distance (not hue angles)
+
+**Use case**: When you want to see interpolation difficulty per color (not individual predictions)
+
+---
+
+### Legacy Figures
 - Channel tuning curves (8 color-selective channels)
 - Reconstruction color wheel (32 hues)
 - RDM heatmaps (8×8 color similarity)

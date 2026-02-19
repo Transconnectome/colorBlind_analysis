@@ -792,6 +792,88 @@ analysis/phase2_SRM_across_between/
 
 ---
 
+## Visualization (NEW - 2026-02-19)
+
+### 1. Color-Pair RDM Difference Analysis
+
+**Script**: `analysis/compute_color_pair_differences.py`
+
+**Purpose**: Identify which of the 28 unique color pairs (from 8×8 RDM upper triangle) show robust HC-CVD divergence using bootstrap confidence intervals.
+
+**Run**:
+```bash
+cd analysis
+python3 compute_color_pair_differences.py
+```
+
+**Outputs** (in `results/color_pair_analysis/`):
+- `color_pair_analysis_V1.json` - Per-CVD results (23 KB)
+- `color_pair_analysis_all_rois.json` - Combined results (26 KB)
+
+**Algorithm**:
+1. Extract 28 unique pairs from 8×8 RDM upper triangle
+2. Compute differences: `diff = RDM_CVD[i,j] - RDM_HC[i,j]`
+3. Bootstrap 95% CIs (1000 iterations)
+4. Significance: CI excludes zero
+
+**Key Findings (V1)**:
+- **Sub-08 (Deutan)**: Cyan-Magenta (-0.651), Red-Cyan (+0.577), Orange-Cyan (+0.515)
+- **Sub-09 (Protan)**: Orange-Cyan (+0.486), Red-Yellow (+0.434, classic protan confusion), Cyan-Purple (+0.411)
+- **Sub-10 (Deutan)**: Red-Purple (+0.652), Blue-Magenta (-0.335), Cyan-Blue (+0.306)
+- All subjects: 28/28 pairs show some deviation
+
+**Interpretation**:
+- Positive values: CVD sees colors more dissimilar than HC
+- Negative values: CVD sees colors more similar than HC
+- Patterns link to cone photoreceptor deficits
+
+**Current Limitation**: V1 only (V2/V3/V4 pending RDM generation); bootstrap uses replicated HC mean (degenerate CIs)
+
+**Documentation**: See `analysis/README_color_pair.md` for details
+
+---
+
+### 2. SRM 4-Panel Comprehensive Figure
+
+**Script**: `visualization/visualize_srm_4panel.py`
+
+**Purpose**: Publication-ready figure combining group statistics, individual tests, methodology, and color-pair analysis.
+
+**Run**:
+```bash
+cd visualization
+python3 visualize_srm_4panel.py
+```
+
+**Output** (in `results/loo_consistent/20260218_163819/figures/`):
+- `srm_4panel_figure.png` (20×14 inches, 300 DPI, ~1 MB)
+
+**Panels**:
+- **Panel A (top-left)**: Group-level HC-CVD comparison
+  - Violin plot showing V1 p=0.062 (†), V2 p=0.075 (†)
+  - Blue (HC) vs Red (CVD) with individual points
+
+- **Panel B (top-right)**: Individual CVD profiles (Crawford & Howell heatmap)
+  - 3 CVD × 4 ROIs grid with t-statistics and p-values
+  - Color-coded: Dark red p<0.01**, Red p<0.05*, Orange p<0.10†, Gray n.s.
+  - Key findings: Sub-09 V1 p=0.007** (dark red), Sub-08 V2 p=0.040* (red)
+
+- **Panel C (bottom-left)**: LOO-consistent methodology schematic
+  - 4-step flowchart showing bias corrections
+  - Blue boxes (HC training), Red boxes (CVD projection)
+  - Yellow advantage box listing three bias fixes
+
+- **Panel D (bottom-right)**: Color-pair-specific RDM differences
+  - Top pairs per CVD subject for V1/V2
+  - Links to cone mechanisms (Protan: Red-Green, Deutan: Yellow-Blue preserved)
+  - Shows "pending" if color-pair analysis not run
+
+**Use Case**: Main manuscript figure or comprehensive supplementary figure
+
+**Documentation**: See `visualization/README_4panel.md` for panel details and customization
+
+---
+
 ## Related Documentation
 
 ### Detailed Guides

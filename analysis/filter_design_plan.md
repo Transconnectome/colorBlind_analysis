@@ -1,7 +1,7 @@
 # CVD Display Filter Design Plan
 
-> Last updated: 2026-02-17
-> Status: Planning (pre-implementation)
+> Last updated: 2026-02-19
+> Status: Planning (pre-implementation validations COMPLETE)
 > Approach: Individual case-study filter design with neural surrogate + behavioral calibration
 
 ---
@@ -277,6 +277,11 @@ The filter requires Future Phase 2 (continuous hue encoder) to predict neural re
   - `color_wheel_separability.png` -- Adjacent pair separability on color wheel
   - `check5_results.json` -- Complete numerical results
 
+**NEW (2026-02-19)**: LOO-consistent SRM color-pair RDM analysis:
+- `analysis/phase2_SRM_across_between/visualization/color_pair_differences_{V1,V2,V3,V4}.png` -- Bar plots with bootstrap CIs
+- `analysis/phase2_SRM_across_between/results/color_pair_analysis/color_pair_analysis_all_rois.json` -- Complete RDM differences with bootstrap CIs
+- `analysis/phase2_SRM_across_between/visualization/srm_4panel_figure.png` -- Comprehensive SRM summary (Panels A-D)
+
 ---
 
 ## 7. TODO: Remaining Validations & Development
@@ -313,12 +318,43 @@ The filter requires Future Phase 2 (continuous hue encoder) to predict neural re
 **Script**: `analysis/future_phase3_filter_optimization/pre_validation/filter_pre_validation.py`
 **Results**: `analysis/future_phase3_filter_optimization/pre_validation/results/`
 
-### 7.2 Phase 2 SRM pending validations (server)
+### 7.1c Color-Pair RDM Analysis (2026-02-19) ✅ COMPLETED
 
-- [ ] **LOSO stability** -- verify no single HC subject drives results
-- [ ] **Split-half SRM reliability** -- test SRM temporal stability
-- [ ] **SRM k-value selection** -- justify k=4
-- [ ] **Alignment comparison** -- SRM vs Procrustes vs Raw
+- [x] **RDM-based color-pair differences with bootstrap CIs** — **DONE**
+  - Uses LOO-consistent SRM-aligned amplitudes (HC-only training)
+  - Computes 8×8 correlation distance RDM per subject
+  - Bootstrap resampling of HC subjects (n=1000) for proper CIs
+  - **Results**: V1: 17-24/28 significant pairs; V2: 19-21/28; V3: 16-19/28; V4: 12-26/28
+  - **Key findings**:
+    - sub-08 (Deutan): Red-Cyan +1.107 (V1), Orange-Blue +1.034 (V2), Orange-Cyan -1.380 (V3), Blue-Purple +1.056 (V4)
+    - sub-09 (Protan): Green-Magenta +1.007 (V1), Cyan-Magenta +0.904 (V2), Orange-Cyan -1.206 (V3), Yellow-Cyan +1.227 (V4)
+    - sub-10 (Deutan): Red-Cyan +0.998 (V1), Red-Purple -0.818 (V2), Yellow-Purple -1.694 (V3), **Blue-Purple +0.916** (V4)
+  - **Filter targets validated**: L-M axis deficits and S-cone compensations confirmed with proper statistical inference
+
+**Script**: `analysis/phase2_SRM_across_between/compute_color_pair_differences.py`
+**Output JSON**: `analysis/phase2_SRM_across_between/results/color_pair_analysis/color_pair_analysis_all_rois.json`
+**Figures**: `analysis/phase2_SRM_across_between/visualization/color_pair_differences_{ROI}.png`
+
+### 7.2 Phase 2 SRM validations ✅ COMPLETED 2026-02-17
+
+- [x] **LOSO stability** — **DONE** (7-fold LOSO, 2026-02-17)
+  - All folds show consistent HC-CVD disparity patterns
+  - No single HC subject drives results
+  - Results: `validation/results/20260217_192817/loso_fold{0-6}_results.json`
+
+- [x] **Split-half SRM reliability** — **DONE** (ICC analysis, 2026-02-17)
+  - Run split 1-3 vs 4-6: sub-08 ICC 0.41-0.71 (moderate-good), sub-09 0.30-0.59 (poor-moderate), sub-10 0.29-0.50 (poor-moderate)
+  - Best stability: sub-08 hV4 (ICC=0.709, Spearman-Brown=0.830)
+  - Report: `validation/2A_run_split_icc/results/20260217_141354/icc_report.txt`
+
+- [x] **SRM k-value selection** — **DONE** (mean rank aggregation)
+  - V1: k=4 (composite rank 2.24), V2: k=4 (rank 2.43), V3: k=3 (rank 2.29), hV4: k=3 (rank 2.71)
+  - Method: Mean rank across 3 metrics (RDM reliability, cross-subject RDM corr, reconstruction error)
+  - Results: `validation/k_aggregation_results.json`
+
+- [x] **Alignment comparison** — **DONE** (SRM vs Procrustes vs Raw)
+  - Results for all ROIs: `validation/2D_alignment_comparison/results/alignment_comparison_{V1,V2,V3,hV4}_results.json`
+  - Confirms SRM superiority for cross-subject alignment
 
 ### 7.3 Pre-filter development (Future Phase 1-2)
 

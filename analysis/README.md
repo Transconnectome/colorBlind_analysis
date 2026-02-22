@@ -28,6 +28,8 @@ Per-subject per-ROI directory (`full_dataset_C010/sub-{ID}/{ROI}/`):
 config.json                    # {subject, roi, n_voxels, pipeline, motion_tissue, wm_acompcor}
 metrics.json                   # noise ceiling, RDM reliability, temporal autocorrelation
 amplitudes_procrustes.npy      # (6, 8, n_voxels) — 6 runs, 8 colors, Procrustes-aligned
+amplitudes_srm.npy             # (6, 8, k) — SRM-projected per-run amplitudes (k=3-4 per ROI)
+srm_config.json                # SRM provenance: k, training subjects, projection method
 amplitudes_raw.npy             # (6, 8, n_voxels) — raw (no Procrustes)
 procrustes_disparities.npy     # per-run disparities
 roi_hrf.npy                    # HRF estimates

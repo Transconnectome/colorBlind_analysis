@@ -6,7 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Before running any Python code, activate the nilearn conda environment:
 ```bash
-conda activate nilearn
+conda activate nilearn # if in server
+conda activate srm # if in local
 ```
 
 Most of the files are being ran in the remote server and directory named: haba6030@node3:/scratch/connectome/haba6030/colorBlind

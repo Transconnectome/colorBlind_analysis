@@ -163,13 +163,15 @@ def is_linear_model(model_name):
 
 def is_nonlinear_model(model_name):
     """Check if model is non-linear"""
-    nonlinear_models = ['KernelRidge', 'SVM', 'MLP', 'FE_MLP', 'FE_SVM']
+    nonlinear_models = ['KernelRidge', 'SVM', 'MLP', 'FE_MLP', 'FE_SVM',
+                        'HybridMLP', 'HybridSVR']
     return model_name in nonlinear_models
 
 
 def uses_labels(model_name):
     """Check if model uses discrete labels (vs continuous hue)"""
-    label_models = ['LDA', 'SVM', 'MLP', 'ForwardEncoding', 'FE_MLP', 'FE_SVM']
+    label_models = ['LDA', 'SVM', 'MLP', 'ForwardEncoding', 'FE_MLP', 'FE_SVM',
+                    'HybridMLP', 'HybridSVR']
     return model_name in label_models
 
 
@@ -332,6 +334,22 @@ def get_model_architecture(model_name):
             'linearity': 'nonlinear readout',
             'description': 'Stage 1: ForwardEncoding extracts 6 channel responses. '
                            'Stage 2: SVM-RBF classifies from 6-dim channel space.'
+        },
+        'HybridMLP': {
+            'type': 'hybrid_degree',
+            'target': 'continuous hue (0-359°) via MLP→6-channel→template',
+            'linearity': 'nonlinear encoder',
+            'description': 'Stage 1: MLPRegressor maps voxels to 6 channel activations. '
+                           'Stage 2: FE template matching selects best hue (0-359°). '
+                           'Reverses standard FE→MLP hybrid: nonlinear encoding + linear decoding.'
+        },
+        'HybridSVR': {
+            'type': 'hybrid_degree',
+            'target': 'continuous hue (0-359°) via SVR→6-channel→template',
+            'linearity': 'nonlinear encoder',
+            'description': 'Stage 1: MultiOutput SVR maps voxels to 6 channel activations. '
+                           'Stage 2: FE template matching selects best hue (0-359°). '
+                           'SVR variant of the degree-based hybrid model.'
         }
     }
     return architectures.get(model_name, {'type': 'unknown', 'target': 'unknown',
@@ -381,6 +399,16 @@ def get_model_defaults(model_name):
         'FE_SVM': {
             'params': {'fe_alpha': 0, 'n_channels': 6, 'C': 1.0, 'gamma': 'scale'},
             'rationale': 'FE stage 1 (alpha=0) + SVM-RBF stage 2 (auto-scaled gamma).'
+        },
+        'HybridMLP': {
+            'params': {'n_channels': 6, 'hidden_layer_sizes': (64, 32), 'alpha': 0.1},
+            'rationale': 'MLPRegressor to 6 channels + FE template matching. '
+                         'Two hidden layers, moderate L2.'
+        },
+        'HybridSVR': {
+            'params': {'n_channels': 6, 'C': 1.0, 'epsilon': 0.1},
+            'rationale': 'MultiOutput SVR to 6 channels + FE template matching. '
+                         'RBF kernel, auto-scaled gamma.'
         }
     }
     return defaults.get(model_name, {'params': {}, 'rationale': 'unknown model'})

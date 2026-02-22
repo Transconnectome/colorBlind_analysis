@@ -22,9 +22,14 @@ Usage:
         --output_dir ./results \
         --subject 01 \
         --rois V1 V2 V3 V4 \
-        --models LDA Ridge KernelRidge SVM MLP ForwardEncoding \
+        --models LDA Ridge KernelRidge SVM MLP ForwardEncoding HybridMLP HybridSVR \
         --alignment procrustes \
         --permutations 0
+
+Alignment options:
+    raw        - amplitudes_raw.npy (n_voxels features)
+    procrustes - amplitudes_procrustes.npy (n_voxels features)
+    srm        - amplitudes_srm.npy (k=3-4 features, HC-only SRM)
 """
 
 import os
@@ -46,11 +51,16 @@ sys.path.insert(0, str(script_dir))
 from run_model_comparison import (
     LDADecoder, RidgeDecoder, KernelRidgeDecoder,
     SVMDecoder, MLPDecoder, ForwardEncodingDecoder,
-    load_amplitudes, labels_to_hue, hue_to_labels, circular_diff_deg,
+    load_amplitudes as _load_amplitudes_base,
+    labels_to_hue, hue_to_labels, circular_diff_deg,
     HUE_ANGLES
 )
 from utils import (get_model_architecture, get_model_defaults,
                    get_subject_group)
+
+from sklearn.neural_network import MLPRegressor
+from sklearn.svm import SVR
+from sklearn.multioutput import MultiOutputRegressor
 
 # Import basis function utility
 import importlib.util
@@ -61,6 +71,33 @@ _spec = importlib.util.spec_from_file_location(
 _mod = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_mod)
 create_basis_functions = _mod.create_basis_functions
+
+
+# ============================================================================
+# Data Loading (extended for SRM alignment)
+# ============================================================================
+
+def load_amplitudes(baseline_dir, subject, roi, alignment='procrustes'):
+    """
+    Load amplitudes with SRM support.
+
+    Args:
+        baseline_dir: Path to full_dataset_C010
+        subject: Subject ID (e.g., '01')
+        roi: ROI name (e.g., 'V1')
+        alignment: 'raw', 'procrustes', or 'srm'
+
+    Returns:
+        amplitudes: (n_runs, n_colors, n_features) array
+    """
+    if alignment == 'srm':
+        subject_roi_dir = Path(baseline_dir) / f"sub-{subject}" / roi
+        amp_path = subject_roi_dir / "amplitudes_srm.npy"
+        if not amp_path.exists():
+            raise FileNotFoundError(f"SRM amplitudes not found: {amp_path}")
+        return np.load(amp_path)  # (6, 8, k)
+    else:
+        return _load_amplitudes_base(baseline_dir, subject, roi, alignment)
 
 
 # ============================================================================
@@ -151,6 +188,126 @@ class LOCOForwardEncodingDecoder:
 
 
 # ============================================================================
+# Hybrid Degree Models: MLP/SVR → 6 channels → FE template matching → degree
+# ============================================================================
+
+class HybridDegreeMLPDecoder:
+    """
+    Hybrid degree model: MLP regression to 6 channel activations,
+    then FE template matching to continuous hue degree.
+
+    Reverses the standard hybrid (FE→MLP→label):
+      Voxel → MLP (regression) → 6 channels → template matching → continuous hue
+    """
+
+    def __init__(self, n_channels=6, hidden_layer_sizes=(64, 32), alpha=0.1):
+        self.n_channels = n_channels
+        self.hidden_layer_sizes = hidden_layer_sizes
+        self.alpha = alpha
+        self.mlp = None
+        self.basis_full = None
+
+    def fit(self, X, y_labels):
+        """
+        Args:
+            X: (n_samples, n_features) brain patterns
+            y_labels: (n_samples,) color labels (0-7)
+        """
+        self.basis_full = create_basis_functions(n_channels=self.n_channels)  # (360, 6)
+
+        # Target: basis_functions at each sample's hue angle → (n_samples, 6)
+        targets = np.array([self.basis_full[HUE_ANGLES[int(l)]] for l in y_labels])
+
+        self.mlp = MLPRegressor(
+            hidden_layer_sizes=self.hidden_layer_sizes,
+            alpha=self.alpha,
+            activation='relu',
+            solver='adam',
+            learning_rate='adaptive',
+            max_iter=500,
+            early_stopping=True,
+            validation_fraction=0.2,
+            random_state=42,
+        )
+        self.mlp.fit(X, targets)
+
+    def predict(self, X):
+        """Returns: (n_samples,) predicted HUE ANGLES (0-359°)"""
+        if self.mlp is None:
+            raise RuntimeError("Model not fitted yet")
+
+        channel_pred = self.mlp.predict(X)  # (n_samples, 6)
+
+        n_samples = X.shape[0]
+        y_pred_hues = np.zeros(n_samples, dtype=float)
+
+        for i in range(n_samples):
+            # Correlate predicted channels with all 360 templates
+            pred = channel_pred[i]
+            correlations = np.array([
+                np.corrcoef(pred, self.basis_full[h])[0, 1]
+                if np.std(pred) > 1e-10 else 0.0
+                for h in range(360)
+            ])
+            y_pred_hues[i] = np.argmax(correlations)
+
+        return y_pred_hues
+
+
+class HybridDegreeSVRDecoder:
+    """
+    Hybrid degree model: SVR regression to 6 channel activations,
+    then FE template matching to continuous hue degree.
+
+    Same architecture as HybridDegreeMLPDecoder but uses SVR.
+    """
+
+    def __init__(self, n_channels=6, C=1.0, epsilon=0.1):
+        self.n_channels = n_channels
+        self.C = C
+        self.epsilon = epsilon
+        self.svr = None
+        self.basis_full = None
+
+    def fit(self, X, y_labels):
+        """
+        Args:
+            X: (n_samples, n_features) brain patterns
+            y_labels: (n_samples,) color labels (0-7)
+        """
+        self.basis_full = create_basis_functions(n_channels=self.n_channels)  # (360, 6)
+
+        # Target: basis_functions at each sample's hue angle → (n_samples, 6)
+        targets = np.array([self.basis_full[HUE_ANGLES[int(l)]] for l in y_labels])
+
+        self.svr = MultiOutputRegressor(
+            SVR(C=self.C, epsilon=self.epsilon, kernel='rbf', gamma='scale')
+        )
+        self.svr.fit(X, targets)
+
+    def predict(self, X):
+        """Returns: (n_samples,) predicted HUE ANGLES (0-359°)"""
+        if self.svr is None:
+            raise RuntimeError("Model not fitted yet")
+
+        channel_pred = self.svr.predict(X)  # (n_samples, 6)
+
+        n_samples = X.shape[0]
+        y_pred_hues = np.zeros(n_samples, dtype=float)
+
+        for i in range(n_samples):
+            pred = channel_pred[i]
+            correlations = np.array([
+                np.corrcoef(pred, self.basis_full[h])[0, 1]
+                if np.std(pred) > 1e-10 else 0.0
+                for h in range(360)
+            ])
+            y_pred_hues[i] = np.argmax(correlations)
+
+        return y_pred_hues
+
+
+# ============================================================================
 # LOCO Cross-Validation
 # ============================================================================
 
@@ -170,7 +327,11 @@ def loco_cv(amplitudes, model_class, model_name):
     all_labels = np.arange(n_colors)
     all_hues = np.array(HUE_ANGLES)
 
-    uses_label = model_name in ['LDA', 'SVM', 'MLP', 'ForwardEncoding']
+    # Models that take label inputs (0-7) rather than continuous hue
+    uses_label = model_name in ['LDA', 'SVM', 'MLP', 'ForwardEncoding',
+                                'HybridMLP', 'HybridSVR']
+    # Models that output continuous hue angles (0-359°) directly
+    outputs_continuous = model_name in ['ForwardEncoding', 'HybridMLP', 'HybridSVR']
     fold_results = []
 
     for test_color in range(n_colors):
@@ -195,15 +356,12 @@ def loco_cv(amplitudes, model_class, model_name):
         y_pred = model.predict(X_test)  # (6,) — one prediction per run
 
         # Convert to hue for evaluation
-        if uses_label:
-            # ForwardEncoding now returns continuous hues (0-359°)
-            # Other models (LDA, SVM, MLP) still return discrete labels
-            if model_name == 'ForwardEncoding':
-                pred_hues = y_pred  # Already continuous hues!
-            else:
-                pred_hues = labels_to_hue(y_pred)  # Discrete labels → 8 hues
+        if outputs_continuous:
+            pred_hues = y_pred  # Already continuous hues (0-359°)
+        elif uses_label:
+            pred_hues = labels_to_hue(y_pred)  # Discrete labels → 8 hues
         else:
-            pred_hues = y_pred
+            pred_hues = y_pred  # Ridge/KernelRidge return continuous hue
 
         # Circular error per run
         errors = np.abs(circular_diff_deg(pred_hues, test_hue))
@@ -249,7 +407,9 @@ def loco_permutation_test(amplitudes, model_class, model_name,
     """
     n_runs, n_colors, n_voxels = amplitudes.shape
     all_hues = np.array(HUE_ANGLES)
-    uses_label = model_name in ['LDA', 'SVM', 'MLP', 'ForwardEncoding']
+    uses_label = model_name in ['LDA', 'SVM', 'MLP', 'ForwardEncoding',
+                                'HybridMLP', 'HybridSVR']
+    outputs_continuous = model_name in ['ForwardEncoding', 'HybridMLP', 'HybridSVR']
 
     null_distribution = []
 
@@ -287,12 +447,10 @@ def loco_permutation_test(amplitudes, model_class, model_name,
             model.fit(X_train, y_train)
             y_pred = model.predict(X_test)
 
-            if uses_label:
-                # ForwardEncoding now returns continuous hues
-                if model_name == 'ForwardEncoding':
-                    pred_hues = y_pred  # Already continuous hues!
-                else:
-                    pred_hues = labels_to_hue(y_pred)
+            if outputs_continuous:
+                pred_hues = y_pred
+            elif uses_label:
+                pred_hues = labels_to_hue(y_pred)
             else:
                 pred_hues = y_pred
 
@@ -346,7 +504,9 @@ def run_single_subject_roi(baseline_dir, subject, roi, alignment, models,
         'KernelRidge': KernelRidgeDecoder,
         'SVM': SVMDecoder,
         'MLP': MLPDecoder,
-        'ForwardEncoding': LOCOForwardEncodingDecoder
+        'ForwardEncoding': LOCOForwardEncodingDecoder,
+        'HybridMLP': HybridDegreeMLPDecoder,
+        'HybridSVR': HybridDegreeSVRDecoder,
     }
 
     results = {}
@@ -405,7 +565,7 @@ def main():
                         default=['LDA', 'Ridge', 'KernelRidge', 'SVM',
                                  'MLP', 'ForwardEncoding'])
     parser.add_argument('--alignment', type=str, default='procrustes',
-                        choices=['raw', 'procrustes'])
+                        choices=['raw', 'procrustes', 'srm'])
     parser.add_argument('--permutations', type=int, default=0,
                         help='Number of permutations (0=skip)')
 

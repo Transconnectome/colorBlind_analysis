@@ -83,10 +83,10 @@ def load_amplitudes(baseline_dir, subject, roi, alignment='raw'):
         baseline_dir: Path to full_dataset_C010
         subject: Subject ID (e.g., '01')
         roi: ROI name (e.g., 'V1')
-        alignment: 'raw' or 'procrustes'
+        alignment: 'raw', 'procrustes', or 'srm'
 
     Returns:
-        amplitudes: (n_runs=6, n_colors=8, n_voxels) array
+        amplitudes: (n_runs=6, n_colors=8, n_features) array
     """
     subject_roi_dir = Path(baseline_dir) / f"sub-{subject}" / roi
 
@@ -94,8 +94,10 @@ def load_amplitudes(baseline_dir, subject, roi, alignment='raw'):
         amp_path = subject_roi_dir / "amplitudes_raw.npy"
     elif alignment == 'procrustes':
         amp_path = subject_roi_dir / "amplitudes_procrustes.npy"
+    elif alignment == 'srm':
+        amp_path = subject_roi_dir / "amplitudes_srm.npy"
     else:
-        raise ValueError(f"Unknown alignment: {alignment}. Use 'raw' or 'procrustes'")
+        raise ValueError(f"Unknown alignment: {alignment}. Use 'raw', 'procrustes', or 'srm'")
 
     if not amp_path.exists():
         raise FileNotFoundError(f"Amplitudes not found: {amp_path}")

@@ -57,7 +57,7 @@ recommended-model: sonnet
 
 **Phase 2 예시**:
 ```markdown
-| ROI | HC 평균 (SD) | CVD 평균 (SD) | 분리도 [95% CI] | p (순열검정) | Hedges' g |
+| ROI | HC Mean (SD) | CVD Mean (SD) | Disparity [95% CI] | p (permutation test) | Hedges' g |
 |-----|-------------|--------------|----------------|-------------|-----------|
 | **V1** | 0.453 (0.083) | 0.590 (0.156) | 0.137 [−0.005, 0.301] | **0.062** | **1.16** |
 | **V2** | 0.486 (0.103) | 0.606 (0.107) | 0.120 [0.001, 0.244] | **0.075** | **1.04** |
@@ -101,11 +101,11 @@ recommended-model: sonnet
 
 사용한 검정 방법 명시:
 ```markdown
-**통계 검정**:
-- 순열검정 (10,000회, label shuffling)
-- Crawford & Howell (1998) 단일사례 검정 (df=6, 단측)
+**Statistical tests**:
+- Permutation test (10,000 iterations, label shuffling)
+- Crawford & Howell (1998) single-case test (df=6, one-tailed)
 - Bootstrap 95% CI (1,000 iterations)
-- Hedges' g (소표본 편향 보정)
+- Hedges' g (small-sample bias correction)
 ```
 
 ---
@@ -116,12 +116,12 @@ recommended-model: sonnet
 
 **Phase 2 예시**:
 ```markdown
-| 검증 | V1 | V2 | V3 | hV4 | 해석 |
+| Validation | V1 | V2 | V3 | hV4 | Interpretation |
 |------|----|----|----|----|------|
-| LOSO 안정성 | 6/7 유의 | **7/7 유의** | 0/7 | 0/7 | V2 완벽 |
-| 반분 신뢰도 | 편측 유의 | **양쪽 유의** | n.s. | n.s. | V2 강건 |
-| CVD 색 의존성 | n.s. | **p=0.010** | **p=0.000** | **p=0.016** | CVD만 색 특이적 |
-| Crossnobis 수렴 | r=0.721* | r=0.806** | r=0.200 | r=0.248 | V1/V2 수렴 |
+| LOSO stability | 6/7 significant | **7/7 significant** | 0/7 | 0/7 | V2 perfect |
+| Split-half reliability | One-sided significant | **Both significant** | n.s. | n.s. | V2 robust |
+| CVD color dependency | n.s. | **p=0.010** | **p=0.000** | **p=0.016** | CVD만 color-specific |
+| Crossnobis convergence | r=0.721* | r=0.806** | r=0.200 | r=0.248 | V1/V2 converge |
 ```
 
 **중요**:
@@ -186,6 +186,12 @@ HC-CVD RDM 상관 [0.414, 0.587]이 HC-HC [0.442, 0.592]와 대폭 중첩된다.
 - Notion 복사-붙여넣기 가능한 clean markdown
 - 이모지 사용 금지 (Notion 자체 아이콘 사용)
 - 상대 경로 링크 사용 (Notion에서 자동 변환)
+- **한영 혼용 규칙**: 통계 용어, 방법론 용어, 기술 표현은 반드시 **영어**로 작성. 일반 설명/서술은 한국어 유지. 예시:
+  - ✅ "V1/V2에서 large effect size (g>1.0)" / "split-half reliability" / "permutation test"
+  - ❌ "대효과" / "반분 신뢰도" / "순열검정"
+  - ✅ "SRM alignment artifact" / "convergent validity" / "statistical power"
+  - ❌ "정렬 아티팩트" / "수렴 타당도" / "검정력"
+  - 테이블 헤더도 영어: Disparity, Hedges' g, Interpretation, Direction 등
 
 ---
 

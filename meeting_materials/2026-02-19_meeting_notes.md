@@ -1,31 +1,31 @@
-# 색각이상(CVD) fMRI 신경 색 표상 분석 — 회의 자료
+# 색각이상(CVD) fMRI Neural Color Representation 분석 — 회의 자료
 
 > **프로젝트**: Color Vision Deficiency Neural Representation Analysis
 > **날짜**: 2026-02-19
-> **대상**: Phase 2 (SRM 그룹 비교), Phase 2b (디코더 모델 비교), Phase 3 (필터 사전검증)
+> **대상**: Phase 2 (SRM group comparison), Phase 2b (decoder model comparison), Phase 3 (filter pre-validation)
 > **피험자**: HC 7명 (sub-01~07), CVD 3명 (sub-08 deutan, sub-09 protan, sub-10 deutan)
 > **ROI**: V1, V2, V3, hV4 (Wang Atlas 2015)
 
 ---
 
-## Phase 2: SRM 기반 그룹 간 색 표상 비교
+## Phase 2: SRM 기반 Group-Level Color Representation Comparison
 
 ### 주요 결과
 
-**결론**: CVD 피험자는 HC 공통 색 표상 공간에서 체계적으로 이탈하며, 그 양상은 개인별 · ROI별로 특이적이다.
+**결론**: CVD 피험자는 HC common color representation space에서 체계적으로 이탈하며, 그 양상은 개인별 · ROI별로 특이적이다.
 
 **근거 — 핵심 지표**:
 
-| ROI | HC 평균 (SD) | CVD 평균 (SD) | 분리도 [95% CI] | p (순열검정) | Hedges' g |
+| ROI | HC Mean (SD) | CVD Mean (SD) | Disparity [95% CI] | p (permutation test) | Hedges' g |
 |-----|-------------|--------------|----------------|-------------|-----------|
 | **V1** | 0.453 (0.083) | 0.590 (0.156) | 0.137 [−0.005, 0.301] | **0.062** | **1.16** |
 | **V2** | 0.486 (0.103) | 0.606 (0.107) | 0.120 [0.001, 0.244] | **0.075** | **1.04** |
 | V3 | 0.540 (0.096) | 0.564 (0.167) | 0.023 [−0.137, 0.194] | 0.395 | 0.18 |
 | hV4 | 0.700 (0.128) | 0.677 (0.211) | −0.023 [−0.244, 0.172] | 0.559 | −0.14 |
 
-> 순열검정 10,000회. V1/V2에서 대효과(g>1.0), V2 분리도 CI가 영을 간신히 제외 [0.001, 0.244].
+> 10,000 permutations. V1/V2에서 large effect size (g>1.0), V2 disparity CI가 zero를 간신히 제외 [0.001, 0.244].
 
-**개인별 Crawford & Howell (1998) 단일사례 검정** (df=6, 단측):
+**개인별 Crawford & Howell (1998) single-case test** (df=6, one-tailed):
 
 | 피험자 | 유형 | V1 | V2 | V3 | hV4 |
 |--------|------|----|----|----|----|
@@ -33,34 +33,34 @@
 | **sub-08** | Deutan | t=1.1, p=0.157 (+20.9%) | **t=2.1, p=0.040\*** (+47.4%) | t=1.9, p=0.052 (+35.7%) | t=0.2, p=0.411 (+3.5%) |
 | sub-10 | Deutan | t=0.0, p=0.483 (−0.1%) | t=0.2, p=0.433 (+3.1%) | t=−1.3, p=0.884 (−26.8%) | t=−1.9, p=0.945 (−39.1%) |
 
-> sub-09(protan)는 V1에서, sub-08(deutan)은 V2에서 HC 분포 밖에 위치. sub-10은 모든 ROI에서 HC 범위 내.
+> sub-09(protan)는 V1에서, sub-08(deutan)은 V2에서 HC distribution 밖에 위치. sub-10은 모든 ROI에서 HC 범위 내.
 
 **시각화**:
-- 4-panel SRM 그룹 비교 도표: [`phase2_SRM_across_between/results/loo_consistent/20260218_163819/figures/srm_4panel_figure.png`](../phase2_SRM_across_between/results/loo_consistent/20260218_163819/figures/srm_4panel_figure.png)
+- 4-panel SRM group comparison figure: [`phase2_SRM_across_between/results/loo_consistent/20260218_163819/figures/srm_4panel_figure.png`](../phase2_SRM_across_between/results/loo_consistent/20260218_163819/figures/srm_4panel_figure.png)
 
 ---
 
 ### 분석 방법
 
-**SRM (Shared Response Model)**: 서로 다른 뇌를 하나의 "공용어"로 번역하는 방법이다. 7명의 HC 피험자 fMRI 데이터로 색 표상의 공통 좌표계를 학습한 후, CVD 피험자 데이터를 이 좌표계에 투영(SVD)한다. 마치 7명이 합의한 지도 위에 새로운 사람의 위치를 표시하는 것과 같다. 이 공간에서 각 피험자가 얼마나 "표준 지도"에서 벗어나 있는지를 Procrustes disparity로 측정한다.
+**SRM (Shared Response Model)**: 서로 다른 뇌를 하나의 "공용어"로 번역하는 방법이다. 7명의 HC 피험자 fMRI 데이터로 color representation의 common coordinate system을 학습한 후, CVD 피험자 데이터를 이 좌표계에 투영(SVD projection)한다. 마치 7명이 합의한 지도 위에 새로운 사람의 위치를 표시하는 것과 같다. 이 공간에서 각 피험자가 얼마나 "표준 지도"에서 벗어나 있는지를 Procrustes disparity로 측정한다.
 
-**세 가지 편향 보정**:
-1. **HC-only SRM 훈련**: CVD가 공간 정의에 참여하지 않으므로 순환 편향(circularity) 제거
-2. **LOO for HC**: HC 개인 i의 disparity는 나머지 6명 평균 대비로 측정 (자기 자신 포함 방지)
-3. **동일 LOO 참조**: CVD도 동일한 7개 LOO 참조 세트에 대해 평가 → HC와 CVD가 같은 기준선에서 비교됨
+**세 가지 bias correction**:
+1. **HC-only SRM training**: CVD가 공간 정의에 참여하지 않으므로 circularity 제거
+2. **LOO for HC**: HC 개인 i의 disparity는 나머지 6명 mean 대비로 측정 (자기 자신 포함 방지)
+3. **동일 LOO reference**: CVD도 동일한 7개 LOO reference set에 대해 평가 → HC와 CVD가 같은 baseline에서 비교됨
 
-**K값 선택**: 7-fold LOSO 교차검증 + 평균순위 집계 (RDM reliability + cross-subject RDM correlation) → V1=4, V2=4, V3=3, hV4=3.
+**K-value selection**: 7-fold LOSO cross-validation + mean rank aggregation (RDM reliability + cross-subject RDM correlation) → V1=4, V2=4, V3=3, hV4=3.
 
-**K값 선택 상세 (2C 결과)**:
+**K-value selection 상세 (2C 결과)**:
 
-| ROI | 선택 k | RDM reliability (M±SD) | Cross-subj RDM (M±SD) | 평균 순위 | 차순위 |
+| ROI | Selected k | RDM reliability (M±SD) | Cross-subj RDM (M±SD) | Mean rank | Runner-up |
 |-----|--------|----------------------|----------------------|----------|--------|
 | V1 | 4 | 0.496 ± 0.146 | 0.597 ± 0.229 | 1.93 | k=3 (2.71) |
 | V2 | 4 | 0.429 ± 0.137 | 0.566 ± 0.145 | 2.14 | k=5 (2.36) |
-| V3 | 3 | 0.446 ± 0.194 | 0.546 ± 0.279 | 2.14 | k=4 (동점) |
+| V3 | 3 | 0.446 ± 0.194 | 0.546 ± 0.279 | 2.14 | k=4 (tie) |
 | hV4 | 3 | 0.560 ± 0.185 | 0.317 ± 0.169 | 2.07 | k=4 (2.57) |
 
-> 7-fold LOSO 교차검증, 2개 RDM 지표(rdm_reliability + cross_subject_rdm_corr)의 평균 순위로 선택. Reconstruction error는 고차원 편향(k=6 항상 1위)으로 제외.
+> 7-fold LOSO cross-validation, 2개 RDM metric (rdm_reliability + cross_subject_rdm_corr)의 mean rank로 선택. Reconstruction error는 high-dimensional bias (k=6 항상 1위)로 제외.
 
 ---
 
@@ -68,133 +68,133 @@
 
 #### 추가 검증 지표
 
-**LOSO 안정성** (7-fold leave-one-HC-out):
+**LOSO stability** (7-fold leave-one-HC-out):
 
-| ROI | 유의미한 폴드 | 범위 | 안정성 |
+| ROI | Significant folds | Range | Stability |
 |-----|-------------|------|--------|
-| V1 | **6/7** | p=0.007–0.052 | 강건 (1개 경계값 p=0.052) |
-| V2 | **7/7** | p=<0.001–0.032 | **완벽** |
-| V3 | 0/7 | — | 일관적 비유의 |
-| hV4 | 0/7 | — | 일관적 비유의 |
+| V1 | **6/7** | p=0.007–0.052 | Robust (1개 borderline p=0.052) |
+| V2 | **7/7** | p=<0.001–0.032 | **Perfect** |
+| V3 | 0/7 | — | Consistently n.s. |
+| hV4 | 0/7 | — | Consistently n.s. |
 
-> V2는 어떤 HC 피험자를 제거해도 CVD-HC 분리가 유의미 → 단일 피험자에 의한 결과가 아님을 확인.
+> V2는 어떤 HC 피험자를 제거해도 CVD-HC separation이 significant → 단일 피험자에 의한 결과가 아님을 확인.
 
-**반분 신뢰도** (runs 1-3 vs 4-6):
+**Split-half reliability** (runs 1-3 vs 4-6):
 
-| ROI | 전반 p | 후반 p | 양쪽 유의? | 교차 상관 r (p) |
+| ROI | First-half p | Second-half p | Both significant? | Cross-correlation r (p) |
 |-----|--------|--------|-----------|---------------|
-| V2 | **0.006** | **0.022** | **양쪽 유의** | 0.709 (p=0.022) |
-| V1 | 0.059 | 0.019 | 편측만 | 0.709 (p=0.022) |
-| hV4 | 0.402 | 0.174 | 불가 | 0.782 (p=0.008) |
+| V2 | **0.006** | **0.022** | **Both significant** | 0.709 (p=0.022) |
+| V1 | 0.059 | 0.019 | One-sided only | 0.709 (p=0.022) |
+| hV4 | 0.402 | 0.174 | N/A | 0.782 (p=0.008) |
 
-**색 라벨 의존성 검정** (LOSO — HC와 CVD 모두 SVD 투영):
+**Color label dependency test** (LOSO — HC와 CVD 모두 SVD projection):
 
-| ROI | HC p | CVD p | 해석 |
+| ROI | HC p | CVD p | Interpretation |
 |-----|------|-------|------|
-| V1 | 0.364 | 0.412 | 양쪽 모두 색 비의존 |
-| **V2** | 0.227 | **0.010** | **CVD만 색 의존적** |
-| **V3** | 0.207 | **0.000** | **CVD만 색 의존적** |
-| **hV4** | 0.330 | **0.016** | **CVD만 색 의존적** |
+| V1 | 0.364 | 0.412 | 양쪽 모두 color-independent |
+| **V2** | 0.227 | **0.010** | **CVD만 color-dependent** |
+| **V3** | 0.207 | **0.000** | **CVD만 color-dependent** |
+| **hV4** | 0.330 | **0.016** | **CVD만 color-dependent** |
 
-> **핵심 비대칭**: HC는 색 라벨을 섞어도 SRM 공간 내 disparity가 변하지 않는 반면, CVD는 색 라벨에 민감하게 의존한다. 이는 CVD의 높은 disparity가 일반적 노이즈가 아니라 **특정 색에 대한 체계적 왜곡**임을 의미한다.
+> **핵심 asymmetry**: HC는 color label을 shuffle해도 SRM space 내 disparity가 변하지 않는 반면, CVD는 color label에 민감하게 의존한다. 이는 CVD의 높은 disparity가 일반적 noise가 아니라 **특정 색에 대한 systematic distortion**임을 의미한다.
 
 #### 해석
 
 "**Scattered but Parallel**" 패턴:
-- CVD 피험자는 HC보다 SRM 공간에서 1.4~1.6배 더 분산되어 있으나 (heterogeneous)
-- V2에서 HC-CVD RDM 상관 [0.414, 0.587]이 HC-HC [0.442, 0.592]와 대폭 중첩 → 색 간 관계 구조는 보존
-- 즉, CVD는 **동일한 색 지도**를 갖되 **위치가 어긋난** 것이지, 지도 자체가 깨진 것이 아님
+- CVD 피험자는 HC보다 SRM space에서 1.4~1.6배 더 dispersed되어 있으나 (heterogeneous)
+- V2에서 HC-CVD RDM correlation [0.414, 0.587]이 HC-HC [0.442, 0.592]와 대폭 overlap → 색 간 relational structure는 보존
+- 즉, CVD는 **동일한 color map**을 갖되 **위치가 어긋난** 것이지, map 자체가 깨진 것이 아님
 
-**RDM 상관 (SRM 공간, Bootstrap 95% CI)**:
+**RDM Correlation (SRM space, Bootstrap 95% CI)**:
 
-| ROI | HC-HC [95% CI] | HC-CVD [95% CI] | CVD-CVD [95% CI] | 해석 |
+| ROI | HC-HC [95% CI] | HC-CVD [95% CI] | CVD-CVD [95% CI] | Interpretation |
 |-----|---------------|----------------|----------------|------|
-| V1 | 0.447 [0.357, 0.531] | 0.322 [0.237, 0.402] | 0.297 [0.126, 0.493] | HC-CVD < HC-HC (CI 미미 분리) |
-| **V2** | **0.517 [0.442, 0.592]** | **0.499 [0.414, 0.587]** | **0.591 [0.471, 0.702]** | **HC-CVD ≈ HC-HC (CI 대폭 중첩)** |
-| V3 | 0.385 [0.300, 0.473] | 0.348 [0.245, 0.457] | 0.591 [0.490, 0.672] | HC-CVD < HC-HC (약간 분리) |
-| hV4 | 0.158 [0.069, 0.248] | 0.224 [0.119, 0.328] | 0.276 [0.008, 0.734] | CVD-CVD CI 극광 (n=3) |
+| V1 | 0.447 [0.357, 0.531] | 0.322 [0.237, 0.402] | 0.297 [0.126, 0.493] | HC-CVD < HC-HC (CI marginally separated) |
+| **V2** | **0.517 [0.442, 0.592]** | **0.499 [0.414, 0.587]** | **0.591 [0.471, 0.702]** | **HC-CVD ≈ HC-HC (CI heavily overlapping)** |
+| V3 | 0.385 [0.300, 0.473] | 0.348 [0.245, 0.457] | 0.591 [0.490, 0.672] | HC-CVD < HC-HC (slightly separated) |
+| hV4 | 0.158 [0.069, 0.248] | 0.224 [0.119, 0.328] | 0.276 [0.008, 0.734] | CVD-CVD CI extremely wide (n=3) |
 
-> Noise ceiling 맥락: Phase 1 split-half ceiling V1=0.582, V2=0.635. V2 HC-HC 0.517 = ceiling의 81%.
+> Noise ceiling context: Phase 1 split-half ceiling V1=0.582, V2=0.635. V2 HC-HC 0.517 = 81% of ceiling.
 
 개인 프로필:
-- **sub-09 (protan)**: V1 우세 (HC 대비 +68%), 초기 시각피질에서 L-cone 결핍의 직접적 반영
-- **sub-08 (deutan)**: V2 우세 (HC 대비 +48%), V3 경계값 (p=0.052), 중간 수준 시각 처리에서의 영향
-- **sub-10 (deutan)**: 전 ROI에서 HC 범위 내 — **피질 보상(cortical compensation)**의 증거
+- **sub-09 (protan)**: V1 dominant (HC 대비 +68%), early visual cortex에서 L-cone deficit의 직접적 반영
+- **sub-08 (deutan)**: V2 dominant (HC 대비 +48%), V3 borderline (p=0.052), mid-level visual processing에서의 영향
+- **sub-10 (deutan)**: 전 ROI에서 HC 범위 내 — **cortical compensation**의 증거
 
 #### 우려 지점 및 보완 계획
 
-1. **n=3 검정력 한계**: CVD 3명으로는 그룹 수준 p<0.05 도달이 구조적으로 어려움. 대효과(g>1.0)에도 불구하고 trending에 그침 → 개인 단일사례 분석(Crawford & Howell)으로 보완하여 "2/3이 유의"라는 사례 기반 보고로 전환
-2. **SRM 정렬 아티팩트 가능성**: 아래 삼각검증(A3/A4/A5)으로 독립 검증 완료
+1. **n=3 statistical power 한계**: CVD 3명으로는 group-level p<0.05 도달이 구조적으로 어려움. Large effect size (g>1.0)에도 불구하고 trending에 그침 → 개인 single-case analysis (Crawford & Howell)으로 보완하여 "2/3이 significant"라는 case-based report로 전환
+2. **SRM alignment artifact 가능성**: 아래 triangulation (A3/A4/A5)으로 independent validation 완료
 
 ---
 
-## Phase 2 보강: SRM-독립 삼각검증 (A3/A4/A5)
+## Phase 2 보강: SRM-Independent Triangulation (A3/A4/A5)
 
 ### 주요 결과
 
-**결론**: SRM이 아닌 독립적 방법으로도 동일한 피험자 수준 패턴이 재현되어, SRM 결과가 정렬 아티팩트가 아닌 실제 신경학적 차이를 반영함이 확인됨.
+**결론**: SRM이 아닌 independent method로도 동일한 subject-level 패턴이 재현되어, SRM 결과가 alignment artifact가 아닌 실제 neurological difference를 반영함이 확인됨.
 
-**수렴 타당도 요약**:
+**Convergent validity 요약**:
 
-| 검증 방법 | SRM 의존? | **k값** | 그룹 차이 | SRM↔독립지표 상관 (pooled) |
+| Validation method | SRM dependency? | **k-value** | Group difference | SRM↔Independent metric correlation (pooled) |
 |-----------|-----------|---------|----------|--------------------------|
-| **A4 Crossnobis RDM** | **없음** (네이티브 복셀) | **N/A (full dim)** | V1 p=0.051 경향 | **r=0.486 (p=0.001)** |
-| **A5 PCA-only** | **없음** (다른 정렬법) | **V1/V2=4, V3/hV4=3** | n.s. | **r=0.742 (p<0.001)** |
-| **A5 PCA-CCA** | **없음** (다른 정렬법) | **V1/V2=4, V3/hV4=3** | n.s. | **r=0.472 (p=0.002)** |
-| **A3 Variance Explained** | 있음 (SRM W) | **SRM k** | V2: CVD>HC, g=−1.68 | r=−0.246 (n.s.) |
+| **A4 Crossnobis RDM** | **None** (native voxel) | **N/A (full dim)** | V1 p=0.051 trending | **r=0.486 (p=0.001)** |
+| **A5 PCA-only** | **None** (different alignment) | **V1/V2=4, V3/hV4=3** | n.s. | **r=0.742 (p<0.001)** |
+| **A5 PCA-CCA** | **None** (different alignment) | **V1/V2=4, V3/hV4=3** | n.s. | **r=0.472 (p=0.002)** |
+| **A3 Variance Explained** | Yes (SRM W) | **SRM k** | V2: CVD>HC, g=−1.68 | r=−0.246 (n.s.) |
 
-> A4에서 V1의 crossnobis 그룹 차이가 경향적(p=0.051)이며, SRM V1 결과(p=0.062)와 수렴. PCA-only 방법과의 pooled 상관 r=0.742는 SRM disparity가 측정한 피험자 수준 패턴이 정렬 방법에 비의존적임을 강력히 시사.
+> A4에서 V1의 crossnobis group difference가 trending (p=0.051)이며, SRM V1 결과(p=0.062)와 converge. PCA-only와의 pooled correlation r=0.742는 SRM disparity가 측정한 subject-level 패턴이 alignment method에 비의존적임을 강력히 시사.
 
 ### 분석 방법
 
-- **A4 Crossnobis**: 차원 축소 없이 원래 복셀 공간에서 교차검증된 마할라노비스 거리(Walther et al. 2016)를 계산. SRM과 완전히 독립적인 지표.
-- **A5 PCA-CCA**: SRM 대신 PCA 차원축소 + CCA 정렬로 동일한 분석을 재현. 45개 피험자 쌍 각각 독립 정렬.
-- **A3 Variance Explained**: SRM 공유공간이 각 피험자 데이터를 얼마나 잘 재구성하는지 정량화 (VE = 1 − ||X − WS||^2/||X||^2).
+- **A4 Crossnobis**: Dimensionality reduction 없이 native voxel space에서 cross-validated Mahalanobis distance (Walther et al. 2016)를 계산. SRM과 완전히 independent한 metric.
+- **A5 PCA-CCA**: SRM 대신 PCA dimensionality reduction + CCA alignment으로 동일한 분석을 재현. 45개 subject pair 각각 독립 alignment.
+- **A3 Variance Explained**: SRM shared space가 각 subject의 데이터를 얼마나 잘 reconstruct하는지 정량화 (VE = 1 − ||X − WS||^2/||X||^2).
 
-**A3의 역설적 결과**: CVD의 VE가 전 ROI에서 HC 이상, 특히 V2에서 유의미하게 높음 (CVD 0.448 vs HC 0.331, g=−1.68). CVD 데이터가 SRM 공간에서 더 잘 재구성된다는 것은, CVD가 "약한 신호"가 아니라 "**강한 신호, 다른 구조**"임을 의미한다. 이는 "비등방적 보정(anisotropy correction)" 프레이밍을 지지한다.
+**A3의 역설적 결과**: CVD의 VE가 전 ROI에서 HC 이상, 특히 V2에서 significantly 높음 (CVD 0.448 vs HC 0.331, g=−1.68). CVD 데이터가 SRM space에서 더 잘 reconstruct된다는 것은, CVD가 "weak signal"이 아니라 "**strong signal, different structure**"임을 의미한다. 이는 "anisotropic correction" framing을 지지한다.
 
 ---
 
-## Phase 2b: 디코더 모델 비교
+## Phase 2b: Decoder Model Comparison
 
 ### 주요 결과
 
-**결론**: 복셀-색 매핑은 근본적으로 선형이며, Procrustes 정렬이 모든 모델 성능의 결정적 요인이다. 또한 Forward Encoding 모델만이 연속적 색 공간 보간(interpolation)이 가능하다.
+**결론**: Voxel-color mapping은 근본적으로 linear이며, Procrustes alignment이 모든 model performance의 결정적 요인이다. 또한 Forward Encoding model만이 continuous color space interpolation이 가능하다.
 
-**LORO 전체 성능 (Procrustes 정렬 후)**:
+**LORO overall performance (Procrustes-aligned)**:
 
-| 모델 | 유형 | acc_45 [95% CI] | MAE (degree) [95% CI] |
+| Model | Type | acc_45 [95% CI] | MAE (degree) [95% CI] |
 |------|------|----------------|--------------|
-| **LDA** | 선형 | **0.821** [0.802, 0.841] | **25.6** [22.8, 28.3] |
-| Ridge | 선형 | 0.783 [0.750, 0.821] | 41.8 [37.9, 45.0] |
-| SVM | 비선형 | 0.776 [0.734, 0.811] | 32.9 [27.1, 38.7] |
-| KernelRidge | 비선형 | 0.739 [0.692, 0.779] | 47.9 [43.9, 52.1] |
-| ForwardEnc | 선형 | 0.736 [0.708, 0.773] | 43.5 [38.6, 47.2] |
-| MLP | 비선형 | 0.394 [0.381, 0.409] | 87.1 [85.1, 88.9] |
+| **LDA** | Linear | **0.821** [0.802, 0.841] | **25.6** [22.8, 28.3] |
+| Ridge | Linear | 0.783 [0.750, 0.821] | 41.8 [37.9, 45.0] |
+| SVM | Nonlinear | 0.776 [0.734, 0.811] | 32.9 [27.1, 38.7] |
+| KernelRidge | Nonlinear | 0.739 [0.692, 0.779] | 47.9 [43.9, 52.1] |
+| ForwardEnc | Linear | 0.736 [0.708, 0.773] | 43.5 [38.6, 47.2] |
+| MLP | Nonlinear | 0.394 [0.381, 0.409] | 87.1 [85.1, 88.9] |
 
-> 우연 수준: acc_45 = 37.5%, MAE = 90 degree. MLP를 제외한 모든 모델이 유의미하게 우연 이상. LDA가 최고 성능.
+> Chance level: acc_45 = 37.5%, MAE = 90 degree. MLP를 제외한 모든 모델이 significantly above chance. LDA가 best performance.
 
-**Procrustes 정렬 효과**:
+**Procrustes alignment effect**:
 
-| 모델 | Raw acc_45 | Procrustes acc_45 | 향상 |
+| Model | Raw acc_45 | Procrustes acc_45 | Improvement |
 |------|-----------|-------------------|------|
 | LDA | 0.393 | 0.821 | **+0.428** |
 | SVM | 0.382 | 0.776 | +0.393 |
 | MLP | 0.370 | 0.394 | +0.024 |
 
-> 정렬 없이는 **모든** 모델이 우연 수준(~37-39%). 비선형 모델(SVM, KernelRidge)도 런 간 정렬 불일치를 보상하지 못함. Procrustes 정렬이 유일한 핵심 요인.
+> Alignment 없이는 **모든** 모델이 chance level (~37-39%). Nonlinear models (SVM, KernelRidge)도 run-to-run alignment mismatch를 compensate하지 못함. Procrustes alignment이 유일한 핵심 요인.
 
-**LOCO 보간 검정 (10명 x 4 ROI x 1000 순열)**:
+**LOCO interpolation test (10 subjects × 4 ROI × 1000 permutations)**:
 
-| 모델 | V1 MAE (degree) | V2 MAE (degree) | V3 MAE (degree) | V4 MAE (degree) |
+| Model | V1 MAE (degree) | V2 MAE (degree) | V3 MAE (degree) | V4 MAE (degree) |
 |------|---------|---------|---------|---------|
 | **ForwardEnc** | **80.6 +/- 15.0** | **83.1 +/- 18.2** | **72.5 +/- 14.0** | **72.8 +/- 12.2** |
 | LDA | 107.4 | 103.1 | 99.7 | 99.4 |
 | SVM | 107.9 | 104.2 | 100.9 | 101.3 |
 
-> ForwardEncoding만이 전 ROI에서 우연(90 degree) 이하의 MAE를 보임 → 연속적 색 공간 구조를 포착하는 유일한 모델.
+> ForwardEncoding만이 전 ROI에서 chance (90 degree) 이하의 MAE를 보임 → continuous color space structure를 포착하는 유일한 모델.
 
-**HC vs CVD SRM 공간 교차 디코딩 (HC-only SRM 훈련, LDA)**:
+**HC vs CVD cross-decoding in SRM space (HC-only SRM training, LDA)**:
 
 | ROI | k | HC LOSO | sub-08 (p) | sub-09 (p) | sub-10 (p) |
 |-----|---|---------|-----------|-----------|-----------|
@@ -203,21 +203,21 @@
 | V3 | 3 | 0.768 | **0.625** (<0.001) | **0.750** (<0.001) | **0.875** (<0.001) |
 | hV4 | 3 | 0.446 | 0.375 (0.057) | **0.625** (<0.001) | 0.375 (0.056) |
 
-> 우연 = 12.5%. 12개 검정 중 **9개가 p<0.001**로 유의미. CVD 피험자의 색 표상이 HC 공통 공간에서 **해독 가능**(decodable)함을 확인 → 색 신호 자체는 존재하되 기하학적 구조가 왜곡된 것.
+> Chance = 12.5%. 12개 tests 중 **9개가 p<0.001**로 significant. CVD 피험자의 color representation이 HC common space에서 **decodable**함을 확인 → color signal 자체는 존재하되 geometric structure가 distorted된 것.
 
 **시각화**:
-- LOCO 색 원 도표: [`phase2_decoder_comparing/results/loco/color_wheel_plots/`](../phase2_decoder_comparing/results/loco/color_wheel_plots/)
-- 원형 도표: [`phase2_decoder_comparing/results/loco/circular_plots/`](../phase2_decoder_comparing/results/loco/circular_plots/)
+- LOCO color wheel plots: [`phase2_decoder_comparing/results/loco/color_wheel_plots/`](../phase2_decoder_comparing/results/loco/color_wheel_plots/)
+- Circular plots: [`phase2_decoder_comparing/results/loco/circular_plots/`](../phase2_decoder_comparing/results/loco/circular_plots/)
 
 ---
 
 ### 분석 방법
 
-**LORO (Leave-One-Run-Out)**: 6개 런 중 5개로 훈련, 1개로 검증. "같은 색이 다른 런에서도 동일하게 보이는가?"를 검증. 비유: 같은 시험 문제를 다른 날 풀었을 때 일관성 검사.
+**LORO (Leave-One-Run-Out)**: 6개 run 중 5개로 training, 1개로 testing. "같은 색이 다른 run에서도 동일하게 보이는가?"를 검증. 비유: 같은 시험 문제를 다른 날 풀었을 때 consistency 검사.
 
-**LOCO (Leave-One-Color-Out)**: 8개 색 중 7개로 훈련, 1개로 검증. "학습하지 않은 색을 예측할 수 있는가?"를 검증. 비유: 무지개에서 파란색을 빼고 학습한 후, 파란색의 뇌 활동을 맞출 수 있는지. Forward Encoding 모델의 6-채널 기저함수 구조만이 이를 가능하게 함.
+**LOCO (Leave-One-Color-Out)**: 8개 색 중 7개로 training, 1개로 testing. "학습하지 않은 색을 predict할 수 있는가?"를 검증. 비유: 무지개에서 파란색을 빼고 학습한 후, 파란색의 neural response를 맞출 수 있는지. Forward Encoding model의 6-channel basis function 구조만이 이를 가능하게 함.
 
-**Nested Procrustes**: 기존 Procrustes 정렬이 검증 데이터에 대한 정보 누출(leakage)을 일으키는지 검증. 결과: 누출 제거 후 오히려 SVM 성능이 +0.123 향상 → 기존 결과가 보수적이었음을 확인.
+**Nested Procrustes**: 기존 Procrustes alignment이 test data에 대한 data leakage를 일으키는지 검증. 결과: leakage 제거 후 오히려 SVM performance가 +0.123 향상 → 기존 결과가 conservative이었음을 확인.
 
 ---
 
@@ -225,203 +225,233 @@
 
 #### 핵심 해석
 
-LORO-LOCO 해리(dissociation)가 CVD 연구의 핵심 증거:
-- **LORO 높은 정확도** (CVD ~ HC): CVD 피험자가 색 선택적 신호를 갖고 있음
-- **LOCO 낮은 보간력** (CVD < HC): 그러나 색 공간의 **기하학적 구조가 왜곡**되어, 연속적 색상환이 깨져 있음
-- 이 해리는 CVD를 "신호 손실(signal loss)"이 아닌 "**색 공간 왜곡(color space distortion)**"으로 규정하는 직접적 신경학적 증거
+LORO-LOCO dissociation이 CVD 연구의 핵심 증거:
+- **LORO high accuracy** (CVD ~ HC): CVD 피험자가 color-selective signal을 갖고 있음
+- **LOCO low interpolation** (CVD < HC): 그러나 color space의 **geometric structure가 distorted**되어, continuous color wheel이 깨져 있음
+- 이 dissociation은 CVD를 "signal loss"가 아닌 "**color space distortion**"으로 규정하는 직접적 neurological evidence
 
 #### 우려 지점
 
-1. **LOCO 개인 수준 통계적 검정력 부족**: 8-fold x 6-run = 48 시행으로는 개별 유의성 도달이 어려움 (4/40만 p<0.05)
-2. **MLP 퇴행(degenerate) 해**: n=40 훈련 샘플에 36K+ 파라미터 → 47.5%에서 상수 예측 발생. 비선형 용량이 데이터 부족으로 활용 불가
+1. **LOCO individual-level statistical power 부족**: 8-fold × 6-run = 48 trials로는 individual significance 도달이 어려움 (4/40만 p<0.05)
+2. **MLP degenerate solution**: n=40 training samples에 36K+ parameters → 47.5%에서 constant prediction 발생. Nonlinear capacity가 데이터 부족으로 활용 불가
+
+#### Decoder Reliability 분석 — ForwardEncoding이 main model인 이유
+
+**결론**: LDA가 highest accuracy (82.1%)이지만, ForwardEncoding이 multi-criteria evaluation에서 optimal decoder로 선정됨.
+
+**Accuracy-Reliability Paradox**:
+- LDA는 82.1% accuracy에도 불구하고, run-pair reliability가 r=0.009로 **사실상 random** — subject-ROI difficulty ranking이 run subset 간 완전히 reshuffle됨
+- 568 voxels + 40 training samples → fold-specific separating hyperplane 학습 (overfitting의 hallmark)
+
+**Multi-criteria Comparison**:
+
+| Criterion | LDA | SVM (nested) | **ForwardEncoding** |
+|-----------|-----|-------------|---------------------|
+| LORO acc_45 (preloaded) | **0.821** | 0.776 | 0.736 |
+| LORO acc_45 (nested) | 0.892 | **0.899** | 0.781 |
+| Run-pair reliability | **0.009** (random) | 0.164 | **0.329** (best) |
+| W matrix stability [95% CI] | N/A | N/A | **0.921** [0.907, 0.935] |
+| LOCO interpolation | N.S. | N.S. | **p<0.01** (V3) |
+| Alignment sensitivity | +0.428 (dependent) | +0.123 (moderate) | **+0.045** (robust) |
+| Effective parameters | ~568 (overfit risk) | support vectors | **6** (parsimonious) |
+
+**ForwardEncoding 선정 근거**:
+1. **유일한 interpolation 가능 모델** — LOCO에서 V3 p<0.01 (continuous color space 포착)
+2. **최고 alignment robustness** — nested vs preloaded 차이 +0.045 (SVM +0.123)
+3. **최고 run-pair reliability** — r=0.329 (LDA의 37배)
+4. **높은 encoding weight stability** — W matrix cosine similarity 0.921 [0.907, 0.935]
+5. **Neuroscientifically grounded** — Brouwer & Heeger (2009) 6-channel basis function
+6. **Parsimonious** — 6 effective parameters (LDA ~568, MLP 36K+)
+
+> **LDA paradox 해석**: High accuracy + zero reliability = fold-specific hyperplane → test-time generalization은 높으나 learned representation이 unstable. ForwardEncoding은 moderate accuracy에 stable representation → Phase 3 filter learning에 적합한 basis.
 
 ---
 
-## Phase 3: 필터 사전검증 (Filter Pre-Validation) — V1/V2 집중 전략
+## Phase 3: Filter Pre-Validation — V1/V2 집중 전략
 
 ### 전략 변경 요약
 
 **기존 계획 (폐기)**:
-- 3명 CVD 그룹 수준 필터, V1-V4 모든 영역 포함, "3/3 동의" 우선순위 쌍
+- 3명 CVD group-level filter, V1-V4 모든 영역 포함, "3/3 동의" 우선순위 쌍
 
 **확정 전략 (2026-02-19)**:
-- 개인별 맞춤 필터 (sub-08 deutan, sub-09 protan 별도)
-- **V1/V2만 집중** (초기 시각 영역, 망막 결핍의 직접 영향)
-- FDR 생존 쌍만 타겟 (통계적 엄격성)
-- 행동 검증 우선 (4주) → r>0.5이면 필터 진행
+- Individual-specific filter (sub-08 deutan, sub-09 protan 별도)
+- **V1/V2만 집중** (early visual areas, retinal deficit의 직접 영향)
+- FDR-surviving pairs만 target (통계적 엄격성)
+- Behavioral validation 우선 (4주) → r>0.5이면 filter 진행
 
 **V1/V2 집중 근거**:
-1. V1/V2가 1차 색상 처리 영역 — cone 결핍의 직접적 반영
-2. 디스플레이 필터는 망막 입력을 변경 → V1/V2 교정이 가장 직접적
-3. V3/hV4는 보상(compensation) 영역 — 필터 타겟이 아님
-4. Phase 2 모든 검증 지표에서 V1/V2만 강건 (LOSO 안정성, 반분 신뢰도, crossnobis 수렴)
+1. V1/V2가 primary color processing areas — cone deficit의 직접적 반영
+2. Display filter는 retinal input을 변경 → V1/V2 correction이 가장 직접적
+3. V3/hV4는 compensation areas — filter target이 아님
+4. Phase 2 모든 validation metrics에서 V1/V2만 robust (LOSO stability, split-half reliability, crossnobis convergence)
 
 ### 주요 결과
 
-**결론**: V1/V2에서 FDR 생존한 색 쌍은 sub-08에서 14쌍, sub-09에서 7쌍이며, 이들이 필터 설계의 유일한 타겟이다.
+**결론**: V1/V2에서 FDR-surviving color pairs는 sub-08에서 14 pairs, sub-09에서 7 pairs이며, 이들이 filter design의 유일한 target이다.
 
-**V1/V2 FDR 보정 결과** (Benjamini-Hochberg, q=0.05, Global FDR):
+**V1/V2 FDR correction 결과** (Benjamini-Hochberg, q=0.05, Global FDR):
 
-| 피험자 | V1 FDR 생존 | V2 FDR 생존 | **V1/V2 합계** | 필터 권고 |
+| 피험자 | V1 FDR surviving | V2 FDR surviving | **V1/V2 Total** | Filter recommendation |
 |--------|-----------|-----------|------------|---------|
-| **sub-08** (deutan) | 3쌍 | 11쌍 | **14쌍** | **STRONG** — 필터 설계 진행 |
-| **sub-09** (protan) | 6쌍 | 1쌍 | **7쌍** | **WEAK** — 탐색적만 |
-| sub-10 (deutan) | 0쌍 | 1쌍 | **1쌍** | **불충분** — 필터 불가 |
+| **sub-08** (deutan) | 3 pairs | 11 pairs | **14 pairs** | **STRONG** — filter design 진행 |
+| **sub-09** (protan) | 6 pairs | 1 pair | **7 pairs** | **WEAK** — exploratory only |
+| sub-10 (deutan) | 0 pairs | 1 pair | **1 pair** | **Insufficient** — filter 불가 |
 
-> 참고: 전체 252 검정 (28쌍 x 3ROI x 3CVD) 중 V3 포함 시 37쌍 FDR 생존이나, V1/V2 집중 전략에 따라 실제 필터 타겟은 위 수치로 한정됨.
+> 참고: 전체 252 tests (28 pairs × 3 ROI × 3 CVD) 중 V3 포함 시 37 pairs FDR surviving이나, V1/V2 집중 전략에 따라 실제 filter target은 위 수치로 한정됨.
 
 ---
 
-### sub-08 (Deutan): V1/V2 필터 타겟 14쌍
+### sub-08 (Deutan): V1/V2 Filter Target 14 Pairs
 
-#### V2 타겟 (11쌍) — 주요 영역
+#### V2 Target (11 pairs) — 주요 영역
 
-| 쌍 | z-score | p-value | 방향 | 가중치 | 메커니즘 |
+| Pair | z-score | p-value | Direction | Weight | Mechanism |
 |----|---------|---------|------|--------|----------|
-| **yellow-purple** | +13.87 | <0.0001 | 정상화 down | 4.0 | S-cone 극심한 보상 |
-| **red-yellow** | +9.38 | <0.0001 | 정상화 down | 4.0 | S-cone 과의존 |
-| **blue-purple** | +6.15 | <0.0001 | 정상화 down | 3.5 | S-cone 과분리 |
-| yellow-green | +5.47 | <0.0001 | 정상화 down | 2.5 | 인접 과분리 |
-| **orange-yellow** | +5.45 | <0.0001 | 정상화 down | 3.0 | S-cone 보상 |
-| cyan-purple | +4.51 | <0.0001 | 정상화 down | 2.5 | S-cone 축 |
-| red-purple | +3.85 | 0.0001 | 정상화 down | 2.0 | — |
-| orange-purple | +3.43 | 0.0006 | 정상화 down | 2.0 | — |
-| red-blue | +3.31 | 0.0009 | 정상화 down | 2.0 | cool-warm 불균형 |
-| yellow-cyan | +3.10 | 0.0019 | 정상화 down | 2.0 | — |
+| **yellow-purple** | +13.87 | <0.0001 | Normalize down | 4.0 | S-cone extreme compensation |
+| **red-yellow** | +9.38 | <0.0001 | Normalize down | 4.0 | S-cone over-reliance |
+| **blue-purple** | +6.15 | <0.0001 | Normalize down | 3.5 | S-cone over-separation |
+| yellow-green | +5.47 | <0.0001 | Normalize down | 2.5 | Adjacent over-separation |
+| **orange-yellow** | +5.45 | <0.0001 | Normalize down | 3.0 | S-cone compensation |
+| cyan-purple | +4.51 | <0.0001 | Normalize down | 2.5 | S-cone axis |
+| red-purple | +3.85 | 0.0001 | Normalize down | 2.0 | — |
+| orange-purple | +3.43 | 0.0006 | Normalize down | 2.0 | — |
+| red-blue | +3.31 | 0.0009 | Normalize down | 2.0 | Cool-warm imbalance |
+| yellow-cyan | +3.10 | 0.0019 | Normalize down | 2.0 | — |
 
-#### V1 타겟 (3쌍)
+#### V1 Target (3 pairs)
 
-| 쌍 | z-score | p-value | 방향 | 가중치 |
+| Pair | z-score | p-value | Direction | Weight |
 |----|---------|---------|------|--------|
-| **red-yellow** | +5.14 | <0.0001 | 정상화 down | 3.5 |
-| **yellow-purple** | +4.84 | <0.0001 | 정상화 down | 3.0 |
-| red-cyan | +3.61 | 0.0003 | 정상화 down | 2.5 |
+| **red-yellow** | +5.14 | <0.0001 | Normalize down | 3.5 |
+| **yellow-purple** | +4.84 | <0.0001 | Normalize down | 3.0 |
+| red-cyan | +3.61 | 0.0003 | Normalize down | 2.5 |
 
 **Deutan 패턴 요약**:
-- **핵심 결핍**: L-M 축 (red-orange-yellow-green)
-- **보상 전략**: S-cone 극심한 과의존 (yellow-purple z=13.87!)
-- **필터 목표**: S-cone 축 과분리 감소, L-M 분리도 복원
-- **1순위 타겟**: yellow-purple, red-yellow, blue-purple, orange-yellow (V1/V2 공통)
+- **핵심 deficit**: L-M axis (red-orange-yellow-green)
+- **Compensation strategy**: S-cone extreme over-reliance (yellow-purple z=13.87!)
+- **Filter objective**: S-cone axis over-separation 감소, L-M separation 복원
+- **Priority targets**: yellow-purple, red-yellow, blue-purple, orange-yellow (V1/V2 공통)
 
 ---
 
-### sub-09 (Protan): V1/V2 필터 타겟 7쌍
+### sub-09 (Protan): V1/V2 Filter Target 7 Pairs
 
-#### V1 타겟 (6쌍) — 주요 영역
+#### V1 Target (6 pairs) — 주요 영역
 
-| 쌍 | z-score | p-value | 방향 | 가중치 | 메커니즘 |
+| Pair | z-score | p-value | Direction | Weight | Mechanism |
 |----|---------|---------|------|--------|----------|
-| **cyan-magenta** | +4.08 | <0.0001 | 정상화 down | 3.5 | S+M cone 보상 |
-| **orange-magenta** | +3.71 | 0.0002 | 정상화 down | 3.0 | Magenta 축 상승 |
-| **red-magenta** | +3.52 | 0.0004 | 정상화 down | 3.0 | L-cone 결핍 보상 |
-| green-magenta | +3.43 | 0.0006 | 정상화 down | 2.5 | — |
-| yellow-purple | -3.31 | 0.0009 | 복원 up | 2.5 | 과소분리 (protan 특이) |
-| green-blue | -3.00 | 0.0027 | 복원 up | 2.0 | — |
+| **cyan-magenta** | +4.08 | <0.0001 | Normalize down | 3.5 | S+M cone compensation |
+| **orange-magenta** | +3.71 | 0.0002 | Normalize down | 3.0 | Magenta axis elevation |
+| **red-magenta** | +3.52 | 0.0004 | Normalize down | 3.0 | L-cone deficit compensation |
+| green-magenta | +3.43 | 0.0006 | Normalize down | 2.5 | — |
+| yellow-purple | -3.31 | 0.0009 | Restore up | 2.5 | Under-separation (protan-specific) |
+| green-blue | -3.00 | 0.0027 | Restore up | 2.0 | — |
 
-#### V2 타겟 (1쌍)
+#### V2 Target (1 pair)
 
-| 쌍 | z-score | p-value | 방향 | 가중치 |
+| Pair | z-score | p-value | Direction | Weight |
 |----|---------|---------|------|--------|
-| orange-magenta | +2.91 | 0.0036 | 정상화 down | 2.0 |
+| orange-magenta | +2.91 | 0.0036 | Normalize down | 2.0 |
 
 **Protan 패턴 요약**:
-- **핵심 결핍**: L-cone (red) 결핍
-- **보상 전략**: M+S cone 의존 → magenta 축 과분리
-- **Deutan과 차이**: 보상 축이 다름 (magenta vs yellow-purple)
-- **필터 목표**: Magenta 축 정상화, cool-color 분리도 복원
-- **1순위 타겟**: cyan-magenta, orange-magenta, red-magenta
+- **핵심 deficit**: L-cone (red) deficit
+- **Compensation strategy**: M+S cone reliance → magenta axis over-separation
+- **Deutan과 차이**: Compensation axis가 다름 (magenta vs yellow-purple)
+- **Filter objective**: Magenta axis normalization, cool-color separation 복원
+- **Priority targets**: cyan-magenta, orange-magenta, red-magenta
 
 ---
 
-### sub-10 (Deutan, 보상 성공): 필터 불가
+### sub-10 (Deutan, compensation 성공): Filter 불가
 
-- V2에서 blue-purple 1쌍만 FDR 생존 (z=+2.86, p=0.0042)
-- **"피질 보상 성공" 사례 연구**로 보고
-- 필터 개발 안 함
+- V2에서 blue-purple 1 pair만 FDR surviving (z=+2.86, p=0.0042)
+- **"Cortical compensation success" case study**로 보고
+- Filter 개발 안 함
 
 ---
 
 ### 분석 방법
 
-**B1 순열검정**: 10명 중 3명을 "유사-CVD"로 무작위 배정하는 모든 조합(C(10,3)=120)으로 귀무 분포 생성. 각 색 쌍의 z-score가 귀무 분포에서 얼마나 극단적인지 양측 검정.
+**B1 Permutation test**: 10명 중 3명을 "pseudo-CVD"로 random assignment하는 모든 조합(C(10,3)=120)으로 null distribution 생성. 각 color pair의 z-score가 null distribution에서 얼마나 극단적인지 two-tailed test.
 
-비유: 교실에서 무작위로 3명을 골라 "색맹"이라고 라벨 붙였을 때와, 실제 CVD 피험자의 뇌 반응 차이가 같은 수준인지 비교하는 것.
+비유: 교실에서 random으로 3명을 골라 "색맹"이라고 label 붙였을 때와, 실제 CVD 피험자의 neural response 차이가 같은 수준인지 비교하는 것.
 
-**B2 반분 안정성**: 실험의 전반부(run 1-3)와 후반부(run 4-6)에서 동일한 색 쌍 패턴이 나타나는지를 Spearman 상관으로 측정.
+**B2 Split-half stability**: 실험의 first half (run 1-3)와 second half (run 4-6)에서 동일한 color pair 패턴이 나타나는지를 Spearman correlation으로 측정.
 
-**B3 부트스트랩 CI**: 6개 런에서 복원 추출(1000회)하여 각 색 쌍의 z-score에 대한 95% 신뢰구간 산출. CI가 영을 포함하지 않으면 유의미.
+**B3 Bootstrap CI**: 6개 run에서 resampling with replacement (1000 iterations)하여 각 color pair의 z-score에 대한 95% CI 산출. CI가 zero를 포함하지 않으면 significant.
 
-**Crossnobis**: Walther et al. (2016)의 교차검증 마할라노비스 거리. SRM 없이 원래 복셀 공간에서 직접 색 쌍 거리를 추정하여 SRM 결과의 독립적 재현을 시도.
+**Crossnobis**: Walther et al. (2016)의 cross-validated Mahalanobis distance. SRM 없이 native voxel space에서 직접 color pair distance를 추정하여 SRM 결과의 independent replication을 시도.
 
 ---
 
 ### 논의
 
-#### 반분 신뢰도 (B2) — V1/V2 중심
+#### Split-half Reliability (B2) — V1/V2 중심
 
-| ROI | sub-08 r | sub-09 r | sub-10 r | 그룹 r |
+| ROI | sub-08 r | sub-09 r | sub-10 r | Group r |
 |-----|---------|---------|---------|--------|
 | **V1** | 0.777*** | 0.645*** | 0.286 | **0.729*** |
 | **V2** | **0.839***  | 0.684*** | 0.677*** | **0.714*** |
 
-> V1, V2 모두 그룹 수준 r > 0.71 → 시간적으로 안정적. sub-08이 V2에서 가장 안정적 (r=0.839).
+> V1, V2 모두 group-level r > 0.71 → temporally stable. sub-08이 V2에서 가장 stable (r=0.839).
 
-#### Deutan vs Protan 보상 축의 차이
+#### Deutan vs Protan Compensation Axis 차이
 
-- **sub-08 (deutan)**: S-cone 축 과의존 → yellow-purple/red-yellow 과분리
-- **sub-09 (protan)**: Magenta 축 과의존 → cyan-magenta/orange-magenta 과분리
-- 이 차이가 CVD 하위 유형별 개인 맞춤 필터의 필요성을 뒷받침
+- **sub-08 (deutan)**: S-cone axis over-reliance → yellow-purple/red-yellow over-separation
+- **sub-09 (protan)**: Magenta axis over-reliance → cyan-magenta/orange-magenta over-separation
+- 이 차이가 CVD subtype별 individual-specific filter의 필요성을 뒷받침
 
-#### V1/V2 수렴 증거 — "표상-의존성" 문제의 완화
+#### V1/V2 Convergence Evidence — "Representation-dependency" 문제의 완화
 
-**문제 (기존)**: SRM 공간에서 37/252 쌍이 유의미하지만, 네이티브 복셀 공간(crossnobis)에서는 0/252가 FDR 생존.
+**문제 (기존)**: SRM space에서 37/252 pairs가 significant하지만, native voxel space (crossnobis)에서는 0/252가 FDR surviving.
 
 **V1/V2 집중 전략에 의한 완화**:
 
-| 수렴 지표 | V1 | V2 | V3 | hV4 |
+| Convergence metric | V1 | V2 | V3 | hV4 |
 |----------|----|----|----|----|
-| SRM-Crossnobis 상관 | **r=0.721\*** | **r=0.806\*\*** | r=0.200 | r=0.248 |
-| SRM-PCA 상관 | r=0.636\* | **r=0.891\*\*\*** | r=0.285 | r=0.661\* |
+| SRM-Crossnobis correlation | **r=0.721\*** | **r=0.806\*\*** | r=0.200 | r=0.248 |
+| SRM-PCA correlation | r=0.636\* | **r=0.891\*\*\*** | r=0.285 | r=0.661\* |
 
-> V1/V2에서만 SRM과 독립 방법 간 강한 수렴 (r>0.6~0.9). V3/hV4는 수렴 약함.
-> → **V1/V2 필터 타겟은 SRM 아티팩트가 아닌 실제 신호에 기반**할 가능성이 가장 높음.
+> V1/V2에서만 SRM과 independent method 간 strong convergence (r>0.6~0.9). V3/hV4는 convergence 약함.
+> → **V1/V2 filter targets은 SRM artifact가 아닌 real signal에 기반**할 가능성이 가장 높음.
 
 **중화 논거**:
-1. V1/V2의 SRM-crossnobis 상관이 r=0.72~0.81로 **방향성 수렴** → 신호가 존재하되 고차원에서 노이즈에 묻힘
-2. V1/V2에서만 LOSO 안정성(6/7, 7/7), 반분 신뢰도(양쪽 유의), 개인 단일사례 유의(sub-09 V1, sub-08 V2) 모두 수렴
-3. V3/hV4를 제외함으로써 "표상-의존성" 비판의 영향 범위를 최소화
+1. V1/V2의 SRM-crossnobis correlation이 r=0.72~0.81로 **directional convergence** → signal이 존재하되 high-dimensional space에서 noise에 묻힘
+2. V1/V2에서만 LOSO stability (6/7, 7/7), split-half reliability (both significant), individual single-case significance (sub-09 V1, sub-08 V2) 모두 converge
+3. V3/hV4를 제외함으로써 "representation-dependency" critique의 영향 범위를 최소화
 
 #### 보완 계획
 
 | 항목 | 상태 | 일정 |
 |------|------|------|
-| 다중비교 보정 (FDR) | **완료** | — |
-| SRM 순환성 (crossnobis 재현) | **완료** (V1/V2 수렴 확인) | — |
+| Multiple comparison correction (FDR) | **완료** | — |
+| SRM circularity (crossnobis replication) | **완료** (V1/V2 convergence 확인) | — |
 | V1/V2 집중 전략 확정 | **완료** | — |
-| **행동 검증** (FM-100 + JND) | **미완** | 1-2주 내 수집 |
-| 8-색 과적합 → Fourier 매개변수화 | 설계 완료 | Phase 3 본격 시 |
+| **Behavioral validation** (FM-100 + JND) | **미완** | 1-2주 내 수집 |
+| 8-color overfitting → Fourier parameterization | Design 완료 | Phase 3 본격 시 |
 
-**Go/No-Go 기준**: 행동 JND와 SRM z-score 간 상관 r>0.5이면 필터 설계 진행, r<0.3이면 특성 기술 논문으로 전환.
+**Go/No-Go 기준**: Behavioral JND와 SRM z-score 간 correlation r>0.5이면 filter design 진행, r<0.3이면 descriptive paper로 전환.
 
 ---
 
 ## 종합 요약
 
-| 분석 | V1 | V2 | V3 | hV4 |
+| Analysis | V1 | V2 | V3 | hV4 |
 |------|----|----|----|----|
-| 그룹 순열검정 | p=0.062 (경향) | p=0.075 (경향) | n.s. | n.s. |
-| Crawford 개인 검정 | **sub-09 p=0.007\*\*** | **sub-08 p=0.040\*** | sub-08 p=0.052 | n.s. |
-| LOSO 안정성 | 6/7 유의 | **7/7 유의** | 0/7 | 0/7 |
-| 반분 신뢰도 | 편측 유의 | **양쪽 유의** | 불가 | 불가 |
-| CVD 색 의존성 (LOSO) | n.s. | **p=0.010** | **p=0.000** | **p=0.016** |
-| Crossnobis 수렴 (A4) | **r=0.721\*** | **r=0.806\*\*** | r=0.200 | r=0.248 |
-| PCA-only 수렴 (A5) | r=0.636\* | **r=0.891\*\*\*** | r=0.285 | r=0.661\* |
-| CVD 교차 디코딩 | 3/3 유의 | 3/3 유의 | 3/3 유의 | 1/3 유의 |
-| **필터 타겟 (V1/V2 FDR)** | sub-09: **6쌍** | sub-08: **11쌍** | *(제외)* | *(제외)* |
+| Group permutation test | p=0.062 (trending) | p=0.075 (trending) | n.s. | n.s. |
+| Crawford individual test | **sub-09 p=0.007\*\*** | **sub-08 p=0.040\*** | sub-08 p=0.052 | n.s. |
+| LOSO stability | 6/7 significant | **7/7 significant** | 0/7 | 0/7 |
+| Split-half reliability | One-sided significant | **Both significant** | N/A | N/A |
+| CVD color dependency (LOSO) | n.s. | **p=0.010** | **p=0.000** | **p=0.016** |
+| Crossnobis convergence (A4) | **r=0.721\*** | **r=0.806\*\*** | r=0.200 | r=0.248 |
+| PCA-only convergence (A5) | r=0.636\* | **r=0.891\*\*\*** | r=0.285 | r=0.661\* |
+| CVD cross-decoding | 3/3 significant | 3/3 significant | 3/3 significant | 1/3 significant |
+| **Filter targets (V1/V2 FDR)** | sub-09: **6 pairs** | sub-08: **11 pairs** | *(excluded)* | *(excluded)* |
 
-**V2가 가장 강건한 ROI**: 모든 검증 지표에서 일관적. V1은 개인 수준에서 강력(sub-09). V3/hV4는 그룹 차이 없으며 필터 타겟에서 제외.
+**V2가 가장 robust한 ROI**: 모든 validation metrics에서 일관적. V1은 individual level에서 강력 (sub-09). V3/hV4는 group difference 없으며 filter target에서 제외.
 
-**핵심 메시지**: CVD 피험자의 시각피질 색 표상은 (1) HC와 구별 가능하고, (2) 개인별 · ROI별로 특이적이며, (3) 색 신호 자체는 보존되나 기하학적 구조가 왜곡되어 있다. V1/V2에서의 강건한 수렴 증거에 기반하여, 개인 맞춤형 색 필터는 sub-08(V2 중심 14쌍)과 sub-09(V1 중심 7쌍)를 대상으로 설계한다.
+**핵심 메시지**: CVD 피험자의 visual cortex color representation은 (1) HC와 distinguishable하고, (2) individual-specific · ROI-specific이며, (3) color signal 자체는 보존되나 geometric structure가 distorted되어 있다. V1/V2에서의 robust convergence evidence에 기반하여, individual-specific color filter는 sub-08 (V2-dominant, 14 pairs)과 sub-09 (V1-dominant, 7 pairs)를 대상으로 설계한다.
 
 ---
 
@@ -431,6 +461,6 @@ LORO-LOCO 해리(dissociation)가 CVD 연구의 핵심 증거:
 |------|------|
 | [`phase2_SRM_across_between/results/loo_consistent/20260218_163819/figures/srm_4panel_figure.png`](../phase2_SRM_across_between/results/loo_consistent/20260218_163819/figures/srm_4panel_figure.png) | Phase 2 시각화 |
 | [`future_phase3_filter_optimization/pre_validation/UPDATED_FILTER_STRATEGY.md`](../future_phase3_filter_optimization/pre_validation/UPDATED_FILTER_STRATEGY.md) | V1/V2 전략 상세 |
-| [`future_phase3_filter_optimization/pre_validation/FDR_CORRECTION_SUMMARY.md`](../future_phase3_filter_optimization/pre_validation/FDR_CORRECTION_SUMMARY.md) | FDR 보정 결과 |
+| [`future_phase3_filter_optimization/pre_validation/FDR_CORRECTION_SUMMARY.md`](../future_phase3_filter_optimization/pre_validation/FDR_CORRECTION_SUMMARY.md) | FDR correction 결과 |
 | [`future_phase3_filter_optimization/pre_validation/PROJECT_STATUS_2026-02-19.md`](../future_phase3_filter_optimization/pre_validation/PROJECT_STATUS_2026-02-19.md) | 프로젝트 현황 |
-| [`future_phase3_filter_optimization/pre_validation/results/fdr_corrected/FDR_CORRECTION_REPORT.md`](../future_phase3_filter_optimization/pre_validation/results/fdr_corrected/FDR_CORRECTION_REPORT.md) | FDR 상세 보고서 |
+| [`future_phase3_filter_optimization/pre_validation/results/fdr_corrected/FDR_CORRECTION_REPORT.md`](../future_phase3_filter_optimization/pre_validation/results/fdr_corrected/FDR_CORRECTION_REPORT.md) | FDR correction 상세 보고서 |

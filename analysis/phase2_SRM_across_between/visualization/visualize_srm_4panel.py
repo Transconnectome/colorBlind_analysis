@@ -217,15 +217,6 @@ def create_panel_B(loo_results, ax):
         spine.set_edgecolor('black')
         spine.set_linewidth(2)
 
-    # Add colorbar legend
-    legend_text = ("Dark Red: p < 0.01**\n"
-                   "Red: p < 0.05*\n"
-                   "Orange: p < 0.10†\n"
-                   "Gray: n.s.")
-    ax.text(1.08, 0.5, legend_text, transform=ax.transAxes,
-            fontsize=10, va='center', family='monospace',
-            bbox=dict(boxstyle='round,pad=0.6', facecolor='white',
-                     alpha=0.95, edgecolor='black', linewidth=1.5))
 
 
 def create_panel_C(loo_results, validation_data, ax):
@@ -238,14 +229,17 @@ def create_panel_C(loo_results, validation_data, ax):
     # Create 2×3 subplots within ax
     ax.axis('off')
 
-    # Create GridSpec for 2×3 layout
+    # Create GridSpec for 2×3 layout (bottom_margin for legend/subtitle clearance)
     from matplotlib.gridspec import GridSpecFromSubplotSpec
     gs_inner = GridSpecFromSubplotSpec(2, 3, subplot_spec=ax.get_subplotspec(),
                                        hspace=0.45, wspace=0.35)
 
-    # Title - moved higher to avoid overlap
+    # Title + subtitle with k-value info
     ax.text(0.5, 1.19, 'C. Convergent Validity: SRM vs. Alternative Alignment Methods',
             ha='center', va='top', fontsize=15, fontweight='bold',
+            transform=ax.transAxes)
+    ax.text(0.5, 1.13, 'PCA/PCA-CCA use identical k to SRM (V1/V2=4, V3/hV4=3)',
+            ha='center', va='top', fontsize=9, style='italic', color='#555555',
             transform=ax.transAxes)
 
     # Extract validation data
@@ -329,15 +323,7 @@ def create_panel_C(loo_results, validation_data, ax):
                        bbox=dict(boxstyle='round,pad=0.3', facecolor='white',
                                 alpha=0.9, edgecolor='gray', linewidth=1))
 
-    # Add legend only (no blue box)
-    legend_text = "● HC (n=7)   ▲ CVD (n=3)"
-    ax.text(0.5, -0.02, legend_text, transform=ax.transAxes,
-            fontsize=10, va='top', ha='center', fontweight='bold')
 
-    # Add k-value footnote
-    footnote = "Note: PCA/PCA-CCA use identical k-values as SRM (V1/V2=4, V3/hV4=3)"
-    ax.text(0.5, -0.08, footnote, transform=ax.transAxes,
-            fontsize=8, va='top', ha='center', style='italic', color='gray')
 
 
 def create_panel_D(validation_data, ax):

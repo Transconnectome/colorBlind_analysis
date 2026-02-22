@@ -824,11 +824,11 @@ Chance = 12.5% (1/8). 9/12 tests p<0.001 (HC-only); previously 12/12 (all-subjec
 
 | Metric | Value |
 |--------|-------|
-| Grand mean cosine similarity | **0.921** |
+| Grand mean cosine similarity | **0.921** [95% CI: 0.907, 0.935] |
 | Range (min-max across subject-ROIs) | 0.878 – 0.978 |
 | Mean std per subject-ROI | 0.017 |
 
-> W matrices are highly stable across folds (cosine sim > 0.87 everywhere).
+> W matrices are highly stable across folds (cosine sim > 0.87 everywhere). Bootstrap 95% CI [0.907, 0.935] computed over 1000 iterations of subject-ROI resampling.
 
 #### Analysis C: Run-Pair Reliability (Spearman r across subject-ROIs)
 
@@ -928,6 +928,21 @@ All results: LORO CV, `full_dataset_C010`, 10 subjects × 4 ROIs, voxel space. *
 4. SVM peaks at 0.899 (nested) but FE is more robust/reliable (see multi-criteria below)
 5. SRM space decoding: TBD (SRM W_i per-run projection needed for LORO)
 
+### FE Cross-Decoding: HC → CVD in SRM Space (2026-02-22, pending execution)
+
+**Script**: `phase2_decoder_comparing/analysis/fe_cross_decoding.py`
+
+**Protocol**: Train ForwardEncoding W-matrix on HC subjects' SRM-projected data (LOSO within HC), evaluate on each CVD subject. Tests whether HC-trained color channel representations generalize to CVD neural patterns.
+
+| ROI | HC MAE (held-out) | sub-08 MAE | sub-09 MAE | sub-10 MAE |
+|-----|-------------------|------------|------------|------------|
+| V1  | *pending*         | *pending*  | *pending*  | *pending*  |
+| V2  | *pending*         | *pending*  | *pending*  | *pending*  |
+| V3  | *pending*         | *pending*  | *pending*  | *pending*  |
+| hV4 | *pending*         | *pending*  | *pending*  | *pending*  |
+
+> Expected: Above-chance accuracy for most CVD-ROI combinations (consistent with LDA cross-decoding showing 9/12 significant). FE cross-decoding provides a neuroscience-grounded version of the same test, evaluating whether the 6-channel basis functions can decode CVD color representations using HC-derived encoding weights.
+
 ### Revised Decoder Conclusions (2026-02-18)
 
 **Previous conclusion**: "LDA is the best decoder → linearity is sufficient"
@@ -939,18 +954,21 @@ All results: LORO CV, `full_dataset_C010`, 10 subjects × 4 ROIs, voxel space. *
 | LORO acc_45 (preloaded) | **0.821** | 0.776 | 0.736 |
 | LORO acc_45 (nested) | — | **0.899** | **0.781** |
 | Run-pair reliability | **0.009** (random) | 0.164 | **0.329** (best) |
-| W matrix stability | N/A | N/A | **0.921** |
+| W matrix stability [95% CI] | N/A | N/A | **0.921** [0.907, 0.935] |
 | LOCO interpolation | NS | NS | **p<0.01** (V3) |
 | Alignment sensitivity | +0.428 (dependent) | +0.123 (moderate) | **+0.045** (robust) |
 | Effective parameters | ~568 (overfit) | support vectors | **6** (parsimonious) |
+| Split-half reliability (acc_45) | 0.015 [−0.474, 0.379] | 0.501 [0.263, 0.693] | **0.596** [0.416, 0.743] |
 
 **Why ForwardEncoding is optimal**:
 1. **Only model with interpolation ability** (LOCO V3 p<0.01)
 2. **Most alignment-robust** (Δ=+0.045 vs SVM's +0.123)
 3. **Highest run-pair reliability** (r=0.329)
-4. **Highly stable encoding weights** (cosine 0.921)
+4. **Highly stable encoding weights** (cosine 0.921 [0.907, 0.935])
 5. **Neuroscientifically grounded** (6-channel basis from Brouwer & Heeger 2009)
 6. **Parsimonious** (6 parameters vs hundreds of support vectors or 36K+ MLP weights)
+
+**Phase 3 filter design justification**: ForwardEncoding's 6-channel basis provides both (a) stable encoding weights that can be reliably estimated across runs (W cosine sim 0.921), and (b) continuous hue interpolation that captures the full color manifold structure. LDA's superior accuracy (0.821) is misleading for filter learning — its near-zero run-pair reliability (r=0.009) means the learned decision boundaries are fold-specific and non-transferable. ForwardEncoding's moderate accuracy (0.736) with high representation stability (r=0.329) makes it the appropriate basis for learning CVD→HC transformations in channel space.
 
 ### Validation Status (Phase 2b)
 

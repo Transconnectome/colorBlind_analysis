@@ -180,6 +180,8 @@
 | hV4 | 0.158 [0.069, 0.248] | 0.224 [0.119, 0.328] | 0.276 [0.008, 0.734] | 21/21/3 |
 
 > **Bootstrap 95% CIs** (10,000 iterations, pair-level resampling). In V2, HC-CVD RDM CI [0.414, 0.587] heavily overlaps with HC-HC CI [0.442, 0.592], confirming CVD subjects largely preserve color relationship structure ("parallel" pattern). In V1, HC-CVD upper bound (0.402) falls below HC-HC lower bound (0.357) only marginally, indicating less preservation in early visual cortex. CVD-CVD CIs are wide due to n=3 pairs (hV4: [0.008, 0.734]).
+>
+> **Noise ceiling context**: Phase 1 noise ceiling (split-half corrected) is V1=0.582, V2=0.635, V3=0.525, hV4=0.697. HC-HC RDM correlations in SRM space (V1=0.447, V2=0.517) reach 77–81% of noise ceiling, indicating SRM extracts most available color structure.
 
 ### Permutation Validation (1D: Pre-SRM Shuffling with Retraining, HC-Only SRM, 1000 iterations)
 
@@ -418,6 +420,7 @@ SRM 분석 결과가 alignment method artifact가 아님을 증명하기 위해,
 ### A5: PCA→CCA Replication — Alternative Alignment Validation
 
 **방법**: SRM 대신 PCA dimensionality reduction + CCA alignment으로 동일한 분석 재현.
+- **Dimensionality (k)**: Same as SRM — V1=4, V2=4, V3=3, hV4=3 (ensures dimensionality-matched comparison)
 - 모든 C(10,2)=45 subject pairs에 대해:
   - **PCA-only**: PCA(k) → Procrustes disparity (CCA 없이)
   - **PCA-CCA**: PCA(k) → CCA alignment → Procrustes disparity

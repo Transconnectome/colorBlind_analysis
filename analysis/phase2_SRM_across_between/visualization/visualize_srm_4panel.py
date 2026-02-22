@@ -28,6 +28,7 @@ OUTPUT_DIR.mkdir(exist_ok=True, parents=True)
 # ROI configuration
 ROIS = ['V1', 'V2', 'V3', 'hV4']
 ROIS_DISPLAY = ['V1', 'V2', 'V3', 'V4']  # For display
+K_VALUES = {'V1': 4, 'V2': 4, 'V3': 3, 'hV4': 3}  # SRM k-values (7-fold LOSO, mean rank aggregation)
 
 CVD_SUBJECTS = ['sub-08', 'sub-09', 'sub-10']
 CVD_TYPES = {'sub-08': 'Deutan', 'sub-09': 'Protan', 'sub-10': 'Deutan'}
@@ -252,7 +253,7 @@ def create_panel_C(loo_results, validation_data, ax):
     pca_cca_data = validation_data['pca_cca']
 
     # Method names and data sources
-    methods = ['Crossnobis\n(SRM-independent)', 'PCA-only\n(Alternative)', 'PCA-CCA\n(Alternative)']
+    methods = ['Crossnobis\n(SRM-independent)', 'PCA-only\n(k matched to SRM)', 'PCA-CCA\n(k matched to SRM)']
 
     # Plot only V1 and V2
     for roi_idx, roi in enumerate(['V1', 'V2']):
@@ -307,8 +308,10 @@ def create_panel_C(loo_results, validation_data, ax):
 
             # Formatting
             sub_ax.set_xlabel('SRM Disparity', fontsize=9, fontweight='bold')
+            roi_name = ['V1', 'V2'][roi_idx]
+            k_val = K_VALUES[roi_name]
             if method_idx == 0:
-                sub_ax.set_ylabel(f'{ROIS_DISPLAY[roi_idx]}\nDistance', fontsize=9, fontweight='bold')
+                sub_ax.set_ylabel(f'{ROIS_DISPLAY[roi_idx]} (k={k_val})\nDistance', fontsize=9, fontweight='bold')
             else:
                 sub_ax.set_ylabel('Distance', fontsize=9, fontweight='bold')
 
@@ -330,6 +333,11 @@ def create_panel_C(loo_results, validation_data, ax):
     legend_text = "● HC (n=7)   ▲ CVD (n=3)"
     ax.text(0.5, -0.02, legend_text, transform=ax.transAxes,
             fontsize=10, va='top', ha='center', fontweight='bold')
+
+    # Add k-value footnote
+    footnote = "Note: PCA/PCA-CCA use identical k-values as SRM (V1/V2=4, V3/hV4=3)"
+    ax.text(0.5, -0.08, footnote, transform=ax.transAxes,
+            fontsize=8, va='top', ha='center', style='italic', color='gray')
 
 
 def create_panel_D(validation_data, ax):

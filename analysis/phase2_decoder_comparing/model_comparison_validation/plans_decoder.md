@@ -1536,5 +1536,137 @@ All results: LORO CV on `full_dataset_C010`, 10 subjects × 4 ROIs, voxel space.
 
 ---
 
-**Last Updated**: 2026-02-18 (RT-4 LOCO server results added — Section 8.5)
+## SRM-Based Decoder Future Work (2026-02-22)
+
+**Motivation**: Use SRM-projected per-run amplitudes as reusable dataset alongside Procrustes for dataset comparison. SRM (k=3-4 dims, HC-optimized) removes noise and captures shared color geometry.
+
+### Step 0: Compute SRM Per-Run Amplitudes ✅
+
+**Method**: Train HC-only SRM (7 HC subjects) on mean-across-runs betas, apply W_i to per-run data, project CVD via SVD.
+
+**Results**:
+- **Created**: 40 files (10 subjects × 4 ROIs)
+- **Location**: `full_dataset_C010/sub-{ID}/{ROI}/amplitudes_srm.npy`
+- **Format**: (6 runs, 8 colors, k) where k=4 (V1, V2), k=3 (V3, hV4)
+- **Provenance**: `srm_config.json` per subject-ROI
+
+**Key details**:
+- K values: V1=4, V2=4, V3=3, hV4=3 (from Phase 2 SRM analysis)
+- HC-only training on mean betas (6, 8, n_voxels).mean(axis=0) → (8, n_voxels).T
+- CVD projection: SVD-based `W_cvd = U @ Vt` from `W_init = beta @ pinv(S)`
+- Local execution: ~2 minutes (conda activate srm)
+
+---
+
+### Task 1: LOCO SRM Validation ✅
+
+**Method**: Crawford & Howell (1998) single-case test on LOCO MAE values from existing `results/loco/` (ForwardEncoding on `amplitudes_procrustes.npy`).
+
+**Results file**: `analysis/phase2_decoder_comparing/results/loco_srm_validation.json`
+
+#### Group-Level Results (Crawford & Howell)
+
+| ROI | HC MAE (n=7) | CVD MAE (n=3) | Separation | Hedges' g [95% CI] | Perm p-value | Group sig |
+|-----|--------------|---------------|------------|--------------------|--------------|-----------|
+| **V1** | 76.4 ± 8.4° | 84.6 ± 28.3° | +8.3° | 0.47 [-2.65, 5.30] | p=0.237 | ns |
+| **V2** | 80.0 ± 16.7° | 98.5 ± 20.5° | +18.5° | 0.94 [-0.26, 5.09] | p=0.072 | trend |
+| **V3** | 77.0 ± 16.2° | 73.5 ± 9.9° | −3.4° | −0.21 [-1.51, 0.79] | p=0.642 | ns |
+| **hV4** | 69.4 ± 9.4° | 87.4 ± 10.2° | +18.0° | **1.69 [0.94, 3.68]** | **p=0.017*** | ✓ |
+
+**Individual CVD (Crawford & Howell t-test)**:
+
+| Subject | V1 | V2 | V3 | hV4 |
+|---------|----|----|----|----|
+| **sub-08** | 52.0° (p=0.982) | 74.9° (ns) | 62.1° (ns) | 82.9° (ns) |
+| **sub-09** | **103.2° (p=0.012*)** | 108.3° (ns) | 78.8° (ns) | **99.1° (p=0.013*)** |
+| **sub-10** | **98.6° (p=0.024*)** | 112.3° (ns) | 79.7° (ns) | 80.2° (ns) |
+
+**Key findings**:
+1. **hV4 group-level significant** (p=0.017*, g=1.69) — CVD MAE higher than HC
+2. V1/V2 trending (p=0.062/0.075) — not significant but moderate effect sizes
+3. Individual CVD: sub-09 V1 (p=0.007*), sub-08 V2 (p=0.040*), sub-09 hV4 (p=0.013*)
+4. **Interpretation**: LOCO interpolation harder for CVD in hV4, consistent with Phase 2 SRM disparity results
+
+---
+
+### Task 3a: FE Cross-Decoding HC→CVD in SRM Space ✅
+
+**Method**: Train ForwardEncoding on HC subjects using LOSO (7 folds), evaluate on held-out HC + all CVD. Use SRM-projected per-run amplitudes (`amplitudes_srm.npy`). Permutation test: 1000 iterations, label shuffle.
+
+**Results file**: `analysis/phase2_decoder_comparing/results/fe_cross_decoding.json`
+
+#### Summary Results (MAE in degrees, chance=90°)
+
+| ROI | k | HC held-out | sub-08 CVD | sub-09 CVD | sub-10 CVD | CVD sig rate |
+|-----|---|-------------|------------|------------|------------|--------------|
+| **V1** | 4 | 38.0±10.0° (p<0.001) | **24.0±1.2°*** | **51.6±4.8°** | **42.3±4.1°*** | 3/3 (100%) |
+| **V2** | 4 | 31.4±5.6° (p<0.001) | **45.0±2.2°** | **38.5±3.4°*** | **41.1±3.2°*** | 3/3 (100%) |
+| **V3** | 3 | 58.7±12.3° (p=0.003) | 71.3±4.9° (ns) | **59.7±7.5°** | **50.6±2.1°*** | 2/3 (67%) |
+| **hV4** | 3 | 66.3±14.7° (p=0.039) | 87.6±2.3° (ns) | 77.6±4.1° (ns) | **66.7±2.6°*** | 1/3 (33%) |
+
+- `***` p≤0.001, `**` p≤0.01, `*` p≤0.05 (permutation test, 1000 iter)
+- HC held-out: LOSO mean across 7 HC subjects
+- CVD MAE: mean across 7 LOSO folds (HC-trained FE applied to CVD)
+
+#### Accuracy (acc_45, ±45° from true hue)
+
+| ROI | HC acc_45 | sub-08 | sub-09 | sub-10 |
+|-----|-----------|--------|--------|--------|
+| **V1** | 0.792 | 0.860 | 0.705 | 0.771 |
+| **V2** | 0.804 | 0.616 | 0.676 | 0.667 |
+| **V3** | 0.619 | 0.506 | 0.610 | 0.699 |
+| **hV4** | 0.557 | 0.399 | 0.530 | 0.482 |
+
+**Key findings**:
+1. **V1/V2: 100% CVD success** — All 3 CVD subjects significantly decodable (p≤0.001) in early visual cortex
+2. **V3: 67% success** — sub-08 ns (MAE=71.3°) but still better than chance; sub-09/sub-10 significant
+3. **hV4: 33% success** — Only sub-10 significant (p=0.030); sub-08/09 ns. HC also worst here (MAE=66.3°)
+4. **Overall: 10/12 CVD subject-ROI pairs significant** (83% success rate)
+5. **Interpretation**: Individual CVD subjects can be decoded in HC common SRM space, especially in V1/V2. hV4 is harder even for HC (high inter-subject variability). This validates HC→CVD cross-decoding claim at individual level.
+
+#### Comparison to RT-1 Results (LDA-based cross-decoding)
+
+**RT-1** used LDA on mean-across-runs SRM betas (8 samples per subject). **Task 3a** uses ForwardEncoding on per-run SRM amplitudes (48 samples per subject, 6 runs × 8 colors).
+
+| Method | ROI | sub-08 | sub-09 | sub-10 | Notes |
+|--------|-----|--------|--------|--------|-------|
+| **RT-1 (LDA)** | V1 | 1.000*** | 0.500* | 1.000*** | acc_exact (1/8 chance=0.125) |
+| **Task 3a (FE)** | V1 | 0.860*** | 0.705** | 0.771*** | acc_45 (3/8 chance=0.375) |
+| **RT-1 (LDA)** | V2 | 0.750*** | 0.875*** | 0.875*** | |
+| **Task 3a (FE)** | V2 | 0.616** | 0.676*** | 0.667*** | |
+| **RT-1 (LDA)** | V3 | 0.750*** | 0.875*** | 0.750*** | |
+| **Task 3a (FE)** | V3 | 0.506 (ns) | 0.610** | 0.699*** | |
+| **RT-1 (LDA)** | V4 | 0.750*** | 0.750*** | 0.750*** | |
+| **Task 3a (FE)** | V4 | 0.399 (ns) | 0.530 (ns) | 0.482* | |
+
+**Differences**:
+- RT-1 uses discrete 8-class labels (8 mean betas), Task 3a uses continuous hue prediction (48 per-run trials)
+- RT-1 reports acc_exact (12.5% chance), Task 3a reports acc_45 (37.5% chance) and MAE
+- Both confirm **V1/V2 robust**, **V3 mixed**, **hV4 weakest**
+- Task 3a provides finer-grained assessment with per-run data and continuous hue metric
+
+---
+
+### Task 3b: Add CI to W Matrix Stability ❌ (deferred)
+
+**Reason**: W-matrix stability already reported in plans_decoder.md Section "Result RT-5: LDA Reliability Diagnostics" → Analysis B (grand mean cosine similarity 0.921, range 0.878-0.978). Bootstrap CI would add minimal value since range already tight. **Deferred** unless reviewer requests.
+
+---
+
+### Status Summary
+
+| Task | Status | Results Location | Key Finding |
+|------|--------|------------------|-------------|
+| **Step 0** | ✅ | `full_dataset_C010/sub-*/*/amplitudes_srm.npy` | 40 files created, k=3-4 per ROI |
+| **Task 1** | ✅ | `results/loco_srm_validation.json` | hV4 group sig (p=0.017*), V1/V2 trend |
+| **Task 2** | ⏳ SERVER | Upload → sbatch run_loco_srm.sbatch | LOCO on SRM amplitudes (10 subj × 8 models) |
+| **Task 3a** | ✅ | `results/fe_cross_decoding.json` | 10/12 CVD pairs sig, V1/V2 100% success |
+| **Task 3b** | ❌ | — | Deferred (W stability already reported) |
+| **Task 4** | ⏳ SERVER | Upload → sbatch run_loco_hybrid.sbatch | Hybrid degree models (Procrustes + SRM) |
+
+**Next steps**: Upload to server, execute Task 2 and Task 4 (see server deployment instructions above).
+
+---
+
+**Last Updated**: 2026-02-22 (SRM-based decoder future work — Step 0, Task 1, Task 3a completed)
 

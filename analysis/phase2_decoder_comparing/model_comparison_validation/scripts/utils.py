@@ -173,7 +173,9 @@ def is_nonlinear_model(model_name):
 def uses_labels(model_name):
     """Check if model uses discrete labels (vs continuous hue)"""
     label_models = ['LDA', 'SVM', 'MLP', 'ForwardEncoding', 'FE_MLP', 'FE_SVM',
-                    'HybridMLP', 'HybridSVR']
+                    'HybridMLP', 'HybridSVR',
+                    'FE_PopVec', 'FE_RidgeEnc', 'FE_GaussML', 'FE_RidgeReg',
+                    'FE_Ensemble', 'FE_EnsembleRidge', 'FE_EnsembleGaussML']
     return model_name in label_models
 
 
@@ -352,6 +354,95 @@ def get_model_architecture(model_name):
             'description': 'Stage 1: MultiOutput SVR maps voxels to 6 channel activations. '
                            'Stage 2: FE template matching selects best hue (0-359°). '
                            'SVR variant of the degree-based hybrid model.'
+        },
+        'FE_PopVec': {
+            'type': 'encoding_model',
+            'target': 'continuous hue (0-359°) via population vector',
+            'linearity': 'linear',
+            'description': 'FE encoding + population vector decoding. '
+                           'Circular weighted mean of 6 channel centers by response magnitude.'
+        },
+        'FE_RidgeEnc': {
+            'type': 'encoding_model',
+            'target': 'continuous hue (0-359°) via Ridge + correlation',
+            'linearity': 'linear',
+            'description': 'FE with Ridge-regularized encoding weights (alpha=1.0). '
+                           'Same correlation-based template matching as baseline FE.'
+        },
+        'FE_GaussML': {
+            'type': 'encoding_model',
+            'target': 'continuous hue (0-359°) via Gaussian ML',
+            'linearity': 'linear',
+            'description': 'FE encoding + Gaussian maximum likelihood decoding. '
+                           'Uses per-channel noise variance estimated from training residuals.'
+        },
+        'FE_RidgeReg': {
+            'type': 'encoding_model',
+            'target': 'continuous hue (0-359°) via Ridge regression',
+            'linearity': 'linear',
+            'description': 'FE encoding + Ridge regression from 6 channels to sin/cos hue. '
+                           'Learned channel-to-hue mapping instead of template matching.'
+        },
+        'FE_Ensemble': {
+            'type': 'encoding_model',
+            'target': 'continuous hue (0-359°) via per-run W ensemble',
+            'linearity': 'linear',
+            'description': 'Per-run W estimation (6 separate W matrices) + correlation-based '
+                           'template matching per W + circular mean of ensemble predictions.'
+        },
+        'FE_EnsembleRidge': {
+            'type': 'encoding_model',
+            'target': 'continuous hue (0-359°) via per-run Ridge W ensemble',
+            'linearity': 'linear',
+            'description': 'Per-run W with Ridge regularization (alpha=1.0) + correlation-based '
+                           'template matching per W + circular mean of ensemble predictions.'
+        },
+        'FE_EnsembleGaussML': {
+            'type': 'encoding_model',
+            'target': 'continuous hue (0-359°) via per-run W + Gaussian ML',
+            'linearity': 'linear',
+            'description': 'Per-run W estimation + within-color noise variance (from run-to-run '
+                           'variability) + Gaussian ML decoding on mean channel responses.'
+        },
+        'HybridMLP_Ensemble': {
+            'type': 'hybrid_ensemble',
+            'target': 'continuous hue (0-359°) via per-run MLP→6-channel→template',
+            'linearity': 'nonlinear encoder + ensemble',
+            'description': 'Per-run MLP regression (7 colors → 6 channel activations), '
+                           'then FE template matching per MLP, circular mean of 6 predictions. '
+                           'Tests per-run diversity to overcome MLP overfitting.'
+        },
+        'HybridSVR_Ensemble': {
+            'type': 'hybrid_ensemble',
+            'target': 'continuous hue (0-359°) via per-run SVR→6-channel→template',
+            'linearity': 'nonlinear encoder + ensemble',
+            'description': 'Per-run MultiOutput SVR (7 colors → 6 channel activations), '
+                           'then FE template matching per SVR, circular mean of 6 predictions. '
+                           'Tests per-run diversity to overcome SVR overfitting.'
+        },
+        'FE_Sequential': {
+            'type': 'encoding_model_sequential',
+            'target': 'continuous hue (0-359°) via incremental FE',
+            'linearity': 'linear',
+            'description': 'One W matrix trained sequentially via incremental data accumulation '
+                           '(run1 → run1+2 → ... → all 6 runs). Final W identical to pooled (42 samples), '
+                           'but learning process mimics continuous brain updates.'
+        },
+        'HybridMLP_Sequential': {
+            'type': 'hybrid_sequential',
+            'target': 'continuous hue (0-359°) via FE(pooled) + MLP(warm_start)',
+            'linearity': 'nonlinear readout + sequential',
+            'description': 'Stage 1: FE with pooled data (stable encoding). '
+                           'Stage 2: MLP with warm_start=True trains sequentially on run1, run2, ..., run6. '
+                           'Mimics continuous readout plasticity with stable representation.'
+        },
+        'HybridSVR_Sequential': {
+            'type': 'hybrid_sequential',
+            'target': 'continuous hue (0-359°) via FE(pooled) + SVR(incremental)',
+            'linearity': 'nonlinear readout + sequential',
+            'description': 'Stage 1: FE with pooled data (stable encoding). '
+                           'Stage 2: SVR trains incrementally (run1 → run1+2 → ... → all runs). '
+                           'SVR variant of sequential hybrid learning.'
         }
     }
     return architectures.get(model_name, {'type': 'unknown', 'target': 'unknown',
@@ -411,6 +502,63 @@ def get_model_defaults(model_name):
             'params': {'n_channels': 6, 'C': 1.0, 'epsilon': 0.1},
             'rationale': 'MultiOutput SVR to 6 channels + FE template matching. '
                          'RBF kernel, auto-scaled gamma.'
+        },
+        'FE_PopVec': {
+            'params': {'alpha': 0, 'n_channels': 6},
+            'rationale': 'Pseudoinverse encoding + population vector decoding (circular weighted mean).'
+        },
+        'FE_RidgeEnc': {
+            'params': {'alpha': 1.0, 'n_channels': 6},
+            'rationale': 'Ridge-regularized encoding (alpha=1.0) + correlation template matching.'
+        },
+        'FE_GaussML': {
+            'params': {'alpha': 0, 'n_channels': 6},
+            'rationale': 'Pseudoinverse encoding + Gaussian ML decoding with per-channel noise variance.'
+        },
+        'FE_RidgeReg': {
+            'params': {'alpha': 0, 'n_channels': 6, 'ridge_alpha': 1.0},
+            'rationale': 'Pseudoinverse encoding + Ridge regression from channels to sin/cos hue.'
+        },
+        'FE_Ensemble': {
+            'params': {'alpha': 0, 'n_channels': 6},
+            'rationale': 'Per-run pseudoinverse W (6 independent W matrices) + correlation '
+                         'template matching + circular mean ensemble.'
+        },
+        'FE_EnsembleRidge': {
+            'params': {'alpha': 1.0, 'n_channels': 6},
+            'rationale': 'Per-run Ridge W (alpha=1.0) + correlation template matching + '
+                         'circular mean ensemble.'
+        },
+        'FE_EnsembleGaussML': {
+            'params': {'alpha': 0, 'n_channels': 6},
+            'rationale': 'Per-run pseudoinverse W + within-color noise estimation + '
+                         'Gaussian ML decoding on mean channel responses.'
+        },
+        'HybridMLP_Ensemble': {
+            'params': {'n_channels': 6, 'hidden_layer_sizes': (64, 32), 'alpha': 0.1},
+            'rationale': 'Per-run MLP (7 colors/run → 6 channels) + FE template matching + '
+                         'circular mean ensemble. Tests per-run diversity vs pooled overfitting.'
+        },
+        'HybridSVR_Ensemble': {
+            'params': {'n_channels': 6, 'C': 1.0, 'epsilon': 0.1},
+            'rationale': 'Per-run MultiOutput SVR (7 colors/run → 6 channels) + FE template matching + '
+                         'circular mean ensemble. Tests per-run diversity vs pooled overfitting.'
+        },
+        'FE_Sequential': {
+            'params': {'alpha': 0, 'n_channels': 6},
+            'rationale': 'Pseudoinverse encoding with incremental training (run1 → run1+2 → ... → all). '
+                         'Final W identical to pooled (42 samples), sequential learning process.'
+        },
+        'HybridMLP_Sequential': {
+            'params': {'fe_alpha': 0, 'n_channels': 6,
+                       'hidden_layer_sizes': (64, 32), 'mlp_alpha': 0.1},
+            'rationale': 'FE pooled (alpha=0) + MLP warm_start sequential (run1→run2→...→run6). '
+                         'Two hidden layers (64, 32), moderate L2 regularization.'
+        },
+        'HybridSVR_Sequential': {
+            'params': {'fe_alpha': 0, 'n_channels': 6, 'C': 1.0, 'epsilon': 0.1},
+            'rationale': 'FE pooled (alpha=0) + SVR incremental (run1 → run1+2 → ... → all). '
+                         'MultiOutput SVR with RBF kernel, auto-scaled gamma.'
         }
     }
     return defaults.get(model_name, {'params': {}, 'rationale': 'unknown model'})

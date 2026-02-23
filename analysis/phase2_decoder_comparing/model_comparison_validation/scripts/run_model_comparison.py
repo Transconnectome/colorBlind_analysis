@@ -94,10 +94,10 @@ def load_amplitudes(baseline_dir, subject, roi, alignment='raw'):
         baseline_dir: Path to full_dataset_C010
         subject: Subject ID (e.g., '01')
         roi: ROI name (e.g., 'V1')
-        alignment: 'raw' or 'procrustes'
+        alignment: 'raw', 'procrustes', or 'srm'
 
     Returns:
-        amplitudes: (n_runs=6, n_colors=8, n_voxels) array
+        amplitudes: (n_runs=6, n_colors=8, n_features) array
     """
     subject_roi_dir = Path(baseline_dir) / f"sub-{subject}" / roi
 
@@ -105,6 +105,8 @@ def load_amplitudes(baseline_dir, subject, roi, alignment='raw'):
         amp_path = subject_roi_dir / "amplitudes_raw.npy"
     elif alignment == 'procrustes':
         amp_path = subject_roi_dir / "amplitudes_procrustes.npy"
+    elif alignment == 'srm':
+        amp_path = subject_roi_dir / "amplitudes_srm.npy"
     else:
         raise ValueError(f"Unknown alignment: {alignment}")
 
@@ -664,7 +666,9 @@ def loro_cv_generic(amplitudes, model_class, model_name, param_grid=None,
 
     # Determine if model uses labels or hue
     uses_labels = model_name in ['LDA', 'SVM', 'MLP', 'ForwardEncoding',
-                                  'FE_MLP', 'FE_SVM']
+                                  'FE_MLP', 'FE_SVM', 'FE_Ensemble']
+    # Models that output continuous hues (0-359°) instead of discrete labels
+    outputs_continuous = model_name in ['FE_Ensemble']
 
     for test_run in range(n_runs):
         # Split train/test
@@ -742,7 +746,11 @@ def loro_cv_generic(amplitudes, model_class, model_name, param_grid=None,
 
                     # Score (accuracy for label-based, MAE for hue-based)
                     if uses_labels:
-                        score = accuracy_score(y_tune_test, y_tune_pred)
+                        if outputs_continuous:
+                            y_tune_pred_labels = hue_to_labels(y_tune_pred)
+                            score = accuracy_score(y_tune_test, y_tune_pred_labels)
+                        else:
+                            score = accuracy_score(y_tune_test, y_tune_pred)
                     else:
                         y_tune_pred_labels = hue_to_labels(y_tune_pred)
                         y_tune_test_labels = hue_to_labels(y_tune_test)
@@ -764,7 +772,10 @@ def loro_cv_generic(amplitudes, model_class, model_name, param_grid=None,
 
         # Convert predictions to labels if needed
         if uses_labels:
-            y_pred_labels = y_pred
+            if outputs_continuous:
+                y_pred_labels = hue_to_labels(y_pred)
+            else:
+                y_pred_labels = y_pred
         else:
             y_pred_labels = hue_to_labels(y_pred)
 
@@ -846,6 +857,12 @@ def run_single_subject_roi(baseline_dir, subject, roi, alignment, models,
         'FE_SVM': (FESVMHybridDecoder, FESVMHybridDecoder.get_param_grid())
     }
 
+    # Lazy import of ensemble decoder to avoid circular import
+    # (run_loco_comparison.py imports from this file)
+    if 'FE_Ensemble' in models:
+        from run_loco_comparison import FE_EnsembleDecoder
+        model_map['FE_Ensemble'] = (FE_EnsembleDecoder, None)
+
     # Run each model
     for model_name in models:
         if model_name not in model_map:
@@ -898,7 +915,7 @@ def main():
                                 'ForwardEncoding', 'FE_MLP', 'FE_SVM'],
                        help='Models to compare')
     parser.add_argument('--alignment', type=str, default='both',
-                       choices=['raw', 'procrustes', 'nested_procrustes', 'both'],
+                       choices=['raw', 'procrustes', 'srm', 'nested_procrustes', 'both'],
                        help='Alignment condition')
     parser.add_argument('--dim_reduction', type=str, default=None,
                        choices=['anova', 'pca'],

@@ -74,6 +74,39 @@ create_basis_functions = _mod.create_basis_functions
 
 
 # ============================================================================
+# Circular Statistics Utilities
+# ============================================================================
+
+def circular_distance(y_true, y_pred):
+    """
+    Compute circular distance in degrees.
+
+    Args:
+        y_true: True hue angles (degrees, 0-359)
+        y_pred: Predicted hue angles (degrees, 0-359)
+
+    Returns:
+        Circular distance (0-180 degrees)
+    """
+    diff = np.abs(y_true - y_pred)
+    return np.minimum(diff, 360 - diff)
+
+
+def circular_mse(y_true, y_pred):
+    """
+    Circular mean squared error.
+
+    Args:
+        y_true: True hue angles (degrees, 0-359)
+        y_pred: Predicted hue angles (degrees, 0-359)
+
+    Returns:
+        Mean squared circular distance
+    """
+    return np.mean(circular_distance(y_true, y_pred) ** 2)
+
+
+# ============================================================================
 # Data Loading (extended for SRM alignment)
 # ============================================================================
 
@@ -308,6 +341,925 @@ class HybridDegreeSVRDecoder:
 
 
 # ============================================================================
+# Per-Run Ensemble FE Decoders
+# ============================================================================
+
+class FE_EnsembleDecoder:
+    """ForwardEncoding with per-run W estimation + ensemble prediction.
+
+    Instead of averaging 6 runs into mean patterns and fitting a single W,
+    fits W separately for each run (7 colors → W_run). At prediction time,
+    all 6 W's produce independent hue predictions, combined via circular mean.
+    """
+
+    def __init__(self, alpha=0, n_channels=6):
+        self.alpha = alpha
+        self.n_channels = n_channels
+        self.weights_list = None  # list of W per run
+        self.predict_basis = None
+
+    def _fit_single_w(self, patterns, labels):
+        """Fit encoding weights from a single run's patterns."""
+        basis_full = create_basis_functions(n_channels=self.n_channels)
+        train_hues = np.array([HUE_ANGLES[l] for l in labels])
+        C = basis_full[train_hues]
+        B = patterns
+
+        if self.alpha > 0:
+            W = np.linalg.solve(
+                C.T @ C + self.alpha * np.eye(self.n_channels),
+                C.T @ B
+            )
+        else:
+            W = np.linalg.pinv(C) @ B
+        return W
+
+    def fit(self, X, y_labels):
+        unique_labels = np.sort(np.unique(y_labels))
+        n_train_colors = len(unique_labels)
+        n_samples = X.shape[0]
+        n_runs = n_samples // n_train_colors
+
+        self.predict_basis = create_basis_functions(n_channels=self.n_channels)
+        self.weights_list = []
+
+        for r in range(n_runs):
+            run_X = X[r * n_train_colors : (r + 1) * n_train_colors]
+            run_labels = y_labels[r * n_train_colors : (r + 1) * n_train_colors]
+
+            # Sort by label to ensure consistent ordering
+            sort_idx = np.argsort(run_labels)
+            run_X = run_X[sort_idx]
+            run_labels = run_labels[sort_idx]
+
+            W = self._fit_single_w(run_X, run_labels)
+            self.weights_list.append(W)
+
+    def _predict_single(self, W, x):
+        """Predict hue for a single sample using one W."""
+        channel_response = W @ x
+        correlations = np.array([
+            np.corrcoef(channel_response, self.predict_basis[h])[0, 1]
+            if np.std(channel_response) > 1e-10 else 0.0
+            for h in range(360)
+        ])
+        return np.argmax(correlations)
+
+    def predict(self, X):
+        if self.weights_list is None:
+            raise RuntimeError("Model not fitted yet")
+
+        n_samples = X.shape[0]
+        y_pred_hues = np.zeros(n_samples, dtype=float)
+
+        for i in range(n_samples):
+            preds_rad = []
+            for W in self.weights_list:
+                h = self._predict_single(W, X[i])
+                preds_rad.append(np.deg2rad(h))
+
+            # Circular mean of ensemble predictions
+            x_mean = np.mean(np.cos(preds_rad))
+            y_mean = np.mean(np.sin(preds_rad))
+            y_pred_hues[i] = np.rad2deg(np.arctan2(y_mean, x_mean)) % 360
+
+        return y_pred_hues
+
+
+class FE_EnsembleRidgeDecoder(FE_EnsembleDecoder):
+    """Per-run W ensemble with Ridge-regularized encoding."""
+
+    def __init__(self, alpha=1.0, n_channels=6):
+        super().__init__(alpha=alpha, n_channels=n_channels)
+
+
+class FE_EnsembleGaussMLDecoder:
+    """Per-run W ensemble + Gaussian ML decoding with within-color noise.
+
+    Key difference from FE_GaussianMLDecoder: noise variance is estimated from
+    WITHIN-color run-to-run variability (6 runs × 7 colors = 42 observations),
+    not from across-color residuals (only 7 points).
+    """
+
+    def __init__(self, alpha=0, n_channels=6):
+        self.alpha = alpha
+        self.n_channels = n_channels
+        self.weights_list = None
+        self.predict_basis = None
+        self.noise_var = None  # (n_channels,) within-color noise
+        self.scale = None      # (n_channels,) mean channel magnitude
+
+    def fit(self, X, y_labels):
+        unique_labels = np.sort(np.unique(y_labels))
+        n_train_colors = len(unique_labels)
+        n_samples = X.shape[0]
+        n_runs = n_samples // n_train_colors
+
+        basis_full = create_basis_functions(n_channels=self.n_channels)
+        self.predict_basis = basis_full
+        train_hues = np.array([HUE_ANGLES[l] for l in unique_labels])
+
+        # Step 1: Fit per-run W
+        self.weights_list = []
+        for r in range(n_runs):
+            run_X = X[r * n_train_colors : (r + 1) * n_train_colors]
+            run_labels = y_labels[r * n_train_colors : (r + 1) * n_train_colors]
+            sort_idx = np.argsort(run_labels)
+            run_X = run_X[sort_idx]
+            run_labels = run_labels[sort_idx]
+
+            C = basis_full[np.array([HUE_ANGLES[l] for l in run_labels])]
+            B = run_X
+            if self.alpha > 0:
+                W = np.linalg.solve(
+                    C.T @ C + self.alpha * np.eye(self.n_channels),
+                    C.T @ B
+                )
+            else:
+                W = np.linalg.pinv(C) @ B
+            self.weights_list.append(W)
+
+        # Step 2: Estimate within-color noise from run-to-run variability
+        # For each color, compute channel responses across 6 runs → variance
+        all_channel_responses = np.zeros((n_runs, n_train_colors, self.n_channels))
+        for r, W in enumerate(self.weights_list):
+            run_X = X[r * n_train_colors : (r + 1) * n_train_colors]
+            run_labels = y_labels[r * n_train_colors : (r + 1) * n_train_colors]
+            sort_idx = np.argsort(run_labels)
+            run_X = run_X[sort_idx]
+            all_channel_responses[r] = (W @ run_X.T).T  # (n_train_colors, n_channels)
+
+        # Within-color variance: var across runs for each color, then average
+        # all_channel_responses: (n_runs, n_colors, n_channels)
+        per_color_var = np.var(all_channel_responses, axis=0)  # (n_colors, n_channels)
+        self.noise_var = np.mean(per_color_var, axis=0)  # (n_channels,)
+        self.noise_var = np.maximum(self.noise_var, 1e-10)
+
+        # Step 3: Estimate scale from mean channel responses vs expected basis
+        mean_channel = np.mean(all_channel_responses, axis=0)  # (n_colors, n_channels)
+        expected = basis_full[train_hues]  # (n_colors, n_channels)
+        # Per-channel scale
+        expected_abs_mean = np.mean(np.abs(expected), axis=0) + 1e-10
+        observed_abs_mean = np.mean(np.abs(mean_channel), axis=0)
+        self.scale = observed_abs_mean / expected_abs_mean
+
+    def predict(self, X):
+        if self.weights_list is None:
+            raise RuntimeError("Model not fitted yet")
+
+        n_samples = X.shape[0]
+        y_pred_hues = np.zeros(n_samples)
+        inv_var = 1.0 / self.noise_var
+
+        for i in range(n_samples):
+            # Ensemble: average channel responses across all W's
+            channel_responses = np.array([W @ X[i] for W in self.weights_list])
+            obs = np.mean(channel_responses, axis=0)  # (n_channels,)
+
+            # Gaussian ML: argmax log-likelihood
+            log_liks = np.zeros(360)
+            for h in range(360):
+                template = self.predict_basis[h] * self.scale
+                diff = obs - template
+                log_liks[h] = -0.5 * np.sum(diff**2 * inv_var)
+            y_pred_hues[i] = np.argmax(log_liks)
+
+        return y_pred_hues
+
+
+# ============================================================================
+# Per-Run Ensemble Hybrid Degree Models
+# ============================================================================
+
+class HybridMLP_Ensemble:
+    """Per-run MLP → 6 channels + ensemble prediction.
+
+    Each run trains an independent MLP regressor (7 colors → 6 channel activations).
+    At prediction time, all 6 MLPs produce channel predictions, which are ensembled
+    via circular mean after template matching.
+
+    Tests whether per-run diversity helps MLP overcome small-sample overfitting
+    (7 training colors/run vs 42 pooled).
+    """
+
+    def __init__(self, n_channels=6, hidden_layer_sizes=(64, 32), alpha=0.1):
+        self.n_channels = n_channels
+        self.hidden_layer_sizes = hidden_layer_sizes
+        self.alpha = alpha
+        self.mlp_list = None
+        self.basis_full = None
+
+    def fit(self, X, y_labels):
+        """
+        Args:
+            X: (n_samples, n_features) — n_samples = n_runs × n_train_colors
+            y_labels: (n_samples,) color labels (subset of 0-7)
+        """
+        unique_labels = np.sort(np.unique(y_labels))
+        n_train_colors = len(unique_labels)
+        n_samples = X.shape[0]
+        n_runs = n_samples // n_train_colors
+
+        self.basis_full = create_basis_functions(n_channels=self.n_channels)
+        self.mlp_list = []
+
+        for r in range(n_runs):
+            run_X = X[r * n_train_colors : (r + 1) * n_train_colors]
+            run_labels = y_labels[r * n_train_colors : (r + 1) * n_train_colors]
+
+            # Sort by label for consistency
+            sort_idx = np.argsort(run_labels)
+            run_X = run_X[sort_idx]
+            run_labels = run_labels[sort_idx]
+
+            # Target: basis functions at training color hues
+            targets = np.array([self.basis_full[HUE_ANGLES[int(l)]] for l in run_labels])
+
+            # Train MLP for this run
+            mlp = MLPRegressor(
+                hidden_layer_sizes=self.hidden_layer_sizes,
+                alpha=self.alpha,
+                activation='relu',
+                solver='adam',
+                learning_rate='adaptive',
+                max_iter=500,
+                early_stopping=True,
+                validation_fraction=0.2,
+                random_state=42,
+            )
+            mlp.fit(run_X, targets)
+            self.mlp_list.append(mlp)
+
+    def _predict_single(self, mlp, x):
+        """Predict hue for a single sample using one MLP."""
+        channel_pred = mlp.predict(x.reshape(1, -1))[0]  # (6,)
+
+        # Template matching
+        correlations = np.array([
+            np.corrcoef(channel_pred, self.basis_full[h])[0, 1]
+            if np.std(channel_pred) > 1e-10 else 0.0
+            for h in range(360)
+        ])
+        return np.argmax(correlations)
+
+    def predict(self, X):
+        """Returns: (n_samples,) predicted HUE ANGLES (0-359°)"""
+        if self.mlp_list is None:
+            raise RuntimeError("Model not fitted yet")
+
+        n_samples = X.shape[0]
+        y_pred_hues = np.zeros(n_samples, dtype=float)
+
+        for i in range(n_samples):
+            preds_rad = []
+            for mlp in self.mlp_list:
+                h = self._predict_single(mlp, X[i])
+                preds_rad.append(np.deg2rad(h))
+
+            # Circular mean of ensemble predictions
+            x_mean = np.mean(np.cos(preds_rad))
+            y_mean = np.mean(np.sin(preds_rad))
+            y_pred_hues[i] = np.rad2deg(np.arctan2(y_mean, x_mean)) % 360
+
+        return y_pred_hues
+
+
+class HybridSVR_Ensemble:
+    """Per-run SVR → 6 channels + ensemble prediction.
+
+    Each run trains an independent MultiOutput SVR (7 colors → 6 channel activations).
+    At prediction time, all 6 SVRs produce channel predictions, which are ensembled
+    via circular mean after template matching.
+
+    Tests whether per-run diversity helps SVR overcome small-sample overfitting
+    (7 training colors/run vs 42 pooled).
+    """
+
+    def __init__(self, n_channels=6, C=1.0, epsilon=0.1):
+        self.n_channels = n_channels
+        self.C = C
+        self.epsilon = epsilon
+        self.svr_list = None
+        self.basis_full = None
+
+    def fit(self, X, y_labels):
+        """
+        Args:
+            X: (n_samples, n_features) — n_samples = n_runs × n_train_colors
+            y_labels: (n_samples,) color labels (subset of 0-7)
+        """
+        unique_labels = np.sort(np.unique(y_labels))
+        n_train_colors = len(unique_labels)
+        n_samples = X.shape[0]
+        n_runs = n_samples // n_train_colors
+
+        self.basis_full = create_basis_functions(n_channels=self.n_channels)
+        self.svr_list = []
+
+        for r in range(n_runs):
+            run_X = X[r * n_train_colors : (r + 1) * n_train_colors]
+            run_labels = y_labels[r * n_train_colors : (r + 1) * n_train_colors]
+
+            # Sort by label for consistency
+            sort_idx = np.argsort(run_labels)
+            run_X = run_X[sort_idx]
+            run_labels = run_labels[sort_idx]
+
+            # Target: basis functions at training color hues
+            targets = np.array([self.basis_full[HUE_ANGLES[int(l)]] for l in run_labels])
+
+            # Train SVR for this run
+            svr = MultiOutputRegressor(
+                SVR(C=self.C, epsilon=self.epsilon, kernel='rbf', gamma='scale')
+            )
+            svr.fit(run_X, targets)
+            self.svr_list.append(svr)
+
+    def _predict_single(self, svr, x):
+        """Predict hue for a single sample using one SVR."""
+        channel_pred = svr.predict(x.reshape(1, -1))[0]  # (6,)
+
+        # Template matching
+        correlations = np.array([
+            np.corrcoef(channel_pred, self.basis_full[h])[0, 1]
+            if np.std(channel_pred) > 1e-10 else 0.0
+            for h in range(360)
+        ])
+        return np.argmax(correlations)
+
+    def predict(self, X):
+        """Returns: (n_samples,) predicted HUE ANGLES (0-359°)"""
+        if self.svr_list is None:
+            raise RuntimeError("Model not fitted yet")
+
+        n_samples = X.shape[0]
+        y_pred_hues = np.zeros(n_samples, dtype=float)
+
+        for i in range(n_samples):
+            preds_rad = []
+            for svr in self.svr_list:
+                h = self._predict_single(svr, X[i])
+                preds_rad.append(np.deg2rad(h))
+
+            # Circular mean of ensemble predictions
+            x_mean = np.mean(np.cos(preds_rad))
+            y_mean = np.mean(np.sin(preds_rad))
+            y_pred_hues[i] = np.rad2deg(np.arctan2(y_mean, x_mean)) % 360
+
+        return y_pred_hues
+
+
+# ============================================================================
+# Sequential Training Models (One model, incremental updates)
+# ============================================================================
+
+class ForwardEncodingSequential:
+    """
+    ForwardEncoding with sequential/incremental training.
+
+    Instead of averaging 6 runs or creating 6 independent models,
+    trains a single W matrix by incrementally accumulating data:
+    run1 → run1+2 → run1+2+3 → ... → all 6 runs
+
+    This mimics continuous learning where the model updates as new data arrives.
+    Final W is identical to pooled training (42 samples), but the learning
+    process is sequential.
+    """
+
+    def __init__(self, alpha=0, n_channels=6):
+        self.alpha = alpha
+        self.n_channels = n_channels
+        self.weights = None
+        self.predict_basis = None
+
+    def fit(self, X, y_labels):
+        """
+        Args:
+            X: (n_samples, n_features) — n_samples = n_runs × n_train_colors
+            y_labels: (n_samples,) color labels (subset of 0-7)
+        """
+        unique_labels = np.sort(np.unique(y_labels))
+        n_train_colors = len(unique_labels)
+        n_samples = X.shape[0]
+        n_runs = n_samples // n_train_colors
+
+        basis_full = create_basis_functions(n_channels=self.n_channels)
+        self.predict_basis = basis_full
+
+        # Sequential training: accumulate data run-by-run
+        for r in range(n_runs):
+            # Accumulated data up to current run
+            X_so_far = X[: (r + 1) * n_train_colors]
+            y_so_far = y_labels[: (r + 1) * n_train_colors]
+
+            # Group by label and average within accumulated data
+            mean_patterns = np.zeros((n_train_colors, X.shape[1]))
+            for i, label in enumerate(unique_labels):
+                mask = y_so_far == label
+                if np.any(mask):
+                    mean_patterns[i] = X_so_far[mask].mean(axis=0)
+
+            # Build basis from training colors
+            train_hues = np.array([HUE_ANGLES[l] for l in unique_labels])
+            train_basis = basis_full[train_hues]
+
+            # Update W with accumulated data
+            C = train_basis
+            B = mean_patterns
+
+            if self.alpha > 0:
+                self.weights = np.linalg.solve(
+                    C.T @ C + self.alpha * np.eye(self.n_channels),
+                    C.T @ B
+                )
+            else:
+                self.weights = np.linalg.pinv(C) @ B
+
+    def predict(self, X):
+        """Returns: (n_samples,) predicted HUE ANGLES (0-359°)"""
+        if self.weights is None:
+            raise RuntimeError("Model not fitted yet")
+
+        channel_responses = self.weights @ X.T  # (n_channels, n_samples)
+        n_samples = X.shape[0]
+        y_pred_hues = np.zeros(n_samples, dtype=float)
+
+        for i in range(n_samples):
+            predicted_response = channel_responses[:, i]
+            # Template matching against all 360 hues
+            correlations = np.array([
+                np.corrcoef(predicted_response, self.predict_basis[h])[0, 1]
+                if np.std(predicted_response) > 1e-10 else 0.0
+                for h in range(360)
+            ])
+            y_pred_hues[i] = np.argmax(correlations)
+
+        return y_pred_hues
+
+
+class HybridMLPSequential:
+    """
+    ForwardEncoding (pooled) + MLP (sequential training with warm_start).
+
+    Stage 1: ForwardEncoding extracts 6-channel responses using pooled data (42 samples)
+    Stage 2: MLP trains sequentially on run1, then run2, ..., run6 using warm_start=True
+
+    This mimics how the brain might continuously update its readout while the
+    encoding structure remains stable.
+    """
+
+    def __init__(self, fe_alpha=0, n_channels=6,
+                 hidden_layer_sizes=(64, 32), mlp_alpha=0.1):
+        self.fe_alpha = fe_alpha
+        self.n_channels = n_channels
+        self.hidden_layer_sizes = hidden_layer_sizes
+        self.mlp_alpha = mlp_alpha
+        self.weights = None  # FE weights
+        self.mlp = None
+        self.basis_full = None
+
+    def fit(self, X, y_labels):
+        """
+        Args:
+            X: (n_samples, n_features) — n_samples = n_runs × n_train_colors
+            y_labels: (n_samples,) color labels (subset of 0-7)
+        """
+        unique_labels = np.sort(np.unique(y_labels))
+        n_train_colors = len(unique_labels)
+        n_samples = X.shape[0]
+        n_runs = n_samples // n_train_colors
+
+        # Stage 1: FE encoding with pooled data (like ForwardEncodingSequential final W)
+        self.basis_full = create_basis_functions(n_channels=self.n_channels)
+
+        # Pooled training for FE
+        mean_patterns = np.zeros((n_train_colors, X.shape[1]))
+        for i, label in enumerate(unique_labels):
+            mask = y_labels == label
+            mean_patterns[i] = X[mask].mean(axis=0)
+
+        train_hues = np.array([HUE_ANGLES[l] for l in unique_labels])
+        train_basis = self.basis_full[train_hues]
+
+        C = train_basis
+        B = mean_patterns
+
+        if self.fe_alpha > 0:
+            self.weights = np.linalg.solve(
+                C.T @ C + self.fe_alpha * np.eye(self.n_channels),
+                C.T @ B
+            )
+        else:
+            self.weights = np.linalg.pinv(C) @ B
+
+        # Extract 6-channel responses for all samples
+        channel_responses = self.weights @ X.T  # (n_channels, n_samples)
+        channel_responses = channel_responses.T  # (n_samples, n_channels)
+
+        # Stage 2: MLP sequential training with warm_start
+        self.mlp = MLPRegressor(
+            hidden_layer_sizes=self.hidden_layer_sizes,
+            alpha=self.mlp_alpha,
+            activation='relu',
+            solver='adam',
+            learning_rate='adaptive',
+            max_iter=500,
+            warm_start=True,  # Enable sequential learning
+            random_state=42,
+        )
+
+        # Sequential training run-by-run
+        for r in range(n_runs):
+            run_channels = channel_responses[r * n_train_colors : (r + 1) * n_train_colors]
+            run_labels = y_labels[r * n_train_colors : (r + 1) * n_train_colors]
+
+            # Target: basis function values at true hue angles
+            targets = np.array([self.basis_full[HUE_ANGLES[int(l)]] for l in run_labels])
+
+            # Sequential fit (updates existing weights when warm_start=True)
+            self.mlp.fit(run_channels, targets)
+
+    def predict(self, X):
+        """Returns: (n_samples,) predicted HUE ANGLES (0-359°)"""
+        if self.weights is None or self.mlp is None:
+            raise RuntimeError("Model not fitted yet")
+
+        # Stage 1: Extract channel responses
+        channel_responses = self.weights @ X.T  # (n_channels, n_samples)
+        channel_responses = channel_responses.T  # (n_samples, n_channels)
+
+        # Stage 2: MLP predicts 6-channel targets
+        channel_pred = self.mlp.predict(channel_responses)  # (n_samples, 6)
+
+        # Stage 3: Template matching
+        n_samples = X.shape[0]
+        y_pred_hues = np.zeros(n_samples, dtype=float)
+
+        for i in range(n_samples):
+            correlations = np.array([
+                np.corrcoef(channel_pred[i], self.basis_full[h])[0, 1]
+                if np.std(channel_pred[i]) > 1e-10 else 0.0
+                for h in range(360)
+            ])
+            y_pred_hues[i] = np.argmax(correlations)
+
+        return y_pred_hues
+
+
+class HybridSVRSequential:
+    """
+    ForwardEncoding (pooled) + SVR (incremental data accumulation).
+
+    Stage 1: ForwardEncoding extracts 6-channel responses using pooled data (42 samples)
+    Stage 2: SVR trains incrementally (run1 → run1+2 → ... → all runs)
+
+    Note: SVR doesn't support warm_start, so we use incremental data accumulation
+    (refit with growing dataset). Final model sees all data, but training is sequential.
+    """
+
+    def __init__(self, fe_alpha=0, n_channels=6, C=1.0, epsilon=0.1):
+        self.fe_alpha = fe_alpha
+        self.n_channels = n_channels
+        self.C = C
+        self.epsilon = epsilon
+        self.weights = None  # FE weights
+        self.svr = None
+        self.basis_full = None
+
+    def fit(self, X, y_labels):
+        """
+        Args:
+            X: (n_samples, n_features) — n_samples = n_runs × n_train_colors
+            y_labels: (n_samples,) color labels (subset of 0-7)
+        """
+        unique_labels = np.sort(np.unique(y_labels))
+        n_train_colors = len(unique_labels)
+        n_samples = X.shape[0]
+        n_runs = n_samples // n_train_colors
+
+        # Stage 1: FE encoding with pooled data
+        self.basis_full = create_basis_functions(n_channels=self.n_channels)
+
+        mean_patterns = np.zeros((n_train_colors, X.shape[1]))
+        for i, label in enumerate(unique_labels):
+            mask = y_labels == label
+            mean_patterns[i] = X[mask].mean(axis=0)
+
+        train_hues = np.array([HUE_ANGLES[l] for l in unique_labels])
+        train_basis = self.basis_full[train_hues]
+
+        C_matrix = train_basis
+        B_matrix = mean_patterns
+
+        if self.fe_alpha > 0:
+            self.weights = np.linalg.solve(
+                C_matrix.T @ C_matrix + self.fe_alpha * np.eye(self.n_channels),
+                C_matrix.T @ B_matrix
+            )
+        else:
+            self.weights = np.linalg.pinv(C_matrix) @ B_matrix
+
+        # Extract 6-channel responses for all samples
+        channel_responses = self.weights @ X.T  # (n_channels, n_samples)
+        channel_responses = channel_responses.T  # (n_samples, n_channels)
+
+        # Stage 2: SVR incremental training (accumulate data run-by-run)
+        for r in range(n_runs):
+            # Accumulated data up to current run
+            channels_so_far = channel_responses[: (r + 1) * n_train_colors]
+            labels_so_far = y_labels[: (r + 1) * n_train_colors]
+
+            # Target: basis function values at true hue angles
+            targets_so_far = np.array([
+                self.basis_full[HUE_ANGLES[int(l)]] for l in labels_so_far
+            ])
+
+            # Refit SVR with accumulated data
+            self.svr = MultiOutputRegressor(
+                SVR(C=self.C, epsilon=self.epsilon, kernel='rbf', gamma='scale')
+            )
+            self.svr.fit(channels_so_far, targets_so_far)
+
+    def predict(self, X):
+        """Returns: (n_samples,) predicted HUE ANGLES (0-359°)"""
+        if self.weights is None or self.svr is None:
+            raise RuntimeError("Model not fitted yet")
+
+        # Stage 1: Extract channel responses
+        channel_responses = self.weights @ X.T  # (n_channels, n_samples)
+        channel_responses = channel_responses.T  # (n_samples, n_channels)
+
+        # Stage 2: SVR predicts 6-channel targets
+        channel_pred = self.svr.predict(channel_responses)  # (n_samples, 6)
+
+        # Stage 3: Template matching
+        n_samples = X.shape[0]
+        y_pred_hues = np.zeros(n_samples, dtype=float)
+
+        for i in range(n_samples):
+            correlations = np.array([
+                np.corrcoef(channel_pred[i], self.basis_full[h])[0, 1]
+                if np.std(channel_pred[i]) > 1e-10 else 0.0
+                for h in range(360)
+            ])
+            y_pred_hues[i] = np.argmax(correlations)
+
+        return y_pred_hues
+
+
+# ============================================================================
+# Alternative FE Decoding Methods (Single-W, deprecated — see Result 7)
+# ============================================================================
+
+class FE_PopulationVectorDecoder:
+    """ForwardEncoding + Population Vector decoding (circular weighted mean)"""
+
+    def __init__(self, alpha=0, n_channels=6):
+        self.alpha = alpha
+        self.n_channels = n_channels
+        self.weights = None
+        self.channel_centers = None
+
+    def fit(self, X, y_labels):
+        unique_labels = np.sort(np.unique(y_labels))
+        n_train_colors = len(unique_labels)
+        n_voxels = X.shape[1]
+
+        mean_patterns = np.zeros((n_train_colors, n_voxels))
+        for i, label in enumerate(unique_labels):
+            mask = y_labels == label
+            mean_patterns[i] = X[mask].mean(axis=0)
+
+        basis_full = create_basis_functions(n_channels=self.n_channels)
+        train_hues = np.array([HUE_ANGLES[l] for l in unique_labels])
+        train_basis = basis_full[train_hues]
+
+        C = train_basis
+        B = mean_patterns
+
+        if self.alpha > 0:
+            self.weights = np.linalg.solve(
+                C.T @ C + self.alpha * np.eye(self.n_channels),
+                C.T @ B
+            )
+        else:
+            self.weights = np.linalg.pinv(C) @ B
+
+        self.channel_centers = np.linspace(0, 360, self.n_channels, endpoint=False)
+
+    def predict(self, X):
+        channel_responses = self.weights @ X.T  # (6, n_samples)
+        n_samples = X.shape[0]
+        y_pred_hues = np.zeros(n_samples)
+
+        for i in range(n_samples):
+            r = np.maximum(channel_responses[:, i], 0)  # half-wave rectify
+            if r.sum() < 1e-10:
+                y_pred_hues[i] = 0
+                continue
+            angles_rad = np.deg2rad(self.channel_centers)
+            x_mean = np.sum(r * np.cos(angles_rad)) / np.sum(r)
+            y_mean = np.sum(r * np.sin(angles_rad)) / np.sum(r)
+            y_pred_hues[i] = np.rad2deg(np.arctan2(y_mean, x_mean)) % 360
+
+        return y_pred_hues
+
+
+class FE_RidgeEncodingDecoder:
+    """ForwardEncoding with Ridge-regularized encoding weights, correlation decoding"""
+
+    def __init__(self, alpha=1.0, n_channels=6):
+        self.alpha = alpha
+        self.n_channels = n_channels
+        self.weights = None
+        self.predict_basis = None
+
+    def fit(self, X, y_labels):
+        unique_labels = np.sort(np.unique(y_labels))
+        n_train_colors = len(unique_labels)
+        n_voxels = X.shape[1]
+
+        mean_patterns = np.zeros((n_train_colors, n_voxels))
+        for i, label in enumerate(unique_labels):
+            mask = y_labels == label
+            mean_patterns[i] = X[mask].mean(axis=0)
+
+        basis_full = create_basis_functions(n_channels=self.n_channels)
+        train_hues = np.array([HUE_ANGLES[l] for l in unique_labels])
+        train_basis = basis_full[train_hues]
+
+        self.predict_basis = basis_full
+
+        C = train_basis
+        B = mean_patterns
+        # Always use Ridge regularization
+        self.weights = np.linalg.solve(
+            C.T @ C + self.alpha * np.eye(self.n_channels),
+            C.T @ B
+        )
+
+    def predict(self, X):
+        """Correlation-based template matching (same as LOCOForwardEncodingDecoder)"""
+        if self.weights is None:
+            raise RuntimeError("Model not fitted yet")
+
+        channel_responses = self.weights @ X.T
+        n_samples = X.shape[0]
+        y_pred_hues = np.zeros(n_samples, dtype=float)
+
+        for i in range(n_samples):
+            predicted_response = channel_responses[:, i]
+            correlations = []
+            for hue in range(360):
+                template = self.predict_basis[hue]
+                corr_matrix = np.corrcoef(predicted_response, template)
+                if corr_matrix.shape == (2, 2):
+                    corr = corr_matrix[0, 1]
+                else:
+                    corr = np.dot(predicted_response, template) / (
+                        np.linalg.norm(predicted_response) * np.linalg.norm(template) + 1e-10
+                    )
+                correlations.append(corr)
+            y_pred_hues[i] = np.argmax(correlations)
+
+        return y_pred_hues
+
+
+class FE_GaussianMLDecoder:
+    """ForwardEncoding + Gaussian ML decoding (diagonal covariance)"""
+
+    def __init__(self, alpha=0, n_channels=6):
+        self.alpha = alpha
+        self.n_channels = n_channels
+        self.weights = None
+        self.predict_basis = None
+        self.noise_var = None
+        self.scale = None
+
+    def fit(self, X, y_labels):
+        unique_labels = np.sort(np.unique(y_labels))
+        n_train_colors = len(unique_labels)
+        n_voxels = X.shape[1]
+
+        mean_patterns = np.zeros((n_train_colors, n_voxels))
+        for i, label in enumerate(unique_labels):
+            mask = y_labels == label
+            mean_patterns[i] = X[mask].mean(axis=0)
+
+        basis_full = create_basis_functions(n_channels=self.n_channels)
+        train_hues = np.array([HUE_ANGLES[l] for l in unique_labels])
+        train_basis = basis_full[train_hues]
+
+        self.predict_basis = basis_full
+
+        C = train_basis
+        B = mean_patterns
+
+        if self.alpha > 0:
+            self.weights = np.linalg.solve(
+                C.T @ C + self.alpha * np.eye(self.n_channels),
+                C.T @ B
+            )
+        else:
+            self.weights = np.linalg.pinv(C) @ B
+
+        # Estimate noise statistics from training residuals
+        channel_responses = self.weights @ mean_patterns.T  # (6, n_train_colors)
+        expected = train_basis.T  # (6, n_train_colors)
+
+        residuals = channel_responses - expected  # (6, n_train_colors)
+        self.noise_var = np.var(residuals, axis=1)  # (6,)
+        self.noise_var = np.maximum(self.noise_var, 1e-10)
+
+        # Per-channel scale: ratio of observed to expected magnitude
+        expected_mean = np.mean(np.abs(expected), axis=1) + 1e-10
+        observed_mean = np.mean(np.abs(channel_responses), axis=1)
+        self.scale = observed_mean / expected_mean
+
+    def predict(self, X):
+        if self.weights is None:
+            raise RuntimeError("Model not fitted yet")
+
+        channel_responses = self.weights @ X.T  # (6, n_samples)
+        n_samples = X.shape[0]
+        y_pred_hues = np.zeros(n_samples)
+
+        inv_var = 1.0 / self.noise_var  # (6,)
+
+        for i in range(n_samples):
+            obs = channel_responses[:, i]  # (6,)
+            log_liks = np.zeros(360)
+            for h in range(360):
+                template = self.predict_basis[h] * self.scale
+                diff = obs - template
+                log_liks[h] = -0.5 * np.sum(diff**2 * inv_var)
+            y_pred_hues[i] = np.argmax(log_liks)
+
+        return y_pred_hues
+
+
+class FE_RidgeRegressorDecoder:
+    """ForwardEncoding + Ridge regression from channels to hue (sin/cos)"""
+
+    def __init__(self, alpha=0, n_channels=6, ridge_alpha=1.0):
+        self.alpha = alpha
+        self.n_channels = n_channels
+        self.ridge_alpha = ridge_alpha
+        self.weights = None
+        self.ridge_sin = None
+        self.ridge_cos = None
+
+    def fit(self, X, y_labels):
+        unique_labels = np.sort(np.unique(y_labels))
+        n_train_colors = len(unique_labels)
+        n_voxels = X.shape[1]
+
+        mean_patterns = np.zeros((n_train_colors, n_voxels))
+        for i, label in enumerate(unique_labels):
+            mask = y_labels == label
+            mean_patterns[i] = X[mask].mean(axis=0)
+
+        basis_full = create_basis_functions(n_channels=self.n_channels)
+        train_hues = np.array([HUE_ANGLES[l] for l in unique_labels])
+        train_basis = basis_full[train_hues]
+
+        C = train_basis
+        B = mean_patterns
+
+        if self.alpha > 0:
+            self.weights = np.linalg.solve(
+                C.T @ C + self.alpha * np.eye(self.n_channels),
+                C.T @ B
+            )
+        else:
+            self.weights = np.linalg.pinv(C) @ B
+
+        # Train Ridge regressors from channel space to sin/cos of hue
+        train_hues_rad = np.deg2rad([HUE_ANGLES[l] for l in unique_labels])
+        channel_train = self.weights @ mean_patterns.T  # (6, n_train)
+        X_ch = channel_train.T  # (n_train, 6)
+        y_sin = np.sin(train_hues_rad)
+        y_cos = np.cos(train_hues_rad)
+
+        from sklearn.linear_model import Ridge
+        self.ridge_sin = Ridge(alpha=self.ridge_alpha).fit(X_ch, y_sin)
+        self.ridge_cos = Ridge(alpha=self.ridge_alpha).fit(X_ch, y_cos)
+
+    def predict(self, X):
+        if self.weights is None:
+            raise RuntimeError("Model not fitted yet")
+
+        channel_responses = self.weights @ X.T  # (6, n_samples)
+        X_ch = channel_responses.T  # (n_samples, 6)
+
+        pred_sin = self.ridge_sin.predict(X_ch)
+        pred_cos = self.ridge_cos.predict(X_ch)
+        y_pred_hues = np.rad2deg(np.arctan2(pred_sin, pred_cos)) % 360
+
+        return y_pred_hues
+
+
+# ============================================================================
 # LOCO Cross-Validation
 # ============================================================================
 
@@ -329,9 +1281,15 @@ def loco_cv(amplitudes, model_class, model_name):
 
     # Models that take label inputs (0-7) rather than continuous hue
     uses_label = model_name in ['LDA', 'SVM', 'MLP', 'ForwardEncoding',
-                                'HybridMLP', 'HybridSVR']
+                                'HybridMLP', 'HybridSVR',
+                                'HybridMLP_Ensemble', 'HybridSVR_Ensemble',
+                                'FE_PopVec', 'FE_RidgeEnc', 'FE_GaussML', 'FE_RidgeReg',
+                                'FE_Ensemble', 'FE_EnsembleRidge', 'FE_EnsembleGaussML']
     # Models that output continuous hue angles (0-359°) directly
-    outputs_continuous = model_name in ['ForwardEncoding', 'HybridMLP', 'HybridSVR']
+    outputs_continuous = model_name in ['ForwardEncoding', 'HybridMLP', 'HybridSVR',
+                                        'HybridMLP_Ensemble', 'HybridSVR_Ensemble',
+                                        'FE_PopVec', 'FE_RidgeEnc', 'FE_GaussML', 'FE_RidgeReg',
+                                        'FE_Ensemble', 'FE_EnsembleRidge', 'FE_EnsembleGaussML']
     fold_results = []
 
     for test_color in range(n_colors):
@@ -408,8 +1366,14 @@ def loco_permutation_test(amplitudes, model_class, model_name,
     n_runs, n_colors, n_voxels = amplitudes.shape
     all_hues = np.array(HUE_ANGLES)
     uses_label = model_name in ['LDA', 'SVM', 'MLP', 'ForwardEncoding',
-                                'HybridMLP', 'HybridSVR']
-    outputs_continuous = model_name in ['ForwardEncoding', 'HybridMLP', 'HybridSVR']
+                                'HybridMLP', 'HybridSVR',
+                                'HybridMLP_Ensemble', 'HybridSVR_Ensemble',
+                                'FE_PopVec', 'FE_RidgeEnc', 'FE_GaussML', 'FE_RidgeReg',
+                                'FE_Ensemble', 'FE_EnsembleRidge', 'FE_EnsembleGaussML']
+    outputs_continuous = model_name in ['ForwardEncoding', 'HybridMLP', 'HybridSVR',
+                                        'HybridMLP_Ensemble', 'HybridSVR_Ensemble',
+                                        'FE_PopVec', 'FE_RidgeEnc', 'FE_GaussML', 'FE_RidgeReg',
+                                        'FE_Ensemble', 'FE_EnsembleRidge', 'FE_EnsembleGaussML']
 
     null_distribution = []
 
@@ -507,6 +1471,19 @@ def run_single_subject_roi(baseline_dir, subject, roi, alignment, models,
         'ForwardEncoding': LOCOForwardEncodingDecoder,
         'HybridMLP': HybridDegreeMLPDecoder,
         'HybridSVR': HybridDegreeSVRDecoder,
+        'HybridMLP_Ensemble': HybridMLP_Ensemble,
+        'HybridSVR_Ensemble': HybridSVR_Ensemble,
+        'FE_PopVec': FE_PopulationVectorDecoder,
+        'FE_RidgeEnc': FE_RidgeEncodingDecoder,
+        'FE_GaussML': FE_GaussianMLDecoder,
+        'FE_RidgeReg': FE_RidgeRegressorDecoder,
+        'FE_Ensemble': FE_EnsembleDecoder,
+        'FE_EnsembleRidge': FE_EnsembleRidgeDecoder,
+        'FE_EnsembleGaussML': FE_EnsembleGaussMLDecoder,
+        # Sequential training models (one model, incremental updates)
+        'FE_Sequential': ForwardEncodingSequential,
+        'HybridMLP_Sequential': HybridMLPSequential,
+        'HybridSVR_Sequential': HybridSVRSequential,
     }
 
     results = {}

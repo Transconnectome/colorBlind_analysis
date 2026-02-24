@@ -50,7 +50,7 @@ def test_sequential_models():
 
     # Training data: 7 colors × 6 runs = 42 samples
     X_train = amplitudes[:, train_colors, :].reshape(-1, amplitudes.shape[2])
-    y_train = np.array([c for c in train_colors for _ in range(6)])
+    y_train = np.tile(train_colors, 6)  # matches loco_cv: [c0..c6, c0..c6, ...] per run
 
     # Test data: held-out color × 6 runs = 6 samples
     X_test = amplitudes[:, held_out_color, :]

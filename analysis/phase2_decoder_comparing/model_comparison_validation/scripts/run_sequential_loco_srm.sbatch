@@ -25,6 +25,6 @@ mpirun -np 1 python ${SCRIPT_DIR}/run_loco_comparison.py \
     --output_dir ${OUTPUT_DIR} \
     --subject ${SUBJECT} \
     --rois V1 V2 V3 V4 \
-    --models FE_Sequential HybridMLP_Sequential HybridSVR_Sequential \
+    --models HybridMLP_Sequential \
     --alignment srm \
     --permutations 0

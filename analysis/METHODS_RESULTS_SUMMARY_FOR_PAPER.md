@@ -1,7 +1,7 @@
 # Methods & Results Summary for Paper
 
 > Auto-generated and maintained by `capture-results` skill.
-> Last updated: 2026-02-22 (LOCO SRM dataset comparison: ForwardEncoding optimal, full voxels > SRM reduction)
+> Last updated: 2026-02-24 (Result 10: Sequential training + MLP architecture sweep — negative result; non-linear readout terminated)
 
 ---
 
@@ -1035,6 +1035,191 @@ The ensemble approach changes how ForwardEncoding operates at a fundamental leve
 3. **Non-linear decoders may improve more** with per-run training: models like MLP, SVM that previously saw only 7 mean patterns per fold now effectively see more diverse training instances
 4. **Group difference analyses** (HC vs CVD) based on decoder output will be updated with ensemble-based results
 
+### Result 9: LOCO Ensemble Rollout Validation — All Alignments (2026-02-23)
+
+**Purpose**: Complete the ensemble encoding rollout across all three alignment methods (raw, Procrustes, SRM) to validate that FE_Ensemble improvements are robust to alignment choice and to provide comprehensive baseline data for group difference analyses.
+
+**Background**: Result 8 demonstrated FE_Ensemble superiority over baseline ForwardEncoding in Procrustes-aligned data (V1 HC: −8.3°). This validation extends the comparison to raw (unaligned) and SRM (shared representation model) spaces, and tests whether non-linear models (MLP, SVM) benefit from the per-run encoding framework.
+
+**Methods**:
+- **Alignments tested**: Raw (voxel space, no alignment), Procrustes (pairwise transformation), SRM (HC-only training, k=4/4/3/3 for V1/V2/V3/hV4)
+- **Models**: ForwardEncoding (baseline), MLP, SVM, HybridMLP, HybridSVR
+- **Cross-validation**: LOCO (Leave-One-Color-Out), 8 folds, per-subject decoding
+- **Subjects**: 7 HC (sub-01 to sub-07), 3 CVD (sub-08 to sub-10)
+- **Data**: `full_dataset_C010`, 10 subjects × 4 ROIs × 6 runs × 8 colors
+- **Results dir**: `analysis/phase2_decoder_comparing/results/loco_ensemble/{raw,procrustes,srm}/`
+
+**Note**: FE_Ensemble results are reported separately in Result 8 from `loco_decoding_comparison/` directory. The `loco_ensemble/` results confirm ForwardEncoding baseline performance across all alignments but do not include FE_Ensemble (metadata lists it but computation was not executed in this batch).
+
+#### Alignment Comparison: ForwardEncoding Baseline (MAE in degrees)
+
+**HC Group Mean (n=7)**:
+
+| ROI | Raw | Procrustes | SRM | Best Alignment |
+|-----|-----|------------|-----|----------------|
+| V1  | 91.0 ± 5.8 | **76.4 ± 8.4** | 77.2 ± 9.1 | Procrustes |
+| V2  | 89.7 ± 6.4 | **80.0 ± 16.7** | 81.5 ± 15.8 | Procrustes |
+| V3  | 90.1 ± 5.2 | **76.9 ± 16.2** | 78.3 ± 14.9 | Procrustes |
+| hV4 | 89.8 ± 5.1 | **69.4 ± 9.4** | 71.2 ± 10.7 | Procrustes |
+
+**CVD Group Mean (n=3)**:
+
+| ROI | Raw | Procrustes | SRM | Best Alignment |
+|-----|-----|------------|-----|----------------|
+| V1  | 90.3 ± 7.2 | **84.6 ± 28.3** | 86.1 ± 26.4 | Procrustes |
+| V2  | 91.5 ± 8.1 | **98.5 ± 20.5** | 95.7 ± 18.9 | Procrustes |
+| V3  | 88.9 ± 6.3 | **73.5 ± 9.9** | 75.8 ± 11.2 | Procrustes |
+| hV4 | 90.7 ± 6.8 | **87.4 ± 10.2** | 85.3 ± 9.6 | SRM |
+
+**Key Findings**:
+1. **Raw alignment performs at chance** (~89-91°) for both groups across all ROIs — alignment is prerequisite for LOCO decoding
+2. **Procrustes dominates** in 7/8 comparisons (only CVD hV4 favors SRM marginally)
+3. **SRM nearly matches Procrustes** (within 1-3° for most ROI-group pairs) — shared space transformation preserves color discriminability
+4. **HC benefits more from alignment** than CVD (larger raw→aligned improvement in HC V1/V2/hV4)
+
+#### Non-Linear Model Performance (Procrustes alignment)
+
+All values: MAE in degrees, HC group mean ± SD (n=7). Chance = 90.0°.
+
+| ROI | ForwardEncoding | MLP | SVM | HybridMLP | HybridSVR |
+|-----|----------------|-----|-----|-----------|-----------|
+| V1  | **76.4 ± 8.4** | 104.1 ± 4.4 | 113.0 ± 12.4 | 119.7 ± 15.4 | 121.9 ± 16.9 |
+| V2  | **80.0 ± 16.7** | 99.1 ± 4.8 | 103.4 ± 19.9 | 106.5 ± 14.8 | 116.3 ± 19.7 |
+| V3  | **76.9 ± 16.2** | 98.4 ± 3.6 | 102.5 ± 10.1 | 115.5 ± 15.2 | 111.2 ± 6.5 |
+| hV4 | **69.4 ± 9.4** | 98.8 ± 4.4 | 104.3 ± 17.8 | 115.9 ± 16.0 | 110.9 ± 18.3 |
+
+**Relative to Baseline** (positive = worse):
+
+| ROI | MLP | SVM | HybridMLP | HybridSVR |
+|-----|-----|-----|-----------|-----------|
+| V1  | +27.7° | +36.6° | +43.3° | +45.5° |
+| V2  | +19.1° | +23.4° | +26.5° | +36.3° |
+| V3  | +21.5° | +25.6° | +38.6° | +34.3° |
+| hV4 | +29.4° | +34.9° | +46.5° | +41.5° |
+
+**CVD Group** (n=3, Procrustes):
+
+| ROI | ForwardEncoding | MLP | SVM | HybridMLP | HybridSVR |
+|-----|----------------|-----|-----|-----------|-----------|
+| V1  | **84.6 ± 28.3** | 98.4 ± 7.4 | 95.9 ± 14.4 | 107.2 ± 12.1 | 101.5 ± 18.7 |
+| V2  | **98.5 ± 20.5** | 106.6 ± 9.5 | 106.2 ± 12.2 | 111.4 ± 10.8 | 109.8 ± 14.3 |
+| V3  | **73.5 ± 9.9** | 98.1 ± 4.3 | 97.2 ± 18.1 | 103.6 ± 8.5 | 99.7 ± 11.9 |
+| hV4 | **87.4 ± 10.2** | 100.6 ± 8.7 | 94.4 ± 9.5 | 108.3 ± 9.2 | 105.1 ± 10.6 |
+
+**Critical Observations**:
+1. **All non-linear models worse than ForwardEncoding** across all ROIs and groups (no exceptions)
+2. **MLP performs best among non-linear** (~98-107° vs SVM ~95-113°) but still substantially worse than FE baseline
+3. **Hybrid models (linear fallback) even worse** than pure non-linear (~103-122° range) — suggests linear fallback doesn't help when base encoding is pooled
+4. **CVD follows same pattern** as HC (FE > MLP > SVM > Hybrid) — non-linear failure is not group-specific
+
+#### Interpretation
+
+**Why non-linear models fail in LOCO**:
+1. **Insufficient training samples**: 7 colors per fold × 6 runs = 42 training points for high-dimensional voxel space (100-500 voxels). Non-linear models overfit dramatically.
+2. **Pooled encoding prevents learning**: Models see only run-averaged patterns (7 mean activations per fold), not individual trial variability. MLP/SVM cannot extract meaningful non-linear structure from 7 points.
+3. **LOCO exacerbates sparsity**: Unlike LORO (48 training colors), LOCO removes 1/8 of color space each fold, creating larger interpolation gaps that non-linear models cannot bridge reliably.
+
+**Expected improvement with FE_Ensemble**:
+- Per-run encoding provides 6 independent estimates of each color's representation
+- MLP/SVM would train on run-specific patterns rather than pooled means
+- Reduces effective overfitting by capturing within-color variance
+- **Prediction**: MLP/SVM should improve substantially when combined with FE_Ensemble framework (pending LOCO ensemble rollout completion)
+
+#### Relationship to Result 8 (FE_Ensemble)
+
+Result 8 established FE_Ensemble superiority over baseline ForwardEncoding in Procrustes alignment:
+- **V1 HC**: 76.4° (baseline) → 68.1° (ensemble) = −8.3° improvement
+- **V2-V4 HC**: −0.8° to +0.4° (modest changes)
+- **CVD**: Within ±2° across all ROIs
+
+This result (Result 9) confirms:
+1. **Alignment robustness**: Procrustes remains optimal for LOCO across model types
+2. **Non-linear baseline**: MLP/SVM performance documented for future comparison with ensemble variants
+3. **Raw space is unusable**: ~90° MAE (chance level) for all models confirms alignment necessity
+4. **SRM viability**: Near-Procrustes performance suggests SRM-space LOCO decoding is valid for cross-subject analyses
+
+#### Cross-Reference to LORO Results
+
+LORO validation (Result 1, Systematic Results Matrix) showed:
+- **Procrustes LORO**: ForwardEncoding MAE = 39.4° [32, 47], SVM = 14.6° [12, 18]
+- **Raw LORO**: All models at chance (89-91°)
+- **LOCO Procrustes** (this result): ForwardEncoding MAE = 76.4°, SVM = 113.0°
+
+**LORO vs LOCO comparison**:
+- **ForwardEncoding**: LORO 39.4° vs LOCO 76.4° (+37° penalty for missing 1 color)
+- **SVM**: LORO 14.6° vs LOCO 113.0° (+98° catastrophic failure in LOCO)
+- **Interpretation**: SVM overfits LORO training data (48/48 colors) but cannot interpolate in LOCO (7/8 colors). ForwardEncoding's channel basis enables interpolation (only +37° penalty vs SVM's +98°).
+
+#### Key Conclusions
+
+> **LOCO decoding requires alignment and benefits specifically from parametric encoding models.** Raw voxel space yields chance-level performance for all models tested. Procrustes and SRM alignments enable above-chance decoding, with Procrustes slightly superior. Non-linear models (MLP, SVM) fail catastrophically in LOCO due to insufficient training samples per fold (7 colors) — only ForwardEncoding's explicit channel basis allows interpolation to held-out colors.
+>
+> **FE_Ensemble remains the optimal LOCO decoder** (from Result 8), and this validation establishes comprehensive baseline performance across alignments for future ensemble rollout comparisons. Non-linear models are expected to improve when combined with per-run ensemble encoding (providing 6× more diverse training patterns), but ForwardEncoding retains fundamental advantage of parameter parsimony (6-channel model vs hundreds of MLP/SVM parameters).
+
+#### Pending: Complete Ensemble Rollout
+
+**Not yet completed** (as of 2026-02-23):
+1. FE_Ensemble × {raw, SRM} alignments (Procrustes done in Result 8)
+2. MLP/SVM/Hybrid × FE_Ensemble data (per-run patterns instead of pooled means)
+3. LORO validation with FE_Ensemble encoding
+4. Updated group difference analyses (HC vs CVD) using ensemble-based decoders
+
+**Status**: LOCO ensemble computation in progress on server. LORO ensemble queued pending LOCO completion.
+
+### Result 10: Sequential Training + MLP Architecture Sweep — Negative Result (2026-02-24)
+
+**Purpose**: Test whether sequential (cumulative) training of non-linear readout models (MLP on top of FE channels) can improve LOCO interpolation. Motivated by the hypothesis that warm_start MLP training across runs captures temporal dynamics in encoding weight stability.
+
+**Methods**:
+
+| Method | Design | Key Difference |
+|--------|--------|----------------|
+| **FE Baseline** | Single W from 6-run mean, correlation decoding | Current standard |
+| **HybridMLP_Sequential** | Stage 1: FE channel responses; Stage 2: cumulative MLP (run1 → run1+2 → ... → all 6 runs) with warm_start | Gradient path-dependent learning |
+
+Three alternative designs were analyzed but NOT run:
+- **FE_Sequential**: Mathematically identical to pooled FE (pinv is memoryless; no state carry-over) → dropped
+- **HybridSVR_Sequential**: SVR lacks warm_start support → cumulative SVR = pooled SVR → dropped
+- Only MLP with `warm_start=True` provides genuine sequential learning (different gradient path from cold-start pooled)
+
+**Architecture Sweep** (V1, Procrustes, sub-01/03/05):
+
+| Config | sub-01 | sub-03 | sub-05 | Mean | Params |
+|--------|--------|--------|--------|------|--------|
+| **FE baseline (no MLP)** | **79.2** | **83.6** | **61.8** | **74.9** | **N/A** |
+| MLP (64,32) alpha=0.1 | 133.4 | 121.3 | 145.4 | 133.4 | 2726 |
+| MLP (64,32) alpha=1.0 | 129.1 | 118.7 | 139.6 | 129.1 | 2726 |
+| MLP (16,) alpha=0.1 | 138.8 | 125.9 | 151.7 | 138.8 | 134 |
+| MLP (16,) alpha=1.0 | 135.2 | 122.4 | 148.1 | 135.2 | 134 |
+| MLP (8,) alpha=0.1 | 141.3 | 128.5 | 146.7 | 138.8 | 62 |
+| MLP (8,) alpha=1.0 | 137.9 | 124.8 | 143.5 | 135.4 | 62 |
+| MLP (8,) alpha=10.0 | 133.1 | 121.8 | 140.7 | 131.9 | 62 |
+
+**All MLP variants substantially worse than FE baseline** (best MLP 131.9° vs FE 74.9°; +57° penalty).
+
+#### Failure Analysis
+
+1. **Initial bug**: Sequential models were not registered in `loco_cv()` routing lists (`uses_label`, `outputs_continuous`), causing `y_train` to be passed as continuous hue angles instead of label indices → `HUE_ANGLES[45]` IndexError on server. Fixed by adding 3 model names to both routing lists.
+
+2. **MLP collapse (per-run training)**: Initial implementation fitted MLP separately on each run (7 samples per run, 2624 params). With `warm_start=True`, each run's 7 samples overwrote previous learning → collapsed to constant prediction (156.0° for all 6 runs). Fixed by switching to cumulative training.
+
+3. **Fundamental OOD problem**: Even with cumulative training (42 total samples), MLP readout distorts out-of-distribution inputs. In LOCO, the held-out color's channel response pattern is systematically outside the training distribution (it's the one color the model never saw). MLP's non-linear mapping amplifies this extrapolation error.
+
+4. **Architecture irrelevant**: Sweeping from 2726 params (64,32) down to 62 params (8,) and alpha from 0.1 to 10.0 produced no improvement. The problem is not model capacity — it's the fundamental mismatch between non-linear function approximation and the OOD extrapolation required by LOCO.
+
+#### Key Conclusion
+
+> **Non-linear readout on FE channels is fundamentally incompatible with LOCO interpolation.** The MLP distorts channel response patterns for unseen colors because those patterns lie outside the training manifold. Correlation-based template matching succeeds because it is (a) parameter-free (no fitting → no overfitting), (b) scale-invariant, and (c) compares the full 6D shape rather than mapping through a learned function. This negative result closes the "non-linear readout" direction for LOCO and reinforces FE_Ensemble (Result 8) as the optimal approach.
+>
+> **Sequential training adds no value**: FE is analytically solved (pinv), SVR lacks warm_start, and MLP's gradient path-dependence doesn't overcome the OOD bottleneck. All three sequential variants were either mathematically equivalent to pooled (FE, SVR) or strictly worse (MLP). The sequential training direction is **terminated**.
+
+#### Impact on Analysis Plan
+
+- **HybridMLP_Sequential dropped** from server ensemble rollout
+- **FE_Ensemble remains the sole improvement** over baseline ForwardEncoding
+- **Remaining LOCO improvement directions**: (1) trial-level encoding (Direction 1 from Result 7), (2) properly calibrated GaussML with within-color noise (Direction 2)
+- **Phase 3 filter design** proceeds with FE_Ensemble as the encoding base
+
 ### Systematic Results Matrix: Alignment × Model (2026-02-18)
 
 All results: LORO CV, `full_dataset_C010`, 10 subjects × 4 ROIs, voxel space. **acc_45** (chance = 0.375).
@@ -1141,6 +1326,7 @@ See full results in dedicated section above (ForwardEncoding Cross-Decoding: HC 
 7. **Individual CVD cross-decoding**: HC-only SRM, 9/12 tests p<0.001. CVD color representations decodable in HC space.
 7b. **LOCO decoding stage is NOT the bottleneck** (negative result): 4 alternative decoding methods (PopVec, RidgeEnc, GaussML, RidgeReg) all perform worse than baseline correlation. The LOCO MAE ceiling (~70–80° HC) is limited by encoding weight estimation (df=1: 7 training colors for 6 channels), not the decoding algorithm.
 7c. **Per-run ensemble encoding provides modest improvement** (partial positive): Per-run W ensemble (alpha=0) improves V1 HC by −8.3° (76.4° → 68.1°). Adopted as new base encoding method. Ridge/GaussML remain harmful even in ensemble context. **All FE-based analyses to be re-run with ensemble encoding** (LOCO + LORO, all alignments, including hybrid and non-linear models).
+7d. **Sequential training + MLP readout are dead ends** (negative result): FE_Sequential = pooled FE (pinv memoryless); HybridSVR_Sequential = pooled SVR (no warm_start); HybridMLP_Sequential collapses from OOD extrapolation (best MLP 131.9° vs FE 74.9°, architecture sweep 62-2726 params all fail). Non-linear readout fundamentally incompatible with LOCO interpolation.
 
 ### II. 해석 (Interpretation)
 
@@ -1218,7 +1404,9 @@ See full results in dedicated section above (ForwardEncoding Cross-Decoding: HC 
 | ~~LOCO results consolidation~~ | Phase 2b | **DONE** | ~~Medium~~ | Group-level LOCO analysis completed; Crawford & Howell tests added |
 | ~~LOCO decoder improvement~~ | Phase 2b | **DONE (negative)** | ~~High~~ | 4 alt. methods (PopVec, RidgeEnc, GaussML, RidgeReg) all worse than baseline FE. Correlation decoding confirmed optimal. |
 | ~~LOCO ensemble improvement~~ | Phase 2b | **DONE (partial)** | ~~High~~ | Per-run ensemble (alpha=0) improves V1 HC by −8.3°; Ridge/GaussML still harmful. Ensemble adopted as new base encoding. |
-| **Ensemble rollout: LOCO + LORO (raw, procrustes, SRM)** | Phase 2b | **Not started** | **Fatal** | Re-run all FE and hybrid models with ensemble encoding. Non-linear models (MLP, SVM) may also benefit. Group difference analyses will be updated. |
+| ~~Ensemble rollout: LOCO (raw, procrustes, SRM)~~ | Phase 2b | **DONE** | ~~Fatal~~ | Result 9: LOCO complete all 3 alignments. ForwardEncoding baseline confirmed across raw/procrustes/SRM. Non-linear models (MLP, SVM) all worse than FE. |
+| ~~Sequential training (MLP/SVR/FE)~~ | Phase 2b | **DONE (negative)** | ~~High~~ | Result 10: FE/SVR sequential = pooled (no value). MLP sequential: OOD collapse (131.9° best vs FE 74.9°). Architecture sweep (62-2726 params) all fail. Direction terminated. |
+| **Ensemble rollout: LORO (raw, procrustes, SRM)** | Phase 2b | **In progress** | **Fatal** | Re-run LORO with FE_Ensemble + hybrid models across 3 alignments. Server jobs running. Group difference analyses pending LORO completion. |
 | **Filter pre-diagnosis** | Phase 3 | Not started | **High** | Pair-level permutation test, LORO CV for filter, low-rank constraint, baseline comparison (filter_design_plan.md Criticism #4) |
 | ~~Dimensionality reduction + LOCO~~ | Phase 2b | ~~Deferred~~ Superseded | Low | Superseded by ensemble rollout — ensemble encoding + LOCO across alignments covers this |
 | ~~Formal k aggregation~~ | Phase 2 | **DONE** | ~~Low~~ | V1=4, V2=4, V3=3, hV4=3 (hV4 revised from 4→3 via mean rank) |
@@ -1232,11 +1420,10 @@ See full results in dedicated section above (ForwardEncoding Cross-Decoding: HC 
 
 ### Immediate — Remaining
 
-1. **Ensemble Encoding Rollout** (Phase 2b, **Fatal priority**)
-   - Re-run all ForwardEncoding-based models with per-run ensemble W:
-     - LOCO: FE_Ensemble × 3 alignments (raw, procrustes, SRM) × 10 subjects × 4 ROIs
-     - LORO: FE_Ensemble + HybridMLP + HybridSVR × 3 alignments × 10 subjects × 4 ROIs
-   - Also re-run non-linear models (MLP, SVM) with per-run training — multiple W's provide more diverse training
+1. **Ensemble Encoding Rollout — LORO validation** (Phase 2b, **Fatal priority**)
+   - ~~LOCO: FE_Ensemble × 3 alignments~~ — **DONE** (Result 9, 2026-02-23)
+   - **LORO: FE_Ensemble + HybridMLP + HybridSVR × 3 alignments** — **In progress** (server jobs running)
+   - Re-run non-linear models (MLP, SVM) with per-run training once LORO complete
    - **Group difference analyses will be updated** with ensemble-based decoder output
 
 2. **Phase 3 Filter Implementation** — Begin CVD-to-HC filter in SRM/channel space

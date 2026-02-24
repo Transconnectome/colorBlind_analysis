@@ -856,7 +856,10 @@ class HybridMLPSequential:
         channel_responses = self.weights @ X.T  # (n_channels, n_samples)
         channel_responses = channel_responses.T  # (n_samples, n_channels)
 
-        # Stage 2: MLP sequential training with warm_start
+        # Stage 2: MLP cumulative sequential training with warm_start
+        # Each step adds one run's data to the training set.
+        # warm_start=True carries over weights → path-dependent learning
+        # (unlike FE/SVR, MLP cumulative ≠ pooled because gradient path matters)
         self.mlp = MLPRegressor(
             hidden_layer_sizes=self.hidden_layer_sizes,
             alpha=self.mlp_alpha,
@@ -864,20 +867,21 @@ class HybridMLPSequential:
             solver='adam',
             learning_rate='adaptive',
             max_iter=500,
-            warm_start=True,  # Enable sequential learning
+            warm_start=True,
             random_state=42,
         )
 
-        # Sequential training run-by-run
+        # Cumulative sequential training: run1 → run1+2 → ... → all runs
         for r in range(n_runs):
-            run_channels = channel_responses[r * n_train_colors : (r + 1) * n_train_colors]
-            run_labels = y_labels[r * n_train_colors : (r + 1) * n_train_colors]
+            # Accumulated data up to current run
+            cum_channels = channel_responses[: (r + 1) * n_train_colors]
+            cum_labels = y_labels[: (r + 1) * n_train_colors]
 
             # Target: basis function values at true hue angles
-            targets = np.array([self.basis_full[HUE_ANGLES[int(l)]] for l in run_labels])
+            targets = np.array([self.basis_full[HUE_ANGLES[int(l)]] for l in cum_labels])
 
-            # Sequential fit (updates existing weights when warm_start=True)
-            self.mlp.fit(run_channels, targets)
+            # warm_start fit: previous weights → more data → refined weights
+            self.mlp.fit(cum_channels, targets)
 
     def predict(self, X):
         """Returns: (n_samples,) predicted HUE ANGLES (0-359°)"""
@@ -1284,12 +1288,14 @@ def loco_cv(amplitudes, model_class, model_name):
                                 'HybridMLP', 'HybridSVR',
                                 'HybridMLP_Ensemble', 'HybridSVR_Ensemble',
                                 'FE_PopVec', 'FE_RidgeEnc', 'FE_GaussML', 'FE_RidgeReg',
-                                'FE_Ensemble', 'FE_EnsembleRidge', 'FE_EnsembleGaussML']
+                                'FE_Ensemble', 'FE_EnsembleRidge', 'FE_EnsembleGaussML',
+                                'FE_Sequential', 'HybridMLP_Sequential', 'HybridSVR_Sequential']
     # Models that output continuous hue angles (0-359°) directly
     outputs_continuous = model_name in ['ForwardEncoding', 'HybridMLP', 'HybridSVR',
                                         'HybridMLP_Ensemble', 'HybridSVR_Ensemble',
                                         'FE_PopVec', 'FE_RidgeEnc', 'FE_GaussML', 'FE_RidgeReg',
-                                        'FE_Ensemble', 'FE_EnsembleRidge', 'FE_EnsembleGaussML']
+                                        'FE_Ensemble', 'FE_EnsembleRidge', 'FE_EnsembleGaussML',
+                                        'FE_Sequential', 'HybridMLP_Sequential', 'HybridSVR_Sequential']
     fold_results = []
 
     for test_color in range(n_colors):

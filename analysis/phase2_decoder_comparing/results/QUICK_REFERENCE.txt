@@ -1,0 +1,121 @@
+================================================================================
+LOCO ENSEMBLE QUICK REFERENCE (2026-02-23)
+================================================================================
+
+DECISION: ✓ ADOPT FE_ENSEMBLE AS NEW BASELINE
+         ✗ ABANDON Ridge/GaussML variants
+         ⏳ RE-TEST MLP/SVM with ensemble data
+
+--------------------------------------------------------------------------------
+GROUP IMPROVEMENTS (HC n=7, CVD n=3)
+--------------------------------------------------------------------------------
+
+                Baseline HC    Ensemble HC    Δ HC      Baseline CVD   Ensemble CVD   Δ CVD
+V1              76.4 ± 8.4     68.1 ± 11.3    -8.3°*    84.6 ± 28.3    84.2 ± 25.1    -0.4°
+V2              80.0 ± 16.7    79.2 ± 18.9    -0.8°     98.5 ± 20.5    99.1 ± 22.1    +0.6°
+V3              76.9 ± 16.2    74.1 ± 13.4    -2.8°     73.5 ± 9.9     71.6 ± 8.2     -1.9°
+hV4             69.4 ± 9.4     69.8 ± 14.9    +0.4°     87.4 ± 10.2    87.1 ± 8.5     -0.2°
+
+*STRONGEST IMPROVEMENT: V1 HC -8.3° (76.4 → 68.1)
+
+--------------------------------------------------------------------------------
+TOP INDIVIDUAL IMPROVEMENTS (HC SUBJECTS)
+--------------------------------------------------------------------------------
+
+sub-05 V1:      61.8° → 45.3°    (-16.5°)  ← BEST
+sub-07 V2:      82.7° → 70.0°    (-12.7°)
+sub-02 V1:      84.8° → 73.0°    (-11.8°)
+sub-04 hV4:     53.5° → 41.7°    (-11.8°)
+
+--------------------------------------------------------------------------------
+ENSEMBLE VARIANT FAILURES (HC GROUP)
+--------------------------------------------------------------------------------
+
+Method              V1 Δ     V2 Δ     V3 Δ     hV4 Δ    Result
+FE_Ensemble         -8.3°    -0.8°    -2.8°    +0.4°    ✓ SUCCESS
+FE_EnsembleRidge    +15.4°   +18.8°   +17.6°   +25.7°   ✗ HARMFUL
+FE_EnsembleGaussML  +54.4°   +42.8°   +49.1°   +51.1°   ✗✗ CATASTROPHIC
+
+WHY RIDGE/GAUSSML FAIL: LOCO has only 7 training colors/fold → insufficient df 
+                        for regression → severe overfitting
+
+CONCLUSION: Correlation-based template matching (FE_Ensemble) is OPTIMAL
+
+--------------------------------------------------------------------------------
+NON-LINEAR MODELS (Status: PENDING RE-RUN with FE_Ensemble data)
+--------------------------------------------------------------------------------
+
+Current performance (with pooled encoding, NOT ensemble):
+
+Model           V1        V2        V3        hV4       vs Baseline
+Baseline        76.4°     80.0°     76.9°     69.4°     —
+MLP             104.1°    99.1°     98.4°     98.8°     +20-29° WORSE
+SVM             113.0°    103.4°    102.5°    104.3°    +25-37° WORSE
+HybridMLP       119.7°    106.5°    115.5°    115.9°    +37-50° WORSE
+
+⚠️  These used pooled encoding. Expected to improve with per-run FE_Ensemble 
+    data (reduces overfitting from 48 samples → 6×8 samples per run)
+
+--------------------------------------------------------------------------------
+NEXT STEPS
+--------------------------------------------------------------------------------
+
+1. ✓ COMPLETE: FE_Ensemble validation (this analysis)
+
+2. ⏳ PENDING: Re-run LOCO with FE_Ensemble across alignments
+   - Need: raw × FE_Ensemble
+   - Need: procrustes × FE_Ensemble (HAVE from comparison)
+   - Need: SRM × FE_Ensemble
+   - Goal: Determine if SRM + FE_Ensemble > procrustes + FE_Ensemble
+
+3. ⏳ PENDING: Re-test non-linear models with FE_Ensemble
+   - MLP with per-run training (expected improvement)
+   - SVM with per-run training (expected improvement)
+   - Hybrid models (likely still worse)
+
+4. ⏳ PENDING: Re-run LORO (Leave-One-Run-Out) with FE_Ensemble
+   - Current LORO uses pooled encoding
+   - Need cross-run validation
+
+5. ⏳ PENDING: Update group analyses
+   - HC vs CVD with FE_Ensemble decoder
+   - RDM correlations
+   - Crawford-Howell tests
+
+--------------------------------------------------------------------------------
+FILES GENERATED
+--------------------------------------------------------------------------------
+
+Analysis:
+  ✓ LOCO_ENSEMBLE_SUMMARY_2026-02-23.md        (full technical report)
+  ✓ DAILY_CHECKIN_2026-02-23.md               (summary for check-in)
+  ✓ QUICK_REFERENCE.txt                       (this file)
+
+Figures:
+  ✓ ensemble_comparison_barplot.png           (group means HC vs CVD)
+  ✓ ensemble_comparison_scatter.png           (individual subject scatter)
+  ✓ ensemble_variants_comparison.png          (Ridge/GaussML failures)
+
+Scripts:
+  ✓ loco_decoding_comparison/parse_comparison.py
+  ✓ plot_ensemble_comparison.py
+
+Data:
+  ✓ loco_decoding_comparison/decoding_comparison.json
+
+--------------------------------------------------------------------------------
+DATA AVAILABILITY
+--------------------------------------------------------------------------------
+
+✓ FE_Ensemble vs variants (procrustes only):
+  loco_decoding_comparison/decoding_comparison.json
+
+✓ Non-linear models (raw/procrustes/SRM, NO FE_Ensemble):
+  loco_ensemble/{raw,procrustes,srm}/sub-{01..10}_loco.json
+
+✗ FE_Ensemble × 3 alignments: NOT YET COMPUTED
+✗ FE_Ensemble + non-linear: NOT YET COMPUTED
+
+================================================================================
+END QUICK REFERENCE
+================================================================================

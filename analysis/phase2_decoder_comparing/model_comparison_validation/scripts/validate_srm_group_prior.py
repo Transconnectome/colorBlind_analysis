@@ -25,7 +25,7 @@ from run_loco_comparison import (
 )
 
 baseline = Path(__file__).resolve().parents[4] / \
-    "analysis/phase1_preprocess_decoding/results/full_dataset_C010"
+    "derivatives/full_dataset_C010"
 
 
 def fit_W(mean_patterns, train_hues, n_channels=6, alpha=0):
@@ -187,53 +187,77 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--subjects', nargs='+', default=None,
-                       help='Subject IDs (default: all HC 01-07)')
+                       help='Target subject IDs to validate (default: all HC 01-07). Group prior uses all other available subjects.')
     parser.add_argument('--rois', nargs='+', default=['V1', 'V2', 'V3', 'V4'])
     parser.add_argument('--lambda_grid', type=str, default='0.0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0')
     args = parser.parse_args()
 
-    subjects_hc = args.subjects if args.subjects else ["01", "02", "03", "04", "05", "06", "07"]
+    # Target subjects to validate
+    target_subjects = args.subjects if args.subjects else ["01", "02", "03", "04", "05", "06", "07"]
+
+    # HC subjects for group prior (normative encoding)
+    hc_subjects = ["01", "02", "03", "04", "05", "06", "07"]
+    cvd_subjects = ["08", "09", "10"]
+
+    # Determine which subjects to load based on targets
+    # Always load all HC (for group prior), plus any CVD targets if specified
+    subjects_to_load = set(hc_subjects)
+    for s in target_subjects:
+        if s in cvd_subjects:
+            subjects_to_load.add(s)
+
     lambda_grid = [float(x) for x in args.lambda_grid.split(',')]
 
     print(f"SRM GroupPrior Validation")
-    print(f"Subjects: {subjects_hc}")
+    print(f"Target subjects (to validate): {target_subjects}")
+    print(f"HC subjects (group prior): {hc_subjects}")
+    print(f"Loading subjects: {sorted(subjects_to_load)}")
     print(f"ROIs: {args.rois}")
     print(f"Lambda grid: {lambda_grid}")
     print()
 
-    # Load SRM data
+    # Load SRM data for HC + target CVD subjects
     all_amps_srm = {}
-    for s in subjects_hc:
+    for s in subjects_to_load:
         try:
             all_amps_srm[s] = load_amplitudes(str(baseline), s, args.rois[0], 'srm')
         except FileNotFoundError:
             print(f"WARNING: sub-{s} SRM not found, skipping")
 
-    if len(all_amps_srm) < 3:
-        print("ERROR: Insufficient SRM data (need >=3 subjects)")
+    # Check HC group prior availability
+    hc_loaded = [s for s in hc_subjects if s in all_amps_srm]
+    if len(hc_loaded) < 3:
+        print(f"ERROR: Insufficient HC data for group prior (need >=3, got {len(hc_loaded)})")
         sys.exit(1)
+
+    print(f"Loaded {len(all_amps_srm)} subjects total ({len(hc_loaded)} HC): {sorted(all_amps_srm.keys())}")
+    print()
 
     for roi in args.rois:
         print(f"\n{'='*70}")
         print(f"ROI: {roi}")
         print(f"{'='*70}")
 
-        # Reload for this ROI
+        # Reload subjects for this ROI (HC for group prior + target CVD)
         all_amps_srm = {}
-        for s in subjects_hc:
+        for s in subjects_to_load:
             try:
                 all_amps_srm[s] = load_amplitudes(str(baseline), s, roi, 'srm')
             except FileNotFoundError:
                 continue
 
-        print(f"Loaded {len(all_amps_srm)} subjects: {list(all_amps_srm.keys())}")
+        hc_loaded = [s for s in hc_subjects if s in all_amps_srm]
+        print(f"Loaded {len(all_amps_srm)} subjects ({len(hc_loaded)} HC): {sorted(all_amps_srm.keys())}")
         print(f"Shape: {list(all_amps_srm.values())[0].shape}")
         print()
 
         results = {}
 
-        # Baseline methods
-        for subj in all_amps_srm:
+        # Baseline methods (only for target subjects)
+        for subj in target_subjects:
+            if subj not in all_amps_srm:
+                print(f"WARNING: sub-{subj} not available for {roi}, skipping")
+                continue
             mae_base = baseline_loco(all_amps_srm[subj], use_ensemble=False)
             mae_ens = baseline_loco(all_amps_srm[subj], use_ensemble=True)
             results[subj] = {
@@ -241,9 +265,20 @@ if __name__ == "__main__":
                 'Ensemble': mae_ens,
             }
 
-        # GroupPrior with nested lambda
-        for subj in all_amps_srm:
-            others = {s: all_amps_srm[s] for s in all_amps_srm if s != subj}
+        # GroupPrior with nested lambda (only for target subjects)
+        for subj in target_subjects:
+            if subj not in all_amps_srm:
+                continue
+
+            # Group prior: HC only (LOO if target is HC, all HC if target is CVD)
+            if subj in hc_subjects:
+                # HC target: use other HC subjects (LOO)
+                others = {s: all_amps_srm[s] for s in hc_subjects if s != subj and s in all_amps_srm}
+                print(f"sub-{subj} (HC): Using {len(others)} other HC subjects as group prior")
+            else:
+                # CVD target: use all HC subjects (no LOO)
+                others = {s: all_amps_srm[s] for s in hc_subjects if s in all_amps_srm}
+                print(f"sub-{subj} (CVD): Using {len(others)} HC subjects as group prior")
 
             print(f"sub-{subj}: Nested LOCO lambda search (single W)...")
             best_lam_single, maes_single, lams_single = nested_loco_lambda_search(
@@ -259,11 +294,11 @@ if __name__ == "__main__":
             results[subj]['GP_ensemble'] = np.mean(maes_ens)
             results[subj]['GP_ensemble_lambda'] = best_lam_ens
 
-        # Print results
+        # Print results (only for validated target subjects)
         print()
         print(f"{'Subject':<10} {'Baseline':>10} {'Ensemble':>10} {'GP_single':>10} {'λ_s':>6} {'GP_ens':>10} {'λ_e':>6}")
         print("-" * 70)
-        for subj in sorted(all_amps_srm.keys()):
+        for subj in sorted(results.keys()):
             r = results[subj]
             print(f"sub-{subj:<6} {r['Baseline']:>10.1f} {r['Ensemble']:>10.1f} "
                   f"{r['GP_single']:>10.1f} {r['GP_single_lambda']:>6.2f} "

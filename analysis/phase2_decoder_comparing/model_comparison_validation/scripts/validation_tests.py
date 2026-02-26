@@ -1197,51 +1197,50 @@ def loco_permutation_summary(loco_data):
 
 def load_gp_results(gp_dir):
     """
-    Load GP results. Supports two formats:
-    1. Aggregated: fe_group_prior_results.json (individual_results array)
-    2. Per-subject: sub-*_fe_group_prior.json files
+    Load GP results from group_prior.py output.
+
+    Format: {metadata: {...}, results: {roi: {sub-XX: {baseline, GP_nested/lambda_X}}}}
+    Files: gp_*_results.json (all subjects) or gp_*_sub-XX.json (per-subject)
 
     Args:
         gp_dir: Path to GP results directory
 
     Returns:
-        gp_data: Dict with 'subjects' list and 'metadata'
+        gp_data: Dict with 'results' (roi→subject→data) and 'metadata'
     """
     gp_path = Path(gp_dir)
 
-    # Try aggregated file first
-    agg_file = gp_path / "fe_group_prior_results.json"
-    if agg_file.exists():
-        with open(agg_file, 'r') as f:
+    # Try aggregated file first (gp_loco_nested_results.json etc.)
+    agg_files = sorted(gp_path.glob("gp_*_results.json"))
+    if agg_files:
+        with open(agg_files[0], 'r') as f:
             raw = json.load(f)
-        print(f"Loaded aggregated GP results from {agg_file}")
+        print(f"Loaded GP results from {agg_files[0]}")
         return {
-            'subjects': raw.get('individual_results', []),
+            'results': raw['results'],
             'metadata': raw.get('metadata', {})
         }
 
-    # Try per-subject files in subject_results/ subdir
-    subj_dir = gp_path / "subject_results"
-    if not subj_dir.exists():
-        subj_dir = gp_path
-
-    subj_files = sorted(subj_dir.glob("sub-*_fe_group_prior.json"))
+    # Try per-subject files (gp_loco_nested_sub-01.json etc.)
+    subj_files = sorted(gp_path.glob("gp_*_sub-*.json"))
     if len(subj_files) == 0:
-        raise FileNotFoundError(f"No GP result files found in {gp_dir}")
+        raise FileNotFoundError(f"No GP result files (gp_*.json) found in {gp_dir}")
 
-    subjects = []
+    # Merge per-subject files into unified results[roi][subject]
+    merged_results = {}
+    metadata = {}
     for f in subj_files:
         with open(f, 'r') as fh:
             data = json.load(fh)
-        # Normalize structure to match aggregated format
-        subjects.append({
-            'subject': data['subject'],
-            'group': data['group'],
-            'rois': data.get('results_by_roi', {})
-        })
+        if not metadata:
+            metadata = data.get('metadata', {})
+        for roi, roi_data in data.get('results', {}).items():
+            if roi not in merged_results:
+                merged_results[roi] = {}
+            merged_results[roi].update(roi_data)
 
-    print(f"Loaded {len(subjects)} GP subject files from {subj_dir}")
-    return {'subjects': subjects, 'metadata': {}}
+    print(f"Loaded and merged {len(subj_files)} GP subject files from {gp_dir}")
+    return {'results': merged_results, 'metadata': metadata}
 
 
 def gp_improvement_test(gp_data):
@@ -1250,8 +1249,12 @@ def gp_improvement_test(gp_data):
     Wilcoxon signed-rank test: GP MAE vs baseline MAE.
     Reports per-subject improvement (delta, %) per ROI.
 
+    Expects group_prior.py output format:
+        results[roi][sub-XX] = {baseline: float, GP_nested: {mean_mae, best_lambda}}
+        or for fixed mode: {baseline: float, lambda_0.5: {mean_mae, fold_maes}}
+
     Args:
-        gp_data: Dict from load_gp_results()
+        gp_data: Dict from load_gp_results() with 'results' and 'metadata'
 
     Returns:
         gp_results: Dict[roi] with test results and per-subject details
@@ -1260,34 +1263,45 @@ def gp_improvement_test(gp_data):
     print(f"Group Prior Improvement Test")
     print(f"{'='*80}\n")
 
-    subjects = gp_data['subjects']
+    results = gp_data['results']
+    mode = gp_data.get('metadata', {}).get('mode', 'nested')
     gp_results = {}
 
-    # Collect ROIs from first subject
-    first_rois = subjects[0].get('rois', {})
-    rois = sorted(first_rois.keys())
-
-    for roi in rois:
+    for roi in sorted(results.keys()):
         print(f"ROI: {roi}")
 
         baseline_vals = []
         gp_vals = []
         subject_details = []
 
-        for subj in subjects:
-            subj_id = subj['subject']
-            group = subj['group']
-            roi_data = subj.get('rois', {}).get(roi, {})
-
-            if 'baseline' not in roi_data:
+        for subj_key, subj_data in sorted(results[roi].items()):
+            # subj_key is "sub-01" etc.
+            if 'baseline' not in subj_data:
                 continue
 
-            bl = roi_data['baseline']
-            # Use gp_single as primary GP metric
-            gp = roi_data.get('gp_single', roi_data.get('gp_ensemble', None))
+            bl = subj_data['baseline']
+
+            # Extract GP MAE based on mode
+            gp = None
+            best_lambda = None
+            if 'GP_nested' in subj_data:
+                gp = subj_data['GP_nested']['mean_mae']
+                best_lambda = subj_data['GP_nested'].get('best_lambda')
+            else:
+                # Fixed mode: find best lambda key (lowest MAE)
+                lambda_keys = [k for k in subj_data if k.startswith('lambda_')]
+                if lambda_keys:
+                    best_key = min(lambda_keys,
+                                   key=lambda k: subj_data[k]['mean_mae'])
+                    gp = subj_data[best_key]['mean_mae']
+                    best_lambda = float(best_key.replace('lambda_', ''))
 
             if gp is None:
                 continue
+
+            # Determine group from subject ID
+            subj_num = int(subj_key.replace('sub-', ''))
+            group = 'HC' if subj_num <= 7 else 'CVD'
 
             baseline_vals.append(bl)
             gp_vals.append(gp)
@@ -1296,10 +1310,11 @@ def gp_improvement_test(gp_data):
             pct = (delta / bl * 100) if bl != 0 else 0
 
             subject_details.append({
-                'subject': subj_id,
+                'subject': subj_key,
                 'group': group,
                 'baseline_mae': float(bl),
                 'gp_mae': float(gp),
+                'best_lambda': float(best_lambda) if best_lambda is not None else None,
                 'delta': float(delta),
                 'pct_change': float(pct)
             })

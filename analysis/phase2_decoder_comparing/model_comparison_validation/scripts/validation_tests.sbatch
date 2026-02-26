@@ -19,7 +19,7 @@ BASELINE_DIR=/scratch/connectome/haba6030/colorBlind/derivatives/full_dataset_C0
 PERF_DIR=${BASE}/results/loro/procrustes
 OUTPUT_DIR=${BASE}/results/validation
 LOCO_DIR=${BASE}/results/loco/procrustes
-GP_DIR=${BASE}/results/FE_group_prior
+GP_DIR=${BASE}/results/FE_group_prior/loco_nested
 
 echo "=============================="
 echo "Job: $SLURM_JOB_ID"

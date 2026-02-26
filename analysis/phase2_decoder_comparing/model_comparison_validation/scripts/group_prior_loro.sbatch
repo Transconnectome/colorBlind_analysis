@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=gp_loro
 #SBATCH --nodelist=node2
-#SBATCH --array=1-10
+#SBATCH --array=1-10%5
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=8G
 #SBATCH --time=06:00:00

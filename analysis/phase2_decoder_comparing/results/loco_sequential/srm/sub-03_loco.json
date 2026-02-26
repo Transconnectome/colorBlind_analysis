@@ -1,0 +1,84 @@
+{
+  "subject": "03",
+  "subject_group": "HC",
+  "rois": [
+    "V1",
+    "V2",
+    "V3",
+    "V4"
+  ],
+  "models": [
+    "FE_Sequential",
+    "HybridMLP_Sequential",
+    "HybridSVR_Sequential"
+  ],
+  "alignment": "srm",
+  "n_permutations": 0,
+  "settings": {
+    "baseline_dir": "/scratch/connectome/haba6030/colorBlind/derivatives/full_dataset_C010",
+    "dataset_name": "full_dataset_C010",
+    "n_runs": 6,
+    "n_colors": 8,
+    "cv_method": "LOCO (Leave-One-Color-Out)",
+    "hp_tuning": false,
+    "hp_tuning_note": "LOCO uses default hyperparameters. With only 7 training colors per fold, nested HP tuning would be unreliable."
+  },
+  "hyperparameters": {
+    "FE_Sequential": {
+      "params": {
+        "alpha": 0,
+        "n_channels": 6
+      },
+      "rationale": "Pseudoinverse encoding with incremental training (run1 \u2192 run1+2 \u2192 ... \u2192 all). Final W identical to pooled (42 samples), sequential learning process."
+    },
+    "HybridMLP_Sequential": {
+      "params": {
+        "fe_alpha": 0,
+        "n_channels": 6,
+        "hidden_layer_sizes": [
+          64,
+          32
+        ],
+        "mlp_alpha": 0.1
+      },
+      "rationale": "FE pooled (alpha=0) + MLP warm_start sequential (run1\u2192run2\u2192...\u2192run6). Two hidden layers (64, 32), moderate L2 regularization."
+    },
+    "HybridSVR_Sequential": {
+      "params": {
+        "fe_alpha": 0,
+        "n_channels": 6,
+        "C": 1.0,
+        "epsilon": 0.1
+      },
+      "rationale": "FE pooled (alpha=0) + SVR incremental (run1 \u2192 run1+2 \u2192 ... \u2192 all). MultiOutput SVR with RBF kernel, auto-scaled gamma."
+    }
+  },
+  "model_architectures": {
+    "FE_Sequential": {
+      "type": "encoding_model_sequential",
+      "target": "continuous hue (0-359\u00b0) via incremental FE",
+      "linearity": "linear",
+      "description": "One W matrix trained sequentially via incremental data accumulation (run1 \u2192 run1+2 \u2192 ... \u2192 all 6 runs). Final W identical to pooled (42 samples), but learning process mimics continuous brain updates."
+    },
+    "HybridMLP_Sequential": {
+      "type": "hybrid_sequential",
+      "target": "continuous hue (0-359\u00b0) via FE(pooled) + MLP(warm_start)",
+      "linearity": "nonlinear readout + sequential",
+      "description": "Stage 1: FE with pooled data (stable encoding). Stage 2: MLP with warm_start=True trains sequentially on run1, run2, ..., run6. Mimics continuous readout plasticity with stable representation."
+    },
+    "HybridSVR_Sequential": {
+      "type": "hybrid_sequential",
+      "target": "continuous hue (0-359\u00b0) via FE(pooled) + SVR(incremental)",
+      "linearity": "nonlinear readout + sequential",
+      "description": "Stage 1: FE with pooled data (stable encoding). Stage 2: SVR trains incrementally (run1 \u2192 run1+2 \u2192 ... \u2192 all runs). SVR variant of sequential hybrid learning."
+    }
+  },
+  "results": {
+    "V1": {},
+    "V2": {},
+    "V3": {},
+    "V4": {}
+  },
+  "timestamp": "20260224_143731",
+  "datetime": "2026-02-24T14:37:32.652577"
+}

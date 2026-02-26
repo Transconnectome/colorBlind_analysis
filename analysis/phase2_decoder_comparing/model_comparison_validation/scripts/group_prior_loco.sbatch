@@ -1,14 +1,14 @@
 #!/bin/bash
 #SBATCH --job-name=gp_loco
 #SBATCH --nodelist=node2
-#SBATCH --array=1-10
+#SBATCH --array=1-10%5
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=8G
 #SBATCH --time=06:00:00
 #SBATCH --no-requeue
 #SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation
-#SBATCH --output=logs/srm_gp_%a_%j.out
-#SBATCH --error=logs/srm_gp_%a_%j.err
+#SBATCH --output=logs/gp_loco_%a_%j.out
+#SBATCH --error=logs/gp_loco_%a_%j.err
 
 source ~/.bashrc
 conda activate nilearn

@@ -1,0 +1,28 @@
+{
+  "description": "LOCO decoder comparison",
+  "baseline_dir": "/scratch/connectome/haba6030/colorBlind/derivatives/full_dataset_C010",
+  "dataset_name": "full_dataset_C010",
+  "alignment": "srm",
+  "models": [
+    "LDA",
+    "Ridge",
+    "KernelRidge",
+    "SVM",
+    "MLP",
+    "ForwardEncoding",
+    "HybridMLP",
+    "HybridSVR"
+  ],
+  "rois": [
+    "V1",
+    "V2",
+    "V3",
+    "V4"
+  ],
+  "n_permutations": 1000,
+  "cv_method": "LOCO (Leave-One-Color-Out)",
+  "hp_tuning": false,
+  "n_runs": 6,
+  "n_colors": 8,
+  "created": "2026-02-22T23:15:27.500370"
+}

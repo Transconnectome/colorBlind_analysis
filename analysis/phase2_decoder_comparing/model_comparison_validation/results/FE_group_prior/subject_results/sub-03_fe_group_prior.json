@@ -1,0 +1,52 @@
+{
+  "subject": "sub-03",
+  "group": "HC",
+  "analysis": "FE_GroupPrior_SRM_LOCO",
+  "date": "2026-02-25",
+  "results_by_roi": {
+    "V1": {
+      "baseline": 88.6,
+      "ensemble": 77.7,
+      "gp_single": 54.5,
+      "lambda_single": 0.0,
+      "gp_ensemble": 58.4,
+      "lambda_ensemble": 0.0,
+      "delta_ensemble": -10.899999999999991,
+      "delta_gp_single": -34.099999999999994,
+      "delta_gp_ensemble": -30.199999999999996
+    },
+    "V2": {
+      "baseline": 103.1,
+      "ensemble": 91.0,
+      "gp_single": 36.7,
+      "lambda_single": 0.0,
+      "gp_ensemble": 34.0,
+      "lambda_ensemble": 0.0,
+      "delta_ensemble": -12.099999999999994,
+      "delta_gp_single": -66.39999999999999,
+      "delta_gp_ensemble": -69.1
+    },
+    "V3": {
+      "baseline": 104.8,
+      "ensemble": 103.6,
+      "gp_single": 81.1,
+      "lambda_single": 0.0,
+      "gp_ensemble": 81.9,
+      "lambda_ensemble": 0.0,
+      "delta_ensemble": -1.2000000000000028,
+      "delta_gp_single": -23.700000000000003,
+      "delta_gp_ensemble": -22.89999999999999
+    },
+    "V4": {
+      "baseline": 76.1,
+      "ensemble": 73.7,
+      "gp_single": 81.7,
+      "lambda_single": 0.2,
+      "gp_ensemble": 81.3,
+      "lambda_ensemble": 0.15,
+      "delta_ensemble": -2.3999999999999915,
+      "delta_gp_single": 5.6000000000000085,
+      "delta_gp_ensemble": 5.200000000000003
+    }
+  }
+}

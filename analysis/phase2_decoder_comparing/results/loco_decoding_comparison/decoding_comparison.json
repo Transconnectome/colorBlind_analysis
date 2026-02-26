@@ -1,0 +1,878 @@
+{
+  "description": "LOCO decoding method comparison \u2014 Round 2: Ensemble (baseline + 3 ensemble variants)",
+  "models": [
+    "ForwardEncoding",
+    "FE_Ensemble",
+    "FE_EnsembleRidge",
+    "FE_EnsembleGaussML"
+  ],
+  "subjects": [
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
+    "06",
+    "07",
+    "08",
+    "09",
+    "10"
+  ],
+  "rois": [
+    "V1",
+    "V2",
+    "V3",
+    "V4"
+  ],
+  "alignment": "procrustes",
+  "n_permutations": 0,
+  "per_subject": {
+    "01": {
+      "V1": {
+        "ForwardEncoding": {
+          "mae": 79.20833333333333,
+          "adjacent_acc": 0.35416666666666663
+        },
+        "FE_Ensemble": {
+          "mae": 72.28688221761217,
+          "adjacent_acc": 0.41666666666666663
+        },
+        "FE_EnsembleRidge": {
+          "mae": 89.10242274888378,
+          "adjacent_acc": 0.2708333333333333
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 144.47916666666669,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V2": {
+        "ForwardEncoding": {
+          "mae": 84.3125,
+          "adjacent_acc": 0.4375
+        },
+        "FE_Ensemble": {
+          "mae": 89.64790322841432,
+          "adjacent_acc": 0.33333333333333337
+        },
+        "FE_EnsembleRidge": {
+          "mae": 128.74767685867388,
+          "adjacent_acc": 0.0625
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 124.0625,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V3": {
+        "ForwardEncoding": {
+          "mae": 51.041666666666664,
+          "adjacent_acc": 0.5833333333333333
+        },
+        "FE_Ensemble": {
+          "mae": 51.69758574544053,
+          "adjacent_acc": 0.5833333333333333
+        },
+        "FE_EnsembleRidge": {
+          "mae": 79.0663087685725,
+          "adjacent_acc": 0.35416666666666663
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 124.8125,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V4": {
+        "ForwardEncoding": {
+          "mae": 71.0625,
+          "adjacent_acc": 0.4375
+        },
+        "FE_Ensemble": {
+          "mae": 77.57312963398185,
+          "adjacent_acc": 0.45833333333333326
+        },
+        "FE_EnsembleRidge": {
+          "mae": 115.75820347910076,
+          "adjacent_acc": 0.25
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 122.125,
+          "adjacent_acc": 0.0
+        }
+      }
+    },
+    "02": {
+      "V1": {
+        "ForwardEncoding": {
+          "mae": 84.79166666666666,
+          "adjacent_acc": 0.375
+        },
+        "FE_Ensemble": {
+          "mae": 72.97292276937777,
+          "adjacent_acc": 0.45833333333333337
+        },
+        "FE_EnsembleRidge": {
+          "mae": 108.36499579300735,
+          "adjacent_acc": 0.16666666666666666
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 128.79166666666669,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V2": {
+        "ForwardEncoding": {
+          "mae": 95.58333333333334,
+          "adjacent_acc": 0.14583333333333334
+        },
+        "FE_Ensemble": {
+          "mae": 88.556332849804,
+          "adjacent_acc": 0.16666666666666669
+        },
+        "FE_EnsembleRidge": {
+          "mae": 105.96123552548511,
+          "adjacent_acc": 0.10416666666666666
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 112.10416666666666,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V3": {
+        "ForwardEncoding": {
+          "mae": 66.72916666666666,
+          "adjacent_acc": 0.4583333333333333
+        },
+        "FE_Ensemble": {
+          "mae": 66.38177503484513,
+          "adjacent_acc": 0.4375
+        },
+        "FE_EnsembleRidge": {
+          "mae": 82.40106810913208,
+          "adjacent_acc": 0.29166666666666663
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 113.25,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V4": {
+        "ForwardEncoding": {
+          "mae": 74.0625,
+          "adjacent_acc": 0.375
+        },
+        "FE_Ensemble": {
+          "mae": 72.73096434295216,
+          "adjacent_acc": 0.3541666666666667
+        },
+        "FE_EnsembleRidge": {
+          "mae": 91.13132333713851,
+          "adjacent_acc": 0.14583333333333334
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 100.35416666666666,
+          "adjacent_acc": 0.0
+        }
+      }
+    },
+    "03": {
+      "V1": {
+        "ForwardEncoding": {
+          "mae": 83.64583333333334,
+          "adjacent_acc": 0.4791666666666667
+        },
+        "FE_Ensemble": {
+          "mae": 76.29757436814536,
+          "adjacent_acc": 0.4166666666666667
+        },
+        "FE_EnsembleRidge": {
+          "mae": 110.69203627176061,
+          "adjacent_acc": 0.20833333333333334
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 135.5,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V2": {
+        "ForwardEncoding": {
+          "mae": 80.64583333333334,
+          "adjacent_acc": 0.5
+        },
+        "FE_Ensemble": {
+          "mae": 78.72351387232133,
+          "adjacent_acc": 0.4166666666666667
+        },
+        "FE_EnsembleRidge": {
+          "mae": 90.09760867209309,
+          "adjacent_acc": 0.2916666666666667
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 133.125,
+          "adjacent_acc": 0.020833333333333332
+        }
+      },
+      "V3": {
+        "ForwardEncoding": {
+          "mae": 95.47916666666667,
+          "adjacent_acc": 0.24999999999999997
+        },
+        "FE_Ensemble": {
+          "mae": 89.3176639001783,
+          "adjacent_acc": 0.3125
+        },
+        "FE_EnsembleRidge": {
+          "mae": 98.73785826270293,
+          "adjacent_acc": 0.20833333333333331
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 141.125,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V4": {
+        "ForwardEncoding": {
+          "mae": 68.04166666666667,
+          "adjacent_acc": 0.5833333333333333
+        },
+        "FE_Ensemble": {
+          "mae": 65.73135798870821,
+          "adjacent_acc": 0.5625
+        },
+        "FE_EnsembleRidge": {
+          "mae": 99.90126965128476,
+          "adjacent_acc": 0.33333333333333337
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 119.29166666666667,
+          "adjacent_acc": 0.08333333333333333
+        }
+      }
+    },
+    "04": {
+      "V1": {
+        "ForwardEncoding": {
+          "mae": 75.6875,
+          "adjacent_acc": 0.43750000000000006
+        },
+        "FE_Ensemble": {
+          "mae": 73.56964136895583,
+          "adjacent_acc": 0.4375
+        },
+        "FE_EnsembleRidge": {
+          "mae": 85.6270667888367,
+          "adjacent_acc": 0.2708333333333333
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 122.79166666666666,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V2": {
+        "ForwardEncoding": {
+          "mae": 80.3125,
+          "adjacent_acc": 0.29166666666666663
+        },
+        "FE_Ensemble": {
+          "mae": 83.40629332988354,
+          "adjacent_acc": 0.22916666666666669
+        },
+        "FE_EnsembleRidge": {
+          "mae": 98.57132797196513,
+          "adjacent_acc": 0.14583333333333331
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 126.75,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V3": {
+        "ForwardEncoding": {
+          "mae": 87.95833333333334,
+          "adjacent_acc": 0.25
+        },
+        "FE_Ensemble": {
+          "mae": 81.65872831703555,
+          "adjacent_acc": 0.27083333333333337
+        },
+        "FE_EnsembleRidge": {
+          "mae": 103.17801354784541,
+          "adjacent_acc": 0.125
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 123.16666666666669,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V4": {
+        "ForwardEncoding": {
+          "mae": 53.479166666666664,
+          "adjacent_acc": 0.5208333333333333
+        },
+        "FE_Ensemble": {
+          "mae": 41.70027970884604,
+          "adjacent_acc": 0.6041666666666667
+        },
+        "FE_EnsembleRidge": {
+          "mae": 71.10820918890263,
+          "adjacent_acc": 0.41666666666666663
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 120.33333333333333,
+          "adjacent_acc": 0.0
+        }
+      }
+    },
+    "05": {
+      "V1": {
+        "ForwardEncoding": {
+          "mae": 61.75,
+          "adjacent_acc": 0.375
+        },
+        "FE_Ensemble": {
+          "mae": 45.29906127867682,
+          "adjacent_acc": 0.6041666666666667
+        },
+        "FE_EnsembleRidge": {
+          "mae": 65.33594860409711,
+          "adjacent_acc": 0.3125
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 130.75,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V2": {
+        "ForwardEncoding": {
+          "mae": 44.4375,
+          "adjacent_acc": 0.45833333333333337
+        },
+        "FE_Ensemble": {
+          "mae": 42.611054559520916,
+          "adjacent_acc": 0.5416666666666666
+        },
+        "FE_EnsembleRidge": {
+          "mae": 48.48967677349659,
+          "adjacent_acc": 0.41666666666666663
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 115.58333333333334,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V3": {
+        "ForwardEncoding": {
+          "mae": 69.64583333333333,
+          "adjacent_acc": 0.3333333333333333
+        },
+        "FE_Ensemble": {
+          "mae": 70.42791873743306,
+          "adjacent_acc": 0.4583333333333333
+        },
+        "FE_EnsembleRidge": {
+          "mae": 93.49706245860747,
+          "adjacent_acc": 0.22916666666666663
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 124.45833333333334,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V4": {
+        "ForwardEncoding": {
+          "mae": 82.54166666666667,
+          "adjacent_acc": 0.3125
+        },
+        "FE_Ensemble": {
+          "mae": 86.69278149106852,
+          "adjacent_acc": 0.27083333333333337
+        },
+        "FE_EnsembleRidge": {
+          "mae": 108.51327592177881,
+          "adjacent_acc": 0.10416666666666666
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 124.08333333333334,
+          "adjacent_acc": 0.0
+        }
+      }
+    },
+    "06": {
+      "V1": {
+        "ForwardEncoding": {
+          "mae": 80.6875,
+          "adjacent_acc": 0.3125
+        },
+        "FE_Ensemble": {
+          "mae": 75.25775062431654,
+          "adjacent_acc": 0.33333333333333337
+        },
+        "FE_EnsembleRidge": {
+          "mae": 90.85453397149223,
+          "adjacent_acc": 0.25
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 128.08333333333331,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V2": {
+        "ForwardEncoding": {
+          "mae": 92.02083333333334,
+          "adjacent_acc": 0.16666666666666669
+        },
+        "FE_Ensemble": {
+          "mae": 101.42489166365073,
+          "adjacent_acc": 0.22916666666666666
+        },
+        "FE_EnsembleRidge": {
+          "mae": 112.53276196283281,
+          "adjacent_acc": 0.12499999999999999
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 111.9375,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V3": {
+        "ForwardEncoding": {
+          "mae": 93.60416666666667,
+          "adjacent_acc": 0.12499999999999999
+        },
+        "FE_Ensemble": {
+          "mae": 88.25260587456381,
+          "adjacent_acc": 0.14583333333333331
+        },
+        "FE_EnsembleRidge": {
+          "mae": 101.3721016749184,
+          "adjacent_acc": 0.16666666666666669
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 127.8125,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V4": {
+        "ForwardEncoding": {
+          "mae": 62.14583333333333,
+          "adjacent_acc": 0.5625
+        },
+        "FE_Ensemble": {
+          "mae": 62.84609878526121,
+          "adjacent_acc": 0.47916666666666674
+        },
+        "FE_EnsembleRidge": {
+          "mae": 85.63900391233425,
+          "adjacent_acc": 0.35416666666666663
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 125.9375,
+          "adjacent_acc": 0.08333333333333333
+        }
+      }
+    },
+    "07": {
+      "V1": {
+        "ForwardEncoding": {
+          "mae": 68.75,
+          "adjacent_acc": 0.41666666666666663
+        },
+        "FE_Ensemble": {
+          "mae": 60.97573198573441,
+          "adjacent_acc": 0.49999999999999994
+        },
+        "FE_EnsembleRidge": {
+          "mae": 92.05295037079165,
+          "adjacent_acc": 0.20833333333333331
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 124.91666666666666,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V2": {
+        "ForwardEncoding": {
+          "mae": 82.70833333333334,
+          "adjacent_acc": 0.5
+        },
+        "FE_Ensemble": {
+          "mae": 69.97762723451538,
+          "adjacent_acc": 0.5
+        },
+        "FE_EnsembleRidge": {
+          "mae": 107.48078313017778,
+          "adjacent_acc": 0.20833333333333331
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 136.3125,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V3": {
+        "ForwardEncoding": {
+          "mae": 74.1875,
+          "adjacent_acc": 0.375
+        },
+        "FE_Ensemble": {
+          "mae": 71.07108287103404,
+          "adjacent_acc": 0.35416666666666663
+        },
+        "FE_EnsembleRidge": {
+          "mae": 103.81348472935343,
+          "adjacent_acc": 0.14583333333333331
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 127.41666666666666,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V4": {
+        "ForwardEncoding": {
+          "mae": 74.45833333333333,
+          "adjacent_acc": 0.39583333333333337
+        },
+        "FE_Ensemble": {
+          "mae": 81.15938593584718,
+          "adjacent_acc": 0.3541666666666667
+        },
+        "FE_EnsembleRidge": {
+          "mae": 93.6131162786662,
+          "adjacent_acc": 0.16666666666666666
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 131.14583333333334,
+          "adjacent_acc": 0.0
+        }
+      }
+    },
+    "08": {
+      "V1": {
+        "ForwardEncoding": {
+          "mae": 52.020833333333336,
+          "adjacent_acc": 0.43749999999999994
+        },
+        "FE_Ensemble": {
+          "mae": 56.099928594984796,
+          "adjacent_acc": 0.45833333333333337
+        },
+        "FE_EnsembleRidge": {
+          "mae": 68.40204674468123,
+          "adjacent_acc": 0.12499999999999999
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 117.0,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V2": {
+        "ForwardEncoding": {
+          "mae": 74.91666666666667,
+          "adjacent_acc": 0.27083333333333337
+        },
+        "FE_Ensemble": {
+          "mae": 73.65195841826397,
+          "adjacent_acc": 0.25
+        },
+        "FE_EnsembleRidge": {
+          "mae": 84.53458347792441,
+          "adjacent_acc": 0.08333333333333333
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 115.47916666666666,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V3": {
+        "ForwardEncoding": {
+          "mae": 62.10416666666667,
+          "adjacent_acc": 0.375
+        },
+        "FE_Ensemble": {
+          "mae": 62.089555614632275,
+          "adjacent_acc": 0.39583333333333337
+        },
+        "FE_EnsembleRidge": {
+          "mae": 75.25677052519131,
+          "adjacent_acc": 0.20833333333333331
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 95.47916666666666,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V4": {
+        "ForwardEncoding": {
+          "mae": 82.85416666666667,
+          "adjacent_acc": 0.25
+        },
+        "FE_Ensemble": {
+          "mae": 82.46706989571524,
+          "adjacent_acc": 0.25
+        },
+        "FE_EnsembleRidge": {
+          "mae": 102.34125082851362,
+          "adjacent_acc": 0.0
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 120.47916666666667,
+          "adjacent_acc": 0.0
+        }
+      }
+    },
+    "09": {
+      "V1": {
+        "ForwardEncoding": {
+          "mae": 103.25,
+          "adjacent_acc": 0.1875
+        },
+        "FE_Ensemble": {
+          "mae": 104.45950416474645,
+          "adjacent_acc": 0.20833333333333331
+        },
+        "FE_EnsembleRidge": {
+          "mae": 104.96758871132872,
+          "adjacent_acc": 0.125
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 137.97916666666666,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V2": {
+        "ForwardEncoding": {
+          "mae": 108.3125,
+          "adjacent_acc": 0.10416666666666666
+        },
+        "FE_Ensemble": {
+          "mae": 113.3141868710772,
+          "adjacent_acc": 0.0625
+        },
+        "FE_EnsembleRidge": {
+          "mae": 115.22397826576176,
+          "adjacent_acc": 0.0625
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 118.77083333333334,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V3": {
+        "ForwardEncoding": {
+          "mae": 78.8125,
+          "adjacent_acc": 0.20833333333333331
+        },
+        "FE_Ensemble": {
+          "mae": 76.8964134020024,
+          "adjacent_acc": 0.27083333333333337
+        },
+        "FE_EnsembleRidge": {
+          "mae": 88.78536040537467,
+          "adjacent_acc": 0.1875
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 117.1875,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V4": {
+        "ForwardEncoding": {
+          "mae": 99.08333333333333,
+          "adjacent_acc": 0.125
+        },
+        "FE_Ensemble": {
+          "mae": 96.95813252918887,
+          "adjacent_acc": 0.14583333333333331
+        },
+        "FE_EnsembleRidge": {
+          "mae": 108.05086527437477,
+          "adjacent_acc": 0.125
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 143.16666666666666,
+          "adjacent_acc": 0.020833333333333332
+        }
+      }
+    },
+    "10": {
+      "V1": {
+        "ForwardEncoding": {
+          "mae": 98.5625,
+          "adjacent_acc": 0.10416666666666666
+        },
+        "FE_Ensemble": {
+          "mae": 91.96641034402856,
+          "adjacent_acc": 0.20833333333333331
+        },
+        "FE_EnsembleRidge": {
+          "mae": 120.8008755184024,
+          "adjacent_acc": 0.08333333333333333
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 131.41666666666666,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V2": {
+        "ForwardEncoding": {
+          "mae": 112.27083333333333,
+          "adjacent_acc": 0.08333333333333333
+        },
+        "FE_Ensemble": {
+          "mae": 110.35832628620932,
+          "adjacent_acc": 0.125
+        },
+        "FE_EnsembleRidge": {
+          "mae": 120.48427801121926,
+          "adjacent_acc": 0.0
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 123.75,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V3": {
+        "ForwardEncoding": {
+          "mae": 79.6875,
+          "adjacent_acc": 0.3333333333333333
+        },
+        "FE_Ensemble": {
+          "mae": 75.78714721142151,
+          "adjacent_acc": 0.3958333333333333
+        },
+        "FE_EnsembleRidge": {
+          "mae": 101.73228468774238,
+          "adjacent_acc": 0.22916666666666663
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 121.75,
+          "adjacent_acc": 0.0
+        }
+      },
+      "V4": {
+        "ForwardEncoding": {
+          "mae": 80.1875,
+          "adjacent_acc": 0.16666666666666666
+        },
+        "FE_Ensemble": {
+          "mae": 81.98024384949935,
+          "adjacent_acc": 0.14583333333333334
+        },
+        "FE_EnsembleRidge": {
+          "mae": 87.90434095583582,
+          "adjacent_acc": 0.125
+        },
+        "FE_EnsembleGaussML": {
+          "mae": 116.77083333333333,
+          "adjacent_acc": 0.0
+        }
+      }
+    }
+  },
+  "group_summary": {
+    "ForwardEncoding": {
+      "V1": {
+        "HC_mean": 76.36011904761905,
+        "HC_std": 7.772047765802967,
+        "CVD_mean": 84.61111111111111,
+        "CVD_std": 23.12412619303393
+      },
+      "V2": {
+        "HC_mean": 80.00297619047619,
+        "HC_std": 15.484921415412371,
+        "CVD_mean": 98.5,
+        "CVD_std": 16.754050436193584
+      },
+      "V3": {
+        "HC_mean": 76.94940476190477,
+        "HC_std": 15.016962371660995,
+        "CVD_mean": 73.53472222222223,
+        "CVD_std": 8.090513229764081
+      },
+      "V4": {
+        "HC_mean": 69.39880952380953,
+        "HC_std": 8.7074178472664,
+        "CVD_mean": 87.375,
+        "CVD_std": 8.350312563455775
+      }
+    },
+    "FE_Ensemble": {
+      "V1": {
+        "HC_mean": 68.094223516117,
+        "HC_std": 10.421569137301653,
+        "CVD_mean": 84.1752810345866,
+        "CVD_std": 20.496965779666123
+      },
+      "V2": {
+        "HC_mean": 79.19251667687288,
+        "HC_std": 17.453481413687594,
+        "CVD_mean": 99.10815719185017,
+        "CVD_std": 18.04065445874109
+      },
+      "V3": {
+        "HC_mean": 74.11533721150434,
+        "HC_std": 12.381460539270305,
+        "CVD_mean": 71.5910387426854,
+        "CVD_std": 6.73380794176668
+      },
+      "V4": {
+        "HC_mean": 69.77628541238074,
+        "HC_std": 13.825001913307414,
+        "CVD_mean": 87.13514875813449,
+        "CVD_std": 6.948741254098565
+      }
+    },
+    "FE_EnsembleRidge": {
+      "V1": {
+        "HC_mean": 91.71856493555278,
+        "HC_std": 14.030312246139363,
+        "CVD_mean": 98.05683699147079,
+        "CVD_std": 21.94277681021824
+      },
+      "V2": {
+        "HC_mean": 98.84015298496062,
+        "HC_std": 23.357447981331664,
+        "CVD_mean": 106.74761325163514,
+        "CVD_std": 15.853111306592881
+      },
+      "V3": {
+        "HC_mean": 94.5808425073046,
+        "HC_std": 9.356260349455791,
+        "CVD_mean": 88.59147187276945,
+        "CVD_std": 10.809452872838271
+      },
+      "V4": {
+        "HC_mean": 95.09491453845799,
+        "HC_std": 13.694665500103147,
+        "CVD_mean": 99.43215235290808,
+        "CVD_std": 8.478118933857449
+      }
+    },
+    "FE_EnsembleGaussML": {
+      "V1": {
+        "HC_mean": 130.75892857142856,
+        "HC_std": 6.754479858404827,
+        "CVD_mean": 128.79861111111111,
+        "CVD_std": 8.762496587766366
+      },
+      "V2": {
+        "HC_mean": 122.83928571428571,
+        "HC_std": 9.187366470561578,
+        "CVD_mean": 119.33333333333333,
+        "CVD_std": 3.39989957640364
+      },
+      "V3": {
+        "HC_mean": 126.00595238095238,
+        "HC_std": 7.638573612335337,
+        "CVD_mean": 111.47222222222221,
+        "CVD_std": 11.461165474907427
+      },
+      "V4": {
+        "HC_mean": 120.46726190476191,
+        "HC_std": 8.989803921470441,
+        "CVD_mean": 126.80555555555554,
+        "CVD_std": 11.667687620671893
+      }
+    }
+  },
+  "timestamp": "2026-02-23T01:11:18.201449"
+}

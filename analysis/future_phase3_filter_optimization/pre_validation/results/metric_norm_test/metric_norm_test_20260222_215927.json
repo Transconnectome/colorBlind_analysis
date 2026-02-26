@@ -1,0 +1,43 @@
+{
+  "timestamp": "20260222_215927",
+  "n_hc": 7,
+  "n_cvd": 3,
+  "rois": [
+    "V1",
+    "V2",
+    "V3",
+    "hV4"
+  ],
+  "tests": [
+    {
+      "metric": "correlation",
+      "normalization": "none",
+      "results": []
+    },
+    {
+      "metric": "correlation",
+      "normalization": "within",
+      "results": []
+    },
+    {
+      "metric": "correlation",
+      "normalization": "pooled",
+      "results": []
+    },
+    {
+      "metric": "crossnobis",
+      "normalization": "none",
+      "results": []
+    },
+    {
+      "metric": "crossnobis",
+      "normalization": "within",
+      "results": []
+    },
+    {
+      "metric": "crossnobis",
+      "normalization": "pooled",
+      "results": []
+    }
+  ]
+}

@@ -243,7 +243,7 @@ def run_permutation_test(baseline_dir, performance_dir, alignment='procrustes'):
                     continue
 
                 # Import model class
-                from run_model_comparison import (
+                from loro_baseline import (
                     LDADecoder, RidgeDecoder, KernelRidgeDecoder,
                     SVMDecoder, MLPDecoder, ForwardEncodingDecoder
                 )
@@ -487,7 +487,7 @@ def cross_subject_generalization(baseline_dir, alignment='procrustes'):
     print(f"Cross-Subject Generalization (Alignment: {alignment})")
     print(f"{'='*80}\n")
 
-    from run_model_comparison import (
+    from loro_baseline import (
         LDADecoder, RidgeDecoder, KernelRidgeDecoder,
         SVMDecoder, MLPDecoder, ForwardEncodingDecoder
     )
@@ -769,7 +769,7 @@ def forward_encoding_weight_stability(baseline_dir, subjects, rois, alignment='p
     print(f"ForwardEncoding W Stability (Alignment: {alignment})")
     print(f"{'='*80}\n")
 
-    from run_model_comparison import ForwardEncodingDecoder, load_amplitudes as mc_load_amplitudes
+    from loro_baseline import ForwardEncodingDecoder, load_amplitudes as mc_load_amplitudes
 
     stability_results = {}
 

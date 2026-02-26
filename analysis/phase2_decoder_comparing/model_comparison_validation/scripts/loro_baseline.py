@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
 """
-Extended Decoder Model Comparison - 6 Models
+LORO Baseline Decoder Comparison
 
-Compares 6 decoding models on full_dataset_C010:
-1. LDA (Linear Discriminant Analysis) - Current baseline
+Compares decoding models on full_dataset_C010 using LORO cross-validation:
+1. LDA (Linear Discriminant Analysis)
 2. Ridge Regression - Linear with circular encoding
 3. Kernel Ridge - Non-linear with RBF
 4. SVM - Support Vector Machine
 5. MLP - Multi-Layer Perceptron
-6. Forward Encoding - 6-channel model
+6. Forward Encoding - 6-channel model (pooled W)
+7. FE_MLP - FE + MLP hybrid
+8. FE_SVM - FE + SVM hybrid
 
 Protocol:
 - LORO (Leave-One-Run-Out) cross-validation
@@ -384,31 +386,22 @@ class ForwardEncodingDecoder:
 
     def fit(self, X, y_labels):
         """
+        Fit encoding weights from POOLED trials (not run-averaged).
+
         Args:
-            X: (n_samples, n_voxels)
+            X: (n_samples, n_voxels) — e.g., (40, n_voxels) for 5 train runs × 8 colors
             y_labels: (n_samples,) color labels (0-7)
         """
-        n_colors = 8
-        n_runs = len(X) // n_colors
-        n_voxels = X.shape[1]
-
-        if len(X) % n_colors != 0:
-            raise ValueError(f"X length {len(X)} not divisible by n_colors")
-
-        # Reshape to (n_runs, n_colors, n_voxels)
-        amplitudes_train = X.reshape(n_runs, n_colors, n_voxels)
-
-        # Create basis functions: (360, n_channels) full, then sample at stimulus hues
+        # Create basis functions: (360, n_channels) full
         basis_full = create_basis_functions(n_channels=self.n_channels)  # (360, n_channels)
-        self.basis_functions = basis_full[HUE_ANGLES]  # (8, n_channels)
+        self.basis_functions = basis_full[HUE_ANGLES]  # (8, n_channels) — for predict
 
-        # Average over runs
-        mean_patterns = amplitudes_train.mean(axis=0)  # (n_colors, n_voxels)
+        # Get hue for EACH trial → basis function per trial (pooled)
+        hues = np.array([HUE_ANGLES[int(l)] for l in y_labels])
+        C = basis_full[hues]  # (n_samples, n_channels)
+        B = X                 # (n_samples, n_voxels)
 
         # Encoding weights: W = (C^T C + αI)^-1 C^T B
-        C = self.basis_functions
-        B = mean_patterns
-
         if self.alpha > 0:
             self.weights = np.linalg.solve(
                 C.T @ C + self.alpha * np.eye(self.n_channels),
@@ -605,6 +598,25 @@ def compute_classification_metrics(y_true_labels, y_pred_labels):
     return metrics
 
 
+def compute_reconstruction_metrics(y_true_hue, y_pred_hue):
+    """
+    Compute circular reconstruction error metrics.
+
+    Args:
+        y_true_hue: (n_samples,) true hue angles
+        y_pred_hue: (n_samples,) predicted hue angles
+
+    Returns:
+        metrics: Dict with mae, medae, errors
+    """
+    errors = np.abs(circular_diff_deg(y_true_hue, y_pred_hue))
+    return {
+        'mae': float(np.mean(errors)),
+        'medae': float(np.median(errors)),
+        'errors': errors.tolist()
+    }
+
+
 # ============================================================================
 # LORO Cross-Validation
 # ============================================================================
@@ -666,9 +678,9 @@ def loro_cv_generic(amplitudes, model_class, model_name, param_grid=None,
 
     # Determine if model uses labels or hue
     uses_labels = model_name in ['LDA', 'SVM', 'MLP', 'ForwardEncoding',
-                                  'FE_MLP', 'FE_SVM', 'FE_Ensemble']
+                                  'FE_MLP', 'FE_SVM']
     # Models that output continuous hues (0-359°) instead of discrete labels
-    outputs_continuous = model_name in ['FE_Ensemble']
+    outputs_continuous = False
 
     for test_run in range(n_runs):
         # Split train/test
@@ -856,12 +868,6 @@ def run_single_subject_roi(baseline_dir, subject, roi, alignment, models,
         'FE_MLP': (FEMLPHybridDecoder, FEMLPHybridDecoder.get_param_grid()),
         'FE_SVM': (FESVMHybridDecoder, FESVMHybridDecoder.get_param_grid())
     }
-
-    # Lazy import of ensemble decoder to avoid circular import
-    # (run_loco_comparison.py imports from this file)
-    if 'FE_Ensemble' in models:
-        from run_loco_comparison import FE_EnsembleDecoder
-        model_map['FE_Ensemble'] = (FE_EnsembleDecoder, None)
 
     # Run each model
     for model_name in models:

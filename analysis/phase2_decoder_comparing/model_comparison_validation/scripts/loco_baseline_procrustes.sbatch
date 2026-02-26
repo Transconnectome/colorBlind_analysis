@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=loco_cmp
+#SBATCH --job-name=loco_pro_cmp
 #SBATCH --nodelist=node2
 #SBATCH --array=1-10%5
 #SBATCH --cpus-per-task=4
@@ -31,7 +31,7 @@ echo "Start: $(date)"
 echo "=============================="
 
 # Run LOCO comparison (all 6 models, all 4 ROIs, 1000 permutations)
-python ${SCRIPT_DIR}/run_loco_comparison.py \
+python ${SCRIPT_DIR}/loco_baseline.py \
     --baseline_dir ${BASELINE_DIR} \
     --output_dir ${OUTPUT_DIR} \
     --subject ${SUBJECT} \

@@ -25,7 +25,7 @@ echo "Start: $(date)"
 echo "=============================="
 
 # Run permutation test + cross-subject generalization
-python ${SCRIPT_DIR}/run_validation_tests.py \
+python ${SCRIPT_DIR}/validation_tests.py \
     --baseline_dir ${BASELINE_DIR} \
     --performance_dir ${PERF_DIR} \
     --output_dir ${OUTPUT_DIR} \

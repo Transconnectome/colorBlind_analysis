@@ -33,7 +33,7 @@ echo "=============================="
 # Condition 1: Raw control (must match original raw results)
 echo ""
 echo "=== Condition 1: Raw control ==="
-python ${SCRIPT_DIR}/run_model_comparison.py \
+python ${SCRIPT_DIR}/loro_baseline.py \
     --baseline_dir ${BASELINE_DIR} \
     --output_dir ${OUTPUT_BASE}/raw_ctrl \
     --subject ${SUBJECT} \
@@ -43,7 +43,7 @@ python ${SCRIPT_DIR}/run_model_comparison.py \
 # Condition 2: Nested Procrustes only (RT-2)
 echo ""
 echo "=== Condition 2: Nested Procrustes only ==="
-python ${SCRIPT_DIR}/run_model_comparison.py \
+python ${SCRIPT_DIR}/loro_baseline.py \
     --baseline_dir ${BASELINE_DIR} \
     --output_dir ${OUTPUT_BASE}/nested_only \
     --subject ${SUBJECT} \
@@ -53,7 +53,7 @@ python ${SCRIPT_DIR}/run_model_comparison.py \
 # Condition 3: Nested Procrustes + ANOVA k=100 (RT-2 + RT-3)
 echo ""
 echo "=== Condition 3: Nested Procrustes + ANOVA 100 ==="
-python ${SCRIPT_DIR}/run_model_comparison.py \
+python ${SCRIPT_DIR}/loro_baseline.py \
     --baseline_dir ${BASELINE_DIR} \
     --output_dir ${OUTPUT_BASE}/nested_anova100 \
     --subject ${SUBJECT} \
@@ -64,7 +64,7 @@ python ${SCRIPT_DIR}/run_model_comparison.py \
 # Condition 4: Nested Procrustes + PCA k=20 (RT-2 + RT-3)
 echo ""
 echo "=== Condition 4: Nested Procrustes + PCA 20 ==="
-python ${SCRIPT_DIR}/run_model_comparison.py \
+python ${SCRIPT_DIR}/loro_baseline.py \
     --baseline_dir ${BASELINE_DIR} \
     --output_dir ${OUTPUT_BASE}/nested_pca20 \
     --subject ${SUBJECT} \
@@ -75,7 +75,7 @@ python ${SCRIPT_DIR}/run_model_comparison.py \
 # Condition 5: Raw + ANOVA k=100 (isolates dim reduction effect)
 echo ""
 echo "=== Condition 5: Raw + ANOVA 100 ==="
-python ${SCRIPT_DIR}/run_model_comparison.py \
+python ${SCRIPT_DIR}/loro_baseline.py \
     --baseline_dir ${BASELINE_DIR} \
     --output_dir ${OUTPUT_BASE}/raw_anova100 \
     --subject ${SUBJECT} \

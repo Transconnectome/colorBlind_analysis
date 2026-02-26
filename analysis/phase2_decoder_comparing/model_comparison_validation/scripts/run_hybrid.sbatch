@@ -35,7 +35,7 @@ echo "=============================="
 # Condition 1: Nested Procrustes (our best alignment)
 echo ""
 echo "=== Cond 1: Nested Procrustes ==="
-python ${SCRIPT_DIR}/run_model_comparison.py \
+python ${SCRIPT_DIR}/loro_baseline.py \
     --baseline_dir ${BASELINE_DIR} \
     --output_dir ${OUTPUT_BASE}/nested \
     --subject ${SUBJECT} \
@@ -45,7 +45,7 @@ python ${SCRIPT_DIR}/run_model_comparison.py \
 # Condition 2: Preloaded Procrustes (control)
 echo ""
 echo "=== Cond 2: Preloaded Procrustes (control) ==="
-python ${SCRIPT_DIR}/run_model_comparison.py \
+python ${SCRIPT_DIR}/loro_baseline.py \
     --baseline_dir ${BASELINE_DIR} \
     --output_dir ${OUTPUT_BASE}/procrustes_ctrl \
     --subject ${SUBJECT} \

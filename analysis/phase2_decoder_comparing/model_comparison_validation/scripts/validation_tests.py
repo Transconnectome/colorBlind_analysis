@@ -61,6 +61,8 @@ def load_amplitudes(baseline_dir, subject, roi, alignment='raw'):
         amp_path = subject_roi_dir / "amplitudes_raw.npy"
     elif alignment == 'procrustes':
         amp_path = subject_roi_dir / "amplitudes_procrustes.npy"
+    elif alignment == 'srm':
+        amp_path = subject_roi_dir / "amplitudes_srm.npy"
     else:
         raise ValueError(f"Unknown alignment: {alignment}")
 
@@ -940,6 +942,411 @@ def run_lda_reliability(baseline_dir, performance_data, alignment='procrustes'):
 
 
 # ============================================================================
+# 6. LOCO Validation Tests
+# ============================================================================
+
+def load_loco_results(loco_dir):
+    """
+    Load sub-*_loco.json files from a LOCO results directory.
+
+    Args:
+        loco_dir: Path to directory containing sub-*_loco.json files
+
+    Returns:
+        loco_data: List of dicts (one per subject)
+    """
+    loco_path = Path(loco_dir)
+    loco_files = sorted(loco_path.glob("sub-*_loco.json"))
+
+    if len(loco_files) == 0:
+        raise FileNotFoundError(f"No LOCO files found in {loco_dir}")
+
+    loco_data = []
+    for f in loco_files:
+        with open(f, 'r') as fh:
+            loco_data.append(json.load(fh))
+
+    print(f"Loaded {len(loco_data)} LOCO result files from {loco_dir}")
+    return loco_data
+
+
+def loco_bootstrap_ci(loco_data, n_bootstrap=1000):
+    """
+    Bootstrap CI on overall_mae per model x ROI across subjects.
+
+    Args:
+        loco_data: List of LOCO result dicts
+        n_bootstrap: Number of bootstrap iterations
+
+    Returns:
+        ci_results: Dict[roi][model] with mean, ci_lower, ci_upper
+    """
+    print(f"\n{'='*80}")
+    print(f"LOCO Bootstrap CI (n_bootstrap={n_bootstrap})")
+    print(f"{'='*80}\n")
+
+    # Collect MAE values: {roi: {model: [mae_per_subject]}}
+    mae_data = {}
+
+    for subj_data in loco_data:
+        results = subj_data['results']
+        for roi in results:
+            if roi not in mae_data:
+                mae_data[roi] = {}
+            for model in results[roi]:
+                if model not in mae_data[roi]:
+                    mae_data[roi][model] = []
+                mae_data[roi][model].append(results[roi][model]['overall_mae'])
+
+    ci_results = {}
+
+    for roi in sorted(mae_data.keys()):
+        ci_results[roi] = {}
+        print(f"ROI: {roi}")
+
+        for model in sorted(mae_data[roi].keys()):
+            mae_values = np.array(mae_data[roi][model])
+            n_subjects = len(mae_values)
+
+            bootstrap_means = []
+            for _ in range(n_bootstrap):
+                sampled = np.random.choice(mae_values, size=n_subjects, replace=True)
+                bootstrap_means.append(np.mean(sampled))
+
+            bootstrap_means = np.array(bootstrap_means)
+            ci_lower = np.percentile(bootstrap_means, 2.5)
+            ci_upper = np.percentile(bootstrap_means, 97.5)
+            mean_mae = np.mean(mae_values)
+
+            ci_results[roi][model] = {
+                'mean_mae': float(mean_mae),
+                'std_mae': float(np.std(mae_values)),
+                'ci_lower': float(ci_lower),
+                'ci_upper': float(ci_upper),
+                'n_subjects': n_subjects
+            }
+
+            print(f"  {model}: MAE={mean_mae:.1f}, 95% CI=[{ci_lower:.1f}, {ci_upper:.1f}]")
+
+    return ci_results
+
+
+def loco_group_comparison(loco_data):
+    """
+    HC vs CVD group comparison on MAE per model x ROI.
+    Uses Mann-Whitney U test + bootstrap difference CI.
+
+    Args:
+        loco_data: List of LOCO result dicts
+
+    Returns:
+        group_results: Dict[roi][model] with HC/CVD means, U-stat, p-value
+    """
+    print(f"\n{'='*80}")
+    print(f"LOCO Group Comparison (HC vs CVD)")
+    print(f"{'='*80}\n")
+
+    # Split by group
+    hc_data = [d for d in loco_data if d['subject_group'] == 'HC']
+    cvd_data = [d for d in loco_data if d['subject_group'] == 'CVD']
+
+    print(f"HC: {len(hc_data)} subjects, CVD: {len(cvd_data)} subjects")
+
+    group_results = {}
+
+    # Get ROIs and models from first subject
+    sample_results = loco_data[0]['results']
+    rois = sorted(sample_results.keys())
+
+    for roi in rois:
+        group_results[roi] = {}
+        models = sorted(sample_results[roi].keys())
+        print(f"\nROI: {roi}")
+
+        for model in models:
+            hc_maes = [d['results'][roi][model]['overall_mae'] for d in hc_data
+                       if roi in d['results'] and model in d['results'][roi]]
+            cvd_maes = [d['results'][roi][model]['overall_mae'] for d in cvd_data
+                        if roi in d['results'] and model in d['results'][roi]]
+
+            if len(hc_maes) < 2 or len(cvd_maes) < 2:
+                continue
+
+            hc_mean = np.mean(hc_maes)
+            cvd_mean = np.mean(cvd_maes)
+
+            # Mann-Whitney U test
+            u_stat, p_value = stats.mannwhitneyu(
+                hc_maes, cvd_maes, alternative='two-sided')
+
+            # Bootstrap difference CI
+            n_boot = 1000
+            boot_diffs = []
+            for _ in range(n_boot):
+                s_hc = np.random.choice(hc_maes, size=len(hc_maes), replace=True)
+                s_cvd = np.random.choice(cvd_maes, size=len(cvd_maes), replace=True)
+                boot_diffs.append(np.mean(s_cvd) - np.mean(s_hc))
+
+            boot_diffs = np.array(boot_diffs)
+            ci_lower = np.percentile(boot_diffs, 2.5)
+            ci_upper = np.percentile(boot_diffs, 97.5)
+
+            group_results[roi][model] = {
+                'hc_mean': float(hc_mean),
+                'hc_std': float(np.std(hc_maes)),
+                'cvd_mean': float(cvd_mean),
+                'cvd_std': float(np.std(cvd_maes)),
+                'diff_cvd_minus_hc': float(cvd_mean - hc_mean),
+                'diff_ci_lower': float(ci_lower),
+                'diff_ci_upper': float(ci_upper),
+                'mann_whitney_u': float(u_stat),
+                'p_value': float(p_value),
+                'n_hc': len(hc_maes),
+                'n_cvd': len(cvd_maes)
+            }
+
+            sig = '*' if p_value < 0.05 else ''
+            print(f"  {model}: HC={hc_mean:.1f}, CVD={cvd_mean:.1f}, "
+                  f"diff={cvd_mean - hc_mean:+.1f}, p={p_value:.3f}{sig}")
+
+    return group_results
+
+
+def loco_permutation_summary(loco_data):
+    """
+    Aggregate pre-computed permutation p-values from LOCO JSONs.
+    Count significant subjects per model x ROI.
+
+    Args:
+        loco_data: List of LOCO result dicts
+
+    Returns:
+        perm_results: Dict[roi][model] with subject-level p-values and summary
+    """
+    print(f"\n{'='*80}")
+    print(f"LOCO Permutation Summary")
+    print(f"{'='*80}\n")
+
+    perm_results = {}
+
+    sample_results = loco_data[0]['results']
+    rois = sorted(sample_results.keys())
+
+    for roi in rois:
+        perm_results[roi] = {}
+        models = sorted(sample_results[roi].keys())
+        print(f"ROI: {roi}")
+
+        for model in models:
+            subject_pvals = []
+
+            for subj_data in loco_data:
+                subject = subj_data['subject']
+                group = subj_data['subject_group']
+
+                if roi not in subj_data['results']:
+                    continue
+                if model not in subj_data['results'][roi]:
+                    continue
+
+                perm = subj_data['results'][roi][model].get('permutation', {})
+                p_val = perm.get('p_value', None)
+                z_score = perm.get('z_score', None)
+
+                if p_val is not None:
+                    subject_pvals.append({
+                        'subject': subject,
+                        'group': group,
+                        'p_value': float(p_val),
+                        'z_score': float(z_score) if z_score is not None else None,
+                        'significant_05': p_val < 0.05,
+                        'significant_01': p_val < 0.01
+                    })
+
+            n_total = len(subject_pvals)
+            n_sig_05 = sum(1 for s in subject_pvals if s['significant_05'])
+            n_sig_01 = sum(1 for s in subject_pvals if s['significant_01'])
+
+            # Separate HC and CVD
+            hc_pvals = [s for s in subject_pvals if s['group'] == 'HC']
+            cvd_pvals = [s for s in subject_pvals if s['group'] == 'CVD']
+
+            perm_results[roi][model] = {
+                'n_total': n_total,
+                'n_significant_05': n_sig_05,
+                'n_significant_01': n_sig_01,
+                'proportion_sig_05': n_sig_05 / n_total if n_total > 0 else 0,
+                'hc_significant_05': sum(1 for s in hc_pvals if s['significant_05']),
+                'hc_total': len(hc_pvals),
+                'cvd_significant_05': sum(1 for s in cvd_pvals if s['significant_05']),
+                'cvd_total': len(cvd_pvals),
+                'subjects': subject_pvals
+            }
+
+            print(f"  {model}: {n_sig_05}/{n_total} sig (p<.05), "
+                  f"{n_sig_01}/{n_total} sig (p<.01), "
+                  f"HC={sum(1 for s in hc_pvals if s['significant_05'])}/{len(hc_pvals)}, "
+                  f"CVD={sum(1 for s in cvd_pvals if s['significant_05'])}/{len(cvd_pvals)}")
+
+    return perm_results
+
+
+# ============================================================================
+# 7. Group Prior Validation Tests
+# ============================================================================
+
+def load_gp_results(gp_dir):
+    """
+    Load GP results. Supports two formats:
+    1. Aggregated: fe_group_prior_results.json (individual_results array)
+    2. Per-subject: sub-*_fe_group_prior.json files
+
+    Args:
+        gp_dir: Path to GP results directory
+
+    Returns:
+        gp_data: Dict with 'subjects' list and 'metadata'
+    """
+    gp_path = Path(gp_dir)
+
+    # Try aggregated file first
+    agg_file = gp_path / "fe_group_prior_results.json"
+    if agg_file.exists():
+        with open(agg_file, 'r') as f:
+            raw = json.load(f)
+        print(f"Loaded aggregated GP results from {agg_file}")
+        return {
+            'subjects': raw.get('individual_results', []),
+            'metadata': raw.get('metadata', {})
+        }
+
+    # Try per-subject files in subject_results/ subdir
+    subj_dir = gp_path / "subject_results"
+    if not subj_dir.exists():
+        subj_dir = gp_path
+
+    subj_files = sorted(subj_dir.glob("sub-*_fe_group_prior.json"))
+    if len(subj_files) == 0:
+        raise FileNotFoundError(f"No GP result files found in {gp_dir}")
+
+    subjects = []
+    for f in subj_files:
+        with open(f, 'r') as fh:
+            data = json.load(fh)
+        # Normalize structure to match aggregated format
+        subjects.append({
+            'subject': data['subject'],
+            'group': data['group'],
+            'rois': data.get('results_by_roi', {})
+        })
+
+    print(f"Loaded {len(subjects)} GP subject files from {subj_dir}")
+    return {'subjects': subjects, 'metadata': {}}
+
+
+def gp_improvement_test(gp_data):
+    """
+    Test whether Group Prior improves over baseline.
+    Wilcoxon signed-rank test: GP MAE vs baseline MAE.
+    Reports per-subject improvement (delta, %) per ROI.
+
+    Args:
+        gp_data: Dict from load_gp_results()
+
+    Returns:
+        gp_results: Dict[roi] with test results and per-subject details
+    """
+    print(f"\n{'='*80}")
+    print(f"Group Prior Improvement Test")
+    print(f"{'='*80}\n")
+
+    subjects = gp_data['subjects']
+    gp_results = {}
+
+    # Collect ROIs from first subject
+    first_rois = subjects[0].get('rois', {})
+    rois = sorted(first_rois.keys())
+
+    for roi in rois:
+        print(f"ROI: {roi}")
+
+        baseline_vals = []
+        gp_vals = []
+        subject_details = []
+
+        for subj in subjects:
+            subj_id = subj['subject']
+            group = subj['group']
+            roi_data = subj.get('rois', {}).get(roi, {})
+
+            if 'baseline' not in roi_data:
+                continue
+
+            bl = roi_data['baseline']
+            # Use gp_single as primary GP metric
+            gp = roi_data.get('gp_single', roi_data.get('gp_ensemble', None))
+
+            if gp is None:
+                continue
+
+            baseline_vals.append(bl)
+            gp_vals.append(gp)
+
+            delta = gp - bl
+            pct = (delta / bl * 100) if bl != 0 else 0
+
+            subject_details.append({
+                'subject': subj_id,
+                'group': group,
+                'baseline_mae': float(bl),
+                'gp_mae': float(gp),
+                'delta': float(delta),
+                'pct_change': float(pct)
+            })
+
+        baseline_arr = np.array(baseline_vals)
+        gp_arr = np.array(gp_vals)
+
+        # Wilcoxon signed-rank test (two-sided)
+        if len(baseline_arr) >= 5:
+            try:
+                w_stat, w_pvalue = stats.wilcoxon(baseline_arr, gp_arr)
+            except ValueError:
+                w_stat, w_pvalue = np.nan, np.nan
+        else:
+            w_stat, w_pvalue = np.nan, np.nan
+
+        # Split by group
+        hc_details = [d for d in subject_details if d['group'] == 'HC']
+        cvd_details = [d for d in subject_details if d['group'] == 'CVD']
+
+        hc_improved = sum(1 for d in hc_details if d['delta'] < 0)
+        cvd_improved = sum(1 for d in cvd_details if d['delta'] < 0)
+
+        gp_results[roi] = {
+            'baseline_mean': float(np.mean(baseline_arr)),
+            'gp_mean': float(np.mean(gp_arr)),
+            'mean_delta': float(np.mean(gp_arr - baseline_arr)),
+            'wilcoxon_w': float(w_stat) if not np.isnan(w_stat) else None,
+            'wilcoxon_p': float(w_pvalue) if not np.isnan(w_pvalue) else None,
+            'n_subjects': len(baseline_arr),
+            'n_improved': int(np.sum(gp_arr < baseline_arr)),
+            'hc_improved': f"{hc_improved}/{len(hc_details)}",
+            'cvd_improved': f"{cvd_improved}/{len(cvd_details)}",
+            'subjects': subject_details
+        }
+
+        sig = '*' if (not np.isnan(w_pvalue) and w_pvalue < 0.05) else ''
+        print(f"  Baseline: {np.mean(baseline_arr):.1f}, GP: {np.mean(gp_arr):.1f}, "
+              f"delta={np.mean(gp_arr - baseline_arr):+.1f}, "
+              f"Wilcoxon p={w_pvalue:.3f}{sig}")
+        print(f"  Improved: {int(np.sum(gp_arr < baseline_arr))}/{len(baseline_arr)} "
+              f"(HC: {hc_improved}/{len(hc_details)}, CVD: {cvd_improved}/{len(cvd_details)})")
+
+    return gp_results
+
+
+# ============================================================================
 # Main
 # ============================================================================
 
@@ -954,11 +1361,17 @@ def main():
     parser.add_argument('--output_dir', type=str, required=True,
                        help='Output directory')
     parser.add_argument('--alignment', type=str, default='procrustes',
-                       choices=['raw', 'procrustes'],
+                       choices=['raw', 'procrustes', 'srm'],
                        help='Which alignment to test')
+    parser.add_argument('--loco_dir', type=str, default=None,
+                       help='Directory with LOCO results (sub-*_loco.json)')
+    parser.add_argument('--gp_dir', type=str, default=None,
+                       help='Directory with GP results (fe_group_prior_results.json or sub-*_fe_group_prior.json)')
     parser.add_argument('--tests', nargs='+',
                        default=['permutation', 'bootstrap', 'reliability', 'generalization'],
-                       help='Which tests to run (permutation, bootstrap, reliability, generalization, lda_reliability)')
+                       help='Tests: permutation, bootstrap, reliability, generalization, '
+                            'lda_reliability, loco_bootstrap, loco_group, loco_permutation, '
+                            'gp_comparison')
 
     args = parser.parse_args()
 
@@ -1051,6 +1464,47 @@ def main():
         with open(output_file, 'w') as f:
             json.dump(results['lda_reliability'], f, indent=2)
         print(f"\nSaved: {output_file}")
+
+    # --- LOCO tests ---
+    loco_tests = [t for t in args.tests if t.startswith('loco_')]
+    if loco_tests:
+        if args.loco_dir is None:
+            print("\nERROR: --loco_dir required for LOCO tests")
+        else:
+            loco_data = load_loco_results(args.loco_dir)
+
+            if 'loco_bootstrap' in args.tests:
+                results['loco_bootstrap'] = loco_bootstrap_ci(loco_data)
+                output_file = output_path / 'loco_bootstrap_ci.json'
+                with open(output_file, 'w') as f:
+                    json.dump(results['loco_bootstrap'], f, indent=2)
+                print(f"\nSaved: {output_file}")
+
+            if 'loco_group' in args.tests:
+                results['loco_group'] = loco_group_comparison(loco_data)
+                output_file = output_path / 'loco_group_comparison.json'
+                with open(output_file, 'w') as f:
+                    json.dump(results['loco_group'], f, indent=2)
+                print(f"\nSaved: {output_file}")
+
+            if 'loco_permutation' in args.tests:
+                results['loco_permutation'] = loco_permutation_summary(loco_data)
+                output_file = output_path / 'loco_permutation_summary.json'
+                with open(output_file, 'w') as f:
+                    json.dump(results['loco_permutation'], f, indent=2)
+                print(f"\nSaved: {output_file}")
+
+    # --- GP test ---
+    if 'gp_comparison' in args.tests:
+        if args.gp_dir is None:
+            print("\nERROR: --gp_dir required for gp_comparison test")
+        else:
+            gp_data = load_gp_results(args.gp_dir)
+            results['gp_comparison'] = gp_improvement_test(gp_data)
+            output_file = output_path / 'gp_comparison.json'
+            with open(output_file, 'w') as f:
+                json.dump(results['gp_comparison'], f, indent=2)
+            print(f"\nSaved: {output_file}")
 
     print(f"\n{'='*80}")
     print(f"All validation tests complete!")

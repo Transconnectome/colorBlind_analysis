@@ -17,7 +17,7 @@ conda activate nilearn
 # Paths
 SCRIPT_DIR=/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation/scripts
 BASELINE_DIR=/scratch/connectome/haba6030/colorBlind/derivatives/full_dataset_C010
-OUTPUT_DIR=/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation/results/loco
+OUTPUT_DIR=/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation/results/loco/procrustes
 
 # Subject mapping (array index 1-10 → subject ID)
 SUBJECTS=(01 02 03 04 05 06 07 08 09 10)

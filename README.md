@@ -84,11 +84,12 @@ These questions address methodological foundations for the 3-phase neural-guided
 #### SRQ1: Shared Decoder Validation
 **Can a common color decoder be successfully applied across HC and CVD participants after alignment?**
 
-- ✅ **Answer**: Yes — SRM enables shared decoding; Procrustes alignment is essential
-  - Decoder validation (`phase2_decoder_comparing/`): LDA achieves acc_45 = 0.821 with Procrustes
-  - Without alignment: ALL models perform at chance (~37–39%)
+- ✅ **Answer**: Yes — alignment is essential; optimal pipeline is task-dependent
+  - **LORO classification**: LDA+SRM best (acc_45 = 0.793, ICC = 0.666); resolves Procrustes LDA reliability paradox
+  - **LOCO interpolation**: FE+Procrustes best (HC MAE 75.7°); ForwardEncoding is the only model with interpolation ability
+  - Without alignment: ALL models perform at chance (~37–39% LORO, ~90° LOCO)
   - HC ≈ CVD performance (LDA: HC 0.805, CVD 0.859) → shared voxel-color mapping confirmed
-  - ForwardEncoding is the only model with interpolation ability (LOCO: MAE 72–83° vs 90° chance)
+  - Group prior: HC-mean W improves CVD LOCO by +4–8% (leakage-free nested CV)
 
 #### SRQ2: Hyperalignment for Common Space
 **Can trial-aligned Generalized Procrustes Analysis (GPA) create a stable HC common space for robust encoder learning?**
@@ -141,17 +142,14 @@ These questions address methodological foundations for the 3-phase neural-guided
 - **Phase 2**: SRM between-subject group comparison (HC-only SRM, LOO-consistent)
   - Group: V1 p=0.062, V2 p=0.075; Individual: sub-09 V1 p=0.007*, sub-08 V2 p=0.040*
   - LOSO color-dependency: CVD V2/V3/hV4 significant, HC not significant
-- **Phase 2b**: Decoder model comparison and cross-validation
-  - LDA best (acc_45=0.821); Procrustes essential; HC ≈ CVD performance
-  - ForwardEncoding: only model with interpolation ability (LOCO)
+- **Phase 2b**: Decoder model comparison and cross-validation (21/21 validations complete)
+  - Task-dependent optimality: LDA+SRM for LORO (0.793), FE+Procrustes for LOCO (75.7°)
+  - Procrustes/SRM alignment essential; HC ≈ CVD; group prior validated (+4–8% CVD LOCO)
+  - Negative results: decoder bottleneck not improvable (Result 7), sequential/MLP dead ends (Result 10)
 - **Robustness triangulation** (A3/A4/A5):
   - A3 Variance Explained: CVD VE ≥ HC (V2 g=−1.68)
   - A4 Crossnobis RDM: SRM-independent convergent r=0.486**
   - A5 PCA-CCA replication: convergent r=0.742***
-
-### In Progress 🔄
-
-- **Prediction model pipeline** planning (`prediction_model_workspace/`)
 
 ### Planned 📋
 
@@ -227,10 +225,14 @@ These questions address methodological foundations for the 3-phase neural-guided
 **Methods**: 6 models (LDA, Ridge, ForwardEncoding, KernelRidge, SVM, MLP) compared with LORO and LOCO CV
 
 **Key Findings**:
-1. **LDA is the best decoder** (acc_45 = 0.821, MAE = 25.6°)
-2. **Procrustes alignment is essential**: Without it, ALL models perform at chance (~37–39%)
+1. **Task-dependent optimality**: LDA+SRM for LORO classification (0.793, ICC 0.666); FE+Procrustes for LOCO interpolation (75.7°)
+2. **Alignment is essential**: Without it, ALL models perform at chance (~37–39% LORO, ~90° LOCO)
 3. **HC ≈ CVD**: Shared voxel-color mapping confirmed (justifies filter learning)
 4. **ForwardEncoding is the only model with interpolation ability** (LOCO MAE 72–83° vs 90° chance)
+5. **LDA+SRM = optimal LORO pipeline**: SRM resolves LDA fold-instability (ICC 0.013 → 0.666)
+6. **Group prior validated**: HC-mean W improves CVD LOCO by +4–8% (leakage-free nested CV)
+7. **Cross-subject generalization**: HC→CVD = HC→HC in SRM space (no group bias)
+8. **Negative results**: Decoder bottleneck not improvable (4 alt. methods all worse); sequential/MLP dead ends
 
 **Documents**: `analysis/phase2_decoder_comparing/model_comparison_validation/`, `analysis/METHODS_RESULTS_SUMMARY_FOR_PAPER.md`
 
@@ -532,4 +534,4 @@ See `materials/` for stimulus generation code.
 
 ---
 
-**Last Updated**: 2026-02-18
+**Last Updated**: 2026-02-28

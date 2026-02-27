@@ -162,7 +162,7 @@ other_trials = ['blank']
 - **Structure**: `BH2009_{dataset}/{timestamp}/sm*_sub-{ID}_{ROI}_*/`
 
 ## 3. Analysis Pipeline
-### Current Analysis Pipeline (original_v3 dataset)
+### Current Analysis Pipeline (method3_header_mi dataset)
 
 Follow phase 1~3 and then future_phase 1~3 in `/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis`
 
@@ -171,7 +171,7 @@ Follow phase 1~3 and then future_phase 1~3 in `/Users/jinilkim/Library/CloudStor
 ### 4.1 fMRIPrep Settings 
 Check `/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/prep_trials/README.md`
 
-### 4.2 Baseline Decoding Settings (Baseline32)
+### 4.2 Baseline Decoding Settings (Legacy — Baseline32, superseded by C010+Procrustes)
 Check `/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase1_preprocess_decoding/README.md`
 
 ## 5. File Outputs

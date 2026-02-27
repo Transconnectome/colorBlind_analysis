@@ -193,6 +193,16 @@ Earlier reference-based Procrustes approach (before SRM):
 
 ## Version History
 
+**2026-02-28**: Phase 2b decoder validation complete (21/21 validations)
+- LORO 3-alignment comparison: LDA+SRM optimal (0.793, ICC 0.666); Procrustes LDA reliability paradox resolved
+- LOCO 3-alignment comparison: FE+Procrustes optimal (HC MAE 75.7°); FE sole interpolation model
+- LOCO decoder improvement attempts: 4 alternatives all worse (correlation-based is optimal)
+- Sequential/MLP architecture sweep: negative result — non-linear LOCO dead end
+- Group prior (HC-mean W): CVD LOCO improvement +4–8% with leakage-free nested CV
+- FE cross-decoding (HC→CVD in SRM): 10/12 pairs significant; HC→CVD ≈ HC→HC
+- hV4 k confirmed as 3 (mean rank aggregation, 2026-02-18)
+- Pooled W adopted as base for both LOCO and LORO; ensemble classes removed
+
 **2026-02-18**: Robustness triangulation (A3/A4/A5) + LOO-consistent analysis
 - HC-only SRM + LOO-consistent disparity: V1 p=0.062, V2 p=0.075
 - Crawford & Howell individual CVD tests: sub-09 V1 p=0.007*, sub-08 V2 p=0.040*
@@ -221,7 +231,7 @@ Earlier reference-based Procrustes approach (before SRM):
 **2026-02-09**: SRM between-subject alignment
 - BrainIAK SRM on HC subjects, CVD projected into shared space
 - Procrustes pre-alignment validated as superior to raw
-- K values optimized via cross-validation: V1=4, V2=4, V3=3, hV4=4
+- K values optimized via mean rank aggregation: V1=4, V2=4, V3=3, hV4=3
 
 **2026-01-22**: Dataset migration to method3_header_mi
 - Updated dataset from original_v3 to method3_header_mi
@@ -240,4 +250,4 @@ Earlier reference-based Procrustes approach (before SRM):
 
 ---
 
-Last Updated: 2026-02-18
+Last Updated: 2026-02-28

@@ -165,7 +165,7 @@ results/srm_evaluation/{TIMESTAMP}/visualizations/
 **Purpose**: Main between-group HC-CVD comparison in SRM shared space
 
 **Method**:
-- Learn shared space from HC subjects (n=6, excluding sub-07)
+- Learn shared space from HC subjects (n=7, all HC subjects)
 - Project CVD subjects (n=3) to shared space
 - Compare Procrustes disparities: CVD-to-HC vs HC-to-HC
 
@@ -442,8 +442,8 @@ t, p = ttest_ind(cvd_hc_disparities, hc_hc_disparities)
 - Python environment: nilearn conda environment
 
 **Data Paths** (auto-detected):
-- **Server**: `/scratch/connectome/haba6030/colorBlind/analysis/phase1_preprocess_decoding/results/baseline`
-- **Local**: `/Users/jinilkim/.../analysis/phase1_preprocess_decoding/results/baseline`
+- **Server**: `/scratch/connectome/haba6030/colorBlind/analysis/phase1_preprocess_decoding/results/full_dataset_C010`
+- **Local**: `/Users/jinilkim/.../analysis/phase1_preprocess_decoding/results/full_dataset_C010`
 
 ---
 
@@ -491,7 +491,6 @@ ls results/srm_evaluation/*/sub-*_srm_results.json | wc -l
 
 **Job Configuration** (from sbatch file):
 ```bash
-#SBATCH --qos=shared
 #SBATCH --nodelist=node2
 #SBATCH --array=1-40%10
 #SBATCH --mem=32G
@@ -688,7 +687,7 @@ analysis/phase2_SRM_across_between/
 
 ### Future Directions
 
-#### 1. Procrustes-Based Validation ✅ RECOMMENDED
+#### 1. Procrustes-Based Validation ✅ Done
 **Approach**: Complement SRM with pairwise Procrustes alignment
 
 **Advantages**:
@@ -696,19 +695,21 @@ analysis/phase2_SRM_across_between/
 - Robust to CVD heterogeneity
 - Established baseline from Phase 1
 
-**Status**: Pending implementation
+**Status**: ✅ Completed — Phase 2b LOCO/LORO with Procrustes, SRM, and raw alignments compared (see `analysis/phase2_decoder_comparing/`)
 
 ---
 
-#### 2. Alternative Dimensionality Reduction
+#### 2. Alternative Dimensionality Reduction ✅ Done
 **Options**:
 - PCA on voxel patterns (no shared response assumption)
 - Searchlight SRM (local voxel neighborhoods)
 - ICA for independent components
 
+**Status**: ✅ Completed — PCA-CCA replication (A5) confirmed convergent validity r=0.742*** (see `validation/`)
+
 ---
 
-#### 3. Continuous Hue Space
+#### 3. Continuous Hue Space ✅ Done (partially)
 **Proposal**: Use 360° hue circle instead of 8 discrete colors
 
 **Benefits**:
@@ -716,7 +717,7 @@ analysis/phase2_SRM_across_between/
 - Better dimensionality for SRM
 - Continuous color space analysis
 
-**Challenges**: Longer scan time, more complex design
+**Status**: ✅ LOCO interpolation validated — ForwardEncoding achieves continuous hue decoding from 8 discrete stimuli (see `analysis/phase2_decoder_comparing/`, Result 2b/9). Full 360° scan not needed for interpolation proof-of-concept.
 
 ---
 
@@ -950,5 +951,5 @@ d = (mean_CVD - mean_HC) / pooled_std
 ---
 
 **Status**: ✅ Analysis completed + robustness validated
-**Last Updated**: 2026-02-18
+**Last Updated**: 2026-02-28
 **Contact**: For methodology questions, see analysis scripts or CLAUDE.md

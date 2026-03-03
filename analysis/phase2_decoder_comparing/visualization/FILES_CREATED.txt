@@ -1,0 +1,123 @@
+═══════════════════════════════════════════════════════════════════════════
+CVD COLOR DISTORTION FIGURE - FILES CREATED
+Implementation Date: 2026-02-22
+═══════════════════════════════════════════════════════════════════════════
+
+PYTHON SCRIPTS (3 files):
+───────────────────────────────────────────────────────────────────────────
+
+1. create_cvd_distortion_figure.py                               14 KB
+   Location: analysis/phase2_decoder_comparing/visualization/
+   Purpose:  Main script - generates 3×4 multi-panel CVD distortion figures
+   Usage:    python create_cvd_distortion_figure.py --roi V2
+   Features: 
+     • 3 CVD subjects (sub-08, sub-09, sub-10) × 4 panels
+     • Panel A: Color wheel stimulus
+     • Panel B: Glass brain with ROI activation
+     • Panel C: Posterior inflated cortical surface
+     • Panel D: RDM distortion bars (CVD - HC)
+     • CLI: --roi {V1,V2,V3,hV4}, --all-rois, --output
+     • Output: 6000×4800 px @ 300 DPI PNG (~15-20 MB per figure)
+
+2. test_cvd_figure.py                                            5.8 KB
+   Location: analysis/phase2_decoder_comparing/visualization/
+   Purpose:  Validation suite - tests data availability and RDM computation
+   Usage:    python test_cvd_figure.py --full-test
+   Features:
+     • Data availability check (40/40 files ✓)
+     • RDM computation validation (symmetry, diagonal, range)
+     • Full figure creation test for V2
+     • Exit codes for CI/CD integration
+
+3. prepare_matlab_surface_data.py                                8.3 KB
+   Location: analysis/matlab_viewers/
+   Purpose:  Prepares surface-projected data for MATLAB interactive viewer
+   Usage:    python prepare_matlab_surface_data.py --all-cvd --roi V2
+   Features:
+     • Projects volume data to fsaverage5 surface
+     • Creates ROI masks and functional activation maps
+     • Exports .mat files for MATLAB compatibility
+     • Batch processing support
+
+MATLAB SCRIPTS (1 file):
+───────────────────────────────────────────────────────────────────────────
+
+4. interactive_surface_viewer.m                                  9.4 KB
+   Location: analysis/matlab_viewers/
+   Purpose:  Interactive 3D brain surface viewer with functional overlays
+   Usage:    interactive_surface_viewer('sub-08', 'V2')
+   Features:
+     • 3D rotation, zoom, pan controls
+     • ROI contour overlay (toggleable)
+     • View cycling (Posterior/Anterior/Dorsal/Ventral/Lateral)
+     • Surface transparency adjustment
+     • Real-time lighting and materials
+   Requirements: MATLAB R2020b+, GIFTI toolbox
+
+DOCUMENTATION (3 files):
+───────────────────────────────────────────────────────────────────────────
+
+5. QUICKSTART.md                                                 5.4 KB
+   Location: analysis/phase2_decoder_comparing/visualization/
+   Purpose:  Fast-track guide to generate first figure
+   Contents:
+     • Quick start commands
+     • Expected output descriptions
+     • Common troubleshooting
+     • Scientific pattern predictions
+
+6. README_cvd_distortion_figure.md                               8.8 KB
+   Location: analysis/phase2_decoder_comparing/visualization/
+   Purpose:  Comprehensive technical documentation
+   Contents:
+     • Panel-by-panel descriptions
+     • Data requirements and paths
+     • Dependencies and installation
+     • Advanced usage examples
+     • Troubleshooting guide
+     • Scientific interpretation
+
+7. IMPLEMENTATION_SUMMARY.md                                    11 KB
+   Location: analysis/phase2_decoder_comparing/visualization/
+   Purpose:  Technical implementation details and validation results
+   Contents:
+     • Data pipeline diagrams
+     • RDM computation methods
+     • Bug fixes applied
+     • Validation test results
+     • Scientific predictions
+     • Processing time estimates
+
+═══════════════════════════════════════════════════════════════════════════
+QUICK START:
+═══════════════════════════════════════════════════════════════════════════
+
+# Recommended first run (V2 - strongest effects):
+conda activate srm
+python analysis/phase2_decoder_comparing/visualization/create_cvd_distortion_figure.py --roi V2
+
+# Output location:
+# analysis/phase2_decoder_comparing/visualization/cvd_distortion_figures/cvd_distortion_figure_V2.png
+
+# Expected time: 3-5 minutes
+# Expected size: ~15-20 MB
+
+═══════════════════════════════════════════════════════════════════════════
+VALIDATION STATUS:
+═══════════════════════════════════════════════════════════════════════════
+
+✓ Data availability:  40/40 files present (all subjects × all ROIs)
+✓ RDM computation:    Symmetric, diagonal=0, correct range
+✓ Bug fixes applied:  hV4/V4 naming discrepancy resolved
+✓ Test suite:         All tests passing
+
+═══════════════════════════════════════════════════════════════════════════
+TOTAL CODE VOLUME:
+═══════════════════════════════════════════════════════════════════════════
+
+Python:          873 lines (3 scripts)
+MATLAB:          276 lines (1 script)
+Documentation:   ~800 lines (3 markdown files)
+Total:          ~1,949 lines
+
+═══════════════════════════════════════════════════════════════════════════

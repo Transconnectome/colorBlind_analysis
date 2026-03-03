@@ -1,0 +1,814 @@
+{
+  "metadata": {
+    "analysis": "FE_GroupPrior_SRM_LOCO",
+    "date": "2026-02-25",
+    "description": "Nested LOCO validation with group prior shrinkage",
+    "lambda_grid": [
+      0.0,
+      0.05,
+      0.1,
+      0.15,
+      0.2,
+      0.25,
+      0.3,
+      0.35,
+      0.4,
+      0.45,
+      0.5,
+      0.6,
+      0.7,
+      0.8,
+      0.9,
+      1.0
+    ],
+    "n_hc": 7,
+    "n_cvd": 3,
+    "rois": [
+      "V1",
+      "V2",
+      "V3",
+      "V4"
+    ]
+  },
+  "individual_results": [
+    {
+      "subject": "sub-01",
+      "group": "HC",
+      "rois": {
+        "V1": {
+          "baseline": 91.9,
+          "ensemble": 88.8,
+          "gp_single": 30.3,
+          "lambda_single": 0.0,
+          "gp_ensemble": 30.3,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": -3.1000000000000085,
+          "delta_gp_single": -61.60000000000001,
+          "delta_gp_ensemble": -61.60000000000001
+        },
+        "V2": {
+          "baseline": 85.4,
+          "ensemble": 95.6,
+          "gp_single": 30.4,
+          "lambda_single": 0.0,
+          "gp_ensemble": 31.7,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": 10.199999999999989,
+          "delta_gp_single": -55.00000000000001,
+          "delta_gp_ensemble": -53.7
+        },
+        "V3": {
+          "baseline": 111.0,
+          "ensemble": 102.6,
+          "gp_single": 52.7,
+          "lambda_single": 0.0,
+          "gp_ensemble": 51.1,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": -8.400000000000006,
+          "delta_gp_single": -58.3,
+          "delta_gp_ensemble": -59.9
+        },
+        "V4": {
+          "baseline": 61.9,
+          "ensemble": 63.5,
+          "gp_single": 59.4,
+          "lambda_single": 0.0,
+          "gp_ensemble": 59.0,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": 1.6000000000000014,
+          "delta_gp_single": -2.5,
+          "delta_gp_ensemble": -2.8999999999999986
+        }
+      }
+    },
+    {
+      "subject": "sub-02",
+      "group": "HC",
+      "rois": {
+        "V1": {
+          "baseline": 77.6,
+          "ensemble": 67.2,
+          "gp_single": 43.6,
+          "lambda_single": 0.0,
+          "gp_ensemble": 43.6,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": -10.399999999999991,
+          "delta_gp_single": -33.99999999999999,
+          "delta_gp_ensemble": -33.99999999999999
+        },
+        "V2": {
+          "baseline": 95.8,
+          "ensemble": 87.8,
+          "gp_single": 24.8,
+          "lambda_single": 0.0,
+          "gp_ensemble": 24.8,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": -8.0,
+          "delta_gp_single": -71.0,
+          "delta_gp_ensemble": -71.0
+        },
+        "V3": {
+          "baseline": 78.2,
+          "ensemble": 75.3,
+          "gp_single": 42.5,
+          "lambda_single": 0.0,
+          "gp_ensemble": 43.0,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": -2.9000000000000057,
+          "delta_gp_single": -35.7,
+          "delta_gp_ensemble": -35.2
+        },
+        "V4": {
+          "baseline": 75.0,
+          "ensemble": 70.3,
+          "gp_single": 81.8,
+          "lambda_single": 1.0,
+          "gp_ensemble": 81.7,
+          "lambda_ensemble": 1.0,
+          "delta_ensemble": -4.700000000000003,
+          "delta_gp_single": 6.799999999999997,
+          "delta_gp_ensemble": 6.700000000000003
+        }
+      }
+    },
+    {
+      "subject": "sub-03",
+      "group": "HC",
+      "rois": {
+        "V1": {
+          "baseline": 88.6,
+          "ensemble": 77.7,
+          "gp_single": 54.5,
+          "lambda_single": 0.0,
+          "gp_ensemble": 58.4,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": -10.899999999999991,
+          "delta_gp_single": -34.099999999999994,
+          "delta_gp_ensemble": -30.199999999999996
+        },
+        "V2": {
+          "baseline": 103.1,
+          "ensemble": 91.0,
+          "gp_single": 36.7,
+          "lambda_single": 0.0,
+          "gp_ensemble": 34.0,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": -12.099999999999994,
+          "delta_gp_single": -66.39999999999999,
+          "delta_gp_ensemble": -69.1
+        },
+        "V3": {
+          "baseline": 104.8,
+          "ensemble": 103.6,
+          "gp_single": 81.1,
+          "lambda_single": 0.0,
+          "gp_ensemble": 81.9,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": -1.2000000000000028,
+          "delta_gp_single": -23.700000000000003,
+          "delta_gp_ensemble": -22.89999999999999
+        },
+        "V4": {
+          "baseline": 76.1,
+          "ensemble": 73.7,
+          "gp_single": 81.7,
+          "lambda_single": 0.2,
+          "gp_ensemble": 81.3,
+          "lambda_ensemble": 0.15,
+          "delta_ensemble": -2.3999999999999915,
+          "delta_gp_single": 5.6000000000000085,
+          "delta_gp_ensemble": 5.200000000000003
+        }
+      }
+    },
+    {
+      "subject": "sub-04",
+      "group": "HC",
+      "rois": {
+        "V1": {
+          "baseline": 78.2,
+          "ensemble": 76.7,
+          "gp_single": 41.5,
+          "lambda_single": 0.0,
+          "gp_ensemble": 41.5,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": -1.5,
+          "delta_gp_single": -36.7,
+          "delta_gp_ensemble": -36.7
+        },
+        "V2": {
+          "baseline": 85.0,
+          "ensemble": 84.6,
+          "gp_single": 27.3,
+          "lambda_single": 0.0,
+          "gp_ensemble": 27.3,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": -0.4000000000000057,
+          "delta_gp_single": -57.7,
+          "delta_gp_ensemble": -57.7
+        },
+        "V3": {
+          "baseline": 122.0,
+          "ensemble": 124.4,
+          "gp_single": 48.2,
+          "lambda_single": 0.0,
+          "gp_ensemble": 48.2,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": 2.4000000000000057,
+          "delta_gp_single": -73.8,
+          "delta_gp_ensemble": -73.8
+        },
+        "V4": {
+          "baseline": 50.6,
+          "ensemble": 48.4,
+          "gp_single": 43.7,
+          "lambda_single": 0.05,
+          "gp_ensemble": 37.0,
+          "lambda_ensemble": 0.2,
+          "delta_ensemble": -2.200000000000003,
+          "delta_gp_single": -6.899999999999999,
+          "delta_gp_ensemble": -13.600000000000001
+        }
+      }
+    },
+    {
+      "subject": "sub-05",
+      "group": "HC",
+      "rois": {
+        "V1": {
+          "baseline": 61.1,
+          "ensemble": 55.3,
+          "gp_single": 25.8,
+          "lambda_single": 0.0,
+          "gp_ensemble": 25.8,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": -5.800000000000004,
+          "delta_gp_single": -35.3,
+          "delta_gp_ensemble": -35.3
+        },
+        "V2": {
+          "baseline": 57.1,
+          "ensemble": 54.1,
+          "gp_single": 35.5,
+          "lambda_single": 0.0,
+          "gp_ensemble": 34.3,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": -3.0,
+          "delta_gp_single": -21.6,
+          "delta_gp_ensemble": -22.800000000000004
+        },
+        "V3": {
+          "baseline": 86.8,
+          "ensemble": 94.7,
+          "gp_single": 56.7,
+          "lambda_single": 0.0,
+          "gp_ensemble": 56.7,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": 7.900000000000006,
+          "delta_gp_single": -30.099999999999994,
+          "delta_gp_ensemble": -30.099999999999994
+        },
+        "V4": {
+          "baseline": 91.3,
+          "ensemble": 91.4,
+          "gp_single": 64.9,
+          "lambda_single": 0.0,
+          "gp_ensemble": 67.3,
+          "lambda_ensemble": 0.05,
+          "delta_ensemble": 0.10000000000000853,
+          "delta_gp_single": -26.39999999999999,
+          "delta_gp_ensemble": -24.0
+        }
+      }
+    },
+    {
+      "subject": "sub-06",
+      "group": "HC",
+      "rois": {
+        "V1": {
+          "baseline": 86.7,
+          "ensemble": 80.0,
+          "gp_single": 31.9,
+          "lambda_single": 0.0,
+          "gp_ensemble": 31.9,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": -6.700000000000003,
+          "delta_gp_single": -54.800000000000004,
+          "delta_gp_ensemble": -54.800000000000004
+        },
+        "V2": {
+          "baseline": 89.0,
+          "ensemble": 96.1,
+          "gp_single": 40.8,
+          "lambda_single": 0.0,
+          "gp_ensemble": 38.2,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": 7.099999999999994,
+          "delta_gp_single": -48.2,
+          "delta_gp_ensemble": -50.8
+        },
+        "V3": {
+          "baseline": 100.5,
+          "ensemble": 103.3,
+          "gp_single": 80.8,
+          "lambda_single": 0.0,
+          "gp_ensemble": 69.8,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": 2.799999999999997,
+          "delta_gp_single": -19.700000000000003,
+          "delta_gp_ensemble": -30.700000000000003
+        },
+        "V4": {
+          "baseline": 72.2,
+          "ensemble": 71.0,
+          "gp_single": 58.8,
+          "lambda_single": 0.0,
+          "gp_ensemble": 56.8,
+          "lambda_ensemble": 0.05,
+          "delta_ensemble": -1.2000000000000028,
+          "delta_gp_single": -13.400000000000006,
+          "delta_gp_ensemble": -15.400000000000006
+        }
+      }
+    },
+    {
+      "subject": "sub-07",
+      "group": "HC",
+      "rois": {
+        "V1": {
+          "baseline": 76.0,
+          "ensemble": 73.1,
+          "gp_single": 37.8,
+          "lambda_single": 0.0,
+          "gp_ensemble": 37.8,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": -2.9000000000000057,
+          "delta_gp_single": -38.2,
+          "delta_gp_ensemble": -38.2
+        },
+        "V2": {
+          "baseline": 79.2,
+          "ensemble": 78.8,
+          "gp_single": 39.4,
+          "lambda_single": 0.0,
+          "gp_ensemble": 39.6,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": -0.4000000000000057,
+          "delta_gp_single": -39.800000000000004,
+          "delta_gp_ensemble": -39.6
+        },
+        "V3": {
+          "baseline": 91.6,
+          "ensemble": 88.9,
+          "gp_single": 78.9,
+          "lambda_single": 0.0,
+          "gp_ensemble": 88.5,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": -2.6999999999999886,
+          "delta_gp_single": -12.699999999999989,
+          "delta_gp_ensemble": -3.0999999999999943
+        }
+      }
+    },
+    {
+      "subject": "sub-08",
+      "group": "CVD",
+      "rois": {
+        "V1": {
+          "baseline": 62.1,
+          "ensemble": 63.1,
+          "gp_single": 25.7,
+          "lambda_single": 0.0,
+          "gp_ensemble": 25.0,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": 1.0,
+          "delta_gp_single": -36.400000000000006,
+          "delta_gp_ensemble": -37.1
+        },
+        "V2": {
+          "baseline": 70.6,
+          "ensemble": 72.2,
+          "gp_single": 47.2,
+          "lambda_single": 0.0,
+          "gp_ensemble": 47.1,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": 1.6000000000000085,
+          "delta_gp_single": -23.39999999999999,
+          "delta_gp_ensemble": -23.499999999999993
+        },
+        "V3": {
+          "baseline": 73.0,
+          "ensemble": 77.4,
+          "gp_single": 83.6,
+          "lambda_single": 0.0,
+          "gp_ensemble": 65.9,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": 4.400000000000006,
+          "delta_gp_single": 10.599999999999994,
+          "delta_gp_ensemble": -7.099999999999994
+        },
+        "V4": {
+          "baseline": 82.9,
+          "ensemble": 83.8,
+          "gp_single": 103.8,
+          "lambda_single": 0.0,
+          "gp_ensemble": 105.5,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": 0.8999999999999915,
+          "delta_gp_single": 20.89999999999999,
+          "delta_gp_ensemble": 22.599999999999994
+        }
+      }
+    },
+    {
+      "subject": "sub-09",
+      "group": "CVD",
+      "rois": {
+        "V1": {
+          "baseline": 109.8,
+          "ensemble": 109.4,
+          "gp_single": 52.2,
+          "lambda_single": 0.0,
+          "gp_ensemble": 64.7,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": -0.3999999999999915,
+          "delta_gp_single": -57.599999999999994,
+          "delta_gp_ensemble": -45.099999999999994
+        },
+        "V2": {
+          "baseline": 94.4,
+          "ensemble": 99.7,
+          "gp_single": 39.6,
+          "lambda_single": 0.0,
+          "gp_ensemble": 40.0,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": 5.299999999999997,
+          "delta_gp_single": -54.800000000000004,
+          "delta_gp_ensemble": -54.400000000000006
+        },
+        "V3": {
+          "baseline": 92.3,
+          "ensemble": 89.2,
+          "gp_single": 60.2,
+          "lambda_single": 0.0,
+          "gp_ensemble": 60.2,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": -3.0999999999999943,
+          "delta_gp_single": -32.099999999999994,
+          "delta_gp_ensemble": -32.099999999999994
+        },
+        "V4": {
+          "baseline": 108.9,
+          "ensemble": 111.3,
+          "gp_single": 74.8,
+          "lambda_single": 0.0,
+          "gp_ensemble": 74.8,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": 2.3999999999999915,
+          "delta_gp_single": -34.10000000000001,
+          "delta_gp_ensemble": -34.10000000000001
+        }
+      }
+    },
+    {
+      "subject": "sub-10",
+      "group": "CVD",
+      "rois": {
+        "V1": {
+          "baseline": 108.5,
+          "ensemble": 103.2,
+          "gp_single": 39.4,
+          "lambda_single": 0.0,
+          "gp_ensemble": 39.4,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": -5.299999999999997,
+          "delta_gp_single": -69.1,
+          "delta_gp_ensemble": -69.1
+        },
+        "V2": {
+          "baseline": 106.7,
+          "ensemble": 108.1,
+          "gp_single": 49.5,
+          "lambda_single": 0.0,
+          "gp_ensemble": 48.8,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": 1.3999999999999915,
+          "delta_gp_single": -57.2,
+          "delta_gp_ensemble": -57.900000000000006
+        },
+        "V3": {
+          "baseline": 99.5,
+          "ensemble": 95.5,
+          "gp_single": 49.7,
+          "lambda_single": 0.0,
+          "gp_ensemble": 49.7,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": -4.0,
+          "delta_gp_single": -49.8,
+          "delta_gp_ensemble": -49.8
+        },
+        "V4": {
+          "baseline": 81.0,
+          "ensemble": 81.0,
+          "gp_single": 80.2,
+          "lambda_single": 0.0,
+          "gp_ensemble": 76.5,
+          "lambda_ensemble": 0.0,
+          "delta_ensemble": 0.0,
+          "delta_gp_single": -0.7999999999999972,
+          "delta_gp_ensemble": -4.5
+        }
+      }
+    }
+  ],
+  "group_statistics": {
+    "V1": {
+      "HC": {
+        "baseline": {
+          "mean": 80.01428571428572,
+          "std": 10.349465134557853,
+          "n": 7
+        },
+        "ensemble": {
+          "mean": 74.11428571428571,
+          "std": 10.588268440657735,
+          "n": 7
+        },
+        "gp_single": {
+          "mean": 37.91428571428572,
+          "std": 9.671164799104014,
+          "n": 7
+        },
+        "gp_ensemble": {
+          "mean": 38.471428571428575,
+          "std": 10.828929507837525,
+          "n": 7
+        },
+        "lambda_single": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 7
+        },
+        "lambda_ensemble": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 7
+        }
+      },
+      "CVD": {
+        "baseline": {
+          "mean": 93.46666666666665,
+          "std": 27.172105794975355,
+          "n": 3
+        },
+        "ensemble": {
+          "mean": 91.89999999999999,
+          "std": 25.133443854752578,
+          "n": 3
+        },
+        "gp_single": {
+          "mean": 39.1,
+          "std": 13.252546925025394,
+          "n": 3
+        },
+        "gp_ensemble": {
+          "mean": 43.03333333333333,
+          "std": 20.09784399713893,
+          "n": 3
+        },
+        "lambda_single": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 3
+        },
+        "lambda_ensemble": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 3
+        }
+      },
+      "difference": {
+        "baseline": -13.452380952380935,
+        "ensemble": -17.785714285714278,
+        "gp_single": -1.1857142857142833,
+        "gp_ensemble": -4.561904761904756
+      }
+    },
+    "V2": {
+      "HC": {
+        "baseline": {
+          "mean": 84.94285714285715,
+          "std": 14.562721488199143,
+          "n": 7
+        },
+        "ensemble": {
+          "mean": 84.0,
+          "std": 14.5248063670398,
+          "n": 7
+        },
+        "gp_single": {
+          "mean": 33.55714285714286,
+          "std": 6.138093390963554,
+          "n": 7
+        },
+        "gp_ensemble": {
+          "mean": 32.84285714285714,
+          "std": 5.393470479155681,
+          "n": 7
+        },
+        "lambda_single": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 7
+        },
+        "lambda_ensemble": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 7
+        }
+      },
+      "CVD": {
+        "baseline": {
+          "mean": 90.56666666666666,
+          "std": 18.35274729661294,
+          "n": 3
+        },
+        "ensemble": {
+          "mean": 93.33333333333333,
+          "std": 18.777735042686412,
+          "n": 3
+        },
+        "gp_single": {
+          "mean": 45.43333333333334,
+          "std": 5.181055233572919,
+          "n": 3
+        },
+        "gp_ensemble": {
+          "mean": 45.29999999999999,
+          "std": 4.667976006793522,
+          "n": 3
+        },
+        "lambda_single": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 3
+        },
+        "lambda_ensemble": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 3
+        }
+      },
+      "difference": {
+        "baseline": -5.623809523809513,
+        "ensemble": -9.333333333333329,
+        "gp_single": -11.87619047619048,
+        "gp_ensemble": -12.457142857142848
+      }
+    },
+    "V3": {
+      "HC": {
+        "baseline": {
+          "mean": 99.27142857142857,
+          "std": 14.970049463925662,
+          "n": 7
+        },
+        "ensemble": {
+          "mean": 98.97142857142856,
+          "std": 15.165499693461504,
+          "n": 7
+        },
+        "gp_single": {
+          "mean": 62.98571428571428,
+          "std": 16.744793078389925,
+          "n": 7
+        },
+        "gp_ensemble": {
+          "mean": 62.74285714285714,
+          "std": 17.576391091732223,
+          "n": 7
+        },
+        "lambda_single": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 7
+        },
+        "lambda_ensemble": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 7
+        }
+      },
+      "CVD": {
+        "baseline": {
+          "mean": 88.26666666666667,
+          "std": 13.702676137650387,
+          "n": 3
+        },
+        "ensemble": {
+          "mean": 87.36666666666667,
+          "std": 9.188217092196576,
+          "n": 3
+        },
+        "gp_single": {
+          "mean": 64.5,
+          "std": 17.354250199878987,
+          "n": 3
+        },
+        "gp_ensemble": {
+          "mean": 58.6,
+          "std": 8.217663901620705,
+          "n": 3
+        },
+        "lambda_single": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 3
+        },
+        "lambda_ensemble": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 3
+        }
+      },
+      "difference": {
+        "baseline": 11.004761904761907,
+        "ensemble": 11.604761904761887,
+        "gp_single": -1.5142857142857196,
+        "gp_ensemble": 4.142857142857139
+      }
+    },
+    "V4": {
+      "HC": {
+        "baseline": {
+          "mean": 71.18333333333334,
+          "std": 13.815269330225401,
+          "n": 6
+        },
+        "ensemble": {
+          "mean": 69.71666666666667,
+          "std": 14.007628873819677,
+          "n": 6
+        },
+        "gp_single": {
+          "mean": 65.05,
+          "std": 14.728306080469675,
+          "n": 6
+        },
+        "gp_ensemble": {
+          "mean": 63.85,
+          "std": 16.906655494212924,
+          "n": 6
+        },
+        "lambda_single": {
+          "mean": 0.20833333333333334,
+          "std": 0.39549546984341893,
+          "n": 6
+        },
+        "lambda_ensemble": {
+          "mean": 0.24166666666666667,
+          "std": 0.37870393009139297,
+          "n": 6
+        }
+      },
+      "CVD": {
+        "baseline": {
+          "mean": 90.93333333333334,
+          "std": 15.588564184469762,
+          "n": 3
+        },
+        "ensemble": {
+          "mean": 92.03333333333335,
+          "std": 16.744053670880696,
+          "n": 3
+        },
+        "gp_single": {
+          "mean": 86.26666666666667,
+          "std": 15.422494394012055,
+          "n": 3
+        },
+        "gp_ensemble": {
+          "mean": 85.60000000000001,
+          "std": 17.25485438941749,
+          "n": 3
+        },
+        "lambda_single": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 3
+        },
+        "lambda_ensemble": {
+          "mean": 0.0,
+          "std": 0.0,
+          "n": 3
+        }
+      },
+      "difference": {
+        "baseline": -19.75,
+        "ensemble": -22.316666666666677,
+        "gp_single": -21.21666666666667,
+        "gp_ensemble": -21.750000000000007
+      }
+    }
+  }
+}

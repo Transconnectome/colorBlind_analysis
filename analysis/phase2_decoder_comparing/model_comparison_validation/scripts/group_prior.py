@@ -85,11 +85,13 @@ def decode_with_W(W, basis_full, X_test):
     return pred_hues
 
 
-def compute_group_W(other_amps_dict):
+def compute_group_W(other_amps_dict, exclude_color_idx=None):
     """Compute group W from other subjects' pooled data.
 
     Args:
         other_amps_dict: {subj_id: (n_runs, n_colors, n_voxels)}
+        exclude_color_idx: int or None. If set, exclude this color index
+            from group W computation (LOCO leakage fix).
 
     Returns:
         W_group: (n_channels, n_voxels)
@@ -99,8 +101,15 @@ def compute_group_W(other_amps_dict):
     W_others = []
     for s, amp in other_amps_dict.items():
         n_r, n_c, n_v = amp.shape
-        X_pooled = amp.reshape(-1, n_v)
-        hues_pooled = np.tile(all_hues, n_r)
+        if exclude_color_idx is not None:
+            train_colors = [c for c in range(n_c) if c != exclude_color_idx]
+            amp_train = amp[:, train_colors, :]
+            hues_train = np.array([HUE_ANGLES[c] for c in train_colors])
+            X_pooled = amp_train.reshape(-1, n_v)
+            hues_pooled = np.tile(hues_train, n_r)
+        else:
+            X_pooled = amp.reshape(-1, n_v)
+            hues_pooled = np.tile(all_hues, n_r)
         W_s, _ = fit_W(X_pooled, hues_pooled)
         W_others.append(W_s)
     W_group = np.mean(W_others, axis=0)
@@ -159,9 +168,6 @@ def baseline_cv(amp, cv_type='loco'):
 def loco_with_fixed_lambda(target_amp, other_amps_dict, lambda_fixed):
     """LOCO with FIXED lambda (single pooled W, no ensemble)."""
     n_runs, n_colors, n_voxels = target_amp.shape
-    all_hues = np.array(HUE_ANGLES)
-
-    W_group, basis_full = compute_group_W(other_amps_dict)
 
     fold_maes = []
     for test_color in range(n_colors):
@@ -169,6 +175,10 @@ def loco_with_fixed_lambda(target_amp, other_amps_dict, lambda_fixed):
         train_hues = np.array([HUE_ANGLES[c] for c in train_colors])
         test_hue = HUE_ANGLES[test_color]
         X_test = target_amp[:, test_color, :]
+
+        # Group W also excludes test color (leakage fix)
+        W_group, basis_full = compute_group_W(other_amps_dict,
+                                              exclude_color_idx=test_color)
 
         X_train = target_amp[:, train_colors, :].reshape(-1, n_voxels)
         hues_train = np.tile(train_hues, n_runs)
@@ -183,17 +193,23 @@ def loco_with_fixed_lambda(target_amp, other_amps_dict, lambda_fixed):
 
 
 def nested_loco_lambda_search(target_amp, other_amps_dict, lambda_grid):
-    """Nested LOCO for lambda selection (single pooled W only)."""
-    n_runs, n_colors, n_voxels = target_amp.shape
-    all_hues = np.array(HUE_ANGLES)
+    """Nested LOCO for lambda selection (single pooled W only).
 
-    W_group, basis_full = compute_group_W(other_amps_dict)
+    Leakage fix: group W excludes the outer test color per fold.
+    Inner folds also exclude the outer test color from group W
+    (inner val color is from training set, no additional exclusion needed).
+    """
+    n_runs, n_colors, n_voxels = target_amp.shape
 
     outer_fold_maes = []
     selected_lambdas = []
 
     for outer_test_color in range(n_colors):
         outer_train_colors = [c for c in range(n_colors) if c != outer_test_color]
+
+        # Group W excludes outer test color (leakage fix)
+        W_group, basis_full = compute_group_W(other_amps_dict,
+                                              exclude_color_idx=outer_test_color)
 
         # Inner LOCO for lambda selection (on 7 training colors)
         lambda_scores = {lam: [] for lam in lambda_grid}
@@ -374,14 +390,15 @@ def run_group_prior(subjects, rois, lambda_values, cv_type, mode, output_dir):
                 print(f"WARNING: sub-{subj} not available for {roi}, skipping")
                 continue
 
-            # Group prior: HC LOO for HC, all HC for CVD
+            # Group prior: HC LOO for HC targets, all HC for CVD targets
             if subj in HC_SUBJECTS:
                 others = {s: all_amps[s] for s in HC_SUBJECTS
                           if s != subj and s in all_amps}
-                print(f"sub-{subj} (HC): Using {len(others)} other HC as group prior")
             else:
                 others = {s: all_amps[s] for s in HC_SUBJECTS if s in all_amps}
-                print(f"sub-{subj} (CVD): Using {len(others)} HC as group prior")
+
+            subj_group = 'HC' if subj in HC_SUBJECTS else 'CVD'
+            print(f"sub-{subj} ({subj_group}): Using {len(others)} HC as group prior")
 
             # Baseline (no GP)
             mae_base = baseline_cv(all_amps[subj], cv_type=cv_type)

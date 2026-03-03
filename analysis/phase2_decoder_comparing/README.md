@@ -28,7 +28,7 @@ This phase validates decoder assumptions before proceeding to filter optimizatio
 
 ## Key Findings
 
-### Task-Dependent Optimality (Revised Conclusion, 2026-02-27)
+### Primary Result 1: Task-Dependent Optimality
 
 | Task | Optimal Pipeline | Key Metric | Why |
 |------|-----------------|------------|-----|
@@ -37,48 +37,97 @@ This phase validates decoder assumptions before proceeding to filter optimizatio
 | Phase 3 (filter design) | **FE + Procrustes** | W cosine 0.921 | Stable 6-channel representation |
 | Cross-subject comparison | **LDA + SRM** | p=0.668 (no bias) | Unbiased HC→CVD generalization |
 
-### LORO Model Comparison (Procrustes, acc_45, chance = 0.375)
+### Primary Result 2: LORO Classification — 3-Alignment Validation (Result 11)
 
-| Model | acc_45 [95% CI] | MAE [95% CI] |
-|-------|-----------------|-------------|
-| **LDA** | **0.821** [0.802, 0.841] | **25.6°** [22.8, 28.3] |
-| Ridge | 0.783 [0.750, 0.821] | 41.8° [37.9, 45.0] |
-| SVM | 0.776 [0.734, 0.811] | 32.9° [27.1, 38.7] |
-| KernelRidge | 0.739 [0.692, 0.779] | 47.9° [43.9, 52.1] |
-| ForwardEnc | 0.736 [0.708, 0.773] | 43.5° [38.6, 47.2] |
-| MLP | 0.394 [0.381, 0.409] | 87.1° [85.1, 88.9] |
+**Bootstrap Accuracy (95% CI, 1000 iterations)**
 
-**Note**: Under SRM alignment, LDA achieves 0.793 with ICC 0.666 (vs Procrustes ICC 0.013).
+| Model | Raw | Procrustes | SRM |
+|-------|-----|------------|-----|
+| **LDA** | 0.135 [0.119, 0.153] | **0.758** [0.734, 0.780] | **0.793** [0.759, 0.825] |
+| SVM | 0.127 [0.114, 0.140] | 0.685 [0.655, 0.714] | 0.727 [0.685, 0.770] |
+| FE | 0.129 [0.110, 0.146] | 0.545 [0.511, 0.579] | 0.480 [0.449, 0.514] |
+| Ridge | 0.131 [0.116, 0.147] | 0.388 [0.361, 0.417] | 0.313 [0.276, 0.348] |
+| KRidge | 0.127 [0.110, 0.143] | 0.332 [0.300, 0.366] | 0.285 [0.252, 0.319] |
+| MLP | 0.126 [0.118, 0.135] | 0.147 [0.136, 0.158] | 0.131 [0.126, 0.138] |
 
-### Alignment Effect (LORO, all models at chance without alignment)
+**Test-Retest Reliability (ICC)**
 
-| Alignment | LDA | SVM | FE | Ridge |
-|-----------|-----|-----|-----|-------|
-| Raw | 0.393 | 0.382 | 0.367 | 0.375 |
-| Procrustes | **0.821** | 0.776 | 0.736 | 0.783 |
-| SRM | **0.793** | 0.727 | 0.480 | 0.313 |
+| Model | Raw | Procrustes | SRM |
+|-------|-----|------------|-----|
+| LDA | 0.224 | 0.013 | **0.666** |
+| Ridge | 0.233 | 0.148 | **0.762** |
+| KRidge | 0.324 | 0.463 | **0.790** |
+| SVM | -0.284 | 0.495 | **0.760** |
+| MLP | 0.611 | 0.720 | **0.713** |
+| FE | 0.471 | 0.574 | **0.753** |
 
-### HC vs CVD (Procrustes, acc_45)
+- **SRM LDA is recommended LORO pipeline**: 0.793 accuracy, ICC 0.666, no group bias (p=0.668)
+- **Procrustes LDA paradox**: 0.758 accuracy but ICC=0.013 — high fold-to-fold instability
+- **Alignment × ROI interaction**: SRM > Proc V1 (p=0.002); Proc > SRM V3 (p=9.1e-08), V4 (p=1.8e-05)
+- **Cross-subject generalization**: HC→CVD ≈ HC→HC for LDA (p=0.668), SVM (p=0.647) — no group bias in SRM space
 
-HC ≈ CVD across all models. LDA: HC 0.805, CVD 0.859 (CVD numerically higher). **Shared voxel-color mapping confirmed** → filter learning justified.
+### Primary Result 3: LOCO Interpolation — 3-Alignment Baseline (Result 12)
 
-### LOCO: ForwardEncoding is the Only Interpolation Model
+**ForwardEncoding MAE by Alignment × Group (degrees, chance = 90°)**
 
-- **FE+Procrustes HC MAE**: V1 76.4°, V2 80.0°, V3 76.9°, hV4 69.4° (chance = 90°)
-- All other models (LDA, SVM, MLP, Ridge, KernelRidge) at or worse than chance in LOCO
+| ROI | Raw HC | Raw CVD | Proc HC | Proc CVD | SRM HC | SRM CVD |
+|-----|--------|---------|---------|----------|--------|---------|
+| V1 | 76.9 | 76.4 | 76.4 | 84.6 | 80.0 | 93.5 |
+| V2 | 74.8 | 78.5 | 80.0 | 98.5 | 84.9 | 90.5 |
+| V3 | 77.8 | 76.4 | 77.0 | 73.5 | 99.3 | 88.3 |
+| V4 | 73.5 | 76.0 | 69.4 | 87.4 | 72.2 | 90.9 |
+
+- **FE dominates LOCO**: best model in 85% of subject-ROI-alignment combinations (102/120)
+- **Procrustes optimal alignment for LOCO**: most significant permutation tests (4 sig vs SRM's 1)
+- **LORO vs LOCO alignment preference diverges**: LORO → SRM; LOCO → Procrustes
+- **CVD deficit visible only with alignment**: Raw HC ≈ CVD; Procrustes reveals CVD distortion (V2 +18.5°, V4 +18.0°)
 - **Correlation-based template matching is optimal** — 4 alternative decoding methods all worse (Result 7)
 
-### Key Negative Results
+### Primary Result 4: FE Group Prior — HC→CVD Knowledge Transfer (Result 13)
+
+**Method**: W_combined = λ·W_individual + (1-λ)·W_group, nested CV for λ selection
+**Subjects**: 9 (6 HC, 3 CVD; sub-07 excluded for hV4 voxel count)
+
+**LOCO GP (leakage-fixed, nested CV)**
+
+| ROI | HC Baseline | HC GP | HC Δ% | CVD Baseline | CVD GP | CVD Δ% |
+|-----|-------------|-------|-------|-------------|--------|--------|
+| V1 | 80.7° | 77.3° | **+4.3%** | 93.5° | 85.7° | **+8.3%** |
+| V2 | 85.9° | 78.7° | **+8.3%** | 90.5° | 85.4° | **+5.7%** |
+| V3 | 100.6° | 105.9° | -5.3% | 88.3° | 112.2° | -27.0% |
+| V4 | 71.2° | 75.5° | -6.1% | 90.9° | 95.7° | -5.2% |
+
+**LORO GP (no leakage issue)**
+
+| ROI | Baseline Mean | GP Mean | Improvement |
+|-----|---------------|---------|-------------|
+| V1 | 42.40° | 34.47° | **-18.7%** |
+| V2 | 50.96° | 32.72° | **-35.8%** |
+| V3 | 60.63° | 54.25° | -10.5% |
+| V4 | 62.21° | 61.34° | -1.4% |
+
+**Individual CVD Profiles (LOCO GP)**
+
+| Subject | V1 Δ% | V2 Δ% | V3 Δ% | V4 Δ% |
+|---------|--------|--------|--------|--------|
+| sub-08 (deutan) | -7.0% | +0.6% | **-59.2%** | -15.6% |
+| sub-09 (protan) | **+10.5%** | +1.3% | -31.6% | +7.8% |
+| sub-10 (deutan) | **+14.7%** | **+12.9%** | +0.8% | -12.1% |
+
+**λ-MAE curve (Result 14)**: Non-monotonic, ROI-specific. V1 monotonic (λ=0 best, pure GP), V2 shallow U-shape (λ*≈0.1–0.2), V3 HC/CVD reversed, V4 minimal benefit. Early visual (V1/V2) benefits from GP; higher visual (V3/V4) harmed.
+
+**Key interpretation**:
+- LOCO GP: V1/V2 benefit (+4–8%), V3/V4 harmful — HC mean does not capture individual V3/V4 variability
+- LORO GP more effective than LOCO GP: V1 -18.7%, V2 -35.8% (individual W from 5 runs more stable than from 7 LOCO colors)
+- Previous LOCO GP result (median -50.9%) was leakage artifact — resolved 2026-02-28; see METHODS historical note
+
+**Results**: `model_comparison_validation/results/FE_group_prior/`
+
+### Negative Results
 
 - **Result 7**: Decoder bottleneck — PopVec, RidgeEnc, GaussML, RidgeReg all worse than baseline correlation. Encoding estimation (df=1) is the limiting factor, not decoding.
 - **Result 10**: Sequential training + MLP architecture sweep — all MLP variants substantially worse than FE baseline. Non-linear readout fundamentally incompatible with LOCO OOD extrapolation.
 - **Result 6**: Hybrid decoder (FE+MLP, FE+SVM) — FE_SVM ≈ FE (0.779 vs 0.784). Channel-to-color mapping is adequately linear.
-
-### Group Prior (HC-mean W for CVD)
-
-- HC-mean encoding weights (W) improve CVD LOCO MAE by +4–8%
-- Leakage-free nested CV validated
-- Results: `model_comparison_validation/results/FE_group_prior/`
 
 ---
 
@@ -233,4 +282,4 @@ model_comparison_validation/results/
 
 ---
 
-**Last Updated**: 2026-02-28
+**Last Updated**: 2026-03-03

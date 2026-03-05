@@ -110,6 +110,37 @@ For each original color θ_orig, solve:
 
 ---
 
+## Relationship to LOCO Trials (Phase 2b Decoder Comparison)
+
+LOCO_trials의 Phase 1/1b MDS 진단 및 pre-validation 결과를 통해 **SRM 공간의 연속 색 구조 한계**가 확인됨 (2026-03-04). 이에 따라 LOCO_trials Phase 4가 본 디렉토리를 가리키며, **Procrustes 공간이 필터 operating space로 확정**됨.
+
+```
+LOCO_trials Phase 2 (Ridge, SRM)      → df stabilization baseline
+LOCO_trials Phase 3 (GP, V2 SRM)      → SRM-space ceiling benchmark
+LOCO_trials Phase 4 = THIS DIRECTORY   → ★ main filter path (Procrustes)
+```
+
+### Filter Architecture: SRM + Procrustes 상보적 역할
+
+피험자마다 voxel 수가 다르므로 (sub-01 V1: ~500 vs sub-07 hV4: 16) cross-subject 비교에 SRM이 **필수**.
+
+| 역할 | 공간 | 설명 |
+|------|------|------|
+| HC mean 타겟 정의 | **SRM** (필수) | k-dim 공유 공간에서 HC 그룹 패턴 학습. Procrustes에서는 voxel 수 불일치로 불가 |
+| 그룹 비교 / 검증 | **SRM** (필수) | CVD 편차 식별, cross-decoding, corrected 결과 검증 |
+| 개인 필터 적용 | **Procrustes** | n_voxels × 8 풍부한 파라미터로 개인 수준 교정 |
+| 양방향 브릿지 | **SRM W_i** | voxel→SRM: `S = W_i^T × X`, SRM→voxel: `X̂ = W_i × S` |
+| Pre-validation | — | `pre_validation/notion.md` — SRM 연속구조 한계, FDR 타겟, 메트릭 민감도 |
+
+### LOCO_trials에서 확인된 SRM 한계
+
+| 문제 | 결과 | 출처 |
+|------|------|------|
+| V1 stress plateau | 7D까지 0.127 | Phase 1b Analysis 1 |
+| hV4 CIELab 부호 반전 | raw +0.402 → SRM -0.308 | Phase 1b Analysis 2 / notion.md |
+| LORO HC≈CVD | p=0.668 (SRM 필터 ≈ 항등) | Phase 2b LORO |
+| LOCO 결손은 연속 보간 | HC 69.4° vs CVD 87.4° (hV4) | Phase 2b LOCO |
+
 ## Relationship to Current Phase 3
 
 | Aspect | Current Phase 3 (Procrustes Filter) | Future Phase 3 (360° Optimization) |

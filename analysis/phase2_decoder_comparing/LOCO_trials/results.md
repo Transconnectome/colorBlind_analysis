@@ -467,9 +467,76 @@ V1은 방향(orientation), 공간주파수(spatial frequency), 위상(phase) 등
 
 ---
 
+## Strategic Direction Revision (2026-03-04)
+
+### SRM 공간 한계 — Pre-validation 결과 종합
+
+Phase 1b 결과와 `future_phase3_filter_optimization/pre_validation/notion.md`의 사전 검증을 종합하면, **SRM 공간은 연속 색 구조에 부적합**하다:
+
+| 문제 | 증거 |
+|------|------|
+| V1 stress plateau | 7D까지 0.127 정체 (raw/procrustes는 dim 4-5에서 < 0.10 도달) |
+| hV4 CIELab 부호 반전 | raw r=+0.402* → SRM r=-0.308. SRM 투영이 색 기하학 파괴 |
+| CVD 범주 표상 이미 동등 | Cross-decoding 10/12 유의, LORO HC≈CVD (p=0.668) → SRM 필터 ≈ 항등변환 |
+| 연속 보간에서 결손 | LOCO HC 69.4° vs CVD 87.4° (hV4, p=0.017) — Procrustes 공간에서 교정 가능 |
+| SRM W matrix 빈약 | (k×8) = 24~32 params vs Procrustes (n_voxels×8) = 3,408+ params |
+
+### 수정된 Phase 구조
+
+```
+Phase 2: Ridge (SRM LOCO)         ← 진행 (df 안정화 baseline, 빠름)
+Phase 3: GP Matern (V2 SRM only)  ← 축소 (SRM ceiling 확인용 benchmark)
+Phase 4: Procrustes Filter        ← ★ 주력 (notion.md 전략)
+```
+
+### Filter Architecture: SRM + Procrustes 상보적 역할
+
+**피험자마다 voxel 수가 다르므로 cross-subject 비교에 SRM이 필수** (sub-01 V1: ~500 voxels vs sub-07 hV4: 16 voxels). Procrustes 공간에서 직접 W_HC mean을 구하거나 cross-subject 비교가 불가능하다.
+
+```
+[SRM: 필수 인프라 — 타겟 정의 + 그룹 비교]
+  HC Procrustes amplitudes → SRM (W_i^T × X) → k-dim 공유 공간
+  HC mean pattern (k-dim) = 타겟
+  CVD 편차 식별 (z-score, FDR pairs)
+
+[Procrustes: 개인 해상도 — 필터 적용]
+  SRM HC 타겟 → W_i × S_HC → 개인 voxel 공간 타겟 (역투영)
+  개인 voxel 공간에서 FE W_CVD → W_HC-like 변환 학습
+  ※ n_voxels × 8 파라미터 → 풍부한 개인차 포착
+
+[양방향 브릿지: SRM projection W_i]
+  voxel → SRM:  S = W_i^T × X_proc    (그룹 비교용)
+  SRM → voxel:  X̂_proc = W_i × S      (타겟 역투영용)
+```
+
+**핵심**: SRM은 "검증 전용"이 아니라 **타겟 정의와 그룹 비교의 필수 인프라**. Procrustes는 SRM을 대체하는 것이 아니라, SRM projection W_i를 브릿지로 하여 **개인 voxel 수준 해상도**를 제공한다.
+
+| 역할 | SRM | Procrustes |
+|------|-----|-----------|
+| 그룹 비교 | **필수** (voxel 수 통일) | 불가 (차원 불일치) |
+| HC mean 타겟 | **필수** (k-dim mean) | 불가 |
+| 필터 파라미터 | 제한적 (k×8 = 24-32) | **풍부** (n_voxels×8 = 3,408+) |
+| 연속 색 거리 | 부분 보존 (V2만 structured) | 보존 |
+| 개인 필터 적용 | 가능하나 해상도 부족 | **최적** |
+
+### Periodic Kernel 기각 근거
+
+| 근거 | 수치 |
+|------|------|
+| Mantel test (equidistant) 전 ROI 실패 | 최고 r=hV4/Raw 0.276 (p=0.062), 유의 없음 |
+| CIELab 비균등성 | 인접 거리 30.9~68.3 (2.2배), equidistant 가정 기각 |
+| H1 persistent homology 전 ROI 실패 | 최저 p=V1 0.150, 원형 위상 부재 |
+| Per-subject circular order | \|rho\| > 0.8 달성 피험자 없음 |
+
+**결론**: ExpSinSquared(periodic) kernel은 전제 조건(등간격 원형 배열)을 충족하지 않음. V2에서 Anisotropic Matern만 benchmark으로 테스트.
+
+---
+
 ## Phase 2: Ridge Regularization
 
-*(서버 실행 대기 중)*
+*(서버 실행 대기 중 — df 안정화 baseline)*
+
+**목적**: Ridge가 SRM LOCO의 df=1 문제를 얼마나 완화하는지 확인. 주력 방법이 아닌 **baseline delta 기록용**.
 
 ### 2.1 Fixed Alpha Grid (MAE in degrees)
 | Subject | ROI | OLS | a=0.001 | a=0.01 | a=0.1 | a=1 | a=10 | a=100 | a=1000 |
@@ -487,37 +554,65 @@ V1은 방향(orientation), 공간주파수(spatial frequency), 위상(phase) 등
 
 ---
 
-## Phase 3: Gaussian Process
+## Phase 3: GP Matern — V2 Benchmark Only
 
-*(서버 실행 대기 중)*
+*(서버 실행 대기 중 — SRM ceiling 확인용)*
 
-### 3.1 Basic GP (periodic kernel)
-| Subject | ROI | FE_OLS | GP_periodic | Delta |
-|---------|-----|--------|-------------|-------|
-|         |     |        |             |       |
+**목적**: V2 SRM 공간에서 Anisotropic Matern GP의 LOCO 개선 상한 확인. Periodic kernel은 기각됨.
 
-### 3.2 GP + FE Mean Function
-| Subject | ROI | GP_periodic | GP+FE_mean | Delta |
-|---------|-----|-------------|------------|-------|
-|         |     |             |            |       |
+**범위**: V2 only (유일한 STRUCTURED ROI, 2/4). V1은 음성 대조군으로 포함 가능.
 
-### 3.3 Cross-ROI Prior
-| Subject | ROI | Single-ROI | Cross-ROI | Delta |
-|---------|-----|------------|-----------|-------|
-|         |     |            |           |       |
+### 3.1 GP Matern (V2, Anisotropic ARD)
+| Subject | ROI | FE_OLS | GP_Matern | Delta | Note |
+|---------|-----|--------|-----------|-------|------|
+|         | V2  |        |           |       | L-M lengthscale < S-LM |
+|         | V1  |        |           |       | Negative control |
+
+### 3.2 GP + FE Mean Function (V2)
+| Subject | ROI | GP_Matern | GP+FE_mean | Delta |
+|---------|-----|-----------|------------|-------|
+|         | V2  |           |            |       |
 
 ### Phase 3 Decision
-- Best method:
+- GP Matern V2 improvement vs Ridge: [ ]
+- SRM-space ceiling established: [ ]
 - Rationale:
+
+---
+
+## Phase 4: Procrustes Filter (★ Main Path)
+
+**이 phase의 상세 결과는 `analysis/future_phase3_filter_optimization/`에 기록됨.**
+
+Procrustes 공간에서 FE W matrix 변환으로 CVD 색 표상 교정. SRM은 검증 전용.
+
+### 4.1 Filter Design
+- **SRM 역할**: HC mean 타겟 정의 + 그룹 비교 (필수 인프라, voxel 수 차이 해결)
+- **Procrustes 역할**: 개인 voxel 수준 필터 적용 (n_voxels × 8 파라미터)
+- **브릿지**: SRM projection W_i — SRM 타겟을 개인 voxel 공간으로 역투영
+- **Target subjects**: sub-08 (FDR 32 pairs), sub-09 (FDR 7 pairs)
+
+### 4.2 Comparison: SRM vs Procrustes Filter
+| Metric | SRM (Phase 2-3) | Procrustes (Phase 4) |
+|--------|-----------------|---------------------|
+| LOCO MAE (HC) | | |
+| LOCO MAE (CVD) | | |
+| Filter Delta | | |
+| W params | k×8 = 24-32 | n_voxels×8 = 3,408+ |
+
+### Phase 4 Decision
+- Procrustes > SRM: [ ]
+- Best ROI: [ ]
+- Filter candidate: [ ]
 
 ---
 
 ## Final Summary
 
-| Method | HC Mean MAE | CVD Mean MAE | Best For |
-|--------|-------------|--------------|----------|
-| FE_OLS (baseline) | | | |
-| Ridge | | | |
-| GP_periodic | | | |
-| GP+FE_mean | | | |
-| Cross-ROI | | | |
+| Method | Space | HC MAE | CVD MAE | Delta | Note |
+|--------|-------|--------|---------|-------|------|
+| FE_OLS (baseline) | SRM | | | | Current LOCO |
+| Ridge | SRM | | | | Phase 2 — df stabilization |
+| GP Matern (V2) | SRM | | | | Phase 3 — SRM ceiling |
+| **Procrustes FE** | **Proc** | | | | **Phase 4 — main path** |
+| Procrustes + Filter | Proc | | | | Phase 4 — corrected CVD |

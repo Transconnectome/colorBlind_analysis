@@ -3,16 +3,15 @@
 Phase 2: Ridge-Regularized LOCO Forward Encoding
 
 Stabilizes W estimation via Ridge penalty while keeping 6 channels.
-Effectively shrinks df from (7 colors - 6 channels = 1) to a regularized solution.
 
 Modes:
-  fixed    : Test alpha grid [0.001, 0.01, 0.1, 1, 10, 100, 1000] on outer folds
-  nested   : Outer LOCO 8-fold, inner CV selects alpha
-  combined : Ridge(alpha) + Group Prior(lambda) joint optimization
+  fixed    : Test alpha grid on outer folds (diagnostic landscape, no selection)
+  gcv      : GCV-based alpha selection per outer fold (proper evaluation)
+  combined : GCV for alpha + leave-one-run-out for lambda (Ridge + Group Prior)
 
 Usage (server):
     python loco_ridge.py --subject 01 --rois V1 V2 V3 V4 --mode fixed
-    python loco_ridge.py --subject 01 --rois V1 V2 V3 V4 --mode nested
+    python loco_ridge.py --subject 01 --rois V1 V2 V3 V4 --mode gcv
     python loco_ridge.py --subject 01 --rois V1 V2 V3 V4 --mode combined
 
 Output:
@@ -25,6 +24,7 @@ import json
 import numpy as np
 from pathlib import Path
 from datetime import datetime
+from collections import Counter
 
 # Resolve paths
 SCRIPT_DIR = Path(__file__).resolve().parent
@@ -61,11 +61,13 @@ BASELINE_DIR = Path('/scratch/connectome/haba6030/colorBlind/derivatives/full_da
 
 
 # ============================================================================
-# Core Functions (reused from group_prior.py with Ridge support)
+# Core Functions
 # ============================================================================
 
 def fit_W(X, hues, n_channels=6, alpha=0):
     """Fit encoding weights W with optional Ridge regularization.
+
+    W = (C^T C + alpha I)^{-1} C^T X
 
     Args:
         X: (n_samples, n_voxels) pooled brain patterns
@@ -138,11 +140,53 @@ def compute_group_W(other_amps_dict, exclude_color_idx=None, alpha=0):
 
 
 # ============================================================================
-# Mode 1: Fixed Alpha Grid
+# GCV Utility
+# ============================================================================
+
+def gcv_select_alpha(C, Y, alpha_grid):
+    """Select Ridge alpha via Generalized Cross-Validation.
+
+    GCV(alpha) = mean(||Y - H Y||^2) / (1 - tr(H)/n)^2
+
+    where H = C (C^T C + alpha I)^{-1} C^T.
+
+    Computed efficiently via SVD of C:
+      H = U diag(s^2 / (s^2 + alpha)) U^T
+
+    Args:
+        C: (n_samples, n_channels) design matrix
+        Y: (n_samples, n_voxels) response matrix
+        alpha_grid: list of candidate alphas
+
+    Returns:
+        best_alpha: alpha with lowest GCV score
+        gcv_scores: dict of alpha -> gcv_score
+    """
+    n = C.shape[0]
+    U, s, Vt = np.linalg.svd(C, full_matrices=False)
+
+    gcv_scores = {}
+    for alpha in alpha_grid:
+        d = s**2 / (s**2 + alpha)
+        Y_hat = (U * d[np.newaxis, :]) @ (U.T @ Y)
+        residuals = Y - Y_hat
+        tr_H = np.sum(d)
+        gcv = np.mean(residuals**2) / (1 - tr_H / n)**2
+        gcv_scores[alpha] = float(gcv)
+
+    best_alpha = min(gcv_scores, key=gcv_scores.get)
+    return best_alpha, gcv_scores
+
+
+# ============================================================================
+# Mode 1: Fixed Alpha Grid (diagnostic)
 # ============================================================================
 
 def loco_fixed_alpha(amp, alpha_grid):
     """LOCO with fixed alpha grid. No group prior.
+
+    Diagnostic tool: shows how each alpha affects LOCO MAE.
+    Not for alpha selection (that would be test-set selection bias).
 
     Returns:
         results: dict mapping alpha -> {'mean_mae', 'fold_maes'}
@@ -175,135 +219,133 @@ def loco_fixed_alpha(amp, alpha_grid):
 
 
 # ============================================================================
-# Mode 2: Nested CV for Alpha Selection
+# Mode 2: GCV-based LOCO
 # ============================================================================
 
-def loco_nested_alpha(amp, alpha_grid):
-    """Nested LOCO: outer 8-fold (color), inner LOCO for alpha selection.
+def loco_gcv(amp, alpha_grid):
+    """LOCO with GCV-based alpha selection per fold.
 
-    Inner loop: 7 training colors -> leave-one-out -> 6 training colors.
-    Ridge is essential in inner loop (6 colors - 6 channels = df=0).
+    For each outer LOCO fold (8-fold):
+      1. GCV on 7 training colors (42 samples, overdetermined) -> select alpha
+      2. Fit W with selected alpha on all 42 training samples
+      3. Predict held-out color (6 samples) -> MAE
 
     Returns:
-        best_alpha: most-selected alpha across outer folds
-        outer_fold_maes: list of MAE per outer fold
-        selected_alphas: list of selected alpha per outer fold
+        dict with mean_mae, fold_maes, selected_alphas, gcv_details
     """
     n_runs, n_colors, n_voxels = amp.shape
-    outer_fold_maes = []
+    basis_full = create_basis_functions(n_channels=6)
+
+    fold_maes = []
     selected_alphas = []
+    gcv_details = []
 
-    for outer_test_color in range(n_colors):
-        outer_train_colors = [c for c in range(n_colors) if c != outer_test_color]
+    for test_color in range(n_colors):
+        train_colors = [c for c in range(n_colors) if c != test_color]
+        train_hues = np.array([HUE_ANGLES[c] for c in train_colors])
+        test_hue = HUE_ANGLES[test_color]
 
-        # Inner LOCO: select alpha on 7 training colors
-        alpha_scores = {a: [] for a in alpha_grid}
+        X_train = amp[:, train_colors, :].reshape(-1, n_voxels)
+        hues_train = np.tile(train_hues, n_runs)
+        C_train = basis_full[hues_train.astype(int)]
 
-        for inner_val_color in outer_train_colors:
-            inner_train_colors = [c for c in outer_train_colors if c != inner_val_color]
-            inner_train_hues = np.array([HUE_ANGLES[c] for c in inner_train_colors])
-            inner_val_hue = HUE_ANGLES[inner_val_color]
-            X_val = amp[:, inner_val_color, :]
-
-            for alpha in alpha_grid:
-                X_train = amp[:, inner_train_colors, :].reshape(-1, n_voxels)
-                hues_train = np.tile(inner_train_hues, n_runs)
-                W, basis_full = fit_W(X_train, hues_train, alpha=alpha)
-                pred_hues = decode_with_W(W, basis_full, X_val)
-                errors = circular_distance(np.full(n_runs, inner_val_hue), pred_hues)
-                alpha_scores[alpha].append(float(np.mean(errors)))
-
-        # Select best alpha (lowest inner MAE)
-        alpha_means = {a: np.mean(s) for a, s in alpha_scores.items()}
-        best_alpha = min(alpha_means, key=alpha_means.get)
+        # GCV alpha selection on training data only
+        best_alpha, gcv_scores = gcv_select_alpha(C_train, X_train, alpha_grid)
         selected_alphas.append(best_alpha)
+        gcv_details.append(gcv_scores)
 
-        # Test outer fold with best alpha
-        outer_train_hues = np.array([HUE_ANGLES[c] for c in outer_train_colors])
-        outer_test_hue = HUE_ANGLES[outer_test_color]
-        X_train = amp[:, outer_train_colors, :].reshape(-1, n_voxels)
-        hues_train = np.tile(outer_train_hues, n_runs)
-        X_test = amp[:, outer_test_color, :]
-
-        W, basis_full = fit_W(X_train, hues_train, alpha=best_alpha)
+        # Fit and predict
+        W, _ = fit_W(X_train, hues_train, alpha=best_alpha)
+        X_test = amp[:, test_color, :]
         pred_hues = decode_with_W(W, basis_full, X_test)
-        errors = circular_distance(np.full(n_runs, outer_test_hue), pred_hues)
-        outer_fold_maes.append(float(np.mean(errors)))
+        errors = circular_distance(np.full(n_runs, test_hue), pred_hues)
+        fold_maes.append(float(np.mean(errors)))
 
-    # Most frequent alpha
-    from collections import Counter
-    best_alpha_overall = Counter(selected_alphas).most_common(1)[0][0]
-
-    return best_alpha_overall, outer_fold_maes, selected_alphas
+    return {
+        'mean_mae': float(np.mean(fold_maes)),
+        'fold_maes': fold_maes,
+        'selected_alphas': [float(a) for a in selected_alphas],
+        'gcv_details': gcv_details,
+    }
 
 
 # ============================================================================
-# Mode 3: Combined Ridge + Group Prior
+# Mode 3: Combined Ridge + Group Prior (GCV + leave-one-run-out)
 # ============================================================================
 
-def loco_combined(target_amp, other_amps_dict, alpha_grid, lambda_grid):
-    """Joint optimization of Ridge alpha + Group Prior lambda.
+def loco_combined_gcv(target_amp, other_amps_dict, alpha_grid, lambda_grid):
+    """Joint optimization: GCV for alpha, leave-one-run-out for lambda.
 
-    Nested LOCO: outer 8-fold, inner LOCO searches (alpha, lambda) grid.
+    For each outer LOCO fold:
+      1. GCV on training data (7 colors x 6 runs = 42 samples) -> best alpha
+      2. W_group from other HC subjects (exclude test color, OLS)
+      3. Leave-one-run-out (6-fold over runs) -> select lambda
+         Each run-fold: 5 runs x 7 colors = 35 train, 1 run x 7 colors = 7 val
+         (7 unique hue conditions > 6 channels -> overdetermined)
+      4. Final prediction with (best_alpha, best_lambda)
 
     Returns:
-        best_params: (best_alpha, best_lambda)
-        outer_fold_maes: list
         selected_params: list of (alpha, lambda) per fold
+        fold_maes: list of MAE per fold
     """
     n_runs, n_colors, n_voxels = target_amp.shape
-    outer_fold_maes = []
+    basis_full = create_basis_functions(n_channels=6)
+
+    fold_maes = []
     selected_params = []
 
-    for outer_test_color in range(n_colors):
-        outer_train_colors = [c for c in range(n_colors) if c != outer_test_color]
+    for test_color in range(n_colors):
+        train_colors = [c for c in range(n_colors) if c != test_color]
+        train_hues = np.array([HUE_ANGLES[c] for c in train_colors])
+        test_hue = HUE_ANGLES[test_color]
 
-        # Group W (excludes outer test color)
-        W_group, basis_full = compute_group_W(
-            other_amps_dict, exclude_color_idx=outer_test_color
+        # Full training data
+        X_train_full = target_amp[:, train_colors, :].reshape(-1, n_voxels)
+        hues_train_full = np.tile(train_hues, n_runs)
+        C_train_full = basis_full[hues_train_full.astype(int)]
+
+        # Step 1: GCV for alpha on full training data
+        best_alpha, _ = gcv_select_alpha(C_train_full, X_train_full, alpha_grid)
+
+        # Step 2: Group W (exclude test color, OLS)
+        W_group, _ = compute_group_W(
+            other_amps_dict, exclude_color_idx=test_color
         )
 
-        # Inner LOCO: grid search (alpha, lambda)
-        param_scores = {}
+        # Step 3: Leave-one-run-out for lambda selection
+        lambda_scores = {lam: [] for lam in lambda_grid}
 
-        for inner_val_color in outer_train_colors:
-            inner_train_colors = [c for c in outer_train_colors if c != inner_val_color]
-            inner_train_hues = np.array([HUE_ANGLES[c] for c in inner_train_colors])
-            inner_val_hue = HUE_ANGLES[inner_val_color]
-            X_val = target_amp[:, inner_val_color, :]
+        for val_run in range(n_runs):
+            train_runs = [r for r in range(n_runs) if r != val_run]
 
-            for alpha in alpha_grid:
-                X_train = target_amp[:, inner_train_colors, :].reshape(-1, n_voxels)
-                hues_train = np.tile(inner_train_hues, n_runs)
-                W_ind, _ = fit_W(X_train, hues_train, alpha=alpha)
+            # W_ind from (n_runs-1) runs
+            X_lr_train = target_amp[train_runs][:, train_colors, :].reshape(-1, n_voxels)
+            hues_lr_train = np.tile(train_hues, len(train_runs))
+            W_ind_lr, _ = fit_W(X_lr_train, hues_lr_train, alpha=best_alpha)
 
-                for lam in lambda_grid:
-                    W_combined = lam * W_ind + (1 - lam) * W_group
-                    pred_hues = decode_with_W(W_combined, basis_full, X_val)
-                    errors = circular_distance(np.full(n_runs, inner_val_hue), pred_hues)
-                    key = (alpha, lam)
-                    param_scores.setdefault(key, []).append(float(np.mean(errors)))
+            # Validation: val_run's training colors
+            X_lr_val = target_amp[val_run, train_colors, :]  # (7, n_voxels)
 
-        # Select best (alpha, lambda)
-        param_means = {k: np.mean(v) for k, v in param_scores.items()}
-        best_key = min(param_means, key=param_means.get)
-        best_alpha, best_lambda = best_key
-        selected_params.append(best_key)
+            for lam in lambda_grid:
+                W_combined = lam * W_ind_lr + (1 - lam) * W_group
+                pred = decode_with_W(W_combined, basis_full, X_lr_val)
+                errors = circular_distance(train_hues, pred)
+                lambda_scores[lam].append(float(np.mean(errors)))
 
-        # Test outer fold
-        outer_train_hues = np.array([HUE_ANGLES[c] for c in outer_train_colors])
-        outer_test_hue = HUE_ANGLES[outer_test_color]
-        X_train = target_amp[:, outer_train_colors, :].reshape(-1, n_voxels)
-        hues_train = np.tile(outer_train_hues, n_runs)
-        X_test = target_amp[:, outer_test_color, :]
+        # Select best lambda
+        lambda_means = {l: np.mean(s) for l, s in lambda_scores.items()}
+        best_lambda = min(lambda_means, key=lambda_means.get)
+        selected_params.append((best_alpha, best_lambda))
 
-        W_ind, _ = fit_W(X_train, hues_train, alpha=best_alpha)
-        W_combined = best_lambda * W_ind + (1 - best_lambda) * W_group
+        # Step 4: Final prediction with best (alpha, lambda)
+        W_ind_full, _ = fit_W(X_train_full, hues_train_full, alpha=best_alpha)
+        W_combined = best_lambda * W_ind_full + (1 - best_lambda) * W_group
+        X_test = target_amp[:, test_color, :]
         pred_hues = decode_with_W(W_combined, basis_full, X_test)
-        errors = circular_distance(np.full(n_runs, outer_test_hue), pred_hues)
-        outer_fold_maes.append(float(np.mean(errors)))
+        errors = circular_distance(np.full(n_runs, test_hue), pred_hues)
+        fold_maes.append(float(np.mean(errors)))
 
-    return selected_params, outer_fold_maes
+    return selected_params, fold_maes
 
 
 # ============================================================================
@@ -324,8 +366,8 @@ def main():
     parser.add_argument('--subject', type=str, required=True,
                         help='Subject ID (e.g., 01)')
     parser.add_argument('--rois', nargs='+', default=ROIS)
-    parser.add_argument('--mode', type=str, default='fixed',
-                        choices=['fixed', 'nested', 'combined'])
+    parser.add_argument('--mode', type=str, default='gcv',
+                        choices=['fixed', 'gcv', 'combined'])
     parser.add_argument('--alignment', type=str, default='srm',
                         choices=['raw', 'procrustes', 'srm'])
     parser.add_argument('--baseline_dir', type=str, default=str(BASELINE_DIR))
@@ -383,30 +425,23 @@ def main():
                 print(f'  alpha={alpha:>8.3f}: MAE={res["mean_mae"]:.1f} '
                       f'(delta={delta:+.1f})')
 
-        elif args.mode == 'nested':
-            best_alpha, fold_maes, sel_alphas = loco_nested_alpha(amp, ALPHA_GRID)
-            nested_mae = float(np.mean(fold_maes))
-            delta = nested_mae - ols['mean_mae']
-            roi_result['nested'] = {
-                'best_alpha': float(best_alpha),
-                'mean_mae': nested_mae,
-                'fold_maes': fold_maes,
-                'selected_alphas': [float(a) for a in sel_alphas],
-            }
-            print(f'  Nested: MAE={nested_mae:.1f} (best_alpha={best_alpha}, '
+        elif args.mode == 'gcv':
+            gcv_result = loco_gcv(amp, ALPHA_GRID)
+            delta = gcv_result['mean_mae'] - ols['mean_mae']
+            roi_result['gcv'] = gcv_result
+            print(f'  GCV: MAE={gcv_result["mean_mae"]:.1f} '
+                  f'(alphas={gcv_result["selected_alphas"]}, '
                   f'delta={delta:+.1f})')
 
         elif args.mode == 'combined':
             if roi not in other_amps or not other_amps[roi]:
                 print(f'  No group data for combined mode, skipping')
                 continue
-            sel_params, fold_maes = loco_combined(
+            sel_params, fold_maes = loco_combined_gcv(
                 amp, other_amps[roi], ALPHA_GRID, LAMBDA_GRID)
             combined_mae = float(np.mean(fold_maes))
             delta = combined_mae - ols['mean_mae']
 
-            # Aggregate selected params
-            from collections import Counter
             param_counts = Counter(sel_params)
             most_common = param_counts.most_common(1)[0]
 
@@ -459,9 +494,12 @@ def main():
                         key=lambda x: x[1]['mean_mae'])
             print(f' | Best Ridge: alpha={best_a[0]}, MAE={best_a[1]["mean_mae"]:.1f}',
                   end='')
-        elif args.mode == 'nested' and 'nested' in r:
-            print(f' | Nested: MAE={r["nested"]["mean_mae"]:.1f}, '
-                  f'alpha={r["nested"]["best_alpha"]}', end='')
+        elif args.mode == 'gcv' and 'gcv' in r:
+            alpha_counts = Counter(r['gcv']['selected_alphas'])
+            mode_alpha = alpha_counts.most_common(1)[0]
+            print(f' | GCV: MAE={r["gcv"]["mean_mae"]:.1f}, '
+                  f'modal_alpha={mode_alpha[0]} ({mode_alpha[1]}/8 folds)',
+                  end='')
         elif args.mode == 'combined' and 'combined' in r:
             p = r['combined']['most_common_params']
             print(f' | Combined: MAE={r["combined"]["mean_mae"]:.1f}, '

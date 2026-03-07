@@ -1,0 +1,170 @@
+{
+  "V1_raw": {
+    "hc_pass_rates": {
+      "1_triangle": 1.0,
+      "2_eigenvalue": 1.0,
+      "3_stress": 0.0,
+      "4_circular": 0.0,
+      "5_monotonicity": 0.0,
+      "6_adj_opp": 0.0,
+      "7_pca": 0.0,
+      "8_lipschitz": 0.0
+    },
+    "overall_rate": 0.25,
+    "n_hc_subjects": 7
+  },
+  "V2_raw": {
+    "hc_pass_rates": {
+      "1_triangle": 1.0,
+      "2_eigenvalue": 0.86,
+      "3_stress": 0.0,
+      "4_circular": 0.0,
+      "5_monotonicity": 0.0,
+      "6_adj_opp": 0.0,
+      "7_pca": 0.0,
+      "8_lipschitz": 0.0
+    },
+    "overall_rate": 0.23,
+    "n_hc_subjects": 7
+  },
+  "V3_raw": {
+    "hc_pass_rates": {
+      "1_triangle": 1.0,
+      "2_eigenvalue": 0.86,
+      "3_stress": 0.0,
+      "4_circular": 0.0,
+      "5_monotonicity": 0.0,
+      "6_adj_opp": 0.0,
+      "7_pca": 0.0,
+      "8_lipschitz": 0.0
+    },
+    "overall_rate": 0.23,
+    "n_hc_subjects": 7
+  },
+  "hV4_raw": {
+    "hc_pass_rates": {
+      "1_triangle": 0.71,
+      "2_eigenvalue": 0.43,
+      "3_stress": 0.14,
+      "4_circular": 0.0,
+      "5_monotonicity": 0.0,
+      "6_adj_opp": 0.14,
+      "7_pca": 0.29,
+      "8_lipschitz": 0.0
+    },
+    "overall_rate": 0.21,
+    "n_hc_subjects": 7
+  },
+  "V1_procrustes": {
+    "hc_pass_rates": {
+      "1_triangle": 1.0,
+      "2_eigenvalue": 0.86,
+      "3_stress": 0.0,
+      "4_circular": 0.0,
+      "5_monotonicity": 0.0,
+      "6_adj_opp": 0.0,
+      "7_pca": 0.0,
+      "8_lipschitz": 0.0
+    },
+    "overall_rate": 0.23,
+    "n_hc_subjects": 7
+  },
+  "V2_procrustes": {
+    "hc_pass_rates": {
+      "1_triangle": 1.0,
+      "2_eigenvalue": 0.86,
+      "3_stress": 0.14,
+      "4_circular": 0.0,
+      "5_monotonicity": 0.0,
+      "6_adj_opp": 0.14,
+      "7_pca": 0.14,
+      "8_lipschitz": 0.0
+    },
+    "overall_rate": 0.29,
+    "n_hc_subjects": 7
+  },
+  "V3_procrustes": {
+    "hc_pass_rates": {
+      "1_triangle": 1.0,
+      "2_eigenvalue": 0.71,
+      "3_stress": 0.0,
+      "4_circular": 0.0,
+      "5_monotonicity": 0.0,
+      "6_adj_opp": 0.0,
+      "7_pca": 0.14,
+      "8_lipschitz": 0.0
+    },
+    "overall_rate": 0.23,
+    "n_hc_subjects": 7
+  },
+  "hV4_procrustes": {
+    "hc_pass_rates": {
+      "1_triangle": 1.0,
+      "2_eigenvalue": 0.43,
+      "3_stress": 0.29,
+      "4_circular": 0.0,
+      "5_monotonicity": 0.0,
+      "6_adj_opp": 0.14,
+      "7_pca": 0.43,
+      "8_lipschitz": 0.0
+    },
+    "overall_rate": 0.29,
+    "n_hc_subjects": 7
+  },
+  "V1_srm": {
+    "hc_pass_rates": {
+      "1_triangle": 0.0,
+      "2_eigenvalue": 0.0,
+      "3_stress": 0.0,
+      "4_circular": 0.0,
+      "5_monotonicity": 0.0,
+      "6_adj_opp": 0.0,
+      "7_pca": 0.71,
+      "8_lipschitz": 0.0
+    },
+    "overall_rate": 0.09,
+    "n_hc_subjects": 7
+  },
+  "V2_srm": {
+    "hc_pass_rates": {
+      "1_triangle": 0.0,
+      "2_eigenvalue": 0.0,
+      "3_stress": 0.0,
+      "4_circular": 0.0,
+      "5_monotonicity": 0.0,
+      "6_adj_opp": 0.14,
+      "7_pca": 0.71,
+      "8_lipschitz": 0.0
+    },
+    "overall_rate": 0.11,
+    "n_hc_subjects": 7
+  },
+  "V3_srm": {
+    "hc_pass_rates": {
+      "1_triangle": 0.0,
+      "2_eigenvalue": 0.0,
+      "3_stress": 0.0,
+      "4_circular": 0.0,
+      "5_monotonicity": 0.0,
+      "6_adj_opp": 0.14,
+      "7_pca": 1.0,
+      "8_lipschitz": 0.0
+    },
+    "overall_rate": 0.14,
+    "n_hc_subjects": 7
+  },
+  "hV4_srm": {
+    "hc_pass_rates": {
+      "1_triangle": 0.0,
+      "2_eigenvalue": 0.0,
+      "3_stress": 0.14,
+      "4_circular": 0.0,
+      "5_monotonicity": 0.0,
+      "6_adj_opp": 0.0,
+      "7_pca": 1.0,
+      "8_lipschitz": 0.0
+    },
+    "overall_rate": 0.14,
+    "n_hc_subjects": 7
+  }
+}

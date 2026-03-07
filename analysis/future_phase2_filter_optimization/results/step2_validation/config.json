@@ -1,0 +1,14 @@
+{
+  "description": "Step 2: Prediction Model Structural Validation",
+  "metrics": {
+    "metric1_mae": "Mean Absolute Error (circular, chance=90 deg)",
+    "metric2_circular_order": "Spearman rank correlation (|rho| > 0.7)",
+    "metric3_monotonicity": "Adjacent pair swap violations (< 2)",
+    "metric4_rdm_rank": "Kendall tau of predicted vs actual RDM (tau > 0.5)",
+    "metric5_trajectory": "Mean pairwise Pearson of 360 deg trajectories (r > 0.6)"
+  },
+  "method": "LOCO FE (OLS, alpha=0, 6 channels)",
+  "alignment": "procrustes",
+  "baseline_dir": "/scratch/connectome/haba6030/colorBlind/derivatives/full_dataset_C010",
+  "created": "2026-03-07T17:38:48.694438"
+}

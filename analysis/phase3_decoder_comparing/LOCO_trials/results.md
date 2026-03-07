@@ -429,6 +429,112 @@ V2는 **L-M cone-opponent 축이 지배하는 3차원 비선형 다양체(warped
 
 ---
 
+### Phase 1c: Neural Color Geometry — Literature Review (2026-03-06)
+
+**목적**: Phase 1/1b에서 "이상적 원형 구조"가 기각되었으므로, 실제 뇌에서 색이 어떤 기하학적 구조를 갖는지 문헌을 정리한다. 이를 통해 (1) 우리 결과가 문헌과 일치하는지, (2) model-free 보간의 가능성을 평가한다.
+
+---
+
+#### 1c.1 V1~V4 색 기하학의 계층적 변환
+
+| 영역 | 기하학적 형태 | 지배 원리 | Novel color 보간 | 핵심 논문 |
+|------|-------------|-----------|-----------------|----------|
+| **V1** | 비원형, 자기교차(self-intersecting) | Cone-opponent (L-M, S-(L+M)) | 유의하게 저하 | Brouwer & Heeger 2009 |
+| **V2** | 전이적 — endspectral bias 감소, hue clustering 향상 | Cone-opponent → perceptual 전환 | 중간 | Liu et al. 2020; Nasr et al. 2016 |
+| **V3** | 대체로 원형 (passive viewing) | 혼합 | 중간-높음 | Brouwer & Heeger 2013 |
+| **V4/hV4** | **거의 완벽한 원** (perceptual space) | Perceptual similarity (CIELUV 상관) | **trained ≈ novel** | Brouwer & Heeger 2009; Conway lab 2016 |
+
+**핵심 변환**: 계층을 올라갈수록 physical chromaticity → perceived color로 전환.
+- V1/V2: 망막 입력의 물리적 색차를 부호화 (Kim et al. 2020, PNAS)
+- V4/VO1: 지각된 색을 부호화 — switch rivalry 실험으로 확인
+
+#### 1c.2 V1의 실제 구조
+
+Brouwer & Heeger (2009)의 PCA 결과: V1에서 첫 두 주성분이 **비원형, 자기교차 궤적**을 형성.
+
+구조적 특징:
+- **Endspectral bias**: 빨강/파랑 과대표현, 노랑/초록 과소표현 (Liu et al. 2020, *Neuron*)
+- **Elliptical distortion**: "lime-magenta" 방향으로 최대 진폭 기울기 (Xiao et al. 2022, *Frontiers*)
+- **Under-represented quadrants**: 최대 1/4 색 공간이 과소표현, 개인차 존재 (Mullen et al. 2015, *Cereb Cortex*)
+- **Intermediate hues 존재**: 개별 voxel이 비주축 색(purple, cyan, orange)에도 선택적 → cone-opponent 재조합
+
+**→ 우리의 Phase 1b V1 "UNSTRUCTURED" 판정과 일치**: V1의 population-level 구조는 cone-opponent 축 지배 + endspectral bias로 인해 등간격 원형에서 크게 이탈.
+
+#### 1c.3 V2의 비선형 3D 다양체
+
+V2는 V1과 V4 사이의 전환 영역:
+- **Color/disparity thin stripes**: 7T fMRI로 인간 V2에서 확인 (Nasr et al. 2016, *JNeurosci*)
+- **Hue clustering 향상**: two-photon imaging에서 V1 대비 강화된 hue-specific clustering (Liu et al. 2020)
+- **L-M cone-opponent 축 지배**: Phase 1b에서 a*-only Mantel r=0.282가 최고 (다른 모델 대비)
+
+**→ 우리의 Phase 1b V2 "STRUCTURED (3D nonlinear manifold)" 판정과 일치**: Isomap > MDS 결과는 V2의 비선형 manifold 구조를 반영.
+
+#### 1c.4 V4/hV4: 보간의 최적 영역
+
+Brouwer & Heeger (2009)의 핵심 발견:
+> "V4와 VO1에서 **학습에 사용하지 않은 색의 재구성 정확도가 학습된 색과 거의 동일**"
+
+- **Glob cells**: 좁은(narrow) 비선형 tuning, population으로 **perceptually uniform** 공간 형성, CIELUV와 유의 상관 (Conway lab, eNeuro 2016)
+- **Endspectral bias 소실**: V1의 빨강/파랑 과대표현이 V4에서 사실상 사라짐 (Liu et al. 2020)
+- **Categorical clustering**: passive viewing에서는 원형, **color naming task에서만** 범주적 왜곡 출현 — gain modulation 메커니즘 (Brouwer & Heeger 2013, *JNeurosci*)
+
+**→ 우리의 hV4 LOCO MAE 69.4° (최우수)와 일치**: hV4가 보간에 가장 적합한 것은 문헌적 예측과 부합.
+
+#### 1c.5 Smoothness와 보간 가능성
+
+**국소적 smoothness는 V1에서도 존재**:
+- fMRI adaptation (Persichetti et al. 2015, *JOV*): V1, V2/3, hV4 모두에서 hue distance에 따라 **연속적으로 증가하는** adaptation release. 범주적 불연속 없음.
+- **함의**: 비록 V1의 global geometry가 원형이 아니지만, **인접 색 간의 local smoothness**는 보존 → 국소 보간은 가능.
+
+**비균등 spacing**:
+- Warm > cool 정밀도: 빨강/주황이 파랑/초록보다 높은 decoding accuracy + 짧은 latency (Rosenthal et al. 2021, *Curr Biol*)
+- 이는 우리 RDM에서 특정 색 쌍 간 거리가 비균등한 것과 일치
+
+#### 1c.6 Nyquist 한계와 8색 sampling
+
+8개 등간격 색(45° 간격) → Shannon-Nyquist 정리에 의해 **최대 4차 harmonic** (주기 90°)까지 복원 가능.
+
+- V1/V2 broad tuning (반원 ~180° 범위): 1-2차 harmonic 지배 → **8점으로 대략적 보간 충분**
+- V4 glob cells narrow tuning: 고차 harmonic 포함 가능 → **8점 한계 주의**
+- 어떤 방법(GP, FE, kernel regression)으로도 4차 이상의 성분은 복원 불가 — **물리적 상한**
+
+#### 1c.7 Model-Free 보간 전 진단 체크리스트
+
+문헌과 현재 데이터를 종합하면, model-free 보간(GP 등) 시도 전에 다음 8개 진단으로 거리관계의 보간 가능성을 확인해야 함:
+
+| # | 진단 | 무엇을 검증하는가 | "보간 가능" 기준 |
+|---|------|------------------|-----------------|
+| 1 | 삼각부등식 위반 | 거리가 metric인가? | 56 triple 중 < 5% 위반 |
+| 2 | MDS eigenvalue | 유클리드 embeddable? | 음수 고유값 < max의 5% |
+| 3 | MDS stress-1 (2D) | 저차원 구조 존재? | < 0.10 |
+| 4 | 원형 순서 보존 | Ring topology? | 0 crossings |
+| 5 | 단조성 (Spearman ρ) | 거리가 각도에 비례? | ρ > 0.6 |
+| 6 | 인접/대각 거리비 | Smoothness? | < 0.7 |
+| 7 | PCA 분산 (2 PC) | 저차원성? | > 70% |
+| 8 | Lipschitz 상수 | 국소 변화 속도? | L × 45° / std(y) < 1.5 |
+
+**이 진단의 참조 논문**:
+- Diedrichsen & Kriegeskorte (2017), *PLoS Comput Biol* — RDM의 second moment이 linear decodability 결정
+- Diedrichsen et al. (2020), *NBDT* — whitened unbiased distance matrix similarity
+- Barbieri et al. (2023), *Front Hum Neurosci* — GP regression을 fMRI 연속 자극 encoding에 적용 (motion direction 0-360°, 본 프로젝트와 직접 유사)
+
+#### 1c.8 핵심 참고 문헌
+
+1. Brouwer & Heeger (2009). "Decoding and Reconstructing Color from Responses in Human Visual Cortex." *J Neurosci* 29:13992-14003. [PMC2799419]
+2. Brouwer & Heeger (2013). "Categorical Clustering of the Neural Representation of Color." *J Neurosci* 33:15454-15465. [PMC3782623]
+3. Liu et al. (2020). "Hierarchical Representation for Chromatic Processing across Macaque V1, V2, and V4." *Neuron* 108:538-550.
+4. Conway lab (Bohon, Hermann, Conway) (2016). "Representation of Perceptual Color Space in Macaque Posterior Inferior Temporal Cortex." *eNeuro* 3(4). [PMC5002982]
+5. Persichetti et al. (2015). "fMRI adaptation reveals a noncategorical representation of hue in early visual cortex." *J Vision* 15(6):18. [PMC4461891]
+6. Rosenthal et al. (2021). "Color Space Geometry Uncovered with Magnetoencephalography." *Current Biology* 31:515-526. [PMC7878424]
+7. Kim et al. (2020). "Neural representations of perceptual color experience in the human ventral visual pathway." *PNAS* 117:13145-13150.
+8. Nasr et al. (2016). "Interdigitated Color- and Disparity-Selective Columns within Human Visual Cortical Areas V2 and V3." *J Neurosci* 36:1841-1857.
+9. Mullen et al. (2015). "Hue Selectivity in Human Visual Cortex." *Cereb Cortex* 25:4869-4881. [PMC4635924]
+10. Garg et al. (2022). "Cone opponent functional domains in primary visual cortex." *Nat Commun* 13:6112.
+11. Barbieri et al. (2023). "Encoding of continuous perceptual choices in human early visual cortex." *Front Hum Neurosci*. — GP regression으로 연속 circular 자극의 voxel-level tuning 추정.
+12. Diedrichsen & Kriegeskorte (2017). "Representational models." *PLoS Comput Biol* 13:e1005508.
+
+---
+
 ### V1 처리 전략: 음성 대조군 + Cross-ROI Prior
 
 #### V1 구조 부재의 원인
@@ -471,7 +577,7 @@ V1은 방향(orientation), 공간주파수(spatial frequency), 위상(phase) 등
 
 ### SRM 공간 한계 — Pre-validation 결과 종합
 
-Phase 1b 결과와 `future_phase3_filter_optimization/pre_validation/notion.md`의 사전 검증을 종합하면, **SRM 공간은 연속 색 구조에 부적합**하다:
+Phase 1b 결과와 `future_phase2_filter_optimization/pre_validation/notion.md`의 사전 검증을 종합하면, **SRM 공간은 연속 색 구조에 부적합**하다:
 
 | 문제 | 증거 |
 |------|------|
@@ -532,25 +638,163 @@ Phase 4: Procrustes Filter        ← ★ 주력 (notion.md 전략)
 
 ---
 
-## Phase 2: Ridge Regularization
-
-*(서버 실행 대기 중 — df 안정화 baseline)*
+## Phase 2: Ridge Regularization (2026-03-06)
 
 **목적**: Ridge가 SRM LOCO의 df=1 문제를 얼마나 완화하는지 확인. 주력 방법이 아닌 **baseline delta 기록용**.
 
-### 2.1 Fixed Alpha Grid (MAE in degrees)
-| Subject | ROI | OLS | a=0.001 | a=0.01 | a=0.1 | a=1 | a=10 | a=100 | a=1000 |
-|---------|-----|-----|---------|--------|-------|-----|------|-------|--------|
-|         |     |     |         |        |       |     |      |       |        |
+**방법**: 3 modes — (1) Fixed alpha grid sweep (진단용), (2) GCV-based alpha selection (proper evaluation), (3) Combined = GCV alpha + leave-one-run-out lambda (Ridge + Group Prior).
 
-### 2.2 Nested CV (best alpha per fold)
-| Subject | ROI | OLS MAE | Ridge MAE | Best alpha | Delta |
-|---------|-----|---------|-----------|------------|-------|
-|         |     |         |           |            |       |
+**GCV 사용 이유**: 원래 nested CV는 inner loop에서 6색/6채널 = exactly determined 시스템이 되어 alpha 선별력이 없음. GCV는 training data만으로 analytical LOO를 계산하여 holdout 불필요.
+
+**sub-07 V4**: SRM k=3인데 16 voxels만 존재 → 크래시. V1/V2/V3는 정상 실행.
+
+---
+
+### 2.1 Fixed Alpha Grid — OLS vs Best Ridge (MAE in degrees)
+
+#### V1 (SRM k=4)
+
+| Subject | Group | OLS | Best α | Best MAE | Delta |
+|---------|-------|-----|--------|----------|-------|
+| sub-01 | HC | 91.9 | 100 | 89.4 | -2.5 |
+| sub-02 | HC | 77.7 | 0.001 | 77.7 | 0.0 |
+| sub-03 | HC | 88.6 | 0.001 | 88.6 | 0.0 |
+| sub-04 | HC | 78.2 | 0.1 | 77.8 | -0.4 |
+| sub-05 | HC | 61.2 | 1.0 | 60.0 | -1.1 |
+| sub-06 | HC | 86.7 | 0.001 | 86.7 | 0.0 |
+| sub-07 | HC | 76.0 | 0.1 | 75.9 | -0.1 |
+| sub-08 | CVD | 62.1 | 0.001 | 62.1 | 0.0 |
+| sub-09 | CVD | 109.8 | 1000 | 109.1 | -0.7 |
+| sub-10 | CVD | 108.5 | 1000 | 99.6 | -8.9 |
+
+#### V2 (SRM k=4)
+
+| Subject | Group | OLS | Best α | Best MAE | Delta |
+|---------|-------|-----|--------|----------|-------|
+| sub-01 | HC | 85.4 | 0.001 | 85.4 | 0.0 |
+| sub-02 | HC | 95.8 | 100 | 92.7 | -3.1 |
+| sub-03 | HC | 103.1 | 1000 | 94.9 | -8.3 |
+| sub-04 | HC | 85.0 | 1.0 | 83.2 | -1.9 |
+| sub-05 | HC | 57.1 | 1.0 | 56.6 | -0.5 |
+| sub-06 | HC | 89.0 | 0.01 | 89.0 | 0.0 |
+| sub-07 | HC | 79.2 | 0.1 | 78.4 | -0.8 |
+| sub-08 | CVD | 70.6 | 0.001 | 70.6 | 0.0 |
+| sub-09 | CVD | 94.4 | 0.001 | 94.4 | 0.0 |
+| sub-10 | CVD | 106.7 | 1000 | 105.3 | -1.4 |
+
+#### V3 (SRM k=3)
+
+| Subject | Group | OLS | Best α | Best MAE | Delta |
+|---------|-------|-----|--------|----------|-------|
+| sub-01 | HC | 111.0 | 0.1 | 110.4 | -0.6 |
+| sub-02 | HC | 78.3 | 0.01 | 78.2 | -0.1 |
+| sub-03 | HC | 104.8 | 0.01 | 104.8 | 0.0 |
+| sub-04 | HC | 122.0 | 0.1 | 121.9 | -0.1 |
+| sub-05 | HC | 86.8 | 0.001 | 86.8 | 0.0 |
+| sub-06 | HC | 100.5 | 0.01 | 100.4 | -0.1 |
+| sub-07 | HC | 91.6 | 0.01 | 91.6 | 0.0 |
+| sub-08 | CVD | 73.0 | 0.001 | 73.0 | 0.0 |
+| sub-09 | CVD | 92.3 | 0.01 | 91.7 | -0.6 |
+| sub-10 | CVD | 99.5 | 0.01 | 99.5 | 0.0 |
+
+#### hV4 (SRM k=3, sub-07 missing)
+
+| Subject | Group | OLS | Best α | Best MAE | Delta |
+|---------|-------|-----|--------|----------|-------|
+| sub-01 | HC | 61.9 | 0.001 | 61.9 | 0.0 |
+| sub-02 | HC | 75.0 | 0.001 | 75.0 | 0.0 |
+| sub-03 | HC | 76.1 | 0.1 | 70.8 | -5.3 |
+| sub-04 | HC | 50.6 | 0.001 | 50.6 | 0.0 |
+| sub-05 | HC | 91.3 | 0.01 | 91.3 | 0.0 |
+| sub-06 | HC | 72.2 | 0.001 | 72.2 | 0.0 |
+| sub-07 | HC | — | — | — | — |
+| sub-08 | CVD | 82.9 | 0.001 | 82.9 | 0.0 |
+| sub-09 | CVD | 108.9 | 0.01 | 108.9 | 0.0 |
+| sub-10 | CVD | 81.0 | 0.1 | 78.7 | -2.3 |
+
+**Fixed mode 요약**: 40개 subject-ROI 중 17개에서 delta ≈ 0 (OLS ≈ Ridge). 의미있는 개선 (>2°)은 5건: sub-10 V1 (-8.9), sub-03 V2 (-8.3), sub-03 hV4 (-5.3), sub-02 V2 (-3.1), sub-01 V1 (-2.5). Best alpha가 양극단 분포 (0.001 또는 100~1000).
+
+---
+
+### 2.2 GCV-based Alpha Selection (MAE in degrees)
+
+GCV가 각 LOCO fold에서 training data (7색×6runs=42samples)로 alpha를 analytical하게 선택.
+
+#### 전체 결과
+
+| Subject | Group | V1 OLS | V1 GCV | V1 Δ | V2 OLS | V2 GCV | V2 Δ | V3 OLS | V3 GCV | V3 Δ | hV4 OLS | hV4 GCV | hV4 Δ |
+|---------|-------|--------|--------|------|--------|--------|------|--------|--------|------|---------|---------|-------|
+| sub-01 | HC | 91.9 | 91.9 | +0.0 | 85.4 | 87.5 | +2.1 | 111.0 | 109.7 | -1.3 | 61.9 | 62.1 | +0.1 |
+| sub-02 | HC | 77.7 | 77.9 | +0.3 | 95.8 | 96.1 | +0.3 | 78.3 | 78.5 | +0.3 | 75.0 | 75.8 | +0.8 |
+| sub-03 | HC | 88.6 | 88.8 | +0.3 | 103.1 | 101.4 | -1.7 | 104.8 | 110.5 | +5.7 | 76.1 | 70.5 | **-5.6** |
+| sub-04 | HC | 78.2 | 83.8 | +5.6 | 85.0 | 83.7 | -1.3 | 122.0 | 122.0 | 0.0 | 50.6 | 51.2 | +0.7 |
+| sub-05 | HC | 61.2 | 61.5 | +0.3 | 57.1 | 57.2 | +0.1 | 86.8 | 90.6 | +3.8 | 91.3 | 91.9 | +0.6 |
+| sub-06 | HC | 86.7 | 90.1 | +3.4 | 89.0 | 89.2 | +0.1 | 100.5 | 102.1 | +1.7 | 72.2 | 86.0 | +13.8 |
+| sub-07 | HC | 76.0 | 86.4 | +10.5 | 79.2 | 81.1 | +2.0 | 91.6 | 96.8 | +5.2 | — | — | — |
+| sub-08 | CVD | 62.1 | 62.3 | +0.2 | 70.6 | 72.7 | +2.1 | 73.0 | 77.6 | +4.6 | 82.9 | 103.4 | +20.5 |
+| sub-09 | CVD | 109.8 | 112.6 | +2.8 | 94.4 | 95.1 | +0.8 | 92.3 | 94.2 | +1.9 | 108.9 | 107.2 | -1.8 |
+| sub-10 | CVD | 108.5 | 108.6 | +0.1 | 106.7 | 106.7 | 0.0 | 99.5 | 99.3 | -0.3 | 81.0 | 79.1 | -2.0 |
+
+**GCV가 선택한 alpha**: 거의 항상 **alpha=0.1** (one-size-fits-all). 간혹 0.01 또는 1.0.
+
+**GCV 요약**: 대부분 OLS보다 **악화**. 치명적 실패: sub-08 hV4 (+20.5°), sub-06 hV4 (+13.8°), sub-07 V1 (+10.5°). 개선은 산발적 (sub-03 hV4 -5.6°, sub-10 hV4 -2.0°). **원인**: GCV는 training MSE 최소화 기준이나, 실제 평가는 unseen color의 circular MAE → 목적함수 불일치.
+
+---
+
+### 2.3 Combined: GCV Alpha + Group Prior Lambda (MAE in degrees)
+
+Alpha: GCV로 training data에서 선택. Lambda: leave-one-run-out (6-fold over runs, 7색 유지 → overdetermined).
+
+W_combined = λ × W_individual + (1-λ) × W_group.
+
+#### 전체 결과
+
+| Subject | Group | V1 OLS | V1 Comb | V1 Δ | V2 OLS | V2 Comb | V2 Δ | V3 OLS | V3 Comb | V3 Δ | hV4 OLS | hV4 Comb | hV4 Δ |
+|---------|-------|--------|---------|------|--------|---------|------|--------|---------|------|---------|----------|-------|
+| sub-01 | HC | 91.9 | 97.8 | +5.9 | 85.4 | 86.6 | +1.2 | 111.0 | 110.9 | -0.1 | 61.9 | 62.6 | +0.7 |
+| sub-02 | HC | 77.7 | 72.7 | **-5.0** | 95.8 | 86.1 | **-9.7** | 78.3 | 91.3 | +13.0 | 75.0 | 77.6 | +2.5 |
+| sub-03 | HC | 88.6 | 77.9 | **-10.7** | 103.1 | 83.9 | **-19.2** | 104.8 | 106.4 | +1.5 | 76.1 | 94.9 | +18.9 |
+| sub-04 | HC | 78.2 | 68.2 | **-10.0** | 85.0 | 81.4 | -3.6 | 122.0 | 127.0 | +5.0 | 50.6 | 60.5 | +9.9 |
+| sub-05 | HC | 61.2 | 72.2 | +11.0 | 57.1 | 65.5 | +8.4 | 86.8 | 102.4 | +15.5 | 91.3 | 94.5 | +3.2 |
+| sub-06 | HC | 86.7 | 85.6 | -1.2 | 89.0 | 84.8 | -4.3 | 100.5 | 110.2 | +9.7 | 72.2 | 84.8 | +12.6 |
+| sub-07 | HC | 76.0 | 79.9 | +3.9 | 79.2 | 87.1 | +7.9 | 91.6 | 105.5 | +14.0 | — | — | — |
+| sub-08 | CVD | 62.1 | 69.0 | +6.9 | 70.6 | 71.9 | +1.4 | 73.0 | 101.5 | +28.5 | 82.9 | 97.1 | +14.2 |
+| sub-09 | CVD | 109.8 | 112.2 | +2.4 | 94.4 | 88.7 | **-5.7** | 92.3 | 117.9 | +25.6 | 108.9 | 123.9 | +14.9 |
+| sub-10 | CVD | 108.5 | 101.6 | -6.9 | 106.7 | 102.9 | -3.8 | 99.5 | 97.7 | -1.9 | 81.0 | 81.2 | +0.1 |
+
+#### Combined — ROI별 요약
+
+| ROI | HC mean Δ | CVD mean Δ | 개선 비율 | 판정 |
+|-----|-----------|-----------|-----------|------|
+| **V1** | -0.9 | +0.8 | HC 4/7 개선 | HC에서만 경미한 개선 |
+| **V2** | **-2.7** | **-2.7** | **7/10 개선** | **양 그룹 개선 — 최우수 ROI** |
+| V3 | +8.4 | +17.4 | 2/10 개선 | **해로움** |
+| hV4 | +8.0 | +9.7 | 1/9 개선 | **해로움** |
+
+**V2 주목할 개선**: sub-03 (-19.2°), sub-02 (-9.7°), sub-09 (-5.7°), sub-06 (-4.3°), sub-04 (-3.6°), sub-10 (-3.8°)
+
+---
+
+### 2.4 Cross-Mode Winner (ROI별)
+
+| ROI | OLS wins | Fixed wins | GCV wins | Combined wins | 총 cases |
+|-----|----------|-----------|----------|--------------|----------|
+| V1 | 2 | 4 | 0 | 4 | 10 |
+| V2 | 2 | 1 | 0 | **7** | 10 |
+| V3 | 4 | 4 | 1 | 1 | 10 |
+| hV4 | 4 | 1 | 2 | 0 | 9* |
+
+\*sub-07 hV4 제외
+
+---
 
 ### Phase 2 Decision
-- Ridge improvement > 5deg: [ ]
-- Rationale:
+
+- Ridge improvement > 5° (fixed, oracle): sub-10 V1 (-8.9), sub-03 V2 (-8.3), sub-03 hV4 (-5.3) — **3건만**
+- GCV 자동 alpha 선택: **부적합** — 대부분 악화, alpha=0.1 고정. MSE≠circular MAE 불일치.
+- Combined Group Prior: **V2에서만 유효** (HC -2.7°, CVD -2.7°). V3/hV4에서 해로움.
+- **Rationale**: SRM k=3~4의 low-dim 공간에서는 overfitting이 문제가 아님 → Ridge 불필요. Group Prior의 V2 효과는 V2의 cross-subject consistency (Phase 1b STRUCTURED 판정)와 일치. V3/hV4에서 group prior가 해로운 이유: 개인 간 표상이 이질적 → HC mean이 개인 패턴을 왜곡.
+- **결론**: Ridge는 SRM LOCO에서 **실질적 개선을 제공하지 않음**. Combined의 V2 효과는 기록하되, 주력은 Procrustes 필터(Phase 4)로 진행.
 
 ---
 
@@ -582,7 +826,7 @@ Phase 4: Procrustes Filter        ← ★ 주력 (notion.md 전략)
 
 ## Phase 4: Procrustes Filter (★ Main Path)
 
-**이 phase의 상세 결과는 `analysis/future_phase3_filter_optimization/`에 기록됨.**
+**이 phase의 상세 결과는 `analysis/future_phase2_filter_optimization/`에 기록됨.**
 
 Procrustes 공간에서 FE W matrix 변환으로 CVD 색 표상 교정. SRM은 검증 전용.
 

@@ -95,7 +95,7 @@ For each original color θ_orig, solve:
 ## When This Phase is Complete
 
 **최종 스크립트 위치**: 이 디렉토리에 복사됨
-**디렉토리명 변경**: `future_phase3_filter_optimization` → `phase3_filter_optimization`
+**디렉토리명 변경**: `future_phase2_filter_optimization` → `phase3_filter_optimization`
 
 ---
 
@@ -149,7 +149,7 @@ LOCO_trials Phase 4 = THIS DIRECTORY   → ★ main filter path (Procrustes)
 | **Method** | Direct linear transformation | Optimization-based search |
 | **Coverage** | 8 measured colors | 360° continuous hue |
 | **Validation** | Retrospective | Prospective (planned) |
-| **Location** | `../phase3_procrustes_filter/` | This directory (when complete) |
+| **Location** | `../archive/phase3_procrustes_filter/` | This directory (when complete) |
 
 **Current Phase 3** = Proof-of-concept for filter feasibility
 **Future Phase 3** = Full stimulus-space filter pipeline

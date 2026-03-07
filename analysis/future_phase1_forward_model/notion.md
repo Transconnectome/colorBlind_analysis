@@ -34,7 +34,7 @@ C(θ) = max(0, exp(-(θ - θ_center)² / 2σ²))
 ---
 
 ## 완료 후 조치
-- 디렉토리명 변경: `future_phase2_forward_model` → `phase2_forward_model`
+- 디렉토리명 변경: `future_phase1_forward_model` → `phase2_forward_model`
 
 ## 다음 단계
 → **Future Phase 3**: CVD Filter Optimization via 360° search

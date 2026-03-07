@@ -5,15 +5,15 @@
 #SBATCH --mem=8G
 #SBATCH --time=06:00:00
 #SBATCH --no-requeue
-#SBATCH --output=/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation/logs/decoder_val_%j.out
-#SBATCH --error=/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation/logs/decoder_val_%j.err
+#SBATCH --output=/scratch/connectome/haba6030/colorBlind/analysis/phase3_decoder_comparing/model_comparison_validation/logs/decoder_val_%j.out
+#SBATCH --error=/scratch/connectome/haba6030/colorBlind/analysis/phase3_decoder_comparing/model_comparison_validation/logs/decoder_val_%j.err
 
 # Environment
 source ~/.bashrc
 conda activate nilearn
 
 # Paths
-BASE=/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation
+BASE=/scratch/connectome/haba6030/colorBlind/analysis/phase3_decoder_comparing/model_comparison_validation
 SCRIPT_DIR=${BASE}/scripts
 BASELINE_DIR=/scratch/connectome/haba6030/colorBlind/derivatives/full_dataset_C010
 PERF_DIR=${BASE}/results/loro/procrustes

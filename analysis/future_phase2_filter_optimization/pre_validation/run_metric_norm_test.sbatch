@@ -7,7 +7,7 @@
 #SBATCH --mem=8G
 #SBATCH --time=01:30:00
 #SBATCH --no-requeue
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase3_filter_optimization/pre_validation
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization/pre_validation
 
 # Create output directories in same folder as script
 mkdir -p logs results
@@ -65,6 +65,6 @@ ls -lh logs/slurm_*.out
 echo ""
 echo "=========================================="
 echo "Download results with:"
-echo "scp haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/future_phase3_filter_optimization/pre_validation/results/metric_norm_test_*.json ."
-echo "scp haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/future_phase3_filter_optimization/pre_validation/logs/slurm_$SLURM_JOB_ID.out ."
+echo "scp haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization/pre_validation/results/metric_norm_test_*.json ."
+echo "scp haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization/pre_validation/logs/slurm_$SLURM_JOB_ID.out ."
 echo "=========================================="

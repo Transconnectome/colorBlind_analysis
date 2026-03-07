@@ -712,7 +712,7 @@ Panel F: Cross-Subject Generalization
 
 ### ✅ IMPLEMENTATION COMPLETE
 
-**Location**: `analysis/phase2_decoder_comparing/model_comparison_validation/scripts/`
+**Location**: `analysis/phase3_decoder_comparing/model_comparison_validation/scripts/`
 
 **Status**: All phases complete and ready for testing
 
@@ -915,7 +915,7 @@ python visualize_comprehensive.py \
 
 ### Result 1: LORO Model Comparison (Section 5)
 
-**Results dir**: `analysis/phase2_decoder_comparing/model_comparison_validation/results/model_comparison_server/consolidated/`
+**Results dir**: `analysis/phase3_decoder_comparing/model_comparison_validation/results/model_comparison_server/consolidated/`
 
 #### Overall Performance (Procrustes, acc_45, subject-level mean ± std)
 
@@ -1102,7 +1102,7 @@ for test_color in range(8):
 
 ### 8.4 Local Test Results (sub-01, 4 ROIs, 100 permutations)
 
-**Results dir**: `analysis/phase2_decoder_comparing/model_comparison_validation/results/loco/20260217_193257/`
+**Results dir**: `analysis/phase3_decoder_comparing/model_comparison_validation/results/loco/20260217_193257/`
 
 **핵심 발견: ForwardEncoding만 유의미한 보간 능력 보유**
 
@@ -1159,7 +1159,7 @@ for test_color in range(8):
 
 [x] Implementation (LOCOForwardEncodingDecoder 포함)
 [x] Local test (sub-01, 4 ROIs, 100 permutations) → `model_comparison_validation/results/loco/20260217_193257/`
-[x] Server deployment (10 subjects × 4 ROIs, 1000 permutations) → `analysis/phase2_decoder_comparing/results/loco/`
+[x] Server deployment (10 subjects × 4 ROIs, 1000 permutations) → `analysis/phase3_decoder_comparing/results/loco/`
 [x] Results consolidation & analysis → Section 8.5 below
 
 **Scripts**: `run_loco_comparison.py`, `run_loco_comparison.sbatch`
@@ -1169,7 +1169,7 @@ for test_color in range(8):
 
 ### 8.5 Server Deployment Results (10 subjects, 4 ROIs, 1000 permutations)
 
-**Results dir**: `analysis/phase2_decoder_comparing/results/loco/`
+**Results dir**: `analysis/phase3_decoder_comparing/results/loco/`
 **Settings**: procrustes alignment, 1000 permutations, nested HP tuning OFF
 
 #### Aggregate Performance — MAE° mean ± SD (chance = 90°)
@@ -1319,7 +1319,7 @@ Pairwise cosine similarity of weight matrices across 6 LORO folds (15 pairs per 
 
 **Purpose**: Nested Procrustes + PCA dim reduction으로 data leakage 제거 후 모델 성능 비교.
 
-**Results dir**: `analysis/phase2_decoder_comparing/results/focused_nested/{nested_only,nested_pca20,procrustes_ctrl}/`
+**Results dir**: `analysis/phase3_decoder_comparing/results/focused_nested/{nested_only,nested_pca20,procrustes_ctrl}/`
 
 **Note**: 파일명 `sub-XX_performance_raw.json`은 코드 convention상 "raw"가 붙지만, JSON 내부 alignment key는 정확 (`nested_procrustes` / `procrustes`).
 
@@ -1376,7 +1376,7 @@ SVM nested가 최고 정확도이지만, **alignment 의존성이 높음** (nest
 |-----|--------|--------|---------------|
 | **RT-4** | `run_loco_comparison.sbatch` | ✅ Complete | LOCO 10 subjects × 4 ROIs × 1000 perms |
 
-**Results dir**: `analysis/phase2_decoder_comparing/results/loco/`
+**Results dir**: `analysis/phase3_decoder_comparing/results/loco/`
 
 **Summary**: ForwardEncoding is the only model with below-chance MAE across all ROIs (V1:80.6°, V2:83.1°, V3:72.5°, V4:72.8°) and adj_acc above chance (0.39~0.46). Group-level significance is not reached with n=10; individual significance: 4 subject-ROI pairs (sub-01 V3 p=0.004**, sub-04 V4 p=0.033*, sub-05 V2 p=0.011*, sub-08 V1 p=0.035*). See Section 8.5 for full results.
 
@@ -1401,7 +1401,7 @@ FE+SVM: voxels → FE (6 channels) → SVM-RBF → 8-class label
 
 ### Result: Hybrid Decoder (FE+MLP, FE+SVM) — 2026-02-18
 
-**Results dir**: `analysis/phase2_decoder_comparing/model_comparison_validation/results/hybrid/{nested,procrustes_ctrl}/`
+**Results dir**: `analysis/phase3_decoder_comparing/model_comparison_validation/results/hybrid/{nested,procrustes_ctrl}/`
 
 #### Dataset & Alignment Conditions
 
@@ -1562,7 +1562,7 @@ All results: LORO CV on `full_dataset_C010`, 10 subjects × 4 ROIs, voxel space.
 
 **Method**: Crawford & Howell (1998) single-case test on LOCO MAE values from existing `results/loco/` (ForwardEncoding on `amplitudes_procrustes.npy`).
 
-**Results file**: `analysis/phase2_decoder_comparing/results/loco_srm_validation.json`
+**Results file**: `analysis/phase3_decoder_comparing/results/loco_srm_validation.json`
 
 #### Group-Level Results (Crawford & Howell)
 
@@ -1593,7 +1593,7 @@ All results: LORO CV on `full_dataset_C010`, 10 subjects × 4 ROIs, voxel space.
 
 **Method**: Train ForwardEncoding on HC subjects using LOSO (7 folds), evaluate on held-out HC + all CVD. Use SRM-projected per-run amplitudes (`amplitudes_srm.npy`). Permutation test: 1000 iterations, label shuffle.
 
-**Results file**: `analysis/phase2_decoder_comparing/results/fe_cross_decoding.json`
+**Results file**: `analysis/phase3_decoder_comparing/results/fe_cross_decoding.json`
 
 #### Summary Results (MAE in degrees, chance=90°)
 

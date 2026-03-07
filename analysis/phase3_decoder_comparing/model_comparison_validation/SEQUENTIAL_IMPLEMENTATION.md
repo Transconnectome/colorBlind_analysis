@@ -129,21 +129,21 @@ Each JSON contains per-ROI (V1, V2, V3, V4) results for 3 models:
 
 ```bash
 # Upload modified Python files
-scp analysis/phase2_decoder_comparing/model_comparison_validation/scripts/run_loco_comparison.py \
-    analysis/phase2_decoder_comparing/model_comparison_validation/scripts/utils.py \
-    haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation/scripts/
+scp analysis/phase3_decoder_comparing/model_comparison_validation/scripts/run_loco_comparison.py \
+    analysis/phase3_decoder_comparing/model_comparison_validation/scripts/utils.py \
+    haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/phase3_decoder_comparing/model_comparison_validation/scripts/
 
 # Upload sbatch files
-scp analysis/phase2_decoder_comparing/model_comparison_validation/scripts/run_sequential_loco_*.sbatch \
-    analysis/phase2_decoder_comparing/model_comparison_validation/scripts/submit_sequential_loco.sh \
-    haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation/scripts/
+scp analysis/phase3_decoder_comparing/model_comparison_validation/scripts/run_sequential_loco_*.sbatch \
+    analysis/phase3_decoder_comparing/model_comparison_validation/scripts/submit_sequential_loco.sh \
+    haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/phase3_decoder_comparing/model_comparison_validation/scripts/
 ```
 
 ### 2. Submit jobs on server
 
 ```bash
 ssh haba6030@node3
-cd /scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation
+cd /scratch/connectome/haba6030/colorBlind/analysis/phase3_decoder_comparing/model_comparison_validation
 bash scripts/submit_sequential_loco.sh
 ```
 
@@ -158,8 +158,8 @@ squeue -u haba6030
 
 ```bash
 # On local machine
-scp -r haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation/results/loco_sequential/ \
-    analysis/phase2_decoder_comparing/results/
+scp -r haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/phase3_decoder_comparing/model_comparison_validation/results/loco_sequential/ \
+    analysis/phase3_decoder_comparing/results/
 ```
 
 ## Expected Runtime

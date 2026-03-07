@@ -108,7 +108,7 @@ def generate_summary(results):
 
     lines = []
     lines.append(f"\n## LOCO (Leave-One-Color-Out) Interpolation Results — {timestamp}\n")
-    lines.append("**Phase:** phase2_decoder_comparing  ")
+    lines.append("**Phase:** phase3_decoder_comparing  ")
     lines.append("**Analysis:** Color interpolation using ForwardEncoding model  ")
     lines.append("**Method:** Leave-one-color-out cross-validation (8 folds, one per color)  ")
     lines.append("**Metric:** Mean Absolute Error (MAE) in degrees (0-180°, circular distance)  ")
@@ -229,7 +229,7 @@ def generate_summary(results):
     lines.append("### Data for SRM Analysis\n")
     lines.append("**Dataset:** LOCO ForwardEncoding MAE per subject-ROI  ")
     lines.append("**Format:** Continuous metric (degrees, 0-180°)  ")
-    lines.append("**Source:** `phase2_decoder_comparing/results/loco/sub-{ID}_loco.json`  ")
+    lines.append("**Source:** `phase3_decoder_comparing/results/loco/sub-{ID}_loco.json`  ")
     lines.append("**Key fields:** `results[ROI]['ForwardEncoding']['mae']`  ")
     lines.append("**Use case:** Could be used as dependent variable in SRM-based HC-CVD comparison  ")
     lines.append("**Note:** Current analysis shows NO group-level effects (all p > 0.10), but strong individual heterogeneity\n")

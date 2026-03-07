@@ -234,7 +234,7 @@ hV4: 0 pairs  → 보상 또는 null
 ## Files Generated
 
 ```
-analysis/future_phase3_filter_optimization/figures/
+analysis/future_phase2_filter_optimization/figures/
 ├── cvd_distortion_figure_V1.png   (updated with within-ROI FDR)
 ├── cvd_distortion_figure_V2.png   (updated)
 ├── cvd_distortion_figure_V3.png   (updated)

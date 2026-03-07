@@ -7,7 +7,7 @@
 #SBATCH --output=logs/gp_%a.out
 #SBATCH --error=logs/gp_%a.err
 #SBATCH --no-requeue
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/LOCO_trials
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase3_decoder_comparing/LOCO_trials
 
 source ~/.bashrc
 conda activate nilearn

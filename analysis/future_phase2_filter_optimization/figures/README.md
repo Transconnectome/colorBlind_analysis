@@ -1,7 +1,7 @@
 # CVD Color Distortion Figures - Visualization Methods & Results
 
 **Generated:** 2026-02-22
-**Location:** `analysis/future_phase3_filter_optimization/figures/`
+**Location:** `analysis/future_phase2_filter_optimization/figures/`
 **Method:** Within-ROI FDR correction (q < 0.05)
 
 ---
@@ -469,7 +469,7 @@ Top 10:
 
 If you need to regenerate with different parameters:
 ```bash
-python analysis/phase2_decoder_comparing/visualization/create_cvd_distortion_figure.py --roi V2
+python analysis/phase3_decoder_comparing/visualization/create_cvd_distortion_figure.py --roi V2
 ```
 
 To switch back to global FDR, modify `load_fdr_significant_pairs()` function in the script.

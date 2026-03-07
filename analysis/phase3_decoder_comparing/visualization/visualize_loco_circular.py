@@ -15,7 +15,7 @@ import json
 
 # Configuration
 BASE_DIR = Path('/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis')
-LOCO_DIR = BASE_DIR / 'analysis' / 'phase2_decoder_comparing' / 'results' / 'loco'
+LOCO_DIR = BASE_DIR / 'analysis' / 'phase3_decoder_comparing' / 'results' / 'loco'
 OUTPUT_DIR = LOCO_DIR / 'circular_plots'
 OUTPUT_DIR.mkdir(exist_ok=True, parents=True)
 

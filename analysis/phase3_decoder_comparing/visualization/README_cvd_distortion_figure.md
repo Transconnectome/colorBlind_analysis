@@ -18,7 +18,7 @@ Publication-quality 3×4 panel figure showing CVD color representation distortio
 
 ### Generate V2 figure (strongest effects):
 ```bash
-cd analysis/phase2_decoder_comparing/visualization
+cd analysis/phase3_decoder_comparing/visualization
 conda activate srm  # or nilearn
 
 python create_cvd_distortion_figure.py --roi V2
@@ -32,7 +32,7 @@ python create_cvd_distortion_figure.py --all-rois
 ## Output Location
 
 ```
-analysis/phase2_decoder_comparing/visualization/cvd_distortion_figures/
+analysis/phase3_decoder_comparing/visualization/cvd_distortion_figures/
 ├── cvd_distortion_figure_V1.png  (~15 MB, 6000×4800 px)
 ├── cvd_distortion_figure_V2.png
 ├── cvd_distortion_figure_V3.png
@@ -230,7 +230,7 @@ plt.savefig(output_path, dpi=200, ...)  # Change to 150
 ## File Structure
 
 ```
-analysis/phase2_decoder_comparing/visualization/
+analysis/phase3_decoder_comparing/visualization/
 ├── create_cvd_distortion_figure.py       # Main script
 ├── README_cvd_distortion_figure.md       # This file
 └── cvd_distortion_figures/               # Output directory

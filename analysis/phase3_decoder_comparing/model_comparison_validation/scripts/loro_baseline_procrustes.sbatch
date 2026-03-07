@@ -6,17 +6,17 @@
 #SBATCH --mem=4G
 #SBATCH --time=00:30:00
 #SBATCH --no-requeue
-#SBATCH --output=/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation/logs/decoder_pro_%a_%j.out
-#SBATCH --error=/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation/logs/decoder_pro_%a_%j.err
+#SBATCH --output=/scratch/connectome/haba6030/colorBlind/analysis/phase3_decoder_comparing/model_comparison_validation/logs/decoder_pro_%a_%j.out
+#SBATCH --error=/scratch/connectome/haba6030/colorBlind/analysis/phase3_decoder_comparing/model_comparison_validation/logs/decoder_pro_%a_%j.err
 
 # Environment
 source ~/.bashrc
 conda activate nilearn
 
 # Paths
-SCRIPT_DIR=/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation/scripts
+SCRIPT_DIR=/scratch/connectome/haba6030/colorBlind/analysis/phase3_decoder_comparing/model_comparison_validation/scripts
 BASELINE_DIR=/scratch/connectome/haba6030/colorBlind/derivatives/full_dataset_C010
-OUTPUT_DIR=/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation/results/loro/procrustes
+OUTPUT_DIR=/scratch/connectome/haba6030/colorBlind/analysis/phase3_decoder_comparing/model_comparison_validation/results/loro/procrustes
 
 # Subject mapping (array index 1-10 → subject ID)
 SUBJECTS=(01 02 03 04 05 06 07 08 09 10)

@@ -155,7 +155,7 @@
 
 ### File Locations
 ```
-/Users/jinilkim/.../analysis/phase2_decoder_comparing/results/
+/Users/jinilkim/.../analysis/phase3_decoder_comparing/results/
 ├── loco_decoding_comparison/
 │   ├── decoding_comparison.json          # FE_Ensemble vs variants (procrustes)
 │   └── decoding_comparison_full.json     # Full fold-level data

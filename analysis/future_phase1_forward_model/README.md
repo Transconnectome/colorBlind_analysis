@@ -108,7 +108,7 @@ With this encoder:
 ## When This Phase is Complete
 
 **최종 스크립트 위치**: 이 디렉토리에 복사됨
-**디렉토리명 변경**: `future_phase2_forward_model` → `phase2_forward_model`
+**디렉토리명 변경**: `future_phase1_forward_model` → `phase2_forward_model`
 
 ---
 

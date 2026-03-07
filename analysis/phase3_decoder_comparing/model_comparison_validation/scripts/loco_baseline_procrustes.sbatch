@@ -6,7 +6,7 @@
 #SBATCH --mem=4G
 #SBATCH --time=06:00:00
 #SBATCH --no-requeue
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase3_decoder_comparing/model_comparison_validation
 #SBATCH --output=logs/loco_cmp_%a_%j.out
 #SBATCH --error=logs/loco_cmp_%a_%j.err
 
@@ -15,9 +15,9 @@ source ~/.bashrc
 conda activate nilearn
 
 # Paths
-SCRIPT_DIR=/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation/scripts
+SCRIPT_DIR=/scratch/connectome/haba6030/colorBlind/analysis/phase3_decoder_comparing/model_comparison_validation/scripts
 BASELINE_DIR=/scratch/connectome/haba6030/colorBlind/derivatives/full_dataset_C010
-OUTPUT_DIR=/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation/results/loco/procrustes
+OUTPUT_DIR=/scratch/connectome/haba6030/colorBlind/analysis/phase3_decoder_comparing/model_comparison_validation/results/loco/procrustes
 
 # Subject mapping (array index 1-10 → subject ID)
 SUBJECTS=(01 02 03 04 05 06 07 08 09 10)

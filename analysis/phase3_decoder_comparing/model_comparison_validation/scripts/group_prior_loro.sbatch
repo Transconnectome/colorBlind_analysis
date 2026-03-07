@@ -6,7 +6,7 @@
 #SBATCH --mem=8G
 #SBATCH --time=06:00:00
 #SBATCH --no-requeue
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase3_decoder_comparing/model_comparison_validation
 #SBATCH --output=logs/gp_loro_%a_%j.out
 #SBATCH --error=logs/gp_loro_%a_%j.err
 

@@ -57,7 +57,7 @@
 **스크립트 생성 완료**:
 ```bash
 # 로컬에서 생성된 파일들
-analysis/phase2_decoder_comparing/model_comparison_validation/scripts/
+analysis/phase3_decoder_comparing/model_comparison_validation/scripts/
 ├── validate_fixed_lambda_grid.py    # 메인 스크립트
 └── validate_lambda_grid.sbatch      # SLURM batch 파일
 ```
@@ -66,19 +66,19 @@ analysis/phase2_decoder_comparing/model_comparison_validation/scripts/
 ```bash
 # 1. 서버에 업로드
 scp validate_fixed_lambda_grid.py validate_lambda_grid.sbatch \
-    haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation/scripts/
+    haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/phase3_decoder_comparing/model_comparison_validation/scripts/
 
 # 2. 서버에서 실행
 ssh node3
-cd /scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation/scripts
+cd /scratch/connectome/haba6030/colorBlind/analysis/phase3_decoder_comparing/model_comparison_validation/scripts
 sbatch validate_lambda_grid.sbatch
 
 # 3. 결과 확인 (2시간 후)
-cat /scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation/results/FE_lambda_grid/lambda_grid_*.out
+cat /scratch/connectome/haba6030/colorBlind/analysis/phase3_decoder_comparing/model_comparison_validation/results/FE_lambda_grid/lambda_grid_*.out
 
 # 4. 결과 다운로드
-scp -r haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation/results/FE_lambda_grid \
-    analysis/phase2_decoder_comparing/model_comparison_validation/results/
+scp -r haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/phase3_decoder_comparing/model_comparison_validation/results/FE_lambda_grid \
+    analysis/phase3_decoder_comparing/model_comparison_validation/results/
 ```
 
 **테스트 λ 값**: 0.0, 0.3, 0.5, 0.7, 0.9, 1.0
@@ -129,7 +129,7 @@ scp -r haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/phase2_de
 - `validate_fixed_lambda_grid.py` — Fixed λ 테스트 스크립트
 - `validate_lambda_grid.sbatch` — SLURM batch 파일
 
-**위치**: `analysis/phase2_decoder_comparing/model_comparison_validation/results/FE_group_prior/`
+**위치**: `analysis/phase3_decoder_comparing/model_comparison_validation/results/FE_group_prior/`
 
 ---
 

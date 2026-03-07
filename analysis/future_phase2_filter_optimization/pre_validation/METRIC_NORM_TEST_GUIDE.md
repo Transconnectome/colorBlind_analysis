@@ -33,7 +33,7 @@ pre_validation/
 **Single SCP command** (combines all files):
 
 ```bash
-scp test_rdm_metric_and_normalization_server.py run_metric_norm_test.sbatch test_metric_norm_interactive.sh haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/future_phase3_filter_optimization/pre_validation/
+scp test_rdm_metric_and_normalization_server.py run_metric_norm_test.sbatch test_metric_norm_interactive.sh haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization/pre_validation/
 ```
 
 ---
@@ -47,7 +47,7 @@ scp test_rdm_metric_and_normalization_server.py run_metric_norm_test.sbatch test
 ssh haba6030@node3
 
 # Navigate to directory
-cd /scratch/connectome/haba6030/colorBlind/analysis/future_phase3_filter_optimization/pre_validation
+cd /scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization/pre_validation
 
 # Make script executable
 chmod +x test_metric_norm_interactive.sh
@@ -97,10 +97,10 @@ Once job completes:
 
 ```bash
 # Download results JSON
-scp haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/future_phase3_filter_optimization/pre_validation/results/metric_norm_test_*.json analysis/future_phase3_filter_optimization/pre_validation/results/
+scp haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization/pre_validation/results/metric_norm_test_*.json analysis/future_phase2_filter_optimization/pre_validation/results/
 
 # Download log files
-scp haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/future_phase3_filter_optimization/pre_validation/logs/slurm_*.out analysis/future_phase3_filter_optimization/pre_validation/logs/
+scp haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization/pre_validation/logs/slurm_*.out analysis/future_phase2_filter_optimization/pre_validation/logs/
 ```
 
 ---

@@ -55,7 +55,7 @@ PAIR_LABELS = [f"{COLOR_NAMES[i]}-{COLOR_NAMES[j]}" for i, j in PAIR_INDICES]
 N_PAIRS = len(PAIR_LABELS)  # 28
 
 SCRIPT_PATH = Path(__file__).resolve()
-# Script is in: analysis/future_phase3_filter_optimization/pre_validation/
+# Script is in: analysis/future_phase2_filter_optimization/pre_validation/
 # Data is in:   analysis/phase1_preprocess_decoding/results/full_dataset_C010/
 DATA_DIR = SCRIPT_PATH.parent.parent.parent / 'phase1_preprocess_decoding/results/full_dataset_C010'
 

@@ -165,7 +165,7 @@ red-magenta:    4.96,  3.22, -1.04 (divergent)
 
 ## Files Referenced
 
-- **Input**: `/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase3_filter_optimization/pre_validation/results/filter_pre_validation_results.json`
+- **Input**: `/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase2_filter_optimization/pre_validation/results/filter_pre_validation_results.json`
 - **Output**:
   - `VALIDATION_RESULTS_SUMMARY.md` (full details)
   - `QUICK_REFERENCE.md` (this file)

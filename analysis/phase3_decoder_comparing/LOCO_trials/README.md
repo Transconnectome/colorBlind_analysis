@@ -24,7 +24,7 @@ Phase 4 Procrustes Filter (★ MAIN PATH) ← notion.md 전략
   +- Operating space: Procrustes (NOT SRM)
   +- FE W matrix: W_CVD → W_HC transform
   +- Evaluation: LOCO MAE in Procrustes + SRM validation
-  +- Connects to: future_phase3_filter_optimization/
+  +- Connects to: future_phase2_filter_optimization/
 ```
 
 **Key strategic pivot (2026-03-04)**: Pre-validation (notion.md)에서 SRM 공간이 연속 색 구조에 부적합함이 확인됨 (V1 stress plateau, hV4 CIELab 부호 반전). Ridge/GP는 baseline/benchmark으로 유지하되, **주력은 Procrustes 공간 필터로 전환**.
@@ -56,13 +56,13 @@ Phase 4 Procrustes Filter (★ MAIN PATH) ← notion.md 전략
 - **Scope**: V2 only (유일한 STRUCTURED ROI). Periodic kernel 기각됨 → Matern + L-M ARD
 - **Note**: SRM 공간 ceiling 확인이 목적. 주력 방법이 아닌 비교용 benchmark
 
-### Phase 4: Procrustes Filter Design → future_phase3_filter_optimization/
+### Phase 4: Procrustes Filter Design → future_phase2_filter_optimization/
 - Purpose: **주력 필터 설계** — SRM + Procrustes 상보적 활용
 - **SRM 역할 (필수 인프라)**: HC mean 타겟 정의 + 그룹 비교 (voxel 수 차이 해결)
 - **Procrustes 역할 (개인 해상도)**: voxel 수준 필터 적용 (n_voxels × 8 params)
 - **브릿지**: SRM projection W_i — 타겟 역투영 (SRM→voxel) 및 결과 검증 (voxel→SRM)
 - **Filter target**: sub-08 (FDR 32 pairs), sub-09 (FDR 7 pairs)
-- See: `analysis/future_phase3_filter_optimization/pre_validation/notion.md`
+- See: `analysis/future_phase2_filter_optimization/pre_validation/notion.md`
 
 ## Decision Criteria
 
@@ -86,7 +86,7 @@ Phase 4 Procrustes Filter (★ MAIN PATH) ← notion.md 전략
 | Ridge MAE < OLS MAE | > 5deg | df stabilization effect |
 | GP Matern (V2) < Ridge (V2) | > 5deg | Kernel-based interpolation gain |
 
-### Phase 4 (Procrustes Filter) — see future_phase3 README
+### Phase 4 (Stimulus-Space Filter) — see future_phase2_filter_optimization/ README
 
 | Metric | Threshold | Purpose |
 |--------|-----------|---------|

@@ -7,7 +7,7 @@ Outputs a comparison table (MAE per method × ROI × group) + JSON results.
 
 Usage:
     conda activate srm
-    python analysis/phase2_decoder_comparing/analysis/test_decoding_methods.py
+    python analysis/phase3_decoder_comparing/analysis/test_decoding_methods.py
 """
 
 import sys
@@ -19,7 +19,7 @@ from datetime import datetime
 
 # Setup paths
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
-SCRIPT_DIR = PROJECT_ROOT / 'analysis' / 'phase2_decoder_comparing' / 'model_comparison_validation' / 'scripts'
+SCRIPT_DIR = PROJECT_ROOT / 'analysis' / 'phase3_decoder_comparing' / 'model_comparison_validation' / 'scripts'
 sys.path.insert(0, str(SCRIPT_DIR))
 
 from run_loco_comparison import (
@@ -36,7 +36,7 @@ from utils import HUE_ANGLES, HC_SUBJECTS, CVD_SUBJECTS
 # ============================================================================
 
 C010_DIR = PROJECT_ROOT / 'analysis' / 'phase1_preprocess_decoding' / 'results' / 'full_dataset_C010'
-OUTPUT_DIR = PROJECT_ROOT / 'analysis' / 'phase2_decoder_comparing' / 'results' / 'loco_decoding_comparison'
+OUTPUT_DIR = PROJECT_ROOT / 'analysis' / 'phase3_decoder_comparing' / 'results' / 'loco_decoding_comparison'
 
 SUBJECTS = [f'{i:02d}' for i in range(1, 11)]
 ROIS = ['V1', 'V2', 'V3', 'V4']

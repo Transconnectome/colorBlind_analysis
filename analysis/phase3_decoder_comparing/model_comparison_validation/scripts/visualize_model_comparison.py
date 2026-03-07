@@ -715,7 +715,7 @@ def main():
         original_stats = None
 
     # 2. Focused nested (RT-2/RT-3)
-    # These are at analysis/phase2_decoder_comparing/results/focused_nested/
+    # These are at analysis/phase3_decoder_comparing/results/focused_nested/
     decoder_results = BASE_DIR.parent / 'results'
     nested_only_dir = decoder_results / 'focused_nested' / 'nested_only'
     ctrl_dir = decoder_results / 'focused_nested' / 'procrustes_ctrl'

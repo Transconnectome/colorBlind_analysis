@@ -23,7 +23,7 @@
 
 **Output location:**
 ```
-analysis/phase2_decoder_comparing/visualization/cvd_distortion_figures/
+analysis/phase3_decoder_comparing/visualization/cvd_distortion_figures/
 └── cvd_distortion_figure_{ROI}.png
 ```
 
@@ -242,17 +242,17 @@ Difference (CVD - HC): [-0.668, 0.781] (reasonable range) ✓
 cd /Users/jinilkim/Library/.../colorBlind_analysis
 conda activate srm
 
-python analysis/phase2_decoder_comparing/visualization/create_cvd_distortion_figure.py --roi V2
+python analysis/phase3_decoder_comparing/visualization/create_cvd_distortion_figure.py --roi V2
 ```
 
 ### 2. Generate all ROIs:
 ```bash
-python analysis/phase2_decoder_comparing/visualization/create_cvd_distortion_figure.py --all-rois
+python analysis/phase3_decoder_comparing/visualization/create_cvd_distortion_figure.py --all-rois
 ```
 
 ### 3. Custom output location:
 ```bash
-python analysis/phase2_decoder_comparing/visualization/create_cvd_distortion_figure.py \
+python analysis/phase3_decoder_comparing/visualization/create_cvd_distortion_figure.py \
     --roi V2 \
     --output ~/Desktop/v2_cvd_distortion.png
 ```
@@ -274,17 +274,17 @@ interactive_surface_viewer('sub-08', 'V2')
 ## Files Created (6 total)
 
 ### Python Scripts (3):
-1. `analysis/phase2_decoder_comparing/visualization/create_cvd_distortion_figure.py` ✓
-2. `analysis/phase2_decoder_comparing/visualization/test_cvd_figure.py` ✓
+1. `analysis/phase3_decoder_comparing/visualization/create_cvd_distortion_figure.py` ✓
+2. `analysis/phase3_decoder_comparing/visualization/test_cvd_figure.py` ✓
 3. `analysis/matlab_viewers/prepare_matlab_surface_data.py` ✓
 
 ### MATLAB Scripts (1):
 4. `analysis/matlab_viewers/interactive_surface_viewer.m` ✓
 
 ### Documentation (3):
-5. `analysis/phase2_decoder_comparing/visualization/README_cvd_distortion_figure.md` ✓
-6. `analysis/phase2_decoder_comparing/visualization/QUICKSTART.md` ✓
-7. `analysis/phase2_decoder_comparing/visualization/IMPLEMENTATION_SUMMARY.md` ✓ (this file)
+5. `analysis/phase3_decoder_comparing/visualization/README_cvd_distortion_figure.md` ✓
+6. `analysis/phase3_decoder_comparing/visualization/QUICKSTART.md` ✓
+7. `analysis/phase3_decoder_comparing/visualization/IMPLEMENTATION_SUMMARY.md` ✓ (this file)
 
 **Total lines of code:** ~1,349 lines (Python: 873, MATLAB: 276, Markdown: 200+)
 

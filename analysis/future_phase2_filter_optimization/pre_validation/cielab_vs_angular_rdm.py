@@ -20,7 +20,7 @@ false negatives caused by an inappropriate reference model.
 
 Usage (local):
     conda activate srm
-    cd analysis/future_phase3_filter_optimization/pre_validation
+    cd analysis/future_phase2_filter_optimization/pre_validation
     python cielab_vs_angular_rdm.py
 
 Output:

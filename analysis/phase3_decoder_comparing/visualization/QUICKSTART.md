@@ -16,12 +16,12 @@ All required data files are present and validated. RDM computation tested succes
 cd /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis
 conda activate srm
 
-python analysis/phase2_decoder_comparing/visualization/create_cvd_distortion_figure.py --roi V2
+python analysis/phase3_decoder_comparing/visualization/create_cvd_distortion_figure.py --roi V2
 ```
 
 **Expected output:**
 ```
-analysis/future_phase3_filter_optimization/figures/cvd_distortion_figure_V2.png
+analysis/future_phase2_filter_optimization/figures/cvd_distortion_figure_V2.png
 ```
 - Size: ~15-20 MB
 - Resolution: 6000×4800 pixels (300 DPI)
@@ -30,7 +30,7 @@ analysis/future_phase3_filter_optimization/figures/cvd_distortion_figure_V2.png
 
 ### 2. All ROIs:
 ```bash
-python analysis/phase2_decoder_comparing/visualization/create_cvd_distortion_figure.py --all-rois
+python analysis/phase3_decoder_comparing/visualization/create_cvd_distortion_figure.py --all-rois
 ```
 
 **Processing time:** ~5-10 minutes per ROI (surface rendering is slow)
@@ -40,13 +40,13 @@ python analysis/phase2_decoder_comparing/visualization/create_cvd_distortion_fig
 ### Quick validation:
 ```bash
 # Test data availability
-python analysis/phase2_decoder_comparing/visualization/test_cvd_figure.py --data-check
+python analysis/phase3_decoder_comparing/visualization/test_cvd_figure.py --data-check
 
 # Test RDM computation
-python analysis/phase2_decoder_comparing/visualization/test_cvd_figure.py --rdm-test
+python analysis/phase3_decoder_comparing/visualization/test_cvd_figure.py --rdm-test
 
 # Full test (creates V2 figure)
-python analysis/phase2_decoder_comparing/visualization/test_cvd_figure.py --full-test
+python analysis/phase3_decoder_comparing/visualization/test_cvd_figure.py --full-test
 ```
 
 ## Expected Scientific Patterns
@@ -146,7 +146,7 @@ Expected pattern: Low dissimilarity for adjacent hues, high for complementary co
 ## Files Created
 
 ```
-analysis/phase2_decoder_comparing/visualization/
+analysis/phase3_decoder_comparing/visualization/
 ├── create_cvd_distortion_figure.py   # Main script ✓
 ├── test_cvd_figure.py                # Validation script ✓
 ├── README_cvd_distortion_figure.md   # Full documentation ✓

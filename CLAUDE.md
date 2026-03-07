@@ -164,7 +164,7 @@ other_trials = ['blank']
 ## 3. Analysis Pipeline
 ### Current Analysis Pipeline (method3_header_mi dataset)
 
-Follow phase 1~3 and then future_phase 1~3 in `/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis`
+Follow phase 1~3 and then future_phase 1~2 in `/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis`
 
 ## 4. Preprocessing Settings
 
@@ -189,13 +189,17 @@ Analysis creates:
 - Manage result grouping via directory names (e.g., `results/loco/`, `results/nested_procrustes/raw_ctrl/`)
 - **WHY**: SLURM array jobs start simultaneously → identical timestamps → overwrites and data loss
 
-## 7. Future Phases Development (SRQ2-4)
+## 7. Future Phases Development (SRQ3-4)
 
 **Development workspace**: `prediction_model_workspace/`
 **TODO tracking**: `prediction_model_workspace/MASTER_PLAN.md`
 
-### Phase Directories
+### Active Phase Directories
 
-- **Future Phase 1**: `analysis/future_phase1_hyperalignment/` - HC common space (SRQ2)
-- **Future Phase 2**: `analysis/future_phase2_forward_model/` - 360° hue encoder (SRQ3)
-- **Future Phase 3**: `analysis/future_phase3_filter_optimization/` - CVD filter optimization (SRQ4)
+- **Future Phase 1**: `analysis/future_phase1_forward_model/` - 360° hue encoder (SRQ3)
+- **Future Phase 2**: `analysis/future_phase2_filter_optimization/` - CVD stimulus-space filter optimization (SRQ4)
+
+### Archived (superseded)
+
+- `analysis/archive/future_phase1_hyperalignment/` — HC hyperalignment (superseded by SRM, Phase 2)
+- `analysis/archive/phase3_procrustes_filter/` — Procrustes voxel-space filter (superseded by stimulus-space approach)

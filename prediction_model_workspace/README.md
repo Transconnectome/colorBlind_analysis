@@ -39,8 +39,8 @@ prediction_model_workspace/final/phase1/
 **Step 2**: `../analysis/`로 복사 및 이름 변경
 ```bash
 # Phase 1 예시
-cp -r final/phase1/* ../analysis/future_phase1_hyperalignment/
-mv ../analysis/future_phase1_hyperalignment ../analysis/phase1_hyperalignment
+cp -r final/phase1/* ../analysis/archive/future_phase1_hyperalignment/
+mv ../analysis/archive/future_phase1_hyperalignment ../analysis/phase1_hyperalignment
 ```
 
 **Step 3**: workspace 버전 아카이브
@@ -103,9 +103,9 @@ prediction_model_workspace/
 ## 🔗 연관 디렉토리
 
 **메인 분석 디렉토리** (최종 완성된 분석):
-- `../analysis/future_phase1_hyperalignment/` - Phase 1 계획 (workspace 완료 시 phase1_hyperalignment로 변경)
-- `../analysis/future_phase2_forward_model/` - Phase 2 계획
-- `../analysis/future_phase3_filter_optimization/` - Phase 3 계획
+- `../analysis/archive/future_phase1_hyperalignment/` - Phase 1 계획 (workspace 완료 시 phase1_hyperalignment로 변경)
+- `../analysis/future_phase1_forward_model/` - Phase 2 계획
+- `../analysis/future_phase2_filter_optimization/` - Phase 3 계획
 
 **문서 참조**:
 - 메인 README.md에서 이 workspace 설명: `../README.md` (Project Structure 섹션)

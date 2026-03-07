@@ -174,22 +174,23 @@ Earlier reference-based Procrustes approach (before SRM):
 - HC super-participant template
 - Quality metrics: Procrustes disparity, RDM correlation
 
-### Phase 3: Filter Learning (`phase3_procrustes_filter/`)
+### Phase 3: Decoder Model Comparison (`phase3_decoder_comparing/`)
 
-**CVD->HC Transformation**
-- Goal: F = Y @ A + b mapping CVD to HC patterns
-- Loss: L = lambda_mag x L_magnitude + lambda_base x L_baseline + lambda_rdm x L_RDM
-- Steps:
-  1. Pattern extraction
-  2. Training: PyTorch gradient descent
-  3. Analysis
-- Outputs: Transformation matrices (A, b), training curves, metrics
+**LORO + LOCO decoder validation**
+- LORO: LDA+SRM optimal (0.793, ICC 0.666)
+- LOCO: FE+Procrustes optimal (HC MAE 75.7°); correlation-based template matching confirmed optimal
+- Pooled W adopted as base for both LOCO and LORO
+- Includes LOCO_trials sub-pipeline (MDS diagnostic, Ridge stabilization, GP validation)
 
 ### Future Phases
 
-- **Future Phase 1** (`future_phase1_hyperalignment/`): HC common space via hyperalignment (SRQ2)
-- **Future Phase 2** (`future_phase2_forward_model/`): 360-degree hue encoder (SRQ3)
-- **Future Phase 3** (`future_phase3_filter_optimization/`): CVD filter optimization (SRQ4)
+- **Future Phase 1** (`future_phase1_forward_model/`): 360-degree hue encoder (SRQ3)
+- **Future Phase 2** (`future_phase2_filter_optimization/`): CVD stimulus-space filter optimization (SRQ4)
+
+### Archived (superseded)
+
+- `archive/phase3_procrustes_filter/`: Voxel-space Procrustes filter (superseded by stimulus-space approach)
+- `archive/future_phase1_hyperalignment/`: HC hyperalignment (superseded by SRM, Phase 2)
 
 ## Version History
 

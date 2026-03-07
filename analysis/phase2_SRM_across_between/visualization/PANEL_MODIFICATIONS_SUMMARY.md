@@ -155,7 +155,7 @@ Together, these panels transform the figure from a **methods + results** narrati
 All validation data already exists:
 - `/analysis/phase2_SRM_across_between/results/loo_consistent/20260218_163819/loo_consistent_results.json`
 - `/analysis/phase2_SRM_across_between/validation/results/crossnobis_rdm/crossnobis_results.json`
-- `/analysis/future_phase3_filter_optimization/pre_validation/results/filter_pre_validation_results.json`
+- `/analysis/future_phase2_filter_optimization/pre_validation/results/filter_pre_validation_results.json`
 
 ---
 

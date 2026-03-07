@@ -49,7 +49,7 @@ echo "Creating required directories..."
 mkdir -p analysis/comprehensive/logs
 mkdir -p analysis/comprehensive/results
 mkdir -p analysis/phase1_preprocess_decoding/${DATASET}/results
-mkdir -p analysis/phase2_decoder_comparing/${DATASET}/results
+mkdir -p analysis/phase3_decoder_comparing/${DATASET}/results
 mkdir -p analysis/phase2_procrustes_cvd_hc/${DATASET}/results
 mkdir -p analysis/phase3_filter_learning/${DATASET}/results
 
@@ -81,12 +81,12 @@ for ROI in "${ROIS[@]}"; do
     echo "--- RDM Analysis: ROI ${ROI} ---"
     echo "HC subjects: ${HC_SUBJECTS[@]}"
 
-    python analysis/phase2_decoder_comparing/phase1_rsa.py \
+    python analysis/phase3_decoder_comparing/phase1_rsa.py \
         --roi $ROI \
         --timestamp $TIMESTAMP \
         --dataset $DATASET \
         --subjects ${HC_SUBJECTS[@]} \
-        --output-dir analysis/phase2_decoder_comparing/${DATASET}/results/rdm_analysis
+        --output-dir analysis/phase3_decoder_comparing/${DATASET}/results/rdm_analysis
 
     if [ $? -eq 0 ]; then
         echo "✓ RDM analysis completed for ${ROI}"
@@ -215,7 +215,7 @@ echo "  CVD: ${CVD_SUBJECTS[@]} (3 subjects)"
 echo ""
 echo "Results saved to:"
 echo "  Phase 0: analysis/phase1_preprocess_decoding/${DATASET}/results/"
-echo "  Phase 1: analysis/phase2_decoder_comparing/${DATASET}/results/"
+echo "  Phase 1: analysis/phase3_decoder_comparing/${DATASET}/results/"
 echo "  Phase 2: analysis/comprehensive/results/${TIMESTAMP}/"
 echo "  Phase 3: analysis/comprehensive/results/${TIMESTAMP}/[ROI]/filter_learning/"
 echo "  Phase 4 Summary: analysis/comprehensive/results/COMPREHENSIVE_SUMMARY_${TIMESTAMP}.txt"

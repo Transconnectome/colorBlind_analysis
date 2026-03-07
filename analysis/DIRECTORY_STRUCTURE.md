@@ -49,7 +49,7 @@ analysis/
 │   │   └── figures/
 │   └── logs/
 │
-├── phase3_procrustes_filter/{dataset}/
+├── archive/phase3_procrustes_filter/{dataset}/
 │   ├── results/
 │   │   ├── patterns/
 │   │   ├── models/

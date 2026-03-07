@@ -124,7 +124,7 @@ diff ALL_ROIS_RESULTS_SUMMARY.md SRM_ANALYSIS_SUMMARY.md
 - **Decision**: DEFER to manual review (need to check if files serve distinct purposes)
 
 ### 3.2 Filter Pre-Validation Summaries
-**Location**: `analysis/future_phase3_filter_optimization/pre_validation/`
+**Location**: `analysis/future_phase2_filter_optimization/pre_validation/`
 
 **Files** (all created 2026-02-19):
 - `VALIDATION_RESULTS_SUMMARY.md`
@@ -169,9 +169,9 @@ diff ALL_ROIS_RESULTS_SUMMARY.md SRM_ANALYSIS_SUMMARY.md
 **Examples**:
 - `analysis/phase1_preprocess_decoding/results/`
 - `analysis/phase2_SRM_across_between/results/`
-- `analysis/phase2_decoder_comparing/results/`
+- `analysis/phase3_decoder_comparing/results/`
 - `analysis/validation/results/`
-- `analysis/future_phase3_filter_optimization/pre_validation/results/`
+- `analysis/future_phase2_filter_optimization/pre_validation/results/`
 
 **Recommendation**:
 - **Action**: Document structure, no consolidation

@@ -80,8 +80,8 @@ Phase 1 uses a single decoder (6-channel Forward Encoding from Brouwer & Heeger 
 - **Input shape**: `amplitudes_{raw,procrustes}.npy` — (6 runs, 8 colors, n_voxels)
 - **LORO CV**: Leave-One-Run-Out with nested hyperparameter tuning (inner LORO on train runs)
 - **LOCO CV**: Leave-One-Color-Out (no HP tuning; default params)
-- **Scripts**: `analysis/phase2_decoder_comparing/model_comparison_validation/scripts/`
-- **Results**: `analysis/phase2_decoder_comparing/model_comparison_validation/results/`
+- **Scripts**: `analysis/phase3_decoder_comparing/model_comparison_validation/scripts/`
+- **Results**: `analysis/phase3_decoder_comparing/model_comparison_validation/results/`
 
 ### Models Compared (6)
 
@@ -195,7 +195,7 @@ Phase 1 uses a single decoder (6-channel Forward Encoding from Brouwer & Heeger 
 
 ### Result 2b: LOCO Server Deployment — RT-4 (10 subjects x 4 ROIs x 1000 permutations)
 
-**Results dir**: `analysis/phase2_decoder_comparing/results/loco/`
+**Results dir**: `analysis/phase3_decoder_comparing/results/loco/`
 **Settings**: Procrustes-aligned (`amplitudes_procrustes.npy`), 1000 permutations, no HP tuning
 
 #### Aggregate Performance — ForwardEncoding vs Others (MAE° mean ± SD)
@@ -274,7 +274,7 @@ Phase 1 uses a single decoder (6-channel Forward Encoding from Brouwer & Heeger 
 - Preloaded Procrustes (ctrl): `amplitudes_procrustes.npy` (aligned on all 6 runs)
 - Feature space: voxel space (no SRM) | LORO CV
 
-**Results dir**: `analysis/phase2_decoder_comparing/results/focused_nested/{nested_only,nested_pca20,procrustes_ctrl}/`
+**Results dir**: `analysis/phase3_decoder_comparing/results/focused_nested/{nested_only,nested_pca20,procrustes_ctrl}/`
 
 #### Overall Performance (acc_45, mean across all 10 subjects x 4 ROIs)
 
@@ -325,7 +325,7 @@ In procrustes_ctrl, **19/40 subject-ROI cells (47.5%)** showed degenerate MLP be
 
 **Method (updated 2026-02-18, RT-7 fix)**: Train SRM on 7 HC only → Transform HC via `srm.w_[i]` → Project CVD via SVD → Train LDA on 7 HC mean betas → Test on each CVD → Permutation test (1000 iterations, label shuffling). Previous method used all-subjects SRM (circular).
 
-**Results dir**: `analysis/phase2_decoder_comparing/model_comparison_validation/results/cvd_cross_decoding/`
+**Results dir**: `analysis/phase3_decoder_comparing/model_comparison_validation/results/cvd_cross_decoding/`
 
 **HC-only SRM results (current):**
 
@@ -353,7 +353,7 @@ Chance = 12.5% (1/8). 9/12 tests p<0.001 (HC-only); previously 12/12 (all-subjec
 
 **Purpose**: Explain LDA's high accuracy (82.1%) but near-zero split-half reliability (r=0.015).
 
-**Results dir**: `analysis/phase2_decoder_comparing/results/lda_reliability/`
+**Results dir**: `analysis/phase3_decoder_comparing/results/lda_reliability/`
 
 #### Analysis A: Fold-Level CV (std/mean)
 
@@ -404,7 +404,7 @@ LDA's low reliability is NOT about inaccuracy — it achieves 82.1%. The instabi
 - **FE_SVM**: voxels → FE (6 channels) → SVM-RBF → 8-class label
 - **ForwardEncoding** (control): voxels → FE (6 channels) → template matching → label
 
-**Results dir**: `analysis/phase2_decoder_comparing/model_comparison_validation/results/hybrid/{nested,procrustes_ctrl}/`
+**Results dir**: `analysis/phase3_decoder_comparing/model_comparison_validation/results/hybrid/{nested,procrustes_ctrl}/`
 
 **Dataset & Alignment**:
 - Dataset: `full_dataset_C010` (P3 pipeline, C010 confounds, MNI space)
@@ -459,7 +459,7 @@ LDA's low reliability is NOT about inaccuracy — it achieves 82.1%. The instabi
 | **FE_GaussML** | Gaussian ML with per-channel noise variance | Scale-aware, noise-weighted |
 | **FE_RidgeReg** | Ridge regression: 6 channels → sin/cos hue | Learned channel-to-hue mapping |
 
-**Results dir**: `analysis/phase2_decoder_comparing/results/loco_decoding_comparison/`
+**Results dir**: `analysis/phase3_decoder_comparing/results/loco_decoding_comparison/`
 
 #### Group-Level MAE (degrees, chance = 90°)
 
@@ -523,7 +523,7 @@ Instead of a single W from all training data: train multiple W estimates from ru
 - **Cross-validation**: LOCO (Leave-One-Color-Out), 8 folds, per-subject decoding
 - **Subjects**: 7 HC (sub-01 to sub-07), 3 CVD (sub-08 to sub-10)
 - **Data**: `full_dataset_C010`, 10 subjects x 4 ROIs x 6 runs x 8 colors
-- **Results dir**: `analysis/phase2_decoder_comparing/results/loco_ensemble/{raw,procrustes,srm}/`
+- **Results dir**: `analysis/phase3_decoder_comparing/results/loco_ensemble/{raw,procrustes,srm}/`
 
 #### Alignment Comparison: ForwardEncoding Baseline (MAE in degrees)
 

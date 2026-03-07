@@ -428,7 +428,7 @@ def load_validation_data():
                 }
 
         # Load B2/B3 filter pre-validation results
-        b2_b3_path = VALIDATION_DIR / 'future_phase3_filter_optimization' / 'pre_validation' / 'results' / 'filter_pre_validation_results.json'
+        b2_b3_path = VALIDATION_DIR / 'future_phase2_filter_optimization' / 'pre_validation' / 'results' / 'filter_pre_validation_results.json'
         print(f"  Loading B2/B3: {b2_b3_path}")
         with open(b2_b3_path, 'r') as f:
             b2_b3_full = json.load(f)

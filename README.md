@@ -234,7 +234,7 @@ These questions address methodological foundations for the 3-phase neural-guided
 7. **Cross-subject generalization**: HC→CVD = HC→HC in SRM space (no group bias)
 8. **Negative results**: Decoder bottleneck not improvable (4 alt. methods all worse); sequential/MLP dead ends
 
-**Documents**: `analysis/phase2_decoder_comparing/model_comparison_validation/`, `analysis/METHODS_RESULTS_SUMMARY_FOR_PAPER.md`
+**Documents**: `analysis/phase3_decoder_comparing/model_comparison_validation/`, `analysis/METHODS_RESULTS_SUMMARY_FOR_PAPER.md`
 
 ---
 
@@ -391,7 +391,7 @@ mpirun -np 1 python analysis/phase2_SRM_across_between/rerun_loo_consistent.py
 
 ```bash
 # Run model comparison (LORO + LOCO)
-python analysis/phase2_decoder_comparing/model_comparison_validation/scripts/run_comparison.py
+python analysis/phase3_decoder_comparing/model_comparison_validation/scripts/run_comparison.py
 ```
 
 ---
@@ -420,16 +420,16 @@ colorBlind_analysis/
 │   │   ├── validation/                    # 12+ validation tests (A3/A4/A5, 1A-2D)
 │   │   └── results/
 │   │
-│   ├── phase2_decoder_comparing/          # Phase 2b: Decoder cross-validation ✅
+│   ├── phase3_decoder_comparing/          # Phase 2b: Decoder cross-validation ✅
 │   │   ├── model_comparison_validation/   # 6-model LORO + LOCO comparison
 │   │   └── results/
 │   │
 │   ├── phase2_procrustes_cvd_hc/          # Legacy: Procrustes-based comparison
-│   ├── phase3_procrustes_filter/          # Legacy: Exploratory filter learning
+│   ├── archive/phase3_procrustes_filter/          # Legacy: Exploratory filter learning
 │   │
-│   ├── future_phase1_hyperalignment/      # SRQ2: HC common space (planned)
-│   ├── future_phase2_forward_model/       # SRQ3: 360° encoder (planned)
-│   ├── future_phase3_filter_optimization/ # SRQ4: Filter optimization (planned)
+│   ├── archive/future_phase1_hyperalignment/      # SRQ2: HC common space (planned)
+│   ├── future_phase1_forward_model/       # SRQ3: 360° encoder (planned)
+│   ├── future_phase2_filter_optimization/ # SRQ4: Filter optimization (planned)
 │   │
 │   ├── comprehensive/                     # Cross-phase analyses
 │   ├── validation/                        # Cross-pipeline validation

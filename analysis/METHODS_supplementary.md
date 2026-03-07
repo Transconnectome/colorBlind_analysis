@@ -57,7 +57,7 @@
 ## Filter Pre-Validation (B1–B3) — 2026-02-18
 
 > **Purpose**: Validate per-pair z-score claims before filter implementation (filter_design_plan.md §7.1).
-> **Script**: `analysis/future_phase3_filter_optimization/pre_validation/filter_pre_validation.py`
+> **Script**: `analysis/future_phase2_filter_optimization/pre_validation/filter_pre_validation.py`
 > **Runtime**: 22s local (BrainIAK SRM, 1000 bootstrap × SRM retrain)
 
 ### Settings
@@ -353,8 +353,8 @@
 ## SRM-Based LOCO Validation (Crawford & Howell) — 2026-02-22
 
 > **Purpose**: Apply Crawford & Howell (1998) single-case modified t-test to LOCO ForwardEncoding MAE values for HC-CVD comparison. Uses existing LOCO results from Procrustes-aligned voxel data.
-> **Script**: `analysis/phase2_decoder_comparing/analysis/validate_loco_srm.py`
-> **Results**: `analysis/phase2_decoder_comparing/results/loco_srm_validation.json`
+> **Script**: `analysis/phase3_decoder_comparing/analysis/validate_loco_srm.py`
+> **Results**: `analysis/phase3_decoder_comparing/results/loco_srm_validation.json`
 > **Runtime**: Local, instant (reads precomputed LOCO results)
 
 ### Settings
@@ -435,7 +435,7 @@ To match CVD test paradigm (leave-one-subject-out), HC disparity recomputed usin
 
 > **Purpose**: Compare LOCO interpolation performance on SRM-projected amplitudes (k=3-4 dims) vs Procrustes-aligned full voxels. Tests whether SRM dimensionality reduction preserves continuous hue structure needed for interpolation.
 > **Script**: `run_loco_comparison.py --alignment srm`
-> **Results**: `analysis/phase2_decoder_comparing/results/loco_srm/`
+> **Results**: `analysis/phase3_decoder_comparing/results/loco_srm/`
 > **Runtime**: 6h server (10 subjects × 4 ROIs × 8 models × 1000 permutations)
 
 ### Settings
@@ -532,8 +532,8 @@ Based on SRM vs Procrustes comparison:
 ## ForwardEncoding Cross-Decoding: HC → CVD in SRM Space — 2026-02-22
 
 > **Purpose**: Test whether HC-trained ForwardEncoding W-matrix can decode CVD subjects' color representations in SRM shared space. Validates individual CVD decodability in HC common space.
-> **Script**: `analysis/phase2_decoder_comparing/analysis/fe_cross_decoding.py`
-> **Results**: `analysis/phase2_decoder_comparing/results/fe_cross_decoding.json`
+> **Script**: `analysis/phase3_decoder_comparing/analysis/fe_cross_decoding.py`
+> **Results**: `analysis/phase3_decoder_comparing/results/fe_cross_decoding.json`
 > **Runtime**: 72 minutes local (1000 permutations × 4 ROIs × 7 LOSO folds)
 
 ### Settings

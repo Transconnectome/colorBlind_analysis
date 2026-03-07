@@ -82,7 +82,7 @@ Sub-type heterogeneity (2 deutan + 1 protan) becomes an advantage: it demonstrat
 > Sections 3.3–3.5 (individual profiles) retain old 10-subject SRM values for historical record.
 > Section 3.6 (cross-subject consistency) has been **updated** with HC-only SRM values.
 > Qualitative patterns confirmed: L-M axis deficit and S-cone compensation preserved.
-> See `future_phase3_filter_optimization/pre_validation/results/` for full data.
+> See `future_phase2_filter_optimization/pre_validation/results/` for full data.
 
 ### 3.1 Summary Table: Mean |z-score| from HC
 
@@ -315,8 +315,8 @@ The filter requires Future Phase 2 (continuous hue encoder) to predict neural re
 | B2 Split-half sub-10 | r<0.30 V1/hV4; r=0.68* V2 | **V2-only filter confirmed** |
 | B3 All-3-consistent | red-orange deficit (V1), blue-purple elevation (V2), red-magenta elevation (V1/V2) | HIGH-priority pairs validated |
 
-**Script**: `analysis/future_phase3_filter_optimization/pre_validation/filter_pre_validation.py`
-**Results**: `analysis/future_phase3_filter_optimization/pre_validation/results/`
+**Script**: `analysis/future_phase2_filter_optimization/pre_validation/filter_pre_validation.py`
+**Results**: `analysis/future_phase2_filter_optimization/pre_validation/results/`
 
 ### 7.1c Color-Pair RDM Analysis (2026-02-19) ✅ COMPLETED
 

@@ -60,7 +60,7 @@ def generate_summary(dataset, timestamp):
         f.write("PHASE 1: RDM/RSA Analysis\n")
         f.write("="*70 + "\n")
         f.write("Status: ⚠️  Check individual ROI logs\n")
-        f.write("Location: analysis/phase2_decoder_comparing/{dataset}/results/rdm_analysis/\n")
+        f.write("Location: analysis/phase3_decoder_comparing/{dataset}/results/rdm_analysis/\n")
         f.write("Note: May require baseline results in new directory structure\n")
         f.write("\n")
 

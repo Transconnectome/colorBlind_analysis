@@ -206,8 +206,8 @@
 > Chance = 12.5%. 12개 tests 중 **9개가 p<0.001**로 significant. CVD 피험자의 color representation이 HC common space에서 **decodable**함을 확인 → color signal 자체는 존재하되 geometric structure가 distorted된 것.
 
 **시각화**:
-- LOCO color wheel plots: [`phase2_decoder_comparing/results/loco/color_wheel_plots/`](../phase2_decoder_comparing/results/loco/color_wheel_plots/)
-- Circular plots: [`phase2_decoder_comparing/results/loco/circular_plots/`](../phase2_decoder_comparing/results/loco/circular_plots/)
+- LOCO color wheel plots: [`phase3_decoder_comparing/results/loco/color_wheel_plots/`](../phase3_decoder_comparing/results/loco/color_wheel_plots/)
+- Circular plots: [`phase3_decoder_comparing/results/loco/circular_plots/`](../phase3_decoder_comparing/results/loco/circular_plots/)
 
 ---
 
@@ -460,7 +460,7 @@ LORO-LOCO dissociation이 CVD 연구의 핵심 증거:
 | 파일 | 용도 |
 |------|------|
 | [`phase2_SRM_across_between/results/loo_consistent/20260218_163819/figures/srm_4panel_figure.png`](../phase2_SRM_across_between/results/loo_consistent/20260218_163819/figures/srm_4panel_figure.png) | Phase 2 시각화 |
-| [`future_phase3_filter_optimization/pre_validation/UPDATED_FILTER_STRATEGY.md`](../future_phase3_filter_optimization/pre_validation/UPDATED_FILTER_STRATEGY.md) | V1/V2 전략 상세 |
-| [`future_phase3_filter_optimization/pre_validation/FDR_CORRECTION_SUMMARY.md`](../future_phase3_filter_optimization/pre_validation/FDR_CORRECTION_SUMMARY.md) | FDR correction 결과 |
-| [`future_phase3_filter_optimization/pre_validation/PROJECT_STATUS_2026-02-19.md`](../future_phase3_filter_optimization/pre_validation/PROJECT_STATUS_2026-02-19.md) | 프로젝트 현황 |
-| [`future_phase3_filter_optimization/pre_validation/results/fdr_corrected/FDR_CORRECTION_REPORT.md`](../future_phase3_filter_optimization/pre_validation/results/fdr_corrected/FDR_CORRECTION_REPORT.md) | FDR correction 상세 보고서 |
+| [`future_phase2_filter_optimization/pre_validation/UPDATED_FILTER_STRATEGY.md`](../future_phase2_filter_optimization/pre_validation/UPDATED_FILTER_STRATEGY.md) | V1/V2 전략 상세 |
+| [`future_phase2_filter_optimization/pre_validation/FDR_CORRECTION_SUMMARY.md`](../future_phase2_filter_optimization/pre_validation/FDR_CORRECTION_SUMMARY.md) | FDR correction 결과 |
+| [`future_phase2_filter_optimization/pre_validation/PROJECT_STATUS_2026-02-19.md`](../future_phase2_filter_optimization/pre_validation/PROJECT_STATUS_2026-02-19.md) | 프로젝트 현황 |
+| [`future_phase2_filter_optimization/pre_validation/results/fdr_corrected/FDR_CORRECTION_REPORT.md`](../future_phase2_filter_optimization/pre_validation/results/fdr_corrected/FDR_CORRECTION_REPORT.md) | FDR correction 상세 보고서 |

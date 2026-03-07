@@ -258,8 +258,8 @@ python compare_baseline_vs_trialwise.py \
 - `/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/prediction_model_workspace/scripts/compare_baseline_vs_trialwise.py`
 
 **Step 1.4 (예정)**:
-- `/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase1_hyperalignment/scripts/hyperalignment_core.py`
-- `/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase1_hyperalignment/COMPARISON.md` - Hyperalignment vs SRM 비교
+- `/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/archive/future_phase1_hyperalignment/scripts/hyperalignment_core.py`
+- `/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/archive/future_phase1_hyperalignment/COMPARISON.md` - Hyperalignment vs SRM 비교
 
 ### 5.4 서버 경로
 

@@ -179,7 +179,7 @@ def get_filter_paths(
         Dictionary with filter paths
     """
     paths = get_phase_paths(
-        phase='phase3_procrustes_filter',
+        phase='archive/phase3_procrustes_filter',
         dataset=dataset,
         create=create
     )

@@ -1,7 +1,7 @@
 # Methods & Results Summary for Paper
 
 > Maintained by `capture-results` skill.
-> Last updated: 2026-03-03.
+> Last updated: 2026-03-09.
 
 ---
 
@@ -12,6 +12,7 @@
 - [Phase 2: SRM Between-Subject Analysis](METHODS_phase2_srm.md)
 - [Phase 2b: Decoder Model Comparison](METHODS_phase2b_decoders.md)
 - [Supplementary Validations](METHODS_supplementary.md)
+- [Future Phase 1: Forward Model Validation](future_phase1_forward_model/RESULTS.md)
 
 ### This File
 - [Key Findings Summary](#key-findings-summary)
@@ -56,21 +57,39 @@
 13. **A3 Variance Explained (재구성 품질)**: CVD VE ≥ HC VE (전 ROI). V2 diff=−0.117 [−0.190, −0.042], g=−1.68. CVD signal이 noisy가 아닌 **체계적으로 다름**. "Strong signal, different structure."
 14. **SRM validation battery complete**: LOSO stability (V2 7/7), split-half (V2 both halves sig), permutation (10K iter), bootstrap CIs, alignment comparison (2.4–6.5×).
 
+### IV-b. Future Phase 1 — Forward Encoding Model (360° Hue Encoder)
+
+19. **Ridge-GCV is the optimal LOCO encoder**: Ridge-GCV > prior_finetune for all ROIs in LOCO (interpolation). Prior helps LORO (+0.018 to +0.114) but hurts LOCO (-0.014 to -0.210). LORO-LOCO dissociation: SRM prior captures run-level variance but not color-specific tuning for cross-color interpolation. Generic ridge shrinkage superior.
+
+20. **HC LOCO significantly > 0 in V1**: One-sample t-test (ridge_gcv, HC, n=7): V1 M=0.130, t(6)=3.544, p=0.012 (two-tail); V2 M=0.150, t(6)=2.109, p=0.079; hV4 M=0.183, t(6)=2.423, p=0.052. V3 M=0.023, p=0.808 (fails).
+
+21. **HC > CVD in LOCO with large effect sizes**: V1 d=1.61 (p=0.021), V2 d=1.85 (p=0.022). CVD subjects show impaired cross-color interpolation, consistent with distorted hue representations. Converges with Phase 2 SRM findings (V1 p=0.062, V2 p=0.075).
+
+22. **FE-6 basis confirmed over Fourier alternatives**: FE-6 vs LF-4 paired t-test (LOCO OLS, n=10): V1 p=0.045, V2 p=0.042, hV4 p=0.016. FE-6 > LF-4 > LF-6. Half-wave rectified cosine better captures peaked neural color tuning than raw Fourier harmonics.
+
+23. **3/4 ROIs pass GO/NO-GO gate**: Three criteria (reliability, normalized fit, interpolation significance) → V1, V2, hV4 GO; V3 NO-GO. Noise-ceiling normalized LOCO: V1=0.310, V2=0.373, hV4=0.313 (~30-37% of achievable signal). Gate uses ridge_gcv (best empirical model).
+
+24. **Individual CVD profiles — no single-case significance for LOCO**: Crawford-Howell tests on ridge_gcv LOCO voxel_corr: sub-08 hV4 p=0.076 (trending), sub-10 V2 p=0.089 (trending), sub-09 uniformly negative but non-significant. Contrast with Phase 2 SRM where sub-09 V1 p=0.007, sub-08 V2 p=0.040 — the LOCO metric captures a different aspect (interpolation vs. disparity).
+
+25. **Massive leakage from naive prior construction**: Including held-out color in group prior (A_g) inflated LOCO voxel_corr by +0.55 to +0.69 in V1-V3. Corrected by recomputing W0 per fold excluding held-out color. This validates the leakage-free pipeline.
+
 ### IV. 최종 해석 및 Phase 3 함의
 
 15. **CVD 색 표상은 "다르되 체계적"**: noisy가 아니라 anisotropic (방향-의존적 왜곡). SRM VE가 높고 (재구성 가능), 고유한 color-dependent 구조를 가짐 → anisotropy correction (구조 보정) 프레이밍 적합.
 16. **Convergent validity가 핵심 증거**: SRM disparity ↔ crossnobis (r=0.486), ↔ PCA (r=0.742). 세 가지 독립적 방법이 동일한 subject-level 패턴 → SRM alignment artifact 배제.
 17. **LOCO dissociation — signal vs. geometry** (RT-4, 2026-02-18): CVD는 LORO에서 HC와 동등하거나 우수한 성능 (within-color discriminability ↑), 그러나 LOCO interpolation에서 HC < CVD (V1, V2, V4). ForwardEncoding만 색상 간 보간 가능하며, HC 색 공간은 circular continuous → 보간 가능; CVD 색 공간은 hue 축이 compressed/warped → 보간 실패. 개별 CVD 이질성: sub-08 (deutan)은 V1에서 최고 성능(MAE=50.6°, p=0.035), sub-09/10은 chance 수준. **핵심: CVD = 신호 없음이 아닌, 색 공간 왜곡**. LORO (within-color signal) vs LOCO (cross-color geometry) 이중 해리가 Phase 3 filter learning의 신경과학적 근거를 제공함.
 
-18. **Filter design prerequisites met**:
+18. **Filter design prerequisites met** (updated 2026-03-09):
     - Linear channel representation exists (ForwardEncoding validated)
     - CVD signal preserved in SRM space (VE ≥ HC)
     - Individual CVD profiles identifiable (Crawford & Howell significant)
     - Channel→color mapping is linear (FE_SVM ≈ FE)
     - **CVD color space is distorted, not absent** (LOCO dissociation: HC>CVD interpolation, HC≈CVD discrimination)
-    - **Group prior proof-of-concept**: HC group W reduces CVD LOCO MAE — V1 +8.7% (93.5→85.4°), V2 +6.4% (90.5→84.7°), confirming HC→CVD knowledge transfer is feasible. V3/V4 harmful.
+    - **Forward encoder validated**: Ridge-GCV + FE-6 basis. HC LOCO > 0 at p=0.012 (V1), p=0.040 one-tail (V2), p=0.026 one-tail (hV4). 3/4 ROIs pass gate.
+    - **HC > CVD LOCO confirmed**: V1 d=1.61 (p=0.021), V2 d=1.85 (p=0.022) — large effect sizes converging with Phase 2 SRM findings.
+    - **Prior not needed for encoding**: Ridge-GCV > prior_finetune for LOCO in all ROIs. Generic shrinkage sufficient.
     - **Cross-subject generalization**: SRM LDA HC→CVD = 0.665 (p=0.668 vs HC→HC), no group bias
-    → Phase 3: CVD→HC transformation in 6-channel space로 진행 가능.
+    → Phase 2 (filter optimization): CVD→HC transformation in 6-channel space, using ridge_gcv encoder on V1, V2, hV4.
 
 ---
 
@@ -79,23 +98,33 @@
 - **Multiple comparisons**: 4 ROIs tested; LOO-consistent group p-values (V1=0.062, V2=0.075) do not reach p<0.05. Results framed as trending effects with individual-level confirmation via Crawford & Howell tests.
 - **CVD-CVD RDM instability across halves**: Split-half CVD-CVD RDM correlation is inconsistent (V2 Set A: 0.536, Set B: 0.124), suggesting CVD within-group color structure is less reliably estimated with n=3 and half-run data.
 - **V3/hV4 non-significance**: Consistent across all validation tests (LOSO 0/7, split-half 0/2, permutation n.s.). May reflect genuine absence of difference or insufficient power.
-- **V1 validation gap**: Disparity significant (p=0.024), LOSO 6/7 robust, but RDM color-specificity not significant (p=0.192/0.599), complicating interpretation of what V1 disparity represents.
+- **V1 validation gap**: Disparity significant (p=0.024), LOSO 6/7 robust, but RDM color-specificity not significant (p=0.192/0.599), complicating interpretation of what V1 disparity represents. Forward model partially addresses this: V1 HC LOCO > 0 (p=0.012), HC > CVD (d=1.61, p=0.021).
+- **Forward model LOCO metric**: Voxel pattern correlation is scale-invariant but sensitive to n_voxels — sub-07 hV4 (16 voxels) produces noisy estimates. No significant correlation between n_voxels and LOCO_r for V1-V3 (all p>0.6), but hV4 trends (r=0.660, p=0.106). Ridge MAE > OLS MAE paradox: ridge shrinks predictions toward zero → conservative angular errors; voxel_corr is the more reliable metric.
+- **No individual CVD significance for LOCO**: Unlike Phase 2 SRM (sub-09 V1 p=0.007, sub-08 V2 p=0.040), ridge_gcv LOCO Crawford-Howell tests are non-significant (best: sub-08 hV4 p=0.076). LOCO captures cross-color interpolation, a different (harder) aspect than within-color disparity.
 - **SRM within-subject trade-off**: SRM improves between-subject agreement (2.4–6.5×) but reduces within-subject RDM test-retest reliability (V2: raw 0.473 → SRM 0.098). This drop conflates two sources: (1) genuine dimensionality reduction and (2) SRM fitting instability from independent split-half fits learning different shared spaces. The main analysis uses a single SRM fit on all runs, mitigating fitting instability. The "parallel" pattern (CVD preserving color structure) is independently validated by 2B in native voxel space without SRM (CVD ≥ HC in V1/V2), so does not rely on SRM-derived metrics alone.
 
 ---
 
 ## TODO (Next Steps)
 
-1. **Phase 3 Filter Implementation** — Begin CVD-to-HC filter in SRM/channel space
-   - Prerequisites met: B1-B3 pre-validation done, LDA+SRM optimal for LORO, FE optimal for LOCO/Phase 3
-   - LORO-CV framework for filter evaluation (filter_design_plan.md Criticism #4)
+### Completed
+- [x] **Future Phase 1: Forward Model Validation** — Ridge-GCV + FE-6 validated. 3/4 ROIs pass gate (V1, V2, hV4). Basis ablation confirms FE-6 > Fourier.
 
-2. **Phase 3 RDM Metric & Normalization Test** — Validate metric choice before filter
-   - Compare correlation vs Euclidean distance; z-score vs min-max normalization
+### Active
+1. **Future Phase 2: Filter Optimization** — CVD→HC stimulus-space filter using ridge_gcv encoder
+   - ROIs: V1, V2, hV4 (V3 excluded — no reliable interpolation)
+   - Encoder: Ridge-GCV + FE-6 basis (frozen W_s from forward model)
+   - Framework: LORO-CV for filter evaluation
 
-3. **Filter pre-diagnosis** — Pair-level permutation test, LORO CV for filter, low-rank constraint, baseline comparison (filter_design_plan.md Criticism #4)
+2. **Forward model additional analyses** (metric robustness):
+   - Per-color LOCO: which colors are hardest to interpolate?
+   - Residual structure: is (Y - W@C) systematic or noise?
+   - Permutation test: shuffle color labels for null LOCO distribution (more robust than parametric t with n=7)
+   - Ridge alpha distribution: GCV lambda stability across folds
 
-4. **Publication figure** — Comprehensive summary of decoder comparison results
+### Deferred
+3. **Publication figure** — Comprehensive summary of decoder comparison results
+4. **Phase 2 SRM RDM metric test** — correlation vs Euclidean, z-score vs min-max
 
 ---
 

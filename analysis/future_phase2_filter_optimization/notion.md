@@ -653,53 +653,17 @@ Operating space와 target space 분리의 데이터 기반 정당화:
 
 ## 7. 우려 지점 및 보완 계획
 
-### 우려 1: n=3 CVD의 statistical power 한계
-
-Phase 2에서도 V1 p=0.062, V2 p=0.075로 trending에 그침.
-
-**보완**: Individual-level 분석 중심 전환. Crawford & Howell (1998) single-case test + per-subject permutation test. "3명 중 2명 유의" 사례 기반 보고.
-
 ### 우려 2: FE+Procrustes MAE가 높을 수 있음
 
 HC LOCO MAE ~ 75. 7색/fold encoding estimation 한계가 근본 원인.
 
 **보완**: MAE를 유일 지표로 두지 않는다. Structural metrics (order preservation, rank tau, trajectory stability) 검증으로 "structurally reliable surrogate" 입증.
 
-### 우려 3: SRM artifact 가능성
-
-Pre-validation: crossnobis FDR 0 pairs vs SRM FDR 39 pairs.
-
-**보완**: (1) SRM-crossnobis z-score 수렴 확인 (r=0.3-0.7, 8/9 p < 0.05). (2) 필터는 Procrustes에서 작동, SRM은 target 정의에만 사용 — artifact가 filter operation에 전파되지 않는 구조.
-
-### 우려 4: CVD heterogeneity
-
-sub-08 (32 FDR), sub-09 (7 FDR), sub-10 (0 FDR)의 profile이 다르다.
-
-**보완**: 개인별 T_psi 최적화. Latent geometry matching은 pairwise target 없이 전체 geometry를 이동시키므로, 개인 이질성을 자연스럽게 수용. 같은 4-parameter Fourier family가 deutan (sub-08: 2nd harmonic dominant)과 protan (sub-09: 1st harmonic dominant) 모두 포착 가능 — phase freedom이 distortion 축을 자유롭게 회전 (Section 4b(4) 참조).
-
-### 우려 5: M_s evaluation bridge 미검증 (Vulnerability #1) — **해소됨**
-
-Filter objective가 SRM evaluation (M_s bridge)에 의존하지만, step2b가 미구현 상태였다.
-
-**결과 (2026-03-08 실행)**: Step 2b 완료. Check 4 (operational validity) **전 ROI PASS**:
-- V1: HC mean r=0.678 ± 0.075, CVD mean r=0.556
-- V2: HC mean r=0.794 ± 0.146, CVD mean r=0.468 (**최강**)
-- V3: HC mean r=0.675 ± 0.126, CVD mean r=0.634 (checks 2,3 FAIL하나 check4 PASS)
-- V4: HC mean r=0.799 ± 0.160, CVD mean r=0.515
-
-M_s는 FE quality를 SRM evaluation으로 충실히 전달한다. V3의 distance structure 왜곡은 주의 필요하나, Procrustes-only fallback은 불필요. Pre-validation에서 우려했던 V1 stress plateau, V4 CIELab sign flip은 bridge 실패로 이어지지 않음 — M_s는 SRM 내부 geometry가 아니라 FE→SRM 전달의 quality를 측정하며, 이 전달은 adequate하다.
-
 ### 우려 6: Gate가 전 ROI를 PASS시킴 (Vulnerability #2)
 
 Revised gate에서 V1/V2/V3/V4 모두 PASS → discriminative power 부족.
 
 **보완**: Gate의 질문은 "어떤 ROI를 reject할 것인가"가 아니라 **"Procrustes interpolation이 어떤 ROI에서 작동하는가"**이다. 전 ROI PASS는 Procrustes가 실제로 interpolation에 적합한 공간이라는 pre-validation 결론과 일치한다 (Section 1b: SRM에서는 V3가 chance worse, V1이 plateau). **M_s bridge test (Step 2b) 완료**: V1/V2/V4 PASS (4/4), V3 FAIL (2/4 but check4 PASS). Procrustes gate PASS + bridge check4 PASS → 전 ROI에서 filter optimization 진행 가능. V3는 distance structure 왜곡 주의.
-
-### 우려 7: Categorical-continuous paradox (Vulnerability #4)
-
-Cross-decoding 10/12 significant (CVD ≈ HC categorically) → 왜 filter가 필요한가?
-
-**보완**: 이 paradox는 CVD의 결손이 **categorical representation이 아니라 continuous interpolation**에 있음을 정확히 보여준다. LORO (classification): HC ≈ CVD (p=0.668). LOCO (interpolation): HC 69.4° vs CVD 87.4° (hV4, p=0.017). 즉 CVD 뇌는 8개 색을 올바르게 "분류"하지만, 색 사이의 연속적 geometry가 왜곡되어 있다. Filter는 이 continuous geometry를 교정한다 — categorical mapping (이미 동등)이 아니라.
 
 ### 우려 8: V3 borderline threshold (Vulnerability #5)
 

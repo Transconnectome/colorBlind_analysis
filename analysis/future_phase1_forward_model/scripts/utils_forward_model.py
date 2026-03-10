@@ -168,6 +168,151 @@ def fit_W_prior_ridge(C, X, W0, lam):
     return np.linalg.solve(C.T @ C + lam * np.eye(K), C.T @ X + lam * W0)
 
 
+def fit_W_ridge_rrr(C, X, alpha, rank):
+    """Ridge + Reduced-Rank (SVD truncation).
+
+    Args:
+        C: (n, K) design matrix
+        X: (n, V_s) voxel patterns
+        alpha: ridge penalty
+        rank: target rank for W (must be <= K)
+
+    Returns:
+        W: (K, V_s) rank-r approximation of ridge solution
+    """
+    W_full = fit_W_ridge(C, X, alpha)
+    U, s, Vt = np.linalg.svd(W_full, full_matrices=False)
+    r = min(rank, len(s))
+    return (U[:, :r] * s[:r][np.newaxis, :]) @ Vt[:r, :]
+
+
+def fit_W_smooth_ridge(C, X, alpha, beta):
+    """Ridge with circular channel-smoothness penalty.
+
+    min_W ||X - C@W||^2 + alpha*||W||^2 + beta*||D@W||^2
+    where D is a circular difference matrix coupling adjacent channels.
+
+    Solution: W = (C'C + alpha*I + beta*D'D)^{-1} C'X
+
+    Args:
+        C: (n, K) design matrix
+        X: (n, V_s) voxel patterns
+        alpha: standard ridge penalty
+        beta: smoothness penalty (0 = standard ridge)
+
+    Returns:
+        W: (K, V_s)
+    """
+    K = C.shape[1]
+    # Circular difference matrix: D[i,i]=1, D[i,(i+1)%K]=-1
+    D = np.zeros((K, K))
+    for i in range(K):
+        D[i, i] = 1.0
+        D[i, (i + 1) % K] = -1.0
+    G = C.T @ C + alpha * np.eye(K) + beta * (D.T @ D)
+    return np.linalg.solve(G, C.T @ X)
+
+
+def compute_prior_precision(A_list, R_s):
+    """Compute per-voxel prior mean and variance from HC encoding matrices.
+
+    Projects each HC's A_i through the target subject's SRM projection R_s
+    to get per-HC weight matrices W_h, then computes element-wise mean/var.
+
+    Args:
+        A_list: list of (k, K) encoding matrices from HC subjects
+        R_s: (V_s, k) SRM projection matrix for target subject
+
+    Returns:
+        W0: (K, V_s) prior mean
+        var_W: (K, V_s) prior variance (floored at 1e-6)
+    """
+    W_stack = np.array([(R_s @ A_h).T for A_h in A_list])  # (n_hc, K, V_s)
+    W0 = W_stack.mean(axis=0)           # (K, V_s)
+    var_W = W_stack.var(axis=0, ddof=1)  # (K, V_s) unbiased
+    var_W = np.maximum(var_W, 1e-6)      # floor to avoid infinite precision
+    return W0, var_W
+
+
+def fit_W_mixed_ridge_prior(C, X, W0, alpha, lam):
+    """Mixed ridge + prior: independent data and prior penalties.
+
+    min_W ||X - C@W||^2 + alpha*||W||^2 + lam*||W - W0||^2
+    Solution: W = (C'C + (alpha+lam)*I)^{-1} (C'X + lam*W0)
+
+    Args:
+        C: (n, K) design matrix
+        X: (n, V_s) voxel patterns
+        W0: (K, V_s) prior weight matrix
+        alpha: data ridge penalty
+        lam: prior penalty
+
+    Returns:
+        W: (K, V_s)
+    """
+    K = C.shape[1]
+    return np.linalg.solve(
+        C.T @ C + (alpha + lam) * np.eye(K),
+        C.T @ X + lam * W0
+    )
+
+
+def fit_W_bayes_prior(C, X, W0, var_W, gamma):
+    """Bayesian prior with per-element precision from HC variance.
+
+    Per-voxel solve: w_v = (C'C + diag(gamma / var_W[:, v]))^{-1}
+                           (C'x_v + diag(gamma / var_W[:, v]) @ w0_v)
+
+    Args:
+        C: (n, K) design matrix
+        X: (n, V_s) voxel patterns
+        W0: (K, V_s) prior mean
+        var_W: (K, V_s) prior variance
+        gamma: global precision scale
+
+    Returns:
+        W: (K, V_s)
+    """
+    K, V_s = W0.shape
+    CtC = C.T @ C        # (K, K)
+    CtX = C.T @ X        # (K, V_s)
+    W = np.zeros((K, V_s))
+
+    for v in range(V_s):
+        prec_v = gamma / var_W[:, v]         # (K,) per-channel precision
+        Lambda_v = np.diag(prec_v)           # (K, K)
+        lhs = CtC + Lambda_v
+        rhs = CtX[:, v] + Lambda_v @ W0[:, v]
+        W[:, v] = np.linalg.solve(lhs, rhs)
+
+    return W
+
+
+def fit_W_smooth_prior(C, X, W0, alpha, lam):
+    """Channel-smooth ridge with group prior.
+
+    min_W ||X - C@W||^2 + alpha*||D@W||^2 + lam*||W - W0||^2
+    Solution: W = (C'C + alpha*D'D + lam*I)^{-1} (C'X + lam*W0)
+
+    Args:
+        C: (n, K) design matrix
+        X: (n, V_s) voxel patterns
+        W0: (K, V_s) prior weight matrix
+        alpha: smoothness penalty
+        lam: prior penalty
+
+    Returns:
+        W: (K, V_s)
+    """
+    K = C.shape[1]
+    D = np.zeros((K, K))
+    for i in range(K):
+        D[i, i] = 1.0
+        D[i, (i + 1) % K] = -1.0
+    G = C.T @ C + alpha * (D.T @ D) + lam * np.eye(K)
+    return np.linalg.solve(G, C.T @ X + lam * W0)
+
+
 # ============================================================================
 # Prediction & Decoding
 # ============================================================================

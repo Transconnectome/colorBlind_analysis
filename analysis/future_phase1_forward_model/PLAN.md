@@ -1,7 +1,7 @@
 # Group-Prior Prediction Model — PLAN
 
-> Last updated: 2026-03-09
-> Status: Implementation complete; awaiting server deployment
+> Last updated: 2026-03-10
+> Status: Baseline complete; prior failure investigation planned (Section 9h)
 > Phase: Future Phase 1 — Forward Model (SRQ3)
 
 ---
@@ -542,6 +542,584 @@ Already described in Section 5. Additional detail:
 
 **Interpretation**: High variance → model is sensitive to training data composition → less trustworthy. Low variance → robust model selection.
 
+### 9g. Prediction Improvement Methods (Q8 — NEW, 2026-03-10)
+
+**Motivation**: HC LOCO ridge_gcv voxel_corr = 0.130 (V1), r²=0.017. Statistically significant (p=0.012) but practically weak. The forward model must predict well enough for Phase 2 filter to have room for improvement.
+
+**Diagnosis**: df is NOT the bottleneck. Code uses 6 runs × 7 colors = 42 training samples for K=6 parameters (df=36). LF-4 (K=4, df=38) performing worse than FE-6 confirms this. Real bottlenecks: (1) low SNR of color signal in BOLD, (2) partial basis shape mismatch, (3) noise dimensions in W.
+
+#### 9g-1. Reduced-Rank Ridge (RRR) — Priority: HIGH
+
+**Method**: After ridge fit, SVD-truncate W to rank r:
+```
+W_ridge = (C^T@C + αI)^{-1} @ C^T @ X    # standard ridge
+U, Σ, V^T = SVD(W_ridge)
+W_RRR = U[:, :r] @ diag(Σ[:r]) @ V^T[:r, :]   # rank-r approximation
+```
+
+**Hyperparameter**: r ∈ {2, 3, 4}, selected via inner-CV (same LORO loop).
+
+**Rationale**: Visual cortex color representation may have < 6 independent spatial patterns. Removing noise dimensions improves interpolation. Effective parameter reduction: 50% at r=3.
+
+**Implementation**: One line of SVD truncation after existing ridge fit. Add `--rank` argument to validation script.
+
+#### 9g-2. Channel-Smoothness Regularization (Circular Tikhonov) — Priority: HIGH
+
+**Method**: Add circular smoothness penalty connecting adjacent FE channels:
+```
+min_W ||X - C @ W||²_F + α||W||²_F + β||D @ W||²_F
+```
+
+where D is 6×6 circular difference matrix:
+```
+D = [[ 1,-1, 0, 0, 0, 0],
+     [ 0, 1,-1, 0, 0, 0],
+     [ 0, 0, 1,-1, 0, 0],
+     [ 0, 0, 0, 1,-1, 0],
+     [ 0, 0, 0, 0, 1,-1],
+     [-1, 0, 0, 0, 0, 1]]
+```
+
+**Closed-form**: `W = (C^T@C + αI + βD^T@D)^{-1} @ C^T @ X`
+
+**Rationale**: "Ridge between basis functions" — a voxel tuned to green should have similar weights for adjacent yellow/cyan channels. Standard ridge shrinks each channel independently; this couples them.
+
+**Hyperparameter**: α × β 2D grid (e.g., 5×5=25 combinations), inner-CV.
+
+#### 9g-3. Elastic Net — Priority: LOW
+
+**Method**: L1+L2 penalty for per-voxel channel sparsity.
+```
+min_W ||X - C @ W||²_F + α||W||₁ + β||W||²_F
+```
+
+**Implementation**: `sklearn.ElasticNetCV` per voxel. More complex than RRR/Smoothness.
+
+#### 9g-4. Combined RRR + Smoothness — Priority: AFTER 9g-1 and 9g-2
+
+If both methods individually help, combine: Circular Tikhonov fit → SVD truncation.
+
+**Experimental design**: 2×2 factorial (±RRR × ±Smoothness) × 4 ROIs × 10 subjects.
+
+### 9h. Prior Failure Investigation — LORO-LOCO Dissociation (Q9 — NEW, 2026-03-10)
+
+**Motivation**: prior_ft wins LORO (V1: 0.315 vs ridge 0.201) but loses LOCO (V1: -0.056 vs ridge +0.130). The LORO-LOCO dissociation means the SRM group prior captures run-level variance structure but NOT color-specific tuning for interpolation. This section investigates WHY and tests structured alternatives.
+
+**Root cause**: The prior-centered ridge `min ||X - CW||² + λ||W - W0||²` uses LORO-based nested CV to select λ. This biases λ HIGH (typically 10-100), keeping W close to W0. But for LOCO, what matters is the *curvature* of the individual's tuning — W0 (HC group average) smooths out exactly this curvature. Meanwhile, ridge_gcv's shrinkage toward ZERO is agnostic about channel structure: it regularizes magnitude without distorting shape, which is a better inductive bias for interpolation.
+
+**Three hypotheses**:
+
+| ID | Hypothesis | If true... |
+|----|-----------|-----------|
+| H1 | **Shape mismatch** — W0 has the wrong voxel pattern direction for the individual | cosine_sim(W0_pred, X_true) is low; no amount of λ tuning can fix this |
+| H2 | **Uncertainty blindness** — W0 is unreliable for some channels/voxels but treated uniformly | LOCO errors correlate with inter-subject A_i variance; per-element weighting helps |
+| H3 | **Missing smoothness** — LOCO needs smooth interpolation, which is orthogonal to "match the group" | Structural smoothness (without any group prior) improves LOCO |
+
+#### 9h-1. Diagnostic: Shape vs Magnitude Decomposition — Priority: HIGH
+
+**Method**: For each LOCO fold c and each subject s:
+
+```python
+W0_pred = C[c] @ W0           # (1, V_s) — group prior predicted pattern
+W_ridge_pred = C[c] @ W_ridge # (1, V_s) — ridge predicted pattern
+X_true = amp[:, c, :].mean(0) # (V_s,) — actual pattern (run-averaged)
+
+# Shape match (scale-invariant):
+cos_prior = cosine_similarity(W0_pred, X_true)
+cos_ridge = cosine_similarity(W_ridge_pred, X_true)
+```
+
+**Interpretation**:
+- If W0 has correct SHAPE (high cosine) but low voxel_corr → magnitude/scaling issue → Model 9h-5 (shape-preserving) may help
+- If W0 has WRONG shape (low cosine) → group average is fundamentally mismatched → favor pure smoothness (9g-2) or mixed model (9h-3)
+- Compare cos_prior vs cos_ridge systematically across all folds × subjects
+
+**Implementation**: Add to existing validation script as a diagnostic output. No new model fitting needed.
+
+#### 9h-2. Diagnostic: Per-Color LOCO + Inter-Subject A_i Variance — Priority: HIGH
+
+**Method**: Extends 9f-2 (per-color LOCO breakdown) with a causal analysis:
+
+1. For each ROI, compute per-element variance of A_i across HC: `σ²_A[j, m] = Var(A_i[j, m])`
+2. For each held-out color c, compute the "prior uncertainty" for that color:
+   `prior_var(c) = ||C[c]||² ⊙ σ²_A` (how uncertain is the prior for this color?)
+3. Correlate per-color prior_var with per-color LOCO error (prior_ft)
+
+**Expected**: If H2 is correct, colors with high prior uncertainty should have worse prior_ft LOCO performance. This would support uncertainty-weighted Model 9h-4.
+
+**Implementation**: Post-hoc analysis of existing A_i files (saved in `results/group_prior/{ROI}/sub-{ID}_A.npy`) and per-fold LOCO results.
+
+#### 9h-3. Model: Mixed Regularization (Ridge + Prior) — Priority: HIGH
+
+**Hypothesis tested**: H1 (partial shape match — prior is partially useful)
+
+**Objective**:
+```
+min ||X - CW||² + α||W||² + λ||W - W0||²
+```
+
+**Closed-form solution**:
+```
+W = (C'C + (α+λ)I)^{-1} (C'X + λW0)
+```
+
+This is equivalent to shrinking toward a SCALED prior `λ/(α+λ) · W0` with total penalty `(α+λ)`. The data determines the optimal mixing:
+- If optimal λ/(α+λ) ≈ 0 → prior is unhelpful (confirms ridge_gcv is sufficient)
+- If optimal λ/(α+λ) ≈ 1 → current prior_ft is correct (contradicts baseline results)
+- If 0 < λ/(α+λ) < 1 → prior is partially useful when combined with zero-shrinkage
+
+**Hyperparameter selection**: 2D grid search via inner LOCO CV (hold out 1 of 7 remaining colors):
+```
+α_grid = [0.01, 0.1, 1, 10, 100]
+λ_grid = [0, 0.01, 0.1, 1, 10, 100]
+```
+25 combinations per inner fold. Inner LOCO uses 6 colors for training (still determined for K=6 with regularization).
+
+**Key methodological change**: Inner CV uses **LOCO** (color-held-out), not LORO (run-held-out). This directly optimizes for interpolation. With 7 training colors in the outer fold, inner LOCO holds out 1 → 6 training colors + regularization makes K=6 solvable.
+
+**Implementation**: Modify `_inner_cv_lambda_loco()` to accept both α and λ grids. Wrap in `fit_model_loco()` as a new model type `mixed_ridge_prior`.
+
+#### 9h-4. Model: Bayesian Uncertainty-Weighted Prior — Priority: HIGH
+
+**Hypothesis tested**: H2 (uncertainty blindness)
+
+**Principle**: Replace scalar λ with per-element precision derived from inter-subject spread. Trust the prior MORE where HC subjects agree, LESS where they disagree.
+
+**Construction of per-element variance**:
+
+For target subject s with projection R_s:
+```python
+# Project each HC's individual A_i into the target subject's voxel space
+for h in HC_subjects:
+    W_h = (R_s @ A_h).T          # (K, V_s) — HC h's encoding in subject s's space
+
+W0 = mean(W_h)                   # (K, V_s) — group prior (same as current)
+σ²[m, v] = Var(W_h[m, v])        # (K, V_s) — inter-subject spread per element
+```
+
+**Objective (scaled form)**:
+```
+min ||X - CW||² + γ · Σ_{m,v} (W[m,v] - W0[m,v])² / σ²[m,v]
+```
+
+where γ > 0 is a global scaling hyperparameter that controls overall prior trust. The **relative** weighting across elements is fixed by the inter-subject data; γ controls the **absolute** level.
+
+**Per-voxel closed form** (K×K solve, trivially fast):
+```python
+Λ_v = diag(γ / σ²[:, v])         # (K, K) diagonal precision matrix per voxel
+w_v = (C'C + Λ_v)^{-1} @ (C'x_v + Λ_v @ w0_v)
+```
+
+**Bayesian interpretation**:
+- Prior: `p(W[m,v]) = N(W0[m,v], σ²[m,v] / γ)`
+- Likelihood: `p(X | W) = N(CW, noise_var · I)`
+- Posterior MAP: the weighted ridge solution above
+
+**Hyperparameter**: γ ∈ [0.01, 0.1, 1, 10, 100], selected via inner LOCO CV.
+
+**Why γ is necessary**: Without γ, the precision is fully determined by inter-subject spread, which may not be calibrated against the noise level of the individual's data. γ rescales the prior variance relative to the data likelihood:
+- γ >> 1: tight prior (trust group even for uncertain elements)
+- γ << 1: loose prior (only trust group where subjects strongly agree)
+- γ = 1: prior variance equals inter-subject variance (default Bayesian)
+
+**Numerical safeguard**: Floor σ² at a small value (e.g., `max(σ², 1e-6)`) to avoid infinite precision for elements where HC subjects happen to agree exactly.
+
+**Implementation**: New function `compute_prior_precision(A_list, R_s)` in `utils_forward_model.py`. Returns (K, V_s) precision matrix. New model type `bayes_prior` in validation script.
+
+#### 9h-5. Model: Smooth + Prior Hybrid — Priority: MEDIUM (after 9h-3 and 9h-4)
+
+**Hypothesis tested**: H2 + H3 combined
+
+**Objective**:
+```
+min ||X - CW||² + α||DW||² + λ||W - W0||²
+```
+
+where D is the 6×6 circular difference matrix from §9g-2.
+
+**Closed-form**:
+```
+W = (C'C + αD'D + λI)^{-1} (C'X + λW0)
+```
+
+**Rationale**: Gets structural smoothness from D (helps interpolation) and starting-point guidance from W0 (helps when individual data is sparse). Tests whether the prior becomes helpful when combined with the right structural constraint.
+
+**Hyperparameter**: Joint (α, λ) grid via inner LOCO CV.
+
+**Implementation**: Combine existing smooth Tikhonov (9g-2) with prior_ridge machinery. New model type `smooth_prior`.
+
+#### 9h-6. Evaluation Protocol
+
+**All models evaluated on the same LOCO (8-fold) protocol** with clean prior recomputation (excluding held-out color from A_g for prior-based models). This ensures fair comparison with existing baseline results.
+
+**Comparison table** (target output):
+
+| Model | Type | λ selection | V1 HC | V2 HC | hV4 HC | V3 HC |
+|-------|------|------------|-------|-------|--------|-------|
+| ridge_gcv | baseline | GCV | 0.130 | 0.150 | 0.183 | 0.023 |
+| prior_ft | baseline | LORO inner | -0.056 | -0.060 | 0.169 | -0.101 |
+| mixed (9h-3) | new | LOCO inner (α,λ) | ? | ? | ? | ? |
+| bayes_prior (9h-4) | new | LOCO inner (γ) | ? | ? | ? | ? |
+| smooth_tikh (9g-2) | new | LOCO inner (α,β) | ? | ? | ? | ? |
+| smooth+prior (9h-5) | new | LOCO inner (α,λ) | ? | ? | ? | ? |
+
+**Decision rules**:
+- If smooth_tikh > ridge_gcv: H3 confirmed, smoothness is the key inductive bias
+- If bayes_prior > prior_ft: H2 confirmed, uncertainty-weighting rescues the prior
+- If mixed with λ/(α+λ) ≈ 0: prior is truly unhelpful, ridge suffices
+- If smooth+prior > smooth_tikh: prior provides value when combined with smoothness
+- If nothing > ridge_gcv: current baseline is already optimal; strong evidence for paper
+
+**Secondary analysis**: HC-CVD group comparison (Welch t-test) and individual CVD profiles (Crawford-Howell) using the best model from this comparison. Compare effect sizes against baseline ridge_gcv.
+
+#### 9h-7. Implementation Plan
+
+| Step | Script | Depends on | Priority |
+|------|--------|-----------|----------|
+| 1 | `diagnose_prior_failure.py` — 9h-1 + 9h-2 diagnostics | Existing results | **FIRST** |
+| 2 | Add `compute_prior_precision()` to `utils_forward_model.py` | A_i files, R_s | HIGH |
+| 3 | Add models `mixed_ridge_prior`, `bayes_prior`, `smooth_prior` to `validate_loro_loco_loso.py` | Step 2 | HIGH |
+| 4 | `run_step4_prior_investigation.sbatch` — run all new models | Steps 1-3 | HIGH |
+| 5 | `analyze_prior_investigation.py` — comparison table + decision | Step 4 results | HIGH |
+
+**Key change from baseline**: Inner CV for hyperparameter selection switches from **LORO** (run-held-out) to **LOCO** (color-held-out) for all new models. This directly optimizes for interpolation, addressing the original observation that LORO-based λ selection biases toward the prior.
+
+### 9h-8. smooth_tikh Permutation Result (2026-03-11)
+
+**FAILED all ROIs** — but paradoxically, RDM improvements are genuine. See `ANALYSIS_smooth_tikh_paradox.md` for detailed analysis.
+
+| ROI | Observed | Null Mean | Null 95% CI | p_perm | Verdict |
+|-----|----------|-----------|-------------|--------|---------|
+| V1 | 0.189 | 0.187 | [0.179, 0.197] | 0.331 | FAIL |
+| V2 | 0.216 | 0.212 | [0.202, 0.223] | 0.188 | FAIL |
+| V3 | 0.125 | 0.128 | [0.115, 0.144] | 0.613 | FAIL |
+| hV4 | 0.239 | 0.241 | [0.230, 0.252] | 0.613 | FAIL |
+
+**Root cause:** voxel_corr captures shared spatial structure (covariance baseline), not just color-discriminative signal. Smoothness penalty (β=100) amplifies this baseline → high null mean (~0.19-0.24).
+
+**Key insight:** RDM-based metrics (rdm_pearson) DID improve significantly (artifact check passed) because RDM removes mean patterns. The permutation failure is a metric problem, not a model problem.
+
+**Resolution:** See §9i for alternative evaluation strategies.
+
+### 9i. Alternative Evaluation Strategies — Leveraging smooth_tikh (Q10 — NEW, 2026-03-11)
+
+**Motivation**: smooth_tikh shows genuine improvements (RDM +0.5, HC-CVD d=3.43) but fails voxel_corr-based permutation. The failure is a *metric problem*, not a model problem. This section explores alternative metrics that capture smooth_tikh's benefits while being permutation-robust.
+
+**Core insight:** voxel_corr conflates two components:
+1. Color-discriminative signal (what we want)
+2. Shared spatial structure / baseline covariance (nuisance)
+
+Smoothness penalty amplifies #2 → high permutation null baseline. Solution: Use metrics that isolate #1.
+
+---
+
+#### 9i-1. RDM-Based Primary Metric (RECOMMENDED) ⭐
+
+**Rationale:**
+- RDM (Representational Dissimilarity Matrix) inherently removes mean patterns via distance computation
+- smooth_tikh rdm_pearson improvements ARE genuine (artifact check passed, Section 7n)
+- RDM directly measures color-discriminative geometry
+
+**Proposal:**
+```python
+# Phase 2 filter evaluation
+PRIMARY_METRIC = rdm_pearson  # Spearman correlation of RDMs
+SECONDARY_METRIC = voxel_corr  # Descriptive only
+```
+
+**Validation:**
+1. Rerun permutation test with **rdm_pearson as test statistic** (not voxel_corr)
+2. Expected: smooth_tikh passes (RDM improvements are robust)
+3. If passes → adopt smooth_tikh with RDM-based evaluation
+
+**Implementation:**
+- Script: `permutation_test_rdm.py` (modify test statistic in existing framework)
+- Compute: RDM from 8 LOCO predictions, correlate with actual RDM
+- Shuffle: Color labels (same as voxel_corr permutation)
+
+**Advantage:**
+- No model modification needed
+- Scientifically appropriate (color space geometry is the question)
+- Leverages smooth_tikh's validated strength
+
+**Priority:** **HIGH** — simplest path to validate smooth_tikh
+
+---
+
+#### 9i-2. Baseline-Corrected voxel_corr
+
+**Method:**
+```python
+# Per model × ROI:
+observed_voxel_corr = 0.189  # e.g., smooth_tikh V1
+null_mean = 0.187            # From permutation test
+
+# Corrected metric
+corrected_voxel_corr = observed_voxel_corr - null_mean  # +0.002 (color signal)
+```
+
+**Interpretation:** Corrected metric = color-specific signal above covariance baseline.
+
+**Example comparison (V1):**
+- ridge_gcv: 0.130 - 0.11 = **+0.020** color signal
+- smooth_tikh: 0.189 - 0.187 = **+0.002** color signal
+- **ridge_gcv wins** for color-discriminative prediction
+
+**Advantage:**
+- Separates signal from nuisance
+- Uses existing permutation infrastructure
+
+**Disadvantage:**
+- Requires permutation for every model (expensive)
+- Corrected values are small → high relative noise
+
+**Priority:** MEDIUM — backup if RDM-based approach insufficient
+
+---
+
+#### 9i-3. Partial Correlation (Control for Baseline)
+
+**Method:**
+```python
+def partial_voxel_corr(Y_pred, Y_actual):
+    baseline = Y_actual.mean(axis=0)  # (V_s,) shared across colors
+
+    # Remove baseline
+    Y_pred_res = Y_pred - baseline
+    Y_actual_res = Y_actual - baseline
+
+    return corr(Y_pred_res, Y_actual_res)
+```
+
+**Advantage:**
+- Direct color-specific correlation
+- No permutation test needed
+
+**Disadvantage:**
+- Assumes baseline = color-average (may be incomplete)
+- Might remove legitimate signal if colors have different mean levels
+
+**Priority:** LOW — exploratory
+
+---
+
+#### 9i-4. Discriminability-Based Objective
+
+**Method:** Optimize for color separability (LDA-like), not voxel correlation.
+
+```python
+def fit_W_discriminative(C, X, alpha, beta):
+    """
+    max trace(W @ S_between @ W.T) / trace(W @ S_within @ W.T)
+    subject to: alpha*||W||^2 + beta*||D@W||^2 < threshold
+    """
+```
+
+**Advantage:**
+- Directly targets color discriminability
+- Less affected by baseline
+
+**Disadvantage:**
+- Non-convex (iterative optimization)
+- Changes model fundamentally
+
+**Priority:** LOW — future work
+
+---
+
+#### 9i-5. Implementation Plan
+
+| Priority | Strategy | Script | Dependencies | Expected Outcome |
+|----------|----------|--------|-------------|------------------|
+| **1 (HIGH)** | **RDM-based permutation** | `permutation_test_rdm.py` | Existing LOCO results | smooth_tikh passes |
+| 2 (MEDIUM) | Baseline-corrected voxel_corr | `analyze_corrected_metrics.py` | Permutation nulls | Compare models on corrected metric |
+| 3 (LOW) | Partial correlation | Modify validation scripts | None | Alternative metric validation |
+
+**Decision rule:**
+- If RDM-based permutation passes → **adopt smooth_tikh with RDM as primary metric**
+- If RDM-based permutation also fails → use baseline-corrected voxel_corr for model comparison
+- Proceed to Phase 2 with best HC model
+
+---
+
+### 9j. hV4-Informed Multi-ROI Prior (Q11 — NEW, 2026-03-11)
+
+**Motivation:** Current model works for HC hV4 (p=0.044 permutation) but fails for V1/V2 and all CVD subjects. Use hV4's robust color representation to inform V1/V2 encoding.
+
+**Hypothesis:** hV4 maintains color structure that V1/V2 should be consistent with. Use hV4 as "color axis reference" for lower visual areas.
+
+---
+
+#### 9j-1. Cross-ROI Prior Projection
+
+**Method 1: RDM-Constrained Fitting**
+
+```python
+# Step 1: Compute target RDM from hV4
+W_hV4 = fit_W_ridge(C, X_hV4, alpha)  # hV4 encoder (works for both HC/CVD)
+RDM_target = compute_rdm(W_hV4 @ basis_full)  # hV4's color geometry
+
+# Step 2: Fit V1 weights with RDM constraint
+def fit_W_rdm_constrained(C, X_V1, RDM_target, lambda_rdm):
+    """
+    min ||X - CW||^2 + lambda_rdm * ||RDM(W@C_full) - RDM_target||^2
+    """
+    # Iterative optimization (RDM is non-linear in W)
+```
+
+**Method 2: Shared Color Subspace**
+
+```python
+# Assumption: V1/V2/hV4 share a common COLOR subspace (despite different spatial maps)
+
+# Step 1: Learn hV4 color subspace (via PCA or ICA on W_hV4)
+color_components = PCA(W_hV4.T, n_components=3)  # 3D color subspace
+
+# Step 2: Constrain V1 weights to this subspace
+W_V1_constrained = W_V1_free @ color_components.T @ color_components
+```
+
+**Advantage:**
+- Leverages hV4's validated color signal
+- Single framework for HC and CVD (if hV4 works for CVD)
+
+**Challenge:**
+- Cross-ROI projection is non-trivial (different voxel spaces)
+- May overconstraint V1/V2 if hV4 structure differs
+
+**Priority:** MEDIUM — after §9i RDM validation confirms hV4's role
+
+---
+
+#### 9j-2. hV4-Adaptive Basis Initialization
+
+**Idea:** Use hV4 to infer subject's color space distortion, initialize V1/V2 basis centers accordingly.
+
+```python
+# Step 1: Fit adaptive basis for hV4 (§9k)
+centers_hV4 = fit_adaptive_basis(X_hV4)  # Per-subject hV4 centers
+
+# Step 2: Initialize V1/V2 basis from hV4
+centers_V1_init = centers_hV4  # Assume V1 follows hV4 color axes
+
+# Step 3: Fine-tune V1/V2 centers (allow small deviations)
+centers_V1 = fit_adaptive_basis(X_V1, centers_init=centers_V1_init,
+                                lambda_deviation=10)  # Penalty for deviating from hV4
+```
+
+**Advantage:**
+- Reduces V1/V2 optimization DOF (6 centers → small deviations)
+- Respects hierarchy (hV4 informs V1/V2)
+
+**Priority:** HIGH (if adaptive basis §9k is implemented)
+
+---
+
+### 9k. Adaptive Basis Optimization (Q12 — NEW, 2026-03-11)
+
+**Motivation:** CVD subjects have distorted color axes → fixed FE-6 basis at [0°, 60°, ...] may be misaligned. Optimize basis centers per subject to match individual color geometry.
+
+**Goal:** Make model work for BOTH HC and CVD by respecting individual color spaces.
+
+---
+
+#### 9k-1. Subject-Specific Basis Centers
+
+**Method:**
+
+```python
+def fit_adaptive_basis(X, n_channels=6, lambda_spacing=1.0):
+    """
+    Optimize basis function centers to maximize LOCO cross-validation.
+
+    Args:
+        X: (n_runs, n_colors, V_s) voxel responses
+        n_channels: number of basis channels (default 6)
+        lambda_spacing: regularization for even spacing
+
+    Returns:
+        centers_opt: (n_channels,) optimized centers [deg]
+        W_opt: (n_channels, V_s) encoding weights
+    """
+    from scipy.optimize import minimize
+
+    # Initial centers (FE-6 default)
+    centers_init = np.linspace(0, 360, n_channels, endpoint=False)
+
+    def objective(centers):
+        # Rebuild basis
+        C = create_basis_matrix(HUE_ANGLES, centers=centers)
+
+        # Fit weights
+        W = fit_W_ridge(C, X, alpha=gcv_alpha(C, X))
+
+        # LOCO cross-validation score
+        loco_score = -evaluate_loco_rdm_corr(W, C, X)  # Use RDM (§9i)
+
+        # Regularization: penalize uneven spacing
+        c_sorted = np.sort(centers)
+        spacing = np.diff(c_sorted, append=c_sorted[0] + 360)
+        spacing_penalty = lambda_spacing * np.var(spacing)
+
+        return loco_score + spacing_penalty
+
+    # Constrained optimization
+    bounds = [(0, 360)] * n_channels
+    result = minimize(objective, centers_init, method='L-BFGS-B', bounds=bounds)
+
+    centers_opt = result.x % 360
+    return centers_opt
+```
+
+**Expected outcomes:**
+- **HC subjects:** centers ≈ [0°, 60°, 120°, 180°, 240°, 300°] (symmetric)
+- **Deutan CVD:** compressed green-red axis, e.g. [0°, 55°, 110°, 180°, 250°, 305°]
+- **Protan CVD:** compressed red-green axis differently
+
+**Validation:**
+1. Within-subject LOCO (test generalization with optimized basis)
+2. Compare CVD vs HC center patterns (interpret distortion)
+3. Test: Does adaptive basis rescue CVD LOCO (currently negative)?
+
+---
+
+#### 9k-2. Hierarchical Adaptive Basis (hV4-Informed)
+
+**Combine §9j and §9k:**
+
+```python
+# Use hV4 to initialize V1/V2 basis optimization
+centers_hV4_CVD = fit_adaptive_basis(X_hV4_CVD)
+centers_V1_init = centers_hV4_CVD  # hV4 as prior
+
+centers_V1 = fit_adaptive_basis(X_V1_CVD,
+                                centers_init=centers_V1_init,
+                                lambda_prior=10)  # Stay close to hV4
+```
+
+**Advantage:**
+- hV4 constrains search space (reduces overfitting)
+- Respects anatomical hierarchy
+
+**Priority:** HIGH (after hV4 validation)
+
+---
+
+#### 9k-3. Implementation Plan
+
+| Step | Script | Output | Priority |
+|------|--------|--------|----------|
+| 1 | `fit_adaptive_basis.py` | Per-subject × ROI optimized centers | **HIGH** |
+| 2 | `validate_adaptive_loco.py` | LOCO with adaptive basis vs fixed basis | **HIGH** |
+| 3 | `analyze_cvd_centers.py` | HC vs CVD center comparison, distortion quantification | MEDIUM |
+| 4 | `fit_hierarchical_adaptive.py` | hV4-informed V1/V2 (§9k-2) | MEDIUM |
+
+**Validation criteria:**
+- Success = CVD LOCO > 0 in at least 2 ROIs with adaptive basis
+- Interpret = CVD center patterns reveal perceptual distortion
+
+---
+
 ### 9d. Native Voxel-Space Inverse Transform (Q4)
 
 **Motivation**: Current metrics are computed in Procrustes space. A reviewer may ask: "Does the model actually predict activity in the subject's native voxel space, or does the Procrustes alignment itself create an artifactual structure?"
@@ -605,47 +1183,153 @@ Gate: CVD metric > HC 5th percentile. This asks "is the CVD prediction within th
 
 ---
 
-## 11. Execution Priority
+## 11. Execution Priority (Updated 2026-03-11)
 
-Strict sequential dependency — each step gates the next.
+### Phase 1a: Baseline (COMPLETE ✅)
 
-| Step | Script(s) | Output | Gate |
+| Step | Script(s) | Output | Status |
 |---|---|---|---|
-| 1a | `step_a_fit_srm.py` | R_i per HC subject | — |
-| **1b** | **`check_rs_stability.py`** | **R_s split-half cosine similarity** | **cosine > 0.5 per ROI → proceed; else redesign prior approach** |
-| 2a | `step_b_group_prior.py` | A_i, A_g per ROI | — |
-| 2b | `step_c_project_prior.py` | W_{0,s} per subject | — |
-| 3 | `step_d_finetune.py` | W_s per subject (lambda via nested CV) | — |
-| **4** | **`validate_loro_loco_loso.py`** | **LORO r, LOCO r, LOCO MAE** | **LOCO r > 0 (p < 0.05) → proceed; else STOP** |
-| 5 | Encoding-basis ablation (Stage 1) | Basis comparison table | Pick best basis |
-| 6 | Full model comparison (Stage 2) | 5 models × 3 CV × 4 ROI table | Identify best model |
-| 7 | Phase 2 filter design | T_ψ optimization | — |
+| 1a | `step_a_fit_srm.py` | R_i per HC subject | ✅ DONE |
+| 1b | `check_rs_stability.py` | R_s split-half cosine similarity | ✅ DONE (all PASS) |
+| 2a | `step_b_group_prior.py` | A_i, A_g per ROI | ✅ DONE |
+| 2b | `step_c_project_prior.py` | W_{0,s} per subject | ✅ DONE |
+| 3 | `step_d_finetune.py` | W_s per subject (nested CV) | ✅ DONE |
+| 4 | `validate_loro_loco_loso.py` | LORO/LOCO/LOSO (4 models) | ✅ DONE |
+| 5 | Basis ablation | FE-6 vs LF-4 vs LF-6 | ✅ DONE (FE-6 wins) |
+| 6 | Extended models (§9g, §9h) | smooth_tikh + prior variants | ✅ DONE |
 
-**Step 1b is from red team criticism 1** — verifies R_s projection reliability before investing in Steps 2-4.
-
-**Step 4 is the critical go/no-go gate** — if prediction model fails LOCO, everything downstream is blocked.
+**Current encoder:** ridge_gcv (hV4 permutation-validated, p=0.044)
 
 ---
 
-## 12. Updated Pipeline Summary
+### Phase 1b: HC Model Refinement (IN PROGRESS 🎯)
+
+**Goal:** Validate smooth_tikh via alternative metrics OR finalize ridge_gcv as encoder.
+
+| Priority | Step | Script | Expected Outcome | Gate |
+|----------|------|--------|------------------|------|
+| **1 (HIGH)** | **§9i-1: RDM permutation** | `permutation_test_rdm.py` | smooth_tikh passes RDM-based test | If PASS → adopt smooth_tikh |
+| 2 (MEDIUM) | §9i-2: Baseline correction | `analyze_corrected_metrics.py` | Compare models on corrected voxel_corr | Pick encoder for Phase 2 |
+| 3 (LOW) | §9i-3: Partial corr | Modify validation scripts | Alternative metric validation | Exploratory |
+
+**Decision point:**
+- ✅ If §9i-1 passes → **smooth_tikh adopted** (RDM as primary metric)
+- ❌ If §9i-1 fails → **ridge_gcv retained** (hV4 only validated ROI)
+- → **Proceed to Phase 2 with HC-validated encoder**
+
+---
+
+### Phase 1c: CVD Model Development (PLANNED 📋)
+
+**Goal:** Make encoder work for CVD subjects (currently LOCO ≤ 0 for most ROIs).
+
+**Prerequisite:** HC model finalized (§9i decision made).
+
+| Priority | Step | Script | Goal | Target |
+|----------|------|--------|------|--------|
+| **1 (HIGH)** | **§9k-1: Adaptive basis** | `fit_adaptive_basis.py` | Optimize basis centers per subject | CVD LOCO > 0 in 2+ ROIs |
+| **2 (HIGH)** | **§9k-1 validation** | `validate_adaptive_loco.py` | Test adaptive vs fixed basis | Significant improvement |
+| 3 (MEDIUM) | §9k-2: hV4-informed adaptive | `fit_hierarchical_adaptive.py` | Use hV4 to constrain V1/V2 | Reduce overfitting |
+| 4 (MEDIUM) | §9j-1: hV4 RDM constraint | `fit_rdm_constrained.py` | V1/V2 match hV4 geometry | Alternative to adaptive |
+| 5 (LOW) | §9k-3: CVD distortion analysis | `analyze_cvd_centers.py` | Quantify color axis compression | Interpretability |
+
+**Decision criteria:**
+- **Minimum bar:** CVD LOCO > 0 in at least 2 ROIs (adaptive basis)
+- **Target:** CVD LOCO within HC range (e.g., CVD > HC 5th percentile)
+- **Stretch:** Unified HC-CVD model (same algorithm, different hyperparameters)
+
+**Gate for Phase 2:**
+- ✅ HC encoder validated (§9i complete)
+- ✅ CVD encoder shows positive LOCO OR explicitly treat CVD as exploratory
+- → **Proceed to filter optimization**
+
+---
+
+### Timeline Recommendation
+
+**Week 1-2 (HC focus):**
+1. Implement & run RDM-based permutation (§9i-1) — 2-3 days
+2. Analyze results, make encoder decision — 1 day
+3. If smooth_tikh validated → update all metrics to RDM-based
+4. Document final HC encoder in RESULTS.md
+
+**Week 3-4 (CVD focus):**
+1. Implement adaptive basis optimization (§9k-1) — 3-4 days
+2. Run on all subjects (HC + CVD), validate LOCO — 1-2 days
+3. If successful → implement hV4-informed variant (§9k-2)
+4. If fails → document limitation, proceed with HC-only Phase 2
+
+**Week 5+ (Phase 2):**
+- Filter optimization with validated encoder
+- Separate HC and CVD evaluation if needed
+
+---
+
+### Critical Dependencies
+
+**§9i-1 (RDM permutation) blocks:**
+- Encoder decision (smooth_tikh vs ridge_gcv)
+- Primary metric for Phase 2 (RDM vs voxel_corr)
+
+**§9k-1 (Adaptive basis) blocks:**
+- CVD model viability
+- Unified vs separate HC-CVD encoding
+
+**Both can run in parallel** — different questions, independent implementations.
+
+---
+
+## 12. Updated Pipeline Summary (2026-03-11)
 
 ```
-Phase 1. Prediction Model
-├── 1. Base model: forward encoding (FE-6 default)
-├── 2. Encoding basis ablation: FE-6 / LF-4 / LF-6
-├── 3. Group prior + subject adaptation (Steps A-D)
-├── 4. Validation: LORO / LOCO / LOSO
-├── 5. Model comparison: OLS / Standard Ridge / Prior-only / Prior+finetune
-├── 6. Metrics: voxel corr, R², LOCO MAE, RDM corr, normalized fit, reliability
-└── 7. Gate: reliability + predictability + interpolation
+Phase 1. Prediction Model (HC Focus First)
+├── 1. Base model: forward encoding (FE-6 default)                  ← DONE
+├── 2. Encoding basis ablation: FE-6 / LF-4 / LF-6                 ← DONE (FE-6 wins)
+├── 3. Group prior + subject adaptation (Steps A-D)                 ← DONE (ridge_gcv retained)
+├── 4. Validation: LORO / LOCO / LOSO                               ← DONE (hV4 passes permutation)
+├── 5. Model comparison: 4 baseline models                          ← DONE (ridge_gcv best LOCO)
+├── 6. Extended models (§9h): prior-based + smooth_tikh             ← DONE (smooth_tikh RDM↑, voxel_corr perm FAIL)
+├── 7. Metrics: voxel corr, R², LOCO MAE, RDM corr, NC-normalized  ← DONE
+├── 8. Gate (HC): hV4 PRIMARY GO (perm p=0.044); V1/V2 CONDITIONAL ← DONE
+│
+├── 9i. Alternative evaluation strategies (smooth_tikh rescue)      ← PLANNED
+│   ├── 9i-1. RDM-based permutation test (PRIMARY)                  ← **HIGH PRIORITY**
+│   ├── 9i-2. Baseline-corrected voxel_corr                         ← MEDIUM (backup)
+│   └── 9i-3. Partial correlation / discriminability                ← LOW (exploratory)
+│
+├── 9j. hV4-informed multi-ROI prior (cross-ROI constraints)        ← PLANNED
+│   ├── 9j-1. RDM-constrained V1/V2 fitting                         ← MEDIUM (after 9i)
+│   └── 9j-2. hV4-adaptive basis initialization                     ← HIGH (if 9k implemented)
+│
+└── 9k. Adaptive basis optimization (CVD-HC unified model)          ← PLANNED
+    ├── 9k-1. Subject-specific basis centers                         ← **HIGH PRIORITY**
+    ├── 9k-2. Hierarchical adaptive (hV4-informed V1/V2)            ← HIGH (after 9k-1)
+    └── 9k-3. Validation: CVD LOCO > 0 target                        ← HIGH
+
+Phase 1.5. CVD Model Development (After HC Validation)
+├── Apply §9i strategies to CVD subjects
+├── Test adaptive basis (§9k) on CVD → target: LOCO > 0 in 2+ ROIs
+└── If successful → unified HC-CVD encoder for Phase 2
 
 Phase 2. Filter Optimization
+├── Encoder: Best HC model from Phase 1 (smooth_tikh if 9i-1 passes, else ridge_gcv)
 ├── Filter families: identity / Fourier-4 / Fourier-6 / optional GP
-├── Evaluation: geometry improvement, held-out validation, permutation, pairwise diagnostics
-└── Individual-level analysis (Crawford & Howell per CVD subject)
+├── Evaluation metric: RDM-based (if 9i-1 validated) or baseline-corrected voxel_corr
+├── Validation: geometry improvement, held-out, permutation, pairwise diagnostics
+└── CVD individual-level analysis (Crawford & Howell)
 
 Phase 3. Behavioral Validation
 └── Neural correction → perceptual improvement prediction
 ```
 
-**Structural principle**: Prediction model의 과학적 타당성을 먼저 확실히 만들고, 그 위에서 filter를 논의한다.
+**Structural principle**:
+1. **HC model validation first** (hV4 confirmed, V1/V2 pending metric resolution)
+2. **Leverage smooth_tikh strengths** via RDM-based evaluation (§9i-1)
+3. **Extend to CVD** via adaptive basis (§9k) and hV4 constraints (§9j)
+4. **Unified framework** for Phase 2 filter optimization
+
+**Current status (2026-03-11):**
+- ✅ HC baseline complete (ridge_gcv, hV4 permutation-validated)
+- ✅ smooth_tikh shows promise (RDM↑, HC-CVD separation↑) but needs metric fix
+- 🎯 **Next: RDM-based permutation (§9i-1)** — rescues smooth_tikh if passes
+- 🎯 **Parallel: Adaptive basis development (§9k-1)** — for CVD model

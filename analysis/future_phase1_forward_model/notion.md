@@ -1,28 +1,18 @@
 # Future Phase 1: Group-Prior Prediction Model
 
 > **프로젝트**: Color Vision Deficiency Neural Representation Analysis
-> **날짜**: 2026-03-08
-> **대상**: Future Phase 1 Forward Model — Group-Prior 기반 Prediction Model 구축 및 검증
+> **날짜**: 2026-03-10 (정리: 2026-03-11)
 > **피험자**: HC 7명 (sub-01~07), CVD 3명 (sub-08 deutan, sub-09 protan, sub-10 deutan)
 > **ROI**: V1, V2, V3, hV4
-> **목적**: HC group prior를 활용한 subject-specific prediction model W_s 학습
+> **목적**: HC group prior를 활용한 subject-specific forward encoding model W_s 학습 및 검증
 
 ---
 
-## 1. 핵심: Prediction은 Procrustes Space에서 한다
+## 1. 핵심 원리
 
-### 1a. 결론
+Prediction model은 **Procrustes voxel space**에서 작동한다. SRM은 prediction 공간도 evaluation 공간도 아닌, **prior-construction helper**로만 사용된다.
 
-Prediction model의 **본체**는 Procrustes voxel space에서 작동한다. SRM은 prediction 공간도 evaluation 공간도 아닌, **prior-construction helper**로만 사용된다.
-
-핵심 목표:
-1. Prediction은 Procrustes voxel space에서 한다
-2. Group prior는 공통공간을 잠깐 거쳐 만든다
-3. 최종적으로는 target subject용 하나의 W_s만 학습한다
-
-### 1b. 왜 SRM은 prediction 공간으로 부적합한가
-
-LOCO MAE 비교 (핵심 증거):
+SRM이 prediction에 부적합한 핵심 증거 — LOCO MAE 비교:
 
 | ROI | Procrustes | SRM | Delta |
 |-----|-----------|-----|-------|
@@ -31,569 +21,420 @@ LOCO MAE 비교 (핵심 증거):
 | V3 | ~77° | **~99°** | **+22° (chance 90°보다 worse)** |
 | hV4 | ~69° | ~72° | +3° |
 
-4가지 이유 요약:
-1. **SRM은 interpolation 구조를 파괴** — V3에서 chance보다 나쁨
-2. **SRM은 stimulus → representation mapping이 아님** — voxel → latent만 학습
-3. **SRM filter는 stimulus control 불가** — latent → latent, 아닌 theta → theta' 필요
-4. **SRM은 cross-subject alignment에는 유효** — prior construction에만 활용
-
-**SRM = prior-construction helper로 역할 재정의**
+SRM은 interpolation 구조를 파괴하고 (V3에서 chance보다 나쁨), stimulus → representation mapping을 학습하지 않는다.
 
 ---
 
-## 2. 기호 정리
-
-각 subject *s*, ROI *r*에 대해:
-
-| 기호 | Shape | 의미 |
-|------|-------|------|
-| V_s | scalar | subject s의 voxel 수 (subject마다 다름) |
-| N | scalar | 조건 수 (= 8 colors, 또는 8 × 6 = 48 if run-level) |
-| K | scalar | Basis channel 수 (= 6) |
-| Y_s | V_s × N | Procrustes-aligned voxel response (`amplitudes_procrustes.npy`) |
-| C | K × N | 색 basis matrix (half-wave rectified cosine, BH2009) |
-| W_s | V_s × K | **학습 대상**: subject-specific encoding weight |
-| k | scalar | SRM latent 차원 (V1=4, V2=4, V3=3, hV4=3) |
-| R_s | V_s × k | SRM projection matrix (`srm.w_` from BrainIAK) |
-| Z_i | k × N | HC subject i의 공통공간 response |
-| A_i | k × K | HC subject i의 공통공간 encoding weight |
-| A_g | k × K | **Group prior** (HC A_i의 평균) |
-| W_{0,s} | V_s × K | target subject voxel space로 투사된 prior weight |
-
-**Prediction equation**:
-
-```
-Y_hat_s = W_s @ C
-```
-
-> **Transpose 주의**: 기존 코드 (loco_baseline.py, group_prior.py)는 W ∈ R^{K×V_s} (channels × voxels) convention을 사용. 이 문서는 W_s ∈ R^{V_s×K} (voxels × channels)를 사용. 구현 시 transpose 필요.
-
----
-
-## 3. 왜 직접 섞으면 안 되는가
-
-원래 하고 싶었던 것:
-
-```
-W_mix = alpha * W_group + (1 - alpha) * W_subject
-```
-
-**이것은 안 된다.** Subject마다 voxel 수가 다르기 때문이다:
-
-```
-W_group   ∈ R^{V_g × K}
-W_subject ∈ R^{V_s × K}
-```
-
-V_g ≠ V_s이므로 같은 공간의 행렬이 아니다. 덧셈 자체가 정의되지 않는다.
-
-> **기존 `group_prior.py`의 문제**: `analysis/phase3_decoder_comparing/model_comparison_validation/scripts/group_prior.py`는 이 문제를 `amplitudes_srm.npy` (SRM 공간)에서 작업함으로써 우회한다. 즉 `W = λ·W_ind + (1-λ)·W_group`을 SRM 공간에서 수행. 하지만 이는 Procrustes 원칙을 위반 — SRM이 interpolation 구조를 파괴하므로, SRM 공간에서의 mixing은 연속 보간 품질을 보장하지 못한다.
-
-**해결 방향**:
-1. 공통공간에서 prior를 만든 뒤
-2. 그 prior를 target subject voxel space로 내려보내고
-3. 그 prior를 중심으로 target subject의 W_s 하나만 학습
-
----
-
-## 4. 전체 알고리즘
-
-전체는 4단계이다.
+## 2. 알고리즘 (Steps A-D)
 
 ### Step A: HC 공통공간 적합
 
-HC subject i = 1, ..., M (M = 7)에 대해, Procrustes-aligned data:
+HC subject i = 1,...,M (M=7)의 Procrustes-aligned data Y_i ∈ R^{V_i × N}에 BrainIAK SRM 적합:
 
 ```
-Y_i ∈ R^{V_i × N}
+R_i ∈ R^{V_i × k},  Z_i = R_i^T @ Y_i ∈ R^{k × N}
 ```
 
-SRM을 적합하여 각 subject에 대한 projection matrix 획득:
+k 값: V1=4, V2=4, V3=3, hV4=3.
+
+### Step B: Group Prior 학습
 
 ```
-R_i ∈ R^{V_i × k}
+A_i = argmin_A ||Z_i - A @ C||² + lambda_A * ||A||²   (per HC subject)
+A_g = (1/M) * sum_i A_i                                (group prior 평균)
 ```
-
-공통공간 response 계산:
-
-```
-Z_i = R_i^T @ Y_i ∈ R^{k × N}
-```
-
-즉 subject마다 다른 voxel 수(V_i)를 가진 data를 모두 같은 k-차원 공간으로 보낸다.
-
-**Source**: BrainIAK SRM, HC-only training. k 값: V1=4, V2=4, V3=3, hV4=3.
-
-### Step B: 공통공간에서 Group Prior 학습
-
-각 HC subject에 대해, 공통공간에서 색 basis C로부터 latent response Z_i를 예측하는 encoding 학습:
-
-```
-A_i = argmin_A ||Z_i - A @ C||_F^2 + lambda_A * ||A||_F^2
-```
-
-여기서 A_i ∈ R^{k × K}. 즉 A_i는 공통공간에서의 encoding weight이다.
-
-Group prior를 평균:
-
-```
-A_g = (1/M) * sum_{i=1}^{M} A_i
-```
-
-**기본값**: 단순 평균 (omega_i = 1/M).
-
-**선택적 가중 변형**: omega_i = r_sh(i) / sum_j r_sh(j), 여기서 r_sh(i)는 subject i의 현재 ROI에 대한 split-half RDM reliability. 이는 noisy한 representation을 가진 subject의 가중치를 낮춘다.
-
-**권고**: 단순 평균으로 시작. M=7에서 한 명의 noisy subject는 평균에 제한적 영향만 미친다. Leave-one-out 분석에서 한 subject가 A_g 품질을 과도하게 저하시킬 때만 가중 평균으로 전환.
 
 ### Step C: Target Subject 공간으로 Prior 투사
-
-Target subject s에 대해, 동일한 공통공간 변환 R_s ∈ R^{V_s × k}를 얻었다고 하자.
-
-Group prior를 target subject voxel space로 투사:
 
 ```
 W_{0,s} = R_s @ A_g ∈ R^{V_s × K}
 ```
 
-차원 확인:
-- R_s: V_s × k
-- A_g: k × K
-- W_{0,s}: V_s × K
-
-**이것이 핵심이다**: voxel 수가 달라도, 공통공간을 거치면 target subject용 prior W_{0,s}를 만들 수 있다.
-
-HC subject의 경우 R_s는 SRM fitting에서 직접 얻어진다. CVD/신규 subject의 경우 SVD-based projection을 사용한다 (Phase 2 `rerun_loo_consistent.py` 참조).
-
-### Step D: Target Subject 데이터로 Fine-Tuning
-
-최종적으로 학습하는 것은 **하나의 행렬** W_s ∈ R^{V_s × K}:
+### Step D: Fine-Tuning (Closed-Form)
 
 ```
-W_s = argmin_W ||Y_s - W @ C||_F^2 + lambda * ||W - W_{0,s}||_F^2
+W_s = argmin_W ||Y_s - W @ C||² + lambda * ||W - W_{0,s}||²
 ```
 
-이 식의 의미:
-- **첫째 항** `||Y_s - W @ C||²`: target subject 실제 데이터에 맞추기
-- **둘째 항** `lambda * ||W - W_{0,s}||²`: group prior에서 너무 멀리 벗어나지 않기
-
-즉 **prior-centered ridge** (= fine-tuning / shrinkage)이다.
-
-### Closed-Form 해
-
-이 식은 해석적으로 풀 수 있다. Normal equation:
-
-```
-W_s @ (C @ C^T + lambda * I) = Y_s @ C^T + lambda * W_{0,s}
-```
-
-따라서:
-
+**Closed-form 해:**
 ```
 W_s = (Y_s @ C^T + lambda * W_{0,s}) @ (C @ C^T + lambda * I)^{-1}
 ```
 
-**이것이 가장 깔끔한 최종식이다.**
-
-### lambda의 의미
-
-lambda가 group prior와 individual information의 비율을 제어한다:
-
-| lambda | 의미 | W_s |
-|--------|------|-----|
-| 0 | Pure subject-specific fit | OLS (기존 baseline과 동일) |
-| 작은 값 | Individual 위주 + 약간의 prior regularization | Subject data 중심 |
-| 적정 값 | Group prior와 individual data의 최적 균형 | **이것을 찾는 것이 목표** |
-| → ∞ | 거의 group prior만 따름 | W_s ≈ W_{0,s} (zero-shot transfer) |
+lambda가 group prior와 individual data의 균형을 제어한다 (0 = OLS, ∞ = zero-shot transfer).
 
 ---
 
-## 5. Validation 구조
+## 3. Validation 구조
 
-이 모델은 반드시 **Procrustes voxel space**에서 평가한다. Prediction의 본체가 Y_hat = W_s @ C이기 때문이다.
+### LORO: Run Generalization
 
-### A. LORO: 새로운 Run Generalization
+- 5 runs로 W_s 학습, held-out 1 run에서 평가
+- Metric: r_LORO = corr(v_pred, v_real)
 
-**질문**: 같은 subject에서 새로운 run에도 prediction이 유지되는가?
+### LOCO: Color Interpolation
 
-**절차**:
-1. Target subject의 5 runs로 W_s 학습
-2. Held-out 1 run의 Y_s^{test}와 비교
+- 7색으로 W_s 학습, held-out 1색 예측
+- Metric: r_LOCO = corr(v_pred, v_real), MAE_LOCO = angular decoding error
+- **Filter pipeline과 가장 직접적으로 연결되는 validation**
 
-**Metric**: r_LORO = corr(v_pred, v_real) — held-out run의 특정 색에 대한 voxel pattern vector 간 상관
-
-### B. LOCO: 새로운 Color Interpolation
-
-**질문**: 훈련에 없는 색도 예측 가능한가?
-
-**절차**:
-1. Target color 제외
-2. 7색으로 W_s 학습
-3. Held-out color의 voxel pattern 예측
-
-**Metric**:
-- r_LOCO = corr(v_pred, v_real)
-- MAE_LOCO = angular decoding error (circular mean absolute error)
-
-이것이 현재 filter pipeline과 가장 직접적으로 연결되는 validation이다.
-
-### C. LOSO: 새로운 Subject Transfer
-
-**질문**: Target subject 정보가 없거나 적을 때 group prior만으로 얼마나 가능한가?
-
-세 조건:
+### LOSO: Subject Transfer
 
 | 조건 | 수식 | 의미 |
 |------|------|------|
-| Zero-shot | W_s = W_{0,s} | Prior만으로 예측 (target subject 데이터 없음) |
-| Few-shot / fine-tuned | argmin ||Y_s - WC||² + lambda·||W - W_{0,s}||² | Prior + target subject data |
-| Subject-only baseline | argmin ||Y_s - WC||² | Target subject data만 (prior 없음) |
+| Zero-shot | W_s = W_{0,s} | Prior만 (target data 없음) |
+| Fine-tuned | Prior + target data | 제안 방법 |
+| Subject-only | OLS (prior 없음) | Baseline |
 
 ---
 
-## 6. 추천 Metrics
+## 4. Metrics
 
-Prediction model의 primary metric은 decoding accuracy가 아니라 voxel-level prediction quality이다.
+| 우선순위 | Metric | 용도 |
+|---------|--------|------|
+| 1차 | Voxel prediction correlation | Primary quality measure |
+| 2차 | Explained variance (R²) | Variance accounted for |
+| 3차 | LOCO angular MAE | Interpolation 정확도 |
+| 4차 | Predicted vs real RDM correlation | Geometry 보존 |
+| 5차 | Normalized geometry fit (pred RDM / ceiling) | Ceiling 대비 성능 |
 
-| 우선순위 | Metric | 수식 | 용도 |
-|---------|--------|------|------|
-| **1차** | Voxel prediction correlation | corr(v_pred, v_real) | Primary quality measure |
-| **2차** | Explained variance | R² = 1 - ||v - v_hat||² / ||v - v_bar||² | Variance accounted for |
-| **3차** | LOCO angular MAE | MAE_LOCO | Interpolation 정확도 |
-| **4차** | Predicted vs real RDM correlation | corr(RDM_pred, RDM_real) | Geometry 보존 (보조 metric) |
-| **5차** | Normalized geometry fit | corr(RDM_pred, RDM_real) / RDM_ceiling | Ceiling 대비 성능 |
-
-### Reliability-Aware Support Metrics
-
-Reviewer가 반드시 묻는 질문: **"이 ROI의 geometry 자체가 noisy한데 모델이 못 맞춘 건가, 아니면 데이터 한계인가?"**
-
-이에 답하려면 noise ceiling이 필요하다.
-
-| Metric | 수식 | 용도 |
-|--------|------|------|
-| RDM noise ceiling | Upper: corr(RDM_single_run, RDM_group_mean). Lower: corr(RDM_LOO_mean, RDM_full_mean) | 측정 noise를 감안한 최대 달성 가능 RDM correlation |
-| Normalized fit | corr(RDM_pred, RDM_real) / RDM_ceiling | 데이터 품질 대비 모델 품질 — ROI간 공정한 비교 가능 |
-| Split-half geometry reliability | corr(RDM_odd_runs, RDM_even_runs) | Subject × ROI별 데이터 품질 |
-
-**왜 중요한가**: Noise ceiling 없이는 ROI 비교가 데이터 품질과 모델 품질을 혼동한다. V4가 V1보다 좋아 보여도, 이것이 모델이 좋은 건지 V4 RDM이 더 reliable한 건지 구분할 수 없다. Normalized fit은 이 혼동을 제거한다.
-
-**핵심 전환**: Prediction model 평가를 "absolute performance"에서 **"ceiling 대비 performance"**로 확장.
+Noise ceiling 없이는 데이터 품질과 모델 품질을 혼동한다. Normalized fit으로 ROI간 공정 비교.
 
 ---
 
-## 7. Encoding Basis Ablation
+## 5. 모델 인덱스 (11 Models Tested)
 
-**질문**: 왜 6-channel cosine tuning인가? 다른 basis가 더 좋을 수 있는가?
+### Baseline Models
 
-| Model | Stimulus basis | K | 설명 |
-|-------|---------------|---|------|
-| FE-6 | Half-wave rectified cosine | 6 | Brouwer & Heeger (2009), 현재 기본값 |
-| LF-4 | Low-frequency Fourier | 4 | cos(θ), sin(θ), cos(2θ), sin(2θ) |
-| LF-6 | Low-frequency Fourier | 6 | 3차 harmonic까지 |
+| Model | 수식 | Inner CV | 판정 |
+|-------|------|----------|------|
+| **ols** | W = (C'C)⁻¹C'X | N/A | Baseline — LOCO 불안정 (V1 +0.051) |
+| **ridge_gcv** | W = (C'C + αI)⁻¹C'X | GCV (outer LOCO) | **LOCO 최적 모델** (V1 +0.130, hV4 +0.183) |
+| **prior_only** | W = W₀ = R_s @ A_g | N/A | LOCO 전 ROI 음 — interpolation 실패 |
+| **prior_finetune** | W = (C'C + λI)⁻¹(C'X + λW₀) | Nested CV (outer LORO) | **LORO 승리** (V1 0.315), **LOCO 패배** (V1 -0.056) |
 
-모든 모델의 prediction target은 동일하다: `Y_hat_s = W_s @ C` (C만 basis에 따라 다름).
+### Encoding Improvement (Section 9g)
 
-**평가**: Section 6과 동일한 metrics (voxel correlation, R², LOCO MAE, RDM correlation, normalized fit)을 각 basis × 각 CV protocol에 적용.
+| Model | 수식 | Inner CV | 판정 |
+|-------|------|----------|------|
+| **ridge_rrr_r{2,3,4}** | SVD truncation of W | Inner LORO | **기각** — 모든 rank에서 baseline보다 나쁨 |
+| **ridge_smooth_best** | W = (C'C + αI + βD'D)⁻¹C'X | Inner LORO | **기각** — voxel_corr ↑ 기만적, rdm_pearson ↓ (37-65%) |
 
-**핵심 질문**:
-- 6-channel tuning이 정말 필요한가, 아니면 4-parameter 모델로 충분한가?
-- CVD distortion이 주로 low-frequency axis distortion인가?
-- Fourier basis가 downstream filter 매개변수화 (T_psi가 Fourier 항을 사용)와 더 잘 맞는가?
+### Extended Models (Section 9h)
 
-**기대 효과**: 이 실험은 **encoding model 구조의 정당화**를 제공한다.
+| Model | 수식 | Inner CV | 가설 | 판정 |
+|-------|------|----------|------|------|
+| **smooth_tikh** | W = (C'C + αI + βD'D)⁻¹C'X | **Inner LOCO** | H3 (smoothness) | **Leading candidate** — artifact check 통과, perm 대기 |
+| **mixed_ridge_prior** | W = (C'C + (α+λ)I)⁻¹(C'X + λW₀) | Inner LOCO | H1 (shape) | **기각** — V1-V3 음 |
+| **bayes_prior** | w_v = (C'C + diag(γ/σ²_v))⁻¹(C'x_v + Λ_v w₀_v) | Inner LOCO | H2 (uncertainty) | **기각** — V1-V3 음 |
+| **smooth_prior** | W = (C'C + αD'D + λI)⁻¹(C'X + λW₀) | Inner LOCO | H3+prior | **기각** — prior가 smoothness 효과 상쇄 |
 
-### 권장 2-Stage 설계
+### Encoding Basis (Section 9c)
 
-**Stage 1 — Basis screening** (고정 모델: Subject-only OLS):
+| Basis | Type | K | 판정 |
+|-------|------|---|------|
+| **FE-6** | Half-wave rectified cos² | 6 | **확정** — LOCO/LORO 모두 최고 |
+| LF-4 | Fourier (1st+2nd harmonic) | 4 | 기각 — FE-6보다 유의하게 나쁨 |
+| LF-6 | Fourier (3rd harmonic까지) | 6 | 기각 — 같은 K에도 최악 |
 
-|         | LORO r         | LOCO r         | LOCO MAE       |
-|---------|----------------|----------------|----------------|
-|         | V1  V2  V3  V4 | V1  V2  V3  V4 | V1  V2  V3  V4 |
-| FE-6    |  .   .   .   . |  .   .   .   . |  .   .   .   . |
-| LF-4    |  .   .   .   . |  .   .   .   . |  .   .   .   . |
-| LF-6    |  .   .   .   . |  .   .   .   . |  .   .   .   . |
+### 공통 표기
 
-값: 10명 피험자의 mean ± SEM. Bold = 열별 최고값.
+- C ∈ R^{K×N}: FE-6 basis (K=6, N=8 hue angles)
+- X ∈ R^{V_s×N}: Run-averaged voxel patterns
+- W₀ = R_s @ A_g: SRM group prior
+- D ∈ R^{K×K}: Circular difference matrix (인접 channel smoothness)
+- Inner LORO: run-held-out, Inner LOCO: color-held-out
 
-**Stage 2 — Full model comparison**: Stage 1에서 선정된 winning basis로 수행.
-→ §8 비교 실험으로 진행.
-
-**근거**: Full factorial (3 × 5 × 3 × 4 = 180 cells)은 N=10으로 해석이 불가능하다. 2단계로 분리하면 encoding-basis 질문을 먼저 해결한 후 모델 복잡성을 추가할 수 있다.
-
----
-
-## 8. 비교 실험 설계
-
-**Design**: 5 models × 3 CV protocols × 4 ROIs (× 3 encoding bases 선택적)
-
-### Models
-
-| Model | Regularization | W_s | 목적 |
-|-------|---------------|-----|------|
-| Subject-only OLS | lambda = 0 | OLS fit, regularization 없음 | Baseline |
-| Standard Ridge | ||W||² (zero 방향 shrink) | Ridge with GCV-selected alpha | 일반적 shrinkage로 충분한지 확인 |
-| Prior-only | lambda → ∞ | W_{0,s} = R_s @ A_g | Zero-shot group prior transfer |
-| Prior + fine-tuning | ||W - W_{0,s}||² | Closed-form with optimal lambda | **제안 방법** |
-| Standard Ridge + GCV | ||W||² with analytical alpha | GCV 선택 (기존 loco_ridge.py) | 가장 강력한 simple baseline |
-
-> **왜 Standard Ridge가 핵심인가**: Prior-centered ridge (||W - W_{0,s}||²)가 standard ridge (||W||²)를 유의미하게 이기지 못하면, SRM-mediated prior construction은 불필요한 복잡성이다. 이 비교는 generic regularization과 prior의 기여를 분리한다.
-
-### CV Protocols
-
-| Protocol | Held-out | 학습 데이터 |
-|----------|----------|-----------|
-| LORO | 1 run | 5 runs (같은 subject, 8 colors 전체) |
-| LOCO | 1 color | 6 runs × 7 colors (같은 subject) |
-| LOSO | 1 subject | 전체 HC data (group prior transfer) |
-
-### 기대 결과
-
-- **Prior-only > Subject-only OLS**: subject data가 부족한 LOSO에서 기대
-- **Prior + fine-tuning >= Standard Ridge**: 모든 조건에서 기대 (prior가 generic shrinkage 이상의 structured regularization 제공)
-- **Prior + fine-tuning >> Subject-only OLS**: CVD subject에서 특히 기대 (group prior가 noisy individual estimate를 regularize)
-- **Standard Ridge > Subject-only OLS**: LOCO에서 기대 (작은 training set가 regularization 혜택)
-
-### Results Table (target)
-
-```
-                  LORO (r)    LOCO (r)    LOCO (MAE)    LOSO (r)
-                  HC   CVD    HC   CVD    HC    CVD     HC   CVD
-subject-only OLS   .    .     .    .     .      .      N/A   .
-standard ridge     .    .     .    .     .      .      N/A   .
-prior-only         .    .     .    .     .      .       .    .
-prior+finetune     .    .     .    .     .      .       .    .
-ridge+GCV          .    .     .    .     .      .      N/A   .
-```
-
-× 4 ROIs (V1, V2, V3, hV4)
+**핵심 교훈**: 동일 수식(smoothness)도 inner LORO → artifact, inner LOCO → genuine improvement. Inner CV 목적 함수가 결정적.
 
 ---
 
-## 9. Gate Criteria
+## 6. 주요 결과
 
-ROI가 downstream filter 설계에 **사용 가능**하려면 세 가지 독립 조건을 만족해야 한다:
+### 6a. Reliability (Data Quality)
 
-| Criterion | Metric | Threshold | 목적 |
-|-----------|--------|-----------|------|
-| Geometry reliability | Split-half RDM correlation | > 0.3 | 데이터 품질이 모델 학습에 충분한가 |
-| Prediction quality | Normalized geometry fit (pred RDM corr / ceiling) | > 0.3 | 모델이 가용 구조를 포착하는가 |
-| Interpolation stability | LOCO voxel correlation (prior+finetune 모델) | > 0 (chance 이상, p < 0.05 by permutation) | 미보유 색에 대한 일반화 가능한가 |
+Split-half RDM correlation:
 
-**Gate rule**: 3개 모두 만족 → PASS. Criterion 1 실패 → 데이터 자체가 noisy (모델 문제 아님). Criteria 2-3 실패 → 모델 개선 필요.
+| Subject | Group | V1 | V2 | V3 | hV4 |
+|---------|-------|------|------|------|------|
+| sub-01 | HC | 0.437 | 0.217 | 0.216 | 0.645 |
+| sub-02 | HC | 0.282 | 0.169 | 0.224 | 0.656 |
+| sub-03 | HC | 0.634 | 0.278 | 0.039 | 0.926 |
+| sub-04 | HC | 0.807 | 0.735 | 0.295 | 0.438 |
+| sub-05 | HC | 0.521 | 0.810 | 0.641 | 0.199 |
+| sub-06 | HC | 0.038 | 0.683 | 0.808 | 0.639 |
+| sub-07 | HC | 0.190 | 0.048 | 0.559 | 0.721 |
+| sub-08 | CVD | 0.706 | 0.846 | 0.643 | 0.902 |
+| sub-09 | CVD | 0.503 | 0.383 | 0.334 | 0.818 |
+| sub-10 | CVD | 0.412 | 0.346 | 0.353 | 0.376 |
+| **HC M (SD)** | | **0.416 (0.266)** | **0.420 (0.312)** | **0.398 (0.276)** | **0.603 (0.229)** |
+| **CVD M (SD)** | | **0.540 (0.150)** | **0.525 (0.279)** | **0.444 (0.173)** | **0.699 (0.283)** |
 
-**기존 gate 대비 장점**: 이전 gate는 5개 structural metrics의 absolute threshold (MAE < 90°, trajectory r > 0.6 등)를 사용 — 데이터 품질과 모델 품질을 혼동했다. 새 gate는 이를 분리: reliability는 데이터에 대한 정보, normalized fit은 모델에 대한 정보.
+Noise Ceiling:
 
-즉 **reliability + predictability + interpolation** 세 조건을 동시에 본다.
+| ROI | HC NC_lower (SD) | HC NC_upper (SD) | CVD NC_lower (SD) | CVD NC_upper (SD) |
+|-----|-----------------|-----------------|------------------|------------------|
+| V1 | 0.441 (0.100) | 0.939 (0.027) | 0.527 (0.188) | 0.955 (0.027) |
+| V2 | 0.452 (0.112) | 0.943 (0.034) | 0.596 (0.161) | 0.970 (0.016) |
+| V3 | 0.451 (0.174) | 0.931 (0.036) | 0.522 (0.148) | 0.947 (0.010) |
+| hV4 | 0.573 (0.141) | 0.957 (0.025) | 0.646 (0.147) | 0.968 (0.019) |
 
-### Failure Analysis Protocol
+### 6b. Baseline LORO (mean voxel_corr)
 
-ROI가 gate를 통과하지 못할 때, *왜* 실패했는지 진단한다:
+| Model | V1 HC (SD) | V1 CVD (SD) | V2 HC (SD) | V2 CVD (SD) | V3 HC (SD) | V3 CVD (SD) | hV4 HC (SD) | hV4 CVD (SD) |
+|-------|-----------|------------|-----------|------------|-----------|------------|------------|-------------|
+| ols | 0.213 (0.044) | 0.218 (0.031) | 0.246 (0.042) | 0.259 (0.078) | 0.326 (0.081) | 0.340 (0.039) | 0.406 (0.068) | 0.399 (0.050) |
+| ridge_gcv | 0.201 (0.050) | 0.207 (0.036) | 0.230 (0.047) | 0.243 (0.092) | 0.308 (0.082) | 0.340 (0.047) | 0.401 (0.068) | 0.396 (0.060) |
+| prior_only | 0.306 (0.015) | 0.287 (0.049) | 0.300 (0.029) | 0.297 (0.017) | 0.304 (0.044) | 0.278 (0.019) | 0.317 (0.031) | 0.303 (0.036) |
+| **prior_ft** | **0.315 (0.021)** | **0.292 (0.053)** | **0.310 (0.027)** | **0.327 (0.070)** | **0.357 (0.064)** | **0.381 (0.047)** | **0.419 (0.062)** | **0.409 (0.058)** |
 
-| Gate 실패 | 해석 | 진단 방법 |
-|---|---|---|
-| Criterion 1 (reliability < 0.3) | 데이터가 너무 noisy | 모델로 해결 불가 — 더 나은 데이터나 추가 run 필요 |
-| Criterion 2 (normalized fit < 0.3) | 모델이 구조를 거의 포착하지 못함 | Per-channel encoding quality: corr(W_s[:,k] @ C[k,:], Y_s) per channel k — 어떤 basis channel이 실패하는지 식별 |
-| Criterion 3 (LOCO r ≤ 0) | Interpolation 실패 | Residual 분석: (Y_s - W_s @ C)가 구조적인가 랜덤인가? 구조적 residual → 체계적 encoding 실패; 랜덤 → voxel noise가 signal 초과 |
+HC-CVD 차이: 모든 |d| < 0.72, 모든 p > 0.22 — LORO에서 유의한 그룹 차이 없음.
 
-이는 **encoding model 부적합**과 **측정 noise**를 분리한다.
+### 6c. Baseline LOCO — Clean (mean voxel_corr)
+
+> Leakage-free: 각 fold마다 held-out color 제외하고 W0 재계산
+
+| Model | V1 HC (SD) | V1 CVD (SD) | V2 HC (SD) | V2 CVD (SD) | V3 HC (SD) | V3 CVD (SD) | hV4 HC (SD) | hV4 CVD (SD) |
+|-------|-----------|------------|-----------|------------|-----------|------------|------------|-------------|
+| ols | +0.051 (0.095) | -0.082 (0.016) | +0.092 (0.127) | -0.181 (0.055) | +0.023 (0.197) | -0.073 (0.140) | +0.158 (0.188) | -0.067 (0.141) |
+| **ridge_gcv** | **+0.130 (0.097)** | -0.012 (0.054) | **+0.150 (0.188)** | -0.174 (0.130) | +0.023 (0.240) | -0.008 (0.163) | **+0.183 (0.200)** | -0.058 (0.207) |
+| prior_only | -0.075 (0.040) | -0.098 (0.019) | -0.099 (0.071) | -0.173 (0.052) | -0.186 (0.096) | -0.203 (0.073) | +0.109 (0.084) | +0.072 (0.066) |
+| prior_ft | -0.056 (0.036) | -0.093 (0.015) | -0.060 (0.085) | -0.163 (0.057) | -0.101 (0.135) | -0.117 (0.097) | +0.169 (0.148) | -0.063 (0.166) |
+
+**LORO-LOCO 해리**: prior_ft가 LORO 승리, ridge_gcv가 LOCO 승리. SRM prior는 run-level variance를 포착하지만 color-specific tuning은 놓침.
+
+### 6d. LOCO 통계 검정 (HC, ridge_gcv)
+
+**One-sample t-test (LOCO > 0):**
+
+| ROI | HC Mean | 95% CI | t(6) | p (one-tail) |
+|-----|---------|--------|------|-------------|
+| **V1** | **0.130** | [0.040, 0.220] | **3.544** | **0.006** |
+| V2 | 0.150 | [-0.024, 0.323] | 2.109 | **0.040** |
+| V3 | 0.023 | [-0.199, 0.245] | 0.254 | 0.404 |
+| **hV4** | **0.183** | [-0.002, 0.367] | **2.423** | **0.026** |
+
+### 6e. Basis Ablation 결과
+
+**LOCO voxel_corr (OLS, n=10):**
+
+| Basis | V1 M (SD) | V2 M (SD) | V3 M (SD) | hV4 M (SD) |
+|-------|----------|----------|----------|-----------|
+| **FE-6** | **+0.011 (0.101)** | **+0.010 (0.170)** | -0.006 (0.180) | **+0.090 (0.199)** |
+| LF-4 | -0.066 (0.087) | -0.097 (0.200) | -0.105 (0.125) | -0.075 (0.091) |
+| LF-6 | -0.111 (0.154) | -0.070 (0.159) | -0.093 (0.220) | -0.093 (0.199) |
+
+**FE-6 vs LF-4 (paired t, n=10):** LOCO에서 V1 p=0.045, V2 p=0.042, hV4 p=0.016. LORO에서 전 ROI p<0.001. **FE-6 확정.**
+
+### 6f. Metric Reinforcement (9f)
+
+**Permutation test (10K color-label shuffles, HC ridge_gcv):**
+
+| ROI | Observed | Null Mean | p_perm |
+|-----|---------|-----------|--------|
+| V1 | 0.130 | 0.109 | 0.274 |
+| V2 | 0.150 | 0.130 | 0.311 |
+| V3 | 0.023 | 0.078 | 0.880 |
+| **hV4** | **0.183** | **0.080** | **0.044*** |
+
+V1/V2의 null이 ~0.10-0.13 (not zero) — voxel covariance structure가 baseline voxel_corr을 생성. **hV4만이 covariance baseline을 유의하게 초과.**
+
+**Friedman test (per-color uniformity, HC):**
+
+| ROI | chi²(7) | p | 해석 |
+|-----|---------|---|------|
+| V1 | 18.33 | 0.011* | 비균일 — Blue 높음, Yellow/Green 낮음 |
+| V2 | 14.24 | 0.047* | 비균일 |
+| V3 | 11.38 | 0.123 | 구조 없음 |
+| hV4 | 6.48 | 0.485 | **균일 — 진정한 연속 보간** |
+
+**Residual structure (HC):**
+
+| Metric | V1 | V2 | V3 | hV4 |
+|--------|------|------|------|------|
+| r(resid, orig) | 0.453 | 0.454 | 0.329 | **0.053** |
+| r(pred, orig) | 0.390 | 0.407 | 0.415 | **0.563** |
+
+hV4 residual이 near-random (0.053) — 모델이 가용 구조 대부분 포착. V1/V2에는 systematic residual 잔존.
+
+### 6g. Extended Models (9h) — LOCO voxel_corr (n=10)
+
+| Model | V1 M (SD) | V2 M (SD) | V3 M (SD) | V4 M (SD) |
+|-------|----------|----------|----------|-----------|
+| ridge_gcv | +0.087 (0.095) | +0.053 (0.194) | +0.014 (0.200) | +0.111 (0.210) |
+| prior_finetune | -0.067 (0.035) | -0.091 (0.090) | -0.105 (0.118) | +0.099 (0.175) |
+| **smooth_tikh** | **+0.112 (0.133)** | **+0.151 (0.175)** | **+0.115 (0.212)** | **+0.157 (0.245)** |
+| smooth_prior | +0.025 (0.153) | -0.002 (0.170) | -0.078 (0.143) | +0.094 (0.244) |
+| mixed_ridge_prior | -0.056 (0.089) | -0.073 (0.126) | -0.066 (0.105) | +0.094 (0.225) |
+| bayes_prior | -0.062 (0.047) | -0.101 (0.082) | -0.123 (0.129) | +0.028 (0.209) |
+
+smooth_tikh만이 모든 ROI에서 양의 LOCO. Prior 기반 3개 모델은 V1-V3 모두 음.
+
+**smooth_tikh vs ridge_gcv (paired t, n=10):**
+
+| ROI | Δ | t(9) | p | Cohen's d |
+|-----|------|------|---|-----------|
+| V1 | +0.025 | 1.136 | 0.285 | +0.359 |
+| V2 | +0.099 | 2.115 | 0.064 | +0.669 |
+| **V3** | **+0.102** | **2.574** | **0.030** | **+0.814** |
+| V4 | +0.046 | 1.271 | 0.236 | +0.402 |
+
+**Artifact check (LOCO rdm_pearson, smooth_tikh vs ridge_gcv, n=10):**
+
+| ROI | ridge_gcv (SD) | smooth_tikh (SD) | Δ | t(9) | p |
+|-----|---------------|-----------------|------|------|---|
+| **V1** | 0.034 (0.226) | **0.531 (0.239)** | **+0.496** | **4.24** | **0.002*** |
+| V2 | 0.179 (0.282) | **0.457 (0.230)** | +0.278 | 1.97 | 0.081 |
+| **V3** | 0.160 (0.200) | **0.398 (0.207)** | **+0.238** | **3.58** | **0.006*** |
+| **hV4** | 0.104 (0.281) | **0.410 (0.180)** | **+0.306** | **2.27** | **0.049*** |
+
+Section 18 artifact이 LOCO에 적용되지 않는 이유: all-data fitting에서는 train-test 겹침으로 β=100이 모든 예측을 평탄화 → rdm_pearson ↓. LOCO에서는 각 예측이 held-out 색에 대한 독립 보간 → smoothing이 tuning curve를 genuinely 개선 → rdm_pearson ↑.
 
 ---
 
-## 10. Implementation
+## 7. GO/NO-GO Gate
 
-### 10a. Script 구성
+### Gate 기준
 
-| Script | Purpose | Status |
-|--------|---------|--------|
-| `step_a_fit_srm.py` | HC subjects SRM 적합 → R_i 추출 | **TODO** |
-| `check_rs_stability.py` | R_s split-half 안정성 검증 (Steps B-D 이전 gate) | **TODO** |
-| `step_b_group_prior.py` | 공통공간 encoding A_i 학습 → A_g 계산 | **TODO** |
-| `step_c_project_prior.py` | W_{0,s} = R_s @ A_g 투사 | **TODO** |
-| `step_d_finetune.py` | Prior-centered ridge → W_s 학습 | **TODO** |
-| `validate_loro_loco_loso.py` | 3종 CV 평가 | **TODO** |
-| `run_comparison.sbatch` | SLURM wrapper | **TODO** |
+| Criterion | Metric | Threshold |
+|-----------|--------|-----------|
+| C1 Reliability | Split-half RDM correlation | > 0.3 |
+| C2 Normalized Fit | LOCO voxel_corr / NC_voxel_r_sb | > 0.2 |
+| C3 Interpolation | HC LOCO voxel_corr > 0 (p < 0.05) | one-tail |
+| C3b Permutation | 10K color-shuffle null | p < 0.05 |
 
-### 10b. Directory Structure
+### ridge_gcv Gate (확정)
 
-```
-future_phase1_forward_model/
-├── PLAN.md                          # Implementation plan (English)
-├── notion.md                        # Algorithm documentation (Korean, 이 문서)
-├── README.md                        # Phase overview
-├── scripts/
-│   ├── step_a_fit_srm.py
-│   ├── check_rs_stability.py
-│   ├── step_b_group_prior.py
-│   ├── step_c_project_prior.py
-│   ├── step_d_finetune.py
-│   ├── validate_loro_loco_loso.py
-│   └── run_comparison.sbatch
-└── results/
-    ├── srm_projections/             # R_i matrices
-    ├── group_prior/                 # A_g per ROI
-    ├── subject_weights/             # W_s per subject-ROI
-    └── validation/                  # LORO/LOCO/LOSO results
-```
+| ROI | C1 | C2 (NC-Norm) | C3 (t-test) | C3b (Perm) | Overall |
+|-----|----|----|----|----|---------|
+| V1 | PASS (0.416) | PASS (0.227) | PASS (p=0.006) | FAIL (p=0.274) | **CONDITIONAL GO** |
+| V2 | PASS (0.420) | PASS (0.268) | PASS (p=0.040) | FAIL (p=0.311) | **CONDITIONAL GO** |
+| V3 | PASS (0.398) | FAIL (0.061) | FAIL (p=0.404) | FAIL (p=0.880) | **NO-GO** |
+| hV4 | PASS (0.603) | PASS (0.316) | PASS (p=0.026) | **PASS (p=0.044)** | **PRIMARY GO** |
 
-### 10c. Data Dependencies
+### smooth_tikh Gate (permutation 대기)
 
-| Data | Path (server) | Shape | Source |
-|------|--------------|-------|--------|
-| Procrustes amplitudes | `derivatives/full_dataset_C010/{sub}/{ROI}/amplitudes_procrustes.npy` | (6, 8, V_s) | Phase 1 |
-| SRM projection matrices | Step A에서 저장 | (V_s, k) per subject | Step A |
-| 색 basis matrix | `create_basis_functions()` | (K, N) | `analysis/utils/utils_color_decoding.py` |
+| ROI | C1 | C2 (NC-Norm) | C3 (LOCO > 0) | C3c (rdm_pearson) | C3b (Perm) | Status |
+|-----|----|----|----|----|----|----|
+| V1 | PASS (0.416) | PASS (0.297) | PASS (p=0.007) | PASS (0.531) | PENDING | **PENDING PERM** |
+| V2 | PASS (0.420) | PASS (0.475) | PASS (p<0.001) | PASS (0.457) | PENDING | **PENDING PERM** |
+| V3 | PASS (0.397) | FAIL (0.185) | FAIL (p=0.170) | PASS (0.398) | PENDING | NO-GO |
+| V4 | PASS (0.603) | PASS (0.254) | PASS (p=0.047) | PASS (0.410) | PENDING | **PENDING PERM** |
 
-### 10d. 기존 코드 재활용
-
-| Function | Source | 용도 |
-|----------|--------|------|
-| `create_basis_functions(n_channels=6)` | `analysis/utils/utils_color_decoding.py` | Basis matrix C 생성 |
-| SRM fitting | `analysis/phase2_SRM_across_between/utils/srm_alignment.py` | Step A |
-| `fit_W()` | `analysis/phase3_decoder_comparing/LOCO_trials/scripts/loco_ridge.py` | OLS/ridge fitting 참조 |
-| SVD projection | Phase 2 `rerun_loo_consistent.py` | CVD subject R_s 획득 |
-
-### 10e. lambda 선택
-
-- **Nested CV**: 각 outer fold 안에서 inner loop로 lambda grid [0, 0.01, 0.1, 1, 10, 100, 1000]에서 선택
-- **Alternative**: Analytical GCV (generalized cross-validation)
-- ROI별, subject별 optimal lambda 보고
+**Decision**: hV4 = **primary ROI** (유일하게 permutation 통과). V1/V2 = **conditional/supportive**. V3 = excluded.
 
 ---
 
-## 11. Filter Pipeline과의 연결
+## 8. HC-CVD 비교
 
-이 Phase에서 학습한 best W_s가 Phase 2의 **prediction engine**이 된다:
+### Group Comparison (ridge_gcv, LOCO)
+
+| ROI | HC M (SD) | CVD M (SD) | Cohen's d | p (Welch) |
+|-----|----------|----------|-----------|-----------|
+| V1 | +0.130 (0.097) | -0.012 (0.054) | **+1.61** | **0.021** |
+| V2 | +0.150 (0.188) | -0.174 (0.130) | **+1.85** | **0.022** |
+| V3 | +0.023 (0.240) | -0.008 (0.163) | +0.14 | 0.819 |
+| hV4 | +0.183 (0.200) | -0.058 (0.207) | +1.19 | 0.169 |
+
+### Group Comparison (smooth_tikh, LOCO)
+
+| ROI | HC M (SD) | CVD M (SD) | Cohen's d | p (Welch) |
+|-----|----------|----------|-----------|-----------|
+| V1 | +0.143 (0.109) | +0.039 (0.180) | +0.80 | 0.429 |
+| **V2** | **+0.246 (0.100)** | **-0.070 (0.063)** | **+3.43** | **0.001** |
+| V3 | +0.100 (0.254) | +0.151 (0.081) | -0.23 | 0.641 |
+| V4 | +0.190 (0.253) | +0.080 (0.255) | +0.43 | 0.568 |
+
+smooth_tikh로 V2 HC-CVD 효과 크기 거의 2배 (d=1.85 → d=3.43).
+
+### Individual CVD Profiles (ridge_gcv)
+
+**sub-08 (deutan)**
+
+| Metric | V1 | V2 | V3 | hV4 |
+|--------|------|------|------|------|
+| LOCO r | -0.062 | -0.241 | +0.049 | -0.275 |
+| HC z-score | -1.97 | -2.08 | +0.11 | -2.29 |
+| Crawford-Howell p | 0.114 | 0.099 | 0.922 | 0.076 |
+
+**sub-09 (protan)**
+
+| Metric | V1 | V2 | V3 | hV4 |
+|--------|------|------|------|------|
+| LOCO r | -0.020 | -0.024 | -0.193 | -0.035 |
+| HC z-score | -1.55 | -0.93 | -0.90 | -1.09 |
+| Crawford-Howell p | 0.197 | 0.419 | 0.433 | 0.346 |
+
+**sub-10 (deutan)**
+
+| Metric | V1 | V2 | V3 | hV4 |
+|--------|------|------|------|------|
+| LOCO r | +0.045 | -0.257 | +0.118 | +0.137 |
+| HC z-score | -0.88 | -2.17 | +0.40 | -0.23 |
+| Crawford-Howell p | 0.444 | 0.089 | 0.723 | 0.837 |
+
+### Individual CVD Profiles (smooth_tikh)
+
+**sub-08 (deutan)**: V2 **significant** (CH p=0.011) — ridge_gcv에서는 trending (0.099)
+**sub-09 (protan)**: V2 **significant** (CH p=0.039) — ridge_gcv에서는 ns (0.419)
+**sub-10 (deutan)**: V2 **significant** (CH p=0.040) — ridge_gcv에서는 trending (0.089)
+
+**핵심**: smooth_tikh로 3명 CVD **모두** V2에서 HC 대비 유의미한 일탈 (모두 CH p < 0.05).
+
+---
+
+## 9. 핵심 발견 및 결정
+
+### 발견
+
+1. **LORO-LOCO 해리**: SRM prior는 run-level variance를 포착하지만 color-specific tuning은 놓침. prior_ft LORO 승리, LOCO 패배.
+2. **ridge_gcv = 현재 최적 LOCO 모델**: HC mean positive across V1/V2/hV4.
+3. **FE-6 basis 확정**: Fourier basis 가설 기각 (half-wave cos²이 peaked tuning에 우수).
+4. **hV4만 genuine color interpolation**: Permutation p=0.044, per-color uniform, residual near-random. V1/V2는 covariance baseline (~0.11)에 의해 인플레이션.
+5. **HC-CVD LOCO gap**: V1 d=1.61 (p=0.021), V2 d=1.85 (p=0.022). CVD의 altered representation 확인.
+6. **Prior 자체가 LOCO와 비호환**: H1(shape), H2(uncertainty) 모두 기각 — 구조적 한계.
+7. **smooth_tikh는 genuine improvement**: Artifact check 통과 (rdm_pearson ↑). Inner LOCO CV가 결정적 차이.
+8. **smooth_tikh로 V2 HC-CVD 효과 극대화**: d=3.43 (p=0.001), 3명 CVD 모두 V2에서 유의미한 일탈.
+9. **V3 전면 제외**: 모든 gate criteria FAIL.
+
+### 확정된 결정
+
+1. **Encoder**: ridge_gcv (현재). smooth_tikh = leading candidate (permutation test 후 최종 결정).
+2. **Basis**: FE-6 확정.
+3. **Prior ablations (9a)**: BLOCKED — prerequisite 미충족.
+4. **RRR/Smoothness (9g)**: 기각됨 — 기만적 개선.
+5. **Phase 2 역할 분리**: V1/V2 = filter correction target (HC-CVD 차이 유의), hV4 = color interpolation oracle.
+
+### 대기 중
+
+- [ ] smooth_tikh 10K permutation test (`run_smooth_tikh_perm.sbatch`)
+  - 통과 → smooth_tikh 채택 (Phase 2 encoder)
+  - 실패 → ridge_gcv 유지
+
+---
+
+## 10. Phase 2 연결
+
+W_s가 Phase 2의 **prediction engine** (frozen):
 
 ```
 theta → C(theta) → W_s @ C(theta) = Y_hat_s(theta)
 ```
 
-Phase 2에서 설계하는 T_psi (stimulus-space filter)는 W_s의 **upstream**에서 작동:
+Phase 2 filter T_psi는 W_s의 **upstream**에서 작동:
 
 ```
 theta → T_psi(theta) → C(T_psi(theta)) → W_s @ C(T_psi(theta))
 ```
 
-**SRM은 filter evaluation에 더 이상 필요하지 않다.** W_s가 Procrustes voxel space에서 prediction을 생성하므로, filter 품질은 voxel-level metric (correlation, R²)으로 직접 평가 가능하다. SRM은 cross-subject comparison에 선택적으로 사용할 수 있지만, core prediction/evaluation 경로에 포함되지 않는다.
+W_s는 filter optimization 시작 전에 고정. Filter T_psi는 stimulus space에서만 작동하며 W_s를 수정하지 않음.
 
-이는 이전의 M_s bridge 접근법 대비 **근본적인 단순화**이다.
+**역할 분리**:
 
-> **핵심 제약**: Prediction model W_s는 filter optimization 시작 전에 고정(frozen)된다. Filter T_ψ는 stimulus space에서만 작동하며, W_s를 수정, 재학습, 또는 fine-tune하지 않는다. 최적화 목적함수는 min_ψ L(W_s @ C(T_ψ(θ)), Y_target)이며 W_s는 고정이다.
+| | V1/V2 | hV4 |
+|--|-------|-----|
+| Phase 2 역할 | Filter correction target | Color interpolation oracle |
+| 근거 | HC-CVD 차이 유의 (d>1.0) | Genuine color interpolation (perm p=0.044) |
+| 활용 | Filter 적용 대상 | Cross-ROI validation, color axis reference |
 
-### Filter Family Ablation (Phase 2 범위, 여기서 참조)
-
-Filter 자체는 Phase 2에서 설계하지만, prediction model은 여러 filter family 비교를 지원해야 한다:
-
-| Filter | Parameters | 설명 |
-|--------|-----------|------|
-| Identity | 0 | 보정 없음 (baseline) |
-| Fourier-4 | 4 | a1·cos(θ) + b1·sin(θ) + a2·cos(2θ) + b2·sin(2θ) |
-| Fourier-6 | 6 | 3차 harmonic까지 |
-| GP (optional) | nonparametric | Gaussian process baseline |
-
-핵심 질문:
-- Correction이 실제로 필요한가? (Identity vs Fourier-4)
-- 4-param이면 충분한가? (Fourier-4 vs Fourier-6)
-- 더 flexible model이 overfit하지 않는가? (Fourier-6 vs GP)
-
----
-
-## 12. 리스크 및 대응 방안
-
-**핵심 리스크**: LOCO voxel correlation ≈ 0이 전체 ROI에서 나타나면, 연속 보간 주장이 무너지고 filter optimization에 활용할 prediction engine이 없어진다.
-
-**발생 가능한 이유**:
-- 8색 훈련이 연속 encoding에 너무 sparse할 수 있음 (특히 higher visual areas에서)
-- SRM-mediated prior가 signal 대신 noise를 주입할 수 있음 (red team criticism 1)
-
-**완화 방안**:
-1. Gate criterion 3이 이를 명시적으로 포착 — filter 단계 이전에 파이프라인 정지
-2. Template-matching LOCO는 이미 작동 (MAE: V1 ~76°, hV4 ~69°), 따라서 model-based 접근은 최소한 template matching 성능을 달성해야 함
-3. R_s split-half stability check (실행 Step 1b)이 prior-projection 실패를 조기에 포착
-
-**대응**: Model-based LOCO가 실패하지만 template matching이 성공하면, filter evaluation에 template-matching 기반 prediction을 사용. 이는 덜 우아하지만 (closed-form gradient 없음) 기능적이다.
-
----
-
-## 13. 실행 우선순위
-
-엄격한 순차 의존 — 각 단계가 다음 단계를 gate한다.
-
-| Step | Script(s) | Output | Gate |
-|---|---|---|---|
-| 1a | `step_a_fit_srm.py` | R_i per HC subject | — |
-| **1b** | **`check_rs_stability.py`** | **R_s split-half cosine similarity** | **cosine > 0.5 per ROI → 진행; 아니면 prior 접근 재설계** |
-| 2a | `step_b_group_prior.py` | A_i, A_g per ROI | — |
-| 2b | `step_c_project_prior.py` | W_{0,s} per subject | — |
-| 3 | `step_d_finetune.py` | W_s per subject (lambda via nested CV) | — |
-| **4** | **`validate_loro_loco_loso.py`** | **LORO r, LOCO r, LOCO MAE** | **LOCO r > 0 (p < 0.05) → 진행; 아니면 STOP** |
-| 5 | Encoding-basis ablation (Stage 1) | Basis comparison table | Best basis 선정 |
-| 6 | Full model comparison (Stage 2) | 5 models × 3 CV × 4 ROI table | Best model 식별 |
-| 7 | Phase 2 filter design | T_ψ optimization | — |
-
-**Step 1b는 red team criticism 1에서 유래** — Steps 2-4에 투자하기 전에 R_s projection의 신뢰성을 검증한다.
-
-**Step 4가 핵심 go/no-go gate** — prediction model이 LOCO에 실패하면, downstream 전체가 차단된다.
-
----
-
-## 14. Updated Pipeline Summary
-
-```
-Phase 1. Prediction Model
-├── 1. Base model: forward encoding (FE-6 기본)
-├── 2. Encoding basis ablation: FE-6 / LF-4 / LF-6
-├── 3. Group prior + subject adaptation (Steps A-D)
-├── 4. Validation: LORO / LOCO / LOSO
-├── 5. Model comparison: OLS / Standard Ridge / Prior-only / Prior+finetune / Ridge+GCV
-├── 6. Metrics: voxel corr, R², LOCO MAE, RDM corr, normalized fit, reliability
-└── 7. Gate: reliability + predictability + interpolation
-
-Phase 2. Filter Optimization
-├── Filter families: identity / Fourier-4 / Fourier-6 / optional GP
-├── Evaluation: geometry improvement, held-out validation, permutation, pairwise diagnostics
-└── Individual-level analysis (Crawford & Howell per CVD subject)
-
-Phase 3. Behavioral Validation
-└── Neural correction → perceptual improvement prediction
-```
-
-**구조적 원칙**: Prediction model의 과학적 타당성을 먼저 확실히 만들고, 그 위에서 filter를 논의한다.
-
-**기존 구조 vs 수정 구조**:
-
-| 기존 | 수정 |
-|------|------|
-| prediction model → filter | prediction model (reliability-aware validation + encoding-basis ablation + group-prior adaptation) → filter-family ablation → behavioral validation |
-
----
-
-## 15. 실무용 알고리즘 요약
-
-### 학습
-
-**HC prior construction**:
-```
-Z_i = R_i^T @ Y_i
-A_i = argmin_A ||Z_i - A @ C||² + lambda_A * ||A||²
-A_g = (1/M) * sum_i A_i
-```
-
-**Target subject prior projection**:
-```
-W_{0,s} = R_s @ A_g
-```
-
-**Target subject fine-tuning**:
-```
-W_s = argmin_W ||Y_s - W @ C||² + lambda * ||W - W_{0,s}||²
-```
-
-**Closed-form**:
-```
-W_s = (Y_s @ C^T + lambda * W_{0,s}) @ (C @ C^T + lambda * I)^{-1}
-```
-
-### 최종 한 줄 정리
-
-> HC 공통공간에서 group prior A_g를 만든 뒤, 이를 target subject voxel space로 내린 W_{0,s} = R_s @ A_g를 prior로 사용하여, **하나의 subject-specific W_s**를 prior-centered ridge로 학습한다. Prediction은 끝까지 Procrustes voxel space에서 수행되며, SRM은 prior construction helper로만 사용된다.
+**smooth_tikh 채택 시 기대 효과**: V2 HC-CVD d=3.43 (2배 증가), NC-normalized 30%→48%, 3명 CVD 모두 V2 유의 (CH p<0.05).

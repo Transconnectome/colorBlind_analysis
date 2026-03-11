@@ -1,7 +1,8 @@
-# smooth_tikh Paradox Analysis
+# smooth_tikh Paradox Analysis (RESOLVED — REJECTED)
 
-> Date: 2026-03-11
+> Date: 2026-03-11 (resolved: 2026-03-11)
 > Question: Why does smooth_tikh improve multiple metrics but fail permutation test?
+> **Answer: All "improvements" are driven by shared spatial covariance capture, not color signal. smooth_tikh REJECTED.**
 
 ---
 
@@ -295,53 +296,60 @@ Y_pred = Y_baseline + W_dev @ C
 
 ---
 
-## Recommendations
+## Rescue Attempts (ALL FAILED)
 
-### For HC Model Development (Immediate)
+### Attempt 1: Condition-Centering ❌
 
-**Primary strategy: Strategy 1 (RDM-based evaluation)** ✅
+**Hypothesis:** Model Y=WC has no intercept → W absorbs shared spatial pattern → β amplifies it. Per-run centering should fix.
 
-**Rationale:**
-1. smooth_tikh genuinely improves RDM (artifact check passed)
-2. RDM is the scientifically relevant metric for color geometry
-3. No model modification needed — just metric change
-4. Can validate with RDM-based permutation test
+**Result:** Per-run centering **commutes with color label shuffle** — `mean(amp[:, perm, :], axis=1) == mean(amp, axis=1)`. Cannot change the permutation test by construction. Confirmed empirically with identical p-values.
 
-**Implementation steps:**
-1. Rerun permutation test with **rdm_pearson as the test statistic**
-2. Expected: smooth_tikh passes (RDM improvements are genuine)
-3. Adopt smooth_tikh with RDM as primary metric
-4. Use voxel_corr as secondary/descriptive metric
+### Attempt 2: Re-Optimized Permutation ❌
 
-**Backup strategy: Strategy 2 (Baseline-corrected voxel_corr)**
+**Hypothesis:** Fixed (α=0.01, β=100) selected on real data biases the null.
 
-If RDM-based permutation also fails, use baseline correction:
-- Observed - null_mean = color-specific signal
-- Compare models on corrected metric
+**Result:** Shuffled data selects β=1000 (45% of shuffles!) — even higher regularization. Smoothness helps fit ANY data, not just color signal.
 
-### For CVD Model Development (Later)
+### Attempt 3: RDM-Based Evaluation ❌
 
-After HC model is validated:
-1. **Adaptive basis optimization** (§9i)
-2. **hV4-informed priors** (§9j)
-3. Apply same metric strategy (RDM-based or baseline-corrected)
+**Hypothesis:** RDM inherently removes baseline → would properly measure color geometry.
+
+**Result:** RDM inspection reveals:
+- **Actual data has NO ideal circular hue structure** (Spearman vs ideal ≈ 0 in all ROIs)
+- smooth_tikh predicted RDM is **anti-correlated** with ideal (ρ ≈ -0.5)
+- RDM distances extremely compressed (0.06-0.23 vs actual 0.66-1.49)
+- rdm_pearson "improvement" = noise pattern-matching, NOT color geometry preservation
 
 ---
 
-## Key Insight
+## Final Resolution
 
-**The permutation test didn't fail because smooth_tikh is bad.**
+**smooth_tikh is REJECTED.** The paradox is fully resolved:
 
-**It failed because voxel_corr is the wrong metric for models that capture spatial structure.**
+**ALL "improvements" were artifacts of spatial covariance capture:**
+1. ✅ Higher voxel_corr → capturing shared spatial pattern (high null baseline proves this)
+2. ✅ Higher rdm_pearson → compressed RDM matching actual noise structure (anti-correlated with ideal)
+3. ✅ Stronger HC-CVD separation → group differences in spatial covariance, not color signal
 
-**Solution: Change the metric, not the model.**
+**Root cause:** β=100 forces near-rank-1 W → predictions dominated by single spatial pattern shared across colors → no color-discriminative content.
 
 ---
 
-## Next Steps
+## Key Insight (FINAL)
+
+**The permutation test correctly identified smooth_tikh as capturing nuisance variance, not color signal.**
+
+**voxel_corr is the correct metric. The permutation test is the correct test. smooth_tikh genuinely fails.**
+
+**Decision: ridge_gcv confirmed as final encoder.**
+
+---
+
+## Completed
 
 1. ✅ Document smooth_tikh permutation results in RESULTS.md
-2. 🎯 Run RDM-based permutation test for smooth_tikh
-3. 🎯 If passes → adopt smooth_tikh with RDM as primary metric
-4. 🎯 Update PLAN.md with new evaluation strategy
-5. 🎯 Proceed to Phase 2 with validated HC model
+2. ✅ Condition-centering tested → commutes with permutation
+3. ✅ Re-optimized permutation tested → null beta stays high
+4. ✅ RDM structure inspected → no circular structure, rdm_pearson misleading
+5. ✅ **Final decision: ridge_gcv confirmed, smooth_tikh REJECTED**
+6. ✅ Updated RESULTS.md, notion.md, PLAN.md

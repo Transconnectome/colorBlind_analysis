@@ -1,7 +1,7 @@
 # Group-Prior Prediction Model — PLAN
 
-> Last updated: 2026-03-10
-> Status: Baseline complete; prior failure investigation planned (Section 9h)
+> Last updated: 2026-03-11
+> Status: Baseline complete; **ridge_gcv confirmed as final encoder** (smooth_tikh REJECTED — Section 9i)
 > Phase: Future Phase 1 — Forward Model (SRQ3)
 
 ---
@@ -795,150 +795,71 @@ W = (C'C + αD'D + λI)^{-1} (C'X + λW0)
 | V3 | 0.125 | 0.128 | [0.115, 0.144] | 0.613 | FAIL |
 | hV4 | 0.239 | 0.241 | [0.230, 0.252] | 0.613 | FAIL |
 
-**Root cause:** voxel_corr captures shared spatial structure (covariance baseline), not just color-discriminative signal. Smoothness penalty (β=100) amplifies this baseline → high null mean (~0.19-0.24).
+**Root cause:** voxel_corr captures shared spatial structure (covariance baseline) + color-discriminative signal. Smoothness penalty (β=100) amplifies the shared baseline → high null mean (~0.19-0.24). Two fixable issues:
+1. **No condition-centering**: Model Y=WC lacks intercept → W absorbs shared voxel pattern → smoothness penalty amplifies it
+2. **Fixed hyperparams in permutation**: (α=0.01, β=100) were selected on real data but used for all 10K shuffles → biased null
 
-**Key insight:** RDM-based metrics (rdm_pearson) DID improve significantly (artifact check passed) because RDM removes mean patterns. The permutation failure is a metric problem, not a model problem.
+**Key insight:** voxel_corr is NOT the wrong metric — it's the standard in the field. The problems are (a) missing intercept in the model and (b) biased permutation procedure. Fix both → smooth_tikh should pass voxel_corr permutation.
 
-**Resolution:** See §9i for alternative evaluation strategies.
+**Resolution:** See §9i for condition-centering and re-optimized permutation fixes.
 
-### 9i. Alternative Evaluation Strategies — Leveraging smooth_tikh (Q10 — NEW, 2026-03-11)
+### 9i. smooth_tikh Investigation — RESOLVED (REJECTED, 2026-03-11)
 
-**Motivation**: smooth_tikh shows genuine improvements (RDM +0.5, HC-CVD d=3.43) but fails voxel_corr-based permutation. The failure is a *metric problem*, not a model problem. This section explores alternative metrics that capture smooth_tikh's benefits while being permutation-robust.
-
-**Core insight:** voxel_corr conflates two components:
-1. Color-discriminative signal (what we want)
-2. Shared spatial structure / baseline covariance (nuisance)
-
-Smoothness penalty amplifies #2 → high permutation null baseline. Solution: Use metrics that isolate #1.
+**Original motivation**: smooth_tikh showed apparent improvements (RDM +0.5, HC-CVD d=3.43) but failed voxel_corr-based permutation. Three rescue attempts were tested.
 
 ---
 
-#### 9i-1. RDM-Based Primary Metric (RECOMMENDED) ⭐
+#### 9i-1. Permutation Test — Fixed Params (DONE — ALL FAIL)
 
-**Rationale:**
-- RDM (Representational Dissimilarity Matrix) inherently removes mean patterns via distance computation
-- smooth_tikh rdm_pearson improvements ARE genuine (artifact check passed, Section 7n)
-- RDM directly measures color-discriminative geometry
-
-**Proposal:**
-```python
-# Phase 2 filter evaluation
-PRIMARY_METRIC = rdm_pearson  # Spearman correlation of RDMs
-SECONDARY_METRIC = voxel_corr  # Descriptive only
-```
-
-**Validation:**
-1. Rerun permutation test with **rdm_pearson as test statistic** (not voxel_corr)
-2. Expected: smooth_tikh passes (RDM improvements are robust)
-3. If passes → adopt smooth_tikh with RDM-based evaluation
-
-**Implementation:**
-- Script: `permutation_test_rdm.py` (modify test statistic in existing framework)
-- Compute: RDM from 8 LOCO predictions, correlate with actual RDM
-- Shuffle: Color labels (same as voxel_corr permutation)
-
-**Advantage:**
-- No model modification needed
-- Scientifically appropriate (color space geometry is the question)
-- Leverages smooth_tikh's validated strength
-
-**Priority:** **HIGH** — simplest path to validate smooth_tikh
+| ROI | Observed | Null Mean | p_perm |
+|-----|---------|-----------|--------|
+| V1 | 0.189 | 0.187 | 0.331 |
+| V2 | 0.216 | 0.212 | 0.188 |
+| V3 | 0.125 | 0.128 | 0.613 |
+| V4 | 0.239 | 0.241 | 0.613 |
 
 ---
 
-#### 9i-2. Baseline-Corrected voxel_corr
+#### 9i-2. Rescue: Condition-Centering (DONE — FAILED)
 
-**Method:**
-```python
-# Per model × ROI:
-observed_voxel_corr = 0.189  # e.g., smooth_tikh V1
-null_mean = 0.187            # From permutation test
-
-# Corrected metric
-corrected_voxel_corr = observed_voxel_corr - null_mean  # +0.002 (color signal)
-```
-
-**Interpretation:** Corrected metric = color-specific signal above covariance baseline.
-
-**Example comparison (V1):**
-- ridge_gcv: 0.130 - 0.11 = **+0.020** color signal
-- smooth_tikh: 0.189 - 0.187 = **+0.002** color signal
-- **ridge_gcv wins** for color-discriminative prediction
-
-**Advantage:**
-- Separates signal from nuisance
-- Uses existing permutation infrastructure
-
-**Disadvantage:**
-- Requires permutation for every model (expensive)
-- Corrected values are small → high relative noise
-
-**Priority:** MEDIUM — backup if RDM-based approach insufficient
+Per-run centering (subtracting mean across 8 colors within each run) **commutes with color label shuffle**: `mean(amp[:, perm, :], axis=1) == mean(amp, axis=1)`. Cannot change the permutation test by construction. Confirmed empirically.
 
 ---
 
-#### 9i-3. Partial Correlation (Control for Baseline)
+#### 9i-3. Rescue: Re-Optimized Permutation (DONE — FAILED)
 
-**Method:**
-```python
-def partial_voxel_corr(Y_pred, Y_actual):
-    baseline = Y_actual.mean(axis=0)  # (V_s,) shared across colors
-
-    # Remove baseline
-    Y_pred_res = Y_pred - baseline
-    Y_actual_res = Y_actual - baseline
-
-    return corr(Y_pred_res, Y_actual_res)
-```
-
-**Advantage:**
-- Direct color-specific correlation
-- No permutation test needed
-
-**Disadvantage:**
-- Assumes baseline = color-average (may be incomplete)
-- Might remove legitimate signal if colors have different mean levels
-
-**Priority:** LOW — exploratory
+Re-selecting (α, β) via inner LOCO-CV within each permutation. Result (5 perms, sub-02 hV4):
+- Null selects β=1000 in 45% of shuffles (most common) — smoothness helps fit ANY data
+- Observed score drops: 0.172 (vs 0.239 fixed)
+- Delta ≈ -0.007 — still not significant
 
 ---
 
-#### 9i-4. Discriminability-Based Objective
+#### 9i-4. RDM Structure Inspection (DONE — REINTERPRETATION)
 
-**Method:** Optimize for color separability (LDA-like), not voxel correlation.
+| RDM Comparison | V1 | V2 | hV4 |
+|---------------|------|------|------|
+| Actual vs Ideal (Spearman) | -0.008 | +0.044 | +0.004 |
+| smooth_tikh Predicted vs Ideal | **-0.624** | **-0.580** | **-0.442** |
 
-```python
-def fit_W_discriminative(C, X, alpha, beta):
-    """
-    max trace(W @ S_between @ W.T) / trace(W @ S_within @ W.T)
-    subject to: alpha*||W||^2 + beta*||D@W||^2 < threshold
-    """
-```
-
-**Advantage:**
-- Directly targets color discriminability
-- Less affected by baseline
-
-**Disadvantage:**
-- Non-convex (iterative optimization)
-- Changes model fundamentally
-
-**Priority:** LOW — future work
+- **Actual data has NO ideal circular hue structure** (all ρ ≈ 0)
+- **smooth_tikh predicted RDM anti-correlated with ideal** (ρ ≈ -0.5)
+- RDM distances extremely compressed (0.06-0.23 vs actual 0.66-1.49)
+- **rdm_pearson "improvement" was noise pattern-matching**, not color geometry preservation
 
 ---
 
-#### 9i-5. Implementation Plan
+#### 9i-5. Final Conclusion
 
-| Priority | Strategy | Script | Dependencies | Expected Outcome |
-|----------|----------|--------|-------------|------------------|
-| **1 (HIGH)** | **RDM-based permutation** | `permutation_test_rdm.py` | Existing LOCO results | smooth_tikh passes |
-| 2 (MEDIUM) | Baseline-corrected voxel_corr | `analyze_corrected_metrics.py` | Permutation nulls | Compare models on corrected metric |
-| 3 (LOW) | Partial correlation | Modify validation scripts | None | Alternative metric validation |
+**smooth_tikh REJECTED.** Root cause: β=100 forces near-rank-1 W → predictions dominated by single shared spatial pattern → ALL "improvements" (voxel_corr, rdm_pearson, HC-CVD separation) driven by spatial covariance, not color signal.
 
-**Decision rule:**
-- If RDM-based permutation passes → **adopt smooth_tikh with RDM as primary metric**
-- If RDM-based permutation also fails → use baseline-corrected voxel_corr for model comparison
-- Proceed to Phase 2 with best HC model
+| "Improvement" | Reality |
+|----------------|---------|
+| Higher voxel_corr | Shared spatial pattern (high null baseline proves it) |
+| Higher rdm_pearson | Compressed RDM matching noise structure |
+| Stronger HC-CVD d | Group differences in spatial covariance |
+
+**The permutation test was correct.** ridge_gcv confirmed as final encoder.
 
 ---
 
@@ -1204,17 +1125,17 @@ Gate: CVD metric > HC 5th percentile. This asks "is the CVD prediction within th
 
 ### Phase 1b: HC Model Refinement (IN PROGRESS 🎯)
 
-**Goal:** Validate smooth_tikh via alternative metrics OR finalize ridge_gcv as encoder.
+**Goal:** Fix smooth_tikh permutation failure via condition-centering + re-optimized permutation. Keep voxel_corr as primary metric.
 
 | Priority | Step | Script | Expected Outcome | Gate |
 |----------|------|--------|------------------|------|
-| **1 (HIGH)** | **§9i-1: RDM permutation** | `permutation_test_rdm.py` | smooth_tikh passes RDM-based test | If PASS → adopt smooth_tikh |
-| 2 (MEDIUM) | §9i-2: Baseline correction | `analyze_corrected_metrics.py` | Compare models on corrected voxel_corr | Pick encoder for Phase 2 |
-| 3 (LOW) | §9i-3: Partial corr | Modify validation scripts | Alternative metric validation | Exploratory |
+| **1 (HIGHEST)** | **§9i-1+2: Condition-center + re-optimized perm** | `permutation_test_centered.py` | smooth_tikh passes voxel_corr perm | If PASS → adopt smooth_tikh |
+| 2 (MEDIUM) | Quick test: centered LOCO (no perm) | Modify `utils_forward_model.py` | Verify centering improves LOCO scores | Sanity check before full perm |
+| 3 (SUPPORTING) | RDM as secondary metric | Existing scripts | Independent geometry evidence | Complementary |
 
 **Decision point:**
-- ✅ If §9i-1 passes → **smooth_tikh adopted** (RDM as primary metric)
-- ❌ If §9i-1 fails → **ridge_gcv retained** (hV4 only validated ROI)
+- ✅ If centered permutation passes → **smooth_tikh adopted** (voxel_corr primary, RDM secondary)
+- ❌ If still fails → **ridge_gcv retained** (hV4 only validated ROI)
 - → **Proceed to Phase 2 with HC-validated encoder**
 
 ---
@@ -1248,10 +1169,11 @@ Gate: CVD metric > HC 5th percentile. This asks "is the CVD prediction within th
 ### Timeline Recommendation
 
 **Week 1-2 (HC focus):**
-1. Implement & run RDM-based permutation (§9i-1) — 2-3 days
-2. Analyze results, make encoder decision — 1 day
-3. If smooth_tikh validated → update all metrics to RDM-based
-4. Document final HC encoder in RESULTS.md
+1. Implement condition-centering in `utils_forward_model.py` + quick LOCO test — 1 day
+2. Implement re-optimized permutation (`permutation_test_centered.py`) — 1-2 days
+3. Run centered permutation on server (10K iters) — 1-2 days
+4. Analyze results, make encoder decision — 1 day
+5. Document final HC encoder in RESULTS.md
 
 **Week 3-4 (CVD focus):**
 1. Implement adaptive basis optimization (§9k-1) — 3-4 days
@@ -1267,9 +1189,9 @@ Gate: CVD metric > HC 5th percentile. This asks "is the CVD prediction within th
 
 ### Critical Dependencies
 
-**§9i-1 (RDM permutation) blocks:**
+**§9i (Centered permutation) blocks:**
 - Encoder decision (smooth_tikh vs ridge_gcv)
-- Primary metric for Phase 2 (RDM vs voxel_corr)
+- Voxel_corr remains primary metric; RDM as secondary
 
 **§9k-1 (Adaptive basis) blocks:**
 - CVD model viability
@@ -1292,10 +1214,10 @@ Phase 1. Prediction Model (HC Focus First)
 ├── 7. Metrics: voxel corr, R², LOCO MAE, RDM corr, NC-normalized  ← DONE
 ├── 8. Gate (HC): hV4 PRIMARY GO (perm p=0.044); V1/V2 CONDITIONAL ← DONE
 │
-├── 9i. Alternative evaluation strategies (smooth_tikh rescue)      ← PLANNED
-│   ├── 9i-1. RDM-based permutation test (PRIMARY)                  ← **HIGH PRIORITY**
-│   ├── 9i-2. Baseline-corrected voxel_corr                         ← MEDIUM (backup)
-│   └── 9i-3. Partial correlation / discriminability                ← LOW (exploratory)
+├── 9i. Model & permutation fixes (condition-centering + re-opt)    ← PLANNED
+│   ├── 9i-1. Condition-centering (add intercept to model)          ← **HIGHEST PRIORITY**
+│   ├── 9i-2. Re-optimized permutation (hyperparams per shuffle)    ← **HIGH PRIORITY**
+│   └── 9i-3. Combined: centered + re-opt perm test                 ← **RECOMMENDED**
 │
 ├── 9j. hV4-informed multi-ROI prior (cross-ROI constraints)        ← PLANNED
 │   ├── 9j-1. RDM-constrained V1/V2 fitting                         ← MEDIUM (after 9i)
@@ -1312,9 +1234,9 @@ Phase 1.5. CVD Model Development (After HC Validation)
 └── If successful → unified HC-CVD encoder for Phase 2
 
 Phase 2. Filter Optimization
-├── Encoder: Best HC model from Phase 1 (smooth_tikh if 9i-1 passes, else ridge_gcv)
+├── Encoder: Best HC model from Phase 1 (smooth_tikh if centered perm passes, else ridge_gcv)
 ├── Filter families: identity / Fourier-4 / Fourier-6 / optional GP
-├── Evaluation metric: RDM-based (if 9i-1 validated) or baseline-corrected voxel_corr
+├── Evaluation metric: voxel_corr (primary) + RDM correlation (secondary)
 ├── Validation: geometry improvement, held-out, permutation, pairwise diagnostics
 └── CVD individual-level analysis (Crawford & Howell)
 
@@ -1323,13 +1245,13 @@ Phase 3. Behavioral Validation
 ```
 
 **Structural principle**:
-1. **HC model validation first** (hV4 confirmed, V1/V2 pending metric resolution)
-2. **Leverage smooth_tikh strengths** via RDM-based evaluation (§9i-1)
+1. **HC model validation first** (hV4 confirmed, V1/V2 pending model/permutation fix)
+2. **Fix smooth_tikh** via condition-centering + re-optimized permutation (§9i) — keep voxel_corr as primary metric
 3. **Extend to CVD** via adaptive basis (§9k) and hV4 constraints (§9j)
 4. **Unified framework** for Phase 2 filter optimization
 
 **Current status (2026-03-11):**
 - ✅ HC baseline complete (ridge_gcv, hV4 permutation-validated)
-- ✅ smooth_tikh shows promise (RDM↑, HC-CVD separation↑) but needs metric fix
-- 🎯 **Next: RDM-based permutation (§9i-1)** — rescues smooth_tikh if passes
+- ✅ smooth_tikh shows promise (RDM↑, HC-CVD separation↑) but perm fails due to missing intercept + biased null
+- 🎯 **Next: Condition-centering + re-optimized permutation (§9i-1+2)** — fixes model & test
 - 🎯 **Parallel: Adaptive basis development (§9k-1)** — for CVD model

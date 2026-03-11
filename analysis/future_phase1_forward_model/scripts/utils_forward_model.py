@@ -32,6 +32,7 @@ N_CHANNELS = 6
 
 LAMBDA_GRID = [0, 0.01, 0.1, 1, 10, 100, 1000]
 ALPHA_GRID = [0.001, 0.01, 0.1, 1.0, 10.0, 100.0, 1000.0]
+BETA_GRID = [0, 1, 10, 100, 1000]
 
 # Default data path (server)
 DEFAULT_BASELINE_DIR = Path(
@@ -465,6 +466,130 @@ def gcv_select_alpha(C, Y, alpha_grid=ALPHA_GRID):
         gcv_scores[alpha] = float(gcv)
     best_alpha = min(gcv_scores, key=gcv_scores.get)
     return best_alpha, gcv_scores
+
+
+# ============================================================================
+# Condition Centering
+# ============================================================================
+
+def condition_center(X):
+    """Remove per-voxel mean across conditions (= add implicit intercept).
+
+    For data X of shape (n_conditions, V_s), subtracts the mean across
+    conditions for each voxel. This removes the shared spatial pattern
+    that is constant across all conditions.
+
+    Equivalent to fitting Y = WC + b*1' + e, where b absorbs the baseline.
+
+    Args:
+        X: (n_conditions, V_s) voxel patterns
+
+    Returns:
+        X_centered: (n_conditions, V_s) condition-centered patterns
+        voxel_mean: (V_s,) the subtracted per-voxel mean
+    """
+    voxel_mean = X.mean(axis=0)
+    return X - voxel_mean[np.newaxis, :], voxel_mean
+
+
+def condition_center_amplitudes(amp):
+    """Condition-center run-level amplitudes.
+
+    For each run, removes the per-voxel mean across conditions.
+
+    Args:
+        amp: (n_runs, n_conditions, V_s) raw amplitudes
+
+    Returns:
+        amp_centered: (n_runs, n_conditions, V_s) centered amplitudes
+        run_means: (n_runs, V_s) per-run voxel means
+    """
+    run_means = amp.mean(axis=1)  # (n_runs, V_s)
+    amp_centered = amp - run_means[:, np.newaxis, :]
+    return amp_centered, run_means
+
+
+# ============================================================================
+# LOCO-CV Hyperparameter Selection for smooth_tikh
+# ============================================================================
+
+def loco_cv_score_smooth(C_full, amp_mean, alpha, beta, center=False):
+    """Compute mean LOCO voxel_corr for smooth_tikh with given (alpha, beta).
+
+    Uses run-averaged data (8, V_s) for fast evaluation.
+
+    Args:
+        C_full: (8, K) design matrix
+        amp_mean: (8, V_s) run-averaged voxel patterns
+        alpha: ridge penalty
+        beta: smoothness penalty
+        center: if True, condition-center training data in each fold
+
+    Returns:
+        mean_voxel_corr: float
+    """
+    n_colors = C_full.shape[0]
+    fold_corrs = np.zeros(n_colors)
+
+    for test_color in range(n_colors):
+        train_colors = [c for c in range(n_colors) if c != test_color]
+        C_train = C_full[train_colors]
+        X_train = amp_mean[train_colors]  # (7, V_s)
+
+        if center:
+            X_train, _ = condition_center(X_train)
+
+        W = fit_W_smooth_ridge(C_train, X_train, alpha, beta)
+
+        C_test = C_full[test_color:test_color + 1]
+        Y_hat = predict_patterns(W, C_test)
+
+        if center:
+            X_test, _ = condition_center(amp_mean[test_color:test_color + 1])
+        else:
+            X_test = amp_mean[test_color:test_color + 1]
+
+        r = voxel_pattern_correlation(Y_hat, X_test)
+        fold_corrs[test_color] = r[0]
+
+    return float(np.mean(fold_corrs))
+
+
+def select_smooth_tikh_params(C_full, amp_mean,
+                               alpha_grid=None, beta_grid=None,
+                               center=False):
+    """Select best (alpha, beta) for smooth_tikh via LOCO-CV.
+
+    Args:
+        C_full: (8, K) design matrix
+        amp_mean: (8, V_s) run-averaged voxel patterns
+        alpha_grid: list of alpha candidates
+        beta_grid: list of beta candidates
+        center: if True, condition-center within each fold
+
+    Returns:
+        best_alpha, best_beta, best_score, all_scores (dict)
+    """
+    if alpha_grid is None:
+        alpha_grid = [0.001, 0.01, 0.1, 1.0, 10.0]
+    if beta_grid is None:
+        beta_grid = BETA_GRID
+
+    best_score = -np.inf
+    best_alpha, best_beta = alpha_grid[0], beta_grid[0]
+    all_scores = {}
+
+    for alpha in alpha_grid:
+        for beta in beta_grid:
+            score = loco_cv_score_smooth(C_full, amp_mean, alpha, beta,
+                                          center=center)
+            all_scores[(alpha, beta)] = score
+            if score > best_score:
+                best_score = score
+                best_alpha = alpha
+                best_beta = beta
+
+    return best_alpha, best_beta, best_score, all_scores
 
 
 # ============================================================================

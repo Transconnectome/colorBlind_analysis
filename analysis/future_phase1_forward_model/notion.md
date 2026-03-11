@@ -1,7 +1,7 @@
 # Future Phase 1: Group-Prior Prediction Model
 
 > **프로젝트**: Color Vision Deficiency Neural Representation Analysis
-> **날짜**: 2026-03-10 (정리: 2026-03-11)
+> **날짜**: 2026-03-10 (정리: 2026-03-11, smooth_tikh 결론 추가: 2026-03-11)
 > **피험자**: HC 7명 (sub-01~07), CVD 3명 (sub-08 deutan, sub-09 protan, sub-10 deutan)
 > **ROI**: V1, V2, V3, hV4
 > **목적**: HC group prior를 활용한 subject-specific forward encoding model W_s 학습 및 검증
@@ -124,7 +124,7 @@ Noise ceiling 없이는 데이터 품질과 모델 품질을 혼동한다. Norma
 
 | Model | 수식 | Inner CV | 가설 | 판정 |
 |-------|------|----------|------|------|
-| **smooth_tikh** | W = (C'C + αI + βD'D)⁻¹C'X | **Inner LOCO** | H3 (smoothness) | **Leading candidate** — artifact check 통과, perm 대기 |
+| **smooth_tikh** | W = (C'C + αI + βD'D)⁻¹C'X | **Inner LOCO** | H3 (smoothness) | **기각** — perm 전 ROI 실패, 공간 공분산만 포착 |
 | **mixed_ridge_prior** | W = (C'C + (α+λ)I)⁻¹(C'X + λW₀) | Inner LOCO | H1 (shape) | **기각** — V1-V3 음 |
 | **bayes_prior** | w_v = (C'C + diag(γ/σ²_v))⁻¹(C'x_v + Λ_v w₀_v) | Inner LOCO | H2 (uncertainty) | **기각** — V1-V3 음 |
 | **smooth_prior** | W = (C'C + αD'D + λI)⁻¹(C'X + λW₀) | Inner LOCO | H3+prior | **기각** — prior가 smoothness 효과 상쇄 |
@@ -145,7 +145,7 @@ Noise ceiling 없이는 데이터 품질과 모델 품질을 혼동한다. Norma
 - D ∈ R^{K×K}: Circular difference matrix (인접 channel smoothness)
 - Inner LORO: run-held-out, Inner LOCO: color-held-out
 
-**핵심 교훈**: 동일 수식(smoothness)도 inner LORO → artifact, inner LOCO → genuine improvement. Inner CV 목적 함수가 결정적.
+**핵심 교훈**: (1) 동일 수식(smoothness)도 inner LORO → artifact, inner LOCO → 개선처럼 보이나 permutation 실패. (2) voxel_corr/rdm_pearson 개선이 반드시 색 판별 신호를 의미하지 않음 — 공간 공분산 포착일 수 있음. (3) Permutation test가 유일한 진정한 검증.
 
 ---
 
@@ -224,7 +224,74 @@ HC-CVD 차이: 모든 |d| < 0.72, 모든 p > 0.22 — LORO에서 유의한 그�
 | LF-4 | -0.066 (0.087) | -0.097 (0.200) | -0.105 (0.125) | -0.075 (0.091) |
 | LF-6 | -0.111 (0.154) | -0.070 (0.159) | -0.093 (0.220) | -0.093 (0.199) |
 
-**FE-6 vs LF-4 (paired t, n=10):** LOCO에서 V1 p=0.045, V2 p=0.042, hV4 p=0.016. LORO에서 전 ROI p<0.001. **FE-6 확정.**
+**FE-6 vs LF-4 (paired t, n=10):** LOCO에서 V1 p=0.045, V2 p=0.042, hV4 p=0.016. LORO에서 전 ROI p<0.001. **FE 형태 확정.**
+
+#### 확장 비교: FE 채널 수 (ridge_gcv, HC n=7, 2026-03-11)
+
+**LOCO voxel_corr by FE channel count:**
+
+| Basis | V1 | V2 | V3 | hV4 |
+|-------|------|------|------|------|
+| FE-2 | **+0.153** | +0.180 | +0.085 | +0.186 |
+| FE-3 | +0.143 | **+0.180** | +0.097 | **+0.205** |
+| FE-6 | +0.130 | +0.150 | +0.023 | +0.183 |
+| FE-8 | +0.128 | +0.176 | **+0.112** | +0.191 |
+| FE-12 | +0.134 | +0.168 | +0.106 | +0.190 |
+
+**Bias-variance tradeoff:**
+- LORO: K↑ → 단조 개선 (r=+0.82~0.89)
+- LOCO: V1/V2에서 K↓ → 개선 (r=-0.23/-0.29) — 적은 채널 = 강한 보간 제약
+
+**Permutation (10K, Stouffer combined, per-ROI optimal basis):**
+
+| ROI | Basis | p_stouffer | FE-6 대비 |
+|-----|-------|-----------|----------|
+| V1 | FE-2 | 0.170 | 0.274→0.170 (개선, FAIL) |
+| V2 | FE-3 | 0.125 | 0.311→0.125 (개선, FAIL) |
+| **V3** | **FE-8** | **0.045*** | **0.360→0.045 (NO-GO→PASS)** |
+| hV4 | FE-3 | **0.026*** | 0.044→0.026 (강화) |
+
+**핵심**: V3 실패는 basis 선택 문제였음 (FE-8로 회복). V1/V2는 어떤 1D FE basis로도 fail.
+
+**HC-CVD gap의 basis 의존성:** V1 FE-2에서 CVD=+0.115 (양수!), d=1.76→0.40. HC-CVD 차이의 상당 부분이 basis mismatch에 기인.
+
+#### Opponent Basis Test (Red Team #3 중화, 10K perm, 2026-03-11)
+
+**질문**: V1/V2 LOCO 실패가 FE basis 선택 문제인가? DKL 2D opponent-channel basis로 검증.
+
+**테스트 basis:**
+
+| Basis | Type | K | 설계 |
+|-------|------|:-:|------|
+| OPP-2 | Raw opponent | 2 | [cos(θ), sin(θ)] |
+| OPP-4 | Opponent + quadrature | 4 | [cos(θ), sin(θ), cos(2θ), sin(2θ)] |
+| OPP-4rect | Half-wave rectified | 4 | [cos⁺, cos⁻, sin⁺, sin⁻] |
+| FE-6 | Fourier encoding (기준) | 6 | Half-wave rectified cos² |
+
+**LOCO Permutation (Stouffer combined, HC):**
+
+| Basis | V1 | V2 | V3 | V4 |
+|-------|:------:|:------:|:------:|:------:|
+| OPP-2 | p=0.324 | p=0.444 | p=0.358 | p=0.302 |
+| OPP-4 | p=0.125 | p=0.109 | p=0.566 | p=0.139 |
+| OPP-4rect | p=0.633 | p=0.261 | p=0.796 | p=0.110 |
+| **FE-6** | p=0.126 | p=0.154 | p=0.367 | **p=0.039*** |
+
+**HC LOCO Mean (observed / null):**
+
+| Basis | V1 | V2 | V3 | V4 |
+|-------|:---:|:---:|:---:|:---:|
+| OPP-2 | -.041/-.055 | -.047/-.062 | -.042/-.047 | -.042/-.058 |
+| OPP-4 | -.054/-.091 | -.074/-.104 | -.118/-.075 | -.045/-.097 |
+| OPP-4rect | +.099/+.113 | +.157/+.127 | +.054/+.090 | +.167/+.103 |
+| FE-6 | +.144/+.111 | +.169/+.129 | +.063/+.077 | +.181/+.085 |
+
+**결론:**
+1. **모든 opponent basis가 V1/V2에서 FAIL** — p < 0.05 달성 불가
+2. **FE-6만이 V4에서 유일하게 통과** (p=0.039)
+3. OPP-2 (K=2): LOCO 전 ROI 음수 — 심각한 underfit
+4. OPP-4rect: null이 양수로 부풀림 — 판별력 없음
+5. **Red Team #3 중화 완료**: V1/V2 실패는 basis mismatch가 아님 — V4만 통과하는 해리(dissociation)는 진짜 영역적(regional) 특성
 
 ### 6f. Metric Reinforcement (9f)
 
@@ -257,6 +324,29 @@ V1/V2의 null이 ~0.10-0.13 (not zero) — voxel covariance structure가 baselin
 
 hV4 residual이 near-random (0.053) — 모델이 가용 구조 대부분 포착. V1/V2에는 systematic residual 잔존.
 
+#### Intercept Model Permutation Test (10K, HC, 2026-03-11)
+
+**질문**: 공유 공간 평균(intercept)이 LOCO 성능 또는 null을 부풀리는가?
+
+3가지 방법 비교:
+- **Standard**: Y = W @ C (기존 ridge_gcv)
+- **Intercept**: Y = W_color @ C + b (평가 시 deviation만: corr(C_test @ W_color, Y_real - b))
+- **Mean_subt**: (Y - mean(Y)) = W @ C (mean 사전 제거)
+
+**Stouffer Combined p-values (per-ROI optimal basis):**
+
+| Method | V1 (FE-6) | V2 (FE-6) | V3 (FE-8) | V4 (FE-3) |
+|--------|:---------:|:---------:|:---------:|:---------:|
+| Standard | p≈0.126 | p≈0.155 | p≈0.043* | p≈0.025* |
+| Intercept | p≈0.127 | p≈0.156 | p≈0.040* | p≈0.064 |
+| Mean_subt | p≈0.136 | p≈0.160 | p≈0.053 | p≈0.059 |
+
+**결론:**
+1. **Standard ≈ Intercept ≈ Mean_subt** — 모든 ROI에서 거의 동일한 p-값
+2. V1/V2는 어떤 방법으로도 유의하지 않음
+3. Intercept null 중심이 ~-0.035 (standard ~+0.05-0.10) — intercept가 공유 신호 흡수
+4. **p-값은 변하지 않음** — 인코딩 신호는 hue-modulated pattern에 있고, 공간 평균이 아님
+
 ### 6g. Extended Models (9h) — LOCO voxel_corr (n=10)
 
 | Model | V1 M (SD) | V2 M (SD) | V3 M (SD) | V4 M (SD) |
@@ -288,7 +378,7 @@ smooth_tikh만이 모든 ROI에서 양의 LOCO. Prior 기반 3개 모델은 V1-V
 | **V3** | 0.160 (0.200) | **0.398 (0.207)** | **+0.238** | **3.58** | **0.006*** |
 | **hV4** | 0.104 (0.281) | **0.410 (0.180)** | **+0.306** | **2.27** | **0.049*** |
 
-Section 18 artifact이 LOCO에 적용되지 않는 이유: all-data fitting에서는 train-test 겹침으로 β=100이 모든 예측을 평탄화 → rdm_pearson ↓. LOCO에서는 각 예측이 held-out 색에 대한 독립 보간 → smoothing이 tuning curve를 genuinely 개선 → rdm_pearson ↑.
+> **⚠️ rdm_pearson 재해석 (2026-03-11):** rdm_pearson "개선"은 기만적. RDM 구조 검사 결과: (1) 실제 데이터에 이상적 원형 색조 구조 없음 (Spearman vs ideal ≈ 0), (2) smooth_tikh 예측 RDM은 이상 구조와 반상관 (ρ ≈ -0.5), (3) 예측 RDM 거리가 극도로 압축 (0.06-0.23). 높은 rdm_pearson은 압축된 RDM이 실제 데이터의 noise 구조와 매칭된 것. §9d 참조.
 
 ---
 
@@ -303,7 +393,7 @@ Section 18 artifact이 LOCO에 적용되지 않는 이유: all-data fitting에�
 | C3 Interpolation | HC LOCO voxel_corr > 0 (p < 0.05) | one-tail |
 | C3b Permutation | 10K color-shuffle null | p < 0.05 |
 
-### ridge_gcv Gate (확정)
+### ridge_gcv Gate — FE-6 (확정)
 
 | ROI | C1 | C2 (NC-Norm) | C3 (t-test) | C3b (Perm) | Overall |
 |-----|----|----|----|----|---------|
@@ -312,16 +402,29 @@ Section 18 artifact이 LOCO에 적용되지 않는 이유: all-data fitting에�
 | V3 | PASS (0.398) | FAIL (0.061) | FAIL (p=0.404) | FAIL (p=0.880) | **NO-GO** |
 | hV4 | PASS (0.603) | PASS (0.316) | PASS (p=0.026) | **PASS (p=0.044)** | **PRIMARY GO** |
 
-### smooth_tikh Gate (permutation 대기)
+### ridge_gcv Gate — Per-ROI 최적 Basis (2026-03-11 추가)
+
+| ROI | Basis | C3 (LOCO>0) | C3b (Perm Stouffer) | FE-6 대비 변화 |
+|-----|-------|-------------|---------------------|--------------|
+| V1 | FE-2 | **PASS (p=0.005)** | FAIL (p=0.170) | 0.274→0.170 (개선, FAIL) |
+| V2 | FE-3 | **PASS (p=0.008)** | FAIL (p=0.125) | 0.311→0.125 (개선, FAIL) |
+| **V3** | **FE-8** | MARGINAL (p=0.065) | **PASS (p=0.045)** | **NO-GO → PASS** |
+| hV4 | FE-3 | **PASS (p=0.021)** | **PASS (p=0.026)** | 0.044→0.026 (강화) |
+
+> **V3 회복**: FE-8로 V3가 NO-GO→PASS. V1/V2는 FE-{2..12} + OPP-2/4/4rect + intercept model 모두 FAIL — 8-stimulus LOCO의 구조적 한계 확인 (basis mismatch 아님).
+
+### smooth_tikh Gate (REJECTED)
 
 | ROI | C1 | C2 (NC-Norm) | C3 (LOCO > 0) | C3c (rdm_pearson) | C3b (Perm) | Status |
 |-----|----|----|----|----|----|----|
-| V1 | PASS (0.416) | PASS (0.297) | PASS (p=0.007) | PASS (0.531) | PENDING | **PENDING PERM** |
-| V2 | PASS (0.420) | PASS (0.475) | PASS (p<0.001) | PASS (0.457) | PENDING | **PENDING PERM** |
-| V3 | PASS (0.397) | FAIL (0.185) | FAIL (p=0.170) | PASS (0.398) | PENDING | NO-GO |
-| V4 | PASS (0.603) | PASS (0.254) | PASS (p=0.047) | PASS (0.410) | PENDING | **PENDING PERM** |
+| V1 | PASS (0.416) | PASS (0.297) | PASS (p=0.007) | ~~PASS~~ 기만적 | **FAIL (p=0.331)** | **REJECTED** |
+| V2 | PASS (0.420) | PASS (0.475) | PASS (p<0.001) | ~~PASS~~ 기만적 | **FAIL (p=0.188)** | **REJECTED** |
+| V3 | PASS (0.397) | FAIL (0.185) | FAIL (p=0.170) | ~~PASS~~ 기만적 | **FAIL (p=0.613)** | NO-GO |
+| V4 | PASS (0.603) | PASS (0.254) | PASS (p=0.047) | ~~PASS~~ 기만적 | **FAIL (p=0.613)** | **REJECTED** |
 
-**Decision**: hV4 = **primary ROI** (유일하게 permutation 통과). V1/V2 = **conditional/supportive**. V3 = excluded.
+> **C3c (rdm_pearson) 소급 무효화**: RDM 검사 결과 실제 데이터에 원형 색조 구조가 없고, smooth_tikh 예측 RDM은 이상적 원형 구조와 **반상관** (ρ ≈ -0.5). rdm_pearson "개선"은 noise 패턴 매칭에 불과.
+
+**Decision**: hV4 = **primary ROI** (FE-6 perm p=0.044). V3 = **conditional** (FE-8 perm p=0.045). V1/V2 = **discrimination-only** (LOCO 전 basis FAIL 확인 — FE, OPP, intercept 모두). **smooth_tikh 전면 기각.**
 
 ---
 
@@ -381,39 +484,223 @@ smooth_tikh로 V2 HC-CVD 효과 크기 거의 2배 (d=1.85 → d=3.43).
 
 **핵심**: smooth_tikh로 3명 CVD **모두** V2에서 HC 대비 유의미한 일탈 (모두 CH p < 0.05).
 
+> **⚠️ 주의 (2026-03-11):** smooth_tikh의 HC-CVD 분리 효과(d=3.43)는 공간 공분산 포착에 의한 것으로, 진정한 색 판별 신호가 아님. smooth_tikh가 기각되었으므로 이 효과는 분석에 사용할 수 없음. ridge_gcv 기반 V2 HC-CVD d=1.85 (p=0.022)가 유효한 결과.
+
 ---
 
-## 9. 핵심 발견 및 결정
+## 9. smooth_tikh 조사 결과 (REJECTED)
+
+### 9a. Permutation Test — 고정 파라미터 (10K shuffles, HC)
+
+| ROI | Observed | Null Mean | p_perm |
+|-----|---------|-----------|--------|
+| V1 | 0.189 | 0.187 | 0.331 |
+| V2 | 0.216 | 0.212 | 0.188 |
+| V3 | 0.125 | 0.128 | 0.613 |
+| V4 | 0.239 | 0.241 | 0.613 |
+
+**전 ROI 실패.** Observed ≈ null mean — 공간 공분산만 포착, 색 신호 아님.
+
+### 9b. 구제 시도 1: Condition-Centering
+
+Per-run condition centering (각 run 내 8색 평균 제거)은 color label shuffle와 **교환 가능(commute)**:
+
+```
+mean(amp[:, perm, :], axis=1) == mean(amp, axis=1)  # 셔플 순서 무관
+```
+
+따라서 centering은 permutation test 결과를 **변경할 수 없음**. 실증 확인: 동일한 p-값 (예: sub-02 hV4 p=0.015, centered/uncentered 동일).
+
+### 9c. 구제 시도 2: 재최적화 Permutation
+
+셔플마다 (α, β)를 inner LOCO-CV로 재선택하는 방법 시도.
+
+결과 (5 perms, sub-02 hV4):
+- Null beta 분포: **β=1000이 45%** (가장 많음), β=0 26%, β=100 9%
+- 셔플 데이터에서도 높은 β가 선호됨 — 정규화가 noise 적합에도 유리
+- 관측값도 하락: 0.172 (고정 0.239에서)
+- Delta (obs - null_mean) ≈ -0.007 — 여전히 유의하지 않음
+
+### 9d. RDM 구조 검사
+
+**실제 데이터 vs 이상적 원형 구조 (Spearman, HC mean):**
+
+| ROI | Actual vs Ideal | 해석 |
+|-----|----------------|------|
+| V1 | -0.008 | 원형 구조 없음 |
+| V2 | +0.044 | 원형 구조 없음 |
+| hV4 | +0.004 | 원형 구조 없음 |
+
+**smooth_tikh 예측 vs 이상적 원형 구조:**
+
+| ROI | Predicted vs Ideal | 해석 |
+|-----|-------------------|------|
+| V1 | **-0.624** | 이상 구조와 반상관 |
+| V2 | **-0.580** | 이상 구조와 반상관 |
+| hV4 | **-0.442** | 이상 구조와 반상관 |
+
+**RDM 거리 압축:** smooth_tikh 예측 RDM 거리 0.06–0.23 (실제 0.66–1.49 대비 극도로 압축).
+
+**rdm_pearson "개선" 재해석:** 높은 rdm_pearson (V1=0.531)은 smooth_tikh의 압축/평탄 RDM이 실제 데이터의 **비원형 noise 구조**와 패턴 매칭된 것. 진정한 색 기하학 보존이 아님.
+
+### 9e. smooth_tikh 최종 결론
+
+| 접근법 | 발견 | 실패 이유 |
+|--------|------|-----------|
+| 고정 파라미터 permutation | 전 p > 0.18 | 공간 공분산이 voxel_corr 지배 |
+| Condition-centering | Shuffle과 교환 | 구조적으로 permutation 변경 불가 |
+| 재최적화 permutation | Null beta ≥ observed | Smoothness가 noise 적합에도 유리 |
+| RDM 기반 평가 | 이상 구조와 반상관 | rdm_pearson 개선은 noise 패턴 매칭 |
+
+**근본 원인:** β=100이 near-rank-1 W를 생성 (모든 열 거의 동일) → 예측이 단일 공간 패턴에 지배됨 → 높은 voxel_corr, 높은 rdm_pearson, 그러나 색 판별 내용 없음.
+
+---
+
+## 10. 핵심 발견 및 결정
 
 ### 발견
 
 1. **LORO-LOCO 해리**: SRM prior는 run-level variance를 포착하지만 color-specific tuning은 놓침. prior_ft LORO 승리, LOCO 패배.
-2. **ridge_gcv = 현재 최적 LOCO 모델**: HC mean positive across V1/V2/hV4.
-3. **FE-6 basis 확정**: Fourier basis 가설 기각 (half-wave cos²이 peaked tuning에 우수).
-4. **hV4만 genuine color interpolation**: Permutation p=0.044, per-color uniform, residual near-random. V1/V2는 covariance baseline (~0.11)에 의해 인플레이션.
-5. **HC-CVD LOCO gap**: V1 d=1.61 (p=0.021), V2 d=1.85 (p=0.022). CVD의 altered representation 확인.
-6. **Prior 자체가 LOCO와 비호환**: H1(shape), H2(uncertainty) 모두 기각 — 구조적 한계.
-7. **smooth_tikh는 genuine improvement**: Artifact check 통과 (rdm_pearson ↑). Inner LOCO CV가 결정적 차이.
-8. **smooth_tikh로 V2 HC-CVD 효과 극대화**: d=3.43 (p=0.001), 3명 CVD 모두 V2에서 유의미한 일탈.
-9. **V3 전면 제외**: 모든 gate criteria FAIL.
+2. **ridge_gcv = 확정된 최적 LOCO 모델**: HC mean positive across V1/V2/hV4. smooth_tikh 기각 후 유일한 선택지.
+3. **FE 형태 확정, 채널 수는 ROI 의존**: Fourier basis 기각 (half-wave cos²이 peaked tuning에 우수). 최적 K: V1→2, V2→3, V3→8, hV4→3.
+4. **Bias-variance tradeoff**: LORO는 K↑로 단조 개선 (r=+0.82~0.89). LOCO는 V1/V2에서 K↓가 유리 (r=-0.23/-0.29). 적은 채널 = 강한 보간 제약 = overfitting 방지.
+5. **V3 회복: FE-8로 NO-GO → PASS**: Permutation p=0.360→0.045. V3 실패는 basis 선택 문제였음.
+6. **V1/V2: 모든 basis에서 LOCO FAIL**: FE-{2..12} + OPP-2/4/4rect 모두 permutation FAIL. Intercept model도 변화 없음. 8-stimulus LOCO의 구조적 해상도 한계 확인 (Red Team #3 중화 완료).
+7. **hV4 genuine color interpolation**: Permutation p=0.044 (FE-6), p=0.026 (FE-3). Per-color uniform, residual near-random.
+8. **HC-CVD gap은 basis 의존적**: V1 FE-2에서 CVD=+0.115, d=0.40 (FE-6: d=1.76). Gap의 상당 부분이 basis mismatch에 기인.
+9. **HC-CVD LOCO gap**: V1 d=1.61 (p=0.021), V2 d=1.85 (p=0.022). CVD의 altered representation 확인.
+10. **Prior 자체가 LOCO와 비호환**: H1(shape), H2(uncertainty) 모두 기각 — 구조적 한계.
+11. **smooth_tikh 전면 기각**: Permutation 실패 + 3가지 구제 시도 모두 실패 + RDM "개선" 기만적.
+12. **실제 데이터에 이상적 원형 색조 구조 없음**: 전 ROI에서 Spearman vs ideal ≈ 0.
+13. **Opponent basis 전 ROI FAIL**: OPP-2/4/4rect 모두 V1/V2 permutation 실패 → V4만 통과하는 해리는 진짜 영역적 특성 (basis mismatch 아님).
+14. **Intercept model 무효**: 공유 공간 평균 제거해도 p-값 불변 → 인코딩 신호는 hue-modulated pattern에 존재.
 
 ### 확정된 결정
 
-1. **Encoder**: ridge_gcv (현재). smooth_tikh = leading candidate (permutation test 후 최종 결정).
-2. **Basis**: FE-6 확정.
-3. **Prior ablations (9a)**: BLOCKED — prerequisite 미충족.
-4. **RRR/Smoothness (9g)**: 기각됨 — 기만적 개선.
-5. **Phase 2 역할 분리**: V1/V2 = filter correction target (HC-CVD 차이 유의), hV4 = color interpolation oracle.
+1. **Encoder**: **ridge_gcv 확정**. smooth_tikh 기각.
+2. **Basis**: FE 형태 확정. Per-ROI 최적: V1→FE-2, V2→FE-3, V3→FE-8, hV4→FE-3/FE-6. Paired t-test로 유의차 없으나 방향 일관적.
+3. **V3 상태 변경**: NO-GO → **CONDITIONAL** (FE-8 basis로 permutation 통과 시).
+4. **Phase 2 역할 분리**: hV4 = primary oracle (perm PASS). V3 = conditional (FE-8). V1/V2 = discrimination-only (LOCO 전 basis FAIL 확인).
+5. **Prior ablations (9a)**: BLOCKED — prerequisite 미충족.
+6. **RRR/Smoothness (9g)**: 기각됨 — 기만적 개선.
+7. **smooth_tikh (9h-9i)**: 기각됨 — 공간 공분산 포착, 색 신호 아님.
+
+### 완료됨
+
+- [x] smooth_tikh 10K permutation test → **전 ROI 실패**
+- [x] Condition-centering 시도 → **교환 문제로 불가**
+- [x] 재최적화 permutation 시도 → **null beta 여전히 높음**
+- [x] RDM 구조 검사 → **원형 구조 없음, rdm_pearson 기만적**
+- [x] **최종 결정: ridge_gcv 확정**
+- [x] FE 채널 수 비교 (FE-2~12) → V3 회복, V1/V2 1D 한계 확인
+- [x] Per-ROI optimal basis permutation → V3 FE-8 PASS, hV4 FE-3 강화
+- [x] Opponent basis test (OPP-2/4/4rect, 10K) → **V1/V2 전 basis FAIL — Red Team #3 중화**
+- [x] Intercept model permutation test (10K) → **Standard ≈ Intercept — p-값 불변**
+- [x] Red Team 대응 → **#3 완전 중화, #1/#2/#4 문서화, #5 부분 대응** (§12)
 
 ### 대기 중
 
-- [ ] smooth_tikh 10K permutation test (`run_smooth_tikh_perm.sbatch`)
-  - 통과 → smooth_tikh 채택 (Phase 2 encoder)
-  - 실패 → ridge_gcv 유지
+- [ ] notion.md / RESULTS.md 정리 (중복 제거, 구조 개편)
+- [ ] Phase 2 사전등록 (Red Team #4 대응)
 
 ---
 
-## 10. Phase 2 연결
+## 12. Red Team 대응
+
+> 자체 비판 2026-03-11 수행. 전체 보고서: `results/redteam/2026-03-11.md`
+
+### RT-1. 통계적 검정력 (N=3 CVD) — FATAL→MITIGATED
+
+**비판:** N=3 CVD로 그룹 수준 추론 불가. Welch t-test (df~4-5) 불안정, 효과크기 부풀림.
+
+**대응 — Case Study 프레이밍:**
+- 모든 CVD 결과는 **Crawford & Howell (2010) 개인별 단일사례 분석**으로 보고
+- 그룹 수준 CVD 비교 (Welch t-test)는 **기술적/탐색적** 보고, 확인적 아님
+- HC 그룹 결과 (N=7) = 검증된 모델; CVD 적용 = "N=3 개념 증명"
+- 확정적 CVD 그룹 주장에 필요한 최소 표본: 그룹당 N≥12 (d=0.8, α=0.05, power=0.80)
+- CVD-CVD RDM 상관 (0.276 > HC-HC 0.158): **기술적 관찰**로만 보고
+
+**파이프라인 영향:** 없음. Phase 2 filter는 개인별 작동; 그룹 수준 CVD 추론 불필요.
+
+### RT-2. 다중비교 보정 (hV4 p=0.044) — FATAL→MITIGATED
+
+**비판:** 4 ROI 검정; Bonferroni 기준 0.0125; hV4 p=0.044 탈락.
+
+**대응 — 사전 지정 Primary ROI + 수렴 증거:**
+
+**hV4가 primary hypothesis인 사전 근거:**
+1. **선행연구**: Brouwer & Heeger (2009)가 V4/VO1을 novel-color reconstruction 부위로 확인
+2. **데이터 품질**: 최고 noise ceiling (HC 0.702), 최고 split-half reliability (HC 0.603)
+3. **생물학적 근거**: hV4의 hue-selective neuron이 FE-6 원형 basis와 가장 호환
+
+**보정 결과:**
+- hV4 = **primary** (미보정 p=0.044; FE-3: p=0.026)
+- V1/V2/V3 = **secondary/exploratory** (보고 시 명시)
+- Bonferroni 4 ROI: hV4 FE-6 p=0.044 > 0.0125 → **미통과** (명시)
+- FDR (BH) per-ROI optimal: hV4 FE-3 q=0.104 → **미통과** (명시)
+
+**수렴 증거 (permutation p-value와 독립):**
+
+| 증거 | V1/V2 | hV4 |
+|------|-------|-----|
+| Permutation | FAIL | p=0.044* |
+| Friedman 균일성 | 비균일* | **균일** (p=0.485) |
+| Residual 구조 | 체계적 (r=0.45) | **근무작위** (r=0.053) |
+| NC-normalized fit | 0.23/0.27 | **0.32** |
+| Noise ceiling | 0.47/0.51 | **0.70** |
+
+**파이프라인 간 구분:**
+- Phase 1 hV4 HC-CVD voxel_corr: p=0.169 (n.s.) — **Phase 1 내 결과**
+- Phase 3 hV4 HC-CVD LOCO MAE: p=0.017 — **별도 파이프라인, 별도 metric**
+- 각각 해당 섹션에서 보고, 혼합 추론 하지 않음
+
+### RT-3. 구분 vs 보간 해리 — NEUTRALIZED
+
+**비판:** 사후 합리화; 대안 basis 미검증.
+
+**결과:** 3종 opponent basis (OPP-2/4/4rect) + FE 채널 변형 (FE-2~12) + intercept 모델 직접 검증. **V1/V2에서 모든 basis FAIL.** FE-6만이 V4에서 유일하게 통과 (p=0.039).
+
+해리는 **8-stimulus LOCO의 V1/V2 구조적 해상도 한계**로 확정. Basis mismatch 아님. 전체 결과: §6e (Opponent Basis Test).
+
+### RT-4. 분석적 자유도 — ADDRESSED
+
+**비판:** 8 모델 × 3 basis × 4 ROI × 6 metric; 하나만 p=0.044.
+
+**대응 — 순차적 제거 논리:**
+
+1. **Basis 선택**: FE-6 > LF-4 > LF-6, paired LOCO CV 기반 (p=0.045/0.042/0.016). Permutation p-value 참조하지 않음.
+2. **모델 선택**: ridge_gcv = LOCO voxel_corr 최고. smooth_tikh는 permutation에서 **독립적으로 기각**.
+3. **Permutation**: 사전 선택된 모델/basis 조합에 대한 **최종 검증 gate**. 모델/basis 선택에 관여하지 않음.
+4. **Metric 선택**: voxel_corr = forward encoding 문헌 표준 (B&H 2009). Parametric → permutation 전환은 "원하는 패턴" 때문이 아니라, voxel covariance가 non-zero baseline 생성 → H₀: μ=0이 부적절하기 때문.
+
+**Phase 2 사전등록:** Phase 2 실행 전 계획.
+
+### RT-5. "CVD 실패 = 데이터" 서사 — PARTIALLY ADDRESSED
+
+**비판:** 반증 불가; CVD reliability가 HC보다 높아 "왜곡" 서사와 모순.
+
+**수정된 프레이밍:**
+
+1. **"실패 = 데이터" → "basis mismatch + 생물학적 효과"로 수정:**
+   - HC-CVD gap은 **부분적으로 basis 의존**: V1 FE-2에서 d=1.76→0.40 (CVD=+0.115)
+   - Basis 최적화 후 남는 gap = 진정한 생물학적 효과 (변형된 cone excitation)
+
+2. **높은 CVD reliability 해명:**
+   - Reliability (0.699 > 0.603) = 패턴이 런 간 **일관되게 재현**
+   - "일관되게 왜곡" 가능 — reliability는 안정성 측정, 정확성 아님
+   - 비유: 고장난 시계는 완벽하게 reliable하나 accurate하지 않음
+
+3. **반증 가능한 예측 (Phase 1c):**
+   - Adaptive basis: CVD 피험자별 center가 L-M 축에서 체계적 압축 보이면 → basis mismatch 확인
+   - 개선 없으면 → 생물학적 효과가 예상보다 큼
+
+4. **Phase 2 filter와의 정합성:**
+   - `W_s @ C(T_psi(θ))`: hV4 카테고리 구조가 CVD에서 보존 (RDM p=0.559) → HC W_s 적용 가능
+   - T_psi는 연속 매핑만 교정, 카테고리 구조 아님 → 내적 일관성 유지
+
+---
+
+## 11. Phase 2 연결
 
 W_s가 Phase 2의 **prediction engine** (frozen):
 
@@ -437,4 +724,4 @@ W_s는 filter optimization 시작 전에 고정. Filter T_psi는 stimulus space�
 | 근거 | HC-CVD 차이 유의 (d>1.0) | Genuine color interpolation (perm p=0.044) |
 | 활용 | Filter 적용 대상 | Cross-ROI validation, color axis reference |
 
-**smooth_tikh 채택 시 기대 효과**: V2 HC-CVD d=3.43 (2배 증가), NC-normalized 30%→48%, 3명 CVD 모두 V2 유의 (CH p<0.05).
+**Encoder**: ridge_gcv 확정. smooth_tikh 기각되었으므로 ridge_gcv 기반 HC-CVD 비교 (V2 d=1.85, p=0.022) 사용.

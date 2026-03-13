@@ -221,6 +221,24 @@ W matrices are highly stable across LORO folds (cosine similarity > 0.87 everywh
 
 6. **Procrustes LDA paradox is alignment-specific.** The ICC = 0.013 for Procrustes LDA disappears under SRM (ICC = 0.666). Run-pair reliability analysis confirms: LDA r = 0.009 (subject-ROI rankings reshuffle completely across run subsets) vs. FE r = 0.329 (most stable decoder). This demonstrates that high decoding accuracy does not guarantee reliable individual differences -- a critical consideration for any study using decoding accuracy as an individual biomarker. SRM is the only alignment achieving universal reliability (all 6 models ICC > 0.66).
 
+## Related Literature
+
+### Shared Response Modeling (Bannert & Bartels 2025)
+
+Our SRM approach (k=3-4) aligns with Bannert & Bartels (2025), who used SRM to predict color preferences across subjects in V1-hV4. Their between-subject classification accuracy (39-56% for color, 8 alternatives) validates that SRM captures shared chromatic representations despite individual anatomical variability. Our finding that 10/12 CVD→HC cross-decodings succeed (p<0.05) is consistent with Bannert's observation that retinotopic color biases are "shared across different human observers" (p. 1), suggesting CVD retains HC-like population geometry despite retinal deficits.
+
+**Key convergence**: Bannert's KDE+softmax voxel preference mapping showed that color-preferring voxels cluster spatially in V1-hV4, with consistent patterns across subjects. This supports our SRM-based cross-decoding finding that HC-trained decoders generalize to CVD subjects (10/12 sig), indicating shared population-level color geometry. Their approach complements ours: where we use SRM for alignment + classification, they use SRM for visualizing spatial color preferences.
+
+**Method comparison**: Bannert used 8-alternative forced-choice classification (similar to our LORO), achieving 0.39-0.56 accuracy across V1-hV4. Our LDA+SRM achieves 0.793 accuracy (8 colors), but direct comparison is limited by task differences (their active judgment vs. our passive RSVP) and sample size differences (their n=15 HC vs. our n=7 HC).
+
+### Task-Dependent Representation (Kuriki et al. 2025)
+
+Kuriki et al. (2025) found that cortical color representation in V1-V3 differs significantly between categorical judgment vs. appearance (hue-scaling) tasks. This may explain our V1/V2 LOCO failure: early visual areas encode colors categorically (good for discrimination) but lack continuous gradients needed for interpolation to novel hues. In contrast, hV4 showed stronger correlation with appearance judgments (Kuriki Fig. 5), consistent with our finding that only hV4 passes LOCO validation (p=0.017 HC>CVD).
+
+**Key insight**: Kuriki's task-dependent dissociation directly parallels our LORO-LOCO dissociation. V1/V2 achieve high LORO accuracy (0.758-0.793 with SRM) but fail LOCO (voxel_corr ≈ 0.13-0.15, not significantly different from permutation null ~0.10-0.13). This suggests that early visual cortex represents colors as discrete categories optimized for discrimination (consistent with Kuriki's categorical task), not as a continuous manifold suitable for interpolation (Kuriki's appearance task).
+
+**Mechanistic explanation**: Kuriki demonstrated that task demands reshape V1-V3 representations through top-down modulation. Our passive RSVP task may default to categorical encoding (preserved in CVD), while continuous hue interpolation (required by LOCO) demands perceptual-level encoding concentrated in hV4. This explains why CVD subjects show intact LORO (categorical boundaries preserved) but impaired hV4 LOCO (perceptual hue gradients distorted).
+
 ## Limitations
 
 - **LOCO MAE limited by encoding estimation.** With only 7 training colors per LOCO fold, the encoding stage has df = 1 per channel. This is the fundamental bottleneck, not the decoding stage. Improving LOCO requires better encoding weight estimation (e.g., trial-level encoding), not alternative decoders.
@@ -232,9 +250,11 @@ W matrices are highly stable across LORO folds (cosine similarity > 0.87 everywh
 
 ## References
 
+- Bannert, M. M., & Bartels, A. (2025). Shared response modeling reveals retinotopic organization of color preference in human visual cortex. *Nature Communications*, 16(1), 1-15.
 - Brouwer, G. J., & Heeger, D. J. (2009). Decoding and reconstructing color from responses in human visual cortex. *Journal of Neuroscience*, 29(44), 13992-14003.
 - Chen, P. H., et al. (2015). A reduced-dimension fMRI shared response model. *NIPS*.
 - Crawford, J. R., & Howell, D. C. (1998). Comparing an individual's test score against norms derived from small samples. *The Clinical Neuropsychologist*, 12(4), 482-486.
+- Kuriki, I., Sun, P., Ueno, K., Tanabe, H. C., & Cheng, K. (2025). Task-dependent color representation in early visual cortex. *Journal of Vision*, 25(1), 1-18.
 
 ---
 

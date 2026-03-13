@@ -1,6 +1,6 @@
 # Group-Prior Prediction Model — PLAN
 
-> Last updated: 2026-03-11
+> Last updated: 2026-03-12
 > Status: Baseline complete; **ridge_gcv confirmed as final encoder** (smooth_tikh REJECTED — Section 9i)
 > Phase: Future Phase 1 — Forward Model (SRQ3)
 
@@ -1123,20 +1123,20 @@ Gate: CVD metric > HC 5th percentile. This asks "is the CVD prediction within th
 
 ---
 
-### Phase 1b: HC Model Refinement (IN PROGRESS 🎯)
+### Phase 1b: HC Model Refinement (COMPLETE ✅)
 
-**Goal:** Fix smooth_tikh permutation failure via condition-centering + re-optimized permutation. Keep voxel_corr as primary metric.
+**Result:** smooth_tikh REJECTED after exhaustive investigation. ridge_gcv confirmed.
 
-| Priority | Step | Script | Expected Outcome | Gate |
-|----------|------|--------|------------------|------|
-| **1 (HIGHEST)** | **§9i-1+2: Condition-center + re-optimized perm** | `permutation_test_centered.py` | smooth_tikh passes voxel_corr perm | If PASS → adopt smooth_tikh |
-| 2 (MEDIUM) | Quick test: centered LOCO (no perm) | Modify `utils_forward_model.py` | Verify centering improves LOCO scores | Sanity check before full perm |
-| 3 (SUPPORTING) | RDM as secondary metric | Existing scripts | Independent geometry evidence | Complementary |
+| Step | Script | Result |
+|------|--------|--------|
+| §9i-1: Condition-centering | `_test_centering.py` | Commutes with permutation — no effect |
+| §9i-2: Re-optimized permutation | `validate_smooth_tikh_artifact.py` | Null beta=1000 (45%) — doesn't fix |
+| §9i-3: RDM structure inspection | `_inspect_rdm.py` | Actual data has NO circular structure |
+| FE channel count (FE-2~12) | `validate_extended_models.py` | V3 FE-8 recovered; hV4 FE-3 strengthened |
+| Opponent basis (OPP-2/4/4rect) | `validate_extended_models.py` | ALL FAIL V1/V2 — dissociation confirmed |
+| Intercept model | `validate_extended_models.py` | Standard ≈ Intercept — no change |
 
-**Decision point:**
-- ✅ If centered permutation passes → **smooth_tikh adopted** (voxel_corr primary, RDM secondary)
-- ❌ If still fails → **ridge_gcv retained** (hV4 only validated ROI)
-- → **Proceed to Phase 2 with HC-validated encoder**
+**Decision:** ridge_gcv confirmed. Per-ROI optimal basis: V1→FE-2, V2→FE-3, V3→FE-8, hV4→FE-3.
 
 ---
 
@@ -1166,75 +1166,57 @@ Gate: CVD metric > HC 5th percentile. This asks "is the CVD prediction within th
 
 ---
 
-### Timeline Recommendation
+### Timeline (Updated 2026-03-12)
 
-**Week 1-2 (HC focus):**
-1. Implement condition-centering in `utils_forward_model.py` + quick LOCO test — 1 day
-2. Implement re-optimized permutation (`permutation_test_centered.py`) — 1-2 days
-3. Run centered permutation on server (10K iters) — 1-2 days
-4. Analyze results, make encoder decision — 1 day
-5. Document final HC encoder in RESULTS.md
+**Immediate:**
+- ✅ Per-ROI optimal basis adopted (no additional server run needed)
+- 🎯 Adaptive basis (§9k-1): implement + quick server run — 2-3 days
 
-**Week 3-4 (CVD focus):**
-1. Implement adaptive basis optimization (§9k-1) — 3-4 days
-2. Run on all subjects (HC + CVD), validate LOCO — 1-2 days
-3. If successful → implement hV4-informed variant (§9k-2)
-4. If fails → document limitation, proceed with HC-only Phase 2
+**Next:**
+- Phase 2 filter optimization with validated encoder — regardless of §9k-1 outcome
+- Phase 2 pre-registration before running
 
-**Week 5+ (Phase 2):**
-- Filter optimization with validated encoder
-- Separate HC and CVD evaluation if needed
+**Critical path:** §9k-1 is the ONLY remaining Phase 1 item. Proceed to Phase 2 regardless of outcome.
 
 ---
 
-### Critical Dependencies
-
-**§9i (Centered permutation) blocks:**
-- Encoder decision (smooth_tikh vs ridge_gcv)
-- Voxel_corr remains primary metric; RDM as secondary
-
-**§9k-1 (Adaptive basis) blocks:**
-- CVD model viability
-- Unified vs separate HC-CVD encoding
-
-**Both can run in parallel** — different questions, independent implementations.
-
----
-
-## 12. Updated Pipeline Summary (2026-03-11)
+## 12. Updated Pipeline Summary (2026-03-12)
 
 ```
-Phase 1. Prediction Model (HC Focus First)
-├── 1. Base model: forward encoding (FE-6 default)                  ← DONE
-├── 2. Encoding basis ablation: FE-6 / LF-4 / LF-6                 ← DONE (FE-6 wins)
-├── 3. Group prior + subject adaptation (Steps A-D)                 ← DONE (ridge_gcv retained)
-├── 4. Validation: LORO / LOCO / LOSO                               ← DONE (hV4 passes permutation)
-├── 5. Model comparison: 4 baseline models                          ← DONE (ridge_gcv best LOCO)
-├── 6. Extended models (§9h): prior-based + smooth_tikh             ← DONE (smooth_tikh RDM↑, voxel_corr perm FAIL)
-├── 7. Metrics: voxel corr, R², LOCO MAE, RDM corr, NC-normalized  ← DONE
-├── 8. Gate (HC): hV4 PRIMARY GO (perm p=0.044); V1/V2 CONDITIONAL ← DONE
+Phase 1. Prediction Model
+├── Phase 1a: Baseline                                               ← COMPLETE ✅
+│   ├── 1. Base model: forward encoding (FE-6 default)               ← DONE
+│   ├── 2. Encoding basis ablation: FE-6 / LF-4 / LF-6             ← DONE (FE-6 wins)
+│   ├── 3. Group prior + subject adaptation (Steps A-D)             ← DONE
+│   ├── 4. Validation: LORO / LOCO / LOSO (4 models)               ← DONE (ridge_gcv best LOCO)
+│   ├── 5. Extended models (§9g-h): smooth_tikh + prior variants    ← DONE (all fail perm)
+│   ├── 6. Metrics: voxel corr, R², LOCO MAE, RDM, NC-normalized   ← DONE
+│   └── 7. Gate (HC): hV4 PRIMARY GO (perm p=0.044)                ← DONE
 │
-├── 9i. Model & permutation fixes (condition-centering + re-opt)    ← PLANNED
-│   ├── 9i-1. Condition-centering (add intercept to model)          ← **HIGHEST PRIORITY**
-│   ├── 9i-2. Re-optimized permutation (hyperparams per shuffle)    ← **HIGH PRIORITY**
-│   └── 9i-3. Combined: centered + re-opt perm test                 ← **RECOMMENDED**
+├── Phase 1b: HC Model Refinement                                    ← COMPLETE ✅
+│   ├── §9i: smooth_tikh investigation (3 rescue attempts)          ← REJECTED
+│   ├── FE channel count ablation (FE-2~12)                         ← DONE (per-ROI optimal found)
+│   ├── Opponent basis test (OPP-2/4/4rect)                         ← DONE (all fail V1/V2)
+│   ├── Intercept model test                                         ← DONE (no change)
+│   └── Per-ROI optimal: V1→FE-2, V2→FE-3, V3→FE-8, hV4→FE-3     ← ADOPTED
 │
-├── 9j. hV4-informed multi-ROI prior (cross-ROI constraints)        ← PLANNED
-│   ├── 9j-1. RDM-constrained V1/V2 fitting                         ← MEDIUM (after 9i)
-│   └── 9j-2. hV4-adaptive basis initialization                     ← HIGH (if 9k implemented)
+├── Phase 1c: CVD Model Development                                  ← IN PROGRESS 🎯
+│   ├── §9k-1: Adaptive basis optimization (per-subject centers)    ← **NEXT**
+│   ├── §9k-2: Hierarchical adaptive (hV4-informed V1/V2)          ← AFTER 9k-1
+│   └── §9k-3: CVD distortion analysis                              ← AFTER 9k-1
 │
-└── 9k. Adaptive basis optimization (CVD-HC unified model)          ← PLANNED
-    ├── 9k-1. Subject-specific basis centers                         ← **HIGH PRIORITY**
-    ├── 9k-2. Hierarchical adaptive (hV4-informed V1/V2)            ← HIGH (after 9k-1)
-    └── 9k-3. Validation: CVD LOCO > 0 target                        ← HIGH
-
-Phase 1.5. CVD Model Development (After HC Validation)
-├── Apply §9i strategies to CVD subjects
-├── Test adaptive basis (§9k) on CVD → target: LOCO > 0 in 2+ ROIs
-└── If successful → unified HC-CVD encoder for Phase 2
+├── §9j: hV4-informed multi-ROI prior                                ← SKIPPED
+│   (V1/V2 fail ALL bases — cross-ROI constraint unlikely to help)
+│
+└── Red Team Response                                                 ← DOCUMENTED ✅
+    ├── RT-1: N=3 CVD → case study framing (Crawford & Howell)
+    ├── RT-2: hV4 a priori primary ROI + converging evidence
+    ├── RT-3: Opponent basis neutralized dissociation claim
+    ├── RT-4: Sequential elimination logic documented
+    └── RT-5: Adaptive basis (§9k-1) for full neutralization
 
 Phase 2. Filter Optimization
-├── Encoder: Best HC model from Phase 1 (smooth_tikh if centered perm passes, else ridge_gcv)
+├── Encoder: ridge_gcv (frozen, per-ROI optimal basis)
 ├── Filter families: identity / Fourier-4 / Fourier-6 / optional GP
 ├── Evaluation metric: voxel_corr (primary) + RDM correlation (secondary)
 ├── Validation: geometry improvement, held-out, permutation, pairwise diagnostics
@@ -1244,14 +1226,12 @@ Phase 3. Behavioral Validation
 └── Neural correction → perceptual improvement prediction
 ```
 
-**Structural principle**:
-1. **HC model validation first** (hV4 confirmed, V1/V2 pending model/permutation fix)
-2. **Fix smooth_tikh** via condition-centering + re-optimized permutation (§9i) — keep voxel_corr as primary metric
-3. **Extend to CVD** via adaptive basis (§9k) and hV4 constraints (§9j)
-4. **Unified framework** for Phase 2 filter optimization
+**Final encoder:** ridge_gcv (smooth_tikh REJECTED after exhaustive investigation)
 
-**Current status (2026-03-11):**
-- ✅ HC baseline complete (ridge_gcv, hV4 permutation-validated)
-- ✅ smooth_tikh shows promise (RDM↑, HC-CVD separation↑) but perm fails due to missing intercept + biased null
-- 🎯 **Next: Condition-centering + re-optimized permutation (§9i-1+2)** — fixes model & test
-- 🎯 **Parallel: Adaptive basis development (§9k-1)** — for CVD model
+**Current status (2026-03-12):**
+- ✅ HC encoder validated: ridge_gcv with hV4 permutation p=0.044
+- ✅ Per-ROI optimal basis adopted: V1→FE-2, V2→FE-3, V3→FE-8, hV4→FE-3
+- ✅ smooth_tikh REJECTED (all 3 rescue attempts failed — §9i)
+- ✅ Red Team criticisms addressed (#3 neutralized, #1/#2 mitigated, #4 addressed)
+- 🎯 **Next: Adaptive basis (§9k-1)** — quick attempt, proceed to Phase 2 regardless
+- 📋 **Phase 2 pre-registration** — planned before filter optimization

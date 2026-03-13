@@ -1,7 +1,7 @@
 # Future Phase 1: Group-Prior Prediction Model
 
 > **프로젝트**: Color Vision Deficiency Neural Representation Analysis
-> **날짜**: 2026-03-10 (정리: 2026-03-11, smooth_tikh 결론 추가: 2026-03-11)
+> **날짜**: 2026-03-10 (정리: 2026-03-11, smooth_tikh 결론: 2026-03-11, 적응 기저: 2026-03-12, per-color residual: 2026-03-13)
 > **피험자**: HC 7명 (sub-01~07), CVD 3명 (sub-08 deutan, sub-09 protan, sub-10 deutan)
 > **ROI**: V1, V2, V3, hV4
 > **목적**: HC group prior를 활용한 subject-specific forward encoding model W_s 학습 및 검증
@@ -380,6 +380,179 @@ smooth_tikh만이 모든 ROI에서 양의 LOCO. Prior 기반 3개 모델은 V1-V
 
 > **⚠️ rdm_pearson 재해석 (2026-03-11):** rdm_pearson "개선"은 기만적. RDM 구조 검사 결과: (1) 실제 데이터에 이상적 원형 색조 구조 없음 (Spearman vs ideal ≈ 0), (2) smooth_tikh 예측 RDM은 이상 구조와 반상관 (ρ ≈ -0.5), (3) 예측 RDM 거리가 극도로 압축 (0.06-0.23). 높은 rdm_pearson은 압축된 RDM이 실제 데이터의 noise 구조와 매칭된 것. §9d 참조.
 
+### 6h. 적응형 기저 최적화 (Section 9k-1, 2026-03-12)
+
+#### 목적과 검정 질문
+
+- **질문**: "CVD LOCO 실패가 고정 기저 불일치 때문인가, 뇌 표상 왜곡 때문인가?"
+- **방법**: FE 기저 센터를 피험자 × ROI별로 자유 최적화 → LOCO voxel_corr 비교
+- **t-test**: Paired one-sample t-test (delta = adaptive − fixed, H₀: delta = 0)
+  → "적응 기저가 고정 기저보다 유의하게 개선하는가?"
+
+#### Fixed vs Adaptive LOCO voxel_corr (per-ROI optimal K)
+
+| Subject | Group | V1(K=2) F/A/Δ | V2(K=3) F/A/Δ | V3(K=8) F/A/Δ | hV4(K=3) F/A/Δ |
+|---------|-------|---------------|---------------|---------------|----------------|
+| sub-01 | HC | +0.135/+0.147/+0.012 | +0.052/+0.156/+0.104 | +0.222/+0.280/+0.058 | +0.040/+0.132/+0.093 |
+| sub-02 | HC | +0.040/+0.142/+0.102 | +0.286/+0.312/+0.026 | +0.104/+0.190/+0.086 | +0.511/+0.554/+0.043 |
+| sub-03 | HC | +0.162/+0.187/+0.025 | +0.202/+0.230/+0.029 | +0.045/+0.085/+0.041 | +0.363/+0.466/+0.103 |
+| sub-04 | HC | +0.182/+0.303/+0.121 | +0.209/+0.333/+0.124 | +0.074/+0.133/+0.059 | +0.256/+0.338/+0.083 |
+| sub-05 | HC | +0.309/+0.305/−0.005 | +0.356/+0.378/+0.022 | +0.423/+0.439/+0.016 | +0.026/+0.088/+0.062 |
+| sub-06 | HC | −0.005/+0.025/+0.030 | −0.061/+0.049/+0.111 | −0.269/−0.090/+0.179 | +0.313/+0.382/+0.070 |
+| sub-07 | HC | +0.251/+0.255/+0.004 | +0.236/+0.237/+0.001 | +0.043/+0.129/+0.087 | −0.059/+0.130/+0.188 |
+| sub-08 | CVD | +0.179/+0.267/+0.088 | +0.003/**+0.265**/+0.262 | +0.192/+0.295/+0.102 | +0.067/**+0.383**/+0.316 |
+| sub-09 | CVD | +0.018/+0.036/+0.018 | +0.065/+0.125/+0.060 | +0.032/+0.080/+0.048 | +0.079/+0.147/+0.068 |
+| sub-10 | CVD | +0.149/+0.149/+0.000 | −0.166/−0.030/+0.136 | +0.203/+0.225/+0.022 | +0.198/+0.283/+0.085 |
+| **HC M (SD)** | | +0.153(0.102)/+0.195(0.094) | +0.183(0.132)/+0.242(0.105) | +0.092(0.193)/+0.167(0.152) | +0.207(0.193)/+0.299(0.170) |
+| **CVD M (SD)** | | +0.115(0.070)/+0.151(0.094) | −0.032(0.098)/+0.120(0.120) | +0.143(0.078)/+0.200(0.089) | +0.115(0.059)/+0.271(0.097) |
+
+#### Delta 통계 (paired t-test: adaptive − fixed vs 0)
+
+| ROI | K | HC Delta M (SD) | t(6) | p | 개선 |
+|-----|---|----------------|------|---|------|
+| V1 | 2 | +0.041 (0.046) | 2.194 | 0.071 | 6/7 |
+| **V2** | **3** | **+0.059 (0.047)** | **3.081** | **0.022*** | **7/7** |
+| **V3** | **8** | **+0.075 (0.048)** | **3.805** | **0.009*** | **7/7** |
+| **hV4** | **3** | **+0.092 (0.044)** | **5.151** | **0.002*** | **7/7** |
+
+CVD 개별 delta (n=3, 그룹 검정 불가):
+
+| Subject | V1 | V2 | V3 | hV4 |
+|---------|------|------|------|------|
+| sub-08 (deutan) | +0.088 | **+0.262** | +0.102 | **+0.316** |
+| sub-09 (protan) | +0.018 | +0.060 | +0.048 | +0.068 |
+| sub-10 (deutan) | +0.000 | +0.136 | +0.022 | +0.085 |
+
+#### 최적화된 센터 패턴
+
+**sub-08 퇴행 패턴**: V2와 hV4에서 최적 센터가 [0°, 180°, 359°] → 사실상 K=2로 수렴. L-M축 압축(deuteranopia) 증거 — 단일 대립축(red-cyan)이 가용 구조 대부분을 포착.
+
+**HC도 비균등 센터에서 개선**: 고정 FE가 정상 색각에서도 최적이 아님 (hV4 HC delta=+0.092, p=0.002).
+
+#### 순환 편향 경고
+
+> **편향**: 센터 최적화가 전체 8색 LOCO를 목적함수로 사용 → 테스트 색이 센터 선택에 간접 영향. 성능 수치는 **낙관적 상한**. Nested LOCO (Section 4b)에서 unbiased 검증 예정.
+
+#### 핵심 발견
+
+1. **38/40 조합에서 delta ≥ 0** — 거의 보편적 개선 (순환 최적화 하)
+2. V2/V3/hV4 HC delta 유의 (모두 p < 0.025); V1 추세 (p=0.071)
+3. **sub-08 (deutan)**: 순환 최적화 하 극적 개선 — §6i에서 debiasing 후 무효화
+4. 순환 편향 → §6i nested LOCO에서 해결
+
+### 6i. Nested LOCO 검증 (Section 9k-2, 2026-03-12)
+
+#### 목적
+
+§6h의 센터 최적화는 8색 전체 LOCO를 목적함수로 사용 → 순환 편향. Nested (이중) LOCO로 debiasing:
+
+```
+외부 fold (8-fold): 1색 hold out for evaluation
+  └── 내부 최적화 (7-fold): 나머지 7색으로 센터 최적화
+  └── 외부 평가: 최적 센터 + 7색 W → held-out 색 예측
+```
+
+3가지 조건 비교: (1) Fixed FE-6, (2) Fixed FE-K (per-ROI optimal), (3) Nested Adaptive
+
+#### 결과: 3-Way 비교 (mean LOCO voxel_corr)
+
+| ROI | K | HC FE-6 | HC FE-K | HC Nested | CVD FE-6 | CVD FE-K | CVD Nested |
+|-----|---|:-------:|:-------:|:---------:|:--------:|:--------:|:----------:|
+| V1 | 2 | +0.130 | +0.153 | +0.175 | −0.012 | +0.115 | +0.130 |
+| V2 | 3 | +0.150 | +0.180 | +0.174 | −0.174 | −0.032 | −0.002 |
+| V3 | 8 | +0.023 | +0.112 | +0.110 | −0.008 | +0.081 | +0.086 |
+| hV4 | 3 | +0.183 | +0.205 | +0.164 | −0.058 | +0.116 | +0.096 |
+
+#### HC Paired t-test: Nested vs Fixed
+
+모든 ROI에서 Nested ≈ FE-K (delta ≈ 0, 모든 p>0.37). **센터 최적화 = 효과 없음.** hV4는 오히려 adaptive가 나쁜 추세 (delta=−0.041, p=0.075).
+
+#### 과대추정 확인 (Circular vs Nested, HC Mean)
+
+| ROI | Circular | Nested | Bias |
+|-----|:--------:|:------:|:----:|
+| V1 | +0.195 | +0.175 | +0.020 |
+| V2 | +0.242 | +0.174 | +0.068 |
+| V3 | +0.167 | +0.110 | +0.056 |
+| hV4 | +0.299 | +0.164 | **+0.135** |
+
+sub-08 hV4: circular=+0.383 → nested=+0.081 (bias=**+0.302**). §6h의 "L-M축 압축 증거"는 과적합 산물로 무효화.
+
+#### HC-CVD Gap 분해: 모델 명세별
+
+| ROI | FE-6 d (p) | FE-K d (p) | Gap 감소 |
+|-----|:----------:|:----------:|:--------:|
+| V1 | 2.01 (0.021) | 0.44 (0.581) | **−78%** |
+| V2 | 2.25 (0.022) | 1.80 (0.067) | −20% |
+| V3 | 0.17 (n.s.) | 0.18 (n.s.) | — |
+| hV4 | 1.36 (0.169) | 0.63 (0.342) | **−54%** |
+
+→ **K 선택이 HC-CVD LOCO gap의 54-78%를 설명.** FE-6 과모수화 문제.
+
+#### 핵심 결론
+
+1. **센터 최적화 = 무효.** 유일한 유효 파라미터는 K (채널 수).
+2. **§6h 순환 결과 무효화**: sub-08 "퇴행 센터" = 과적합 산물.
+3. **HC-CVD gap 대부분 모델 명세 의존적**: 적절한 K 선택으로 gap 대폭 감소.
+4. **잔여 gap** (hV4 d=0.63, p=0.342): n=3 CVD에서 underpowered → Phase 2 filter 타겟.
+
+### 6j. Per-Color Residual 분석 & Cross-Phase 수렴 (Section 9k-3, 2026-03-13)
+
+#### 목적
+
+FE-K 적용 후 남는 HC-CVD gap을 **색별로 분해**하여 어떤 색이 잔여 gap을 주도하는지 확인. Phase 2 SRM prevalidation과의 **독립적 수렴**을 검증.
+
+#### Per-Color LOCO voxel_corr — hV4 FE-3 (Welch t, HC n=7 vs CVD n=3)
+
+| 색 | θ | HC M (SD) | CVD M (SD) | d | p |
+|-----|-----|-----------|-----------|:---:|:---:|
+| red | 0° | +0.353 (0.225) | +0.310 (0.255) | +0.18 | 0.81 |
+| orange | 45° | +0.246 (0.316) | +0.502 (0.224) | −0.94 | 0.22 |
+| yellow | 90° | +0.135 (0.422) | +0.213 (0.167) | −0.24 | 0.70 |
+| green | 135° | +0.107 (0.427) | +0.055 (0.338) | +0.13 | 0.85 |
+| cyan | 180° | −0.008 (0.401) | +0.157 (0.524) | −0.35 | 0.66 |
+| **blue** | **225°** | **+0.349 (0.315)** | **+0.025 (0.114)** | **+1.37** | **0.046*** |
+| purple | 270° | +0.283 (0.319) | −0.124 (0.196) | +1.54 | 0.060† |
+| magenta | 315° | +0.171 (0.384) | −0.211 (0.246) | +1.19 | 0.127 |
+
+#### Warm/Cool 축 분해
+
+| 축 | FE-6 Gap | FE-K Gap | 감소 |
+|------|:--------:|:--------:|:----:|
+| **Warm (L-M)** | +0.118 | **−0.060** | **>100% (역전)** |
+| **Cool (S)** | +0.362 | **+0.237** | **35%만 감소** |
+
+→ K 최적화로 warm-color gap 완전 소멸. Cool-color gap은 원래의 65% 잔존 = **잔여 생물학 후보**.
+
+#### 피험자별 Cool-Color 프로필 (hV4 FE-3)
+
+| 피험자 | Warm 평균 | Cool 평균 | 해석 |
+|---------|:---------:|:---------:|------|
+| sub-08 (deutan) | +0.227 | −0.058 | Cool 여전히 음수 |
+| sub-09 (protan) | +0.340 | −0.197 | Cool 최악 |
+| sub-10 (deutan) | +0.244 | +0.140 | Cool 양수 — 보상됨 |
+| HC 평균 | +0.210 | +0.199 | Warm/Cool 균형 |
+
+#### Cross-Phase 수렴: SRM Prevalidation ↔ Forward Model
+
+SRM prevalidation (crossnobis pairwise distance)과 forward model LOCO는 **완전히 독립적 파이프라인**.
+
+| 신호 | SRM Prevalidation (Phase 2) | Forward Model (Phase F1) | 수렴? |
+|------|---------------------------|------------------------|:----:|
+| Blue-purple 왜곡 | V2 blue-purple p=0.042 (유일한 유의 쌍) | hV4 blue d=+1.37 p=0.046 | **YES** |
+| Green-blue 압축 | V1/V2/V3 3인 일관 deficit | Blue = CVD 최저 색 | **YES** |
+| Red-magenta 확장 | V1/V2/hV4 3인 일관 elevation | Magenta d=+1.19 | **Partial** |
+| sub-10 보상 | SRM: HC-like (crossnobis r=0.701) | FE-K: cool 양수 유일 CVD | **YES** |
+
+→ **핵심 수렴**: SRM에서 유일한 유의 group pair (V2 blue-purple p=0.042)와 FE에서 유일한 유의 per-color gap (hV4 blue p=0.046)이 **동일 색 영역**을 지목.
+
+#### 핵심 결론
+
+1. 잔여 gap은 **S-축 특이적**: blue (d=+1.37), purple (d=+1.54)가 주도.
+2. Warm gap은 **완전한 모델 명세 산물**: FE-3에서 역전.
+3. **Cross-phase 수렴 확인**: 두 독립 파이프라인이 blue/purple/magenta를 CVD 왜곡 중심으로 지목.
+4. **Phase 2 filter 함의**: T_ψ(θ)는 θ ∈ [180°, 315°] (cool/S-축)에 집중, warm 영역은 최소 보정.
+
 ---
 
 ## 7. GO/NO-GO Gate
@@ -567,13 +740,14 @@ mean(amp[:, perm, :], axis=1) == mean(amp, axis=1)  # 셔플 순서 무관
 5. **V3 회복: FE-8로 NO-GO → PASS**: Permutation p=0.360→0.045. V3 실패는 basis 선택 문제였음.
 6. **V1/V2: 모든 basis에서 LOCO FAIL**: FE-{2..12} + OPP-2/4/4rect 모두 permutation FAIL. Intercept model도 변화 없음. 8-stimulus LOCO의 구조적 해상도 한계 확인 (Red Team #3 중화 완료).
 7. **hV4 genuine color interpolation**: Permutation p=0.044 (FE-6), p=0.026 (FE-3). Per-color uniform, residual near-random.
-8. **HC-CVD gap은 basis 의존적**: V1 FE-2에서 CVD=+0.115, d=0.40 (FE-6: d=1.76). Gap의 상당 부분이 basis mismatch에 기인.
-9. **HC-CVD LOCO gap**: V1 d=1.61 (p=0.021), V2 d=1.85 (p=0.022). CVD의 altered representation 확인.
-10. **Prior 자체가 LOCO와 비호환**: H1(shape), H2(uncertainty) 모두 기각 — 구조적 한계.
-11. **smooth_tikh 전면 기각**: Permutation 실패 + 3가지 구제 시도 모두 실패 + RDM "개선" 기만적.
-12. **실제 데이터에 이상적 원형 색조 구조 없음**: 전 ROI에서 Spearman vs ideal ≈ 0.
-13. **Opponent basis 전 ROI FAIL**: OPP-2/4/4rect 모두 V1/V2 permutation 실패 → V4만 통과하는 해리는 진짜 영역적 특성 (basis mismatch 아님).
-14. **Intercept model 무효**: 공유 공간 평균 제거해도 p-값 불변 → 인코딩 신호는 hue-modulated pattern에 존재.
+8. **HC-CVD gap은 K 의존적이며 축 특이적 (§6i-6j 업데이트)**: 총량: V1 d=2.01→0.44 (−78%), hV4 d=1.36→0.63 (−54%). Per-color 분해: warm(L-M) gap **역전** (>100%), cool(S) gap **65% 잔존**. Blue d=+1.37 p=0.046, purple d=+1.54 p=0.060.
+9. **잔여 gap은 S-축 특이적**: FE-K 후 잔여 gap은 blue/purple/magenta에 집중. 센터 최적화 = 무효. Phase 2 filter 타겟: θ ∈ [180°, 315°].
+10. **Cross-phase 수렴 확인 (§6j)**: SRM prevalidation (V2 blue-purple p=0.042, 유일한 유의 쌍) ↔ FE (hV4 blue p=0.046, 유일한 유의 per-color gap). 독립 파이프라인이 동일 색 영역 지목.
+11. **Prior 자체가 LOCO와 비호환**: H1(shape), H2(uncertainty) 모두 기각 — 구조적 한계.
+12. **smooth_tikh 전면 기각**: Permutation 실패 + 3가지 구제 시도 모두 실패 + RDM "개선" 기만적.
+13. **실제 데이터에 이상적 원형 색조 구조 없음**: 전 ROI에서 Spearman vs ideal ≈ 0.
+14. **Opponent basis 전 ROI FAIL**: OPP-2/4/4rect 모두 V1/V2 permutation 실패 → V4만 통과하는 해리는 진짜 영역적 특성 (basis mismatch 아님).
+15. **Intercept model 무효**: 공유 공간 평균 제거해도 p-값 불변 → 인코딩 신호는 hue-modulated pattern에 존재.
 
 ### 확정된 결정
 
@@ -596,6 +770,8 @@ mean(amp[:, perm, :], axis=1) == mean(amp, axis=1)  # 셔플 순서 무관
 - [x] Per-ROI optimal basis permutation → V3 FE-8 PASS, hV4 FE-3 강화
 - [x] Opponent basis test (OPP-2/4/4rect, 10K) → **V1/V2 전 basis FAIL — Red Team #3 중화**
 - [x] Intercept model permutation test (10K) → **Standard ≈ Intercept — p-값 불변**
+- [x] Per-color residual 분석 (§6j) → **blue d=1.37 p=0.046, warm gap 역전, cool gap 65% 잔존**
+- [x] Cross-phase 수렴 검증 (§6j) → **SRM V2 blue-purple p=0.042 ↔ FE hV4 blue p=0.046 수렴 확인**
 - [x] Red Team 대응 → **#3 완전 중화, #1/#2/#4 문서화, #5 부분 대응** (§12)
 
 ### 대기 중
@@ -624,7 +800,11 @@ mean(amp[:, perm, :], axis=1) == mean(amp, axis=1)  # 셔플 순서 무관
 
 ### RT-2. 다중비교 보정 (hV4 p=0.044) — FATAL→MITIGATED
 
-**비판:** 4 ROI 검정; Bonferroni 기준 0.0125; hV4 p=0.044 탈락.
+**비판:** 4 ROI 검정; Bonferroni 기준 0.0125; hV4 p=0.044 탈락. HC-CVD hV4 voxel_corr p=0.169가 결과를 약화시킨다는 주장.
+
+**반박 — HC-CVD 비교는 인코더 검증과 무관:**
+
+Permutation test는 *"HC forward model이 진정한 색 보간 신호를 포착하는가?"*를 검정. 이는 HC-only 모델 검증. HC-CVD voxel_corr (p=0.169)는 *"HC와 CVD의 LOCO 성능이 다른가?"*로 완전히 다른 질문. 인코더 검증에 그룹 비교가 필요하지 않음. "Cross-pipeline cherry-picking" 비판도 부적절: Phase 1 permutation = 인코더 검증, Phase 3 LOCO MAE = 디코더 기반 그룹 차이 — 서로 다른 질문에 답하는 별도 파이프라인.
 
 **대응 — 사전 지정 Primary ROI + 수렴 증거:**
 
@@ -649,11 +829,6 @@ mean(amp[:, perm, :], axis=1) == mean(amp, axis=1)  # 셔플 순서 무관
 | NC-normalized fit | 0.23/0.27 | **0.32** |
 | Noise ceiling | 0.47/0.51 | **0.70** |
 
-**파이프라인 간 구분:**
-- Phase 1 hV4 HC-CVD voxel_corr: p=0.169 (n.s.) — **Phase 1 내 결과**
-- Phase 3 hV4 HC-CVD LOCO MAE: p=0.017 — **별도 파이프라인, 별도 metric**
-- 각각 해당 섹션에서 보고, 혼합 추론 하지 않음
-
 ### RT-3. 구분 vs 보간 해리 — NEUTRALIZED
 
 **비판:** 사후 합리화; 대안 basis 미검증.
@@ -675,28 +850,38 @@ mean(amp[:, perm, :], axis=1) == mean(amp, axis=1)  # 셔플 순서 무관
 
 **Phase 2 사전등록:** Phase 2 실행 전 계획.
 
-### RT-5. "CVD 실패 = 데이터" 서사 — PARTIALLY ADDRESSED
+### RT-5. "CVD 실패 = 데이터" 서사 — Model Comparison으로 수정 (§4b 이후)
 
 **비판:** 반증 불가; CVD reliability가 HC보다 높아 "왜곡" 서사와 모순.
 
-**수정된 프레이밍:**
+**수정된 프레이밍 — 모델 비교:**
 
-1. **"실패 = 데이터" → "basis mismatch + 생물학적 효과"로 수정:**
-   - HC-CVD gap은 **부분적으로 basis 의존**: V1 FE-2에서 d=1.76→0.40 (CVD=+0.115)
-   - Basis 최적화 후 남는 gap = 진정한 생물학적 효과 (변형된 cone excitation)
+1. **"실패 = 데이터" → "모델 명세 민감도"로 수정:**
+   - HC-CVD gap은 **주로 K 의존**: V1 d=2.01→0.44 (−78%), hV4 d=1.36→0.63 (−54%)
+   - 센터 최적화 = 효과 없음 (nested LOCO, §4b 확인)
+   - FE-6의 큰 gap = 과모수화: K=6, 8자극 → df=1, CVD 표상에 불충분
+   - **재프레이밍**: FE-6 하의 CVD LOCO 실패 = 모델 선택 문제, 반드시 생물학적 결함 아님
 
 2. **높은 CVD reliability 해명:**
-   - Reliability (0.699 > 0.603) = 패턴이 런 간 **일관되게 재현**
-   - "일관되게 왜곡" 가능 — reliability는 안정성 측정, 정확성 아님
-   - 비유: 고장난 시계는 완벽하게 reliable하나 accurate하지 않음
+   - Reliability (0.699 > 0.603) = 패턴이 런 간 일관되게 재현
+   - "모델 명세 요구가 다름"과 양립 가능 — reliability는 안정성 측정, 모델 적합도 아님
 
-3. **반증 가능한 예측 (Phase 1c):**
-   - Adaptive basis: CVD 피험자별 center가 L-M 축에서 체계적 압축 보이면 → basis mismatch 확인
-   - 개선 없으면 → 생물학적 효과가 예상보다 큼
+3. **이전 반증 예측 — 해결됨:**
+   - ~~Adaptive basis: CVD center가 L-M 축 압축 보이면 → basis mismatch 확인~~
+   - **결과 (§4b)**: Debiasing 후 adaptive center ≈ uniform. sub-08 "degenerate [0,180,359]°" = 과적합 산물
+   - **새로운 검증 가능한 질문**: CVD K-sensitivity가 모델 선택 문제(bias-variance)인지 vs 진정한 차원 축소인지? 필요: (a) PCA 유효 차원 분석, (b) SNR 통제 시뮬레이션, (c) 행동 데이터 상관
 
-4. **Phase 2 filter와의 정합성:**
-   - `W_s @ C(T_psi(θ))`: hV4 카테고리 구조가 CVD에서 보존 (RDM p=0.559) → HC W_s 적용 가능
-   - T_psi는 연속 매핑만 교정, 카테고리 구조 아님 → 내적 일관성 유지
+4. **남은 취약점 — K-sensitivity 해석:**
+   - CVD가 HC보다 K 감소에서 더 많은 이득 → 두 가지 설명:
+     - (A) 모델 선택: FE-6이 모든 피험자에게 과모수화; CVD가 표상 차이로 더 영향 받음
+     - (B) 생물학: CVD의 유효 색 차원이 진정으로 적음
+   - 현재 데이터 (n=3 CVD)로 A/B 구분 불가
+   - **중화 필요**: PCA (8색 패턴), 또는 행동 데이터 (Farnsworth-Munsell) 상관
+
+5. **Phase 2 filter 정합성:**
+   - `W_s @ C(T_psi(θ))`: HC W_s (hV4, FE-3, ridge_gcv) 사용
+   - 적절한 K에서 T_psi는 **더 작은 잔여갭** 교정 (d=0.63 vs d=1.36)
+   - hV4 RDM HC≈CVD (p=0.559) → T_psi는 단조(순서 보존) 변환
 
 ---
 

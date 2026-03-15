@@ -126,10 +126,9 @@ def analyze_subject_preference(subject, roi, baseline_dir, bandwidth):
     Returns:
         results: dict with preference_pct, preferred_colors, etc.
     """
-    roi_dir = ROI_DIR_MAP[roi]
-
     try:
-        amplitudes = load_amplitudes(subject, roi_dir, baseline_dir)
+        sub_id = subject.replace('sub-', '')
+        amplitudes = load_amplitudes(baseline_dir, sub_id, roi)
     except FileNotFoundError:
         print(f"  ⚠ Missing data: {subject} {roi}")
         return None
@@ -143,12 +142,12 @@ def analyze_subject_preference(subject, roi, baseline_dir, bandwidth):
     )
 
     # Count voxels per color
-    color_counts = [(preferred_colors == i).sum() for i in range(8)]
+    color_counts = [int((preferred_colors == i).sum()) for i in range(8)]
 
     results = {
         'preference_pct': preference_pct.tolist(),
         'color_counts': color_counts,
-        'n_voxels': len(preferred_colors),
+        'n_voxels': int(len(preferred_colors)),
         'bandwidth': bandwidth if bandwidth is not None else 'scott'
     }
 
@@ -400,7 +399,8 @@ def main():
         }, f, indent=2)
     print(f"\n✓ Saved results: {results_file}")
 
-    save_config(output_dir, args)
+    cfg = {k: v for k, v in vars(args).items() if k != 'output_dir'}
+    save_config(output_dir, **cfg)
 
     # Create figures
     print("\nCreating preference maps...")

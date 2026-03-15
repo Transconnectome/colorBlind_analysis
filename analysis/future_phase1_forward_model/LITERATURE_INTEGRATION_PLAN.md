@@ -78,15 +78,10 @@ This plan integrates 3 recent papers into the colorblind fMRI project through:
 
 ```bash
 # From local machine
-cd /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis
+cd /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase1_forward_model
 
-# Upload all new scripts and sbatch files (single scp command)
-scp analysis/future_phase1_forward_model/scripts/analyze_eigenspectrum_decay.py \
-    analysis/future_phase1_forward_model/scripts/fit_meme_eigenspectrum.py \
-    analysis/future_phase1_forward_model/scripts/map_voxel_color_preference.py \
-    analysis/future_phase1_forward_model/run_eigenspectrum_decay.sbatch \
-    analysis/future_phase1_forward_model/run_meme_estimator.sbatch \
-    analysis/future_phase1_forward_model/run_voxel_preference.sbatch \
+# Upload structured folders (dimensionality + population_organization + sbatch)
+scp -r scripts/dimensionality scripts/population_organization sbatch \
     haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model/
 ```
 
@@ -102,18 +97,21 @@ cd /scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model
 # Create logs directory if needed
 mkdir -p logs
 
-# Submit jobs
-sbatch run_eigenspectrum_decay.sbatch
-sbatch run_meme_estimator.sbatch
-sbatch run_voxel_preference.sbatch
+# Option A: Run all dimensionality analyses sequentially (recommended)
+sbatch sbatch/run_dimensionality.sbatch      # Eigenspectrum + MEME (2 hours)
+sbatch sbatch/run_voxel_preference.sbatch    # Voxel preference (1 hour)
+
+# Option B: Run individually (if needed)
+# sbatch sbatch/run_eigenspectrum_decay.sbatch
+# sbatch sbatch/run_meme_estimator.sbatch
+# sbatch sbatch/run_voxel_preference.sbatch
 
 # Monitor jobs
 squeue -u haba6030
 
 # Check logs after completion
-tail logs/eigenspectrum_decay_*.out
-tail logs/meme_estimator_*.out
-tail logs/voxel_preference_*.out
+tail logs/dimensionality_*.out          # Master dimensionality log
+tail logs/voxel_preference_*.out        # Voxel preference log
 ```
 
 ### Step 3: Download Results
@@ -122,10 +120,9 @@ tail logs/voxel_preference_*.out
 # From local machine
 cd /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase1_forward_model
 
-# Download all three result directories
-scp -r haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model/results/eigenspectrum_decay ./results/
-scp -r haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model/results/meme_dimensionality ./results/
-scp -r haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model/results/voxel_preference_maps ./results/
+# Download structured result directories (2 commands)
+scp -r haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model/results/dimensionality ./results/
+scp -r haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model/results/population_organization ./results/
 ```
 
 ### Step 4: Update RESULTS.md with Actual Data

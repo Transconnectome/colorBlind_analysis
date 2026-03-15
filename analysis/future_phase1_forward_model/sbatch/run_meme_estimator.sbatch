@@ -15,7 +15,7 @@ source ~/.bashrc
 conda activate nilearn
 
 BASELINE_DIR="/scratch/connectome/haba6030/colorBlind/derivatives/full_dataset_C010"
-OUTPUT_DIR="results/meme_dimensionality"
+OUTPUT_DIR="results/dimensionality/meme"
 
 mkdir -p logs
 mkdir -p "${OUTPUT_DIR}"
@@ -24,7 +24,7 @@ echo "Starting MEME dimensionality estimation..."
 echo "Baseline data: ${BASELINE_DIR}"
 echo "Output: ${OUTPUT_DIR}"
 
-python scripts/fit_meme_eigenspectrum.py \
+python scripts/dimensionality/fit_meme_eigenspectrum.py \
     --baseline_dir "${BASELINE_DIR}" \
     --output_dir "${OUTPUT_DIR}" \
     --n_moments 3 \

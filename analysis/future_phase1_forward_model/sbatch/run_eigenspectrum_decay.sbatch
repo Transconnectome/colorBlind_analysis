@@ -15,7 +15,7 @@ source ~/.bashrc
 conda activate nilearn
 
 BASELINE_DIR="/scratch/connectome/haba6030/colorBlind/derivatives/full_dataset_C010"
-OUTPUT_DIR="results/eigenspectrum_decay"
+OUTPUT_DIR="results/dimensionality/eigenspectrum"
 
 mkdir -p logs
 mkdir -p "${OUTPUT_DIR}"
@@ -24,7 +24,7 @@ echo "Starting eigenspectrum decay analysis..."
 echo "Baseline data: ${BASELINE_DIR}"
 echo "Output: ${OUTPUT_DIR}"
 
-python scripts/analyze_eigenspectrum_decay.py \
+python scripts/dimensionality/analyze_eigenspectrum_decay.py \
     --baseline_dir "${BASELINE_DIR}" \
     --output_dir "${OUTPUT_DIR}" \
     --n_early 10 \

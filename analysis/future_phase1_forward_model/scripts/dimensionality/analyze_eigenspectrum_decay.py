@@ -107,10 +107,10 @@ def analyze_subject_eigenspectrum(subject, roi, baseline_dir, n_early, n_late):
     Returns:
         results: dict with eigenvalues, alpha_early, alpha_late, etc.
     """
-    roi_dir = ROI_DIR_MAP[roi]
-
     try:
-        amplitudes = load_amplitudes(subject, roi_dir, baseline_dir)
+        # load_amplitudes expects subject='01' not 'sub-01', and handles ROI mapping internally
+        sub_id = subject.replace('sub-', '')
+        amplitudes = load_amplitudes(baseline_dir, sub_id, roi)
     except FileNotFoundError:
         print(f"  ⚠ Missing data: {subject} {roi}")
         return None
@@ -367,7 +367,8 @@ def main():
     print(f"\n✓ Saved results: {results_file}")
 
     # Save config
-    save_config(output_dir, args)
+    cfg = {k: v for k, v in vars(args).items() if k != 'output_dir'}
+    save_config(output_dir, **cfg)
 
     # Create figure
     print("\nCreating eigenspectrum decay plots...")

@@ -4,17 +4,17 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=8G
 #SBATCH --time=01:00:00
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation
 #SBATCH --output=logs/loco_fek_%j.out
 #SBATCH --error=logs/loco_fek_%j.err
 #SBATCH --no-requeue
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind
 
 source ~/.bashrc
 conda activate nilearn
 
-SCRIPT_DIR="analysis/phase3_decoder_comparing/model_comparison_validation/scripts"
+SCRIPT_DIR="scripts"
 BASELINE_DIR="/scratch/connectome/haba6030/colorBlind/derivatives/full_dataset_C010"
-OUTPUT_DIR="analysis/phase3_decoder_comparing/model_comparison_validation/results/loco_fek_retry"
+OUTPUT_DIR="results/loco_fek_retry"
 
 mkdir -p "$OUTPUT_DIR"
 mkdir -p logs

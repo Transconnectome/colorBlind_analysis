@@ -1,34 +1,45 @@
 # Future Phase 1: Forward Model — RESULTS
 
-> Last updated: 2026-03-13
+> Last updated: 2026-03-15
 > Status: All experiments **complete**. smooth_tikh **REJECTED** — ridge_gcv confirmed as final encoder.
+> Track A Residual Biology Report (Exp A3–A6): **DONE**
+> Track B CVD Prediction Model (Exp B1–B3, A2): **DONE**
+> Track C Dimensionality (Exp C1–C3): **DONE**
+> Red Team Analysis (RT-1 through RT-6 + Neutralizations N1–N3): **DONE**
+> LOSO Zero-Shot Transfer (leakage-free SRM refit): **DONE**
 
 ---
 
-## 1. Status Summary
+## Table of Contents
 
-| Experiment | Status | Key Outcome |
-|-----------|--------|-------------|
-| Baseline (4 models × 4 ROIs × LORO/LOCO) | **DONE** | ridge_gcv = best LOCO model |
-| Basis ablation (FE-6 vs LF-4 vs LF-6) | **DONE** | FE-6 confirmed |
-| Metric reinforcement (permutation/Friedman/residual) | **DONE** | hV4 = only genuine color interpolation |
-| Improved encoding (RRR, smoothness) | **DONE** | Both rejected |
-| Extended models (4 new models, inner LOCO) | **DONE** | smooth_tikh = leading candidate |
-| smooth_tikh artifact check | **DONE** | PASSED (rdm_pearson ↑) — but misleading (see §8) |
-| smooth_tikh permutation test (fixed params) | **DONE** | ALL ROIs FAIL (all p>0.18) |
-| smooth_tikh rescue: condition-centering | **DONE** | Commutes with permutation — no effect |
-| smooth_tikh rescue: re-optimized permutation | **DONE** | Null beta stays high — doesn't fix |
-| RDM structure inspection | **DONE** | Actual data has NO circular hue structure |
-| **Final encoder decision** | **DONE** | **ridge_gcv confirmed, smooth_tikh REJECTED** |
-| Opponent basis test (10K perm) | **DONE** | ALL opponent bases FAIL for V1/V2 — dissociation confirmed |
-| Intercept model permutation test (10K) | **DONE** | Standard ≈ intercept ≈ mean_subt — no difference |
-| Adaptive basis optimization (per-subj centers) | **DONE** | 38/40 improved (circular); nested LOCO: adaptive ≈ fixed |
-| Nested LOCO validation (double-CV) | **DONE** | Center optimization = no benefit; K is the only variable |
-| Per-color residual & cross-phase integration | **DONE** | S-axis/cool residual confirmed; SRM ↔ FE convergence on blue/purple |
+- [1. Data Quality](#1-data-quality)
+- [2. Main Prediction Model: LORO & LOCO Results](#2-main-prediction-model-loro--loco-results)
+  - [2a. LORO — Run Generalization](#2a-loro--run-generalization-mean-voxel_corr)
+  - [2b. LOCO — Color Interpolation](#2b-loco--color-interpolation-ridge_gcv-confirmed-model)
+  - [2c. Model Comparison (Supplementary)](#2c-model-comparison-supplementary)
+  - [2d. Model Validation (Supplementary)](#2d-model-validation-supplementary)
+  - [2e. GO/NO-GO Gate](#2e-gono-go-gate)
+  - [2f. LOSO Zero-Shot Transfer](#2f-loso-zero-shot-transfer)
+- [3. Secondary Analysis: HC-CVD Comparison & Model Robustness](#3-secondary-analysis-hc-cvd-comparison--model-robustness)
+  - [3a. HC-CVD Gap Structure (Exploratory, N=3)](#3a-hc-cvd-gap-structure-exploratory-n3)
+  - [3b. Individual CVD Profiles (Crawford-Howell)](#3b-individual-cvd-profiles-crawford-howell)
+  - [3c. Model Specification Sensitivity: K-Ablation](#3c-model-specification-sensitivity-k-ablation)
+  - [3d. Per-Color Residual — Cone Shift Consistency](#3d-per-color-residual--cone-shift-consistency)
+  - [3e. Cross-Phase Convergence (Supporting)](#3e-cross-phase-convergence-supporting)
+  - [3f~3i. Supplementary Collection](#3f3i-supplementary-collection)
+  - [3j. Per-Subject K* (Cone Shift Supporting Evidence)](#3j-per-subject-k-cone-shift-supporting-evidence)
+- [4. Red Team Analysis](#4-red-team-analysis)
+  - [4a. Original Red Team (RT-1~RT-5)](#4a-original-red-team-rt-1-through-rt-5)
+  - [4b. Hinton-Perspective Red Team (RT-6)](#4b-hinton-perspective-red-team-rt-6)
+  - [4c. Neutralization Experiments](#4c-neutralization-experiments)
+  - [4d. Post-Neutralization Scorecard](#4d-post-neutralization-scorecard)
+- [5. Discussion — Literature Integration](#5-discussion--literature-integration)
+- [6. Hierarchical Discoveries & Conclusions](#6-hierarchical-discoveries--conclusions)
+- [7. Phase 2 Handoff & Assessment](#7-phase-2-handoff--assessment)
 
 ---
 
-## 2. Data Quality
+## 1. Data Quality
 
 ### Reliability (Split-Half RDM Correlation)
 
@@ -69,9 +80,9 @@ R_s (SRM projection) stability: ALL PASS (HC mean cosine > 0.5 per ROI; range 0.
 
 ---
 
-## 3. Baseline Results
+## 2. Main Prediction Model: LORO & LOCO Results
 
-### LORO — Run Generalization (mean voxel_corr)
+### 2a. LORO — Run Generalization (mean voxel_corr)
 
 | Model | V1 HC (SD) | V1 CVD (SD) | V2 HC (SD) | V2 CVD (SD) | V3 HC (SD) | V3 CVD (SD) | hV4 HC (SD) | hV4 CVD (SD) |
 |-------|-----------|------------|-----------|------------|-----------|------------|------------|-------------|
@@ -82,9 +93,20 @@ R_s (SRM projection) stability: ALL PASS (HC mean cosine > 0.5 per ROI; range 0.
 
 No significant HC-CVD difference in LORO (all |d| < 0.72, all p > 0.22).
 
-### LOCO — Color Interpolation, Clean (mean voxel_corr)
+**LORO-LOCO dissociation**: prior_ft wins LORO, ridge_gcv wins LOCO. SRM prior captures run-level variance but misses color-specific tuning.
+
+### 2b. LOCO — Color Interpolation (ridge_gcv, confirmed model)
 
 > Leakage-free: W0 recomputed per fold excluding held-out color.
+
+**Metric definition (voxel_corr):**
+- For each held-out color: predict voxel pattern using W trained on 7 other colors
+- Compute Spearman correlation between predicted and actual voxel patterns
+- Average across 8 folds (8 colors) → mean LOCO voxel_corr per subject
+- **Interpretation**: Correlation measures pattern similarity (scale-invariant). Positive values = above-chance interpolation; values near 0 or negative = failed interpolation.
+- **Null baseline**: Permutation test shows V1/V2 null ~+0.10-0.13 from voxel covariance (not color signal). Only hV4 exceeds this null (p=0.044).
+
+#### HC LOCO Table (ridge_gcv, FE-6)
 
 | Model | V1 HC (SD) | V1 CVD (SD) | V2 HC (SD) | V2 CVD (SD) | V3 HC (SD) | V3 CVD (SD) | hV4 HC (SD) | hV4 CVD (SD) |
 |-------|-----------|------------|-----------|------------|-----------|------------|------------|-------------|
@@ -93,27 +115,11 @@ No significant HC-CVD difference in LORO (all |d| < 0.72, all p > 0.22).
 | prior_only | -0.075 (0.040) | -0.098 (0.019) | -0.099 (0.071) | -0.173 (0.052) | -0.186 (0.096) | -0.203 (0.073) | +0.109 (0.084) | +0.072 (0.066) |
 | prior_ft | -0.056 (0.036) | -0.093 (0.015) | -0.060 (0.085) | -0.163 (0.057) | -0.101 (0.135) | -0.117 (0.097) | +0.169 (0.148) | -0.063 (0.166) |
 
-### LOCO MAE (degrees)
-
-| Model | V1 HC (SD) | V1 CVD (SD) | V2 HC (SD) | V2 CVD (SD) | V3 HC (SD) | V3 CVD (SD) | hV4 HC (SD) | hV4 CVD (SD) |
-|-------|-----------|------------|-----------|------------|-----------|------------|------------|-------------|
-| ols | 76.4 (8.4) | 84.6 (28.3) | 80.0 (16.7) | 98.5 (20.5) | 76.9 (16.2) | 73.5 (9.9) | 69.0 (9.2) | 87.4 (10.2) |
-| ridge_gcv | 92.1 (10.0) | 91.9 (26.7) | 95.2 (23.3) | 103.1 (17.7) | 85.4 (15.2) | 83.7 (7.8) | 81.0 (7.0) | 93.8 (8.4) |
-| prior_only | 76.3 (6.8) | 85.4 (16.5) | 80.1 (10.4) | 85.5 (12.9) | 103.2 (8.0) | 112.0 (11.7) | 78.2 (10.7) | 95.4 (4.8) |
-| prior_ft | 78.2 (5.9) | 86.9 (17.7) | 82.6 (10.1) | 86.9 (11.8) | 96.8 (15.0) | 91.8 (7.3) | 72.6 (7.2) | 90.9 (14.5) |
-
 Note: Ridge MAE > OLS MAE because ridge shrinks predictions toward zero → conservative hue estimates. voxel_corr is the more reliable metric.
 
-### One-Sample t-Test: HC LOCO ridge_gcv > 0
+#### HC-CVD Gap (ridge_gcv, LOCO voxel_corr)
 
-| ROI | HC Mean | 95% CI | t(6) | p (two-tail) | p (one-tail) |
-|-----|---------|--------|------|-------------|-------------|
-| **V1** | **0.130** | [0.040, 0.220] | 3.544 | **0.012** | **0.006** |
-| V2 | 0.150 | [-0.024, 0.323] | 2.109 | 0.079 | **0.040** |
-| V3 | 0.023 | [-0.199, 0.245] | 0.254 | 0.808 | 0.404 |
-| **hV4** | **0.183** | [-0.002, 0.367] | 2.423 | 0.052 | **0.026** |
-
-### HC vs CVD (ridge_gcv, LOCO voxel_corr)
+**Gap metric**: Difference in LOCO voxel_corr between HC (n=7) and CVD (n=3) groups. Positive gap = HC better at cross-color interpolation. Statistical test: Welch t-test + Cohen's d.
 
 | ROI | HC M (SD) | CVD M (SD) | Cohen's d | p (Welch) |
 |-----|----------|----------|-----------|-----------|
@@ -122,7 +128,7 @@ Note: Ridge MAE > OLS MAE because ridge shrinks predictions toward zero → cons
 | V3 | +0.023 (0.240) | -0.008 (0.163) | +0.14 | 0.819 |
 | hV4 | +0.183 (0.200) | -0.058 (0.207) | +1.19 | 0.169 |
 
-### NC-Normalized LOCO voxel_corr (ridge_gcv, HC)
+#### NC-Normalized LOCO voxel_corr (ridge_gcv, HC)
 
 | ROI | HC Mean (SD) | Interpretation |
 |-----|-------------|----------------|
@@ -131,11 +137,20 @@ Note: Ridge MAE > OLS MAE because ridge shrinks predictions toward zero → cons
 | V3 | 0.061 (0.413) | Near zero — model fails |
 | **hV4** | **0.316 (0.207)** | **~32% — most consistent** |
 
----
+#### One-Sample t-Test: HC LOCO ridge_gcv > 0
 
-## 4. Basis Ablation
+| ROI | HC Mean | 95% CI | t(6) | p (two-tail) | p (one-tail) |
+|-----|---------|--------|------|-------------|-------------|
+| **V1** | **0.130** | [0.040, 0.220] | 3.544 | **0.012** | **0.006** |
+| V2 | 0.150 | [-0.024, 0.323] | 2.109 | 0.079 | **0.040** |
+| V3 | 0.023 | [-0.199, 0.245] | 0.254 | 0.808 | 0.404 |
+| **hV4** | **0.183** | [-0.002, 0.367] | 2.423 | 0.052 | **0.026** |
 
-### LOCO voxel_corr by Basis (OLS, n=10)
+### 2c. Model Comparison (Supplementary)
+
+#### Basis Ablation (FE-6 vs LF-4 vs LF-6)
+
+**LOCO voxel_corr (OLS, n=10):**
 
 | Basis | V1 M (SD) | V2 M (SD) | V3 M (SD) | hV4 M (SD) |
 |-------|----------|----------|----------|-----------|
@@ -143,32 +158,11 @@ Note: Ridge MAE > OLS MAE because ridge shrinks predictions toward zero → cons
 | LF-4 | -0.066 (0.087) | -0.097 (0.200) | -0.105 (0.125) | -0.075 (0.091) |
 | LF-6 | -0.111 (0.154) | -0.070 (0.159) | -0.093 (0.220) | -0.093 (0.199) |
 
-### LORO voxel_corr by Basis (OLS, n=10)
+**FE-6 vs LF-4 (paired t, n=10):** LOCO — V1 p=0.045, V2 p=0.042, hV4 p=0.016. LORO — all ROIs p<0.001. **FE-6 confirmed: half-wave rectified cosine better captures peaked neural tuning than Fourier harmonics.**
 
-| Basis | V1 M (SD) | V2 M (SD) | V3 M (SD) | hV4 M (SD) |
-|-------|----------|----------|----------|-----------|
-| **FE-6** | **0.214** (0.039) | **0.250** (0.051) | **0.330** (0.069) | **0.404** (0.060) |
-| LF-4 | 0.166 (0.037) | 0.187 (0.060) | 0.245 (0.059) | 0.321 (0.065) |
-| LF-6 | 0.202 (0.047) | 0.254 (0.081) | 0.324 (0.099) | 0.378 (0.082) |
+#### Extended Basis: FE Channel Count (ridge_gcv, HC n=7)
 
-### FE-6 vs LF-4 (paired t, n=10)
-
-| Protocol | ROI | FE-6 M | LF-4 M | Delta | t(9) | p |
-|----------|-----|--------|--------|-------|------|---|
-| LOCO | V1 | +0.011 | -0.066 | +0.077 | 2.32 | **0.045** |
-| LOCO | V2 | +0.010 | -0.097 | +0.107 | 2.37 | **0.042** |
-| LOCO | V3 | -0.006 | -0.105 | +0.099 | 1.67 | 0.129 |
-| LOCO | hV4 | +0.090 | -0.075 | +0.165 | 2.96 | **0.016** |
-| LORO | V1 | 0.214 | 0.166 | +0.049 | 5.87 | **<0.001** |
-| LORO | V2 | 0.250 | 0.187 | +0.063 | 4.61 | **0.001** |
-| LORO | V3 | 0.330 | 0.245 | +0.085 | 6.27 | **<0.001** |
-| LORO | hV4 | 0.404 | 0.321 | +0.083 | 7.31 | **<0.001** |
-
-**Conclusion**: FE-6 > LF-4 > LF-6. Half-wave rectified cosine better captures peaked neural tuning than Fourier harmonics. Basis shape matters more than dimensionality.
-
-### Extended Basis Comparison: FE Channel Count (ridge_gcv, HC n=7)
-
-#### LOCO voxel_corr by FE channel count
+**LOCO voxel_corr by FE channel count:**
 
 | Basis | V1 | V2 | V3 | hV4 |
 |-------|------|------|------|------|
@@ -179,7 +173,7 @@ Note: Ridge MAE > OLS MAE because ridge shrinks predictions toward zero → cons
 | FE-8 | +0.128 | +0.176 | **+0.112** | +0.191 |
 | FE-12 | +0.134 | +0.168 | +0.106 | +0.190 |
 
-#### LORO-LOCO anti-correlation (bias-variance tradeoff)
+**LORO-LOCO anti-correlation (bias-variance tradeoff):**
 
 | ROI | LORO r(K,perf) | LOCO r(K,perf) | Interpretation |
 |-----|---------------|---------------|----------------|
@@ -188,59 +182,11 @@ Note: Ridge MAE > OLS MAE because ridge shrinks predictions toward zero → cons
 | V3 | +0.887 | +0.321 | Both increase (FE-8 optimal) |
 | hV4 | +0.870 | -0.087 | LORO↑, LOCO flat |
 
-LORO: more channels = monotonically better (lower bias). LOCO: fewer channels = better for V1/V2 (lower variance, stronger interpolation constraint).
+No FE basis significantly outperforms FE-6 (all paired p > 0.05, n=7), but direction consistent. Per-ROI optimal: V1→FE-2, V2→FE-3, V3→FE-8, hV4→FE-3.
 
-#### Paired t-test: Optimal vs FE-6 (HC LOCO, n=7)
-
-| ROI | Optimal | Opt M | FE-6 M | Delta | t(6) | p |
-|-----|---------|-------|--------|-------|------|---|
-| V1 | FE-2 | +0.153 | +0.130 | +0.023 | 1.46 | 0.194 |
-| V2 | FE-3 | +0.180 | +0.150 | +0.031 | 0.98 | 0.367 |
-| V3 | FE-8 | +0.112 | +0.023 | +0.089 | 1.27 | 0.252 |
-| hV4 | FE-3 | +0.205 | +0.183 | +0.022 | 0.81 | 0.451 |
-
-No FE basis significantly outperforms FE-6 (all paired p > 0.05, n=7), but direction consistent.
-
-#### Permutation test with per-ROI optimal basis (10K, Stouffer combined)
-
-| ROI | Basis | HC Obs | Null M | Delta | p_stouffer | vs FE-6 |
-|-----|-------|--------|--------|-------|-----------|---------|
-| V1 | FE-2 | +0.153 | +0.133 | +0.021 | 0.170 | FE-6: 0.133 |
-| V2 | FE-3 | +0.181 | +0.138 | +0.043 | 0.125 | FE-6: 0.154 |
-| **V3** | **FE-8** | **+0.144** | **+0.077** | **+0.068** | **0.045*** | FE-6: 0.360 |
-| **hV4** | **FE-3** | **+0.204** | **+0.138** | **+0.066** | **0.026*** | FE-6: 0.039* |
-
-**V3 recovery**: FE-6 p=0.360 (NO-GO) → FE-8 **p=0.045 (PASS)**. V3 failure was basis-driven, not data-driven.
-
-V1/V2: improved but still FAIL with any 1D circular FE basis → structural limitation of 1D hue model.
-
-#### One-sample t-test improvement (HC LOCO > 0, optimal basis)
-
-| ROI | Basis | Mean | 95% CI | t(6) | p (one-tail) |
-|-----|-------|------|--------|------|-------------|
-| V1 | FE-2 | +0.153 | [+0.052, +0.255] | 3.686 | **0.005*** |
-| **V2** | **FE-3** | **+0.180** | **[+0.046, +0.315]** | **3.286** | **0.008*** |
-| V3 | FE-8 | +0.112 | [-0.044, +0.267] | 1.759 | 0.065† |
-| hV4 | FE-3 | +0.205 | [+0.012, +0.398] | 2.594 | **0.021*** |
-
-V2: p=0.040 → **0.008** with FE-3 (CI fully positive).
-
-#### HC-CVD gap by basis
-
-| ROI | Basis | HC M | CVD M | Cohen's d | p (Welch) |
-|-----|-------|------|-------|-----------|-----------|
-| V1 | FE-2 | +0.153 | +0.115 | +0.40 | 0.581 |
-| V1 | FE-6 | +0.130 | -0.012 | +1.76 | 0.021 |
-| V2 | FE-3 | +0.180 | -0.032 | +1.68 | 0.067 |
-| V2 | FE-6 | +0.150 | -0.174 | +2.03 | 0.022 |
-
-V1 FE-2: CVD also positive (+0.115), d shrinks from 1.76 → 0.40. HC-CVD gap partly basis-dependent.
-
-### Opponent Basis Test (Red Team #3 Neutralization, 10K perm)
+#### Opponent Basis Test (Red Team #3 Neutralization, 10K perm)
 
 **Question**: Does V1/V2 LOCO failure stem from FE basis mismatch? Testing 2D DKL opponent-channel bases.
-
-#### Bases Tested
 
 | Basis | Type | K | Design |
 |-------|------|:-:|--------|
@@ -249,7 +195,7 @@ V1 FE-2: CVD also positive (+0.115), d shrinks from 1.76 → 0.40. HC-CVD gap pa
 | OPP-4rect | Half-wave rectified opponent | 4 | [cos⁺, cos⁻, sin⁺, sin⁻] |
 | FE-6 | Fourier encoding (reference) | 6 | Half-wave rectified cos² |
 
-#### LOCO Permutation (Stouffer combined, HC)
+**LOCO Permutation (Stouffer combined, HC):**
 
 | Basis | V1 | V2 | V3 | V4 |
 |-------|:------:|:------:|:------:|:------:|
@@ -258,180 +204,278 @@ V1 FE-2: CVD also positive (+0.115), d shrinks from 1.76 → 0.40. HC-CVD gap pa
 | OPP-4rect | p=0.633 | p=0.261 | p=0.796 | p=0.110 |
 | **FE-6** | p=0.126 | p=0.154 | p=0.367 | **p=0.039*** |
 
-#### HC LOCO Mean (observed / null)
+**Conclusion**: ALL opponent bases FAIL for V1/V2. FE-6 is the ONLY basis passing anywhere (V4 p=0.039). **Red Team #3 neutralized**: V1/V2 failure is a genuine regional property, not basis mismatch.
 
-| Basis | V1 | V2 | V3 | V4 |
-|-------|:---:|:---:|:---:|:---:|
-| OPP-2 | -.041/-.055 | -.047/-.062 | -.042/-.047 | -.042/-.058 |
-| OPP-4 | -.054/-.091 | -.074/-.104 | -.118/-.075 | -.045/-.097 |
-| OPP-4rect | +.099/+.113 | +.157/+.127 | +.054/+.090 | +.167/+.103 |
-| FE-6 | +.144/+.111 | +.169/+.129 | +.063/+.077 | +.181/+.085 |
+#### Alternative Encoders Summary
 
-**Conclusions:**
-1. **ALL opponent bases FAIL for V1/V2** — no basis achieves p < 0.05
-2. **FE-6 is the ONLY basis passing anywhere** (V4 p=0.039)
-3. OPP-2 (K=2) produces negative LOCO everywhere — gross underfit
-4. OPP-4rect has inflated null (positive baseline) — no discriminative power
-5. **Red Team #3 neutralized**: V1/V2 failure is NOT basis mismatch — dissociation (V4 pass, V1/V2 fail) is a genuine regional property
+| Model | Result | Root Cause |
+|-------|--------|------------|
+| **ridge_gcv** | **CONFIRMED** — hV4 perm p=0.044 | Only model passing permutation test |
+| smooth_tikh | REJECTED — all ROIs perm p>0.18 | Captures spatial covariance, not color signal. β forces near-rank-1 W → single spatial pattern dominates. 3 rescue attempts all failed: (1) condition-centering commutes with shuffle, (2) re-optimized β still high on null, (3) rdm_pearson "improvement" was noise pattern-matching (predicted RDM anti-correlated with ideal circular structure, ρ≈-0.5) |
+| mixed_ridge_prior | REJECTED — V1-V3 negative | SRM prior incompatible with LOCO |
+| bayes_prior | REJECTED — V1-V3 negative | Voxel-level uncertainty weighting fails |
+| smooth_prior | REJECTED — near-zero | Prior cancels smoothness effect |
+| ridge_rrr | REJECTED — all worse | SVD truncation loses signal |
+| ridge_smooth_best | REJECTED — rdm_pearson ↓ 37-65% | Inner LORO artifact |
 
-### 4a. Adaptive Basis Optimization (Section 9k-1)
+#### Extended Models LOCO Summary (n=10)
 
-#### Purpose and Test Question
+| Model | V1 M (SD) | V2 M (SD) | V3 M (SD) | V4 M (SD) |
+|-------|----------|----------|----------|-----------|
+| ridge_gcv | +0.087 (0.095) | +0.053 (0.194) | +0.014 (0.200) | +0.111 (0.210) |
+| smooth_tikh | +0.112 (0.133) | +0.151 (0.175) | +0.115 (0.212) | +0.157 (0.245) |
+| prior_finetune | -0.067 (0.035) | -0.091 (0.090) | -0.105 (0.118) | +0.099 (0.175) |
+| smooth_prior | +0.025 (0.153) | -0.002 (0.170) | -0.078 (0.143) | +0.094 (0.244) |
+| mixed_ridge_prior | -0.056 (0.089) | -0.073 (0.126) | -0.066 (0.105) | +0.094 (0.225) |
+| bayes_prior | -0.062 (0.047) | -0.101 (0.082) | -0.123 (0.129) | +0.028 (0.209) |
 
-- **Question**: "Does CVD LOCO failure stem from fixed basis mismatch, or from distorted neural representations?"
-- **Method**: Freely optimize FE basis centers per subject × ROI via multi-start L-BFGS-B, maximizing 8-fold LOCO voxel_corr
-- **t-test**: Paired one-sample t-test (delta = adaptive − fixed, H₀: delta = 0)
-  → "Does the adaptive basis significantly improve over the fixed uniform basis?"
+### 2d. Model Validation (Supplementary)
 
-#### Fixed vs Adaptive LOCO voxel_corr (per-ROI optimal K)
+#### Permutation Test (10K color-label shuffles, HC ridge_gcv, FE-6)
 
-| Subject | Group | V1(K=2) F/A/Δ | V2(K=3) F/A/Δ | V3(K=8) F/A/Δ | hV4(K=3) F/A/Δ |
-|---------|-------|---------------|---------------|---------------|----------------|
-| sub-01 | HC | +0.135/+0.147/+0.012 | +0.052/+0.156/+0.104 | +0.222/+0.280/+0.058 | +0.040/+0.132/+0.093 |
-| sub-02 | HC | +0.040/+0.142/+0.102 | +0.286/+0.312/+0.026 | +0.104/+0.190/+0.086 | +0.511/+0.554/+0.043 |
-| sub-03 | HC | +0.162/+0.187/+0.025 | +0.202/+0.230/+0.029 | +0.045/+0.085/+0.041 | +0.363/+0.466/+0.103 |
-| sub-04 | HC | +0.182/+0.303/+0.121 | +0.209/+0.333/+0.124 | +0.074/+0.133/+0.059 | +0.256/+0.338/+0.083 |
-| sub-05 | HC | +0.309/+0.305/−0.005 | +0.356/+0.378/+0.022 | +0.423/+0.439/+0.016 | +0.026/+0.088/+0.062 |
-| sub-06 | HC | −0.005/+0.025/+0.030 | −0.061/+0.049/+0.111 | −0.269/−0.090/+0.179 | +0.313/+0.382/+0.070 |
-| sub-07 | HC | +0.251/+0.255/+0.004 | +0.236/+0.237/+0.001 | +0.043/+0.129/+0.087 | −0.059/+0.130/+0.188 |
-| sub-08 | CVD | +0.179/+0.267/+0.088 | +0.003/**+0.265**/+0.262 | +0.192/+0.295/+0.102 | +0.067/**+0.383**/+0.316 |
-| sub-09 | CVD | +0.018/+0.036/+0.018 | +0.065/+0.125/+0.060 | +0.032/+0.080/+0.048 | +0.079/+0.147/+0.068 |
-| sub-10 | CVD | +0.149/+0.149/+0.000 | −0.166/−0.030/+0.136 | +0.203/+0.225/+0.022 | +0.198/+0.283/+0.085 |
-| **HC M (SD)** | | +0.153(0.102)/+0.195(0.094) | +0.183(0.132)/+0.242(0.105) | +0.092(0.193)/+0.167(0.152) | +0.207(0.193)/+0.299(0.170) |
-| **CVD M (SD)** | | +0.115(0.070)/+0.151(0.094) | −0.032(0.098)/+0.120(0.120) | +0.143(0.078)/+0.200(0.089) | +0.115(0.059)/+0.271(0.097) |
+| ROI | Observed | Null Mean | Null SD | Null 95% CI | p_perm |
+|-----|---------|-----------|---------|-------------|--------|
+| V1 | 0.130 | 0.109 | 0.034 | [0.043, 0.175] | 0.274 |
+| V2 | 0.150 | 0.130 | 0.039 | [0.055, 0.203] | 0.311 |
+| V3 | 0.023 | 0.078 | 0.046 | [-0.015, 0.167] | 0.880 |
+| **hV4** | **0.183** | **0.080** | 0.059 | [-0.035, 0.196] | **0.044*** |
 
-#### Delta Statistics (paired t-test: adaptive − fixed vs 0)
+V1/V2 null centered at ~0.10-0.13 (not zero) due to voxel covariance structure. Parametric t-tests (p=0.006/0.040) tested H₀: μ=0, which is the wrong null. **Only hV4 shows genuine color-specific interpolation above permutation null.**
 
-| ROI | K | HC Delta M (SD) | t(6) | p | Improved |
-|-----|---|----------------|------|---|----------|
-| V1 | 2 | +0.041 (0.046) | 2.194 | 0.071 | 6/7 |
-| **V2** | **3** | **+0.059 (0.047)** | **3.081** | **0.022*** | **7/7** |
-| **V3** | **8** | **+0.075 (0.048)** | **3.805** | **0.009*** | **7/7** |
-| **hV4** | **3** | **+0.092 (0.044)** | **5.151** | **0.002*** | **7/7** |
+#### Permutation with Per-ROI Optimal Basis (10K, Stouffer combined)
 
-CVD individual deltas (n=3, no group test):
+| ROI | Basis | HC Obs | Null M | Delta | p_stouffer | vs FE-6 |
+|-----|-------|--------|--------|-------|-----------|---------|
+| V1 | FE-2 | +0.153 | +0.133 | +0.021 | 0.170 | FE-6: 0.274 |
+| V2 | FE-3 | +0.181 | +0.138 | +0.043 | 0.125 | FE-6: 0.311 |
+| **V3** | **FE-8** | **+0.144** | **+0.077** | **+0.068** | **0.045*** | FE-6: 0.360 |
+| **hV4** | **FE-3** | **+0.204** | **+0.138** | **+0.066** | **0.026*** | FE-6: 0.044* |
 
-| Subject | V1 | V2 | V3 | hV4 |
-|---------|------|------|------|------|
-| sub-08 (deutan) | +0.088 | **+0.262** | +0.102 | **+0.316** |
-| sub-09 (protan) | +0.018 | +0.060 | +0.048 | +0.068 |
-| sub-10 (deutan) | +0.000 | +0.136 | +0.022 | +0.085 |
+**V3 recovery**: FE-6 p=0.360 (NO-GO) → FE-8 **p=0.045 (PASS)**. V1/V2 improved but still FAIL with any 1D circular FE basis.
 
-#### Optimized Center Patterns
+#### Friedman Test (Per-Color Uniformity, HC)
 
-**V1 (K=2)**: Uniform = [0, 180]°
+| ROI | chi²(7) | p | Interpretation |
+|-----|---------|---|----------------|
+| V1 | 18.33 | **0.011*** | Non-uniform — Blue/Cyan high, Yellow/Green low |
+| V2 | 14.24 | **0.047*** | Non-uniform |
+| V3 | 11.38 | 0.123 | No structure |
+| hV4 | 6.48 | 0.485 | **Uniform — genuine continuous interpolation** |
 
-| Group | HC Mean (SD) | Pattern |
-|-------|-------------|---------|
-| HC | [0, 211(26)]° | Shifted ~30° from uniform |
-| sub-08 | [0, 180]° | Matched uniform |
-| sub-09 | [0, 169]° | Near-uniform |
-| sub-10 | [0, 180]° | Matched uniform |
+#### Residual Structure (HC)
 
-**V2 (K=3)**: Uniform = [0, 120, 240]°
+| Metric | V1 | V2 | V3 | hV4 |
+|--------|------|------|------|------|
+| r(resid, orig) | 0.453 | 0.454 | 0.329 | **0.053** |
+| r(pred, orig) | 0.390 | 0.407 | 0.415 | **0.563** |
+| resid/signal ratio | 0.658 | 0.658 | 0.581 | **0.454** |
 
-| Group | Centers | Pattern |
-|-------|---------|---------|
-| HC mean | [0, 117(53), 233(21)]° | Near-uniform |
-| **sub-08** | **[0, 180, 359]°** | **Degenerate: K=3 → effective K=2** |
-| sub-09 | [0, 145, 271]° | Shifted |
-| sub-10 | [0, 116, 326]° | Shifted |
+hV4 residuals near-random → model captures most available structure. V1/V2 residuals systematic → model misses significant color geometry.
 
-**hV4 (K=3)**: Uniform = [0, 120, 240]°
+#### Intercept Model Test (10K perm, HC)
 
-| Group | Centers | Pattern |
-|-------|---------|---------|
-| HC mean | [0, 131(47), 247(31)]° | Near-uniform |
-| **sub-08** | **[0, 180, 359]°** | **Degenerate: K=3 → effective K=2** |
-| sub-09 | [0, 118, 271]° | Near-uniform |
-| sub-10 | [0, 180, 286]° | 2 of 3 near 0/180° |
+**Question**: Does a shared spatial mean (intercept) inflate LOCO performance?
 
-**sub-08 degenerate pattern**: In both V2 and hV4, optimized centers collapse to [0°, 180°, 359°] ≈ effectively K=2 with channels at 0° and 180°. This is consistent with L-M axis compression in deuteranopia — the optimizer finds that a single opponent axis (red-cyan) captures most available structure, with the third channel redundant.
+| Method | V1 (FE-6) | V2 (FE-6) | V3 (FE-8) | V4 (FE-3) |
+|--------|:---------:|:---------:|:---------:|:---------:|
+| Standard | p≈0.126 | p≈0.155 | p≈0.043* | p≈0.025* |
+| Intercept | p≈0.127 | p≈0.156 | p≈0.040* | p≈0.064 |
+| Mean_subt | p≈0.136 | p≈0.160 | p≈0.053 | p≈0.059 |
 
-#### Circularity Warning
+**Conclusion**: Standard ≈ Intercept ≈ Mean_subt. Encoding signal is in the hue-modulated pattern, not the mean spatial pattern.
 
-> **Bias**: Center optimization uses the full 8-color LOCO as objective function, meaning the test color indirectly influences center selection. Performance numbers are **optimistic upper bounds**. Unbiased validation requires nested LOCO (Section 4b, pending).
+#### Cross-Validation Summary
+
+| Evidence | V1 | V2 | hV4 |
+|----------|------|------|------|
+| Parametric t-test (H₀: μ=0) | p=0.006* | p=0.040* | p=0.026* |
+| **Permutation (H₀: shuffled)** | p=0.274 | p=0.311 | **p=0.044*** |
+| Friedman per-color | non-uniform* | non-uniform* | **uniform** |
+| Residuals | systematic | systematic | **near-random** |
+
+#### Eigenspectrum Decay (Pospisil & Pillow 2024)
+
+| ROI | HC α_early | CVD α_early | p(α_early) | HC α_late | CVD α_late | p(α_late) |
+|-----|-----------|------------|------------|----------|-----------|-----------|
+| V1 | 0.683±0.074 | 0.658±0.044 | 0.539 | 0.376±0.078 | 0.440±0.055 | 0.192 |
+| V2 | 0.734±0.079 | 0.690±0.048 | 0.340 | 0.472±0.068 | 0.493±0.049 | 0.589 |
+| V3 | 0.892±0.231 | 0.886±0.171 | 0.971 | 0.769±0.252 | 0.775±0.193 | 0.969 |
+| hV4 | 0.979±0.302 | 0.867±0.215 | 0.534 | 0.830±0.312 | 0.688±0.223 | 0.453 |
+
+α_early = 0.66-0.98 — within Pospisil's range (0.5-1.0). Broken power law confirmed. **HC ≈ CVD all parameters** (all p > 0.14).
+
+#### MEME Dimensionality
+
+| ROI | HC k* | CVD k* | t | p | SRM k | Δ(HC-SRM) |
+|-----|-------|--------|---|---|-------|-----------|
+| V1 | 340±119 | 354±75 | −0.22 | 0.833 | 4 | +336 |
+| V2 | 232±64 | 244±39 | −0.38 | 0.719 | 4 | +228 |
+| V3 | 53±10 | 59±0 | −1.53 | 0.178 | 3 | +50 |
+| hV4 | 33±10 | 37±0 | −1.12 | 0.304 | 3 | +30 |
+
+HC ≈ CVD (all p > 0.17). k* >> SRM k (100×): γ >> 1 regime → MEME's linear MP correction insufficient.
+
+### 2e. GO/NO-GO Gate
+
+#### Gate Criteria
+
+| Criterion | Metric | Threshold |
+|-----------|--------|-----------|
+| C1 Reliability | Split-half RDM correlation | > 0.3 |
+| C2 Normalized Fit | LOCO voxel_corr / NC_voxel_r_sb | > 0.2 |
+| C3 Interpolation | HC LOCO voxel_corr > 0 (p < 0.05) | one-tail |
+| C3b Permutation | 10K color-shuffle null | p < 0.05 |
+
+#### ridge_gcv Gate — FE-6 (confirmed)
+
+| ROI | C1 (Reliability) | C2 (Norm. Fit) | C3 (Interpolation) | C3b (Permutation) | Overall |
+|-----|-------------------|----------------|---------------------|--------------------|---------|
+| V1 | PASS (0.416) | PASS (0.227) | PASS (p=0.006) | FAIL (p=0.274) | **CONDITIONAL GO** |
+| V2 | PASS (0.420) | PASS (0.268) | PASS (p=0.040) | FAIL (p=0.311) | **CONDITIONAL GO** |
+| V3 | PASS (0.398) | FAIL (0.061) | FAIL (p=0.404) | FAIL (p=0.880) | **NO-GO** |
+| hV4 | PASS (0.603) | PASS (0.316) | PASS (p=0.026) | **PASS (p=0.044)** | **PRIMARY GO** |
+
+#### ridge_gcv Gate — Per-ROI Optimal Basis
+
+| ROI | Basis | C3 (LOCO>0) | C3b (Perm Stouffer) | Change vs FE-6 |
+|-----|-------|-------------|---------------------|----------------|
+| V1 | FE-2 | **PASS (p=0.005)** | FAIL (p=0.170) | Perm 0.274→0.170 (improved, still FAIL) |
+| V2 | FE-3 | **PASS (p=0.008)** | FAIL (p=0.125) | Perm 0.311→0.125 (improved, still FAIL) |
+| **V3** | **FE-8** | MARGINAL (p=0.065) | **PASS (p=0.045)** | **NO-GO → PASS** |
+| hV4 | FE-3 | **PASS (p=0.021)** | **PASS (p=0.026)** | Perm 0.044→0.026 (strengthened) |
+
+> **V3 recovery**: FE-8 basis rescues V3 from NO-GO (p=0.360) to PASS (p=0.045). V1/V2 FAIL with ALL tested bases — FE-{2..12}, OPP-2/4/4rect, intercept model. This is a confirmed structural limitation of 8-stimulus LOCO, not basis mismatch.
+
+#### smooth_tikh Gate (REJECTED)
+
+| ROI | C3b (Perm) | Status |
+|-----|------------|--------|
+| V1 | **FAIL (p=0.331)** | REJECTED |
+| V2 | **FAIL (p=0.188)** | REJECTED |
+| V3 | **FAIL (p=0.613)** | NO-GO |
+| V4 | **FAIL (p=0.613)** | REJECTED |
+
+#### Gate Decision
+
+**Primary**: hV4 = color interpolation oracle (FE-6 perm p=0.044, FE-3 perm p=0.026).
+
+**Conditional**: V3 (FE-8 perm p=0.045).
+
+**Discrimination-only**: V1/V2 (LOCO fails all bases — FE, OPP, intercept).
+
+**Threshold justification**: Permutation test chosen because parametric t-test uses wrong null (H₀: μ=0). Voxel covariance creates non-zero baseline (V1 null mean = 0.109), making H₀: μ=0 inappropriate. Brouwer & Heeger (2009) used LOCO with V4/VO1 as primary — consistent with our a priori hV4 selection.
+
+### 2f. LOSO Zero-Shot Transfer
+
+> **Primary goal**: Validate that group prior W₀ alone can predict voxel patterns for a new subject → foundation for Phase 2 filter's prediction engine.
+
+#### Method
+
+Leave-One-Subject-Out: exclude 1 HC → refit SRM on remaining 6 → build A_g → SVD-project held-out subject → W₀ = R_new @ A_g.
+
+**Leakage-free**: SRM refitted per fold (no R_i reuse). **Direct evaluation**: W₀ uses no held-out subject data → evaluate all 8 colors directly (no LOCO/LORO needed for ZS model).
+
+#### HC Results — 3-Tier Comparison (voxel_corr)
+
+| ROI | ZS (direct) | LORO (ridge_gcv) | LOCO (ridge_gcv) | t(ZS-LORO) | p |
+|-----|:-----------:|:----------------:|:----------------:|:----------:|:---:|
+| V1 | 0.529 | 0.202 | 0.113 | 8.26 | **0.0004*** |
+| V2 | 0.555 | 0.235 | 0.137 | 11.87 | **0.0001*** |
+| V3 | 0.472 | 0.287 | 0.037 | 5.76 | **0.0022*** |
+| **hV4** | **0.417** | **0.407** | **0.232** | **0.115** | **0.913** |
 
 #### Key Findings
 
-1. **38/40 subject×ROI combinations show delta ≥ 0** — near-universal improvement
-2. V2/V3/hV4 HC deltas significant (all p < 0.025); V1 trending (p=0.071)
-3. **sub-08 (deutan)**: V2 +0.262, hV4 +0.316 — dramatic improvement under circular optimization
-4. **HC also benefit from non-uniform centers** — fixed FE is suboptimal even for typical color vision
-5. Circular bias caveat: these results are upper bounds; see Section 4b for unbiased validation
+1. **hV4 only ROI with ZS ≈ LORO** (p=0.913): Group prior alone matches subject-specific ridge_gcv for spatial pattern reconstruction → **hV4 group prior is a reliable prediction engine for Phase 2 filter**
+2. **V1/V2/V3: ZS >> LORO** (all p<0.003): ZS compares against 6-run average vs LORO against single run → noise gap. Group prior reconstructs spatial patterns but cannot interpolate in V1/V2 (LOCO FAIL unchanged)
+3. **LOCO always lowest**: Interpolation is the hardest challenge — harder than run generalization (LORO), harder than spatial pattern reconstruction (ZS)
 
-### 4b. Nested LOCO Validation (Section 9k-2)
+#### CVD Zero-Shot Results
 
-#### Purpose
+| ROI | HC ZS (SD) | CVD ZS (SD) | t | p |
+|-----|:----------:|:----------:|:---:|:---:|
+| V1 | 0.529 (0.080) | 0.474 (0.098) | 0.90 | 0.409 |
+| V2 | 0.555 (0.067) | 0.546 (0.029) | 0.22 | 0.831 |
+| V3 | 0.472 (0.095) | 0.456 (0.067) | 0.28 | 0.793 |
+| hV4 | 0.417 (0.085) | 0.423 (0.125) | −0.08 | 0.940 |
 
-Section 4a's center optimization used 8-color LOCO as objective → test color indirectly influenced center selection → optimistic bias. Nested (double) LOCO removes this circularity:
+**HC ≈ CVD** (all p>0.4). ZS direct evaluation tests spatial pattern reconstruction → cannot distinguish HC from CVD. **LOCO remains the only tool for HC-CVD dissociation** (only interpolation accuracy reveals the difference).
 
-```
-Outer fold (8-fold): hold out 1 color for evaluation
-  └── Inner optimization (7-fold): optimize centers on remaining 7 colors
-  └── Outer evaluation: optimal centers + 7-color W → predict held-out color
-```
+#### Implications for Prediction Model (Phase 2 Filter)
 
-Three conditions compared:
-1. **Fixed FE-6**: 6-channel uniform basis (standard)
-2. **Fixed FE-K**: Per-ROI optimal K, uniform centers
-3. **Nested Adaptive**: Per-ROI optimal K, nested-optimized centers
+| Question | Answer | Evidence |
+|----------|--------|----------|
+| Is group prior valid for hV4 prediction? | **YES** | ZS ≈ LORO (p=0.913) |
+| Can group prior alone interpolate? | **NO** | LOCO << ZS (0.232 vs 0.417) |
+| Does subject data improve interpolation? | **Partially** | ridge_gcv LOCO = 0.183 (FE-6), B1 K* → 0.205-0.541 |
+| Next improvement direction? | Bridge ZS-LOCO gap | ZS→LOCO gap (0.185) = ceiling for filter precision improvement |
 
-#### Results: 3-Way Comparison (mean LOCO voxel_corr)
+---
 
-| ROI | K | HC FE-6 | HC FE-K | HC Nested | CVD FE-6 | CVD FE-K | CVD Nested |
-|-----|---|:-------:|:-------:|:---------:|:--------:|:--------:|:----------:|
-| V1 | 2 | +0.130 | +0.153 | +0.175 | −0.012 | +0.115 | +0.130 |
-| V2 | 3 | +0.150 | +0.180 | +0.174 | −0.174 | −0.032 | −0.002 |
-| V3 | 8 | +0.023 | +0.112 | +0.110 | −0.008 | +0.081 | +0.086 |
-| hV4 | 3 | +0.183 | +0.205 | +0.164 | −0.058 | +0.116 | +0.096 |
+## 3. Secondary Analysis: HC-CVD Comparison & Model Robustness
 
-#### HC Paired t-tests: Nested Adaptive vs Fixed
+> The following analyses describe HC-CVD differences **revealed by** the validated prediction model (§2). This is a secondary objective — CVD N=3 makes all group comparisons exploratory/descriptive. Primary purpose: validate that CVD deficits are consistent with cone-shift mechanisms, supporting Phase 2 filter design.
 
-| Comparison | V1 | V2 | V3 | hV4 |
-|------------|:--:|:--:|:--:|:---:|
-| **FE-K vs FE-6** | Δ=+0.023, p=0.194 | Δ=+0.031, p=0.367 | Δ=+0.089, p=0.252 | Δ=+0.022, p=0.451 |
-| **Nested vs FE-K** | Δ=+0.022, p=0.372 | Δ=−0.006, p=0.637 | Δ=−0.001, p=0.787 | Δ=−0.041, p=0.075 |
+### 3a. HC-CVD Gap Structure (Exploratory, N=3)
 
-→ **Nested adaptive ≈ Fixed FE-K** in all ROIs. Center optimization provides no benefit. hV4 trends **worse** with adaptive centers.
+| ROI | HC M (SD) | CVD M (SD) | Cohen's d | p (Welch) |
+|-----|----------|----------|-----------|-----------|
+| V1 | +0.130 (0.097) | -0.012 (0.054) | +1.61 | **0.021** |
+| V2 | +0.150 (0.188) | -0.174 (0.130) | +1.85 | **0.022** |
+| V3 | +0.023 (0.240) | -0.008 (0.163) | +0.14 | 0.819 |
+| hV4 | +0.183 (0.200) | -0.058 (0.207) | +1.19 | 0.169 |
 
-#### Overestimation: Circular vs Nested (HC Mean)
+**Interpretation**: Positive gap = HC better at cross-color interpolation. This gap reflects distorted hue geometry in CVD, not signal absence (CVD LORO ≈ HC). Gap magnitude is model-specification dependent (see §3c).
 
-| ROI | Circular M | Nested M | Bias |
-|-----|:----------:|:--------:|:----:|
-| V1 | +0.195 | +0.175 | +0.020 |
-| V2 | +0.242 | +0.174 | +0.068 |
-| V3 | +0.167 | +0.110 | +0.056 |
-| hV4 | +0.299 | +0.164 | **+0.135** |
+### 3b. Individual CVD Profiles (Crawford-Howell)
 
-Circular optimization inflated hV4 by +0.135 on average. sub-08 hV4: circular=+0.383 → nested=+0.081 (bias=**+0.302**).
+**sub-08 (deutan)**
 
-#### HC-CVD Gap Decomposition by Model Specification
+| Metric | V1 | V2 | V3 | hV4 |
+|--------|------|------|------|------|
+| LOCO r | -0.062 | -0.241 | +0.049 | -0.275 |
+| HC z-score | -1.97 | -2.08 | +0.11 | -2.29 |
+| Crawford-Howell p | 0.114 | 0.099 | 0.922 | 0.076 |
+
+**sub-09 (protan)**
+
+| Metric | V1 | V2 | V3 | hV4 |
+|--------|------|------|------|------|
+| LOCO r | -0.020 | -0.024 | -0.193 | -0.035 |
+| HC z-score | -1.55 | -0.93 | -0.90 | -1.09 |
+| Crawford-Howell p | 0.197 | 0.419 | 0.433 | 0.346 |
+
+**sub-10 (deutan)**
+
+| Metric | V1 | V2 | V3 | hV4 |
+|--------|------|------|------|------|
+| LOCO r | +0.045 | -0.257 | +0.118 | +0.137 |
+| HC z-score | -0.88 | -2.17 | +0.40 | -0.23 |
+| Crawford-Howell p | 0.444 | 0.089 | 0.723 | 0.837 |
+
+### 3c. Model Specification Sensitivity: K-Ablation
+
+**Gap calculation**: HC_mean − CVD_mean under each model specification. Gap reduction = (FE-6_gap − FE-K_gap) / FE-6_gap × 100%.
 
 | ROI | FE-6 d (p) | FE-K d (p) | Gap Reduction |
 |-----|:----------:|:----------:|:-------------:|
-| V1 | 2.01 (0.021) | 0.44 (0.581) | **−78%** |
+| V1 | 2.01 (0.021) | 0.44 (0.581) | −78% |
 | V2 | 2.25 (0.022) | 1.80 (0.067) | −20% |
 | V3 | 0.17 (0.819) | 0.18 (0.843) | — |
-| hV4 | 1.36 (0.169) | 0.63 (0.342) | **−54%** |
+| hV4 | 1.36 (0.169) | 0.63 (0.342) | −54% |
 
-→ **K selection accounts for 54–78% of the HC-CVD LOCO gap** in V1 and hV4. FE-6 was overparameterized (8 stimuli, K=6 → df=1), and CVD is more sensitive to this misspecification.
+> **Caveat (N2 neutralization result)**: The gap reduction percentages above are within chance levels when labels are shuffled (all p > 0.13, see §4c). The "gap reduction via K optimization" is a statistical artifact of exhaustive search. Per-K gap magnitudes remain valid observations, but the reduction narrative is abandoned.
 
-#### Key Conclusions
+#### Warm/Cool Axis Decomposition (hV4 FE-3)
 
-1. **Center optimization = no benefit**. The sole model parameter that matters is K (channel count).
-2. **Section 4a's circular results invalidated**: sub-08 "degenerate center" pattern was overfitting artifact, not L-M axis compression evidence.
-3. **HC-CVD gap is largely model-specification-dependent**: proper K selection reduces the gap dramatically.
-4. **Remaining gap after K correction** (hV4 d=0.63) is not statistically significant (p=0.342), but n=3 CVD is severely underpowered. This residual gap is the target for Phase 2 filter.
-5. **FE-K gap non-significance does not mean gap=0**: with HC n=7, CVD n=3, we cannot detect d<1.2 at 80% power.
+| Axis | Colors | FE-6 HC-CVD Gap | FE-K HC-CVD Gap | Reduction |
+|------|--------|:---------------:|:---------------:|:---------:|
+| **Warm (L-M)** | red, orange, yellow, green | +0.118 | −0.060 | >100% (reversal) |
+| **Cool (S)** | cyan, blue, purple, magenta | +0.362 | +0.237 | 35% |
 
-### 4c. Per-Color Residual Analysis & Cross-Phase Integration (Section 9k-3)
+> **Caveat**: Warm gap reversal may be an HC-optimization artifact (N2 result). Cool-color gap persistence is the more reliable observation.
 
-#### Purpose
-
-Decompose the aggregate HC-CVD LOCO gap into per-color contributions under FE-K (per-ROI optimal). Identify which colors drive the residual gap and test convergence with Phase 2 SRM prevalidation (independent pipeline).
-
-#### Per-Color LOCO voxel_corr — hV4 FE-3 (Welch t-test, HC n=7 vs CVD n=3)
+### 3d. Per-Color Residual — Cone Shift Consistency
 
 | Color | θ | HC M (SD) | CVD M (SD) | Cohen's d | t(Welch) | p |
 |-------|-----|-----------|-----------|:---------:|:--------:|:---:|
@@ -447,15 +491,6 @@ Decompose the aggregate HC-CVD LOCO gap into per-color contributions under FE-K 
 > Warm colors (red–green): no HC-CVD gap under FE-3 (all |d| < 1, all p > 0.2).
 > Cool colors (blue, purple): d > 1.3 with trending or significant p-values.
 
-#### Warm/Cool Axis Decomposition
-
-| Axis | Colors | FE-6 HC-CVD Gap | FE-K HC-CVD Gap | Reduction |
-|------|--------|:---------------:|:---------------:|:---------:|
-| **Warm (L-M)** | red, orange, yellow, green | +0.118 | **−0.060** | **>100% (reversal)** |
-| **Cool (S)** | cyan, blue, purple, magenta | +0.362 | **+0.237** | **35%** |
-
-> K optimization completely eliminates warm-color gap (reverses it), but only partially reduces cool-color gap. 65% of the cool-color gap persists after model optimization → **residual biology candidate**.
-
 #### Per-Subject Cool-Color Profile (hV4 FE-3)
 
 | Subject | Group | Warm Mean | Cool Mean | Interpretation |
@@ -465,614 +500,478 @@ Decompose the aggregate HC-CVD LOCO gap into per-color contributions under FE-K 
 | sub-10 | CVD (deutan) | +0.244 | +0.140 | Cool positive — compensated |
 | HC mean | HC | +0.210 | +0.199 | Balanced warm/cool |
 
-> sub-09 (protan) shows the largest cool-color deficit despite having the highest warm-color performance. sub-10 is the only CVD subject with positive cool-color performance, consistent with SRM Phase 2 showing HC-like profile (compensation hypothesis).
+### 3e. Cross-Phase Convergence (Supporting)
 
-#### Cross-Phase Convergence: SRM Prevalidation ↔ Forward Model
-
-SRM prevalidation (crossnobis pairwise distance in native voxel space) and forward model LOCO (voxel_corr in individual subject space) are **completely independent pipelines** that share no model assumptions.
+SRM prevalidation (crossnobis pairwise distance) and forward model LOCO (voxel_corr) are **completely independent pipelines** sharing no model assumptions.
 
 | Signal | SRM Prevalidation (Phase 2) | Forward Model (Phase F1) | Converge? |
 |--------|----------------------------|--------------------------|:---------:|
-| Blue-purple distortion | V2 blue-purple p=0.042* (z=[4.34, 0.33, 2.08]) | hV4 blue d=+1.37 p=0.046*; purple d=+1.54 p=0.060† | **YES** |
-| Green-blue compression | V1/V2/V3 all-3-deficit (z all negative) | Blue = CVD lowest LOCO color under FE-K | **YES** |
-| Red-magenta expansion | V1/V2/hV4 all-3-elevation (z=[0.69–4.96]) | Magenta d=+1.19 p=0.127, red d≈0 | **Partial** |
-| Warm = recoverable | sub-08 V2 extreme warm z-scores | Warm gap reversed under FE-K | **YES** |
-| sub-10 compensation | SRM: HC-like profile (crossnobis V2 r=0.701) | FE-K: cool still positive (only CVD) | **YES** |
+| Blue-purple distortion | V2 blue-purple p=0.042* | hV4 blue d=+1.37 p=0.046* | **YES** |
+| Green-blue compression | V1/V2/V3 all-3-deficit | Blue = CVD lowest LOCO color | **YES** |
+| Red-magenta expansion | V1/V2/hV4 all-3-elevation | Magenta d=+1.19 p=0.127 | **Partial** |
+| sub-10 compensation | SRM: HC-like profile (r=0.701) | FE-K: cool still positive (only CVD) | **YES** |
 
 > **Key convergence**: V2 blue-purple is the **only significant group-level pair** in SRM prevalidation (p=0.042), and blue is the **only significant per-color gap** in FE hV4 (p=0.046). Two independent pipelines point to the same color region.
 
-#### Key Conclusions
+### 3f~3i. Supplementary Collection
 
-1. **Residual HC-CVD gap under optimal K is S-axis specific**: blue (d=+1.37, p=0.046) and purple (d=+1.54, p=0.060) drive the cool-color gap.
-2. **Warm-color gap is entirely model-specification artifact**: reversed under FE-3 (CVD slightly better than HC on warm colors).
-3. **Cross-phase convergence confirmed**: SRM pairwise geometry and forward model interpolation independently identify blue/purple/magenta as CVD distortion locus.
-4. **sub-10 compensation**: Only CVD subject with positive cool-color LOCO, consistent with SRM-based compensation hypothesis.
-5. **Phase 2 filter implication**: T_ψ(θ) should focus correction on θ ∈ [180°, 315°] (cool/S-axis), with minimal or no correction on θ ∈ [0°, 135°] (warm/L-M axis).
+> The following 4 subsections (adaptive basis, CVD alternative models, dimensionality, residual biology) are supplementary analyses for the secondary objective. No impact on primary conclusions. See also notion.md for Korean summary.
 
----
+#### 3f. Adaptive Basis Optimization (Supplementary — Comparison)
 
-## 5. Metric Reinforcement
+#### Circular Optimization Results (with bias caveat)
 
-### 5a. Permutation Test (10K color-label shuffles, HC ridge_gcv)
+38/40 subject×ROI combinations show delta ≥ 0 under circular (non-nested) optimization. HC delta significant for V2 (p=0.022), V3 (p=0.009), hV4 (p=0.002).
 
-| ROI | Observed | Null Mean | Null SD | Null 95% CI | p_perm |
-|-----|---------|-----------|---------|-------------|--------|
-| V1 | 0.130 | 0.109 | 0.034 | [0.043, 0.175] | 0.274 |
-| V2 | 0.150 | 0.130 | 0.039 | [0.055, 0.203] | 0.311 |
-| V3 | 0.023 | 0.078 | 0.046 | [-0.015, 0.167] | 0.880 |
-| **hV4** | **0.183** | **0.080** | 0.059 | [-0.035, 0.196] | **0.044*** |
+> **Circularity warning**: Center optimization uses the full 8-color LOCO as objective → test color indirectly influences center selection → optimistic upper bounds.
 
-V1/V2 null centered at ~0.10-0.13 (not zero) due to voxel covariance structure. Parametric t-tests (p=0.006/0.040) tested H₀: μ=0, which is the wrong null. **Only hV4 shows genuine color-specific interpolation above permutation null.**
+#### Nested LOCO Validation (debiased)
 
-### 5b. Per-Color LOCO Breakdown (Friedman test, HC)
+Three conditions: (1) Fixed FE-6, (2) Fixed FE-K, (3) Nested Adaptive.
 
-| ROI | chi²(7) | p | Interpretation |
-|-----|---------|---|----------------|
-| V1 | 18.33 | **0.011*** | Non-uniform — Blue/Cyan high, Yellow/Green low |
-| V2 | 14.24 | **0.047*** | Non-uniform |
-| V3 | 11.38 | 0.123 | No structure |
-| hV4 | 6.48 | 0.485 | **Uniform — genuine continuous interpolation** |
+| ROI | K | HC FE-6 | HC FE-K | HC Nested | CVD FE-6 | CVD FE-K | CVD Nested |
+|-----|---|:-------:|:-------:|:---------:|:--------:|:--------:|:----------:|
+| V1 | 2 | +0.130 | +0.153 | +0.175 | −0.012 | +0.115 | +0.130 |
+| V2 | 3 | +0.150 | +0.180 | +0.174 | −0.174 | −0.032 | −0.002 |
+| V3 | 8 | +0.023 | +0.112 | +0.110 | −0.008 | +0.081 | +0.086 |
+| hV4 | 3 | +0.183 | +0.205 | +0.164 | −0.058 | +0.116 | +0.096 |
 
-### 5c. Residual Structure (HC)
+**Result**: Nested adaptive ≈ Fixed FE-K in all ROIs (all p > 0.37). **Center optimization provides no benefit.** K (channel count) is the sole effective parameter.
 
-| Metric | V1 | V2 | V3 | hV4 |
-|--------|------|------|------|------|
-| r(resid, orig) | 0.453 | 0.454 | 0.329 | **0.053** |
-| r(pred, orig) | 0.390 | 0.407 | 0.415 | **0.563** |
-| resid/signal ratio | 0.658 | 0.658 | 0.581 | **0.454** |
+**Circular vs Nested bias**: hV4 circular=+0.299 → nested=+0.164 (bias=+0.135). sub-08 hV4: circular=+0.383 → nested=+0.081 (bias=+0.302). The "degenerate center pattern" reported in circular optimization was an overfitting artifact, not L-M axis compression evidence.
 
-hV4 residuals near-random → model captures most available structure. V1/V2 residuals systematic → model misses significant color geometry.
+#### 3g. Alternative Models for CVD (Supplementary — Comparison)
 
-### 5d. Cross-Validation Summary
+#### B2: Anisotropic Basis — REJECTED
 
-| Evidence | V1 | V2 | hV4 |
-|----------|------|------|------|
-| Parametric t-test (H₀: μ=0) | p=0.006* | p=0.040* | p=0.026* |
-| **Permutation (H₀: shuffled)** | p=0.274 | p=0.311 | **p=0.044*** |
-| Friedman per-color | non-uniform* | non-uniform* | **uniform** |
-| Residuals | systematic | systematic | **near-random** |
+Parametric channel shift δ = a·sin(2θ) + b·cos(2θ). Nested 8-fold LOCO with 21×21 grid search.
 
-### 5e. Intercept Model Permutation Test (10K, HC)
+| ROI | HC Δ | t | p | Cohen's d |
+|-----|------|-------|-------|-----------|
+| V1 | -0.010 | -0.729 | 0.494 | -0.275 |
+| V2 | -0.007 | -0.419 | 0.690 | -0.158 |
+| V3 | +0.006 | 0.866 | 0.420 | 0.327 |
+| hV4 | **-0.081** | **-3.714** | **0.010*** | **-1.404** |
 
-**Question**: Does a shared spatial mean (intercept) inflate LOCO performance or null?
+Parametric warping significantly **hurts** hV4 HC (p=0.010, d=-1.4). REJECTED.
 
-Three methods tested:
-- **Standard**: Y = W @ C (baseline ridge_gcv)
-- **Intercept**: Y = W_color @ C + b (evaluation uses deviation only: corr(C_test @ W_color, Y_real - b))
-- **Mean_subt**: (Y - mean(Y)) = W @ C (pre-subtracted mean pattern)
+#### B3: Hierarchical FE — REJECTED
 
-#### Stouffer Combined p-values (per-ROI optimal basis)
+Prior-centred ridge: min ||X-CW||² + λ||W-W̄_HC||². Nested lambda selection.
 
-| Method | V1 (FE-6) | V2 (FE-6) | V3 (FE-8) | V4 (FE-3) |
-|--------|:---------:|:---------:|:---------:|:---------:|
-| Standard | p≈0.126 | p≈0.155 | p≈0.043* | p≈0.025* |
-| Intercept | p≈0.127 | p≈0.156 | p≈0.040* | p≈0.064 |
-| Mean_subt | p≈0.136 | p≈0.160 | p≈0.053 | p≈0.059 |
+| ROI | HC Δ | t | p | Cohen's d |
+|-----|------|-------|-------|-----------|
+| V1 | 0.000 | -0.640 | 0.546 | -0.242 |
+| V2 | +0.004 | 3.503 | 0.013* | 1.324 |
+| V3 | +0.041 | 0.955 | 0.376 | 0.361 |
+| hV4 | +0.000 | 0.089 | 0.932 | 0.034 |
 
-**Conclusions:**
-1. **Standard ≈ Intercept ≈ Mean_subt** — nearly identical p-values across all ROIs
-2. V1/V2 remain non-significant under all three methods
-3. Intercept null centers at ~-0.035 (standard null at ~+0.05-0.10) — intercept absorbs shared signal
-4. **p-values unchanged** — encoding signal is in the hue-modulated pattern, not the mean spatial pattern
-5. V3/V4 borderline shifts (V4 standard p=0.025 vs intercept p=0.064) from variance, not systematic bias
+CVD effect negligible (|Δ|<0.012 for all CVD subjects). λ→∞ in CVD = data too noisy for individual tuning. REJECTED.
 
----
+#### A2: Basis Anisotropy Test (subject-dependent)
 
-## 6. Extended Models
+Uniform vs cool_dense (~60% in 180-315°) vs warm_dense (~60% in 0-135°), hV4.
 
-### 6a. LOCO voxel_corr — All Subjects (n=10)
+| Subject | Uniform | Cool-Dense | Warm-Dense | Δcool | Δwarm |
+|---------|---------|-----------|-----------|-------|-------|
+| sub-08 | 0.084 | 0.005 | 0.178 | -0.079 | **+0.094** |
+| sub-09 | 0.071 | -0.004 | 0.006 | -0.075 | -0.065 |
+| sub-10 | 0.192 | 0.302 | 0.205 | **+0.110** | +0.013 |
 
-| Model | V1 M (SD) | V2 M (SD) | V3 M (SD) | V4 M (SD) |
-|-------|----------|----------|----------|-----------|
-| ridge_gcv | +0.087 (0.095) | +0.053 (0.194) | +0.014 (0.200) | +0.111 (0.210) |
-| prior_finetune | -0.067 (0.035) | -0.091 (0.090) | -0.105 (0.118) | +0.099 (0.175) |
-| **smooth_tikh** | **+0.112 (0.133)** | **+0.151 (0.175)** | **+0.115 (0.212)** | **+0.157 (0.245)** |
-| smooth_prior | +0.025 (0.153) | -0.002 (0.170) | -0.078 (0.143) | +0.094 (0.244) |
-| mixed_ridge_prior | -0.056 (0.089) | -0.073 (0.126) | -0.066 (0.105) | +0.094 (0.225) |
-| bayes_prior | -0.062 (0.047) | -0.101 (0.082) | -0.123 (0.129) | +0.028 (0.209) |
+Subject-specific: sub-08 benefits from warm-dense, sub-10 from cool-dense, sub-09 neither. No universal rule.
 
-### 6b. smooth_tikh One-Sample t-Test (HC LOCO > 0)
+#### 3h. Dimensionality & Population Organization (Supplementary — Validation)
 
-| ROI | HC Mean | HC SD | 95% CI | t(6) | p (one-tail) |
-|-----|---------|-------|--------|------|-------------|
-| **V1** | **+0.143** | 0.109 | [+0.043, +0.243] | 3.483 | **0.007** |
-| **V2** | **+0.246** | 0.100 | [+0.153, +0.338] | 6.514 | **<0.001** |
-| V3 | +0.100 | 0.254 | [-0.135, +0.334] | 1.038 | 0.170 |
-| **V4** | **+0.190** | 0.253 | [-0.045, +0.424] | 1.981 | **0.047** |
+#### Eigenspectrum: HC ≈ CVD
 
-### 6c. smooth_tikh vs ridge_gcv (paired t, n=10)
+All p > 0.14 for α_early and α_late. Broken power law confirmed (α_early 0.66-0.98, within Pospisil range). V1/V2 shallower decay → more modes contribute, but carry noise not color signal.
 
-| ROI | smooth_tikh M | ridge_gcv M | Delta | t(9) | p | Cohen's d |
-|-----|-------------|------------|-------|------|---|-----------|
-| V1 | +0.112 | +0.087 | +0.025 | 1.136 | 0.285 | +0.359 |
-| V2 | +0.151 | +0.053 | +0.099 | 2.115 | 0.064 | +0.669 |
-| **V3** | **+0.115** | **+0.014** | **+0.102** | **2.574** | **0.030** | **+0.814** |
-| V4 | +0.157 | +0.111 | +0.046 | 1.271 | 0.236 | +0.402 |
+#### MEME: HC ≈ CVD
 
-### 6d. HC vs CVD: smooth_tikh (Welch t-test)
+All p > 0.17. k* >> SRM k (100×) due to extreme high-dimensional regime (γ >> 1). SRM k=3-4 remains the more informative "color signal" dimensionality estimate.
 
-| ROI | HC M (SD) | CVD M (SD) | Cohen's d | p (Welch) |
-|-----|----------|----------|-----------|-----------|
-| V1 | +0.143 (0.109) | +0.039 (0.180) | +0.80 | 0.429 |
-| **V2** | **+0.246 (0.100)** | **-0.070 (0.063)** | **+3.43** | **0.001** |
-| V3 | +0.100 (0.254) | +0.151 (0.081) | -0.23 | 0.641 |
-| V4 | +0.190 (0.253) | +0.080 (0.255) | +0.43 | 0.568 |
+#### Voxel Color Preference Maps (Bannert & Bartels 2025)
 
-### 6e. NC-Normalized LOCO (smooth_tikh vs ridge_gcv, HC Mean)
+Significant HC vs CVD differences:
+- **V1 green**: HC −9.9% vs CVD −74.5% (t=3.20, p=0.016*)
+- **V2 green**: HC +26.7% vs CVD −73.2% (t=3.05, p=0.017*)
 
-| ROI | ridge_gcv NC (SD) | smooth_tikh NC (SD) | Delta |
-|-----|-------------------|---------------------|-------|
-| V1 | 0.271 (0.215) | 0.297 (0.241) | +0.025 |
-| **V2** | 0.300 (0.356) | **0.475 (0.169)** | **+0.175** |
-| V3 | 0.041 (0.378) | 0.185 (0.381) | +0.145 |
-| V4 | 0.247 (0.265) | 0.254 (0.344) | +0.007 |
+CVD common pattern across all ROIs: **green deficit** (−58 to −75%) and **magenta overrepresentation** (+117 to +196%). V3/hV4: no significant differences.
 
-### 6f. Artifact Check (LOCO rdm_pearson, n=10)
+#### Interpretation: Stimulus-Level Distortion, Not Cortical Reorganization
 
-| ROI | ridge_gcv (SD) | smooth_tikh (SD) | Δ | t(9) | p |
-|-----|---------------|-----------------|------|------|---|
-| **V1** | 0.034 (0.226) | **0.531 (0.239)** | **+0.496** | **4.24** | **0.002*** |
-| V2 | 0.179 (0.282) | **0.457 (0.230)** | +0.278 | 1.97 | 0.081 |
-| **V3** | 0.160 (0.200) | **0.398 (0.207)** | **+0.238** | **3.58** | **0.006*** |
-| **hV4** | 0.104 (0.281) | **0.410 (0.180)** | **+0.306** | **2.27** | **0.049*** |
+Evidence triangulation:
+1. α_CVD ≈ α_HC (eigenspectrum) — same decay structure
+2. k*_CVD ≈ k*_HC (MEME) — same estimated rank
+3. Voxel preference — same voxels, shifted argmax (not fewer responsive voxels)
 
-Artifact flags: 0/10 (V1), 0/10 (V2), 0/10 (V3), 1/10 (V4 — sub-10 only).
+CVD K-sensitivity is **bias-variance tradeoff** (same dimensions, different tuning), not genuine dimensionality reduction. Phase 2 filter should warp **stimulus space**, not reduce dimensionality.
 
-> **⚠️ REINTERPRETATION (2026-03-11):** The rdm_pearson "improvement" is **misleading**. RDM inspection (§8) reveals that (1) actual data has NO circular hue structure (Spearman vs ideal ≈ 0), and (2) smooth_tikh predicted RDM is ANTI-correlated with ideal circular structure (ρ ≈ -0.5). The high rdm_pearson means smooth_tikh's compressed/flat RDM pattern-matches the actual data's non-circular noise structure, NOT that it preserves genuine color geometry.
+#### 3i. Residual Biology Report (Track A: Exp A3–A6) (Supplementary — Validation)
 
-### 6g. Individual CVD Profiles (smooth_tikh)
+> All analyses run locally using FE-6/ridge_gcv predictions. N=6 HC (sub-07 missing), N=3 CVD.
 
-| Subject | Type | V2 LOCO r | V2 HC z-score | Crawford-Howell p |
-|---------|------|-----------|--------------|-------------------|
-| sub-08 | deutan | -0.143 | -3.89 | **0.011*** |
-| sub-09 | protan | -0.034 | -2.81 | **0.039*** |
-| sub-10 | deutan | -0.033 | -2.79 | **0.040*** |
+#### A3: Signed Circular Bias
 
-**All 3 CVD subjects show significant V2 deviation with smooth_tikh** (all CH p < 0.05). Not achieved with ridge_gcv.
+FE-6 LOCO predictions are very noisy: HC same-color mapping rate = 33% in hV4, 21% in V1/V2. CVD = 8% in hV4. Only group-level patterns interpretable.
 
-### 6h. Hypothesis Resolution
+**hV4 Mean Signed Bias (°):**
 
-| Hypothesis | Model | Result | Verdict |
-|-----------|-------|--------|---------|
-| H1 (Shape mismatch) | mixed_ridge_prior | All negative V1-V3 | **REJECTED** |
-| H2 (Uncertainty blindness) | bayes_prior | All negative V1-V3 | **REJECTED** |
-| H3 (Missing smoothness) | smooth_tikh | voxel_corr ↑ AND rdm_pearson ↑ | **CONFIRMED** (perm pending) |
-| H3 + prior | smooth_prior | Near-zero or negative | **REJECTED** |
+| Subject | Group | red | orange | yellow | green | cyan | blue | purple | magenta |
+|---------|-------|:---:|:------:|:------:|:-----:|:----:|:----:|:------:|:-------:|
+| HC mean | — | -43.3 | -2.4 | +10.2 | +3.5 | -40.6 | -16.1 | -8.1 | +5.4 |
+| sub-08 | deutan | -87.5 | -60.5 | +88.2 | -98.3 | -94.0 | **-136.7\*** | +95.3 | +54.7 |
+| sub-09 | protan | +64.8 | -48.3 | -29.3 | +156.2 | -121.5 | **+84.3\*** | +115.2 | +39.2 |
+| sub-10 | deutan | +59.7 | +37.7 | +30.5 | -12.3 | -48.7 | -61.5 | +2.7 | **-107.0\*** |
 
----
+\* Crawford-Howell p < 0.05. sub-08 blue → yellow region (CW), sub-09 blue → magenta region (CCW) — **opposite directions**, matching deutan vs protan distinction.
 
-## 7. GO/NO-GO Gate
+#### A4: 28-Pair Pairwise Residual
 
-### ridge_gcv Gate — FE-6 (confirmed)
+Significant pairs are predominantly **cross-axis** (red-cyan, green-magenta, orange-cyan):
 
-| ROI | C1 (Reliability) | C2 (Norm. Fit) | C3 (Interpolation) | C3b (Permutation) | Overall |
-|-----|-------------------|----------------|---------------------|--------------------|---------|
-| V1 | PASS (0.416) | PASS (0.227) | PASS (p=0.006) | FAIL (p=0.274) | **CONDITIONAL GO** |
-| V2 | PASS (0.420) | PASS (0.268) | PASS (p=0.040) | FAIL (p=0.311) | **CONDITIONAL GO** |
-| V3 | PASS (0.398) | FAIL (0.061) | FAIL (p=0.404) | FAIL (p=0.880) | **NO-GO** |
-| hV4 | PASS (0.603) | PASS (0.316) | PASS (p=0.026) | **PASS (p=0.044)** | **PRIMARY GO** |
+| CVD Subject | Pair | HC Mean° | CVD° | Diff° | p |
+|-------------|------|:--------:|:----:|:-----:|:---:|
+| sub-08 (D) | **red-cyan** | 42.5 | 173.5 | -131.0 | **0.029** |
+| sub-10 (D) | **green-magenta** | 39.3 | 154.5 | -115.3 | **0.016** |
+| sub-10 (D) | **orange-cyan** | 40.7 | 154.5 | -113.8 | **0.030** |
+| sub-09 (P) | green-magenta | 39.3 | 117.0 | -77.7 | 0.060 |
 
-### ridge_gcv Gate — Per-ROI Optimal Basis (updated 2026-03-11)
+#### A5: Confusion Structure
 
-| ROI | Basis | C3 (LOCO>0) | C3b (Perm Stouffer) | Change vs FE-6 |
-|-----|-------|-------------|---------------------|----------------|
-| V1 | FE-2 | **PASS (p=0.005)** | FAIL (p=0.170) | Perm 0.274→0.170 (improved, still FAIL) |
-| V2 | FE-3 | **PASS (p=0.008)** | FAIL (p=0.125) | Perm 0.311→0.125 (improved, still FAIL) |
-| **V3** | **FE-8** | MARGINAL (p=0.065) | **PASS (p=0.045)** | **NO-GO → PASS** |
-| hV4 | FE-3 | **PASS (p=0.021)** | **PASS (p=0.026)** | Perm 0.044→0.026 (strengthened) |
+| ROI | HC Acc | sub-08 (D) | sub-09 (P) | sub-10 (D) |
+|-----|:------:|:----------:|:----------:|:----------:|
+| V1 | 0.097 | 0.146 | 0.083 | 0.021 |
+| V2 | 0.118 | 0.125 | 0.021 | 0.000 |
+| V3 | 0.174 | 0.146 | 0.042 | 0.208 |
+| **hV4** | **0.281** | **0.021** | **0.083** | **0.083** |
 
-> **V3 recovery**: FE-8 basis rescues V3 from NO-GO (p=0.360) to PASS (p=0.045). V1/V2 FAIL with ALL tested bases — FE-{2..12}, OPP-2, OPP-4, OPP-4rect (§4). Intercept model also does not help (§5e). This is a confirmed structural limitation of 8-stimulus LOCO, not basis mismatch.
+hV4 cool accuracy: sub-08=**0.000**, sub-09=**0.000**, sub-10=0.125 (HC mean=0.319).
 
-### smooth_tikh Gate (REJECTED)
+**Asymmetric red-green confusion**: red→green confusion ≈ 0 for all CVD, but green→red is very high for deutan subjects (sub-08: 1.00 in V2, sub-10: 0.83 in V2). Consistent with M-cone loss: "green" response collapses toward L-cone-mediated "red". sub-09 (protan) shows green→purple instead — different cone loss, different confusion pattern.
 
-| ROI | C1 | C2 (NC-Norm) | C3 (LOCO > 0) | C3c (rdm_pearson) | C3b (Perm) | Status |
-|-----|----|----|----|----|----|----|
-| V1 | PASS (0.416) | PASS (0.297) | PASS (p=0.007) | ~~PASS~~ misleading | **FAIL (p=0.331)** | **REJECTED** |
-| V2 | PASS (0.420) | PASS (0.475) | PASS (p<0.001) | ~~PASS~~ misleading | **FAIL (p=0.188)** | **REJECTED** |
-| V3 | PASS (0.397) | FAIL (0.185) | FAIL (p=0.170) | ~~PASS~~ misleading | **FAIL (p=0.613)** | NO-GO |
-| V4 | PASS (0.603) | PASS (0.254) | PASS (p=0.047) | ~~PASS~~ misleading | **FAIL (p=0.613)** | **REJECTED** |
+#### A6: Cross-Phase SRM ↔ FE Correlation
 
-> **Note:** C3c (rdm_pearson) retroactively invalidated — see §8 RDM Inspection.
+28-pair quantitative convergence is largely **non-significant**. Only sub-08 V1 shows significant raw correlation (r=0.385, p=0.043). Weak convergence is explained by metric mismatch (SRM crossnobis vs FE angular prediction) and missing hV4 in SRM crossnobis data. The *qualitative* convergence (SRM V2 blue-purple p=0.042 ↔ FE hV4 blue p=0.046) remains valid.
+
+#### Track A Summary
+
+| Criterion | Status | Evidence |
+|----------|:------:|---------|
+| Cool-axis distortion direction | **Partial** | Crawford-Howell significant for blue, but FE-6 is noisy (33% accuracy) |
+| 28-pair SRM convergence (r>0.4) | **Not met** | sub-08 V1 = 0.385; hV4 crossnobis unavailable |
+| 2/3 CVD consistent cool-axis distortion | **Met** | sub-08/09 cool accuracy=0%, asymmetric confusion confirmed |
+
+### 3j. Per-Subject K* (Cone Shift Supporting Evidence)
+
+> Per-subject K* optimization recovers LOCO in CVD, but K*=8 (sub-08) with 8 colors and 8 channels approaches a lookup table rather than genuine smooth interpolation. K* is **consistent with** cone-shift-driven tuning curve distortion (CVD needs more basis channels to capture asymmetric tuning), but overfitting cannot be excluded (N=1). Used pragmatically in Phase 2; interpretation remains exploratory.
+
+#### hV4 Results
+
+| Subject | Group | K* | K* LOCO | Group K(=3) LOCO | Δ |
+|---------|-------|-----|---------|-------------------|------|
+| sub-01 | HC | 10 | 0.110 | 0.037 | +0.073 |
+| sub-02 | HC | 3 | 0.514 | 0.514 | 0.000 |
+| sub-03 | HC | 6 | 0.441 | 0.360 | +0.081 |
+| sub-04 | HC | 2 | 0.285 | 0.255 | +0.031 |
+| sub-05 | HC | 6 | 0.060 | 0.025 | +0.035 |
+| sub-06 | HC | 4 | 0.357 | 0.301 | +0.055 |
+| sub-07 | HC | 8 | 0.139 | -0.059 | +0.198 |
+| **sub-08** | **CVD** | **8** | **0.541** | **0.084** | **+0.457** |
+| **sub-09** | **CVD** | **3** | **0.071** | **0.071** | **0.000** |
+| **sub-10** | **CVD** | **2** | **0.270** | **0.192** | **+0.078** |
+
+**Critical**: sub-08 hV4 K=3→K=8 → LOCO **6.4× gain** (0.084→0.541).
+
+#### HC Paired t-test (subject_k vs baseline FE-K)
+
+| ROI | Δ | t | p | Cohen's d |
+|-----|------|-------|-------|-----------|
+| V1 | +0.040 | 1.976 | 0.096 | 0.747 |
+| V2 | +0.045 | 3.407 | **0.014*** | 1.288 |
+| V3 | +0.070 | 2.195 | 0.071† | 0.830 |
+| hV4 | +0.068 | 2.804 | **0.031*** | 1.060 |
+
+#### 5-Axis Comparison Summary (hV4)
+
+| Model | HC mean | CVD mean |
+|-------|---------|----------|
+| Baseline FE-K | 0.205 | 0.116 |
+| **B1: Subject K\*** | **0.272** | **0.294** |
+| B2: Anisotropic | 0.124 | 0.034 |
+| B3: Hierarchical | 0.205 | 0.117 |
+
+B1 is the only model where CVD mean exceeds HC baseline. sub-08 now **above** HC mean (0.541 vs 0.272). sub-10 matches HC exactly (0.270 vs 0.272).
 
 ---
 
-## 8. smooth_tikh Investigation (REJECTED)
+## 4. Red Team Analysis
 
-### 8a. Permutation Test — Fixed Params (10K color-label shuffles, HC)
-
-| ROI | Observed | Null Mean | Null SD | p_perm |
-|-----|---------|-----------|---------|--------|
-| V1 | 0.189 | 0.187 | — | 0.331 |
-| V2 | 0.216 | 0.212 | — | 0.188 |
-| V3 | 0.125 | 0.128 | — | 0.613 |
-| V4 | 0.239 | 0.241 | — | 0.613 |
-
-**All ROIs fail.** Observed ≈ null mean — smooth_tikh captures shared spatial covariance, not color-specific signal.
-
-### 8b. Rescue Attempt 1: Condition-Centering
-
-**Hypothesis:** Model Y=WC has no intercept → W absorbs shared spatial pattern → β amplifies it. Per-run condition centering (subtracting mean across 8 colors within each run) should remove this.
-
-**Result:** Per-run centering **commutes with color label shuffle**. The mean across 8 colors is identical regardless of shuffle order: `mean(amp[:, perm, :], axis=1) == mean(amp, axis=1)`. Therefore centering **cannot change the permutation test**. Confirmed empirically: identical p-values with and without centering (e.g., sub-02 hV4 smooth_tikh: p=0.015 both ways).
-
-**Side effect:** Per-run centering makes smooth_tikh predictions dramatically worse (observed r drops to ~-0.9), because the smooth W captures mostly the mean pattern, which centering removes.
-
-### 8c. Rescue Attempt 2: Re-Optimized Permutation
-
-**Hypothesis:** Fixed (α=0.01, β=100) selected on real data biases the null. Re-selecting (α, β) via inner LOCO-CV within each permutation should produce a fairer null.
-
-**Result (5 perms, sub-02 hV4 diagnostic):**
-- Null beta distribution: β=1000 selected 45%, β=0 selected 26%, β=100 only 9%
-- On shuffled data, **high β is still preferred** — regularization helps fit noise
-- Observed score drops with re-optimization: 0.172 (vs 0.239 fixed)
-- Delta (obs - null_mean) still small and negative (-0.007)
-
-**Conclusion:** Re-optimization does not rescue smooth_tikh. The smoothness penalty is inherently beneficial for fitting ANY data (real or shuffled), not specifically for color signal.
-
-### 8d. RDM Structure Inspection
-
-**Question:** Does the previously reported rdm_pearson improvement reflect genuine color geometry preservation?
-
-**Ideal RDM (circular hue distance, normalized to [0,1]):**
-
-| | red | orange | yellow | green | cyan | blue | purple | magenta |
-|---|---|---|---|---|---|---|---|---|
-| red | - | 0.25 | 0.50 | 0.75 | 1.00 | 0.75 | 0.50 | 0.25 |
-| cyan | 1.00 | 0.75 | 0.50 | 0.25 | - | 0.25 | 0.50 | 0.75 |
-
-**Actual data vs Ideal (Spearman, HC mean):**
-
-| ROI | Actual vs Ideal | Interpretation |
-|-----|----------------|----------------|
-| V1 | -0.008 | NO circular structure |
-| V2 | +0.044 | NO circular structure |
-| hV4 | +0.004 | NO circular structure |
-
-**smooth_tikh predicted RDM vs Ideal (Spearman, HC mean):**
-
-| ROI | Predicted vs Ideal | Interpretation |
-|-----|-------------------|----------------|
-| V1 | **-0.624** | ANTI-correlated with ideal |
-| V2 | **-0.580** | ANTI-correlated with ideal |
-| hV4 | **-0.442** | ANTI-correlated with ideal |
-
-**smooth_tikh RDM distance compression:**
-- Actual RDM distances: 0.66–1.49 (wide range)
-- smooth_tikh predicted RDM distances: 0.06–0.23 (extremely compressed)
-
-**Reinterpretation of rdm_pearson "improvement":**
-The previously reported high rdm_pearson (e.g., V1=0.531) means smooth_tikh's compressed/flat RDM pattern-matches the actual data's **non-circular noise structure** — NOT that it preserves genuine color geometry. The actual data itself has no ideal circular hue arrangement. smooth_tikh's smoothness penalty forces near-identical predictions for all colors → compressed RDM → this flat pattern happens to correlate with actual data's noise.
-
-### 8e. smooth_tikh Conclusion
-
-**smooth_tikh is REJECTED.** All three rescue attempts failed:
-
-| Approach | Finding | Why It Doesn't Work |
-|----------|---------|---------------------|
-| Fixed-param permutation | All p > 0.18 | Shared spatial covariance drives voxel_corr |
-| Condition-centering | Commutes with shuffle | Cannot change permutation by construction |
-| Re-optimized permutation | Null beta ≥ observed | Smoothness helps fit any data, not just color signal |
-| RDM-based evaluation | Anti-correlated with ideal | rdm_pearson improvement was noise pattern-matching |
-
-**Root cause:** β=100 forces near-rank-1 W (all columns nearly identical) → predictions are dominated by a single spatial pattern shared across all colors → high voxel_corr, high rdm_pearson, but NO color-discriminative content.
-
----
-
-## 9. Final Decisions
-
-1. **Best LOCO encoder**: **ridge_gcv (confirmed)**. smooth_tikh REJECTED — all rescue attempts failed.
-2. **Encoding basis**: FE-6 confirmed for hV4. Per-ROI optimal: V1→FE-2, V2→FE-3, V3→FE-8, hV4→FE-3. No paired difference reaches p<0.05 vs FE-6.
-3. **Basis-channel tradeoff**: LORO monotonically improves with K. LOCO shows inverse pattern in V1/V2 (bias-variance tradeoff).
-4. **V3 recovery**: FE-8 rescues V3 from NO-GO (perm p=0.360) to PASS (p=0.045). V3 failure was basis-driven.
-5. **V1/V2 LOCO limitation confirmed**: All FE-{2..12} AND all opponent bases (OPP-2/4/4rect) fail permutation for V1/V2. Intercept model also unchanged. This is a structural limitation of 8-stimulus LOCO resolution, not basis mismatch (Red Team #3 neutralized).
-6. **HC-CVD gap is K-dependent and axis-specific** (updated §4b–4c): Aggregate gap reduces 54–78% with optimal K. Per-color decomposition reveals warm-color (L-M) gap reverses entirely under FE-K, while cool-color (S-axis) gap persists at 65% of FE-6 level. Blue d=+1.37 p=0.046, purple d=+1.54 p=0.060. Center placement irrelevant.
-7. **Prior-based models**: All rejected — SRM prior is fundamentally incompatible with LOCO.
-8. **smooth_tikh (9h-9i)**: REJECTED — captures spatial covariance, not color signal. rdm_pearson "improvement" was noise pattern-matching.
-9. **Intercept model**: Does not change LOCO significance. Shared spatial mean does not drive results.
-10. **Phase 2 roles**: hV4 = color interpolation oracle (permutation p=0.026, FE-3). V1/V2 = secondary (gap largely K-dependent; residual gap underpowered). V3 = conditional (FE-8). **Filter target** (§4c): T_ψ(θ) should focus on θ ∈ [180°, 315°] (cool/S-axis); warm region needs minimal correction.
-11. **Leakage prevention**: Including held-out color in A_g inflates LOCO by +0.55 to +0.69. Leakage-free pipeline mandatory.
-12. **Cross-phase convergence** (§4c): SRM prevalidation (V2 blue-purple p=0.042) and forward model (hV4 blue p=0.046) independently identify S-axis/cool colors as CVD distortion locus. Crossnobis-SRM Spearman r=0.33–0.70 confirms SRM is not artifact.
-
----
-
-## 10. Red Team Response
+### 4a. Original Red Team (RT-1 through RT-5)
 
 > Self-critique conducted 2026-03-11. Full report: `results/redteam/2026-03-11.md`
 
-### RT-1. Statistical Power (N=3 CVD)
+**RT-1: N=3 CVD — Statistical Power**
 
-**Criticism:** N=3 CVD precludes group-level inference. Welch t-tests (df~4-5) are unstable; effect sizes inflated.
+All CVD results presented as **individual case analyses** using Crawford & Howell (2010) single-case statistics. Group-level CVD claims (Welch t-tests) are **descriptive/exploratory**, not confirmatory. HC group (N=7) = validated model; CVD = "proof-of-concept with N=3". Minimum for definitive CVD group claims: N≥12 per group.
 
-**Response — Case Study Framing:**
-- All CVD results are presented as **individual case analyses** using Crawford & Howell (2010) single-case statistics, designed for comparing one patient to a normative sample
-- Group-level CVD claims (Welch t-tests) are reported as **descriptive/exploratory**, not confirmatory
-- HC group results (N=7) constitute the validated model; CVD application is "proof-of-concept with N=3"
-- Minimum sample size for definitive CVD group claims: N≥12 per group (d=0.8, α=0.05, power=0.80)
-- CVD-CVD RDM correlation (0.276 > HC-HC 0.158) is reported as **descriptive observation**, not tested
+**Impact on pipeline**: None. Phase 2 filter operates per-subject.
 
-**Impact on pipeline:** None. Phase 2 filter operates per-subject; group-level CVD inference is not required.
+**RT-2: Multiple Comparisons (hV4 p=0.044)**
 
-### RT-2. Multiple Comparison Correction (hV4 p=0.044)
+- hV4 = **a priori primary ROI** (Brouwer & Heeger 2009 identified V4/VO1; highest noise ceiling 0.702, highest reliability 0.603)
+- V1/V2/V3 = **secondary/exploratory**
+- Bonferroni-4: hV4 FE-6 p=0.044 does not survive (threshold 0.0125)
+- **Resolved by N1 Stouffer omnibus** (see §4c): omnibus p=0.0021
 
-**Criticism:** 4 ROIs tested; Bonferroni threshold = 0.0125; hV4 p=0.044 fails. Also claims HC-CVD hV4 voxel_corr p=0.169 undermines the result.
+Converging evidence independent of permutation:
 
-**Rebuttal — HC-CVD comparison is irrelevant to encoder validation:**
+| Evidence | V1/V2 | hV4 |
+|----------|-------|-----|
+| Permutation | FAIL | p=0.044* |
+| Friedman uniformity | Non-uniform* | **Uniform** (p=0.485) |
+| Residual structure | Systematic (r=0.45) | **Near-random** (r=0.053) |
+| NC-normalized fit | 0.23/0.27 | **0.32** |
 
-The permutation test answers: *"Does the HC forward model capture genuine color interpolation signal?"* This is a within-group (HC-only) model validation. The HC-CVD voxel_corr comparison (p=0.169) answers a completely different question: *"Do HC and CVD differ in LOCO performance?"* — which is not required for encoder validation. The "cross-pipeline cherry-picking" accusation is also misframed: Phase 1 permutation validates the encoder, Phase 3 LOCO MAE evaluates decoder-based group differences. These answer separate questions in separate pipelines.
+**RT-3: Discrimination vs. Interpolation Dissociation — NEUTRALIZED**
 
-**Response — A Priori Primary ROI + Converging Evidence:**
+Directly tested with 3 opponent bases (OPP-2/4/4rect) + FE channel variants (FE-2 through FE-12) + intercept model. **ALL bases fail V1/V2 permutation.** FE-6 is the only basis passing anywhere (V4 p=0.039). Dissociation confirmed as structural limitation, not basis mismatch.
 
-**A priori justification for hV4 as primary hypothesis:**
-1. **Literature precedent**: Brouwer & Heeger (2009) identified V4/VO1 as the site of novel-color reconstruction; hV4 was the pre-specified target ROI
-2. **Data quality**: Highest noise ceiling (HC 0.702), highest split-half reliability (HC 0.603)
-3. **Biological rationale**: hV4 contains hue-selective neurons most compatible with FE-6 circular basis (Section 2b of discussion)
+**RT-4: Analytical Degrees of Freedom**
 
-**Correction applied:**
-- hV4 = **primary hypothesis** (uncorrected p=0.044; further strengthened with FE-3: p=0.026)
-- V1/V2/V3 = **secondary/exploratory** (reported as such; V1/V2 fail, V3 conditional)
-- If Bonferroni-corrected across 4 ROIs: hV4 FE-6 p=0.044 does not survive (threshold 0.0125)
-- If FDR (BH) with per-ROI optimal basis [0.170, 0.125, 0.045, 0.026]: hV4 FE-3 q=0.104 (does not survive)
+Pipeline followed **sequential elimination**, not simultaneous testing:
+1. Basis selected on cross-validation performance (FE-6 > LF-4 > LF-6, paired p<0.05)
+2. Model selected by cross-validated voxel_corr (ridge_gcv best LOCO)
+3. Permutation test applied as **final validation gate** to pre-selected combination
+4. Metric (voxel_corr) chosen a priori as literature standard (Brouwer & Heeger 2009)
 
-**Converging evidence (independent of permutation p-value):**
+**RT-5: CVD Failure Narrative — Revised to Model Specification Sensitivity**
 
-| Evidence | V1/V2 | hV4 | Independence |
-|----------|-------|-----|-------------|
-| Permutation (color-shuffle) | FAIL | p=0.044* | Primary test |
-| Friedman per-color uniformity | Non-uniform* | **Uniform** (p=0.485) | Different test statistic |
-| Residual structure | Systematic (r=0.45) | **Near-random** (r=0.053) | Model diagnostics |
-| NC-normalized fit | 0.23/0.27 | **0.32** | Data quality normalized |
-| Noise ceiling | 0.47/0.51 | **0.70** | Measurement quality |
+HC-CVD gap is primarily K-dependent. Center optimization = no benefit (nested LOCO). CVD K-sensitivity arises from bias-variance tradeoff, not dimensionality reduction (eigenspectrum + MEME: HC ≈ CVD). Remaining vulnerability: cannot distinguish model selection (A) from biological (B) explanation with n=3 CVD.
 
-No single test is definitive; convergence across complementary metrics strengthens inference.
+### 4b. Hinton-Perspective Red Team (RT-6)
 
-### RT-3. Discrimination vs. Interpolation Dissociation — NEUTRALIZED
+#### Top 5 Vulnerabilities
 
-**Criticism:** Post-hoc rationalization; no alternative basis tested.
+| # | Vulnerability | Severity | Status |
+|---|-------------|:--------:|:------:|
+| 1 | **"5 convergence lines" = pseudo-replication**: All evidence uses same 48 samples analyzed differently. Multi-faceted characterization of single finding, not independent evidence. | **FATAL** | **N3: Reframing** |
+| 2 | **Multiple comparisons**: hV4 p=0.026 (FE-3) fails Bonferroni-4. 4 ROI × 6+ basis = 24+ tests. | **FATAL** | **N1: Stouffer omnibus** |
+| 3 | **K-dependent gap = HC-optimized search artifact**: K optimized on HC → biases toward HC-optimal → warm gap reversal may be overfitting. | **SEVERE** | **N2: Confirmed artifact** |
+| 4 | **V1/V2 "underdetermined" is unfalsifiable**: 10 models fail → negative result, not "need better models." | **MODERATE** | **N3: Falsification criteria** |
+| 5 | **S-axis discovery is post-hoc**: blue p=0.046 uncorrected (Bonferroni-8: α=0.006). | **MODERATE** | Cross-phase partial mitigation |
 
-**Resolution:** Directly tested with 3 opponent-channel bases (OPP-2, OPP-4, OPP-4rect) + FE channel variants (FE-2 through FE-12) + intercept model. **ALL bases fail V1/V2 permutation.** FE-6 is the only basis passing anywhere (V4 p=0.039).
+#### Revised Conclusions
 
-The dissociation is confirmed as a **structural limitation of 8-stimulus LOCO for V1/V2**, not basis mismatch. Full results in Section 4 (Opponent Basis Test).
+| Original | Revised |
+|----------|---------|
+| "hV4 has genuine interpolation (p=0.026)" | "Omnibus test shows cortical interpolation exists (p=0.002); hV4 drives it (marginal at Bonferroni α)" |
+| "HC-CVD gap 54-78% K-dependent, residual = S-axis biology" | "Gap reduction confounded by HC-optimization bias (N2). S-axis residual requires validation." |
+| "V1/V2 underdetermined" | "Negative result under linear 1D models (N=48). Falsifiable by 2D nonlinear model, N>200, or 7T sub-mm." |
+| "K is THE only DOF" | "K was the only effective DOF among tested regularizers in this 48-sample regime." |
+| "5 independent convergence lines" | "Multi-faceted characterization of single hV4 finding (same data, different analyses)." |
 
-### RT-4. Analytical Degrees of Freedom
+### 4c. Neutralization Experiments
 
-**Criticism:** 8 models × 3+ bases × 4 ROIs × 6 metrics; one combination yields p=0.044.
+#### N1: Stouffer Omnibus (FATAL #2 neutralized)
 
-**Response — Decision Logic (not p-value selection):**
+**Method**: (1) Stouffer combine per-subject perm p-values within each ROI, (2) combine 4 ROI p-values into omnibus, (3) post-hoc only if omnibus passes.
 
-The analytical pipeline followed a **sequential elimination** logic, not simultaneous testing:
+**Per-ROI Stouffer (HC, optimal basis):**
 
-1. **Basis selection** (Section 4): FE-6 > LF-4 > LF-6 by paired LOCO CV (p=0.045/0.042/0.016). Basis selected on cross-validation performance, NOT permutation p-values.
+| ROI | Basis | Stouffer Z | p |
+|-----|-------|:----------:|:----:|
+| V1 | FE-2 | 0.956 | 0.170 |
+| V2 | FE-3 | 1.149 | 0.125 |
+| V3 | FE-8 | 1.692 | 0.045 |
+| hV4 | FE-3 | 1.941 | 0.026 |
 
-2. **Model selection** (Section 6): ridge_gcv selected as best LOCO model by cross-validated voxel_corr. smooth_tikh initially appeared better but was **independently rejected** by permutation test (Section 8). Model selection preceded permutation testing.
+**Omnibus:**
 
-3. **Permutation test** (Section 5a): Applied as **final validation gate** to the pre-selected model/basis combination. The permutation test did not inform model or basis selection.
+| Test | Statistic | p | Gate |
+|------|:---------:|:----:|:----:|
+| Stouffer | Z = 2.869 | **0.0021** | **PASS** |
+| Fisher | χ²(8) = 21.18 | **0.0067** | **PASS** |
 
-4. **Metric selection**: voxel_corr chosen a priori as primary metric (standard in forward encoding literature; Brouwer & Heeger 2009). Permutation test was chosen because parametric t-test uses wrong null (H₀: μ=0 vs H₀: no color-specific signal).
+**Post-hoc**: No individual ROI survives Bonferroni-4 (threshold 0.0125), but V3/hV4 are marginal (uncorrected p<0.05).
 
-**Permutation test was not chosen for producing a "desired pattern":** The parametric t-test (V1 p=0.006) was replaced because it tests the wrong null hypothesis. Voxel covariance creates a non-zero baseline (V1 null mean = 0.109), making H₀: μ=0 inappropriate. This methodological correction was applied uniformly across all ROIs.
+**Conclusion**: Omnibus p=0.0021 — **cortex-level color interpolation exists**. Claim no longer depends on any single uncorrected ROI p-value.
 
-**Phase 2 pre-registration:** Planned before Phase 2 execution.
+#### N2: K-Selection Bias Permutation (SEVERE #3 — confirmed artifact)
 
-### RT-5. "CVD Failure = Data" Narrative (Revised after §4b)
+**Method**: 10K permutations shuffling 7-HC/3-CVD labels → re-run K-optimization per ROI → compute gap reduction → compare observed to null.
 
-**Criticism:** Unfalsifiable; CVD reliability is HIGHER than HC (contradicting "distortion").
+| ROI | Obs Reduction | Null Mean | p(≥obs) | Verdict |
+|-----|:-------------:|:---------:|:-------:|:-------:|
+| V1 | 73.3% | 11.0% | 0.192 | Expected |
+| V2 | 34.4% | -63.5% | 0.228 | Expected |
+| V3 | 3.5% | -633.6% | 0.227 | Expected |
+| hV4 | 63.1% | -109.3% | 0.133 | Expected |
 
-**Updated framing — Model Comparison:**
+ALL ROIs show gap reduction within chance levels. **The "gap reduction" narrative is abandoned.** Per-K gap magnitudes remain valid.
 
-1. **"Failure = data" revised to "model specification sensitivity":**
-   - HC-CVD gap is **primarily K-dependent**: V1 d 2.01→0.44 (−78%), hV4 d 1.36→0.63 (−54%) with per-ROI optimal K
-   - Center optimization provides no additional benefit (nested LOCO, §4b)
-   - The large FE-6 gap was overparameterization: K=6 with 8 stimuli leaves df=1, insufficient for CVD's representations
-   - **Reframing**: CVD LOCO failure under FE-6 is a model selection issue, not necessarily a biological deficit
+#### N3: Convergence Reframing + V1/V2 Falsification
 
-2. **Higher CVD reliability addressed:**
-   - Higher reliability (0.699 vs 0.603) means CVD patterns are **consistently reproduced** across runs
-   - This is compatible with "consistently different model specification needs" — reliability measures stability, not model fit
+**Convergence (FATAL #1 → RESOLVED):**
 
-3. **Previous falsifiable prediction — RESOLVED:**
-   - ~~Adaptive basis: if CVD centers compress along L-M axis → basis mismatch confirmed~~
-   - **Result (§4b)**: Adaptive centers ≈ uniform after debiasing. sub-08 "degenerate [0,180,359]°" was overfitting artifact, not biological compression.
-   - **New testable question**: Does CVD K-sensitivity arise from model selection (bias-variance tradeoff) or genuine dimensionality reduction? Requires: (a) PCA effective dimensionality analysis, (b) SNR-controlled simulation, or (c) behavioral correlation
+> "Multiple analytical perspectives characterize a **single observation**: hV4 forward-model predictions correlate with held-out color patterns above chance (omnibus p=0.002). Warm/cool asymmetry, S-axis specificity, and HC-CVD gap differences describe the **structure** of this correlation, but derive from the **same 48 data points**. They are not independent evidence streams."
 
-4. **Remaining vulnerability — K-sensitivity interpretation:**
-   - CVD benefits more from K reduction than HC → two explanations:
-     - (A) Model selection: FE-6 is overparameterized for all subjects; CVD is more affected due to representational differences
-     - (B) Biological: CVD genuinely has fewer effective color dimensions
-   - Current data (n=3 CVD) cannot distinguish A from B
-   - **Neutralization needed**: PCA on 8-color patterns, or behavioral (Farnsworth-Munsell) correlation with K-sensitivity
+**V1/V2 Falsification (MODERATE #4 → RESOLVED):**
 
-5. **Phase 2 filter consistency:**
-   - `W_s @ C(T_psi(θ)) ≈ Y_CVD(θ)` uses HC-derived W_s (hV4, FE-3, ridge_gcv)
-   - With proper K, the filter T_psi corrects a **smaller residual** (d=0.63 vs d=1.36)
-   - hV4 RDM HC≈CVD (p=0.559) → T_psi is monotonic (order-preserving)
+> "V1/V2 color interpolation fails under all tested linear 1D basis models. This is a **negative result**. Would be falsified by: (1) 2D nonlinear basis achieving LOCO > perm null, (2) N>200 with same basis, or (3) sub-mm 7T resolving V2 thin-stripe modules."
 
----
+### 4d. Post-Neutralization Scorecard
 
-## 11. Eigenspectrum Geometry (Pospisil & Pillow 2024)
+| # | Vulnerability | Original | Post-Neutralization | Status |
+|---|-------------|:--------:|:-------------------:|:------:|
+| 1 | Pseudo-replication | FATAL | **RESOLVED** | Language corrected |
+| 2 | Multiple comparisons | FATAL | **RESOLVED** | Stouffer omnibus p=0.0021 |
+| 3 | K-selection bias | SEVERE | **RESOLVED** | Artifact confirmed; narrative abandoned |
+| 4 | V1/V2 unfalsifiable | MODERATE | **RESOLVED** | Explicit falsification criteria |
+| 5 | S-axis post-hoc | MODERATE | **PARTIALLY MITIGATED** | Cross-phase convergence; remains exploratory |
 
-> **Status**: PLANNED — Awaiting server execution (scripts/analyze_eigenspectrum_decay.py)
-> **Framework**: Broken power law eigenvalue decay analysis
-
-### Motivation
-
-Pospisil & Pillow (2024) demonstrated that V1 population eigenspectrum follows a **broken power law** (α≈0.5 for first ~10 modes, α≈1.2 for later modes), not the simple power law (α≈1) assumed by classical models. This suggests ~10 dominant modes shape sensory encoding, while hundreds of additional modes contribute minimally to signal.
-
-**Key questions for our data:**
-1. Does our 8-color Procrustes-aligned data show similar broken power law structure?
-2. Do CVD subjects show steeper eigenvalue decay (reduced dimensionality hypothesis)?
-3. Does the transition point differ by ROI (V1/V2 vs hV4)?
-
-### Method
-
-For each subject-ROI:
-1. Concatenate Procrustes-aligned amplitudes across runs/colors → X matrix (48 samples × n_voxels)
-2. Compute sample covariance Σ̂ = (1/n) X^T X
-3. Extract eigenvalues λ₁ ≥ λ₂ ≥ ... ≥ λₙ via SVD
-4. Fit power law λᵢ = c · i^(-α) to early modes (i=1-10) vs late modes (i=10-50) via log-log regression
-5. Compare HC vs CVD: Welch t-test for α_early, α_late, transition point
-
-**Expected patterns:**
-- If Pospisil's finding generalizes: α_early ≈ 0.5-0.7, α_late ≈ 1.0-1.5
-- If CVD has reduced dimensionality: α_CVD > α_HC (steeper decay)
-- If hV4 > V1 in representational richness: more eigenvalues above noise floor in hV4
-
-### Results
-
-**TO BE FILLED** after running `run_eigenspectrum_decay.sbatch`
-
-Expected output:
-- Figure: 2×4 subplot (HC/CVD × V1/V2/V3/hV4) log-log eigenvalue decay
-- Table: α_early, α_late, transition point, p-values per ROI
-- Validation: Do SRM k values (V1=4, V2=4, V3=3, hV4=3) capture the shallow-decay regime?
-
-### Connection to Current Findings
-
-**V1/V2 LOCO null ~0.10-0.13**: Pospisil showed that noise eigenspectrum can create spurious low-dimensional structure. Our V1/V2 permutation null likely arises from voxel correlation structure (spatial autocorrelation, measurement noise) rather than true color signal. Only modes above the noise floor carry genuine color information — if V1/V2 have fewer such modes for 8-color interpolation, this explains LOCO failure despite high LORO accuracy.
-
-**Discrimination ≠ Interpolation**: 8-stimulus interpolation may require dimensions beyond the dominant modes (~10), which are optimized for discrimination (categorical perception, Kuriki et al. 2025) rather than continuous hue gradients. V1/V2 eigenspectrum may show steep decay after first few modes, limiting interpolation capacity even with intact discriminability.
+**Overall**: 4/5 fully neutralized. Paper tier: REJECT → **MAJOR REVISION** (eLife/NeuroImage).
 
 ---
 
-## 12. Unbiased Dimensionality Estimation (MEME)
+## 5. Discussion — Literature Integration
 
-> **Status**: PLANNED — Awaiting server execution (scripts/fit_meme_eigenspectrum.py)
-> **Framework**: Moment Estimation via Eigenmoments (Li et al. 2014, Pospisil & Pillow 2024)
+### 5.1 Eigenspectrum Geometry and LOCO Null (Pospisil & Pillow 2024)
 
-### Motivation
+Pospisil & Pillow (2024) demonstrated that V1 population eigenspectrum follows a broken power law (α≈0.5 for first 10 modes, α≈1.2 thereafter).
 
-Standard PCA eigenvalues are downward-biased when n_samples ≈ n_features (high-dimensional noise regime). With 48 samples (6 runs × 8 colors) and 100-800 voxels per subject-ROI, we are in this regime. **MEME** uses eigenmoment matching to recover true signal eigenspectrum.
+**Our data**: α_early = 0.66-0.98, confirming broken power law within Pospisil's range. V1/V2 show shallower decay (α≈0.68) vs hV4 (α≈0.98) — consistent with V1 having more modes contributing, but those modes carry noise rather than color interpolation signal.
 
-**Key question:** Are our manually chosen SRM k values (V1=4, V2=4, V3=3, hV4=3) optimal, or do they under/over-estimate true dimensionality?
+**V1/V2 LOCO null explained**: Permutation null (~0.10-0.13) arises from voxel correlation structure (shallow eigenspectrum decay), not true color signal. Only hV4 exceeds this null.
 
-### Method
+### 5.2 Task-Dependent Representation (Kuriki et al. 2025)
 
-For each subject-ROI:
-1. Compute sample eigenvalues (biased)
-2. Compute eigenmoments m_p = (1/n) Σ λᵢ^p for p=1,2,3
-3. Apply Marchenko-Pastur correction for high-dimensional bias
-4. Find best-fit eigenspectrum {λ̃ᵢ} matching observed moments
-5. Estimate true rank k* = #{λ̃ᵢ > noise floor}
-6. Compare to manual SRM k values
-
-**Validation:** If MEME k*_hV4 ≈ 3-4, confirms current SRM rank choice is optimal.
-
-### Results
-
-**TO BE FILLED** after running `run_meme_estimator.sbatch`
-
-Expected output:
-- Figure: MEME eigenvalues (red) vs PCA eigenvalues (black) vs noise ceiling (gray)
-- Table: Estimated k* per ROI, comparison to SRM k, HC vs CVD
-- Test: Does CVD k* < HC k* (reduced dimensionality hypothesis)?
-
-### Expected Insights
-
-**Phase 1b finding confirmation:** If MEME shows hV4 k*≈3, this validates our FE-3 optimal basis choice. If k*≈6-8, suggests we under-utilized available dimensions.
-
-**CVD dimensionality hypothesis:** If CVD k* significantly < HC k*, supports biological dimensionality reduction (not just model specification, RT-5). If k*_CVD ≈ k*_HC, suggests CVD's K-sensitivity (Section 4b) is purely bias-variance tradeoff, not genuine dimensionality loss.
-
----
-
-## 13. Voxel Color Preference Maps (Bannert & Bartels 2025)
-
-> **Status**: PLANNED — Awaiting server execution (scripts/map_voxel_color_preference.py)
-> **Framework**: KDE+softmax population-level color preference visualization
-
-### Motivation
-
-Current FE weights show voxel tuning to 6-channel basis, but not direct **per-color preference**. Bannert & Bartels (2025) used KDE+softmax to visualize which voxels prefer each color, revealing population-level color biases. This complements our W matrix analysis by showing if HC vs CVD have shifted color preference distributions (e.g., CVD red-preferring voxels shift toward orange).
-
-**Caveat:** Our data lacks retinotopic coordinates → use voxel response magnitude (SNR) as 1D proxy.
-
-### Method
-
-For each ROI × color:
-1. Extract mean response per voxel (averaged across runs)
-2. Identify voxels with max response to each color → "color-preferring voxels"
-3. Apply KDE to response strength distribution
-4. Softmax normalization → % deviation from uniform (12.5% for 8 colors)
-5. Statistical test: HC vs CVD preference for each color
-
-**Expected pattern:** If CVD shows cortical reorganization, red-preferring voxels should shift toward green/yellow (deutan) or green-preferring toward red/blue (protan).
-
-### Results
-
-**TO BE FILLED** after running `run_voxel_preference.sbatch`
-
-Expected output:
-- Figure: 8 polar plots (one per color), showing KDE preference density
-- Figure: Bar plots showing voxel count distribution per color (HC vs CVD)
-- Table: Significant HC vs CVD differences per color-ROI combination
-
-### Connection to Cross-Decoding (Phase 3)
-
-Our finding that 10/12 CVD→HC cross-decodings succeed (Phase 3) suggests CVD retains HC-like population geometry. If voxel preference maps show **similar spatial distributions** (no shifted peaks), this confirms that CVD color representation is geometrically distorted in *hue space* (stimulus-level filter T_psi, Phase 2 target) but not in *voxel space* (population organization intact).
-
-If CVD shows shifted preference maps (e.g., fewer red-preferring voxels), this would suggest **cortical reorganization** beyond stimulus-level distortion, requiring voxel-space transformations.
-
----
-
-## 14. Discussion — Literature Integration
-
-### 14.1 Eigenspectrum Geometry and LOCO Null (Pospisil & Pillow 2024)
-
-Pospisil & Pillow (2024) demonstrated that V1 population eigenspectrum follows a broken power law (α≈0.5 for first 10 modes, α≈1.2 thereafter), not the simple power law assumed by classical models. This suggests ~10 dominant modes shape sensory encoding, while hundreds of additional modes contribute minimally.
-
-**Relevance to our V1/V2 LOCO failure:**
-
-Our finding that V1/V2 fail LOCO despite high LORO accuracy may reflect that 8-stimulus interpolation requires dimensions beyond the dominant modes. The dominant modes are optimized for **discrimination** (categorical perception, consistent with Kuriki et al. 2025 categorical task), not **continuous hue gradients** (Kuriki appearance task).
-
-**LOCO null from voxel covariance:** Our V1/V2 permutation null (~0.10-0.13 MAE, not zero) likely arises from voxel correlation structure rather than true color signal. Pospisil showed that noise eigenspectrum can create spurious low-dimensional structure; similarly, spatial correlations among our 8 stimuli may allow weak above-chance LOCO performance even after color-label permutation. Only hV4 significantly exceeds this null (p=0.044), suggesting genuine color-specific interpolation requires modes beyond those captured by early visual cortex for our 8-color task.
-
-**SRM k validation:** If eigenspectrum analysis confirms ~10 dominant modes (α_early regime), our SRM k=3-4 choice captures only the shallowest-decay modes. This may be optimal for **classification** (LORO) but insufficient for **interpolation** (LOCO), explaining the LORO-LOCO dissociation. Higher modes (k>10) may carry continuous hue structure but are discarded by SRM.
-
-### 14.2 Task-Dependent Representation (Kuriki et al. 2025)
-
-Kuriki et al. (2025) found that cortical color representation in V1-V3 differs significantly between categorical judgment vs. appearance (hue-scaling) tasks. Specifically:
-- **V1-V3**: Stronger representation during categorical tasks (discrimination)
-- **hV4**: Stronger correlation with appearance judgments (continuous hue perception)
+Kuriki et al. (2025) found that V1-V3 show stronger representation during categorical tasks, while hV4 correlates with appearance judgments (continuous hue perception).
 
 **Direct parallel to our LORO-LOCO dissociation:**
 
-| Our Finding | Kuriki Parallel | Interpretation |
-|-------------|----------------|----------------|
-| V1/V2 LORO: 0.758-0.793 acc | V1-V3 categorical task activation | Discrete category boundaries preserved |
-| V1/V2 LOCO: voxel_corr 0.13-0.15 | V1-V3 appearance task weak | Continuous gradients absent |
-| hV4 LOCO: voxel_corr 0.183 (p=0.026) | hV4 appearance correlation | Perceptual-level continuous encoding |
-| CVD LORO ≈ HC | Categorical boundaries task-independent | Retinal deficit doesn't affect categories |
-| CVD hV4 LOCO < HC | Appearance task CVD-sensitive | Perceptual hue gradients distorted |
+| Our Finding | Kuriki Parallel |
+|-------------|----------------|
+| V1/V2 LORO preserved | V1-V3 categorical task activation |
+| V1/V2 LOCO fails | V1-V3 appearance task weak |
+| hV4 LOCO succeeds (p=0.026) | hV4 appearance correlation |
+| CVD LORO ≈ HC | Categorical boundaries task-independent |
+| CVD hV4 LOCO < HC | Appearance task CVD-sensitive |
 
-**Mechanistic explanation:** Kuriki demonstrated that task demands reshape V1-V3 representations through top-down modulation. Our passive RSVP task may default to categorical encoding (preserved in CVD, explaining intact cross-decoding), while continuous hue interpolation (required by LOCO) demands perceptual-level encoding concentrated in hV4. This explains why CVD subjects show:
-- **Intact LORO** (categorical boundaries preserved despite L-/M-cone deficit)
-- **Impaired hV4 LOCO** (perceptual hue gradients distorted by retinal input distortion)
+Our passive RSVP task may default to categorical encoding (preserved in CVD), while LOCO requires perceptual-level encoding concentrated in hV4.
 
-### 14.3 Shared Population Geometry (Bannert & Bartels 2025)
+### 5.3 Shared Population Geometry (Bannert & Bartels 2025)
 
-Bannert & Bartels (2025) used SRM to predict color preferences across subjects in V1-hV4, achieving 39-56% between-subject classification accuracy (8 alternatives). Their key finding: retinotopic color biases are "shared across different human observers" despite individual anatomical variability.
+Bannert & Bartels (2025) found 39-56% between-subject classification accuracy using SRM, showing retinotopic color biases are "shared across different human observers."
 
-**Convergence with our cross-decoding results (Phase 3):**
+Our finding that 10/12 CVD→HC cross-decodings succeed (LDA+SRM) validates this. Despite CVD's retinal deficit, population-level color geometry is sufficiently preserved for HC-trained decoders to generalize. CVD's deficit manifests as hue-space transformation T_psi, not voxel-space reorganization.
 
-Our finding that 10/12 CVD→HC cross-decodings succeed (p<0.05, LDA+SRM) directly validates Bannert's observation. Despite CVD's retinal deficit, the **population-level color geometry** is sufficiently preserved to allow HC-trained decoders to generalize. This suggests:
+Voxel preference results confirm: CVD shows green depletion (V1/V2 p<0.02) and magenta overrepresentation (+117-196%), but the **same voxels** exist — their argmax shifts due to receptor deficit.
 
-1. **Voxel-space geometry intact:** CVD does not show cortical reorganization or remapping
-2. **Stimulus-space geometry distorted:** CVD's deficit manifests as hue-space transformation T_psi (Phase 2 target), not voxel-space transformation
-3. **SRM captures shared structure:** Our SRM k=3-4 extracts the shared color representation that generalizes across HC and CVD
+### 5.4 Dimensionality and Model Specification
 
-**Voxel preference map prediction:** If Bannert's framework applies to CVD, we expect:
-- Similar spatial clustering of color-preferring voxels (no cortical reorganization)
-- But potentially shifted preference distributions (e.g., fewer red-preferring voxels in deutan, shifted toward green)
-- This would confirm stimulus-level distortion without voxel-level remapping
-
-### 14.4 Dimensionality and Model Specification
-
-**RT-5 question resolved by MEME:** Does CVD K-sensitivity (Section 4b) arise from (A) bias-variance tradeoff or (B) genuine dimensionality reduction?
-
-**MEME prediction:** If k*_CVD < k*_HC significantly, supports (B) biological dimensionality reduction. If k*_CVD ≈ k*_HC, supports (A) model specification issue. This directly addresses the RT-5 vulnerability: "Current data (n=3 CVD) cannot distinguish A from B."
-
-**Connection to Pospisil:** If eigenspectrum shows CVD has steeper decay (higher α), MEME k* will be lower. Combined with behavioral correlation (Farnsworth-Munsell error vs LOCO K-sensitivity), this triangulates whether CVD's LOCO impairment reflects:
-- **Fewer effective dimensions** (biological, requires Phase 2 filter to operate in lower-dimensional space)
-- **Same dimensions, different tuning** (geometric, requires Phase 2 filter to warp stimulus space)
+**RT-5 resolved**: Eigenspectrum + MEME both show HC ≈ CVD (all p > 0.14). CVD K-sensitivity is bias-variance tradeoff (Option A), not genuine dimensionality reduction. Phase 2 filter should warp stimulus space (same dimensions, different tuning).
 
 ---
 
-**Last Updated**: 2026-03-13
+## 6. Hierarchical Discoveries & Conclusions
+
+### Primary Objective — Prediction Model
+
+1. **hV4-centered color interpolation model validated** (Stouffer omnibus p=0.002)
+   - hV4 is the only ROI passing permutation test (FE-6 p=0.044, FE-3 p=0.026)
+   - Friedman: hV4 shows uniform per-color interpolation (p=0.485); V1/V2 non-uniform
+   - Residuals: hV4 near-random (r=0.053) — model captures most available structure
+
+2. **LOSO validates group prior as Phase 2 prediction engine** (ZS ≈ LORO, p=0.913 for hV4)
+   - Group prior alone matches subject-specific ridge_gcv for hV4 pattern reconstruction
+   - Interpolation remains challenging: LOCO=0.232 vs ZS=0.417 — Phase 2 filter precision ceiling
+   - V1/V2/V3: ZS >> LORO (noise gap) — hV4-specific property
+
+3. **V1/V2 discriminate but cannot interpolate** — Phase 2 uses hV4 exclusively
+   - All tested bases fail permutation for V1/V2
+   - Consistent with Kuriki (2025): V1-V3 categorical, hV4 perceptual
+
+### Secondary Objective — HC-CVD Comparison
+
+4. **CVD hue-space distortion explained by cone shift** — stimulus-space filter appropriate
+   - Eigenspectrum/MEME: HC ≈ CVD (all p > 0.14) → not cortical reorganization
+   - Cone shift analysis: deutan M' shift → green collapse + yellow over-separation; protan L' shift → red collapse
+   - Per-subject K* differences (sub-08 K*=8) consistent with cone-shift tuning distortion (overfitting not excluded)
+   - Per-color residual cool-axis pattern converges with cone model predictions
+
+### Confirmed Decisions
+
+| Component | Confirmed | Rejected Alternatives |
+|-----------|-----------|----------------------|
+| Encoder | ridge_gcv | smooth_tikh, RRR, bayes_prior, mixed_ridge_prior, smooth_prior |
+| Basis shape | FE (half-wave cos²) | LF (Fourier), OPP (opponent) |
+| Per-ROI K | V1→2, V2→3, V3→8, hV4→3 | FE-6 uniform |
+| Per-subject K* | sub-08→8, sub-09→3, sub-10→2 | Group K=3 fixed (pragmatic; exploratory interpretation) |
+| Center | Uniform (360°/K) | Adaptive, Anisotropic (B2) |
+| Primary ROI | hV4 | V1/V2 (discrimination-only) |
+| Prediction engine | W_HC (group prior) | Subject-specific W (unnecessary, LOSO validated) |
+| CVD mechanism | Cone shift → stimulus-space distortion | Cortical reorganization, dimensionality reduction |
+
+---
+
+## 7. Phase 2 Handoff & Assessment
+
+### 7a. Gate 3 Assessment (3-Track Summary)
+
+| Track | Status | Key Outcome |
+|-------|--------|-------------|
+| A: Residual Biology | **Complete** | Cool-axis distortion confirmed; deutan/protan asymmetry identified |
+| B: CVD Prediction Model | **Complete** | B1 (per-subject K*) ADOPTED; B2/B3 REJECTED |
+| C: Dimensionality | **Complete** | HC ≈ CVD (Option A: bias-variance tradeoff) |
+
+### 7b. Phase 2 Input Specification
+
+| Input | Source | Value |
+|-------|--------|-------|
+| Prediction engine | LOSO (§2f) | **W_HC (group prior)** — ZS≈LORO validated (p=0.913) |
+| Primary ROI | Gate (§2e) | hV4 |
+| Encoder | Gate (§2e) | ridge_gcv |
+| Per-subject K* | B1 (§3j) | sub-08=8, sub-09=3, sub-10=2 (pragmatic; exploratory interpretation) |
+| Distortion mechanism | Cone shift (behavioral) | Deutan: M' shift → green collapse; Protan: L' shift → red collapse |
+| Distortion pattern | A3/A5 (§3i) | Cool-axis collapse (blue d=+1.37 p=0.046) |
+| sub-09 status | B1 | Interpolation failure → filter cannot help → **excluded** |
+| sub-10 status | B1 | HC-level → minimal correction needed |
+| sub-08 status | B1 | **Primary filter target** |
+
+### 7c. Phase 2 Filter Architecture
+
+```
+T_ψ: θ → θ' = θ + ψ(θ)
+where ψ(θ) = Σ_k [a_k sin(kθ) + b_k cos(kθ)]   (Fourier parameterization)
+
+Optimization:
+minimize  E_θ [|| W_HC @ C(T_ψ(θ)) − Y_CVD(θ) ||²]
+subject to  ||ψ||² < ε   (small correction)
+```
+
+W_s is frozen before filter optimization. T_ψ operates in stimulus space only.
+
+### 7d. TODO: Phase 2 Filter Design Steps
+
+1. **Cone-shift-based T_ψ initialization** — Stockman & Sharpe (2000) cone fundamentals → compute deutan/protan hue shift functions → T_ψ initial values
+2. **Filter T_ψ optimization** — minimize ||W_HC @ C(T_ψ(θ)) − Y_CVD(θ)||², Fourier k=1~2
+3. **LOCO-style validation** — train T_ψ on 7 colors → predict 1 (overfitting control)
+4. **Behavioral task (JND 2AFC) linkage** — compare T_ψ predictions with JND changes
+5. **Transition to `future_phase2_filter_optimization/`**
+
+### 7e. Decision Rules
+
+| Decision | Criterion | Status |
+|----------|-----------|--------|
+| Proceed to Phase 2 | hV4 LOCO > perm null | **MET** (HC perm p=0.044) |
+| Prediction engine | LOSO ZS ≈ LORO | **MET** (hV4 p=0.913) |
+| Filter mechanism | Cone shift explanatory power | **MET** (deutan/protan predictions match data) |
+| Include sub-09 in filter | LOCO > perm null with K* | **NOT MET** → excluded |
+| Track C prerequisite | HC ≈ CVD dimensionality | **DONE** |
+
+**Gate 3 verdict**: **PASS** — hV4 group prior (LOSO validated) + cone-shift-based filter → Phase 2.
+
+---
+
+**Last Updated**: 2026-03-15

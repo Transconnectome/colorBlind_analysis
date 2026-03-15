@@ -1235,3 +1235,153 @@ Phase 3. Behavioral Validation
 - ✅ Red Team criticisms addressed (#3 neutralized, #1/#2 mitigated, #4 addressed)
 - 🎯 **Next: Adaptive basis (§9k-1)** — quick attempt, proceed to Phase 2 regardless
 - 📋 **Phase 2 pre-registration** — planned before filter optimization
+
+---
+
+## 13. Project Structure — Literature Integration (Added 2026-03-13)
+
+### New Folder Organization (Gradual Refactoring)
+
+**Rationale**: Literature-driven analyses (Pospisil, Bannert, Kuriki) organized by research question, not chronologically mixed with baseline scripts.
+
+```
+future_phase1_forward_model/
+├── scripts/
+│   ├── (30+ existing baseline scripts)              ← UNCHANGED
+│   │   ├── step_a_fit_srm.py
+│   │   ├── step_b_group_prior.py
+│   │   ├── validate_loro_loco_loso.py
+│   │   └── ...
+│   │
+│   ├── dimensionality/                              ← NEW (2026-03-13)
+│   │   ├── README.md                                   Research Q: CVD reduced-dimensional?
+│   │   ├── analyze_eigenspectrum_decay.py              Pospisil: broken power law
+│   │   └── fit_meme_eigenspectrum.py                   Pospisil: unbiased k* estimator
+│   │
+│   └── population_organization/                     ← NEW (2026-03-13)
+│       ├── README.md                                   Research Q: Voxel-space intact?
+│       └── map_voxel_color_preference.py               Bannert: KDE+softmax preference maps
+│
+├── sbatch/                                          ← NEW (batch scripts separated)
+│   ├── run_dimensionality.sbatch                       Eigenspectrum + MEME sequential
+│   ├── run_eigenspectrum_decay.sbatch                  Individual: eigenspectrum only
+│   ├── run_meme_estimator.sbatch                       Individual: MEME only
+│   └── run_voxel_preference.sbatch                     Individual: voxel preference only
+│
+└── results/
+    ├── (existing baseline results)                  ← UNCHANGED
+    │
+    ├── dimensionality/                              ← NEW
+    │   ├── eigenspectrum/
+    │   │   ├── eigenspectrum_results.json
+    │   │   ├── fig_eigenspectrum_decay.pdf
+    │   │   └── config.json
+    │   └── meme/
+    │       ├── meme_results.json
+    │       ├── fig_meme_vs_pca.pdf
+    │       └── config.json
+    │
+    └── population_organization/                     ← NEW
+        └── voxel_preference/
+            ├── preference_results.json
+            ├── fig_preference_polar.pdf
+            ├── fig_preference_distribution.pdf
+            └── config.json
+```
+
+### Research Questions (Logical Hierarchy)
+
+**Level 1: Dimensionality** (RT-5 resolution)
+```
+Q: Is CVD genuinely reduced-dimensional, or is K-sensitivity a model artifact?
+
+Evidence streams:
+1. Eigenspectrum decay (α_early vs α_late, HC vs CVD)
+2. MEME k* estimate (unbiased dimensionality)
+
+Expected outcome:
+- If k*_CVD < k*_HC AND α_CVD > α_HC → Biological (RT-5 option B)
+- If k*_CVD ≈ k*_HC AND α_CVD ≈ α_HC → Methodological (RT-5 option A)
+```
+
+**Level 2: Population Organization** (Bannert validation)
+```
+Q: Does dimensionality reduction manifest in voxel-space organization?
+
+Evidence stream:
+- Voxel color preference maps (KDE+softmax, HC vs CVD)
+
+Expected outcome:
+- Preference peaks intact (HC ≈ CVD) → Stimulus-level distortion only
+- Preference peaks shifted → Cortical reorganization + stimulus distortion
+
+Connection:
+- Phase 3 cross-decoding (10/12 success) validates shared geometry
+- Informs Phase 2 filter architecture (stimulus-only vs voxel+stimulus)
+```
+
+### Migration Plan
+
+**Current (2026-03-13):**
+- ✅ New analyses in structured folders (`dimensionality/`, `population_organization/`)
+- ✅ Baseline scripts remain flat in `scripts/` (30+ files untouched)
+- ✅ Each new folder has README.md explaining research question
+
+**Future (post-Phase 1 completion):**
+- Move baseline scripts to `scripts/0_baseline/`
+- Move experimental failures to `scripts/archive/` (smooth_tikh, etc.)
+- Full structured hierarchy:
+  ```
+  scripts/
+  ├── 0_baseline/         ← step_a/b/c/d
+  ├── 1_dimensionality/   ← eigenspectrum, MEME
+  ├── 2_organization/     ← voxel preference
+  └── archive/            ← smooth_tikh, failed experiments
+  ```
+
+**Rationale for gradual approach:**
+- Minimal disruption to existing code
+- New analyses clearly separated by purpose
+- Easier to locate literature-driven vs baseline analyses
+- Safe incremental migration path
+
+### Execution
+
+**Single command (both dimensionality analyses):**
+```bash
+sbatch sbatch/run_dimensionality.sbatch
+```
+
+**Individual commands:**
+```bash
+sbatch sbatch/run_eigenspectrum_decay.sbatch
+sbatch sbatch/run_meme_estimator.sbatch
+sbatch sbatch/run_voxel_preference.sbatch
+```
+
+**Download results:**
+```bash
+scp -r haba6030@node3:/scratch/.../results/dimensionality ./results/
+scp -r haba6030@node3:/scratch/.../results/population_organization ./results/
+```
+
+### Documentation Integration
+
+**RESULTS.md updated (2026-03-13):**
+- Section 11: Eigenspectrum Geometry (Pospisil & Pillow 2024)
+- Section 12: Unbiased Dimensionality Estimation (MEME)
+- Section 13: Voxel Color Preference Maps (Bannert & Bartels 2025)
+- Section 14: Discussion — Literature Integration
+
+**Phase 3 README.md updated:**
+- Related Literature section (Bannert SRM, Kuriki task-dependent)
+- References section (all 3 papers added)
+
+**LITERATURE_INTEGRATION_PLAN.md:**
+- Complete implementation roadmap
+- Expected outcomes and validation checklist
+- Troubleshooting guide
+
+---
+
+**Status**: Structure implemented, ready for server execution (2026-03-13)

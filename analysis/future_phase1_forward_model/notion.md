@@ -234,9 +234,13 @@ HC-CVD 차이: 모든 |d| < 0.72, 모든 p > 0.22 — LORO에서 유의한 그�
 
 **LORO-LOCO 해리**: prior_ft LORO 승리, ridge_gcv LOCO 승리. SRM prior는 run-level variance 포착, color-specific tuning은 놓침.
 
+**LORO/ZS = 실제 작동 조건**: LORO는 run generalization, ZS(§7f)는 group prior reliability를 측정. HC-CVD 차이 없음(|d|<0.72)은 CVD 문제가 within-run 표현 결핍이 아닌 **색상 간 연속 구조의 왜곡**임을 확인. LOCO만이 이 왜곡을 포착.
+
 ### 7b. LOCO — Color Interpolation (ridge_gcv, 확정 모델)
 
 > Leakage-free: 각 fold마다 held-out color 제외하고 W0 재계산
+
+> **Phase 2 관점**: LOCO는 7색 학습→1색 보간의 보수적 하한. Phase 2 filter는 전체 8색 사용 + 4개 Fourier 파라미터만 최적화하므로, LOCO보다 높은 성능이 기대됨. LOCO hV4 통과 = filter 설계의 충분조건.
 
 **지표 정의 (voxel_corr):**
 - 각 held-out color마다: 나머지 7개 색으로 학습한 W로 voxel pattern 예측
@@ -857,6 +861,40 @@ HC-CVD gap은 주로 K 의존. Eigenspectrum + MEME: HC ≈ CVD. K-sensitivity =
 
 **결론**: Omnibus p=0.0021 — **피질 수준 색상 보간 존재**. 단일 비보정 ROI p에 의존하지 않음.
 
+#### N1-부록: Stouffer vs Fisher — 방법 선택 근거
+
+두 방법 모두 여러 p-value를 하나로 결합하지만, **감지하는 신호 유형이 다르다**.
+
+| 특성 | Fisher | Stouffer |
+|------|--------|----------|
+| 변환 | p → −log(p) (정보량/surprise) | p → Z (표준편차 단위) |
+| 결합 | −2Σln(p) → χ² 분포 | ΣZ/√k → 정규분포 |
+| 민감도 | **극단적으로 작은 p 하나**가 전체 지배 | **여러 약한 p의 일관된 패턴** |
+| 해석 | "어딘가에서 강한 효과 존재" | "평균적 증거가 우연 이상" |
+| 적합 상황 | GWAS, rare discovery | 신경과학, meta-analysis, 분산 효과 |
+
+**핵심 직관**: Fisher의 로그 변환은 매우 작은 p를 기하급수적으로 증폭한다 (−ln(0.001) = 6.9 vs −ln(0.2) = 1.6). 따라서 **하나의 극단적 p가 전체 결과를 좌우**한다. Stouffer의 Z 변환은 증거 강도에 선형적이므로, **테스트들 간의 일관성(consistency)**을 보상한다.
+
+**우리 데이터에 적용**:
+
+| ROI | p | −ln(p) (Fisher) | Z (Stouffer) |
+|-----|:---:|:---:|:---:|
+| V1 | 0.170 | 1.77 | 0.95 |
+| V2 | 0.125 | 2.08 | 1.15 |
+| V3 | 0.045 | 3.10 | 1.69 |
+| hV4 | 0.026 | 3.65 | 1.94 |
+
+**패턴**: 극단적으로 작은 p가 하나도 없고 (p < 0.01 없음), 대신 시각 위계를 따라 **단조 감소하는 gradient** (V1 > V2 > V3 > hV4)가 존재한다. 이것이 Stouffer가 더 적절한 전형적 시나리오다:
+
+- **Stouffer Z = 2.87, p = 0.0021** — 일관된 gradient 포착
+- **Fisher χ²(8) = 21.18, p = 0.0067** — 통과하지만 상대적으로 약함 (증폭할 극단 p 부재)
+
+**두 검정 모두 통과**한다는 사실 자체가 omnibus 주장을 강화한다. Stouffer가 더 강한 결과를 보이는 것(p=0.002 vs 0.007) 자체가 정보적이다: 우리 효과는 **단일 핫스팟**(Fisher에 민감)이 아닌 **분산 패턴**(Stouffer에 민감) — 시각 위계 전반의 일관된 약-중등도 증거, hV4가 주도하고 V3가 의미 있게 기여.
+
+**Reviewer 관점**: Reviewer가 "효과가 실재하는가?"를 물을 때, 실질적으로 "single hotspot인가(Fisher) distributed pattern인가(Stouffer)"를 묻는 것이다. 우리 데이터는 명확히 후자 — 두 검정 모두 보고하되 Stouffer를 주(primary)로 삼는 것이 이 구조를 투명하게 전달한다.
+
+**주의**: Stouffer의 강점이 동시에 약점이 될 수 있다. 만약 hV4만 진정한 신호이고 V1/V2/V3가 순수 noise라면, noise Z-value가 0 근처이므로 평균 Z가 여전히 양수가 되어 통과할 수 있다. Friedman 균일성 검정(hV4만 균일 보간, p=0.485)과 residual 분석(hV4만 근무작위, r=0.053)이 hV4 주도 신호의 독립적 보강 증거를 제공한다.
+
 #### N2: K-Selection Bias Permutation (SEVERE #3 — artifact 확인)
 
 | ROI | 관측 Reduction | Null 평균 | p(≥obs) | 판정 |
@@ -978,7 +1016,7 @@ RT-5 해결: Eigenspectrum + MEME → HC ≈ CVD. CVD K-sensitivity = bias-varia
 | 피험자별 K* | B1 (§8j) | sub-08=8, sub-09=3, sub-10=2 (실용적; 해석은 탐색적) |
 | 왜곡 메커니즘 | Cone shift (behavioral) | Deutan: M' 이동→green 급감, Protan: L' 이동→red 급감 |
 | 왜곡 패턴 | A3/A5 (§8i) | Cool-axis 왜곡 (blue d=+1.37 p=0.046) |
-| sub-09 | B1 | 보간 실패 (K*=3 = 그룹 K) → 필터 불가 |
+| sub-09 | B1 | K*=3=그룹K → K 최적화 불가. Cone-shift T_ψ로 재시도 대상 |
 | sub-10 | B1 | HC-level → 최소 보정 |
 | sub-08 | B1 | **주요 필터 대상** |
 
@@ -989,7 +1027,8 @@ T_ψ: θ → θ' = θ + ψ(θ)
 where ψ(θ) = Σ_k [a_k sin(kθ) + b_k cos(kθ)]   (Fourier parameterization)
 
 최적화:
-minimize  E_θ [|| W_HC @ C(T_ψ(θ)) − Y_CVD(θ) ||²]
+minimize  E_θ [|| W_CVD @ C(T_ψ(θ)) − Y_HC(θ) ||²]
+# CVD 인코더가 변환된 자극 처리 → HC 실제 반응 매칭
 subject to  ||ψ||² < ε   (small correction)
 ```
 
@@ -1005,10 +1044,19 @@ W_s는 filter 최적화 전 동결. T_ψ는 자극 공간에서만 작동.
 
 **Phase 2 filter 정밀도 상한 = LOCO 성능**. 보간 격차(0.185)를 줄이는 것이 Phase 2 filter 개선의 핵심.
 
+**LOCO ≠ Filter**: LOCO(7색→W→1색 예측) vs Filter(8색+고정W→T_ψ 4 param 최적화).
+LOCO는 W를 매 fold 재추정 → df 부족 직접 영향. Filter는 W 고정(LOSO 검증) → LOCO 한계 ≠ filter 한계.
+
+| | LOCO | Phase 2 Filter |
+|---|------|----------------|
+| 학습 데이터 | 7색 | 8색 |
+| 자유 파라미터 | K×V_s (수백~수천) | 4 Fourier |
+| W 역할 | 매 fold 재추정 | 고정 (prediction engine) |
+
 ### 12e. TODO: Phase 2 Filter 설계 단계
 
 1. **Cone shift 기반 T_ψ 초기화** — Stockman & Sharpe (2000) cone fundamentals → deutan/protan별 hue shift 함수 계산 → T_ψ 초기값
-2. **Filter T_ψ 최적화** — W_HC(group prior) @ C(T_ψ(θ)) ≈ Y_CVD(θ) 최소화, Fourier k=1~2
+2. **Filter T_ψ 최적화** — W_CVD @ C(T_ψ(θ)) ≈ Y_HC(θ) 최소화, Fourier k=1~2
 3. **LOCO-style 검증** — 7색으로 T_ψ 학습 → 1색 예측 (과적합 방지)
 4. **행동 과제(JND 2AFC) 연계** — T_ψ 예측과 JND 변화 비교
 5. **`future_phase2_filter_optimization/`으로 전환**
@@ -1020,10 +1068,83 @@ W_s는 filter 최적화 전 동결. T_ψ는 자극 공간에서만 작동.
 | Phase 2 진행 | hV4 LOCO > perm null | **충족** (HC perm p=0.044) |
 | Prediction engine | LOSO ZS ≈ LORO | **충족** (hV4 p=0.913) |
 | Filter 메커니즘 | Cone shift 설명력 | **충족** (deutan/protan 예측 일치) |
-| sub-09 필터 포함 | K*로 LOCO > perm null | **미충족** → 제외 |
+| sub-09 필터 포함 | Cone-shift T_ψ 적용 후 LOCO 개선 | **보류** (실험 대기) |
 | Track C 선행조건 | HC ≈ CVD 차원성 | **완료** |
 
 **Gate 3 판정: PASS** — hV4 group prior(LOSO 검증) + cone shift 기반 filter로 Phase 2 진행.
+
+### 12g. T_ψ Filter Model: 설계 원리 및 Approach A/B 파이프라인
+
+#### T_ψ Fourier 파라미터화의 강점
+
+**1. 순환성**: Hue = 0°-360° 순환 공간. Fourier = 본질적 주기 함수. Spline/다항식은 경계 불연속.
+
+**2. 부드러움**: k=1,2만 사용 → 고주파 진동 차단. CVD 왜곡은 cone sensitivity의 smooth 변형 → 저주파 보정만 물리적으로 의미.
+
+**3. 파라미터 절약**: 4개 (a₁,b₁,a₂,b₂)로 전체 360° 변환. 8-knot spline=8개(=데이터 수, df=0). Lookup=보간 규칙 필요.
+
+**4. 물리적 해석성**:
+
+| 성분 | 수학 | 물리적 의미 | Cone shift 연결 |
+|------|------|-----------|----------------|
+| 1차 | R₁cos(θ−φ₁) | L-M 축 왜곡 | M/L cone peak shift → R-G 압축 |
+| 2차 | R₂cos(2θ−φ₂) | S-cone 보상 비대칭 | S 보존 + L-M 왜곡 → B-Y 비대칭 |
+
+Deutan vs protan은 φ₁이 다르지만 같은 파라미터 구조.
+
+**5. 대안 비교**:
+
+| 방법 | 순환 | 부드러움 | 파라미터 | 해석 | 판정 |
+|------|:----:|:-------:|:------:|:----:|:----:|
+| **Fourier T_ψ** | 자동 | 주파수 절단 | 4 | 직접적 | **채택** |
+| Lookup table | 수동 | 보장 안 됨 | 8+ | 없음 | 기각 |
+| Spline | 수동 래핑 | 지역적 | 8+ | 없음 | 기각 |
+| 다항식 | 비순환 | 진동 위험 | 3+ | 없음 | 기각 |
+| Affine | 가능 | 선형 | 2 | 부분적 | 기각(비대칭 불가) |
+
+#### Approach A: Cone Shift Model (물리 기반, 1 파라미터)
+
+**입력**: Δλ (cone peak wavelength shift, nm)
+
+**과정**:
+1. Stockman & Sharpe (2000) cone fundamentals l(λ), m(λ), s(λ) 로드
+2. Deutan: M'(λ) = M(λ + Δλ) / Protan: L'(λ) = L(λ − Δλ)
+3. 8색 CIELab → XYZ → LMS_normal 및 LMS_shifted 계산
+4. LMS → opponent channels (rg = L−M, by = S−(L+M)/2) → hue angle
+5. δθ_pred(i) = θ_shifted(i) − θ_normal(i)
+
+**최적화**: Δλ grid search (0-40nm, 1nm 단위)
+```
+Δλ* = argmin_Δλ  Σ_i [ δθ_pred(i; Δλ) − δθ_obs(i) ]²
+```
+δθ_obs = HC mean LOCO voxel_corr − CVD LOCO voxel_corr (per-color, hV4)
+
+**출력**: Δλ* (nm), 색상별 δθ_pred, Fourier fit → T_ψ₀ 초기값 (a₁,b₁,a₂,b₂)
+
+#### Approach B: T_ψ Data-Driven Optimization (데이터 기반, 4 파라미터)
+
+**입력**: W_CVD (CVD 인코더), Y_HC (HC 목표 응답)
+
+```
+minimize  Σ_i || W_CVD @ C(T_ψ(θ_i)) − Y_HC(θ_i) ||²  + λ·||ψ||²
+```
+여기서 T_ψ(θ) = θ + a₁cos θ + b₁sin θ + a₂cos 2θ + b₂sin 2θ
+
+**초기화**: Approach A 출력 (T_ψ₀)로 시작. SciPy L-BFGS-B.
+
+#### A ↔ B 관계 (Nested Model)
+
+| | Approach A | Approach B |
+|---|-----------|-----------|
+| 자유 파라미터 | 1 (Δλ) | 4 (a₁,b₁,a₂,b₂) |
+| 제약 | Stockman 물리 | Fourier smoothness |
+| 과적합 위험 | 극히 낮음 | 중간 (LOCO 검증) |
+| 해석 | 직접 (nm) | 간접 (Fourier) |
+
+**핵심**: A ≈ B → cone shift가 왜곡을 완전히 설명 (retinal origin)
+          A ≠ B → cortical 기여 존재 (Δ = B−A가 cortical 기여 정량)
+
+**구현**: stockman_cone_shift.py(A) → step3_filter_optimization.py(B) → 잔차 비교
 
 ---
 
@@ -1038,7 +1159,7 @@ theta → C(theta) → W_s @ C(theta) = Y_hat_s(theta)
 Phase 2 filter T_psi는 W_s의 **upstream**에서 작동:
 
 ```
-theta → T_psi(theta) → C(T_psi(theta)) → W_s @ C(T_psi(theta))
+theta → T_psi(theta) → C(T_psi(theta)) → W_CVD @ C(T_psi(theta)) ≈ Y_HC
 ```
 
 **역할 분리**:

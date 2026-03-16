@@ -6,7 +6,7 @@
 **Last updated**: 2026-03-14
 
 ---
-
+![overall](docs/predictionmodel.png)
 ## Overview
 
 This phase builds a **forward encoding model** that maps stimulus hue angles to voxel-level brain responses:

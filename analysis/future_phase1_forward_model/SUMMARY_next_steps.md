@@ -473,15 +473,23 @@ SLURM:   sbatch/run_voxel_preference.sbatch                            ← READY
 # 1. 서버 업로드 — 3개 위치
 # (a) FE-K MAE retry
 scp analysis/phase3_decoder_comparing/model_comparison_validation/scripts/loco_fek_retry.py \
-    analysis/phase3_decoder_comparing/model_comparison_validation/run_loco_fek_retry.sbatch \
-    analysis/phase3_decoder_comparing/model_comparison_validation/scripts/analyze_loco_fek.py \
-    haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation/
+analysis/phase3_decoder_comparing/model_comparison_validation/scripts/loco_baseline.py \
+haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation/scripts/
+
+scp analysis/phase3_decoder_comparing/model_comparison_validation/run_loco_fek_retry.sbatch \
+haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation/
 
 # (b) Dimensionality + Population org (이미 scripts/ 와 sbatch/ 에 존재하는 경우 해당 디렉토리만)
-scp -r analysis/future_phase1_forward_model/scripts/dimensionality \
-       analysis/future_phase1_forward_model/scripts/population_organization \
-       analysis/future_phase1_forward_model/sbatch \
-    haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model/
+scp analysis/future_phase1_forward_model/scripts/dimensionality/analyze_eigenspectrum_decay.py \
+analysis/future_phase1_forward_model/scripts/dimensionality/fit_meme_eigenspectrum.py \
+haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model/scripts/dimensionality/
+
+scp analysis/future_phase1_forward_model/scripts/population_organization/map_voxel_color_preference.py \
+haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model/scripts/population_organization/
+
+scp analysis/future_phase1_forward_model/sbatch/run_dimensionality.sbatch \
+analysis/future_phase1_forward_model/sbatch/run_voxel_preference.sbatch \
+haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model/sbatch/
 
 # 2. 병렬 제출
 ssh haba6030@node3 << 'EOF'

@@ -1,6 +1,7 @@
 # Analysis Pipeline for fMRIPrep method3_header_mi
 
 ## Overview
+![overallPipeline](Overall.png)
 
 Complete analysis pipeline for fMRIPrep method3_header_mi dataset covering three research questions:
 

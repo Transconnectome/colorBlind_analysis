@@ -95,9 +95,13 @@ No significant HC-CVD difference in LORO (all |d| < 0.72, all p > 0.22).
 
 **LORO-LOCO dissociation**: prior_ft wins LORO, ridge_gcv wins LOCO. SRM prior captures run-level variance but misses color-specific tuning.
 
+**LORO/ZS = realistic operating conditions**: LORO measures run generalization, ZS (§2f) measures group prior reliability. No HC-CVD difference (|d|<0.72) confirms that the CVD deficit is not within-run representation failure but **distortion of continuous inter-color structure**. Only LOCO captures this distortion.
+
 ### 2b. LOCO — Color Interpolation (ridge_gcv, confirmed model)
 
 > Leakage-free: W0 recomputed per fold excluding held-out color.
+
+> **Phase 2 perspective**: LOCO is a conservative lower bound (7-color training → 1-color interpolation). Phase 2 filter uses all 8 colors + optimizes only 4 Fourier parameters, so performance above LOCO is expected. hV4 LOCO passing permutation null = sufficient condition for filter design.
 
 **Metric definition (voxel_corr):**
 - For each held-out color: predict voxel pattern using W trained on 7 other colors
@@ -797,6 +801,40 @@ HC-CVD gap is primarily K-dependent. Center optimization = no benefit (nested LO
 
 **Conclusion**: Omnibus p=0.0021 — **cortex-level color interpolation exists**. Claim no longer depends on any single uncorrected ROI p-value.
 
+#### N1-Appendix: Why Stouffer Over Fisher — Method Rationale
+
+Both Stouffer and Fisher combine multiple p-values into a single omnibus test, but they differ in **what kind of signal they detect**.
+
+| Property | Fisher | Stouffer |
+|----------|--------|----------|
+| Transform | p → −log(p) (surprise) | p → Z (standard deviation) |
+| Combine | Sum of −2ln(p) → χ² | Mean of Z → normal |
+| Sensitivity | **Extreme single p** dominates | **Consistent pattern** across tests |
+| Interpretation | "At least one strong effect exists" | "Average evidence is above chance" |
+| Best for | Rare discovery (GWAS, signal detection) | Distributed effects (neuroscience, meta-analysis) |
+
+**Key intuition**: Fisher's log transform amplifies very small p-values exponentially (−ln(0.001) = 6.9 vs −ln(0.2) = 1.6), so a single extreme p can drive the whole result. Stouffer's Z-transform is linear in evidence strength, so it rewards **consistency across tests**.
+
+**Application to our data**:
+
+| ROI | p | −ln(p) (Fisher) | Z (Stouffer) |
+|-----|:---:|:---:|:---:|
+| V1 | 0.170 | 1.77 | 0.95 |
+| V2 | 0.125 | 2.08 | 1.15 |
+| V3 | 0.045 | 3.10 | 1.69 |
+| hV4 | 0.026 | 3.65 | 1.94 |
+
+**Pattern**: No single ROI has an extreme p-value (no p < 0.01), but all 4 ROIs show a monotonic gradient (V1 > V2 > V3 > hV4) — a consistent trend across the visual hierarchy. This is exactly the scenario where Stouffer is more appropriate:
+
+- **Stouffer Z = 2.87, p = 0.0021** — captures the consistent gradient
+- **Fisher χ²(8) = 21.18, p = 0.0067** — also passes, but weaker because no single extreme p to amplify
+
+Both tests pass, which strengthens the omnibus claim. The fact that Stouffer gives a stronger result (p = 0.002 vs 0.007) is itself informative: our effect is a **distributed pattern** (consistent weak-to-moderate evidence across ROIs), not a **single hotspot** (one ROI with extreme signal).
+
+**Reviewer perspective**: A reviewer asking "Is your effect real?" effectively asks whether the signal is a single hotspot (Fisher-sensitive) or a distributed pattern (Stouffer-sensitive). Our data clearly show the latter — consistent evidence across the visual hierarchy, with hV4 as the primary driver but V3 providing meaningful contribution. Reporting both tests with Stouffer as primary transparently communicates this structure.
+
+**Caveat**: Stouffer's strength is also its vulnerability. If only hV4 were truly significant and V1/V2/V3 contributed pure noise, Stouffer could still pass by averaging one real signal with noise Z-values near zero. The Friedman uniformity test (hV4 only ROI with uniform per-color interpolation, p=0.485) and residual analysis (hV4 only ROI with near-random residuals, r=0.053) provide independent corroboration that the hV4-driven signal is genuine.
+
 #### N2: K-Selection Bias Permutation (SEVERE #3 — confirmed artifact)
 
 **Method**: 10K permutations shuffling 7-HC/3-CVD labels → re-run K-optimization per ROI → compute gap reduction → compare observed to null.
@@ -935,7 +973,7 @@ Voxel preference results confirm: CVD shows green depletion (V1/V2 p<0.02) and m
 | Per-subject K* | B1 (§3j) | sub-08=8, sub-09=3, sub-10=2 (pragmatic; exploratory interpretation) |
 | Distortion mechanism | Cone shift (behavioral) | Deutan: M' shift → green collapse; Protan: L' shift → red collapse |
 | Distortion pattern | A3/A5 (§3i) | Cool-axis collapse (blue d=+1.37 p=0.046) |
-| sub-09 status | B1 | Interpolation failure → filter cannot help → **excluded** |
+| sub-09 status | B1 | K*=3=group K → K optimization not possible. Retry with cone-shift T_ψ |
 | sub-10 status | B1 | HC-level → minimal correction needed |
 | sub-08 status | B1 | **Primary filter target** |
 
@@ -946,16 +984,26 @@ T_ψ: θ → θ' = θ + ψ(θ)
 where ψ(θ) = Σ_k [a_k sin(kθ) + b_k cos(kθ)]   (Fourier parameterization)
 
 Optimization:
-minimize  E_θ [|| W_HC @ C(T_ψ(θ)) − Y_CVD(θ) ||²]
+minimize  E_θ [|| W_CVD @ C(T_ψ(θ)) − Y_HC(θ) ||²]
+# CVD encoder processes transformed stimulus → match HC actual response
 subject to  ||ψ||² < ε   (small correction)
 ```
 
 W_s is frozen before filter optimization. T_ψ operates in stimulus space only.
 
+**LOCO ≠ Filter**: LOCO (7 colors → W → 1 color prediction) vs Filter (8 colors + frozen W → T_ψ 4 param optimization).
+LOCO re-estimates W per fold → df shortage directly impacts results. Filter freezes W (LOSO validated) → LOCO limitations ≠ filter limitations.
+
+| | LOCO | Phase 2 Filter |
+|---|------|----------------|
+| Training data | 7 colors | 8 colors |
+| Free parameters | K×V_s (hundreds~thousands) | 4 Fourier |
+| W role | Re-estimated per fold | Frozen (prediction engine) |
+
 ### 7d. TODO: Phase 2 Filter Design Steps
 
 1. **Cone-shift-based T_ψ initialization** — Stockman & Sharpe (2000) cone fundamentals → compute deutan/protan hue shift functions → T_ψ initial values
-2. **Filter T_ψ optimization** — minimize ||W_HC @ C(T_ψ(θ)) − Y_CVD(θ)||², Fourier k=1~2
+2. **Filter T_ψ optimization** — minimize ||W_CVD @ C(T_ψ(θ)) − Y_HC(θ)||², Fourier k=1~2
 3. **LOCO-style validation** — train T_ψ on 7 colors → predict 1 (overfitting control)
 4. **Behavioral task (JND 2AFC) linkage** — compare T_ψ predictions with JND changes
 5. **Transition to `future_phase2_filter_optimization/`**
@@ -967,10 +1015,83 @@ W_s is frozen before filter optimization. T_ψ operates in stimulus space only.
 | Proceed to Phase 2 | hV4 LOCO > perm null | **MET** (HC perm p=0.044) |
 | Prediction engine | LOSO ZS ≈ LORO | **MET** (hV4 p=0.913) |
 | Filter mechanism | Cone shift explanatory power | **MET** (deutan/protan predictions match data) |
-| Include sub-09 in filter | LOCO > perm null with K* | **NOT MET** → excluded |
+| Include sub-09 in filter | LOCO improvement after cone-shift T_ψ | **PENDING** (awaiting experiment) |
 | Track C prerequisite | HC ≈ CVD dimensionality | **DONE** |
 
 **Gate 3 verdict**: **PASS** — hV4 group prior (LOSO validated) + cone-shift-based filter → Phase 2.
+
+### 7f. T_ψ Filter Model: Design Principles and Approach A/B Pipeline
+
+#### Strengths of Fourier Parameterization for T_ψ
+
+**1. Periodicity**: Hue = 0°-360° circular space. Fourier = intrinsically periodic. Splines/polynomials have boundary discontinuities.
+
+**2. Smoothness**: Using only k=1,2 → high-frequency oscillations blocked. CVD distortion is a smooth deformation of cone sensitivity → only low-frequency correction is physically meaningful.
+
+**3. Parsimony**: 4 parameters (a₁,b₁,a₂,b₂) for the entire 360° transform. 8-knot spline = 8 parameters (= data count, df=0). Lookup requires interpolation rules.
+
+**4. Physical interpretability**:
+
+| Component | Math | Physical meaning | Cone shift link |
+|-----------|------|-----------------|----------------|
+| 1st order | R₁cos(θ−φ₁) | L-M axis distortion | M/L cone peak shift → R-G compression |
+| 2nd order | R₂cos(2θ−φ₂) | S-cone compensation asymmetry | S preserved + L-M distortion → B-Y asymmetry |
+
+Deutan vs protan differ in φ₁ but share the same parameter structure.
+
+**5. Alternative comparison**:
+
+| Method | Periodic | Smooth | Parameters | Interpretable | Verdict |
+|--------|:--------:|:------:|:----------:|:-------------:|:-------:|
+| **Fourier T_ψ** | auto | freq cutoff | 4 | direct | **adopted** |
+| Lookup table | manual | not guaranteed | 8+ | none | rejected |
+| Spline | manual wrapping | local | 8+ | none | rejected |
+| Polynomial | non-periodic | oscillation risk | 3+ | none | rejected |
+| Affine | possible | linear | 2 | partial | rejected (cannot model asymmetry) |
+
+#### Approach A: Cone Shift Model (physics-based, 1 parameter)
+
+**Input**: Δλ (cone peak wavelength shift, nm)
+
+**Process**:
+1. Load Stockman & Sharpe (2000) cone fundamentals l(λ), m(λ), s(λ)
+2. Deutan: M'(λ) = M(λ + Δλ) / Protan: L'(λ) = L(λ − Δλ)
+3. 8 colors CIELab → XYZ → LMS_normal and LMS_shifted
+4. LMS → opponent channels (rg = L−M, by = S−(L+M)/2) → hue angle
+5. δθ_pred(i) = θ_shifted(i) − θ_normal(i)
+
+**Optimization**: Δλ grid search (0-40nm, 1nm steps)
+```
+Δλ* = argmin_Δλ  Σ_i [ δθ_pred(i; Δλ) − δθ_obs(i) ]²
+```
+δθ_obs = HC mean LOCO voxel_corr − CVD LOCO voxel_corr (per-color, hV4)
+
+**Output**: Δλ* (nm), per-color δθ_pred, Fourier fit → T_ψ₀ initial values (a₁,b₁,a₂,b₂)
+
+#### Approach B: T_ψ Data-Driven Optimization (data-driven, 4 parameters)
+
+**Input**: W_CVD (CVD encoder), Y_HC (HC target response)
+
+```
+minimize  Σ_i || W_CVD @ C(T_ψ(θ_i)) − Y_HC(θ_i) ||²  + λ·||ψ||²
+```
+where T_ψ(θ) = θ + a₁cos θ + b₁sin θ + a₂cos 2θ + b₂sin 2θ
+
+**Initialization**: Start from Approach A output (T_ψ₀). SciPy L-BFGS-B.
+
+#### A ↔ B Relationship (Nested Model)
+
+| | Approach A | Approach B |
+|---|-----------|-----------|
+| Free parameters | 1 (Δλ) | 4 (a₁,b₁,a₂,b₂) |
+| Constraint | Stockman physics | Fourier smoothness |
+| Overfitting risk | very low | moderate (LOCO validation) |
+| Interpretation | direct (nm) | indirect (Fourier) |
+
+**Key**: A ≈ B → cone shift fully explains distortion (retinal origin)
+         A ≠ B → cortical contribution exists (Δ = B−A quantifies cortical contribution)
+
+**Implementation**: stockman_cone_shift.py(A) → step3_filter_optimization.py(B) → residual comparison
 
 ---
 

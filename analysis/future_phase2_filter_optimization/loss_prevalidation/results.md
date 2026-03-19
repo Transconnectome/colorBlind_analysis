@@ -82,7 +82,7 @@ Phase 2 filter 파이프라인의 전제 조건 검증:
 
 ---
 
-## 2. Level 2: V2 Distortion Burden → hV4 LOCO Per-Color
+## 2. Level 2: V2 Distortion Burden → hV4 LOCO Per-Color (미고려)
 
 **질문**: V2에서 많이 왜곡된 색이 hV4 LOCO에서도 실패하는가?
 

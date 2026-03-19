@@ -1,7 +1,7 @@
 """
 Behavioral Pilot Data Visualization — Phase 3
 Generates 4-panel figure:
-  (A) JND comparison bar chart (HC vs CVD)
+  (A) JND comparison bar chart (HC vs HC2 vs CVD)
   (B) RSVP per-color accuracy
   (C) SRM z vs JND ratio concordance
   (D) LOCO vulnerability vs JND direction alignment
@@ -29,6 +29,7 @@ pairs = ['red-\norange', 'orange-\nyellow', 'yellow-\ngreen', 'green-\nblue',
 pairs_short = ['R-O', 'O-Y', 'Y-G', 'G-B', 'Y-P', 'B-P', 'C-M', 'R-C']
 
 hc_jnd = [0.235, 0.443, 0.103, 0.103, 0.025, 0.165, 0.048, 0.048]
+hc2_jnd = [0.018, 0.064, 0.018, 0.020, 0.015, 0.040, 0.015, 0.015]
 cvd_jnd = [0.062, 0.840, 0.278, 0.077, 0.062, 0.120, 0.040, 0.015]
 jnd_dir = ['HYPER', 'HYPO', 'HYPO', 'HYPER', 'HYPO', 'HYPER', 'HYPER', 'HYPER']
 
@@ -39,23 +40,25 @@ srm_concordant = [True, False, False, False, False, True, None, None]
 # RSVP per-color
 colors_order = ['red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple', 'magenta']
 cvd_acc = [1.0, 0.875, 0.625, 0.75, 1.0, 1.0, 0.5, 0.75]
+hc2_acc = [1.0, 1.0, 1.0, 0.875, 1.0, 1.0, 0.875, 1.0]
 loco_vuln = [False, True, True, False, True, False, True, False]  # p<0.05 in any ROI
 
 # ── Figure ──
 fig, axes = plt.subplots(2, 2, figsize=(14, 10))
-fig.suptitle('Phase 3: Behavioral Pilot — sub-08 (Deutan CVD) vs HC\n[PRELIMINARY: N=1 per group]',
+fig.suptitle('Phase 3: Behavioral Pilot — sub-08 (Deutan CVD) vs HC (N=2)\n[PRELIMINARY]',
              fontsize=13, fontweight='bold', y=0.98)
 
 # ── Panel A: JND Comparison ──
 ax = axes[0, 0]
 x = np.arange(len(pairs))
-w = 0.35
-bars_hc = ax.bar(x - w/2, hc_jnd, w, label='HC', color='#4A90D9', alpha=0.8, edgecolor='black', linewidth=0.5)
-bars_cvd = ax.bar(x + w/2, cvd_jnd, w, label='CVD (sub-08)', color='#E74C3C', alpha=0.8, edgecolor='black', linewidth=0.5)
+w = 0.25
+bars_hc = ax.bar(x - w, hc_jnd, w, label='HC1', color='#4A90D9', alpha=0.8, edgecolor='black', linewidth=0.5)
+bars_hc2 = ax.bar(x, hc2_jnd, w, label='HC2', color='#85C1E9', alpha=0.8, edgecolor='black', linewidth=0.5)
+bars_cvd = ax.bar(x + w, cvd_jnd, w, label='CVD (sub-08)', color='#E74C3C', alpha=0.8, edgecolor='black', linewidth=0.5)
 
 # Mark HYPO/HYPER
 for i, d in enumerate(jnd_dir):
-    y_max = max(hc_jnd[i], cvd_jnd[i])
+    y_max = max(hc_jnd[i], hc2_jnd[i], cvd_jnd[i])
     color = '#E74C3C' if d == 'HYPO' else '#2ECC71'
     ax.text(x[i], y_max + 0.02, d, ha='center', va='bottom', fontsize=7,
             fontweight='bold', color=color)
@@ -64,28 +67,34 @@ ax.set_ylabel('JND (interpolation step)')
 ax.set_xticks(x)
 ax.set_xticklabels(pairs_short, fontsize=8)
 ax.legend(fontsize=8, loc='upper left')
-ax.set_title('(A) JND: HC vs CVD', fontweight='bold', fontsize=10)
+ax.set_title('(A) JND: HC1 vs HC2 vs CVD', fontweight='bold', fontsize=10)
 ax.set_ylim(0, 1.0)
 ax.axhline(y=0, color='black', linewidth=0.5)
 
 # ── Panel B: RSVP Per-Color Accuracy ──
 ax = axes[0, 1]
 bar_colors = [COLOR_MAP[c] for c in colors_order]
-bars = ax.bar(colors_order, cvd_acc, color=bar_colors, edgecolor='black', linewidth=0.5, alpha=0.85)
+x_rsvp = np.arange(len(colors_order))
+w_rsvp = 0.35
+bars_cvd_rsvp = ax.bar(x_rsvp - w_rsvp/2, cvd_acc, w_rsvp, label='CVD (sub-08)',
+                        color=[c + 'CC' for c in bar_colors], edgecolor='black', linewidth=0.5)
+bars_hc2_rsvp = ax.bar(x_rsvp + w_rsvp/2, hc2_acc, w_rsvp, label='HC2',
+                        color=[c + '66' for c in bar_colors], edgecolor='black', linewidth=0.5)
 
-# Mark LOCO-vulnerable colors
+# Mark LOCO-vulnerable colors on CVD bars
 for i, (v, acc) in enumerate(zip(loco_vuln, cvd_acc)):
     if v:
-        ax.bar(colors_order[i], acc, color=bar_colors[i], edgecolor='red',
-               linewidth=2.5, alpha=0.85, linestyle='--')
-        ax.text(i, acc + 0.02, 'LOCO\nvuln', ha='center', va='bottom', fontsize=6,
-                color='red', fontweight='bold')
+        ax.bar(x_rsvp[i] - w_rsvp/2, acc, w_rsvp, color='none', edgecolor='red',
+               linewidth=2.5, linestyle='--')
+        ax.text(x_rsvp[i] - w_rsvp/2, acc + 0.02, 'LOCO\nvuln', ha='center', va='bottom',
+                fontsize=6, color='red', fontweight='bold')
 
-ax.axhline(y=1.0, color='#4A90D9', linewidth=1.5, linestyle='--', label='HC (100%)', alpha=0.7)
-ax.set_ylabel('CVD Accuracy')
-ax.set_title('(B) RSVP 8AFC: CVD Per-Color Accuracy', fontweight='bold', fontsize=10)
+ax.axhline(y=1.0, color='#4A90D9', linewidth=1.5, linestyle='--', label='HC1 (100%)', alpha=0.7)
+ax.set_ylabel('Accuracy')
+ax.set_title('(B) RSVP 8AFC: Per-Color Accuracy', fontweight='bold', fontsize=10)
 ax.set_ylim(0, 1.25)
-ax.legend(fontsize=8)
+ax.legend(fontsize=7, loc='upper right')
+ax.set_xticks(x_rsvp)
 ax.set_xticklabels(colors_order, fontsize=8)
 
 # ── Panel C: SRM z vs JND Ratio ──
@@ -118,7 +127,7 @@ discordant_patch = mpatches.Patch(color='#E74C3C', label='Discordant (4/6)')
 ax.legend(handles=[concordant_patch, discordant_patch], fontsize=7, loc='upper left')
 
 ax.set_xlabel('SRM z-score (sub-08, best ROI)')
-ax.set_ylabel('JND Ratio (CVD / HC)')
+ax.set_ylabel('JND Ratio (CVD / HC1)')
 ax.set_title('(C) SRM z vs JND Ratio: 5/7 Discordance', fontweight='bold', fontsize=10)
 
 # ── Panel D: LOCO Vulnerability → JND Alignment ──

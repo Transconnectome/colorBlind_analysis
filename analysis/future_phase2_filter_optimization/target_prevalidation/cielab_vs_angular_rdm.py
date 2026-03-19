@@ -325,8 +325,9 @@ def persistent_homology_test(rdm, n_permutations=1000, random_state=42):
 
 
 def plot_persistence(ph_data, output_path):
-    fig, axes = plt.subplots(2, 2, figsize=(12, 10))
-    for row, roi in enumerate(['V1', 'V2']):
+    rois = ['V1', 'V2', 'hV4']
+    fig, axes = plt.subplots(3, 2, figsize=(12, 14))
+    for row, roi in enumerate(rois):
         key = (roi, 'srm')
         # Persistence diagram
         ax = axes[row, 0]
@@ -398,8 +399,9 @@ def higher_d_mds(rdm, target_dims=(2, 3, 4), random_state=42):
 
 
 def plot_higher_d(hd_data, output_path):
-    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
-    for row, roi in enumerate(['V1', 'V2']):
+    rois = ['V1', 'V2', 'hV4']
+    fig, axes = plt.subplots(3, 3, figsize=(15, 14))
+    for row, roi in enumerate(rois):
         key = (roi, 'srm')
         for col, (label, dim) in enumerate([('2D MDS', 2), ('3D→PCA 2D', 3), ('4D→PCA 2D', 4)]):
             ax = axes[row, col]
@@ -464,8 +466,9 @@ def isomap_vs_mds(patterns, rdm, n_neighbors=3):
 
 
 def plot_isomap(iso_data, output_path):
-    fig, axes = plt.subplots(2, 2, figsize=(12, 10))
-    for row, roi in enumerate(['V1', 'V2']):
+    rois = ['V1', 'V2', 'hV4']
+    fig, axes = plt.subplots(3, 2, figsize=(12, 14))
+    for row, roi in enumerate(rois):
         key = (roi, 'srm')
         for col, (method, ck, rk, pk) in enumerate([
             ('MDS', 'mds_coords', 'mds_rho', 'mds_p'),
@@ -567,9 +570,14 @@ def plot_per_subject(subj_data, output_path):
         ('isc', 'ISC (vs HC mean)', True),
         ('mantel_cielab_r', 'CIELab Mantel r', True),
     ]
-    fig, axes = plt.subplots(2, 4, figsize=(18, 8))
-    for row, roi in enumerate(['V1', 'V2']):
+    rois = ['V1', 'V2', 'hV4']
+    fig, axes = plt.subplots(3, 4, figsize=(18, 11))
+    for row, roi in enumerate(rois):
         if roi not in subj_data or not subj_data[roi]:
+            for col in range(4):
+                axes[row, col].text(0.5, 0.5, 'No data', transform=axes[row, col].transAxes, ha='center')
+                if col == 0:
+                    axes[row, col].set_ylabel(roi, fontsize=11, fontweight='bold')
             continue
         data = subj_data[roi]
         for col, (mk, label, _) in enumerate(metrics):
@@ -602,7 +610,7 @@ def plot_per_subject(subj_data, output_path):
         Line2D([0], [0], marker='D', color='w', markerfacecolor='#9b59b6', markersize=8, label='sub-10'),
     ]
     fig.legend(handles=legend_els, loc='lower center', ncol=4, fontsize=9, bbox_to_anchor=(0.5, -0.02))
-    fig.suptitle('Per-Subject V1/V2 Diagnostic (SRM)', fontsize=13)
+    fig.suptitle('Per-Subject V1/V2/hV4 Diagnostic (SRM)', fontsize=13)
     plt.tight_layout(rect=[0, 0.03, 1, 0.97])
     plt.savefig(output_path, dpi=150, bbox_inches='tight')
     plt.close()
@@ -694,7 +702,7 @@ def main():
 
     # === Analysis 3: Persistent Homology ===
     print('\n--- Analysis 3: Persistent Homology (H1) ---')
-    for roi in ['V1', 'V2']:
+    for roi in ['V1', 'V2', 'hV4']:
         key = (roi, 'srm')
         if key in group_rdms:
             r = persistent_homology_test(group_rdms[key])
@@ -707,7 +715,7 @@ def main():
 
     # === Analysis 4: Higher-D MDS ===
     print('\n--- Analysis 4: Higher-D MDS + PCA 2D ---')
-    for roi in ['V1', 'V2']:
+    for roi in ['V1', 'V2', 'hV4']:
         key = (roi, 'srm')
         if key in group_rdms:
             r = higher_d_mds(group_rdms[key])
@@ -721,7 +729,7 @@ def main():
 
     # === Analysis 5: Isomap vs MDS ===
     print('\n--- Analysis 5: Isomap vs MDS ---')
-    for roi in ['V1', 'V2']:
+    for roi in ['V1', 'V2', 'hV4']:
         key = (roi, 'srm')
         if key in group_rdms and key in group_patterns:
             r = isomap_vs_mds(group_patterns[key], group_rdms[key])
@@ -732,8 +740,8 @@ def main():
     plot_isomap(iso_data, RESULTS_DIR / 'fig5_isomap_vs_mds.png')
 
     # === Analysis 6: Per-Subject ===
-    print('\n--- Analysis 6: Per-Subject V1/V2 ---')
-    for roi in ['V1', 'V2']:
+    print('\n--- Analysis 6: Per-Subject V1/V2/hV4 ---')
+    for roi in ['V1', 'V2', 'hV4']:
         results = per_subject_analysis(roi)
         subj_data[roi] = results
         for d in results:

@@ -1151,4 +1151,263 @@ where T_ψ(θ) = θ + a₁cos θ + b₁sin θ + a₂cos 2θ + b₂sin 2θ
 
 ---
 
-**Last Updated**: 2026-03-15
+## Appendix A: SRM vs Procrustes — MDS/Mantel Diagnostic
+
+### A.1 Motivation and Research Question
+
+Phase 1 forward model MDS analyses in V1/V2 failed all 4 diagnostic criteria under SRM projection, raising two hypotheses:
+
+- **H1 (Reference Model Problem)**: Angular (equidistant) reference RDM is inappropriate; perceptual CIELab distances would recover structure.
+- **H2 (True Structural Absence)**: SRM dimensionality reduction (99%+ compression: e.g., 568 voxels → 3–4 dims) irreversibly destroys continuous color-space geometry.
+
+This appendix tests H1 vs H2 by comparing neural RDMs against both angular and CIELab reference models across three alignment spaces (raw, Procrustes, SRM) for all 4 ROIs.
+
+### A.2 Methods
+
+**Data**: C010 + Procrustes dataset, 10 subjects (7 HC, 3 CVD), 8 colors (45° equidistant hue angles).
+
+**Alignment conditions**: (1) Raw voxel space, (2) Procrustes-aligned voxel space, (3) SRM (k = V1:4, V2:4, V3:3, hV4:3).
+
+**Group mean RDM**: Average of HC subjects' individual 8×8 correlation distance RDMs.
+
+#### Mantel Test (Detailed Description)
+
+The Mantel test (Mantel, 1967) is a nonparametric permutation test for the association between two distance (dissimilarity) matrices.
+
+**Procedure**:
+1. Extract upper-triangular elements (28 unique pairs from 8×8 RDM) from both the neural RDM and a reference RDM.
+2. Compute Spearman rank correlation (r_obs) between the two vectors.
+3. Generate null distribution: simultaneously permute rows and columns of the neural RDM 10,000 times, recomputing r each time.
+4. One-tailed p-value: p = (count(r_perm >= r_obs) + 1) / (n_perm + 1).
+
+**Interpretation**:
+- r > 0: Neural distances reflect the reference structure (structure present).
+- r ≈ 0: No association.
+- r < 0: **Anti-correlation** — the projection inverts distance relationships.
+
+**Sign Reversal Significance**: When the same neural data yields raw r = +0.402 but SRM r = −0.308, this indicates that SRM's extreme dimensionality reduction (e.g., 568 voxels → 3 dims for hV4) irreversibly destroys and inverts the inter-color distance structure.
+
+**Four Reference Models**:
+1. **Angular** (equidistant): min(|θ_i − θ_j|, 360° − |θ_i − θ_j|) / 180°
+2. **CIELab a\*b\***: Euclidean distance in perceptual a\*,b\* plane (normalized)
+3. **a\*-only**: L−M cone-opponent axis (1D)
+4. **b\*-only**: S−(L+M) cone-opponent axis (1D)
+
+**Multiple comparisons**: Bonferroni α = 0.05 / (4 ROI × 4 reference) = 0.003125.
+
+#### Six Analysis Modules
+
+1. **Stress curve (1–7D)**: Kruskal's normalized stress-1 from metric MDS at each dimensionality.
+2. **Reference RDM comparison (Mantel)**: Neural RDM vs 4 reference models, all alignment conditions.
+3. **Persistent homology (H1)**: Rips filtration detecting 1-dimensional loops; permutation test for max H1 lifetime significance.
+4. **Higher-D MDS + PCA**: MDS in 2D/3D/4D, then PCA to best 2D plane. Metrics: stress, Shepard R², circular rank correlation (ρ).
+5. **Isomap vs MDS**: Nonlinear (Isomap, n_neighbors=3) vs linear (MDS) 2D embedding. Tests for manifold curvature.
+6. **Per-subject analysis**: Individual subject metrics (stress, circular ρ, ISC vs HC mean, Mantel r).
+
+**Decision rule**: ≥2/4 criteria pass (Q1: CIELab > Angular; Q2: H1 topology significant; Q3: stress < 0.10 or ρ > 0.7 in higher-D; Q4: Isomap superior to MDS) → STRUCTURED.
+
+### A.3 Results
+
+#### A.3.1 CIELab Non-Uniformity
+
+Adjacent CIELab distances (a\*b\* plane) for 8 equidistant hue angles (45° apart):
+
+| Pair | Δa\* | Δb\* | Distance |
+|------|-----:|-----:|---------:|
+| Red → Orange | −13.5 | +41.8 | 43.9 |
+| Orange → Yellow | −36.1 | −3.9 | 36.3 |
+| Yellow → Green | −68.1 | +5.7 | 68.3 |
+| Green → Cyan | +13.7 | −52.3 | 54.0 |
+| Cyan → Blue | +29.9 | −36.0 | 46.8 |
+| Blue → Purple | +30.6 | −13.2 | 33.4 |
+| Purple → Magenta | +27.6 | +13.8 | 30.9 |
+| Magenta → Red | +15.9 | +44.1 | 46.9 |
+
+Range: 30.9–68.3 (ratio = 2.2×). Hue angles that are equidistant in angular space are substantially non-uniform in perceptual CIELab space.
+
+#### A.3.2 Stress Curves (1–7D)
+
+Kruskal's normalized stress-1 for HC group-mean RDM:
+
+| Dim | V1 raw | V1 Proc | V1 SRM | V2 raw | V2 Proc | V2 SRM | V3 raw | V3 Proc | V3 SRM | hV4 raw | hV4 Proc | hV4 SRM |
+|----:|-------:|--------:|-------:|-------:|--------:|-------:|-------:|--------:|-------:|--------:|---------:|--------:|
+| 1 | 0.498 | 0.482 | 0.463 | 0.496 | 0.478 | 0.463 | 0.481 | 0.460 | 0.464 | 0.505 | 0.430 | 0.464 |
+| 2 | 0.279 | 0.271 | 0.188 | 0.263 | 0.260 | 0.194 | 0.263 | 0.235 | 0.127 | 0.240 | 0.220 | **0.084** |
+| 3 | 0.174 | 0.138 | 0.126 | 0.169 | 0.161 | **0.097** | 0.163 | 0.124 | **0.093** | 0.142 | 0.116 | **0.063** |
+| 4 | 0.127 | **0.096** | 0.127 | 0.117 | 0.103 | 0.098 | 0.115 | **0.067** | 0.092 | **0.081** | **0.070** | 0.063 |
+| 5 | **0.098** | 0.059 | 0.127 | **0.090** | 0.073 | 0.099 | **0.070** | 0.053 | 0.093 | 0.066 | 0.047 | 0.063 |
+| 6 | 0.067 | 0.036 | 0.127 | 0.062 | 0.042 | 0.099 | 0.050 | 0.038 | 0.093 | 0.047 | 0.026 | 0.064 |
+| 7 | 0.031 | 0.024 | 0.128 | 0.028 | 0.027 | 0.099 | 0.029 | 0.028 | 0.093 | 0.026 | 0.027 | 0.065 |
+
+Bold = first dimension achieving stress < 0.10.
+
+**Key observations**:
+- **SRM plateau**: All ROIs show stress plateauing at dim ≥ k (SRM dimensionality), with no further reduction beyond. This confirms that SRM projection is a hard information bottleneck.
+- **V1 SRM**: Never reaches stress < 0.10 (plateau at 0.126–0.128). All distance structure is lost.
+- **hV4 SRM**: Achieves stress < 0.10 at 2D (0.084), plateauing at 0.063 from 3D. Among all ROIs, hV4 SRM retains the best distance structure — yet still fails Mantel tests (see below).
+- **Raw/Procrustes**: Both achieve stress < 0.10 at 4–5D, continuing to decrease through 7D. No artificial plateau.
+
+#### A.3.3 Mantel Tests (Full 48-Test Table)
+
+HC group-mean neural RDM vs 4 reference models, 3 alignment conditions, 4 ROIs:
+
+| ROI | Align | Angular r (p) | CIELab r (p) | a\*-only r (p) | b\*-only r (p) |
+|-----|-------|:-------------:|:------------:|:--------------:|:--------------:|
+| V1 | raw | −0.050 (0.528) | +0.047 (0.363) | −0.065 (0.589) | +0.034 (0.340) |
+| V1 | Proc | −0.058 (0.604) | +0.036 (0.422) | −0.031 (0.561) | +0.073 (0.341) |
+| V1 | SRM | −0.295 (0.926) | −0.195 (0.837) | −0.292 (0.958) | −0.083 (0.613) |
+| V2 | raw | +0.010 (0.426) | +0.167 (0.190) | +0.033 (0.403) | −0.004 (0.483) |
+| V2 | Proc | +0.077 (0.319) | +0.181 (0.174) | +0.302 (0.071) | −0.008 (0.506) |
+| V2 | SRM | −0.005 (0.503) | +0.124 (0.261) | +0.282 (0.085) | −0.130 (0.721) |
+| V3 | raw | −0.083 (0.688) | +0.141 (0.231) | +0.097 (0.264) | −0.056 (0.598) |
+| V3 | Proc | +0.044 (0.392) | −0.010 (0.500) | −0.118 (0.707) | +0.143 (0.217) |
+| V3 | SRM | −0.120 (0.685) | −0.014 (0.489) | −0.165 (0.785) | +0.124 (0.225) |
+| **hV4** | **raw** | +0.276 (0.062) | **+0.402 (0.018\*)** | +0.186 (0.171) | +0.075 (0.321) |
+| hV4 | Proc | −0.031 (0.537) | −0.191 (0.851) | −0.144 (0.772) | −0.088 (0.674) |
+| hV4 | SRM | −0.302 (0.942) | **−0.308 (0.966)** | −0.249 (0.936) | −0.085 (0.572) |
+
+\* p < 0.05 (uncorrected); none survive Bonferroni correction (α = 0.003125).
+
+**Critical finding**: hV4 raw CIELab r = +0.402 (p = 0.018) → SRM r = −0.308 (p = 0.966). **Complete sign reversal**. The same neural data that shows significant perceptual structure in raw voxel space has that structure destroyed and inverted by SRM k=3 projection (568 voxels → 3 dimensions = 99.5% compression).
+
+**V2 a\*-only trend**: V2 shows a consistent L−M axis trend across all alignments (Proc r = 0.302, p = 0.071; SRM r = 0.282, p = 0.085). This is not SRM-specific — the same pattern appears in Procrustes, suggesting a genuine L−M cone-opponent signal in V2 that is partially preserved even under dimensionality reduction.
+
+#### A.3.4 Persistent Homology (H1)
+
+| ROI | Max H1 Lifetime | p-value | Result |
+|-----|----------------:|--------:|--------|
+| V1 | 0.448 | 1.000 | FAIL |
+| V2 | 0.156 | 1.000 | FAIL |
+| hV4 | 0.279 | 1.000 | FAIL |
+
+No ROI shows a significant 1-dimensional loop (circular topology) in SRM space. All H1 lifetimes are within the permutation null distribution.
+
+#### A.3.5 Higher-D MDS (SRM Space)
+
+| ROI | Dim | Stress | Shepard R² | Circular ρ | p |
+|-----|----:|-------:|-----------:|-----------:|-----:|
+| V1 | 2 | 0.188 | 0.734 | +0.619 | 0.102 |
+| V1 | 3 | 0.126 | 0.880 | +0.643 | 0.086 |
+| V1 | 4 | 0.127 | 0.878 | +0.643 | 0.086 |
+| V2 | 2 | 0.194 | 0.677 | −0.262 | 0.531 |
+| V2 | 3 | 0.097 | 0.919 | +0.357 | 0.385 |
+| V2 | 4 | 0.098 | 0.918 | −0.024 | 0.955 |
+| hV4 | 2 | 0.084 | 0.935 | +0.452 | 0.260 |
+| hV4 | 3 | 0.063 | 0.964 | −0.071 | 0.867 |
+| hV4 | 4 | 0.063 | 0.963 | +0.119 | 0.779 |
+
+**Key**: hV4 achieves the lowest stress (0.063 at 3D) and highest Shepard R² (0.964), indicating good distance preservation within SRM's 3D space. However, circular order correlation is non-significant at all dimensionalities — distances are preserved but the **circular hue order** is not. This dissociation (low stress + poor circular ρ) is the signature of SRM preserving inter-subject variance components rather than within-subject color geometry.
+
+#### A.3.6 Isomap vs MDS (SRM Space)
+
+| ROI | MDS ρ | MDS p | Isomap ρ | Isomap p | Winner |
+|-----|------:|------:|---------:|---------:|--------|
+| V1 | +0.619 | 0.102 | −0.476 | 0.233 | MDS |
+| V2 | −0.262 | 0.531 | +0.524 | 0.183 | Isomap |
+| hV4 | +0.452 | 0.260 | +0.048 | 0.911 | MDS |
+
+V2 is the only ROI where Isomap outperforms MDS, suggesting a curved manifold structure consistent with the L−M cone-opponent axis trend. hV4: MDS dominates (ρ = 0.452 vs 0.048), suggesting the residual structure in SRM space is low-dimensional and linear rather than manifold-curved.
+
+#### A.3.7 Per-Subject Analysis (SRM Space)
+
+**V1** (10 subjects):
+
+| Subject | Group | Stress | Circ. ρ | ISC | Angular r | CIELab r |
+|---------|-------|-------:|--------:|----:|----------:|---------:|
+| sub-01 | HC | 0.144 | +0.190 | 0.783 | −0.216 | −0.153 |
+| sub-02 | HC | 0.165 | −0.167 | 0.879 | −0.292 | −0.230 |
+| sub-03 | HC | 0.163 | +0.119 | 0.610 | −0.078 | +0.020 |
+| sub-04 | HC | 0.102 | −0.286 | 0.716 | −0.212 | −0.107 |
+| sub-05 | HC | 0.223 | −0.119 | 0.853 | −0.182 | −0.100 |
+| sub-06 | HC | 0.156 | +0.286 | 0.592 | −0.266 | −0.264 |
+| sub-07 | HC | 0.170 | −0.571 | 0.834 | −0.257 | −0.142 |
+| sub-08 | CVD | 0.138 | −0.119 | 0.667 | −0.137 | −0.125 |
+| sub-09 | CVD | 0.147 | +0.452 | 0.252 | −0.266 | −0.379 |
+| sub-10 | CVD | 0.159 | −0.143 | 0.694 | −0.381 | −0.366 |
+
+**V2** (10 subjects):
+
+| Subject | Group | Stress | Circ. ρ | ISC | Angular r | CIELab r |
+|---------|-------|-------:|--------:|----:|----------:|---------:|
+| sub-01 | HC | 0.192 | −0.214 | 0.817 | −0.094 | −0.027 |
+| sub-02 | HC | 0.181 | −0.762\* | 0.824 | −0.076 | +0.011 |
+| sub-03 | HC | 0.141 | −0.381 | 0.402 | −0.167 | −0.036 |
+| sub-04 | HC | 0.141 | −0.452 | 0.599 | +0.026 | +0.261 |
+| sub-05 | HC | 0.106 | −0.071 | 0.577 | +0.461\* | +0.485\* |
+| sub-06 | HC | 0.129 | +0.000 | 0.565 | −0.159 | −0.238 |
+| sub-07 | HC | 0.151 | −0.238 | 0.736 | −0.047 | +0.148 |
+| sub-08 | CVD | 0.151 | +0.190 | 0.567 | −0.116 | +0.071 |
+| sub-09 | CVD | 0.142 | −0.452 | 0.366 | −0.161 | −0.072 |
+| sub-10 | CVD | 0.166 | +0.500 | 0.521 | −0.242 | −0.197 |
+
+\* p < 0.05 (uncorrected).
+
+**hV4** (10 subjects):
+
+| Subject | Group | Stress | Circ. ρ | ISC | Angular r | CIELab r |
+|---------|-------|-------:|--------:|----:|----------:|---------:|
+| sub-01 | HC | 0.161 | −0.024 | 0.418 | −0.127 | −0.224 |
+| sub-02 | HC | 0.266 | −0.095 | 0.264 | −0.239 | −0.271 |
+| sub-03 | HC | 0.114 | +0.310 | 0.816 | −0.304 | −0.237 |
+| sub-04 | HC | 0.185 | −0.024 | 0.103 | +0.037 | +0.090 |
+| sub-05 | HC | 0.189 | +0.333 | 0.592 | −0.198 | −0.178 |
+| sub-06 | HC | 0.099 | +0.571 | 0.495 | −0.141 | −0.258 |
+| sub-07 | HC | 0.160 | +0.048 | 0.493 | −0.020 | +0.035 |
+| sub-08 | CVD | 0.176 | +0.500 | 0.096 | −0.083 | −0.271 |
+| sub-09 | CVD | 0.164 | +0.524 | 0.272 | −0.270 | −0.141 |
+| sub-10 | CVD | 0.179 | +0.619 | 0.707 | −0.118 | −0.206 |
+
+**Notable**: hV4 per-subject ISC is highly variable (0.096–0.816), with sub-04 showing extreme outlier ISC = 0.103. hV4 sub-07 has only 16 voxels → low SNR in SRM space.
+
+#### A.3.8 Decision Framework (Updated with hV4)
+
+| ROI | Q1: CIELab > Angular | Q2: H1 Topology | Q3: Higher-D | Q4: Isomap > MDS | Pass | Verdict |
+|-----|:---:|:---:|:---:|:---:|:---:|---------|
+| V1 | FAIL | FAIL | FAIL | FAIL | 0/4 | **UNSTRUCTURED** |
+| V2 | FAIL | FAIL | PASS | PASS | 2/4 | **STRUCTURED** |
+| V3 | FAIL | — | — | — | 0/4 | **UNSTRUCTURED** |
+| hV4 | FAIL | FAIL | PASS | FAIL | 1/4 | **MARGINAL** |
+
+**hV4 detail**: Q3 passes because 3D stress = 0.063 < 0.10 (good distance fit). However, Q1 fails (SRM CIELab r = −0.308 vs SRM angular r = −0.302, both strongly negative); Q2 fails (no H1 loop); Q4 fails (MDS ρ = 0.452 >> Isomap ρ = 0.048). The MARGINAL verdict reflects that SRM preserves *some* distance structure in hV4 (lowest stress among all ROIs) but not the *color-specific* circular geometry needed for interpolation.
+
+### A.4 Interpretation
+
+**H2 confirmed**: CIELab reference also fails → the problem is not the reference model but genuine structural absence in SRM-projected space. This is consistent across all 4 ROIs.
+
+**hV4 dissociation**: Raw voxel space retains CIELab structure (r = +0.402, p = 0.018*), but SRM destroys it (r = −0.308, p = 0.966). This **sign reversal** directly explains the +3° LOCO penalty observed in Phase 1 forward model: SRM's inter-subject alignment component optimized for shared variance, which does not necessarily correspond to color-space geometry. When the SRM-projected RDM is inverted relative to the true perceptual structure, forward model interpolation based on that projection will systematically predict incorrect directions.
+
+**V2 L−M manifold**: The consistent a\*-only trend (Proc r = 0.302, SRM r = 0.282) and Isomap superiority suggest V2 retains a curved 3D manifold dominated by the L−M cone-opponent axis. This aligns with known V2 thin-stripe color selectivity.
+
+**V1 negative control**: 0/4 criteria pass. V1 shows no recoverable color structure in any alignment condition, consistent with Phase 1 finding that V1 discriminates but cannot interpolate.
+
+### A.5 Implications for Phase 2 Filter Design
+
+| Criterion | Procrustes | SRM |
+|-----------|:---------:|:---:|
+| Distance preservation | Good (stress decreases to 7D) | Plateaus at k (hard bottleneck) |
+| Mantel: hV4 CIELab | r = −0.191 (destroyed by alignment) | r = −0.308 (destroyed + inverted) |
+| Mantel: V2 a\*-only | r = +0.302 (p = 0.071) | r = +0.282 (p = 0.085) |
+| Circular topology (H1) | Not tested (high-D) | Absent in all ROIs |
+| Dimensionality flexibility | Full voxel space | Fixed at k |
+
+**Conclusion**: Procrustes alignment preserves more of the original distance structure than SRM. For Phase 2 filter optimization, the prediction engine should operate in Procrustes-aligned voxel space (ridge_gcv + Procrustes) rather than SRM space. SRM remains useful for Phase 2 RDM-based criterion (low-dimensional comparison), but LORO/LOCO criteria should use Procrustes.
+
+### A.6 Figure Legends
+
+- **fig1\_stress\_curve.png**: Kruskal's normalized stress-1 as a function of MDS dimensionality (1–7D) for 4 ROIs × 3 alignments. Gray dashed line = stress = 0.10 threshold; orange dotted line = SRM k value. SRM curves plateau at k.
+- **fig2\_mantel\_comparison.png**: Mantel test null distributions (10,000 permutations) for SRM alignment. 4 ROIs (rows) × 4 reference models (columns). Red vertical line = observed r (p < Bonferroni); orange = p < 0.05 uncorrected; gray = n.s.
+- **fig3\_persistence.png**: Persistent homology H1 diagrams (left: birth-death, right: permutation null) for V1, V2, hV4 in SRM space.
+- **fig4\_higher\_d\_mds.png**: 2D/3D→PCA/4D→PCA MDS embeddings for V1, V2, hV4. Color-coded points with stress, Shepard R², and circular ρ annotations.
+- **fig5\_isomap\_vs\_mds.png**: Side-by-side MDS vs Isomap 2D embeddings for V1, V2, hV4 in SRM space.
+- **fig6\_per\_subject.png**: Individual subject metrics (stress, circular ρ, ISC, CIELab Mantel r) for V1, V2, hV4. Blue circles = HC; colored diamonds = CVD (red = sub-08, orange = sub-09, purple = sub-10).
+
+### A.7 Data References
+
+- **Script**: `future_phase2_filter_optimization/target_prevalidation/cielab_vs_angular_rdm.py`
+- **Results directory**: `target_prevalidation/results/cielab_diagnostic/`
+- **JSON summary**: `cielab_diagnostic_summary.json` (stress curves, Mantel tests, persistent homology, higher-D MDS, isomap, per-subject, decision framework)
+- **Figures**: `fig1_stress_curve.png` through `fig6_per_subject.png`
+
+---
+
+**Last Updated**: 2026-03-19

@@ -187,9 +187,28 @@ Crawford-Howell 검정: sub-08 개인 LOCO voxel_corr vs HC 분포 (df=6, 단측
 **HC2 기준**: 일치 1쌍(green-blue: 압축+HYPO), 불일치 5쌍, N/A 2쌍 → **1/6 일치(17%)**. HC2의 극히 낮은 JND가 거의 모든 쌍을 HYPO로 만들어, 양의 SRM z 쌍과 전부 불일치. 유일한 일치(green-blue)는 음의 SRM z(-0.89)가 HYPO 방향과 우연히 일치.
 **HC평균 기준**: 명확한 쌍만 평가 시(borderline 제외) 일치 1쌍(red-orange)/불일치 3쌍 → **1/4 일치(25%)**.
 
-**해석**: 어떤 HC 기준을 사용하든 SRM z ↔ JND 불일치가 지배적. 이는 SRM z(전역 끝점 거리)와 JND(국소 보간 기울기)가 측정하는 대상 자체가 다르기 때문이며, HC 기준의 불확실성에 의한 artifact가 아니다.
+**해석**: 어떤 HC 기준을 사용하든 SRM z ↔ JND 불일치가 지배적. 이는 SRM z(전역 기하학적 거리)와 JND(국소 보간 민감도)가 측정하는 속성 자체가 다르기 때문이며, HC 기준의 불확실성에 의한 artifact가 아니다.
 
-**설명**: SRM z는 차원 축소된 공간에서 색 끝점 간의 전역 기하학적 거리를 측정한다. JND는 보간된 기울기에 대한 국소 지각 민감도를 측정한다. 원추세포 이동은 동일 쌍에 대해 끝점 과분리(양의 SRM z)와 국소 기울기 감소(높은 JND/HYPO)를 동시에 유발한다 — 끝점을 벌리는 동일한 M' 피크 이동이 그 사이의 반응 곡선을 평탄화하기 때문이다.
+**설명 (수정: 2026-03-22)**:
+
+**1단계 — "고원(plateau) 가설" 기각**: Forward Model gradient profile 분석(§3-4)으로 검증한 결과, 복셀 공간에서 CVD의 국소 기울기는 평탄화되지 않았다 — 오히려 HC와 비례하거나 더 가팔랐다(V2 HYPO 쌍: gradient ratio 1.01~1.38). "끝점 과분리 + 중간 기울기 감소"라는 초기 설명은 기각된다. 단, gradient 분석이 전체 8색으로 학습한 W를 사용한 반면 LOCO는 7색 학습 W를 사용하므로(§3-4 참조), 이 분석은 LOCO 실패의 메커니즘과 다른 조건임에 유의.
+
+**2단계 — 수정된 해석: 0차 vs 고차 기하학의 해리**
+
+SRM z와 LOCO는 **모두 기하학적 연산**이지만, 색 다양체(manifold)의 서로 다른 **차수(order)**의 속성을 포착한다:
+
+| | SRM z | LOCO |
+|---|---|---|
+| 측정 대상 | 두 끝점 간 거리 (**0차**) | 이웃 색으로부터 held-out 색의 복원 가능성 (**고차**) |
+| 공간 | SRM 공유 공간 (K=3-4차원) | 원 복셀 공간 (수백 차원) |
+| 질문 | "두 색이 얼마나 먼가?" | "이 색을 이웃에서 보간할 수 있는가?" |
+| W 사용 | 없음 (직접 거리) | 피험자 자신의 데이터로 7색 ridge_gcv 학습 → 1색 예측 |
+
+LOCO가 측정하는 것: **피험자 자체 색 다양체의 국소 규칙성(local regularity)**. 7색으로 학습한 모델이 나머지 1색을 보간할 수 있으면 다양체가 매끄럽고, 실패하면 해당 색이 이웃 대비 불규칙한 위치에 있다. HC는 8색 모두 매끄럽게 보간 가능. CVD(sub-08)는 orange, yellow, purple 위치에서 보간 실패 — 이 색들이 cone shift로 인해 다양체의 국소 불규칙 지점이 되었음을 시사.
+
+SRM z는 0차(쌍별 거리)를 측정하므로, 끝점이 과분리(z+)되어도 국소 규칙성(보간 가능 여부)에 대해서는 정보를 제공하지 않는다. JND는 보간된 중간 자극의 변별이므로, 0차(거리)보다 고차(보간 충실도)에 의존한다.
+
+**핵심 관계**: SRM z와 LOCO가 **같은 색**(orange, yellow, purple)에서 이상을 감지하지만, SRM z의 **방향**(과분리→HYPER 예측)은 JND와 불일치하고, LOCO의 **방향**(보간 실패→HYPO 예측)은 JND와 일치한다. 이는 SRM z가 왜곡의 **위치**는 올바르게 포착하나, 왜곡의 **행동적 결과**를 예측하려면 고차 속성(보간 충실도)이 필요함을 시사한다.
 
 ### 3-2. LOCO 취약성 vs JND — 100% 일치
 
@@ -243,6 +262,48 @@ Crawford-Howell 검정: sub-08 개인 LOCO voxel_corr vs HC 분포 (df=6, 단측
 
 **시사점**: LOCO 취약성(고차 피질 통합을 포착)이 단순 분광 모델(HC1: 62.5%, HC2: 25%, HC평균: 40%)보다 우수한 예측자(100%, HC 기준 불변).
 
+### 3-4. Forward Model Gradient Profile 검증 — "고원 가설" 기각
+
+> 추가: 2026-03-22. 스크립트: `scripts/analysis_gradient_profile.py`
+
+**목적**: §3-1의 기존 설명("끝점 과분리 + 중간 기울기 평탄화")을 실증 검증.
+
+**방법**:
+1. 각 피험자의 ridge_gcv W matrix (6채널 FE basis, (6, V_s)) 로딩
+2. FE basis를 1° 해상도로 생성 → C(θ): (360, 6)
+3. Y_pred(θ) = C(θ) @ W → 각 θ에서 예측 복셀 패턴
+4. Local gradient(θ) = ||Y(θ+1) - Y(θ)|| (Euclidean)
+5. 각 색 쌍별로:
+   - Global distance = ||Y(θ_A) - Y(θ_B)|| → SRM z 대응
+   - Mean local gradient = 구간 내 gradient 평균 → JND 대응
+6. HC 7명 평균 vs CVD (sub-08) 비교
+
+**"고원" 예측**: HYPO 쌍에서 global ratio (CVD/HC) > 1 이면서 gradient ratio < 1.
+
+**결과**:
+
+| ROI | 쌍 | Global ratio | Gradient ratio | JND | 고원? |
+|-----|------|:---:|:---:|:---:|:---:|
+| V1 | orange-yellow | 1.02 | 1.02 | HYPO | **NO** |
+| V1 | yellow-green | 1.00 | 1.00 | HYPO | 경계 |
+| V1 | yellow-purple | 0.99 | 0.99 | HYPO | **NO** |
+| V2 | orange-yellow | **1.51** | **1.38** | HYPO | **NO** (둘 다 증가) |
+| V2 | yellow-green | 1.04 | 1.01 | HYPO | **NO** |
+| V2 | yellow-purple | **1.79** | **1.17** | HYPO | **NO** (둘 다 증가) |
+| V4 | orange-yellow | 2.27 | 2.33 | HYPO | **NO** (gradient 더 가파름) |
+| V4 | yellow-green | 1.78 | 1.55 | HYPO | **NO** |
+| V4 | yellow-purple | 2.97 | 2.20 | HYPO | **NO** |
+
+**전체 일치도**: Plateau+HYPO 조합은 V1 1건, V3 1건에 불과. 12개 HYPO 사례(4 ROI × 3 쌍) 중 2건(17%).
+
+**V2 핵심**: SRM z가 FDR-유의한 ROI에서 HYPO 3쌍 모두 global ratio > 1 **이면서** gradient ratio도 > 1. CVD의 복셀 공간 반응이 전체적으로 스케일업되었을 뿐, 끝점만 벌어지고 중간이 평탄해진 것이 아니다.
+
+**구조적 원인**: FE basis (cos², 6채널, 60° 폭)가 gradient profile의 **형태**를 결정하고 W matrix는 **진폭**만 조절. gradient(θ) = ||(C(θ+1) - C(θ)) @ W|| 에서 C 차분은 고정 → W 크기가 커지면 global distance와 local gradient가 **함께** 증가. 고원 패턴은 이 basis 구조에서 구조적으로 발생 불가.
+
+**결론**: "고원(plateau)" 메커니즘은 기각. SRM z-JND 불일치는 복셀 공간의 기울기 차이가 아니라, **SRM z(기하학적 거리)와 JND(보간 기반 변별)가 색 표상의 서로 다른 속성을 측정**하기 때문이다 (§3-1 수정된 해석 참조).
+
+> **출처**: `results/gradient_profile/summary.json`, `figures/gradient_profile_V{1,2,3,4}.png`, `figures/gradient_plateau_verification.png`
+
 ---
 
 ## 4. RSVP-LOCO 수렴
@@ -266,66 +327,247 @@ Crawford-Howell 검정: sub-08 개인 LOCO voxel_corr vs HC 분포 (df=6, 단측
 
 ## 5. 필터 설계 시사점
 
-### 5-1. 현재 이해
+### 5-1. SRM RDM의 역할 재정립 (수정: 2026-03-22)
 
-1. **LOCO 취약성 → JND HYPO (100%)**: 필터는 LOCO 실패 색(orange, yellow, purple)을 타겟해야 하며, SRM z 편차가 아님.
-2. **SRM z 양수 ≠ 더 나은 지각**: 끝점 과분리가 국소 보간에 도움이 되지 않음. SRM z를 HC 값으로 교정하는 것만으로는 불충분.
-3. **hV4 = 보간 오라클**: 순열 null을 통과하는 유일한 ROI (p=0.026-0.044). 필터는 hV4 LOCO 공간에서 주로 평가해야 함.
+SRM RDM과 JND의 불일치(§3-1, 33%)와 고원 가설 기각(§3-4)을 반영하여, SRM RDM의 위치를 재정립한다.
 
-### 5-2. HYPER 교정 가능성 (신규)
+**SRM RDM이 보여주는 것 (유효)**:
+- CVD 색 공간의 **기하학적 왜곡이 존재**한다는 독립 증거 (V2: FDR-유의 12쌍)
+- 왜곡의 **위치와 크기** (어떤 쌍이 과분리/압축되었는지)
+- 원추세포 이동의 신경적 영향에 대한 정량적 기술
 
-JND HYPER 쌍(red-orange 0.27x, red-cyan 0.32x, green-blue 0.75x, blue-purple 0.73x, cyan-magenta 0.84x)은 CVD가 해당 쌍을 HC보다 더 다르게 지각함을 시사. 두 가지 해석:
+**SRM RDM의 한계 — "방향" 예측 실패**:
+- SRM z의 **부호**(과분리/압축)는 JND 방향(HYPO/HYPER)을 예측하지 못함 (33%)
+- 과분리(양의 SRM z) ≠ 더 나은 지각
+- 단, SRM z와 LOCO는 **같은 색**(orange, yellow, purple)에서 이상을 감지 → SRM z가 왜곡의 **위치**는 올바르게 포착하나 **행동적 방향**을 예측하지 못하는 것 (§3-1 핵심 관계 참조)
+
+**SRM RDM fitting의 구조적 한계 (Phase 2 v2 발견)**:
+- SRM projection(R_cvd = SVD(data @ pinv(S)))이 CVD 데이터를 HC 공간에 최대 정렬 → cone shift 신호(δθ)가 R에 흡수
+- 결과: RDM 기반 δθ fitting 시 δθ=0이 항상 최적 → **fitting criterion으로 구조적으로 불가**
+- LOCO는 SRM projection 없이 원 복셀 공간에서 작동하므로 δθ 신호를 보존
+
+**결론**: SRM RDM은 **왜곡 위치의 존재 증거**로 유효하며, LOCO와 같은 색에서 이상을 감지하므로 두 지표는 관련이 있다. 그러나 SRM z의 부호는 행동 방향을 예측하지 못하고, RDM fitting은 SRM projection의 구조적 한계로 불가능하므로, LOCO가 fitting criterion이 되어야 한다.
+
+### 5-2. 수정된 파이프라인
+
+**기존 계획**:
+```
+SRM RDM 기반 δθ fitting → hV4 LOCO 평가
+```
+
+**수정 계획 (2026-03-22)**:
+```
+LOCO 기반 δθ fitting (primary) → SRM RDM 수렴 검증 (convergence validation)
+```
+
+- **Primary criterion**: LOCO MSE — 행동 예측력 100%, 기능적 보간 충실도 직접 측정
+- **Convergence validation**: LOCO에서 최적화된 δθ가 SRM RDM 왜곡도 교정하는지 확인
+  - 수렴하면: δθ가 기하학적 + 기능적 왜곡을 동시 설명 → 강한 증거
+  - 수렴하지 않으면: 기능적 교정은 달성했으나 기하학적 잔존 왜곡 → 해리 자체가 발견
+
+이 구조는 Phase 2 v2 파이프라인(MEMORY.md 참조)의 cross-eval 프레임워크와 일치: fit on A → eval on B.
+
+### 5-3. SRM RDM의 논문 내 위치
+
+SRM RDM 결과의 서술 프레임:
+
+> "CVD 색 공간은 SRM 공유 공간에서 유의한 기하학적 왜곡을 보인다 (V2: 12쌍 FDR-유의, 최대 z=+13.87). SRM z와 LOCO 취약성은 동일한 색(orange, yellow, purple)에서 이상을 감지하여, 두 지표가 같은 기저 왜곡(cone shift에 의한 색 다양체 변형)을 포착함을 시사한다. 그러나 SRM z의 부호(과분리 vs 압축)는 행동적 민감도 방향(HYPO vs HYPER)을 예측하지 못한 반면 (2/6=33%), LOCO 보간 실패는 JND HYPO 방향을 완벽히 예측하였다 (3/3=100%). 이 부분 해리는 쌍별 거리(0차 기하학)와 국소 보간 충실도(고차 기하학)가 동일 왜곡의 서로 다른 차수의 표현이며, 지각적 색 변별이 후자에 의존함을 보여준다."
+
+### 5-4. HYPER 교정 가능성
+
+JND HYPER 쌍(red-orange 0.27x, red-cyan 0.32x 등)은 CVD가 해당 쌍을 HC보다 더 다르게 지각함을 시사. 두 가지 해석:
 - **유익한 보상**: HYPER가 실생활 변별에 도움이 되면 유지
 - **왜곡**: HYPER가 지각적 균일성을 훼손하면 교정
 
 HYPO와 HYPER 모두 필터 타겟이 될 수 있으며, 목표가 HC 정상화인지 기능적 최적화인지에 따라 결정.
 
-### 5-3. 역방향 파이프라인 제안 (신규)
+---
 
-**현재 파이프라인** (Phase 2 계획):
+## 6. Geometry→Function Framework: RDM 시뮬레이션 기반 LOCO 재현 파이프라인
+
+> **상태**: 설계 단계 (2026-03-23). 실험 미실시.
+> **동기**: RDM이 표상적 원인을, LOCO/JND가 기능적 발현을 보여준다면, RDM 수준에서 추정한 왜곡으로 가상 뇌 데이터를 생성하여 LOCO 취약 패턴을 재현할 수 있는가?
+
+### 6-0. 핵심 논리
+
+| 수준 | 지표 | 질문 | 역할 |
+|------|------|------|------|
+| **표상적 원인** | RDM/ΔRDM | "어디가, 얼마나 왜곡되었나?" | Pathology의 **존재 증거** (§3-1: 위치 포착, 방향 불일치) |
+| **기능적 발현** | LOCO/JND | "어떤 색에서 보간이 실패하나?" | Pathology의 **행동적 결과** (§3-2: 100% JND 일치) |
+
+**RDM→LOCO 방향 불일치의 설명**: RDM은 쌍별 거리(0차), LOCO는 국소 보간 충실도(고차). 저차원 공간(K=3~4)에서의 끝점 거리 변화가 고차원 voxel 공간의 보간 가능성을 직접 결정하지 않음. 그러나 **동일한 색**(orange, yellow, purple)에서 양쪽 모두 이상 감지 → 공유된 기저 원인(cone shift) 존재.
+
+**피질 간 방향 차이의 자연성**: V1→V2→hV4로 갈수록 stimulus-driven → percept-driven 표상으로 전환 (Kim et al. 2020 PNAS). Anomalous trichromat의 V1 chromatic response 감소가 V2v/V3v에서 보상됨 (Tregillus et al. 2021 Curr Biol). RDM 왜곡 **방향**이 피질마다 다른 것은 neural compensation의 자연스러운 결과.
+
+**인과 가설**: "초기 표상(RDM) 왜곡을 교정하면, 하류 기능(LOCO/JND)도 개선될 수 있다."
+→ 직접 intervention 없이는 인과 입증 불가. 본 프레임워크는 **시뮬레이션 기반 필요조건 검증**: RDM 왜곡이 LOCO 실패를 **재현**하는지 확인. 재현 성공 = 인과의 필요조건 충족, 재현 실패 = 추가 메커니즘 존재.
+
+### 6-1. 파이프라인 설계
+
 ```
-SRM RDM 기반 교정 → hV4 LOCO 평가
+Phase A: δ 추정 (RDM criterion — fitting)
+────────────────────────────────────────
+1. HC mean W 고정 (기존 step0)
+2. δ sweep: C(θ+δ) @ W_HC → ΔRDM_sim or RDM comparison
+3. Loss = f(ΔRDM_sim(δ), ΔRDM_obs) — 다중 메트릭 (§6-2)
+4. δ*_RDM = argmin Loss
+5. Permutation test on δ*_RDM
+
+Phase B: Synthetic CVD-like brain data 생성
+────────────────────────────────────────
+6. Per-HC: Ŷ_δ_i = C(θ + δ*_RDM) @ W_HC_i   # (8, V_s)
+   Ŷ_δ = mean across 7 HCs
+
+Phase C: LOCO 재현 테스트 (독립 평가)
+────────────────────────────────────────
+7. Ŷ_δ에서 LOCO 수행 (synthetic data에 대한 7색→1색 보간):
+   For each color c:
+     C_train = C(θ+δ*)[나머지 7색]
+     W_sim = ridge_gcv(C_train, Ŷ_δ[나머지 7색])
+     Y_pred_c = C(θ+δ*)[c] @ W_sim
+     vuln_sim[c] = corr(Y_pred_c, Ŷ_δ[c])
+
+8. 비교:
+   a) Spearman(vuln_sim, vuln_CVD_observed)  → 프로파일 재현?
+   b) orange/yellow/purple이 vuln_sim에서도 취약?
+   c) Spearman(vuln_sim, JND_direction)      → 행동 예측?
+
+Phase D: 대조군 검증
+────────────────────────────────────────
+9. Null: random δ ~ U(-50, 50) × 1000 → LOCO profile →
+   observed match가 null보다 유의하게 높은가?
+10. sub-10 (normal): δ*_RDM에서 LOCO 문제 없어야 함
 ```
 
-**대안 파이프라인**:
+**순환성 방지**: fitting criterion (Phase A: RDM) ≠ evaluation criterion (Phase C: LOCO). RDM은 pairwise distance (28개 값), LOCO는 per-color interpolation fidelity (8개 값). 같은 데이터의 서로 다른 함수이나, 완전 독립은 아님 (Diedrichsen & Kriegeskorte 2017: encoding model ↔ RSA는 동일 2nd moment의 다른 표현). **진정한 독립 검증은 JND (외부 행동 데이터)**.
+
+**선행 연구 선례**: Sprague et al. (2018 eNeuro) — forward model synthetic data → decoder 적용 → ground truth 비교. Brouwer & Heeger (2013 J Neurosci) — gain model 시뮬레이션 → channel response → categorical clustering 재현.
+
+### 6-2. RDM fitting 다중 메트릭
+
+#### 6-2-1. 현재까지 테스트된 RDM 메트릭
+
+| 메트릭 | 방법 | 결과 | 한계 |
+|--------|------|------|------|
+| SRM-space RDM | A_g @ C(θ+δ)^T → pdist | **전 ROI 실패** | SRM alignment이 δθ 흡수 |
+| Voxel→SRM Path A | C(θ+δ)@W → SVD → SRM RDM | V1 sub-08 cone_3way r=0.543 | SD 높음, fold 불안정 |
+| Voxel RDM Path B | C(θ+δ)@W → pdist directly | 대부분 ≈0 | Voxel noise 지배 |
+| **ΔRDM (cone_1way)** | RDM_sim(δ)-RDM_sim(0) vs RDM_CVD-RDM_HC | **V1 sub-09 p=0.005*** | sub-08 실패, V4 FP |
+
+**핵심 미탐색**: ΔRDM은 **cone_1way만 테스트**. cone_3way, fourier 미실험. sub-08 deutan에서 S-cone shift가 관여할 가능성 → cone_3way ΔRDM이 개선될 수 있음.
+
+#### 6-2-2. 신규 RDM 거리 메트릭 (추가 실험 대상)
+
+**A) Cosine distance (angular distance)**
 ```
-hV4 복셀 예측 (Forward Model) 기반 교정 → SRM RDM V1/V2 평가
+d_cos(i,j) = 1 - (y_i · y_j) / (‖y_i‖ ‖y_j‖)
+```
+- 의미: "두 색의 voxel 패턴이 같은 방향인가?" (크기 무시)
+- Correlation distance와의 차이: correlation = mean-centered cosine. cosine = 원점 기준
+- BOLD 공통 baseline이 존재하면 양자가 다름
+- 장점: scale-free이면서 centering artifact 없음
+
+**B) Local triangle distortion**
+```
+Δ_local(i,j;k) = d(i,j) - [d(i,k) + d(k,j)] / 2
+```
+- 의미: "i-j 거리가 중간점 k를 경유한 평균 거리 대비 과대/과소인가?"
+- Δ < 0: shortcut (i,j가 k 경유보다 가까움) → manifold 오목
+- Δ > 0: detour (i,j가 k 경유보다 멀음) → manifold 볼록
+- k 선택: circular neighbors (i-1, i+1, j-1, j+1) 또는 all intermediate colors
+- **LOCO와의 직접 연결**: LOCO는 7색으로부터 1색을 보간 → local triangle distortion이 크면 보간 실패 예측
+- 산출: 8×8×8 tensor → (i,j) 쌍마다 k 평균 → 28개 값 (RDM과 동일 차원)
+
+**C) Cosine + triangle composite**
+```
+ΔRDM_composite(δ) = w₁ · ΔRDM_corr(δ) + w₂ · ΔRDM_cos(δ) + w₃ · Δ_triangle(δ)
+```
+가중치는 HC cross-validation으로 결정하거나, 각 메트릭 독립 fitting → 수렴 여부 확인.
+
+#### 6-2-3. Distortion model × RDM metric 실험 매트릭스
+
+| | ΔRDM corr | ΔRDM cosine | Local triangle | Vox→SRM Path A |
+|---|:---:|:---:|:---:|:---:|
+| **cone_1way** (df=1) | ✅ Done | ❌ TODO | ❌ TODO | ✅ Done (failed) |
+| **cone_3way** (df=3) | ❌ TODO | ❌ TODO | ❌ TODO | ✅ Done (V1 r=0.543) |
+| **fourier** (df=4) | ❌ TODO | ❌ TODO | ❌ TODO | ✅ Done (V1 r=0.804) |
+| **per_color** (df=8) | ❌ TODO | ❌ TODO | ❌ TODO | (overfitting risk) |
+
+**우선순위**: ΔRDM × {cone_3way, fourier} × {corr, cosine, triangle} = 6 조합. sub-08 deutan V1에서 우선 테스트 (ΔRDM cone_1way 실패한 조건).
+
+### 6-3. W Preservation 검증 (선행 조건)
+
+Synthetic data 생성의 핵심 가정: W_CVD ≈ W_HC (피질 인코딩 보존, 입력만 다름).
+
+**올바른 검증 방향**:
+```python
+# CVD 실제 반응 = W_true @ C(θ + δ_true) 가정
+# 따라서 CVD data를 cone-shifted basis로 학습하면:
+W_CVD_shifted = ridge_gcv(C(θ + δ*), X_CVD)  # shifted basis → CVD W
+W_HC_mean = mean(W_HC_i)                       # HC mean W
+
+# 프로파일 유사도
+sim = corr(W_CVD_shifted.flatten(), W_HC_mean.flatten())
+# sim > 0.8 → W preservation 지지
 ```
 
-**근거**: hV4는 검증된 그룹 사전분포를 가지므로(ZS ≈ LORO, p=0.913), hV4 forward model로 교정된 자극이 유발할 복셀 패턴을 예측한 후, 해당 교정이 V1/V2의 SRM 색 거리를 정상화하는지 검증 가능.
+주의: X_CVD 자체가 왜곡된 입력을 거친 반응이므로, C(θ-δ*)가 아니라 C(θ+δ*)를 사용해야 함. "CVD 망막이 실제로 보는 색(θ+δ)"에 맞게 W를 학습하는 것.
 
-**장점**:
-- V1/V2 SRM은 더 많은 유의 쌍 보유 (sub-08 V2에서 FDR 12쌍) → 풍부한 평가 신호
-- 보간이 실패하는 공간(V1/V2 SRM)이 아니라, 검증된 보간 모델(hV4)에 근거한 교정
-- 양방향: HYPO와 HYPER 교정을 동시 평가 가능
+**추가 검증**: Per-ROI voxel count, SNR, tuning selectivity (max(W)/std(W)) HC vs CVD 비교표 작성.
 
-**상태**: 제안 단계. 추가 행동 데이터 확보 후 구현 결정.
+### 6-4. 통계적 검정력 고려
+
+- N=3 CVD (1 deutan, 1 protan, 1 normal control) → 사례 연구(case study) 수준
+- Bayes factor (BF₁₀) 보고로 "증거 강도"를 정량화: BF > 10 = strong evidence, BF < 1/3 = evidence for null
+- 논문 프레이밍: "pilot framework" or "proof-of-concept" — replication cohort (N≥8 CVD) 명시
+
+### 6-5. 선행 연구 근거
+
+| 주제 | 핵심 논문 | 관련성 |
+|------|-----------|--------|
+| RDM-행동 연결 | Kriegeskorte et al. 2008 (Front Sys Neurosci) | RSA 프레임워크: neural RDM ↔ behavioral RDM |
+| Synthetic 검증 | Sprague et al. 2018 (eNeuro) | Forward model → synthetic data → decoder → ground truth 비교 |
+| 계층적 보상 | Tregillus et al. 2021 (Curr Biol) | V1 CVD 감소 → V2v/V3v 보상 |
+| V4 perceptual hub | Bannert & Bartels 2018 (J Neurosci) | hV4 encoding model → trial-by-trial 행동 예측 |
+| Cone shift 모델 | Machado et al. 2009 (IEEE TVCG) | Severity-parameterized cone fundamental interpolation |
+| Encoding-RSA 통합 | Diedrichsen & Kriegeskorte 2017 (PLOS CB) | Encoding model ↔ RSA = 동일 2nd moment의 다른 표현 |
+| V1→V4 전환 | Kim et al. 2020 (PNAS) | V1/V2 stimulus-driven, V4/VO1 percept-driven |
+
+### 6-6. Pending Validations
+
+- [ ] **V1**: ΔRDM × {cone_3way, fourier} × {corr, cosine, triangle} 6 조합 (sub-08 우선)
+- [ ] **V2**: 동일 매트릭스 (sub-08 ΔRDM cone_1way 실패 → cone_3way 개선 가능?)
+- [ ] **W preservation**: per-ROI W_CVD_shifted vs W_HC_mean 유사도
+- [ ] **Phase C**: Synthetic LOCO 재현 스크립트 (step4_synthetic_loco.py)
+- [ ] **Null distribution**: random δ × 1000 → LOCO profile → permutation p-value
+- [ ] **Bayes factor**: per subject-ROI BF₁₀ 계산
 
 ---
 
-## 6. 제한점 및 향후 계획
+## 7. 제한점 및 향후 계획
 
-### 6-1. 제한점
+### 7-1. 제한점
 - **표본 크기**: CVD N=1, HC N=2. 모든 발견은 사례 수준. 그룹 통계 불가.
-- **HC 개인차 극심**: HC1 vs HC2 JND가 5~13배 차이(§8 상세). HC 기준에 따라 방향 분류가 달라지는 쌍이 존재.
+- **HC 개인차 극심**: HC1 vs HC2 JND가 5~13배 차이(§9 상세). HC 기준에 따라 방향 분류가 달라지는 쌍이 존재.
 - **HC 피험자 불일치**: JND HC(CDX003, CDX004) ≠ fMRI HC(sub-01~sub-07). 피험자 내 직접 비교 불가.
 - **단색광 근사**: 원추세포 모델이 단일 파장 근사 사용. purple, magenta는 광대역 자극.
 - **fMRI-행동 비등록**: sub-08 행동 세션 ≠ sub-08 fMRI 세션.
-- **계단법 floor 효과**: HC2가 다수 쌍에서 level=0에 도달(§8 상세). 진정한 역치가 계단법 해상도 이하일 가능성.
+- **계단법 floor 효과**: HC2가 다수 쌍에서 level=0에 도달(§9 상세). 진정한 역치가 계단법 해상도 이하일 가능성.
+- **Gradient 분석의 basis 한계**: FE 6채널 basis의 매끄러움이 gradient profile 형태를 고정 → 더 높은 해상도의 basis(또는 비모수적 접근)에서는 고원 효과가 관찰될 가능성을 완전히 배제할 수 없음. 단, 현재 forward model의 최적 basis(FE-3~FE-8)가 LOCO를 잘 예측하므로, basis 해상도 자체가 병목이 아닐 가능성이 높다.
 
-### 6-2. 추가 데이터 수집 계획
+### 7-2. 추가 데이터 수집 계획
 - HC 및 CVD 추가 피험자 JND 검사
 - 피험자 내 fMRI + 행동 동시 검사
 - 확장된 색 쌍 세트 (8쌍 이상)
 
-### 6-3. 보류 분석
+### 7-3. 보류 분석
 - N>1 확보 시 정식 통계 비교
 - 개별 JND 값과 LOCO 색별 격차 간 상관
 - 정식 모델 비교: 원추세포 기울기 모델 vs LOCO 예측자 vs SRM z 예측자
 
 ---
 
-## 7. 출처 참조
+## 8. 출처 참조
 
 | 데이터 | 출처 파일 | 단계 |
 |------|------------|-------|
@@ -342,6 +584,7 @@ hV4 복셀 예측 (Forward Model) 기반 교정 → SRM RDM V1/V2 평가
 | LOCO 색별 | `analysis/future_phase1_forward_model/RESULTS.md` §3d | Future Phase 1 (Forward Model) |
 | LOCO 그룹 격차 | `analysis/future_phase1_forward_model/RESULTS.md` §2b | Future Phase 1 (Forward Model) |
 | 원추세포 모델 | `data/behav_pilot/cone_model_verify.py` | Phase 3 (행동) |
+| Gradient 검증 | `scripts/analysis_gradient_profile.py`, `results/gradient_profile/summary.json` | Phase 3 (검증) |
 
 ---
 

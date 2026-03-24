@@ -1,16 +1,18 @@
 #!/usr/bin/env python3
 """
-step3_fit_loro.py — Criterion 2: SRM-space LORO fitting.
+step3_fit_loro.py — Criterion 2: Voxel-space LORO fitting.
 
-Uses A_g in SRM space (NOT W0 in voxel space).
-W0 = (R_new @ A_g)^T contains CVD-specific R_new which absorbed partial cone shift.
-Working in SRM k-space keeps the model side R_new-free.
+Loads W0 directly from Phase 1 subject_weights (pre-computed by step_c):
+  W0 = (R_new @ A_g)^T   shape (K, V_s)
+
+Evaluates voxel-space pattern correlation (identical to Phase 1 prior_only):
+  Y_hat = C(theta+delta) @ W0   shape (8, V_s)
+  corr(Y_hat[c], X_test[c])     across V_s dimensions per color
 
 For each CVD subject x ROI x model:
-  1. Load A_g and compute R_new locally (no BrainIAK)
-  2. Project CVD per-run data to SRM space: Z_CVD_r = R_new^T @ Y_CVD_r^T
-  3. 6-fold LORO: predict Z_pred = A_g @ C(theta+delta)^T, compare to Z_CVD_r
-  4. Optimize delta_theta to maximize mean fold correlation
+  1. Load pre-computed W0 from Phase 1 subject_weights
+  2. 6-fold LORO: predict Y_hat = C(theta+delta) @ W0, compare to CVD run data
+  3. Optimize delta_theta to maximize mean fold voxel correlation
 
 Runs locally (conda env: srm).
 
@@ -36,7 +38,7 @@ sys.path.insert(0, _FWD_DIR)
 
 from utils_forward_model import (
     HC_SUBJECTS, CVD_SUBJECTS, ROIS, K_VALUES, N_CHANNELS,
-    HUE_ANGLES, N_RUNS, load_amplitudes,
+    HUE_ANGLES, N_RUNS, load_amplitudes, voxel_pattern_correlation,
 )
 from utils_distortion_models import (
     MODELS, get_design_matrix, get_initial_params, compute_aicc,
@@ -50,37 +52,21 @@ FWD_RESULTS = Path(__file__).resolve().parent.parent.parent.parent \
 CVD_TYPE = {'08': 'deutan', '09': 'protan', '10': 'normal'}
 
 
-def compute_R_new(beta_cvd, shared_response):
-    """Compute CVD SRM projection without BrainIAK."""
-    S = shared_response
-    W_init = beta_cvd.T @ np.linalg.pinv(S)
-    U, _, Vt = np.linalg.svd(W_init, full_matrices=False)
-    return U @ Vt
+def loro_objective(params, model_name, W0, cvd_runs, cvd_type):
+    """Negative mean LORO voxel correlation.
 
-
-def loro_objective(params, model_name, A_g, Z_cvd_runs, cvd_type):
-    """Negative mean LORO correlation in SRM space.
-
-    Z_pred = A_g @ C(theta+delta)^T  (model, NO R_new)
-    Z_test = Z_cvd_runs[run]          (target via R_new, fixed)
+    Y_hat = C(theta+delta) @ W0    (8, V_s) — voxel-space prediction
+    X_test = cvd_runs[run]         (8, V_s) — actual CVD run data
+    corr across V_s dimensions per color (identical to Phase 1 evaluate_fold_loro).
     """
     C_shifted = get_design_matrix(model_name, params, cvd_type=cvd_type)
-    Z_pred = A_g @ C_shifted.T  # (k, 8) — model prediction
+    Y_hat = C_shifted @ W0  # (8, V_s)
 
     fold_corrs = []
     for run in range(N_RUNS):
-        Z_test = Z_cvd_runs[run]  # (k, 8)
-        # Pattern correlation across k dimensions for each color
-        corrs = []
-        for c in range(8):
-            pred_vec = Z_pred[:, c]
-            test_vec = Z_test[:, c]
-            if np.std(pred_vec) == 0 or np.std(test_vec) == 0:
-                corrs.append(0.0)
-            else:
-                r = np.corrcoef(pred_vec, test_vec)[0, 1]
-                corrs.append(r if np.isfinite(r) else 0.0)
-        fold_corrs.append(np.mean(corrs))
+        X_test = cvd_runs[run]  # (8, V_s)
+        r = voxel_pattern_correlation(Y_hat, X_test)  # (8,)
+        fold_corrs.append(float(np.mean(r)))
 
     return -np.mean(fold_corrs)
 
@@ -89,37 +75,22 @@ def fit_loro(roi, cvd_subj, output_dir):
     """Run LORO fitting for one CVD subject x ROI."""
     cvd_type = CVD_TYPE[cvd_subj]
 
-    # Load SRM data
-    A_g = np.load(FWD_RESULTS / 'group_prior' / roi / 'A_g.npy')
-    S = np.load(FWD_RESULTS / 'srm_projections' / roi / 'shared_response.npy')
+    # Load W0 from Phase 1 (pre-computed by step_c_project_prior.py)
+    W0_path = FWD_RESULTS / 'subject_weights' / roi / f'sub-{cvd_subj}_W0.npy'
+    W0 = np.load(W0_path)  # (K, V_s)
+    V_s = W0.shape[1]
 
-    # CVD data
+    # CVD per-run data in voxel space
     amp_cvd = load_amplitudes(LOCAL_BASELINE, cvd_subj, roi)
-    beta_cvd = amp_cvd.mean(axis=0)  # (8, V_s)
-    R_new = compute_R_new(beta_cvd, S)
+    cvd_runs = [amp_cvd[run] for run in range(N_RUNS)]  # each (8, V_s)
 
-    # Project CVD per-run to SRM space
-    Z_cvd_runs = []
-    for run in range(N_RUNS):
-        Y_run = amp_cvd[run]  # (8, V_s)
-        Z_run = R_new.T @ Y_run.T  # (k, 8)
-        Z_cvd_runs.append(Z_run)
-
-    # Baseline: delta=0 (unshifted)
+    # Baseline: delta=0 (unshifted) — should match Phase 1 prior_only LORO
     C_orig = get_design_matrix('per_color', [0]*8)
-    Z_pred_orig = A_g @ C_orig.T
+    Y_hat_orig = C_orig @ W0  # (8, V_s)
     baseline_corrs = []
     for run in range(N_RUNS):
-        run_corrs = []
-        for c in range(8):
-            pv = Z_pred_orig[:, c]
-            tv = Z_cvd_runs[run][:, c]
-            if np.std(pv) > 0 and np.std(tv) > 0:
-                r = np.corrcoef(pv, tv)[0, 1]
-                run_corrs.append(r if np.isfinite(r) else 0.0)
-            else:
-                run_corrs.append(0.0)
-        baseline_corrs.append(np.mean(run_corrs))
+        r = voxel_pattern_correlation(Y_hat_orig, cvd_runs[run])
+        baseline_corrs.append(float(np.mean(r)))
     baseline_score = float(np.mean(baseline_corrs))
 
     model_results = {}
@@ -129,7 +100,7 @@ def fit_loro(roi, cvd_subj, output_dir):
 
         res = minimize(
             loro_objective, x0,
-            args=(model_name, A_g, Z_cvd_runs, cvd_type),
+            args=(model_name, W0, cvd_runs, cvd_type),
             method='L-BFGS-B', bounds=bounds,
             options={'maxiter': 500, 'ftol': 1e-10}
         )
@@ -159,6 +130,7 @@ def fit_loro(roi, cvd_subj, output_dir):
         'cvd_type': cvd_type,
         'timestamp': datetime.now().isoformat(),
         'k': int(K_VALUES[roi]),
+        'n_voxels': V_s,
         'baseline_loro_corr': baseline_score,
         'models': model_results,
     }
@@ -175,7 +147,7 @@ def main():
     args = parser.parse_args()
 
     print('=' * 60)
-    print('Step 3: SRM-Space LORO Fitting (Criterion 2)')
+    print('Step 3: Voxel-Space LORO Fitting (Criterion 2)')
     print(f'ROIs: {args.rois}')
     print(f'CVD subjects: {args.cvd_subjects}')
     print('=' * 60)

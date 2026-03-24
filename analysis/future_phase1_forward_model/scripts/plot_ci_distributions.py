@@ -430,8 +430,17 @@ def plot_per_color_hv4(save=True):
         jit_cvd = np.random.uniform(-0.06, 0.06, len(cvd_vals))
         ax.scatter(x[ci_idx] - width/2 + jit_hc, hc_vals,
                    c="black", s=18, alpha=0.5, zorder=6)
-        ax.scatter(x[ci_idx] + width/2 + jit_cvd, cvd_vals,
-                   c="#B71C1C", s=25, marker="^", alpha=0.7, zorder=6)
+
+        # CVD dots with subject labels
+        for cvd_idx, (y_val, jit) in enumerate(zip(cvd_vals, jit_cvd)):
+            ax.scatter(x[ci_idx] + width/2 + jit, y_val,
+                       c="#B71C1C", s=25, marker="^", alpha=0.7, zorder=6)
+            # Add subject label for CVD only
+            subj_id = CVD_SUBS[cvd_idx]
+            ax.annotate(f'sub-{subj_id}',
+                        xy=(x[ci_idx] + width/2 + jit, y_val),
+                        xytext=(3, 3), textcoords='offset points',
+                        fontsize=7, color='#B71C1C', alpha=0.8)
 
     ax.axhline(0, color="black", ls="-", lw=0.5, alpha=0.3)
     ax.set_xticks(x)

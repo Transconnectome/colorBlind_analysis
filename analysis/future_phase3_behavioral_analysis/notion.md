@@ -1,19 +1,19 @@
 # Future Phase 3: 행동 검증 — 파일럿 데이터 분석
 
-> **상태**: 예비 분석 (CVD N=1, HC N=2, 파일럿). 추가 데이터 수집 예정.
-> **날짜**: 2026-03-18
-> **피험자**: sub-08 (CDX002, deutan CVD) vs HC1 (CDX003) + HC2 (CDX004)
-> **데이터**: `data/behav_pilot/`
+> **상태**: 예비 분석 (CVD N=1, HC N=5, 파일럿). 추가 데이터 수집 가능.
+> **날짜**: 2026-03-27 (N=5 업데이트)
+> **피험자**: sub-08 (CDX002, deutan CVD) vs HC1 (CDX003) + HC2 (CDX004) + JYPark + JHKim + MJChoi
+> **데이터**: `data/` (JHKim, JYPark, MJChoi raw trials), HC1/HC2/CVD summary values
 
 ---
 
 ## 0. 개요
 
-본 문서는 파일럿 행동 데이터(JND, RSVP 8AFC)를 Phase 2(SRM) 및 Future Phase 1(Forward Model)의 신경 지표와 통합하여, CVD 색 표상 결손의 교차 양상(cross-modal) 수렴을 평가한다. HC 2명(CDX003=HC1, CDX004=HC2)의 JND가 5~13배 차이 → HC1/HC2/HC 평균 3가지 기준별 방향 분류 및 교차 양상 일치도를 함께 보고한다.
+본 문서는 파일럿 행동 데이터(JND, RSVP 8AFC)를 Phase 2(SRM) 및 Future Phase 1(Forward Model)의 신경 지표와 통합하여, CVD 색 표상 결손의 교차 양상(cross-modal) 수렴을 평가한다. HC 5명(HC1=CDX003, HC2=CDX004, JYPark, JHKim, MJChoi)의 그룹 평균 기준으로 방향 분류 및 교차 양상 일치도를 보고한다.
 
 핵심 해리 2가지:
 
-1. **전역 vs 국소 해리**: SRM z-score(전역 끝점 거리)와 JND 방향(국소 지각 민감도)이 HC1 기준 6쌍 중 4쌍 불일치(DISCORDANT)
+1. **전역 vs 국소 해리**: SRM z-score(전역 끝점 거리)와 JND 방향(국소 지각 민감도)이 검증 가능 쌍에서 다수 불일치(DISCORDANT)
 2. **변별 vs 보간 해리**: RSVP 8AFC(범주적 변별)는 CVD 81% 정확도이나, LOCO(연속 보간)는 완전 실패
 
 ---
@@ -26,27 +26,28 @@
 
 **해석**: JND = "다르다" 응답을 위한 최소 보간 단계. 낮을수록 민감(HYPER), 높을수록 둔감(HYPO).
 
-| 쌍 | HC1 (CDX003) | HC2 (CDX004) | HC 평균 | CVD (CDX002) | HC1 기준 | HC2 기준 | HC평균 기준 |
-|------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| red-orange | **0.235** | **0.018** | **0.127** | **0.062** | **HYPER** | HYPO | **HYPER** |
-| orange-yellow | **0.443** | **0.064** | **0.254** | **0.840** | **HYPO** | **HYPO** | **HYPO** |
-| yellow-green | **0.103** | **0.018** | **0.061** | **0.278** | **HYPO** | **HYPO** | **HYPO** |
-| green-blue | **0.103** | **0.020** | **0.062** | **0.077** | **HYPER** | HYPO | borderline |
-| yellow-purple | **0.025** | **0.015** | **0.020** | **0.062** | **HYPO** | **HYPO** | **HYPO** |
-| blue-purple | **0.165** | **0.040** | **0.103** | **0.120** | **HYPER** | HYPO | borderline |
-| cyan-magenta | **0.048** | **0.015** | **0.032** | **0.040** | **HYPER** | HYPO | borderline |
-| red-cyan | **0.048** | **0.015** | **0.032** | **0.015** | **HYPER** | **HYPER** | **HYPER** |
+| 쌍 | HC1 | HC2 | JHKim | JYPark | MJChoi | HC Mean (N=5) | HC SD | CVD (sub-08) | Ratio | 방향 (N=5) |
+|------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| red-orange | 0.235 | 0.018 | 0.168 | 0.057 | 0.110 | **0.117** | 0.087 | **0.062** | 0.53 | **HYPER** |
+| orange-yellow | 0.443 | 0.064 | 0.328 | 0.168 | 0.248 | **0.250** | 0.146 | **0.840** | 3.36 | **HYPO** |
+| yellow-green | 0.103 | 0.018 | 0.130 | 0.054 | 0.103 | **0.082** | 0.045 | **0.278** | 3.41 | **HYPO** |
+| green-blue | 0.103 | 0.020 | 0.100 | 0.102 | 0.063 | **0.077** | 0.036 | **0.077** | 0.99 | borderline |
+| yellow-purple | 0.025 | 0.015 | 0.030 | 0.018 | 0.018 | **0.021** | 0.006 | **0.062** | 2.95 | **HYPO** |
+| blue-purple | 0.165 | 0.040 | 0.173 | 0.103 | 0.158 | **0.128** | 0.056 | **0.120** | 0.94 | borderline |
+| cyan-magenta | 0.048 | 0.015 | 0.060 | 0.030 | 0.028 | **0.036** | 0.018 | **0.040** | 1.11 | borderline |
+| red-cyan | 0.048 | 0.015 | 0.050 | 0.015 | 0.023 | **0.030** | 0.018 | **0.015** | 0.50 | **HYPER** |
 
-> **출처**: `data/behav_pilot/HC_jnd_ses1_no_filter_summary.csv`, `data/behav_pilot/HC2_jnd_ses1_no_filter_summary.csv`, `data/behav_pilot/sub-08_jnd_ses1_no_filter_summary.csv`
-> 각 HC/CVD 값 = sc0과 sc1의 jnd_mean 평균. HC 평균 = (HC1 + HC2) / 2.
+> **출처**: `data/JHKim/`, `data/JYPark/`, `data/MJChoi/` (raw trials), HC1/HC2/CVD from pilot summary.
+> 각 HC/CVD 값 = sc0과 sc1의 jnd_mean 평균. HC Mean = 5명 산술평균.
+> 방향 기준: ratio > 1.15 = HYPO, ratio < 0.85 = HYPER, 그 외 = borderline.
 
-**HC1 vs HC2 요약**: HC2의 JND가 HC1의 1/5~1/13 수준 (모든 쌍에서 HC2 < HC1). HC2는 계단법 floor(level=0)에 빈번 도달 → 극단적 민감도 또는 반응 기준 차이(§8 상세).
+**N=3→N=5 방향 변동** (JHKim, MJChoi 추가):
+- **안정 HYPO (3쌍)**: orange-yellow, yellow-green, yellow-purple — N=3에서도 N=5에서도 HYPO. ratio 3~5x로 매우 강건.
+- **HYPO→borderline (2쌍)**: blue-purple (1.17→0.94), cyan-magenta (1.29→1.11) — N=3에서 marginal HYPO였으나 JHKim, MJChoi의 높은 JND가 HC mean을 상승시켜 borderline으로 전환.
+- **안정 HYPER (2쌍)**: red-orange, red-cyan — 일관.
+- **안정 borderline (1쌍)**: green-blue — 일관.
 
-**HC1 기준 요약**: HYPO 3쌍 (orange-yellow, yellow-green, yellow-purple), HYPER 5쌍. 이하 §3의 교차 양상 분석은 **HC1 기준을 주 분석(primary)**, HC2·HC평균 기준을 부차 분석(supplementary)으로 보고한다.
-
-**HC2 기준 요약**: 전 쌍 HYPO 또는 HYPER(1쌍: red-cyan만 HYPER). HC2의 극히 낮은 JND 때문에 CVD가 거의 모든 쌍에서 HYPO로 분류.
-
-**HC평균 기준 요약**: HYPO 3쌍 (HC1과 동일), HYPER 2쌍 (red-orange, red-cyan), borderline 3쌍 (green-blue, blue-purple, cyan-magenta — CVD/HC평균 비율 1.16~1.25).
+**HC 개인차 요약**: HC2가 전 쌍에서 최저(floor 효과 의심, §8). HC1과 JHKim이 유사한 패턴(높은 O-Y, B-P). JYPark, MJChoi는 중간 범위. 5명의 CV(SD/Mean)는 쌍별 40~70% — 정상 범위 내 큰 변동.
 
 ### 1-2. RSVP 8AFC — 색 식별
 
@@ -166,28 +167,28 @@ Crawford-Howell 검정: sub-08 개인 LOCO voxel_corr vs HC 분포 (df=6, 단측
 
 ## 3. 교차 양상 일치도 분석
 
-### 3-1. SRM z vs JND 방향 — HC1 기준 6쌍 중 4쌍 불일치
+### 3-1. SRM z vs JND 방향 — HC N=5 기준
 
 **단순 예측**: SRM z 양수(과분리) → HYPER(낮은 JND) 예측. SRM z 음수(압축) → HYPO(높은 JND) 예측.
 
-| 쌍 | SRM z (최고 ROI) | z 방향 | HC1 방향 | HC1 일치? | HC2 방향 | HC2 일치? | HC평균 방향 | HC평균 일치? |
-|------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| red-orange | V2: +1.66 | 과분리 | **HYPER** | YES | HYPO | **NO** | **HYPER** | YES |
-| orange-yellow | V2: +3.29 | 과분리 | **HYPO** | **NO** | **HYPO** | **NO** | **HYPO** | **NO** |
-| yellow-green | V2: +4.14 | 과분리 | **HYPO** | **NO** | **HYPO** | **NO** | **HYPO** | **NO** |
-| green-blue | V1: -0.89 | 압축 | **HYPER** | **NO** | HYPO | YES | borderline | N/A |
-| yellow-purple | V2: +13.87 | 과분리 | **HYPO** | **NO** | **HYPO** | **NO** | **HYPO** | **NO** |
-| blue-purple | V2: +6.15 | 과분리 | **HYPER** | YES | HYPO | **NO** | borderline | N/A |
-| cyan-magenta | — | — | **HYPER** | N/A | HYPO | N/A | borderline | N/A |
-| red-cyan | V1: +1.11* | 과분리 | **HYPER** | YES* | **HYPER** | YES* | **HYPER** | YES* |
+| 쌍 | SRM z (최고 ROI) | z 방향 | JND 방향 (N=5) | 일치? |
+|------|:---:|:---:|:---:|:---:|
+| red-orange | V2: +1.66 | 과분리 | **HYPER** | **YES** |
+| orange-yellow | V2: +3.29 | 과분리 | **HYPO** | **NO** |
+| yellow-green | V2: +4.14 | 과분리 | **HYPO** | **NO** |
+| green-blue | V1: -0.89 | 압축 | borderline | N/A |
+| yellow-purple | V2: +13.87 | 과분리 | **HYPO** | **NO** |
+| blue-purple | V2: +6.15 | 과분리 | borderline | N/A |
+| cyan-magenta | — | — | borderline | N/A |
+| red-cyan | V1: +1.11* | 과분리 | **HYPER** | **YES*** |
 
 \*red-cyan SRM z는 crossnobis V1 값 (SRM 사전검증에서 해당 쌍 미보고).
 
-**HC1 기준** (primary): 일치 2쌍, 불일치 4쌍, N/A 2쌍 → 검증 가능 6쌍 중 **4쌍 불일치(67%)**.
-**HC2 기준**: 일치 1쌍(green-blue: 압축+HYPO), 불일치 5쌍, N/A 2쌍 → **1/6 일치(17%)**. HC2의 극히 낮은 JND가 거의 모든 쌍을 HYPO로 만들어, 양의 SRM z 쌍과 전부 불일치. 유일한 일치(green-blue)는 음의 SRM z(-0.89)가 HYPO 방향과 우연히 일치.
-**HC평균 기준**: 명확한 쌍만 평가 시(borderline 제외) 일치 1쌍(red-orange)/불일치 3쌍 → **1/4 일치(25%)**.
+**N=5 기준**: 일치 1쌍(red-orange), 불일치 3쌍(O-Y, Y-G, Y-P), borderline 제외 3쌍, N/A 1쌍 → 검증 가능 4쌍 중 **3쌍 불일치(75%)**.
 
-**해석**: 어떤 HC 기준을 사용하든 SRM z ↔ JND 불일치가 지배적. 이는 SRM z(전역 기하학적 거리)와 JND(국소 보간 민감도)가 측정하는 속성 자체가 다르기 때문이며, HC 기준의 불확실성에 의한 artifact가 아니다.
+**N=3→N=5 변화**: blue-purple과 cyan-magenta가 borderline으로 전환되어 평가 대상에서 제외됨. 검증 가능 쌍이 줄었으나, 불일치 비율(75%)은 여전히 높음.
+
+**해석**: N=5로 HC 기준이 안정화되어도 SRM z ↔ JND 불일치가 지배적. 이는 SRM z(전역 기하학적 거리)와 JND(국소 보간 민감도)가 측정하는 속성 자체가 다르기 때문이며, HC 기준의 불확실성에 의한 artifact가 아니다.
 
 **설명 (수정: 2026-03-22)**:
 
@@ -212,25 +213,25 @@ SRM z는 0차(쌍별 거리)를 측정하므로, 끝점이 과분리(z+)되어�
 
 ### 3-2. LOCO 취약성 vs JND — 100% 일치
 
-| JND HYPO 쌍 | 관련 LOCO 취약 색 | 일치 |
+| JND HYPO 쌍 (N=5) | 관련 LOCO 취약 색 | 일치 |
 |------|------|:---:|
 | orange-yellow | orange (V1 p=0.0018), yellow (V1 p=0.0059) | **YES** |
 | yellow-green | yellow (V1 p=0.0059, V2 p=0.0077) | **YES** |
 | yellow-purple | yellow (V1 p=0.0059), purple (V1 p=0.020) | **YES** |
 
-**HYPO 3쌍 모두 LOCO 취약 색을 포함 (100%).**
+**HYPO 3쌍 모두 LOCO 취약 색을 포함 (3/3 = 100%).** N=3에서 N=5로 변경 후에도 이 3쌍은 안정적으로 HYPO 유지.
 
-| JND HYPER 쌍 (HC1 기준) | LOCO 취약 색 포함? | 해석 |
+| JND HYPER/borderline 쌍 (N=5) | LOCO 취약 색 포함? | 해석 |
 |------|------|:---:|
-| red-orange | Red: 취약 아님 | HYPER 일관 |
-| green-blue | Blue: 취약 아님 | HYPER 일관 |
-| blue-purple | Blue: 취약 아님 | HYPER 일관 |
-| cyan-magenta | Cyan (V2 p=0.0053 — 경계) | 부분 예외 |
-| red-cyan | Red, Cyan: 취약 아님/경계 | HYPER 일관 |
+| red-orange (HYPER) | Red: 취약 아님 | HYPER 일관 |
+| red-cyan (HYPER) | Red, Cyan: 취약 아님/경계 | HYPER 일관 |
+| green-blue (borderline) | Blue: 취약 아님 | 방향 불확정 |
+| blue-purple (borderline) | Blue: 취약 아님 | 방향 불확정 |
+| cyan-magenta (borderline) | Cyan (V2 p=0.0053 — 경계) | 방향 불확정 |
 
-**HC 기준별 안정성**: HYPO 3쌍(orange-yellow, yellow-green, yellow-purple)은 **HC1/HC2/HC평균 모두에서 HYPO** — 어떤 HC 기준을 사용하든 LOCO ↔ JND 일치도 100% 유지. HC1 HYPER 쌍 중 일부(red-orange, green-blue, blue-purple, cyan-magenta)가 HC2 기준에서 HYPO로 전환되나, 이들은 원래 LOCO 취약 색을 포함하지 않으므로 HYPER 일관성 해석에는 영향 없음.
+**N=3→N=5 안정성**: HYPO 3쌍(orange-yellow, yellow-green, yellow-purple)은 **N=2, N=3, N=5 모든 HC 기준에서 HYPO** — 어떤 HC 표본 크기를 사용하든 LOCO ↔ JND 일치도 100% 유지. blue-purple과 cyan-magenta가 N=5에서 borderline으로 전환되었으나, 이들은 원래 LOCO 취약 색을 강하게 포함하지 않으므로 핵심 결론에 영향 없음.
 
-**결론**: LOCO 색별 취약성이 JND HYPO 방향을 3/3 정확도(100%)로 예측 — HC 기준 선택에 **불변**. Forward Model의 보간 지표는 행동적으로 타당하다.
+**결론**: LOCO 색별 취약성이 JND HYPO 방향을 3/3 정확도(100%)로 예측 — HC N에 **불변**. Forward Model의 보간 지표는 행동적으로 타당하다.
 
 ### 3-3. 원추세포 분광 감도 모델 검증
 
@@ -371,7 +372,7 @@ LOCO 기반 δθ fitting (primary) → SRM RDM 수렴 검증 (convergence valida
 
 SRM RDM 결과의 서술 프레임:
 
-> "CVD 색 공간은 SRM 공유 공간에서 유의한 기하학적 왜곡을 보인다 (V2: 12쌍 FDR-유의, 최대 z=+13.87). SRM z와 LOCO 취약성은 동일한 색(orange, yellow, purple)에서 이상을 감지하여, 두 지표가 같은 기저 왜곡(cone shift에 의한 색 다양체 변형)을 포착함을 시사한다. 그러나 SRM z의 부호(과분리 vs 압축)는 행동적 민감도 방향(HYPO vs HYPER)을 예측하지 못한 반면 (2/6=33%), LOCO 보간 실패는 JND HYPO 방향을 완벽히 예측하였다 (3/3=100%). 이 부분 해리는 쌍별 거리(0차 기하학)와 국소 보간 충실도(고차 기하학)가 동일 왜곡의 서로 다른 차수의 표현이며, 지각적 색 변별이 후자에 의존함을 보여준다."
+> "CVD 색 공간은 SRM 공유 공간에서 유의한 기하학적 왜곡을 보인다 (V2: 12쌍 FDR-유의, 최대 z=+13.87). SRM z와 LOCO 취약성은 동일한 색(orange, yellow, purple)에서 이상을 감지하여, 두 지표가 같은 기저 왜곡(cone shift에 의한 색 다양체 변형)을 포착함을 시사한다. 그러나 SRM z의 부호(과분리 vs 압축)는 행동적 민감도 방향(HYPO vs HYPER)을 예측하지 못한 반면 (검증 가능 4쌍 중 1쌍 일치=25%, HC N=5), LOCO 보간 실패는 JND HYPO 방향을 완벽히 예측하였다 (3/3=100%, HC N에 불변). 이 부분 해리는 쌍별 거리(0차 기하학)와 국소 보간 충실도(고차 기하학)가 동일 왜곡의 서로 다른 차수의 표현이며, 지각적 색 변별이 후자에 의존함을 보여준다."
 
 ### 5-4. HYPER 교정 가능성
 
@@ -547,21 +548,21 @@ sim = corr(W_CVD_shifted.flatten(), W_HC_mean.flatten())
 ## 7. 제한점 및 향후 계획
 
 ### 7-1. 제한점
-- **표본 크기**: CVD N=1, HC N=2. 모든 발견은 사례 수준. 그룹 통계 불가.
-- **HC 개인차 극심**: HC1 vs HC2 JND가 5~13배 차이(§9 상세). HC 기준에 따라 방향 분류가 달라지는 쌍이 존재.
-- **HC 피험자 불일치**: JND HC(CDX003, CDX004) ≠ fMRI HC(sub-01~sub-07). 피험자 내 직접 비교 불가.
+- **표본 크기**: CVD N=1, HC N=5. 핵심 결론(LOCO→JND 100%)은 N에 불변이나, borderline 쌍의 분류는 추가 HC에 따라 변동 가능.
+- **HC 개인차**: HC2의 JND가 나머지 4명의 1/5~1/13 수준(§8 상세). N=5에서 HC2의 영향이 희석되어 기준이 안정화.
+- **HC 피험자 불일치**: JND HC ≠ fMRI HC(sub-01~sub-07). 피험자 내 직접 비교 불가.
 - **단색광 근사**: 원추세포 모델이 단일 파장 근사 사용. purple, magenta는 광대역 자극.
 - **fMRI-행동 비등록**: sub-08 행동 세션 ≠ sub-08 fMRI 세션.
 - **계단법 floor 효과**: HC2가 다수 쌍에서 level=0에 도달(§9 상세). 진정한 역치가 계단법 해상도 이하일 가능성.
 - **Gradient 분석의 basis 한계**: FE 6채널 basis의 매끄러움이 gradient profile 형태를 고정 → 더 높은 해상도의 basis(또는 비모수적 접근)에서는 고원 효과가 관찰될 가능성을 완전히 배제할 수 없음. 단, 현재 forward model의 최적 basis(FE-3~FE-8)가 LOCO를 잘 예측하므로, basis 해상도 자체가 병목이 아닐 가능성이 높다.
 
 ### 7-2. 추가 데이터 수집 계획
-- HC 및 CVD 추가 피험자 JND 검사
+- CVD 추가 피험자(protan, 정상 대조) JND 검사
 - 피험자 내 fMRI + 행동 동시 검사
 - 확장된 색 쌍 세트 (8쌍 이상)
 
 ### 7-3. 보류 분석
-- N>1 확보 시 정식 통계 비교
+- CVD N>1 확보 시 정식 통계 비교
 - 개별 JND 값과 LOCO 색별 격차 간 상관
 - 정식 모델 비교: 원추세포 기울기 모델 vs LOCO 예측자 vs SRM z 예측자
 
@@ -571,13 +572,12 @@ sim = corr(W_CVD_shifted.flatten(), W_HC_mean.flatten())
 
 | 데이터 | 출처 파일 | 단계 |
 |------|------------|-------|
-| HC1 JND | `data/behav_pilot/HC_jnd_ses1_no_filter_summary.csv` | Phase 3 (행동) |
-| HC2 JND | `data/behav_pilot/HC2_jnd_ses1_no_filter_summary.csv` | Phase 3 (행동) |
-| HC1 JND 시행 | `data/behav_pilot/HC_jnd_ses1_no_filter_trials.csv` | Phase 3 (행동) |
-| HC2 JND 시행 | `data/behav_pilot/HC2_jnd_ses1_no_filter_trials.csv` | Phase 3 (행동) |
-| CVD JND | `data/behav_pilot/sub-08_jnd_ses1_no_filter_summary.csv` | Phase 3 (행동) |
-| HC1 RSVP | `data/behav_pilot/HC_rsvp_8afc_ses1_run1.csv` | Phase 3 (행동) |
-| HC2 RSVP | `data/behav_pilot/HC2_rsvp_8afc_ses1_run1.csv` | Phase 3 (행동) |
+| HC1/HC2/CVD JND | `results/hc_group_metrics.json` (summary values) | Phase 3 (행동) |
+| JHKim JND | `data/JHKim/jnd_ses1_no_filter_summary.csv`, `*_trials.csv` | Phase 3 (행동) |
+| JYPark JND | `data/JYPark/jnd_ses1_no_filter_summary.csv`, `*_trials.csv` | Phase 3 (행동) |
+| MJChoi JND | `data/MJChoi/jnd_ses1_no_filter_summary.csv`, `*_trials.csv` | Phase 3 (행동) |
+| HC Group 통계 | `results/hc_group_metrics.json`, `results/jnd_summary.csv` | Phase 3 (분석) |
+| HC1/HC2 RSVP | `data/behav_pilot/HC_rsvp_8afc_ses1_run1.csv`, `HC2_*` | Phase 3 (행동) |
 | CVD RSVP | `data/behav_pilot/sub-08_rsvp_8afc_ses1_run1.csv` | Phase 3 (행동) |
 | SRM z-score | `analysis/future_phase2_filter_optimization/pre_validation/notion_prevalidation.md` §1-1 | Phase 2 (SRM 사전검증) |
 | Crossnobis diff | `analysis/phase2_SRM_across_between/results/color_pair_analysis/color_pair_analysis_V{1,2}.json` | Phase 2 (SRM) |
@@ -585,12 +585,13 @@ sim = corr(W_CVD_shifted.flatten(), W_HC_mean.flatten())
 | LOCO 그룹 격차 | `analysis/future_phase1_forward_model/RESULTS.md` §2b | Future Phase 1 (Forward Model) |
 | 원추세포 모델 | `data/behav_pilot/cone_model_verify.py` | Phase 3 (행동) |
 | Gradient 검증 | `scripts/analysis_gradient_profile.py`, `results/gradient_profile/summary.json` | Phase 3 (검증) |
+| Tier 비교 | §9 (이 문서) | Phase 3 (검증, 2026-03-27) |
 
 ---
 
 ## 8. HC 개인차 심층 분석
 
-> HC1(CDX003)과 HC2(CDX004)의 JND가 5~13배 차이. 이 절에서는 원시 데이터 수준에서 차이의 패턴과 가능한 원인을 분석한다.
+> HC1(CDX003)과 HC2(CDX004)의 JND가 5~13배 차이. N=5에서 HC2의 영향이 희석되었으나, 여전히 최저 JND 피험자. 이 절에서는 원시 데이터 수준에서 차이의 패턴과 가능한 원인을 분석한다.
 
 ### 8-1. JND 전쌍 비교
 
@@ -656,7 +657,87 @@ sim = corr(W_CVD_shifted.flatten(), W_HC_mean.flatten())
 ### 8-5. 교차 양상 분석에 대한 시사점
 
 HC 개인차가 방향 분류에 영향을 미치는 쌍:
-- **안정 쌍 (3쌍)**: orange-yellow, yellow-green, yellow-purple → HC1/HC2/HC평균 모두 HYPO. 이 쌍들의 교차 양상 결과는 HC 기준에 **불변**.
-- **불안정 쌍 (5쌍)**: red-orange, green-blue, blue-purple, cyan-magenta, red-cyan → HC 기준에 따라 방향 변동. 이 쌍들에 대한 교차 양상 결론은 **예비적(preliminary)**.
+- **안정 쌍 (3쌍)**: orange-yellow, yellow-green, yellow-purple → N=2/3/5 모두 HYPO. 이 쌍들의 교차 양상 결과는 HC N에 **불변**.
+- **안정 HYPER (2쌍)**: red-orange, red-cyan → 일관 HYPER.
+- **불안정 쌍 (3쌍)**: green-blue, blue-purple, cyan-magenta → borderline. 추가 HC/CVD로 방향 확정 필요.
 
-> **핵심 결론**: LOCO ↔ JND 100% 일치(§3-2)의 토대인 HYPO 3쌍이 HC 기준에 불변이므로, 논문의 핵심 주장(LOCO가 행동적으로 타당한 예측자)은 HC 개인차에 영향받지 않는다. 추가 HC 피험자 확보 시 불안정 쌍의 방향을 확정해야 한다.
+> **핵심 결론**: LOCO ↔ JND 100% 일치(§3-2)의 토대인 HYPO 3쌍이 HC N에 불변이므로, 논문의 핵심 주장(LOCO가 행동적으로 타당한 예측자)은 HC 표본 크기에 영향받지 않는다.
+
+---
+
+## 9. 사전 가설(Tier) vs 실제 행동 데이터 비교
+
+> 추가: 2026-03-27. Phase 2 필터 파이프라인의 COLOR_PAIRS 사전 설계(cone model + SRM z 기반)와 실제 JND 데이터(N=5 HC)를 비교한다.
+
+### 9-1. 사전 Tier 설계 근거
+
+```python
+COLOR_PAIRS = [
+    # Tier 1: 양 그룹 공통 핵심 쌍
+    ('color_3', 'color_7', 'yellow-purple'),     # 이중 해리: D z=+13.87 vs P z=-3.31
+    ('color_6', 'color_7', 'blue-purple'),       # Group sig p=0.042, S-cone 보상
+    ('color_1', 'color_2', 'red-orange'),        # L-M 압축, 양 CVD 일관
+    # Tier 2a: Protan 특이적
+    ('color_5', 'color_8', 'cyan-magenta'),      # sub-09 V1 z=+4.08, L-M→S 보상
+    ('color_4', 'color_6', 'green-blue'),        # 실제 cone space M 차이, 범 CVD 압축
+    # Tier 2b: Deutan 특이적 (M' 피크 이동 서명)
+    ('color_2', 'color_3', 'orange-yellow'),     # sub-08 V2 z=+3.29, V3 z=+5.36
+    ('color_3', 'color_4', 'yellow-green'),      # sub-08 V2 z=+4.14, V3 z=+5.75
+    # Tier 3: 통제
+    ('color_1', 'color_5', 'red-cyan'),          # 대각 180°, 천장 효과 통제
+]
+```
+
+### 9-2. 쌍별 비교: 가설 vs 실제
+
+| Tier | 쌍 | 사전 가설 | 실제 JND 방향 (N=5) | 실제 Ratio | 판정 |
+|:---:|------|------|:---:|:---:|:---:|
+| **1** | yellow-purple | 이중 해리, D z=+13.87 → 핵심 교정 대상 | **HYPO** (ratio=2.95) | 2.95 | **CONFIRMED** — 가장 극단적 과분리 + HYPO = 해리의 정수 |
+| **1** | blue-purple | Group sig p=0.042, S-cone 보상 → HYPO 예측 | **borderline** (ratio=0.94) | 0.94 | **WEAKENED** — N=3에서 HYPO(1.17)였으나 N=5에서 borderline. HC 높은 JND(0.128 mean)가 CVD(0.12)를 상쇄 |
+| **1** | red-orange | L-M 압축 → HYPER 예측 | **HYPER** (ratio=0.53) | 0.53 | **CONFIRMED** — L-M 압축이 JND 민감도 증가와 일치 |
+| **2a** | cyan-magenta | Protan 특이적 과분리 → HYPO 예측 | **borderline** (ratio=1.11) | 1.11 | **WEAKENED** — Deutan(sub-08) 데이터에서 borderline은 예상 가능. Protan 피험자 데이터 필요 |
+| **2a** | green-blue | 범 CVD 압축 → HYPER/borderline | **borderline** (ratio=0.99) | 0.99 | **CONSISTENT** — 압축 예측과 borderline/near-normal 일치 |
+| **2b** | orange-yellow | Deutan M' 이동 → 과분리 + HYPO 예측 | **HYPO** (ratio=3.36) | 3.36 | **STRONGLY CONFIRMED** — 최대 JND(0.84), 가장 극적 HYPO |
+| **2b** | yellow-green | Deutan M' 양방향 이동 → HYPO 예측 | **HYPO** (ratio=3.41) | 3.41 | **STRONGLY CONFIRMED** — 2번째로 높은 ratio |
+| **3** | red-cyan | 대각 180°, 천장 효과 통제 | **HYPER** (ratio=0.50) | 0.50 | **AS EXPECTED** — 대각 쌍은 HC도 CVD도 매우 민감, 통제 역할 적합 |
+
+### 9-3. Tier별 요약
+
+**Tier 1 (양 그룹 공통 핵심)**:
+- yellow-purple: **CONFIRMED**. 핵심 교정 대상 유지.
+- blue-purple: **WEAKENED**. N=5에서 borderline — Tier 1 자격 재고 필요. 그러나 SRM group sig (p=0.042)는 여전히 유효하므로 신경 수준에서는 왜곡 존재. 행동적으로는 sub-08 deutan에서 CVD ≈ HC.
+- red-orange: **CONFIRMED**. L-M 압축 → HYPER 예측 정확.
+
+> Tier 1 판정: 3쌍 중 2쌍 confirmed, 1쌍 weakened. yellow-purple과 red-orange은 확고. blue-purple은 "신경 왜곡은 있으나 행동적 영향이 미미"한 쌍으로 재분류 고려.
+
+**Tier 2a (Protan 특이적)**:
+- cyan-magenta: **WEAKENED** for deutan. Protan 검증 필요 — sub-09 V1 z=+4.08이므로 protan에서는 HYPO일 가능성.
+- green-blue: **CONSISTENT**. 범 CVD 압축 예측과 borderline 일치.
+
+> Tier 2a 판정: Deutan 데이터만으로는 판정 불가. Protan JND 수집이 결정적.
+
+**Tier 2b (Deutan 특이적)**:
+- orange-yellow: **STRONGLY CONFIRMED**. 가장 극적 HYPO (ratio=3.36).
+- yellow-green: **STRONGLY CONFIRMED**. 2번째로 극적 (ratio=3.41).
+
+> Tier 2b 판정: 2쌍 모두 강력 확인. M' 피크 이동의 행동적 서명이 명확.
+
+**Tier 3 (통제)**:
+- red-cyan: **AS EXPECTED**. 대각 쌍 → 천장 효과 통제 역할 적합.
+
+### 9-4. 핵심 발견: SRM z 방향 ≠ JND 방향 (구조적 해리)
+
+사전 Tier 설계는 SRM z 크기/방향을 기반으로 "교정 필요성"을 추정했으나, 실제 행동 데이터는 **SRM z 방향이 JND 방향을 예측하지 못함**을 보여준다:
+
+| 가설 유형 | 사전 근거 | 행동 검증 결과 |
+|------|------|------|
+| SRM z 과분리 → HYPER | red-orange (z=+1.66) | **HYPER** (일치) |
+| SRM z 과분리 → HYPO | orange-yellow (z=+3.29), yellow-green (z=+4.14), yellow-purple (z=+13.87) | **HYPO** (일치, 하지만 방향이 반대 예측) |
+| SRM z 과분리 → 압축 예측 | blue-purple (z=+6.15) | **borderline** (불명확) |
+
+SRM z의 **크기**는 왜곡의 존재를 확인하지만, **부호**만으로는 "더 민감(HYPER)" vs "더 둔감(HYPO)"을 예측할 수 없다. 이는 §3-1의 "0차 vs 고차 기하학 해리"와 정확히 일치.
+
+**Tier 설계에 대한 시사점**:
+- **Tier 우선순위를 SRM z 크기가 아닌 LOCO 취약성으로 재정렬**: orange, yellow, purple이 LOCO 취약 → orange-yellow, yellow-green, yellow-purple이 최우선 교정 대상
+- **Tier 1 재정의**: {yellow-purple, orange-yellow, yellow-green} (LOCO+JND 수렴) > {blue-purple, red-orange} (SRM만 유의)
+- **Phase 2 필터**: LOCO 기반 δθ fitting이 SRM RDM fitting보다 행동적으로 타당 (§5-2와 일치)

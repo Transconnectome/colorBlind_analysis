@@ -297,6 +297,78 @@ def permutation_test_spearman(hc_vuln_fitted, cvd_vuln, n_perm=10000):
     return float(p), null, float(rho_obs)
 
 
+def permutation_test_improvement(hc_W_dict, hc_amps_dict, cvd_vuln,
+                                  model_name, params_opt, cvd_type,
+                                  n_perm=10000):
+    """Permutation test for Δρ = ρ(Δλ*) − ρ(Δλ=0) > 0.
+
+    Tests whether the cone shift *improves* fit beyond baseline, not just
+    whether ρ > 0. This is the correct null hypothesis: the baseline ρ(Δλ=0)
+    can already be high (~0.5-0.67) due to voxel covariance structure.
+
+    For each permutation of CVD color labels:
+      - Compute ρ_fitted(perm) using fitted Δλ*
+      - Compute ρ_baseline(perm) using Δλ=0
+      - Δρ(perm) = ρ_fitted - ρ_baseline
+    p-value = P(Δρ_perm ≥ Δρ_obs)
+
+    Args:
+        hc_W_dict: dict {subj_id: (K, V_s)} precomputed weights
+        hc_amps_dict: dict {subj_id: (6, 8, V_s)} amplitudes
+        cvd_vuln: (8,) CVD LOCO target
+        model_name: distortion model name
+        params_opt: optimal parameters from fitting
+        cvd_type: 'deutan', 'protan', or 'normal'
+        n_perm: number of permutations
+
+    Returns:
+        p_value, null_delta_rho (array), observed_delta_rho,
+        rho_fitted, rho_baseline
+    """
+    # Compute fitted and baseline vulnerability (unpermuted)
+    C_opt = get_design_matrix(model_name, params_opt, cvd_type=cvd_type)
+    C_baseline = create_basis_matrix(HUE_ANGLES, N_CHANNELS)
+    mean_vuln_fit, _ = simulate_mean_hc_wfixed(hc_W_dict, hc_amps_dict, C_opt)
+    mean_vuln_base, _ = simulate_mean_hc_wfixed(hc_W_dict, hc_amps_dict, C_baseline)
+
+    rho_fit_obs, _ = spearmanr(mean_vuln_fit, cvd_vuln)
+    rho_base_obs, _ = spearmanr(mean_vuln_base, cvd_vuln)
+    if not np.isfinite(rho_fit_obs):
+        rho_fit_obs = 0.0
+    if not np.isfinite(rho_base_obs):
+        rho_base_obs = 0.0
+    delta_rho_obs = rho_fit_obs - rho_base_obs
+
+    # Exact permutation if feasible (8! = 40320)
+    use_exact = n_perm >= 40320
+    if use_exact:
+        null_delta = []
+        for perm in permutations(range(8)):
+            cvd_perm = cvd_vuln[list(perm)]
+            r_fit, _ = spearmanr(mean_vuln_fit, cvd_perm)
+            r_base, _ = spearmanr(mean_vuln_base, cvd_perm)
+            r_fit = r_fit if np.isfinite(r_fit) else 0.0
+            r_base = r_base if np.isfinite(r_base) else 0.0
+            null_delta.append(r_fit - r_base)
+        null_delta = np.array(null_delta)
+    else:
+        rng = np.random.default_rng(42)
+        null_delta = np.zeros(n_perm)
+        for i in range(n_perm):
+            perm = rng.permutation(8)
+            cvd_perm = cvd_vuln[perm]
+            r_fit, _ = spearmanr(mean_vuln_fit, cvd_perm)
+            r_base, _ = spearmanr(mean_vuln_base, cvd_perm)
+            r_fit = r_fit if np.isfinite(r_fit) else 0.0
+            r_base = r_base if np.isfinite(r_base) else 0.0
+            null_delta[i] = r_fit - r_base
+
+    # One-tailed: proportion of null Δρ ≥ observed Δρ
+    p = (np.sum(null_delta >= delta_rho_obs) + 1) / (len(null_delta) + 1)
+    return (float(p), null_delta, float(delta_rho_obs),
+            float(rho_fit_obs), float(rho_base_obs))
+
+
 def permutation_test_mse(hc_vuln_fitted, cvd_vuln, n_perm=10000):
     """Permutation test on MSE (supplementary)."""
     mse_obs = np.mean((hc_vuln_fitted - cvd_vuln) ** 2)
@@ -408,6 +480,12 @@ def fit_mean_hc(hc_W_dict, hc_amps_dict, cvd_vuln, cvd_type, models=None):
         rho_baseline, _ = spearmanr(mean_vuln_baseline, cvd_vuln)
         mse_baseline = float(np.mean((mean_vuln_baseline - cvd_vuln) ** 2))
 
+        # Improvement test: Δρ = ρ(fitted) − ρ(baseline) > 0
+        (perm_p_impr, null_delta_rho, delta_rho_obs,
+         rho_fit_impr, rho_base_impr) = permutation_test_improvement(
+            hc_W_dict, hc_amps_dict, cvd_vuln,
+            model_name, res.x, cvd_type)
+
         # Per-HC individual Spearman r at optimal δθ
         per_hc_rhos = {}
         for subj, vuln in per_hc_vuln.items():
@@ -426,6 +504,11 @@ def fit_mean_hc(hc_W_dict, hc_amps_dict, cvd_vuln, cvd_type, models=None):
             'perm_p_spearman': perm_p_rho,
             'perm_null_rho_mean': float(np.mean(perm_null_rho)),
             'perm_null_rho_std': float(np.std(perm_null_rho)),
+            # Improvement test: Δρ = ρ(fitted) − ρ(baseline)
+            'perm_p_improvement': perm_p_impr,
+            'delta_rho': delta_rho_obs,
+            'perm_null_delta_rho_mean': float(np.mean(null_delta_rho)),
+            'perm_null_delta_rho_std': float(np.std(null_delta_rho)),
             # Supplementary: MSE decomposition
             'mse': mse,
             'mse_baseline': mse_baseline,
@@ -553,6 +636,8 @@ def main():
                 print(f'        Spearman r = {r["spearman_r"]:.3f} '
                       f'(baseline: {r["spearman_r_baseline"]:.3f})')
                 print(f'        Perm p (Spearman) = {r["perm_p_spearman"]:.4f}')
+                print(f'        Δρ = {r["delta_rho"]:.4f} '
+                      f'(perm p improvement = {r["perm_p_improvement"]:.4f})')
                 print(f'        MSE = {r["mse"]:.4f} '
                       f'(baseline: {r["mse_baseline"]:.4f}, '
                       f'reduction: {r["mse_reduction"]:.1%})')

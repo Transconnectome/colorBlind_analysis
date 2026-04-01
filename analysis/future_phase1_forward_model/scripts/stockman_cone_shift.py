@@ -42,9 +42,10 @@ CVD_TYPE = {
     '10': 'normal',   # compensated, minimal shift expected
 }
 
-# 8 experimental colors in CIELab (L*=60, chroma=40)
+# 8 experimental colors in CIELab
+# L*=75, chroma=40 matches actual experiment (colorBlind_test.py)
 HUE_ANGLES_DEG = np.array([0, 45, 90, 135, 180, 225, 270, 315], dtype=float)
-L_STAR = 60.0
+L_STAR = 75.0
 CHROMA = 40.0
 
 # CIELab coordinates

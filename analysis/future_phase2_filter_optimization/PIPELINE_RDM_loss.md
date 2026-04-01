@@ -13,206 +13,6 @@ HC에게 인위적 cone shift(δθ)를 적용하여, CVD와 동일한 LOCO 보�
 ---
 
 ## 2. 파이프라인 구조
-
-파이프라인은 **두 단계**로 분리된다: (A) CVD target 생성, (B) HC simulation + fitting.
-
-### 2-A. CVD Target 생성 (Phase 1 Forward Model 결과 재사용)
-
-**출처**: `future_phase1_forward_model/results/validation/sub-{ID}_loco.json`
-
-이것은 Phase 1에서 이미 계산된 결과이다. 각 CVD 피험자의 **진짜 LOCO** — 7색 학습, 1색 예측:
-
-```
-For each left-out color c (0..7):
-    C_train = C(θ)[나머지 7색]             # (42, K) = 6runs × 7colors
-    X_train = CVD_amplitudes[나머지 7색]    # (42, V_s)
-    alpha = gcv_select_alpha(C_train, X_train)
-    W_cvd = ridge(C_train, X_train, alpha)  # (K, V_s) — 7색으로만 학습
-    Y_pred = C(θ)[c] @ W_cvd               # (1, V_s) — held-out 색 예측
-    Y_actual = CVD_amplitudes[c].mean(runs) # (1, V_s) — 실제 반응
-    cvd_target[c] = corr(Y_pred, Y_actual)  # voxel pattern correlation
-```
-
-**cvd_target의 의미**: 각 색에서의 보간 충실도.
-- 양수: 이 색을 나머지 7색에서 보간 가능 → manifold가 이 지점에서 매끄러움
-- 음수: 보간 실패 → 이 색이 manifold에서 이웃 대비 불규칙한 위치
-
-**실제 값 (sub-08 deutan)**:
-```
-V1: [+0.13, -0.18, -0.44, -0.02, +0.46, +0.19, -0.50, -0.13]
-V2: [+0.56, -0.58, -0.69, -0.40, -0.21, -0.25, -0.48, +0.12]
-V4: [+0.57, -0.64, -0.73, -0.31, +0.25, -0.25, -0.76, -0.33]
-```
-→ V2/V4에서 orange(-0.58/-0.64), yellow(-0.69/-0.73), purple(-0.48/-0.76) 보간 실패.
-
-### 2-B. HC Simulation: W-Fixed Cone Shift
-
-**핵심**: HC의 W를 원래 C(θ)로 1회 학습 후 고정. δθ sweep 시 C(θ+δ)만 변경.
-
-```
-# Step 1: W 사전 계산 (1회)
-For each HC subject:
-    X_pooled = amp.reshape(-1, V_s)      # (48, V_s) = 6runs × 8colors
-    C_pooled = tile(C(θ), (6, 1))         # (48, K)
-    alpha = gcv_select_alpha(C_pooled, X_pooled)
-    W_HC[subj] = ridge(C_pooled, X_pooled, alpha)  # (K, V_s) — 8색 전체 학습
-
-# Step 2: δθ sweep
-For each δθ:
-    C_shifted = C(θ + δθ)                 # (8, K)
-    For each HC subject:
-        For each color c:
-            Y_pred = C_shifted[c] @ W_HC[subj]       # (1, V_s)
-            Y_actual = amp_HC[subj][:, c].mean(runs)  # (1, V_s)
-            hc_vuln[subj][c] = corr(Y_pred, Y_actual)
-
-    mean_hc_vuln = mean(hc_vuln, across 7 HCs)  # (8,)
-
-# Step 3: Fitting
-δθ* = argmax_δθ Spearman(mean_hc_vuln(δθ), cvd_target)
-    → differential_evolution (gradient-free)
-
-# Step 4: Permutation test
-For all 8! = 40,320 permutations of cvd_target:
-    null_rho = Spearman(mean_hc_vuln(δθ*), permuted_cvd_target)
-p = (count(null_rho ≥ observed_rho) + 1) / (40,320 + 1)
-```
-
----
-
-## 3. HC simulation의 correlation이 측정하는 것
-
-### 3-1. 구조적 비대칭
-
-| | CVD target | HC simulation |
-|---|---|---|
-| **W 학습** | 7색 (left-out) | **8색 전체** (pooled) |
-| **예측 입력** | C(θ)[c] (원래 basis) | C(θ+δ)[c] (shifted basis) |
-| **비교 대상** | 자기 자신의 실제 반응 | 자기 자신의 실제 반응 |
-| **측정** | "7색으로 이 색을 보간할 수 있나?" | "shifted input이 원래 반응을 재현하나?" |
-
-### 3-2. HC correlation의 의미
-
-δθ=0일 때: `C(θ)[c] @ W_HC = Y_pred ≈ Y_actual` → W가 8색 전체로 학습되었으므로 correlation ≈ 1.0 (in-sample).
-
-δθ>0일 때: `C(θ+δ)[c] @ W_HC ≠ Y_actual` → shifted basis가 원래 반응과 불일치. **cone shift에 의해 가장 많이 왜곡되는 색에서 correlation이 가장 크게 떨어짐.**
-
-즉, HC simulation의 vuln[c]는: "cone shift가 δθ일 때, 색 c의 예측이 얼마나 왜곡되는가?"
-
-### 3-3. CVD target과의 매칭
-
-**Fitting이 묻는 질문**: "HC에게 δθ를 적용했을 때 가장 왜곡되는 색의 순서(profile)가, CVD에서 보간이 가장 실패하는 색의 순서(profile)와 일치하는가?"
-
-**Spearman ρ 사용 이유**: 절대값이 아닌 **순위**만 비교. CVD target과 HC simulation의 scale이 다르므로 (7색 학습 vs 8색 학습), 어떤 색이 더 취약한지의 **상대적 순서**만 매칭.
-
-### 3-4. 비대칭에 대한 논의
-
-CVD target은 진짜 LOCO (7색→1색), HC simulation은 8색-trained W에 shifted input.
-
-이 비대칭의 물리적 근거:
-- CVD의 실제 상황: cone shift 때문에 색 다양체가 왜곡되어 이웃에서 보간이 실패
-- HC simulation: 정상 인코딩(W)에 왜곡된 입력(C(θ+δ))을 넣으면 어떤 색에서 불일치가 커지는지
-- 두 연산이 같은 물리적 현상(cone shift → 색 표상 왜곡)의 **다른 측면**을 포착
-
-**잠재적 문제**: 
-- HC simulation에서 W가 8색 전체로 학습되어 있으므로, δθ=0에서 vuln ≈ 1.0 (ceiling). 
-- 이는 CVD target (7색 학습, δθ=0에서도 vuln < 1.0)과 scale이 다르다. 
-- Spearman이 이를 보정하나, profile shape 자체가 영향받을 수 있다. 
-- 현재 파이프라인은, 정상인도 색약처럼 망막 이상 색들을 인지한다면, 이들 간의 원형 구조 소실하는지 확인. 
-
----
-
-## 4. SRM 관련: 현재 파이프라인에서의 위치
-
-### 4-1. 현 파이프라인에서 SRM이 하는 일
-
-step0_precompute.py에서 SRM LOO precomputation을 수행:
-- 6 HC → SRM 학습 → shared response S
-- Group prior A_g = mean(R_j^T @ β_j^T)
-- Held-out HC / CVD → SVD projection
-
-이 결과는 **step1_fit_rdm_v2.py** (RDM criterion)에서 사용되나, 해당 criterion은 전 ROI 실패로 확정.
-
-### 4-2. W-Fixed LOCO에서 SRM은 사용되지 않음
-
-step1_fit_loco_v2.py는 SRM 데이터를 **전혀 로드하지 않음**. amplitudes_procrustes.npy만 직접 로드하여 voxel space에서 ridge_gcv.
-
-### 4-3. SRM RDM Criterion: Voxel→SRM 접근 (수정 완료)
-
-**문제 (구버전)**: A_g @ C(θ+δ)^T → SRM 공간에서 직접 prediction → voxel 정보 소실. A_g는 HC 평균이므로 개별 voxel-level 차이를 무시.
-
-**수정된 접근 (구현 완료, 2026-03-23)**:
-```
-For each training HC_i:
-  # 1. Voxel space에서 shifted 반응 예측
-  Y_shifted = C(θ+δ) @ W_HC_i         # (8, V_s) — voxel space prediction
-
-  # 2. 예측된 voxel 반응을 "새로운 피험자"로 취급, SVD projection
-  R_shifted = SVD(Y_shifted @ pinv(S)) # SRM 투영 (CVD와 동일 방식)
-  Z_shifted = R_shifted^T @ Y_shifted  # (k, 8) SRM space representation
-
-  # 3. RDM 계산
-  RDM_i = pdist(Z_shifted.T, 'correlation')
-
-# 6 HC 평균 RDM vs Z_cvd RDM
-loss = Σ(mean_RDM - cvd_RDM)²
-```
-
-**핵심 차이**: A_g를 bypass하고, voxel space → SRM space 매핑을 피험자별로 수행. prediction model이 생성한 voxel-level 왜곡이 SRM space까지 전파.
-
-**Path B (보조)**: Voxel-space RDM 직접 비교. SRM 투영 없이 `C(θ+δ) @ W_HC → RDM` vs CVD voxel RDM.
-
-### 4-4. 수정된 RDM 결과 (cone_1way)
-
-| ROI | Subject | CVD | Path | Δλ median (nm) | SD | Spearman r | r range |
-|-----|---------|-----|------|-----------------|-------|------------|---------|
-| V1 | sub-08 | deutan | A(vox→srm) | 0.05 | 17.50 | **0.345** | -0.08~0.53 |
-| V1 | sub-08 | deutan | B(voxel) | 0.08 | 0.21 | -0.091 | -0.21~0.05 |
-| V1 | sub-09 | protan | A(vox→srm) | 2.72 | 25.27 | 0.171 | -0.25~0.39 |
-| V1 | sub-09 | protan | B(voxel) | 0.01 | 0.00 | 0.230 | 0.14~0.31 |
-| V2 | sub-08 | deutan | A(vox→srm) | 2.71 | 22.49 | -0.036 | -0.22~0.22 |
-| V2 | sub-08 | deutan | B(voxel) | 0.49 | 21.09 | -0.201 | -0.26~-0.06 |
-| V2 | sub-09 | protan | A(vox→srm) | 5.24 | 27.05 | -0.092 | -0.19~0.14 |
-| V2 | sub-09 | protan | B(voxel) | 0.01 | 0.03 | -0.045 | -0.06~0.01 |
-| V4 | sub-08 | deutan | A(vox→srm) | 55.39 | 26.84 | -0.116 | -0.19~0.08 |
-| V4 | sub-08 | deutan | B(voxel) | 0.06 | 21.09 | -0.193 | -0.27~-0.06 |
-| V4 | sub-09 | protan | A(vox→srm) | 5.44 | 17.22 | 0.008 | -0.18~0.12 |
-| V4 | sub-09 | protan | B(voxel) | 0.06 | 0.02 | -0.101 | -0.12~-0.01 |
-| — | sub-10 | normal | all | 43.76 | ~0 | ≈0 or neg | — |
-
-**해석**:
-1. **V1 sub-08 Path A (r=0.345)** 가 유일하게 양의 경향. 그러나 SD=17.50 → fold 불안정.
-2. **전반적으로 RDM criterion은 실패** — Spearman r이 대부분 음수 또는 0 근처.
-3. **원인**: SVD projection이 RDM 차이를 부분적으로 흡수. voxel→SRM 경로에서도 완전 보존 불가.
-4. **LOCO criterion과 대비**: W-fixed LOCO에서 sub-08 V1 r=0.690, V2 r=0.643 → 10배 이상 강한 signal.
-5. **결론**: cone_1way RDM criterion은 cone shift fitting에 부적합. LOCO가 유일한 유효 criterion.
-
-### 4-5. 수정된 RDM 결과 (cone_3way, fourier)
-
-fourier (df=4) Path A가 RDM에서 가장 강한 signal을 보임:
-
-**fourier Path A (voxel→SRM)**:
-
-| ROI | sub-08 (deutan) | sub-09 (protan) | sub-10 (normal) |
-|-----|:-:|:-:|:-:|
-| V1 | **r=0.804** | r=0.228 | r=0.205 |
-| V2 | **r=0.556** | r=0.295 | r=0.318 |
-| V4 | **r=0.604** | r=0.475 | r=0.532 |
-
-**cone_3way Path A (voxel→SRM)**:
-
-| ROI | sub-08 (deutan) | sub-09 (protan) | sub-10 (normal) |
-|-----|:-:|:-:|:-:|
-| V1 | **r=0.543** | r=0.124 | r=0.063 |
-| V2 | r=0.052 | r=0.106 | r=0.024 |
-| V4 | r=0.141 | r=0.305 | r=0.344 |
-
-**해석**:
-1. **V1 fourier Path A sub-08 (r=0.804)**: 전체 파이프라인에서 가장 높은 RDM 상관. 그러나 parameter SD 높고 (각 차원 7~13), V4 sub-10도 r=0.532 → specificity 의문.
-2. **cone_3way V1**: sub-08 r=0.543 (양), sub-10 r=0.063 (null) → V1 한정으로 specificity 유지.
-3. **공통 문제**: 모든 multimodel RDM에서 parameter SD >> parameter estimate → fold 불안정 지속.
-4. **LOCO 결과와 비교**: RDM fourier의 r=0.804는 LOCO cone_1way의 r=0.690보다 높으나, RDM에는 permutation test 미적용 → 직접 비교 불가. 또한 LOCO에서 fourier는 sub-10 false positive (§5-5).
-
 ### 4-6. ΔRDM 접근: Basis-Response Mismatch 없는 RDM 비교 (2026-03-23)
 
 #### 4-6-1. 동기
@@ -481,18 +281,123 @@ SVD projection이 cone shift에 의한 voxel-level RDM 차이를 부분적으로
 
 V1=34.92nm vs V2=3.87nm — 어느 것이 "진짜" cone shift인가? 둘 다 유의하나 값이 10배 차이.
 
+### 6-5. Cross-ROI ΔRDM 일관성: Joint ROI 모델 근거 (2026-04-01)
+
+**동기**: 개별 ROI fitting에서 Δλ 불일치 (V1=34.92nm, V2=3.87nm) → 단일 Δλ joint optimization 가능성?
+
+#### 6-5-1. Cross-ROI ΔRDM Pairwise Consistency (SRM-aligned space)
+
+SRM-aligned amplitudes (8 colors × K dims)에서 correlation distance RDM 계산 → ΔRDM = mean_HC_RDM - CVD_RDM (28 upper-triangle pairs). Cross-ROI Pearson correlation:
+
+| Subject | V1-V2 | V1-V3 | V1-V4 | V2-V3 | V2-V4 |
+|---------|-------|-------|-------|-------|-------|
+| sub-08 (deutan) | **r=0.497**\*\* | r=0.098 | r=0.424\* | r=0.251 | r=0.552\*\* |
+| sub-09 (protan) | **r=0.633**\*\*\* | r=0.250 | r=-0.030 | r=0.467\* | r=0.526\*\* |
+| sub-10 (normal) | **r=0.571**\*\* | r=0.394\* | r=0.440\* | r=0.202 | r=0.509\*\* |
+
+(\*p<0.05, \*\*p<0.01, \*\*\*p<0.001, n=28 pairs)
+
+**핵심 발견**:
+1. **모든 CVD 참여자 (sub-08, sub-09, sub-10 포함)가 V1-V2 ΔRDM consistency 보임** (r=0.497-0.633)
+2. V2-V4도 일관성 높음 (r=0.509-0.552)
+3. sub-10은 정상 cone 기능 (LOCO/ΔRDM criterion null)이지만 CVD 그룹 참여자
+
+#### 6-5-2. Joint ROI 모델 근거
+
+**Cross-ROI consistency는 문제가 아닌 지지 근거**:
+
+1. **Biological plausibility**: Cone shift는 망막 현상 → 전체 visual hierarchy에 cascade
+   - 단일 retinal parameter (Δλ)가 V1→V2→V3→V4 전반에 영향을 미치는 것은 당연
+   - V1-V2 ΔRDM correlation → 하류 ROI들이 공유된 왜곡 구조를 물려받음
+
+2. **Joint optimization 타당성**:
+   - 왜곡 패턴이 ROI 간 **coherent** (random noise 아님)
+   - 단일 Δλ로 multiple ROI를 설명할 수 있는 생물학적 구조 존재
+   - 개별 fitting의 Δλ 불일치 (V1=34.92nm, V2=3.87nm)는 각 ROI의 statistical power 차이 때문일 수 있음
+
+3. **Per-ROI fitting의 한계**:
+   - n=8 색 × n=7 HC mean → 통계적 power 부족
+   - ROI별 K, alpha 차이 → 예측 RDM 품질 차이 (V1 pred ρ=0.356 vs V4=0.102)
+   - Joint fitting으로 cross-ROI constraint 추가 → regularization effect
+
+#### 6-5-3. 향후 구현 방향
+
+**단일 Δλ joint optimization** (예: `step1_fit_loco_v2_joint.py`):
+- Input: precomputed W_HC for all ROIs (V1, V2, V3, V4)
+- Objective: `−mean_ρ_across_rois(Δλ)` 또는 weighted sum (hV4 primary gate)
+- Permutation test: 동일 순열을 모든 ROI에 적용 (retinal property)
+- Output: single `joint_delta_lambda`, per-ROI ρ at joint Δλ
+
+**기대 효과**:
+1. Cross-ROI ΔRDM consistency가 높으므로 joint fit이 feasible
+2. 개별 ROI Δλ 추정치의 불일치 해소
+3. Biological constraint (single retinal parameter) 반영
+
 ---
 
-## 7. 파이프라인 파일
+## 7. ΔRDM Loss Pipeline (2026-04-01)
+
+### 7-1. 동기
+
+기존 LOCO loss (`step1_fit_loco_v2.py`)로는 sub-09 protan V1/V2 signal 포착 불가 (all NS). 반면 `diagnostic_delta_rdm.py`의 ΔRDM 진단에서 sub-09 V1 p=0.005로 강한 signal 확인. ΔRDM을 **primary fitting loss**로 활용하여 cone-shift δθ 추정.
+
+### 7-2. 구조
+
+```
+loss_functions.py           — 모듈형 loss 정의 (DeltaRDM_V1V2_Equal)
+step1_fit_delta_rdm.py      — ΔRDM fitting: V1+V2 combined, 2-stage grid
+step2_validate_v4_loco.py   — V4 LOCO validation: fitted δθ → V4 Spearman
+```
+
+**Loss function**: `DeltaRDM_V1V2_Equal`
+- combined = 0.5 × sim(ΔRDM_sim_V1, ΔRDM_obs_V1) + 0.5 × sim(ΔRDM_sim_V2, ΔRDM_obs_V2)
+- similarity metric: cosine (default), pearson, spearman
+- W-fixed: precompute W_HC once from C(θ), sweep C(θ+δ) only
+
+**Permutation**: 8! exact (40,320), 동일 순열을 V1+V2 동시 적용 (RDM → squareform → reorder → upper-triangle)
+- label_perm_p: P(null_combined ≥ obs_combined)
+- baseline_improvement_p: P(null_improvement ≥ obs_improvement), δ=0 대비
+
+**Grid search**:
+- cone_1way (df=1): coarse 2° → refine ±5° at 0.5°
+- cone_3way/fourier (df>1): differential_evolution
+
+**Validation**: V4 LOCO (ridge_gcv) at fitted δθ → Spearman ρ + exact perm
+
+### 7-3. 기대 결과
+
+| Subject | Expected | Rationale |
+|---------|----------|-----------|
+| sub-09 protan | V1 ΔRDM p<0.05 | 진단에서 p=0.005 확인, cone_1way 30nm peak |
+| sub-08 deutan | V2 기여로 combined 유의 기대 | V1 ΔRDM NS이나 V2에서 LOCO 유의 |
+| sub-10 normal | weak/diffuse signal | CVD이나 cone-shift signal 약함 |
+
+### 7-4. 삭제된 파일
+
+| 파일 | 사유 |
+|------|------|
+| `step1_fit_rdm_v2.py` | SRM-RDM 접근 실패 (SVD projection이 cone shift 흡수) |
+| `step2_fit_rdm.py` | v1 파이프라인 잔재 (SRM-based RDM) |
+| `step3_fit_loco.py` | v1 파이프라인 잔재 (shift_at_both 전용) |
+| `step3_fit_loro.py` | LORO transfer 실패 |
+| `step3_verify_w_constraint.py` | W-fixed 전환 후 불필요 |
+
+---
+
+## 8. 파이프라인 파일
 
 | 파일 | 역할 |
 |------|------|
-| `step0_precompute.py` | SRM LOO precomputation (현재 RDM용, 향후 수정 대상) |
-| `step1_fit_loco_v2.py` | **Primary**: W-fixed LOCO cone shift fitting |
-| `step1_fit_rdm_v2.py` | RDM criterion (실패, 향후 §4-3 방식으로 수정 가능) |
+| `step0_precompute.py` | SRM LOO precomputation |
+| `step1_fit_loco_v2.py` | W-fixed LOCO cone shift fitting |
+| `step1_fit_delta_rdm.py` | **NEW**: ΔRDM V1+V2 combined fitting |
+| `step2_validate_v4_loco.py` | **NEW**: V4 LOCO validation for ΔRDM-fitted δθ |
 | `step2_cross_eval.py` | Within-ROI cross-evaluation |
 | `step2b_cross_roi_eval.py` | Between-ROI cross-evaluation |
 | `step3_summary_v2.py` | V4 summary figures |
 | `step3_cross_roi_summary.py` | Cross-ROI summary |
+| `step4_cross_validate.py` | Cross-validation |
+| `step5_hc_replication_null.py` | HC replication null |
+| `loss_functions.py` | **NEW**: Modular loss function classes |
 | `diagnostic_srm_baseline.py` | SRM A_g prediction quality 진단 |
 | `diagnostic_delta_rdm.py` | ΔRDM sanity check (§4-6), dual distance × triple metric |

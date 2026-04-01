@@ -259,6 +259,46 @@ def rdm_loss_single(params, model_name, cvd_type, hc_W_dict,
     return -float(r)
 
 
+def rdm_loss_scale_penalized(params, model_name, cvd_type, hc_W_dict,
+                              C_baseline, delta_obs, metric, lam=0.1):
+    """Scale-penalized Pearson loss for ΔRDM fitting.
+
+    L = (1 - r) + λ · (log(||ΔRDM_sim|| / ||ΔRDM_obs||))²
+
+    Breaks the singularity of pure Pearson by penalizing scale mismatch.
+    - Direction: captured by (1 - r) term
+    - Magnitude: captured by log-ratio penalty (symmetric for over/under-scaling)
+
+    Args:
+        params, model_name, cvd_type, hc_W_dict, C_baseline, delta_obs, metric:
+            Same as rdm_loss_single.
+        lam: scale penalty weight (default 0.1 — direction-dominant).
+
+    Returns:
+        loss: scalar to minimize
+    """
+    C_shifted = get_design_matrix(model_name, params, cvd_type=cvd_type)
+    delta_sim = compute_delta_rdm_sim(hc_W_dict, C_shifted, C_baseline, metric)
+
+    if np.std(delta_sim) == 0 or np.std(delta_obs) == 0:
+        return 2.0  # worst (range: [0, 2+])
+
+    r, _ = pearsonr(delta_sim, delta_obs)
+    if not np.isfinite(r):
+        return 2.0
+
+    norm_sim = np.linalg.norm(delta_sim)
+    norm_obs = np.linalg.norm(delta_obs)
+
+    if norm_sim < 1e-12 or norm_obs < 1e-12:
+        return 2.0
+
+    log_ratio = np.log(norm_sim / norm_obs)
+    scale_penalty = log_ratio ** 2
+
+    return (1.0 - float(r)) + lam * scale_penalty
+
+
 def rdm_loss_combination(params, model_name, cvd_type, hc_W_dict,
                           C_baseline, delta_obs_corr, delta_obs_cosine,
                           delta_obs_triangle):
@@ -272,11 +312,16 @@ def rdm_loss_combination(params, model_name, cvd_type, hc_W_dict,
 
 def fit_delta_rdm(model_name, cvd_type, hc_W_dict, C_baseline,
                   delta_obs, metric, delta_obs_corr=None,
-                  delta_obs_cosine=None, delta_obs_triangle=None):
+                  delta_obs_cosine=None, delta_obs_triangle=None,
+                  loss_type='pearson', scale_lambda=0.1):
     """Phase A: Optimize δ* to minimize ΔRDM loss.
 
+    Args:
+        loss_type: 'pearson' (default) or 'pearson_scale' (scale-penalized).
+        scale_lambda: weight for scale penalty (only for 'pearson_scale').
+
     Returns:
-        best_params, best_loss, result_dict
+        best_params, best_loss, best_pearson
     """
     bounds = MODELS[model_name]['bounds']
 
@@ -288,6 +333,24 @@ def fit_delta_rdm(model_name, cvd_type, hc_W_dict, C_baseline,
                   delta_obs_corr, delta_obs_cosine, delta_obs_triangle),
             seed=42, maxiter=200, tol=1e-6, polish=True,
         )
+        best_params = result.x.tolist()
+        best_loss = float(result.fun)
+        best_pearson = -best_loss
+    elif loss_type == 'pearson_scale':
+        result = differential_evolution(
+            rdm_loss_scale_penalized,
+            bounds=bounds,
+            args=(model_name, cvd_type, hc_W_dict, C_baseline,
+                  delta_obs, metric, scale_lambda),
+            seed=42, maxiter=200, tol=1e-6, polish=True,
+        )
+        best_params = result.x.tolist()
+        best_loss = float(result.fun)
+        # Recover Pearson r from the best params for reporting
+        C_shifted = get_design_matrix(model_name, best_params, cvd_type=cvd_type)
+        delta_sim = compute_delta_rdm_sim(hc_W_dict, C_shifted, C_baseline, metric)
+        r, _ = pearsonr(delta_sim, delta_obs)
+        best_pearson = float(r) if np.isfinite(r) else 0.0
     else:
         result = differential_evolution(
             rdm_loss_single,
@@ -296,10 +359,9 @@ def fit_delta_rdm(model_name, cvd_type, hc_W_dict, C_baseline,
                   delta_obs, metric),
             seed=42, maxiter=200, tol=1e-6, polish=True,
         )
-
-    best_params = result.x.tolist()
-    best_loss = float(result.fun)
-    best_pearson = -best_loss  # since we minimized -pearson
+        best_params = result.x.tolist()
+        best_loss = float(result.fun)
+        best_pearson = -best_loss
 
     return best_params, best_loss, best_pearson
 
@@ -307,11 +369,16 @@ def fit_delta_rdm(model_name, cvd_type, hc_W_dict, C_baseline,
 def permutation_test_rdm(hc_W_dict, C_baseline, delta_obs, metric,
                          best_params, model_name, cvd_type,
                          delta_obs_corr=None, delta_obs_cosine=None,
-                         delta_obs_triangle=None):
+                         delta_obs_triangle=None,
+                         loss_type='pearson', scale_lambda=0.1):
     """Permutation test: shuffle color labels of observed ΔRDM.
 
-    Tests whether the best Pearson r is higher than chance.
-    Uses exact permutation (8! = 40320).
+    Tests whether the best Pearson r (or scale-penalized score) is higher
+    than chance. Uses exact permutation (8! = 40320).
+
+    For loss_type='pearson': tests Pearson r.
+    For loss_type='pearson_scale': tests -(loss) = r - λ·(log ratio)²
+      so higher = better, consistent with Pearson r direction.
 
     Returns:
         p_value, observed_r
@@ -345,8 +412,19 @@ def permutation_test_rdm(hc_W_dict, C_baseline, delta_obs, metric,
         mat_obs_tri = squareform(delta_obs_triangle)
     else:
         delta_sim = compute_delta_rdm_sim(hc_W_dict, C_shifted, C_baseline, metric)
-        obs_r, _ = pearsonr(delta_sim, delta_obs)
-        obs_r = float(obs_r) if np.isfinite(obs_r) else 0.0
+        norm_sim = np.linalg.norm(delta_sim)
+
+        obs_r_raw, _ = pearsonr(delta_sim, delta_obs)
+        obs_r_raw = float(obs_r_raw) if np.isfinite(obs_r_raw) else 0.0
+
+        if loss_type == 'pearson_scale' and norm_sim > 1e-12:
+            # Test statistic: r - λ·(log ratio)² (higher = better)
+            norm_obs = np.linalg.norm(delta_obs)
+            log_ratio = np.log(norm_sim / max(norm_obs, 1e-12))
+            obs_r = obs_r_raw - scale_lambda * log_ratio ** 2
+        else:
+            obs_r = obs_r_raw
+
         mat_obs = squareform(delta_obs)
 
     # Permutation: shuffle the 8 color labels of ΔRDM_obs
@@ -368,7 +446,14 @@ def permutation_test_rdm(hc_W_dict, C_baseline, delta_obs, metric,
         else:
             delta_perm = mat_obs[np.ix_(perm, perm)][triu_idx]
             r, _ = pearsonr(delta_sim, delta_perm)
-            null_rs.append(float(r) if np.isfinite(r) else 0.0)
+            r = float(r) if np.isfinite(r) else 0.0
+
+            if loss_type == 'pearson_scale' and norm_sim > 1e-12:
+                norm_perm = np.linalg.norm(delta_perm)
+                log_ratio_p = np.log(norm_sim / max(norm_perm, 1e-12))
+                null_rs.append(r - scale_lambda * log_ratio_p ** 2)
+            else:
+                null_rs.append(r)
 
     null_rs = np.array(null_rs)
     p = (np.sum(null_rs >= obs_r) + 1) / (len(null_rs) + 1)
@@ -621,11 +706,13 @@ def precompute_hc_W(hc_amps_dict, C_original):
 # Main pipeline
 # ============================================================================
 
-def run_pipeline(sub_id, roi, model_name, metric, output_dir):
+def run_pipeline(sub_id, roi, model_name, metric, output_dir,
+                 loss_type='pearson', scale_lambda=0.1):
     """Run full Phase A → B → C pipeline for one combination."""
 
     cvd_type = CVD_TYPE[sub_id]
-    combo_name = f'sub-{sub_id}_{roi}_{model_name}_{metric}'
+    loss_suffix = f'_{loss_type}' if loss_type != 'pearson' else ''
+    combo_name = f'sub-{sub_id}_{roi}_{model_name}_{metric}{loss_suffix}'
     out_path = Path(output_dir) / combo_name
     out_path.mkdir(parents=True, exist_ok=True)
 
@@ -682,16 +769,20 @@ def run_pipeline(sub_id, roi, model_name, metric, output_dir):
     # ------------------------------------------------------------------
     # Phase A: ΔRDM-based δ optimization
     # ------------------------------------------------------------------
-    print('[A] Phase A: ΔRDM fitting...')
+    print(f'[A] Phase A: ΔRDM fitting (loss={loss_type})...')
     best_params, best_loss, best_pearson = fit_delta_rdm(
         model_name, cvd_type, hc_W_dict, C_baseline,
         delta_obs, metric,
         delta_obs_corr=delta_obs_corr,
         delta_obs_cosine=delta_obs_cosine,
         delta_obs_triangle=delta_obs_triangle,
+        loss_type=loss_type,
+        scale_lambda=scale_lambda,
     )
     print(f'  Best params: {best_params}')
     print(f'  Best Pearson r: {best_pearson:.4f}')
+    if loss_type == 'pearson_scale':
+        print(f'  Total loss (r + λ·scale): {best_loss:.4f}  (λ={scale_lambda})')
 
     # Permutation test
     print('[A+] Permutation test (8! = 40320)...')
@@ -701,6 +792,8 @@ def run_pipeline(sub_id, roi, model_name, metric, output_dir):
         delta_obs_corr=delta_obs_corr,
         delta_obs_cosine=delta_obs_cosine,
         delta_obs_triangle=delta_obs_triangle,
+        loss_type=loss_type,
+        scale_lambda=scale_lambda,
     )
     sig = '*' if perm_p < 0.05 else ''
     print(f'  Perm p = {perm_p:.4f}{sig}')
@@ -811,6 +904,9 @@ def run_pipeline(sub_id, roi, model_name, metric, output_dir):
             'perm_p': perm_p,
             'delta_theta_deg': delta_theta.tolist(),
             'significant': perm_p < 0.05,
+            'loss_type': loss_type,
+            'scale_lambda': scale_lambda if loss_type == 'pearson_scale' else None,
+            'total_loss': best_loss,
         },
         'phase_b': {
             'primary_mode': 'per_hc',
@@ -898,11 +994,17 @@ def main():
     parser.add_argument('--metric', required=True,
                         choices=['corr', 'cosine', 'triangle', 'combination'],
                         help='RDM distance metric')
+    parser.add_argument('--loss', default='pearson',
+                        choices=['pearson', 'pearson_scale'],
+                        help='Phase A loss function (default: pearson)')
+    parser.add_argument('--scale_lambda', type=float, default=0.1,
+                        help='Scale penalty weight for pearson_scale loss')
     parser.add_argument('--output_dir', default='results/sim',
                         help='Output directory')
     args = parser.parse_args()
 
-    run_pipeline(args.sub, args.roi, args.model, args.metric, args.output_dir)
+    run_pipeline(args.sub, args.roi, args.model, args.metric, args.output_dir,
+                 loss_type=args.loss, scale_lambda=args.scale_lambda)
 
 
 if __name__ == '__main__':

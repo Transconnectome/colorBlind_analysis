@@ -153,9 +153,16 @@ def _fine_tune_subject(cvd_subj: str,
                        anchor_v1: float,
                        anchor_v2: float,
                        half: float,
-                       step: float) -> Dict:
-    """Run the narrow joint L₃ grid for one (subject, model)."""
-    cvd_type = CVD_TYPE[cvd_subj]
+                       step: float,
+                       cvd_type_override: str = None) -> Dict:
+    """Run the narrow joint L₃ grid for one (subject, model).
+
+    If ``cvd_type_override`` is supplied it bypasses the native
+    ``CVD_TYPE[cvd_subj]`` mapping — used by the cross-family specificity
+    sweep.
+    """
+    cvd_type_native = CVD_TYPE[cvd_subj]
+    cvd_type = cvd_type_override if cvd_type_override else cvd_type_native
     grid_v1 = _narrow_grid(anchor_v1, half=half, step=step)
     grid_v2 = _narrow_grid(anchor_v2, half=half, step=step)
 
@@ -212,6 +219,8 @@ def _fine_tune_subject(cvd_subj: str,
     result = {
         'subject': cvd_subj,
         'cvd_type': cvd_type,
+        'cvd_type_native': cvd_type_native,
+        'cvd_type_override': cvd_type_override,
         'model': model,
         'rois': list(FIT_ROIS),
         'loss': {
@@ -297,6 +306,11 @@ def _parse_args() -> argparse.Namespace:
                    help='Machado models only (legacy stays in Stage 1)')
     p.add_argument('--cvd_subjects', nargs='+',
                    default=list(CVD_TYPE.keys()))
+    p.add_argument('--cvd_type_override', type=str, default=None,
+                   choices=['protan', 'deutan', 'normal'],
+                   help='Force a cvd_type for ALL --cvd_subjects (cross-'
+                        'family specificity test). Default: use native '
+                        'CVD_TYPE mapping.')
     p.add_argument('--half_width_nm', type=float,
                    default=WINDOW_HALF_WIDTH_NM)
     p.add_argument('--step_nm', type=float, default=WINDOW_STEP_NM)
@@ -322,6 +336,9 @@ def main() -> None:
     print(f'  ROIs fit   : {FIT_ROIS} (hV4 held out)')
     print(f'  models     : {args.models}')
     print(f'  subjects   : {args.cvd_subjects}')
+    if args.cvd_type_override:
+        print(f'  ⚠ cvd_type_override: {args.cvd_type_override} '
+              f'(cross-family specificity mode)')
     print(f'  window     : ±{args.half_width_nm} nm, step {args.step_nm} nm')
     print(f'  λ_scale    : {args.lam_scale}')
     print(f'  λ_ROI      : {args.lam_roi}')
@@ -352,6 +369,7 @@ def main() -> None:
         'rois': list(FIT_ROIS),
         'models': list(args.models),
         'cvd_subjects': list(args.cvd_subjects),
+        'cvd_type_override': args.cvd_type_override,
         'entries': [],
     }
 
@@ -390,12 +408,19 @@ def main() -> None:
             else:
                 loss.set_fixed_alphas({})
 
+            effective_cvd_type = (
+                args.cvd_type_override
+                if args.cvd_type_override else CVD_TYPE[cvd_subj])
+            family_tag = effective_cvd_type
+            if args.cvd_type_override:
+                family_tag = (f'{effective_cvd_type} [override, '
+                              f'native={CVD_TYPE[cvd_subj]}]')
             if model == 'machado_alpha_free':
-                print(f'  sub-{cvd_subj} ({CVD_TYPE[cvd_subj]}): '
+                print(f'  sub-{cvd_subj} ({family_tag}): '
                       f'anchors V1={anchor_v1:.2f} nm (α={alpha_v1:.2f}), '
                       f'V2={anchor_v2:.2f} nm (α={alpha_v2:.2f})')
             else:
-                print(f'  sub-{cvd_subj} ({CVD_TYPE[cvd_subj]}): '
+                print(f'  sub-{cvd_subj} ({family_tag}): '
                       f'anchors V1={anchor_v1:.2f} nm, V2={anchor_v2:.2f} nm')
 
             result = _fine_tune_subject(
@@ -409,6 +434,7 @@ def main() -> None:
                 anchor_v2=anchor_v2,
                 half=args.half_width_nm,
                 step=args.step_nm,
+                cvd_type_override=args.cvd_type_override,
             )
 
             best = result['best']

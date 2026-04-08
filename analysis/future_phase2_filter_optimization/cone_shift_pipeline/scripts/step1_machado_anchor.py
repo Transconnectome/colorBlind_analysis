@@ -206,9 +206,16 @@ def _fit_triple(cvd_subj: str,
                 C_baseline: np.ndarray,
                 delta_rdm_obs: np.ndarray,
                 delta_step: float,
-                alpha_step: float) -> Dict:
-    """Grid-search a single (subject, ROI, model) triple."""
-    cvd_type = CVD_TYPE[cvd_subj]
+                alpha_step: float,
+                cvd_type_override: str = None) -> Dict:
+    """Grid-search a single (subject, ROI, model) triple.
+
+    If ``cvd_type_override`` is provided it takes priority over the default
+    ``CVD_TYPE[cvd_subj]`` lookup — used by the cross-family specificity sweep
+    (e.g. apply ``deutan`` grid to sub-09 whose native family is ``protan``).
+    """
+    cvd_type_native = CVD_TYPE[cvd_subj]
+    cvd_type = cvd_type_override if cvd_type_override else cvd_type_native
 
     grid = _enumerate_model_grid(model, delta_step, alpha_step)
     sweep: List[Dict] = []
@@ -271,6 +278,8 @@ def _fit_triple(cvd_subj: str,
     result = {
         'subject': cvd_subj,
         'cvd_type': cvd_type,
+        'cvd_type_native': cvd_type_native,
+        'cvd_type_override': cvd_type_override,
         'roi': logical_roi,
         'model': model,
         'df': MODELS[model]['df'],
@@ -313,6 +322,11 @@ def _parse_args() -> argparse.Namespace:
                         '(machado_1way machado_alpha_free cone_3way)')
     p.add_argument('--cvd_subjects', nargs='+',
                    default=list(CVD_TYPE.keys()))
+    p.add_argument('--cvd_type_override', type=str, default=None,
+                   choices=['protan', 'deutan', 'normal'],
+                   help='Force a cvd_type for ALL --cvd_subjects (cross-'
+                        'family specificity test). Default: use native '
+                        'CVD_TYPE mapping.')
     p.add_argument('--delta_step_nm', type=float,
                    default=DELTA_STEP_NM_DEFAULT)
     p.add_argument('--alpha_step', type=float, default=ALPHA_STEP_DEFAULT)
@@ -332,6 +346,9 @@ def main() -> None:
     print(f'  ROIs      : {args.rois}')
     print(f'  models    : {args.models}')
     print(f'  subjects  : {args.cvd_subjects}')
+    if args.cvd_type_override:
+        print(f'  ⚠ cvd_type_override: {args.cvd_type_override} '
+              f'(cross-family specificity mode)')
     print(f'  Δλ step   : {args.delta_step_nm} nm '
           f'(range [0, {DELTA_LAMBDA_MAX}] nm)')
     print(f'  α step    : {args.alpha_step}')
@@ -348,6 +365,7 @@ def main() -> None:
         'rois': list(args.rois),
         'models': list(args.models),
         'cvd_subjects': list(args.cvd_subjects),
+        'cvd_type_override': args.cvd_type_override,
         'entries': [],
     }
 
@@ -373,6 +391,7 @@ def main() -> None:
                     delta_rdm_obs=delta_rdm_obs,
                     delta_step=args.delta_step_nm,
                     alpha_step=args.alpha_step,
+                    cvd_type_override=args.cvd_type_override,
                 )
 
                 # One-line summary

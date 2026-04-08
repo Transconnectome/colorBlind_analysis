@@ -16,19 +16,30 @@ Reads every Stage-1/2/3a/3b JSON and emits:
             cognition_hue_mse_deg2, cognition_drdm_cos,
             verdict
 
+    results/step4_summary/tier_summary.csv   (1 row per subject×model)
     results/step4_summary/step4_manifest.json
     results/step4_summary/figures/fig1_delta_lambda_bar.png
     results/step4_summary/figures/fig2_l3_landscape_sub08.png
     results/step4_summary/figures/fig3_neural_vs_cognition.png
 
-Verdict rules (plan §4):
+Four-tier success criteria (applied at subject × model level):
 
-    PASS           NEURAL p ≤ α  AND  COGNITION hue_mse ≤ threshold
-    NEURAL_ONLY    NEURAL p ≤ α  AND  COGNITION hue_mse >  threshold
-    COGNITION_ONLY NEURAL p >  α  AND  COGNITION hue_mse ≤ threshold
-    HOLD           NEURAL p >  α  AND  COGNITION hue_mse >  threshold
+    G — Geometry          Stage 2 joint V1+V2 label_perm_p ≤ α
+                          AND  baseline_improvement_p ≤ α
+    N — Neural transfer   Stage 3a hV4 label_perm_p ≤ α
+                          AND  baseline_improvement_p ≤ α_neural_improv
+    C — Cognition         Stage 3b hue_mse ≤ hue_mse_threshold
+                          AND  drdm_cos ≥ drdm_cos_threshold
+                          evaluated at V1 OR hV4 (either passes)
 
-Per-ROI NEURAL p is used.
+Tier label:
+    UNIFIED         ≥ 2 of {G, N, C}
+    GEOMETRY_ONLY   G only
+    NEURAL_ONLY     N only
+    COGNITION_ONLY  C only
+    NULL            none
+
+The tier is broadcast to all three ROI rows of the same (subject, model).
 
 Usage:
     mpirun -np 1 python scripts/step4_summary.py \
@@ -67,6 +78,8 @@ DEFAULT_CVD_SUBJECTS = ('08', '09', '10')
 
 DEFAULT_ALPHA = 0.05
 DEFAULT_HUE_MSE_THRESHOLD = 15.0
+DEFAULT_DRDM_COS_THRESHOLD = 0.95
+DEFAULT_NEURAL_IMPROV_THRESHOLD = 0.10
 
 SUMMARY_COLUMNS = [
     'subject', 'cvd_type', 'model', 'roi',
@@ -77,7 +90,20 @@ SUMMARY_COLUMNS = [
     'neural_label_perm_p', 'neural_baseline_improvement_p',
     'cognition_closest_nm', 'cognition_label',
     'cognition_hue_mse_deg2', 'cognition_drdm_cos',
-    'verdict',
+    'stage2_joint_label_p', 'stage2_joint_improvement_p',
+    'geometry_pass', 'neural_pass', 'cognition_pass',
+    'tier',
+    'verdict',   # alias of tier for backward compatibility
+]
+
+TIER_SUMMARY_COLUMNS = [
+    'subject', 'cvd_type', 'model',
+    'stage2_joint_label_p', 'stage2_joint_improvement_p',
+    'hv4_neural_label_p', 'hv4_neural_improvement_p',
+    'v1_hue_mse', 'v1_drdm_cos',
+    'hv4_hue_mse', 'hv4_drdm_cos',
+    'geometry_pass', 'neural_pass', 'cognition_pass',
+    'n_criteria_passed', 'tier',
 ]
 
 
@@ -167,21 +193,115 @@ def _drift_for_roi(stage2_doc: Dict, roi: str) -> Optional[float]:
     return None
 
 
-def _verdict(neural_p: Optional[float],
-             cognition_hue_mse: Optional[float],
-             alpha: float,
-             hue_mse_threshold: float) -> str:
-    if neural_p is None or cognition_hue_mse is None:
-        return 'INCOMPLETE'
-    neural_pass = float(neural_p) <= alpha
-    cognition_pass = float(cognition_hue_mse) <= hue_mse_threshold
-    if neural_pass and cognition_pass:
-        return 'PASS'
-    if neural_pass and not cognition_pass:
-        return 'NEURAL_ONLY'
-    if cognition_pass and not neural_pass:
-        return 'COGNITION_ONLY'
-    return 'HOLD'
+def _leq(value: Optional[float], threshold: float) -> bool:
+    """True iff value is not None and ≤ threshold."""
+    return value is not None and float(value) <= threshold
+
+
+def _geq(value: Optional[float], threshold: float) -> bool:
+    """True iff value is not None and ≥ threshold."""
+    return value is not None and float(value) >= threshold
+
+
+def _assign_tier(stage2_doc: Optional[Dict],
+                 stage3n_doc: Optional[Dict],
+                 stage3c_doc: Optional[Dict],
+                 alpha: float,
+                 hue_mse_threshold: float,
+                 drdm_cos_threshold: float,
+                 neural_improv_threshold: float) -> Dict:
+    """Apply the 4-tier success criteria at subject × model level.
+
+    Returns a dict with the tier label, per-criterion pass flags, and the
+    raw statistics that fed into each decision (for CSV broadcast).
+
+    Criteria:
+        G (Geometry)      Stage 2 JOINT V1+V2 label_perm_p ≤ α
+                          AND  baseline_improvement_p ≤ α
+        N (Neural)        Stage 3a hV4 label_perm_p ≤ α
+                          AND  baseline_improvement_p ≤ neural_improv_threshold
+        C (Cognition)     hue_mse ≤ hue_mse_threshold
+                          AND  drdm_cos ≥ drdm_cos_threshold
+                          evaluated at V1 OR hV4 (either passes)
+    """
+    info = {
+        'stage2_joint_label_p': None,
+        'stage2_joint_improvement_p': None,
+        'hv4_neural_label_p': None,
+        'hv4_neural_improvement_p': None,
+        'v1_hue_mse': None,
+        'v1_drdm_cos': None,
+        'hv4_hue_mse': None,
+        'hv4_drdm_cos': None,
+        'geometry_pass': False,
+        'neural_pass': False,
+        'cognition_pass': False,
+        'n_criteria_passed': 0,
+        'tier': 'NULL',
+    }
+
+    # ------------------------------------------------------------------
+    # G — Geometry: Stage 2 joint V1+V2 permutation test
+    # ------------------------------------------------------------------
+    if stage2_doc is not None:
+        perm = stage2_doc.get('permutation_null', {}) or {}
+        info['stage2_joint_label_p'] = perm.get('label_perm_p')
+        info['stage2_joint_improvement_p'] = perm.get('baseline_improvement_p')
+        info['geometry_pass'] = (
+            _leq(info['stage2_joint_label_p'], alpha)
+            and _leq(info['stage2_joint_improvement_p'], alpha)
+        )
+
+    # ------------------------------------------------------------------
+    # N — Neural transfer: Stage 3a hV4 (held out)
+    # ------------------------------------------------------------------
+    if stage3n_doc is not None:
+        hv4 = stage3n_doc.get('rois', {}).get('hV4', {}) or {}
+        info['hv4_neural_label_p'] = hv4.get('label_perm_p')
+        info['hv4_neural_improvement_p'] = hv4.get('baseline_improvement_p')
+        info['neural_pass'] = (
+            _leq(info['hv4_neural_label_p'], alpha)
+            and _leq(info['hv4_neural_improvement_p'], neural_improv_threshold)
+        )
+
+    # ------------------------------------------------------------------
+    # C — Cognition: V1 OR hV4 closest-canonical agreement
+    # ------------------------------------------------------------------
+    if stage3c_doc is not None:
+        rois_c = stage3c_doc.get('rois', {}) or {}
+        v1c = (rois_c.get('V1', {}) or {}).get('closest', {}) or {}
+        hv4c = (rois_c.get('hV4', {}) or {}).get('closest', {}) or {}
+        info['v1_hue_mse'] = v1c.get('hue_mse_deg2')
+        info['v1_drdm_cos'] = v1c.get('drdm_cos')
+        info['hv4_hue_mse'] = hv4c.get('hue_mse_deg2')
+        info['hv4_drdm_cos'] = hv4c.get('drdm_cos')
+        c_v1 = (_leq(info['v1_hue_mse'], hue_mse_threshold)
+                and _geq(info['v1_drdm_cos'], drdm_cos_threshold))
+        c_hv4 = (_leq(info['hv4_hue_mse'], hue_mse_threshold)
+                 and _geq(info['hv4_drdm_cos'], drdm_cos_threshold))
+        info['cognition_pass'] = bool(c_v1 or c_hv4)
+
+    # ------------------------------------------------------------------
+    # Tier assignment
+    # ------------------------------------------------------------------
+    G = bool(info['geometry_pass'])
+    N = bool(info['neural_pass'])
+    C = bool(info['cognition_pass'])
+    n_pass = int(G) + int(N) + int(C)
+    info['n_criteria_passed'] = n_pass
+
+    if n_pass >= 2:
+        info['tier'] = 'UNIFIED'
+    elif G:
+        info['tier'] = 'GEOMETRY_ONLY'
+    elif N:
+        info['tier'] = 'NEURAL_ONLY'
+    elif C:
+        info['tier'] = 'COGNITION_ONLY'
+    else:
+        info['tier'] = 'NULL'
+
+    return info
 
 
 def _build_row(cvd_subj: str,
@@ -191,9 +311,13 @@ def _build_row(cvd_subj: str,
                stage2_doc: Optional[Dict],
                stage3n_doc: Optional[Dict],
                stage3c_doc: Optional[Dict],
-               alpha: float,
-               hue_mse_threshold: float) -> Dict:
-    """Assemble one row across all four stages."""
+               tier_info: Dict) -> Dict:
+    """Assemble one row across all four stages.
+
+    ``tier_info`` is the (subject × model)-level dict from
+    :func:`_assign_tier` and is broadcast identically across V1/V2/hV4
+    rows of the same (subject, model) group.
+    """
     cvd_type = CVD_TYPE.get(cvd_subj, 'unknown')
 
     # Stage 1 anchor
@@ -246,7 +370,7 @@ def _build_row(cvd_subj: str,
             cog_hue_mse = float(closest.get('hue_mse_deg2')) if closest.get('hue_mse_deg2') is not None else None
             cog_drdm_cos = float(closest.get('drdm_cos')) if closest.get('drdm_cos') is not None else None
 
-    verdict = _verdict(neural_label_p, cog_hue_mse, alpha, hue_mse_threshold)
+    tier_label = tier_info.get('tier', 'NULL')
 
     return {
         'subject': cvd_subj,
@@ -269,7 +393,15 @@ def _build_row(cvd_subj: str,
         'cognition_label': cog_label,
         'cognition_hue_mse_deg2': cog_hue_mse,
         'cognition_drdm_cos': cog_drdm_cos,
-        'verdict': verdict,
+        'stage2_joint_label_p': tier_info.get('stage2_joint_label_p'),
+        'stage2_joint_improvement_p': tier_info.get('stage2_joint_improvement_p'),
+        'geometry_pass': bool(tier_info.get('geometry_pass', False)),
+        'neural_pass': bool(tier_info.get('neural_pass', False)),
+        'cognition_pass': bool(tier_info.get('cognition_pass', False)),
+        'tier': tier_label,
+        # 'verdict' is an alias of 'tier' kept for backward compatibility
+        # with downstream scripts that read the previous column name.
+        'verdict': tier_label,
     }
 
 
@@ -286,16 +418,26 @@ def _write_csv(rows: List[Dict], path: Path) -> None:
             writer.writerow({k: row.get(k) for k in SUMMARY_COLUMNS})
 
 
+def _write_tier_summary(tier_rows: List[Dict], path: Path) -> None:
+    """Write the compact subject × model tier table (≤ n_subj × n_models)."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, 'w', newline='') as f:
+        writer = csv.DictWriter(f, fieldnames=TIER_SUMMARY_COLUMNS)
+        writer.writeheader()
+        for row in tier_rows:
+            writer.writerow({k: row.get(k) for k in TIER_SUMMARY_COLUMNS})
+
+
 # ============================================================================
 # Figures (matplotlib only — no seaborn per CLAUDE.md)
 # ============================================================================
 
 VERDICT_COLORS = {
-    'PASS': '#2ca02c',
+    'UNIFIED': '#2ca02c',
+    'GEOMETRY_ONLY': '#9467bd',
     'NEURAL_ONLY': '#1f77b4',
     'COGNITION_ONLY': '#ff7f0e',
-    'HOLD': '#d62728',
-    'INCOMPLETE': '#7f7f7f',
+    'NULL': '#7f7f7f',
 }
 
 
@@ -446,10 +588,17 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument('--cvd_subjects', nargs='+',
                    default=list(DEFAULT_CVD_SUBJECTS))
     p.add_argument('--alpha', type=float, default=DEFAULT_ALPHA,
-                   help='Significance threshold for NEURAL label_perm_p')
+                   help='Significance threshold for Geometry label_perm_p '
+                        'and for Neural label_perm_p')
     p.add_argument('--hue_mse_threshold', type=float,
                    default=DEFAULT_HUE_MSE_THRESHOLD,
-                   help='Maximum COGNITION hue_mse (deg²) for PASS verdict')
+                   help='Maximum COGNITION hue_mse (deg²) for Cognition pass')
+    p.add_argument('--drdm_cos_threshold', type=float,
+                   default=DEFAULT_DRDM_COS_THRESHOLD,
+                   help='Minimum COGNITION drdm_cos for Cognition pass')
+    p.add_argument('--neural_improvement_threshold', type=float,
+                   default=DEFAULT_NEURAL_IMPROV_THRESHOLD,
+                   help='Maximum Neural baseline_improvement_p for Neural pass')
     p.add_argument('--landscape_subject', type=str, default='08')
     p.add_argument('--landscape_model', type=str,
                    default='machado_1way')
@@ -467,24 +616,45 @@ def main() -> None:
 
     print('=' * 64)
     print('Gen-4 Stage 4 summary and figures')
-    print(f'  step1_dir         : {step1_dir}')
-    print(f'  step2_dir         : {step2_dir}')
-    print(f'  step3_neural_dir  : {step3n_dir}')
-    print(f'  step3_cognition_dir: {step3c_dir}')
-    print(f'  output_dir        : {output_dir}')
-    print(f'  ROIs              : {args.rois}')
-    print(f'  models            : {args.models}')
-    print(f'  subjects          : {args.cvd_subjects}')
-    print(f'  α (NEURAL p)      : {args.alpha}')
-    print(f'  hue_mse threshold : {args.hue_mse_threshold} deg²')
+    print(f'  step1_dir               : {step1_dir}')
+    print(f'  step2_dir               : {step2_dir}')
+    print(f'  step3_neural_dir        : {step3n_dir}')
+    print(f'  step3_cognition_dir     : {step3c_dir}')
+    print(f'  output_dir              : {output_dir}')
+    print(f'  ROIs                    : {args.rois}')
+    print(f'  models                  : {args.models}')
+    print(f'  subjects                : {args.cvd_subjects}')
+    print(f'  α  (Geometry/Neural p)  : {args.alpha}')
+    print(f'  hue_mse threshold       : {args.hue_mse_threshold} deg²')
+    print(f'  drdm_cos threshold      : {args.drdm_cos_threshold}')
+    print(f'  neural improv threshold : {args.neural_improvement_threshold}')
     print('=' * 64)
 
     rows: List[Dict] = []
+    tier_rows: List[Dict] = []
     for model in args.models:
         for cvd_subj in args.cvd_subjects:
             stage2 = _load_stage2(step2_dir, cvd_subj, model)
             stage3n = _load_stage3(step3n_dir, cvd_subj, model)
             stage3c = _load_stage3(step3c_dir, cvd_subj, model)
+
+            # Compute the subject × model tier ONCE and broadcast below.
+            tier_info = _assign_tier(
+                stage2_doc=stage2,
+                stage3n_doc=stage3n,
+                stage3c_doc=stage3c,
+                alpha=args.alpha,
+                hue_mse_threshold=args.hue_mse_threshold,
+                drdm_cos_threshold=args.drdm_cos_threshold,
+                neural_improv_threshold=args.neural_improvement_threshold,
+            )
+            tier_rows.append({
+                'subject': cvd_subj,
+                'cvd_type': CVD_TYPE.get(cvd_subj, 'unknown'),
+                'model': model,
+                **tier_info,
+            })
+
             for roi in args.rois:
                 row = _build_row(
                     cvd_subj=cvd_subj,
@@ -494,15 +664,19 @@ def main() -> None:
                     stage2_doc=stage2,
                     stage3n_doc=stage3n,
                     stage3c_doc=stage3c,
-                    alpha=args.alpha,
-                    hue_mse_threshold=args.hue_mse_threshold,
+                    tier_info=tier_info,
                 )
                 rows.append(row)
 
-    # CSV table
+    # CSV tables
     csv_path = output_dir / 'summary_table.csv'
     _write_csv(rows, csv_path)
-    print(f'\nSummary table → {csv_path}  ({len(rows)} rows)')
+    print(f'\nSummary table       → {csv_path}  ({len(rows)} rows)')
+
+    tier_csv_path = output_dir / 'tier_summary.csv'
+    _write_tier_summary(tier_rows, tier_csv_path)
+    print(f'Tier summary table  → {tier_csv_path}  '
+          f'({len(tier_rows)} rows, 1 per subject × model)')
 
     # Figures
     figures_dir = output_dir / 'figures'
@@ -517,13 +691,26 @@ def main() -> None:
         hue_mse_threshold=args.hue_mse_threshold, alpha=args.alpha)
     print(f'Figures → {figures_dir}')
 
-    # Verdict histogram
-    tally: Dict[str, int] = {}
-    for row in rows:
-        tally[row['verdict']] = tally.get(row['verdict'], 0) + 1
-    print('\nVerdict tally:')
-    for verdict, n in sorted(tally.items()):
-        print(f'  {verdict:15s}: {n}')
+    # Tier histogram — one count per (subject, model), NOT per ROI row
+    tier_order = ['UNIFIED', 'GEOMETRY_ONLY', 'NEURAL_ONLY',
+                  'COGNITION_ONLY', 'NULL']
+    tally: Dict[str, int] = {k: 0 for k in tier_order}
+    for tr in tier_rows:
+        tally[tr['tier']] = tally.get(tr['tier'], 0) + 1
+    print('\nTier tally (subject × model):')
+    for tier_name in tier_order:
+        print(f'  {tier_name:15s}: {tally.get(tier_name, 0)}')
+
+    # Per-subject×model tier line for quick inspection
+    print('\nPer (subject × model):')
+    for tr in tier_rows:
+        flags = ''.join([
+            'G' if tr['geometry_pass'] else '.',
+            'N' if tr['neural_pass'] else '.',
+            'C' if tr['cognition_pass'] else '.',
+        ])
+        print(f'  sub-{tr["subject"]} ({tr["cvd_type"]:6s}) × '
+              f'{tr["model"]:20s}  [{flags}]  {tr["tier"]}')
 
     manifest = {
         'timestamp': datetime.now().isoformat(),
@@ -533,12 +720,16 @@ def main() -> None:
         'step3_cognition_dir': str(step3c_dir),
         'alpha': float(args.alpha),
         'hue_mse_threshold': float(args.hue_mse_threshold),
+        'drdm_cos_threshold': float(args.drdm_cos_threshold),
+        'neural_improvement_threshold': float(args.neural_improvement_threshold),
         'models': list(args.models),
         'rois': list(args.rois),
         'cvd_subjects': list(args.cvd_subjects),
         'n_rows': len(rows),
-        'verdict_tally': tally,
+        'n_tier_rows': len(tier_rows),
+        'tier_tally': tally,
         'summary_table_csv': str(csv_path),
+        'tier_summary_csv': str(tier_csv_path),
         'figures': [
             str(figures_dir / 'fig1_delta_lambda_bar.png'),
             str(figures_dir / 'fig2_l3_landscape_sub08.png'),

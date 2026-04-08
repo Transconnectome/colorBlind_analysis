@@ -68,6 +68,7 @@ conda activate nilearn
 - Use wildcards (*.py, *.sbatch) when multiple files match pattern
 - Only use separate scp commands when destinations differ
 - Prefer 2-3 efficient commands over 10+ separate commands
+- **Shell scripts (.sh, .sbatch) MUST use Unix line endings (LF, not CRLF)**. Always write with `\n` only — Windows `\r\n` causes `invalid option` errors on Linux.
 
 ### 1-4. SLURM Memory Limits (CRITICAL)
 

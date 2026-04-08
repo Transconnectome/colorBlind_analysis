@@ -178,9 +178,15 @@ def _neural_validate_one(cvd_subj: str,
                          stage2_doc: Dict,
                          hc_W: Dict[str, np.ndarray],
                          hc_amps: Dict[str, np.ndarray],
-                         n_perm: int = 40320) -> Dict:
-    """Run the NEURAL transfer check for one (subject, ROI, model)."""
-    cvd_type = CVD_TYPE[cvd_subj]
+                         n_perm: int = 40320,
+                         cvd_type_override: str = None) -> Dict:
+    """Run the NEURAL transfer check for one (subject, ROI, model).
+
+    If ``cvd_type_override`` is supplied it overrides the native
+    ``CVD_TYPE[cvd_subj]`` mapping (cross-family specificity mode).
+    """
+    cvd_type_native = CVD_TYPE[cvd_subj]
+    cvd_type = cvd_type_override if cvd_type_override else cvd_type_native
 
     # Build C_fit and C_baseline
     params_fit = _params_for_model(model, delta_lambda, stage2_doc)
@@ -212,6 +218,9 @@ def _neural_validate_one(cvd_subj: str,
     return {
         'roi': logical_roi,
         'model': model,
+        'cvd_type': cvd_type,
+        'cvd_type_native': cvd_type_native,
+        'cvd_type_override': cvd_type_override,
         'delta_lambda_nm': float(delta_lambda),
         'params': params_fit.tolist(),
         'simulated_vuln': vuln_fit.tolist(),
@@ -254,6 +263,11 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument('--models', nargs='+', default=DEFAULT_MODELS)
     p.add_argument('--cvd_subjects', nargs='+',
                    default=list(CVD_TYPE.keys()))
+    p.add_argument('--cvd_type_override', type=str, default=None,
+                   choices=['protan', 'deutan', 'normal'],
+                   help='Force a cvd_type for ALL --cvd_subjects (cross-'
+                        'family specificity test). Default: use native '
+                        'CVD_TYPE mapping.')
     p.add_argument('--hc_subjects', nargs='+', default=HC_SUBJECTS)
     p.add_argument('--n_perm', type=int, default=40320,
                    help='Permutation count; >=40320 triggers exact 8!')
@@ -275,6 +289,9 @@ def main() -> None:
     print(f'  ROIs       : {args.rois}')
     print(f'  models     : {args.models}')
     print(f'  subjects   : {args.cvd_subjects}')
+    if args.cvd_type_override:
+        print(f'  ⚠ cvd_type_override: {args.cvd_type_override} '
+              f'(cross-family specificity mode)')
     print(f'  n_perm     : {args.n_perm} (exact 8! if >= 40320)')
     print('=' * 64)
 
@@ -296,6 +313,7 @@ def main() -> None:
         'rois': list(args.rois),
         'models': list(args.models),
         'cvd_subjects': list(args.cvd_subjects),
+        'cvd_type_override': args.cvd_type_override,
         'n_perm': int(args.n_perm),
         'entries': [],
     }
@@ -307,13 +325,22 @@ def main() -> None:
             delta_v1 = float(stage2['best']['delta_v1_nm'])
             delta_v2 = float(stage2['best']['delta_v2_nm'])
             delta_bar = 0.5 * (delta_v1 + delta_v2)
-            print(f'  sub-{cvd_subj} ({CVD_TYPE[cvd_subj]}): '
+            effective_cvd_type = (
+                args.cvd_type_override
+                if args.cvd_type_override else CVD_TYPE[cvd_subj])
+            family_tag = effective_cvd_type
+            if args.cvd_type_override:
+                family_tag = (f'{effective_cvd_type} [override, '
+                              f'native={CVD_TYPE[cvd_subj]}]')
+            print(f'  sub-{cvd_subj} ({family_tag}): '
                   f'Δλ_V1={delta_v1:.2f}, Δλ_V2={delta_v2:.2f}, '
                   f'Δλ̄={delta_bar:.2f} nm')
 
             subject_entry = {
                 'subject': cvd_subj,
-                'cvd_type': CVD_TYPE[cvd_subj],
+                'cvd_type': effective_cvd_type,
+                'cvd_type_native': CVD_TYPE[cvd_subj],
+                'cvd_type_override': args.cvd_type_override,
                 'model': model,
                 'delta_v1_nm': delta_v1,
                 'delta_v2_nm': delta_v2,
@@ -335,6 +362,7 @@ def main() -> None:
                         hc_W=hc_W,
                         hc_amps=hc_amps,
                         n_perm=args.n_perm,
+                        cvd_type_override=args.cvd_type_override,
                     )
                 except FileNotFoundError as exc:
                     print(f'    {roi}: missing LOCO target ({exc}) — skip')

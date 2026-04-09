@@ -1,5 +1,5 @@
 #!/bin/bash
-# Quick interactive test: sub-08 hV4, machado_1way only
+# Quick interactive test: sub-08 hV4, fourier DE to verify DE works
 # Run on server: bash scripts/test_loco_filter.sh
 set -eo pipefail
 
@@ -14,10 +14,10 @@ OUT_DIR=results/loco_filter/phase_a_test
 
 mkdir -p ${OUT_DIR}
 
-echo "=== Quick test: sub-08 hV4 machado_1way shift_at_both ==="
+echo "=== Quick test: sub-08 hV4 fourier_warp DE ==="
 /usr/bin/time -v mpirun -np 1 python scripts/loco_distortion_fit.py \
     --subject 08 --roi V4 --method shift_at_both \
-    --models machado_1way \
+    --models fourier_warp \
     --data_dir ${DATA_DIR} \
     --output_dir ${OUT_DIR} \
     2>&1 | tee ${OUT_DIR}/test_output.log

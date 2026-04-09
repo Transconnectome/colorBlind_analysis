@@ -5,16 +5,18 @@
 #SBATCH --nodelist=node2
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=8G
-#SBATCH --time=00:30:00
+#SBATCH --time=01:00:00
 #SBATCH --no-requeue
 #SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization/cone_shift_pipeline
 # ---------------------------------------------------------------------------
-# LOCO Filter Phase A: Distortion Fitting
+# LOCO Filter Phase A v2: R+C g extended [-3,3] + Fourier DE (3 restarts)
 #
-# Benchmarked: machado_1way 41pts = 2s, rc_opponent 697pts ~ 30s,
-# fourier L-BFGS-B ~ 10s, permutation ~5s.  Per subject ~ 1 min.
-# 3 subjects × 3 models + overhead = ~10 min.  30 min is safe margin.
-# Memory: 164 MB peak (test run). 8 GB is generous.
+# Changes from v1:
+#   - rc_opponent g: [-3, 1] -> [-3, 3] (1067 grid points vs 697)
+#   - fourier_warp: L-BFGS-B -> DE with 3 restarts (~5 min/subj)
+#   - machado_1way: unchanged (41 grid points)
+# Estimated: sub-08 ~8 min, sub-09 ~8 min, sub-10 ~0.1 min = ~17 min
+# Time limit 1h is safe margin.
 # ---------------------------------------------------------------------------
 
 set -eo pipefail
@@ -22,7 +24,7 @@ set -eo pipefail
 mkdir -p logs results/loco_filter/phase_a
 
 echo "=============================================================="
-echo "  LOCO Filter Phase A -- $(date)"
+echo "  LOCO Filter Phase A v2 -- $(date)"
 echo "  Host      : $(hostname)"
 echo "  Job ID    : ${SLURM_JOB_ID}"
 echo "  Workdir   : $(pwd)"
@@ -70,6 +72,6 @@ mpirun -np 1 python scripts/loco_distortion_fit.py \
 
 echo ""
 echo "=============================================================="
-echo "  Phase A finished -- $(date)"
+echo "  Phase A v2 finished -- $(date)"
 echo "  Results: ${OUT_DIR}/"
 echo "=============================================================="

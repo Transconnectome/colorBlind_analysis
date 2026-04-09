@@ -279,6 +279,68 @@ def _baseline_hue_normal() -> np.ndarray:
     return _GRID_CACHE['hue_normal']
 
 
+def machado_shifted_hue_at(
+    delta_lambda: float,
+    cvd_type: CvdType,
+    theta_deg: float | np.ndarray,
+    alpha: Optional[float] = None,
+    delta_lambda_max: float = DELTA_LAMBDA_MAX,
+    L_star: float = 75.0,
+    chroma: float = 40.0,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Δλ → shifted hue angle(s) for **arbitrary** CIELab input angle(s).
+
+    Unlike ``machado_shifted_hue`` which uses the 8 hardcoded stimuli,
+    this function constructs CIELab at (L_star, chroma, θ_input) and
+    evaluates the Machado model at those custom inputs.
+
+    Args:
+        delta_lambda: shift in nm (>= 0). 0 ↔ trichromatic baseline.
+        cvd_type: 'protan', 'deutan', or 'normal'.
+        theta_deg: hue angle(s) in degrees [0, 360). Scalar or 1-D array.
+        alpha: if provided, use the 2-DOF variant; else α coupled to Δλ.
+        delta_lambda_max: severity normalization constant.
+        L_star: CIELab lightness (default 75.0, matching experiment).
+        chroma: CIELab chroma (default 40.0, matching experiment).
+
+    Returns:
+        hue_normal: (N,) baseline hue angles under unshifted cones
+        hue_shifted: (N,) shifted hue angles under CVD cones
+        delta_theta: (N,) wrapped difference in [-180, 180]
+    """
+    theta_deg = np.atleast_1d(np.asarray(theta_deg, dtype=float))
+    theta_rad = np.deg2rad(theta_deg)
+
+    # Construct CIELab at requested angles
+    custom_lab = np.column_stack([
+        np.full_like(theta_deg, L_star),
+        chroma * np.cos(theta_rad),
+        chroma * np.sin(theta_rad),
+    ])  # (N, 3)
+
+    wl, L, M, S, _, _, M_xyz2lms = _load_stockman_grid()
+    xyz_custom = lab_to_xyz(custom_lab)
+
+    # Normal hue at custom inputs
+    hue_normal = _hue_from_fundamentals(L, M, S, wl, M_xyz2lms, xyz_custom)
+
+    if cvd_type == 'normal' or delta_lambda == 0.0:
+        hue_shifted = hue_normal.copy()
+    else:
+        if alpha is None:
+            L_a, M_a, S_a = machado_mixed_fundamentals(
+                delta_lambda, cvd_type, wl, L, M, S,
+                delta_lambda_max=delta_lambda_max)
+        else:
+            L_a, M_a, S_a = machado_alpha_free_fundamentals(
+                delta_lambda, alpha, cvd_type, wl, L, M, S)
+        hue_shifted = _hue_from_fundamentals(
+            L_a, M_a, S_a, wl, M_xyz2lms, xyz_custom)
+
+    delta_theta = (hue_shifted - hue_normal + 180.0) % 360.0 - 180.0
+    return hue_normal, hue_shifted, delta_theta
+
+
 def machado_shifted_hue(
     delta_lambda: float,
     cvd_type: CvdType,

@@ -31,7 +31,7 @@ import time
 from datetime import datetime
 from itertools import permutations
 from pathlib import Path
-from scipy.optimize import minimize
+from scipy.optimize import minimize, differential_evolution
 from scipy.stats import spearmanr
 
 # ---------------------------------------------------------------------------
@@ -108,14 +108,14 @@ FILTER_MODELS = {
     },
     'rc_opponent': {
         'df': 2,
-        'bounds': [(0.0, 20.0), (-3.0, 1.0)],
+        'bounds': [(0.0, 20.0), (-3.0, 3.0)],
         'grid_step': [0.5, 0.25],
         'description': 'Machado Δλ + opponent R-G gain g',
     },
     'fourier_warp': {
         'df': 4,
         'bounds': [(-30.0, 30.0)] * 4,
-        'grid_step': None,  # use L-BFGS-B
+        'grid_step': None,  # use differential evolution
         'description': 'Fourier: a₁sin + b₁cos + a₂sin(2θ) + b₂cos(2θ)',
     },
 }
@@ -344,14 +344,20 @@ def grid_search(model_name, hc_amps_dict, vuln_cvd, cvd_type,
 
 
 # ---------------------------------------------------------------------------
-# L-BFGS-B optimizer (for Fourier 4-DOF)
+# Differential Evolution optimizer (for Fourier 4-DOF)
 # ---------------------------------------------------------------------------
 
-def optimize_lbfgsb(model_name, hc_amps_dict, vuln_cvd, cvd_type,
-                    method='shift_at_both',
-                    hc_W_dict=None, delta_rdm_obs=None,
-                    weights=None, verbose=True):
-    """L-BFGS-B for higher-DOF models (Fourier warp)."""
+def optimize_de(model_name, hc_amps_dict, vuln_cvd, cvd_type,
+                method='shift_at_both',
+                hc_W_dict=None, delta_rdm_obs=None,
+                weights=None, verbose=True,
+                n_restarts=3, maxiter=80, popsize=12, seed=42):
+    """Differential Evolution for higher-DOF models (Fourier warp).
+
+    Runs multiple restarts and returns the best solution.
+    DE is gradient-free, so it works with the non-smooth shift_at_both
+    landscape where L-BFGS-B fails.
+    """
     model_info = FILTER_MODELS[model_name]
     bounds = model_info['bounds']
 
@@ -379,23 +385,49 @@ def optimize_lbfgsb(model_name, hc_amps_dict, vuln_cvd, cvd_type,
         loss = compute_fit_loss(vuln_sim, vuln_cvd, delta_theta,
                                 drdm_sim, delta_rdm_obs, weights)
         n_eval[0] += 1
-        if verbose and n_eval[0] % 20 == 0:
-            print(f'  [{n_eval[0]}] L_fit={loss["l_fit"]:.4f} '
-                  f'ρ={loss["spearman_r"]:.3f}')
         return loss['l_fit']
 
     if verbose:
-        print(f'[{model_name}] L-BFGS-B, bounds={bounds}')
+        print(f'[{model_name}] DE: {n_restarts} restarts, '
+              f'maxiter={maxiter}, popsize={popsize}, bounds={bounds}')
 
-    x0 = np.zeros(model_info['df'])
+    best_result = None
+    best_fun = np.inf
     t0 = time.time()
-    res = minimize(objective, x0, method='L-BFGS-B', bounds=bounds,
-                   options={'maxiter': 200, 'ftol': 1e-8})
+
+    for restart in range(n_restarts):
+        n_eval[0] = 0
+        rs = seed + restart * 1000
+
+        def callback(xk, convergence):
+            if verbose:
+                print(f'  [restart {restart+1}, gen {callback.gen}, '
+                      f'{n_eval[0]} evals] convergence={convergence:.4f}')
+                callback.gen += 1
+        callback.gen = 1
+
+        res = differential_evolution(
+            objective, bounds=bounds,
+            maxiter=maxiter, popsize=popsize,
+            tol=1e-6, atol=1e-8,
+            seed=rs, mutation=(0.5, 1.0), recombination=0.7,
+            callback=callback if verbose else None,
+            polish=True)  # L-BFGS-B polish at end (now near optimum)
+
+        if verbose:
+            print(f'  Restart {restart+1}: fun={res.fun:.4f}, '
+                  f'params={np.round(res.x, 2).tolist()}, '
+                  f'{n_eval[0]} evals, success={res.success}')
+
+        if res.fun < best_fun:
+            best_fun = res.fun
+            best_result = res
+
     elapsed = time.time() - t0
 
-    # Compute final loss at optimum
+    # Compute final loss at best optimum
     C_shifted, delta_theta = get_shifted_design(
-        model_name, res.x, cvd_type)
+        model_name, best_result.x, cvd_type)
     if method == 'shift_at_both':
         vuln_sim, _ = simulate_mean_hc_loco_legacy(hc_amps_dict, C_shifted)
     else:
@@ -412,25 +444,28 @@ def optimize_lbfgsb(model_name, hc_amps_dict, vuln_cvd, cvd_type,
                                  drdm_sim, delta_rdm_obs, weights)
 
     if verbose:
-        print(f'  Done in {elapsed:.1f}s, {n_eval[0]} evals. '
-              f'params={res.x.round(2).tolist()}, '
-              f'L_fit={best_loss["l_fit"]:.4f}, ρ={best_loss["spearman_r"]:.3f}')
+        print(f'  Best across {n_restarts} restarts: '
+              f'params={np.round(best_result.x, 2).tolist()}, '
+              f'L_fit={best_loss["l_fit"]:.4f}, '
+              f'ρ={best_loss["spearman_r"]:.3f} '
+              f'({elapsed:.1f}s total)')
 
     return {
         'model': model_name,
         'method': method,
-        'best_params': res.x.tolist(),
+        'best_params': best_result.x.tolist(),
         'best_loss': {
-            'params': res.x.tolist(),
+            'params': best_result.x.tolist(),
             'vuln_sim': vuln_sim.tolist(),
             'delta_theta': delta_theta.tolist(),
             **best_loss,
         },
-        'landscape': None,  # no landscape for L-BFGS-B
-        'n_evaluations': n_eval[0],
+        'landscape': None,  # no landscape for DE
+        'n_evaluations': best_result.nfev,
+        'n_restarts': n_restarts,
         'elapsed_s': elapsed,
-        'optimizer_success': bool(res.success),
-        'optimizer_message': str(res.message),
+        'optimizer_success': bool(best_result.success),
+        'optimizer_message': str(best_result.message),
         'weights': weights or DEFAULT_WEIGHTS,
     }
 
@@ -595,7 +630,7 @@ def main():
                 hc_W_dict=hc_W_dict, delta_rdm_obs=delta_rdm_obs,
                 weights=weights)
         else:
-            result = optimize_lbfgsb(
+            result = optimize_de(
                 model_name, hc_amps_dict, vuln_cvd, cvd_type,
                 method=args.method,
                 hc_W_dict=hc_W_dict, delta_rdm_obs=delta_rdm_obs,

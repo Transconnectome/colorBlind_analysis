@@ -8,7 +8,9 @@ where D is the fitted forward distortion model.
 
 Subject-specific forward models:
   sub-08 → R+C (rc_opponent): params=[Δλ, g]
+  sub-08 → 2-Component (2component): params=[β_s, β_c]
   sub-09 → Machado (machado_1way): params=[Δλ]
+  sub-09 → 2-Component (2component): params=[β_s, β_c]
   sub-10 → both (specificity check — expect identity)
 
 Tiered evaluation:
@@ -49,6 +51,7 @@ from utils_forward_model import create_basis_full, N_CHANNELS  # noqa: E402
 # Constants
 # ---------------------------------------------------------------------------
 CVD_TYPE = {'08': 'deutan', '09': 'protan', '10': 'normal'}
+CONF_AXIS = {'protan': 16.0, 'deutan': 150.0, 'normal': 83.0}
 PRIMARY_MODEL = {'08': 'rc_opponent', '09': 'machado_1way', '10': 'machado_1way'}
 HUE_ANGLES_FLOAT = np.array([0, 45, 90, 135, 180, 225, 270, 315], dtype=float)
 COLOR_NAMES = ['red', 'orange', 'yellow', 'green',
@@ -85,6 +88,15 @@ def forward_model_at_angle(theta_input_deg, model_name, params, cvd_type):
         _, hue_final, _ = machado_with_opponent_gain_at(
             dl, g, cvd_type, theta)
         return hue_final
+
+    elif model_name == '2component':
+        bs, bc = float(params[0]), float(params[1])
+        # θ_base = normal opponent hue at this CIELab input
+        _, hue_base, _ = machado_shifted_hue_at(0.0, cvd_type, theta)
+        theta_conf = CONF_AXIS[cvd_type]
+        dt = (bs * np.cos(np.radians(hue_base - 90.0))
+              + bc * np.cos(np.radians(hue_base - theta_conf)))
+        return (hue_base + dt) % 360.0
 
     else:
         raise ValueError(f'Unknown model: {model_name}')

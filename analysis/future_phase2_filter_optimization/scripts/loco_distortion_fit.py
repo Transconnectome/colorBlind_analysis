@@ -11,6 +11,7 @@ Loss:  L_fit = α·L_vuln + β·L_rank + δ·L_rdm + ε·L_smooth
 Models:
   machado_1way  (1 DOF): Machado 2009 Δλ, α coupled
   rc_opponent   (2 DOF): Machado Δλ + R-G opponent gain g
+  2component    (2 DOF): β_s (S-cone) + β_c (confusion axis) angular dilation
   fourier_warp  (4 DOF): δ(θ) = a₁sin(θ) + b₁cos(θ) + a₂sin(2θ) + b₂cos(2θ)
 
 Usage (server):
@@ -70,6 +71,7 @@ from diagnostic_delta_rdm import (
 # Constants
 # ---------------------------------------------------------------------------
 CVD_TYPE = {'08': 'deutan', '09': 'protan', '10': 'normal'}
+CONF_AXIS = {'protan': 16.0, 'deutan': 150.0, 'normal': 83.0}  # Stockman confusion axes
 HUE_ANGLES_FLOAT = np.array([0, 45, 90, 135, 180, 225, 270, 315], dtype=float)
 
 LOCAL_DATA = (Path(__file__).resolve().parent.parent.parent.parent
@@ -118,6 +120,12 @@ FILTER_MODELS = {
         'grid_step': None,  # use differential evolution
         'description': 'Fourier: a₁sin + b₁cos + a₂sin(2θ) + b₂cos(2θ)',
     },
+    '2component': {
+        'df': 2,
+        'bounds': [(0.0, 50.0), (-50.0, 50.0)],
+        'grid_step': [2.0, 2.0],
+        'description': '2-Component angular dilation: β_s (S-cone) + β_c (confusion axis)',
+    },
 }
 
 
@@ -150,6 +158,17 @@ def get_shifted_design(model_name, params, cvd_type, n_channels=N_CHANNELS):
         basis_full = create_basis_full(n_channels, basis_type='fe')
         idx = np.round(shifted).astype(int) % 360
         dt = (delta + 180) % 360 - 180
+        return basis_full[idx], dt
+
+    elif model_name == '2component':
+        bs, bc = float(params[0]), float(params[1])
+        hue_base, _, _ = machado_shifted_hue(0.0, cvd_type)
+        theta_conf = CONF_AXIS[cvd_type]
+        dt = (bs * np.cos(np.radians(hue_base - 90.0))
+              + bc * np.cos(np.radians(hue_base - theta_conf)))
+        hue_shifted = (hue_base + dt) % 360.0
+        basis_full = create_basis_full(n_channels, basis_type='fe')
+        idx = np.round(hue_shifted).astype(int) % 360
         return basis_full[idx], dt
 
     else:

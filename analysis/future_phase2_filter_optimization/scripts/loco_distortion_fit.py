@@ -39,11 +39,14 @@ from scipy.stats import spearmanr
 # Path setup (same pattern as existing pipeline scripts)
 # ---------------------------------------------------------------------------
 _SCRIPT_DIR = Path(__file__).resolve().parent
+_PHASE2_DIR = _SCRIPT_DIR.parent
 sys.path.insert(0, str(_SCRIPT_DIR))
 
-_FWD_DIR = str(Path(__file__).resolve().parent.parent.parent.parent
-               / 'future_phase1_forward_model' / 'scripts')
-sys.path.insert(0, _FWD_DIR)
+for _base in [_PHASE2_DIR.parent, _PHASE2_DIR.parent.parent]:
+    _fwd = _base / 'future_phase1_forward_model' / 'scripts'
+    if _fwd.exists() and str(_fwd) not in sys.path:
+        sys.path.insert(0, str(_fwd))
+        break
 
 from utils_forward_model import (
     HC_SUBJECTS, CVD_SUBJECTS, N_CHANNELS, N_RUNS, N_COLORS,
@@ -74,8 +77,7 @@ CVD_TYPE = {'08': 'deutan', '09': 'protan', '10': 'normal'}
 CONF_AXIS = {'protan': 16.0, 'deutan': 150.0, 'normal': 83.0}  # Stockman confusion axes
 HUE_ANGLES_FLOAT = np.array([0, 45, 90, 135, 180, 225, 270, 315], dtype=float)
 
-LOCAL_DATA = (Path(__file__).resolve().parent.parent.parent.parent
-              / 'phase1_procrustes_decoding' / 'results'
+LOCAL_DATA = (_PHASE2_DIR.parent / 'phase1_procrustes_decoding' / 'results'
               / 'visualization' / 'full_dataset_C010_with_residuals')
 SERVER_DATA = Path(
     '/scratch/connectome/haba6030/colorBlind/derivatives/full_dataset_C010')
@@ -576,8 +578,7 @@ def main():
         data_dir = LOCAL_DATA
     else:
         # Fallback to old local path
-        old_local = (Path(__file__).resolve().parent.parent.parent.parent
-                     / 'phase1_preprocess_decoding' / 'results'
+        old_local = (_PHASE2_DIR.parent / 'phase1_preprocess_decoding' / 'results'
                      / 'full_dataset_C010')
         if old_local.exists():
             data_dir = old_local

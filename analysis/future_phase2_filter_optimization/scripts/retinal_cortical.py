@@ -38,10 +38,12 @@ _SCRIPT_DIR = Path(__file__).resolve().parent
 if str(_SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPT_DIR))
 
-_FWD_DIR = str(Path(__file__).resolve().parent.parent.parent.parent
-               / 'future_phase1_forward_model' / 'scripts')
-if _FWD_DIR not in sys.path:
-    sys.path.insert(0, _FWD_DIR)
+_PHASE2_DIR = Path(__file__).resolve().parent.parent
+for _base in [_PHASE2_DIR.parent, _PHASE2_DIR.parent.parent]:
+    _fwd = _base / 'future_phase1_forward_model' / 'scripts'
+    if _fwd.exists() and str(_fwd) not in sys.path:
+        sys.path.insert(0, str(_fwd))
+        break
 
 from machado_simulator import machado_shifted_hue, machado_shifted_hue_at  # noqa: E402
 from utils_forward_model import N_CHANNELS, create_basis_full  # noqa: E402

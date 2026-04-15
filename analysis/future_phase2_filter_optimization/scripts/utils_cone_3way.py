@@ -18,10 +18,12 @@ import sys
 from pathlib import Path
 
 # Add forward model scripts to path for imports
-_FWD_DIR = str(Path(__file__).resolve().parent.parent.parent.parent
-               / 'future_phase1_forward_model' / 'scripts')
-if _FWD_DIR not in sys.path:
-    sys.path.insert(0, _FWD_DIR)
+_PHASE2_DIR = Path(__file__).resolve().parent.parent
+for _base in [_PHASE2_DIR.parent, _PHASE2_DIR.parent.parent]:
+    _fwd = _base / 'future_phase1_forward_model' / 'scripts'
+    if _fwd.exists() and str(_fwd) not in sys.path:
+        sys.path.insert(0, str(_fwd))
+        break
 
 from stockman_cone_shift import (
     load_stockman_fundamentals,

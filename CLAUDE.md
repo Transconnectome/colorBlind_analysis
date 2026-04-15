@@ -1,5 +1,17 @@
 # CLAUDE.md
 
+## Current Phase Goal (Phase 2 Filter Optimization — CRITICAL)
+
+**목적**: CVD 색각을 모방하는 모델(2-component, R+C opponent, Machado)을 피팅하고, 그 모델의 역함수(pre-image)를 구하여 CVD 보정 필터를 제작하는 것.
+
+**핵심 문제**: 현재 모델들은 CVD를 잘 모방하고 pre-image도 구할 수 있으나, HC에게도 유의미한 결과를 유도하는 **False Positive 문제**가 있음. 따라서 CVD-specific한 loss/fitting 기준을 개발하여 CVD에게만 유의미한 모델 파라미터를 얻는 것이 목표.
+
+**파이프라인**: CVD 모델 피팅 → pre-image 계산 → 필터 제작 → (궁극적으로) 행동 실험 검증
+
+**참고**: sub-10도 deutan (경도). sub-08 deutan (중등도), sub-09 protan.
+
+---
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## 1. Environment Setup

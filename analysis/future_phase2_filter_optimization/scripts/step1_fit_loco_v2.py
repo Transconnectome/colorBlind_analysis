@@ -36,11 +36,14 @@ from itertools import permutations
 import sys
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
+_PHASE2_DIR = _SCRIPT_DIR.parent
 sys.path.insert(0, str(_SCRIPT_DIR))
 
-_FWD_DIR = str(Path(__file__).resolve().parent.parent.parent.parent
-               / 'future_phase1_forward_model' / 'scripts')
-sys.path.insert(0, _FWD_DIR)
+for _base in [_PHASE2_DIR.parent, _PHASE2_DIR.parent.parent]:
+    _fwd = _base / 'future_phase1_forward_model' / 'scripts'
+    if _fwd.exists() and str(_fwd) not in sys.path:
+        sys.path.insert(0, str(_fwd))
+        break
 
 from utils_forward_model import (
     HC_SUBJECTS, CVD_SUBJECTS, ROIS, N_CHANNELS, N_RUNS, N_COLORS,
@@ -51,10 +54,8 @@ from utils_distortion_models import (
     MODELS, get_design_matrix, get_initial_params, compute_aicc,
 )
 
-LOCAL_BASELINE = Path(__file__).resolve().parent.parent.parent.parent \
-    / 'phase1_preprocess_decoding' / 'results' / 'full_dataset_C010'
-FWD_RESULTS = Path(__file__).resolve().parent.parent.parent.parent \
-    / 'future_phase1_forward_model' / 'results'
+LOCAL_BASELINE = _PHASE2_DIR.parent / 'phase1_preprocess_decoding' / 'results' / 'full_dataset_C010'
+FWD_RESULTS = _PHASE2_DIR.parent / 'future_phase1_forward_model' / 'results'
 
 CVD_TYPE = {'08': 'deutan', '09': 'protan', '10': 'normal'}
 

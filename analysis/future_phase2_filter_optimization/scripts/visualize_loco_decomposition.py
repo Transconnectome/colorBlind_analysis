@@ -326,8 +326,8 @@ def plot_summary(cases_data, out_dir):
 # ---------------------------------------------------------------------------
 
 def main():
-    out_dir = _RESULT_DIR / 'loco_decomposition'
-    out_dir.mkdir(exist_ok=True)
+    out_dir = _RESULT_DIR / 'figures' / 'loco_decomposition'
+    out_dir.mkdir(parents=True, exist_ok=True)
     print(f'Output: {out_dir}')
 
     scatter_data = []

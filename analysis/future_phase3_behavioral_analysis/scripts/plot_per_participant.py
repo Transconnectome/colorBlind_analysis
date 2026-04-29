@@ -12,9 +12,11 @@ from pathlib import Path
 
 # ── Paths ──
 SCRIPT_DIR = Path(__file__).parent
-DATA_DIR = SCRIPT_DIR.parent / "data"
-RESULTS_DIR = SCRIPT_DIR.parent / "results"
-FIG_DIR = SCRIPT_DIR.parent / "figures"
+PHASE_DIR = SCRIPT_DIR.parent
+REPO_ROOT = PHASE_DIR.parent.parent
+DATA_DIR = REPO_ROOT / "data" / "behavior"
+RESULTS_DIR = PHASE_DIR / "results"
+FIG_DIR = PHASE_DIR / "figures"
 FIG_DIR.mkdir(exist_ok=True)
 
 # ── Load metrics ──
@@ -41,9 +43,8 @@ for name in hc_names:
     all_jnd[name] = [hc_metrics[p][name] for p in pairs_raw]
 all_jnd['CVD (sub-08)'] = cvd_vals
 
-# Participants with trial data
-trial_participants = [d.name for d in sorted(DATA_DIR.iterdir())
-                      if d.is_dir() and not d.name.startswith('.')]
+# All HCs have trial data under unified layout
+trial_participants = list(hc_names) + ['sub-08']
 
 # Colors
 PAIR_COLORS = {
@@ -145,7 +146,7 @@ if n_trial == 1:
 
 for p_idx, pname in enumerate(trial_participants):
     ax = axes[p_idx]
-    trial_file = DATA_DIR / pname / "jnd_ses1_no_filter_trials.csv"
+    trial_file = DATA_DIR / f"{pname}_jnd_ses1_no_filter_trials.csv"
     df = pd.read_csv(trial_file)
 
     # Plot each pair's staircase
@@ -196,7 +197,7 @@ fig, ax = plt.subplots(figsize=(14, 6))
 
 x = np.arange(len(pairs_short))
 width = 0.12
-hc_colors = ['#C8DDF0', '#A3C8E8', '#7EB3DD', '#5A9ED2', '#3589C7']
+hc_colors = ['#DDEAF6', '#C8DDF0', '#A3C8E8', '#7EB3DD', '#5A9ED2', '#3589C7', '#1F6FAF']
 
 # HC individual bars
 for j, name in enumerate(hc_names):

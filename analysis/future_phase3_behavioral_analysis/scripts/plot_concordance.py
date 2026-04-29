@@ -31,7 +31,7 @@ cvd_jnd = np.array([hc_metrics[p]['cvd'] for p in pairs_raw])
 jnd_ratio = cvd_jnd / hc_mean_jnd
 jnd_dir = [hc_metrics[p]['direction_hc_group'] for p in pairs_raw]
 
-# SRM z (best ROI)
+# SRM z (best ROI) — upstream Phase-2 constants (sub-08)
 srm_z = np.array([1.66, 3.29, 4.14, -0.89, 13.87, 6.15, np.nan, np.nan])
 
 # Concordance

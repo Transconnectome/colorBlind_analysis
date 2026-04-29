@@ -594,7 +594,7 @@ def _parse_args() -> argparse.Namespace:
                    default='results/step1_machado_anchor',
                    help='Stage-1 anchor results (for reference only)')
     p.add_argument('--output_dir', type=str,
-                   default='results/step2c_retinal_cortical')
+                   default='results/archive_superseded/step2c_retinal_cortical')
     p.add_argument('--baseline_dir', type=str,
                    default=str(LOCAL_BASELINE),
                    help='C010 amplitudes directory (for LOCO validation)')

@@ -872,7 +872,7 @@ def main():
     parser.add_argument('--subjects', nargs='+', default=['08', '09'])
     parser.add_argument('--rois', nargs='+', default=['V1', 'V2'])
     parser.add_argument('--output_dir', type=str,
-                        default='results/2component_comprehensive')
+                        default='results/archive_superseded/2component_comprehensive')
     parser.add_argument('--n_boot', type=int, default=500)
     parser.add_argument('--skip_bootstrap', action='store_true')
     parser.add_argument('--machado_dl', type=float, default=10.0,

@@ -486,8 +486,8 @@ def plot_loco_bars(ax, vuln_hc, vuln_cvd, models, subj_label):
 # ---------------------------------------------------------------------------
 
 def main():
-    out_dir = _RESULT_DIR / 'color_structure'
-    out_dir.mkdir(exist_ok=True)
+    out_dir = _RESULT_DIR / 'figures' / 'color_structure'
+    out_dir.mkdir(parents=True, exist_ok=True)
     print(f'Output: {out_dir}')
 
     print('Computing HC reference geometry (hV4)...')

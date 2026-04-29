@@ -54,7 +54,7 @@ STEP3_NEURAL_DIR = RESULTS_DIR / 'step3_neural'
 BASELINE_DIR = REPO_ROOT / 'analysis' / 'phase1_procrustes_decoding' / 'results' / 'full_dataset_C010'
 FWD_VAL_DIR = REPO_ROOT / 'analysis' / 'future_phase1_forward_model' / 'results' / 'validation'
 
-OUT_DIR = RESULTS_DIR / 'diagnostic_protan_vs_deutan'
+OUT_DIR = RESULTS_DIR / 'figures' / 'diagnostic_protan_vs_deutan'
 FIG_DIR = OUT_DIR / 'figures'
 
 CVD_IDS = ['08', '09', '10']

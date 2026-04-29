@@ -379,7 +379,7 @@ def _parse_args() -> argparse.Namespace:
     p.add_argument('--step0_dir', type=str,
                    default='results/step0_precompute')
     p.add_argument('--output_dir', type=str,
-                   default='results/step2_finetune_l3_v2')
+                   default='results/archive_superseded/step2_finetune_l3_v2')
     p.add_argument('--cvd_subjects', nargs='+', default=['09'])
     p.add_argument('--models', nargs='+', default=['machado_1way'])
     p.add_argument('--grid_min', type=float, default=DEFAULT_GRID_MIN)

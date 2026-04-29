@@ -7,6 +7,7 @@ Generates 4-panel figure:
   (D) LOCO vulnerability vs JND direction alignment
 """
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import json
@@ -45,13 +46,16 @@ hc_sem_jnd = [hc_metrics[p]['hc_sem'] for p in pairs_raw]
 cvd_jnd = [hc_metrics[p]['cvd'] for p in pairs_raw]
 jnd_dir = [hc_metrics[p]['direction_hc_group'] for p in pairs_raw]
 
-# SRM z (best ROI, sub-08)
+# SRM z (best ROI, sub-08) — upstream Phase-2 constants
 srm_z = [1.66, 3.29, 4.14, -0.89, 13.87, 6.15, np.nan, np.nan]
 
-# RSVP per-color
-colors_order = ['red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple', 'magenta']
-cvd_acc = [1.0, 0.875, 0.625, 0.75, 1.0, 1.0, 0.5, 0.75]
-hc2_acc = [1.0, 1.0, 1.0, 0.875, 1.0, 1.0, 0.875, 1.0]
+# RSVP per-color — loaded from regenerated rsvp_per_color.csv (N=4 HC + sub-08)
+rsvp_df = pd.read_csv(RESULTS_DIR / "rsvp_per_color.csv").sort_values('color_id')
+colors_order = rsvp_df['color_name'].tolist()
+cvd_acc = rsvp_df['cvd'].tolist()
+hc_acc_mean = rsvp_df['hc_mean'].tolist()
+hc_acc_sem = rsvp_df['hc_sem'].tolist()
+n_hc_rsvp = 4  # sub-01/03/06/07
 loco_vuln = [False, True, True, False, True, False, True, False]
 
 # ── Figure ──
@@ -64,7 +68,7 @@ ax = axes[0, 0]
 x = np.arange(len(pairs_short))
 
 # Individual HC dots (jittered)
-hc_dot_colors = ['#A3C8E8', '#6AA8D2', '#4A90D9', '#3577BF', '#2060A0']
+hc_dot_colors = ['#C8DDF0', '#A3C8E8', '#6AA8D2', '#4A90D9', '#3577BF', '#2060A0', '#0D4A7D']
 for j, name in enumerate(hc_names):
     jitter = (j - len(hc_names)/2 + 0.5) * 0.06
     vals = hc_individual[name]
@@ -110,8 +114,11 @@ x_rsvp = np.arange(len(colors_order))
 w_rsvp = 0.35
 bars_cvd_rsvp = ax.bar(x_rsvp - w_rsvp/2, cvd_acc, w_rsvp, label='CVD (sub-08)',
                         color=[c + 'CC' for c in bar_colors], edgecolor='black', linewidth=0.5)
-bars_hc2_rsvp = ax.bar(x_rsvp + w_rsvp/2, hc2_acc, w_rsvp, label='HC2',
-                        color=[c + '66' for c in bar_colors], edgecolor='black', linewidth=0.5)
+bars_hc_rsvp = ax.bar(x_rsvp + w_rsvp/2, hc_acc_mean, w_rsvp,
+                       label=f'HC mean (N={n_hc_rsvp})',
+                       color=[c + '66' for c in bar_colors], edgecolor='black', linewidth=0.5)
+ax.errorbar(x_rsvp + w_rsvp/2, hc_acc_mean, yerr=hc_acc_sem, fmt='none',
+            ecolor='black', elinewidth=1.0, capsize=2.5)
 
 for i, (v, acc) in enumerate(zip(loco_vuln, cvd_acc)):
     if v:
@@ -120,7 +127,7 @@ for i, (v, acc) in enumerate(zip(loco_vuln, cvd_acc)):
         ax.text(x_rsvp[i] - w_rsvp/2, acc + 0.02, 'LOCO\nvuln', ha='center', va='bottom',
                 fontsize=6, color='red', fontweight='bold')
 
-ax.axhline(y=1.0, color='#4A90D9', linewidth=1.5, linestyle='--', label='HC1 (100%)', alpha=0.7)
+ax.axhline(y=1.0, color='gray', linewidth=1.0, linestyle=':', alpha=0.5)
 ax.set_ylabel('Accuracy')
 ax.set_title('(B) RSVP 8AFC: Per-Color Accuracy', fontweight='bold', fontsize=10)
 ax.set_ylim(0, 1.25)

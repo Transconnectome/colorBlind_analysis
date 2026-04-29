@@ -8,6 +8,65 @@
 
 ---
 
+## Current Active Configuration (2026-04-16)
+
+**Three models retained. One loss active. Luminance fix is visualization-only.**
+
+### Models (all 3 live; all operate on CIELab L*=75, C*=40 ring)
+
+| # | Name                | DOF | Level            | Forward map                                                                 |
+|---|---------------------|-----|------------------|------------------------------------------------------------------------------|
+| 1 | Machado 1-way       | 1   | Retinal (cone)   | `L_a(λ) = α·L(λ−Δλ) + (1−α)·k_L·M(λ)` (protan);  Δλ ∈ [0, 20 nm]             |
+| 2 | R+C Retinal+Cortical| 2   | Retinal+cortical | `rg' = rg_0 + (1+g)·(rg_ret − rg_0)`;  `g=0` ≡ Machado;  `g<−1` overcompensation |
+| 3 | 2-Component dilation | 2   | Stimulus-space    | `θ' = θ + β_s·cos(θ−90°) + β_c·cos(θ−θ_conf)`;  θ_conf = 16° protan, 150° deutan |
+
+No hybrid, no Fourier warp, no additional DOF. Machado is the physiological anchor; 2-Component is the best behavioral/LOCO-aligned fit for both CVD subjects.
+
+### Active Loss — `L_LOCO` (multi-objective, hV4, shift_at_both)
+
+```
+L_fit = α·L_vuln/4 + β·L_rank/2 + δ·L_rdm/2 + ε·L_smooth/32400
+      = 1.0·L_vuln/4 + 0.5·L_rank/2 + 0.2·L_rdm/2 + 0.1·L_smooth/32400
+```
+
+| Term     | Weight | Meaning                                                            |
+|----------|--------|---------------------------------------------------------------------|
+| L_vuln   | 1.0    | MSE between simulated and observed per-color LOCO vulnerability     |
+| L_rank   | 0.5    | 1 − Spearman ρ between simulated and observed vulnerability profiles|
+| L_rdm    | 0.2    | 1 − cosine(ΔRDM_sim, ΔRDM_obs)                                      |
+| L_smooth | 0.1    | Mean squared adjacent-difference of δθ (angular smoothness)        |
+
+**Script**: `scripts/loco_distortion_fit.py`. **Fit target**: hV4 LOCO vulnerability profile. **Null**: label permutation.
+
+### Filter pipeline (Phase B)
+
+```
+δ_fit(θ) from L_LOCO  →  pre-image search: θ_pre = argmin_θ' |forward(θ') − θ_target|
+```
+
+- 2-Component: exact pre-image (8/8) for both CVD subjects — **no arc compression**.
+- Machado: pre-image OK for sub-08 (Δλ=1.5 nm); 4/8 exact for sub-09 (Δλ=13.5 nm, arc compression).
+- R+C: pre-image 8/8 for sub-08 (Δλ=2.0, g=2.25).
+
+### Visualization luminance fix (data-collection control only)
+
+The `filter_visualization/` figures render the "CVD perceives" and "CVD(Filtered)" columns with a Machado-derived Δ L* (cone-response-equivalent Lab). This ensures the displayed swatch luminance reflects cone physics rather than a uniform CIELab ring.
+
+**This is a display/data-presentation control**, not a constraint on the filter.
+The filter itself operates in the 360° hue domain and does not need to match luminance — stimulus L* is clamped to 75 by the experimental protocol. The luminance-aware rendering exists only so that qualitative evaluators (e.g., sub-08's report) see the correct simulated percept.
+
+### Subjects, parameters, and best-per-subject model
+
+| Subject | CVD group  | Machado (Δλ nm) | R+C (Δλ, g)      | 2-Comp (β_s, β_c) | hV4 LOCO (best)          |
+|---------|------------|------------------|--------------------|--------------------|---------------------------|
+| sub-08  | deutan (mod) | 1.5             | (2.0, 2.25)        | (38°, −14°)        | **2-Comp, p=0.004**      |
+| sub-09  | protan (mod) | 13.5            | (13.5, 0) ≡ Mach   | (6°, −22°)         | **Machado, p=0.018**     |
+| sub-10  | normal       | ≈ 0             | —                  | —                   | NS (as expected)         |
+
+Machado → R+C → 2-Component is a nested hierarchy (R+C reduces to Machado at g=0; 2-Component is independent). **All three are retained** because they probe different mechanistic levels (retinal cone / cortical opponent gain / stimulus-space dilation). The current filter is derived from whichever model wins L_LOCO per subject.
+
+---
+
 ## Workflow Overview
 
 ```
@@ -222,75 +281,11 @@ Independent methods (behavioral hue-scaling vs fMRI ΔRDM fitting) converge with
 
 ---
 
-## Key Scripts
-
-| Script                               | Purpose                                    |
-|--------------------------------------|--------------------------------------------|
-| `step0_precompute.py`                | HC W matrices, ΔRDM_obs, Stockman cache    |
-| `step1_machado_anchor.py`            | Coarse Delta_lambda grid search per ROI    |
-| `step2_finetune_l3.py`               | Joint V1+V2 L3 fine-tune + 8! perm null    |
-| `step2_finetune_l3_v2.py`            | Gen-4.5 with sign + family gates           |
-| `step2c_retinal_cortical.py`         | R+C fitting (Delta_lambda + g)             |
-| `step3_validate_neural.py`           | hV4 LOCO held-out validation               |
-| `step3_validate_cognition.py`        | Machado canonical agreement check          |
-| `step4_summary.py`                   | CSV + figures aggregation                  |
-| `loco_distortion_fit.py`             | Phase A multi-objective LOCO fitting       |
-| `comprehensive_2component_analysis.py`| 2-Component ΔRDM + bootstrap               |
-| `compare_2component_loco.py`         | Cross-model comparison table               |
-| `preimage_filter_search.py`          | Phase B: numerical pre-image search        |
-| `preimage_separation_search.py`      | Sub-09 separation optimization (Machado)   |
-| `machado_simulator.py`               | Machado Eq 5/6 + gray-point check          |
-| `retinal_cortical.py`                | R+C core functions                         |
-| `l3_loss.py`                         | All L3 loss variants                       |
-
-## Folder Layout
-
-```
-future_phase2_filter_optimization/
-├── README.md                          # this file
-├── LOCO_FILTER_PLAN.md                # Phase A-C workflow design
-├── LOCO_FILTER_RESULTS.md             # Full results log (all models)
-├── COMPREHENSIVE_MODEL_RESULTS.md     # V1/V2 focus, statistical details
-├── GEN45_SUB09_DIAGNOSIS.md           # Gen-4 failure analysis
-├── scripts/                           # All pipeline scripts
-│   ├── step0-4 pipeline stages
-│   ├── loco_distortion_fit.py         # L_LOCO fitting
-│   ├── comprehensive_2component_*.py  # L_ΔRDM fitting
-│   ├── preimage_filter_search.py      # Pre-image filter
-│   ├── sub09_validation/              # Task #19-22 diagnostics
-│   └── utils (machado_simulator, l3_loss, retinal_cortical, ...)
-├── sbatch/                            # SLURM batch scripts
-│   ├── run_gen4.sbatch
-│   ├── run_loco_filter_phase_{a,b}.sbatch
-│   ├── run_loco_2component.sbatch
-│   ├── run_preimage_filter.sbatch
-│   └── run_separation_search.sbatch
-├── results/                           # Pipeline outputs (gitignored)
-│   ├── step0_precompute/
-│   ├── step1_machado_anchor/
-│   ├── step2_finetune_l3*/
-│   ├── step3_neural/ step3_cognition/
-│   ├── 2component_*/
-│   ├── step2c_retinal_cortical*/
-│   ├── loco_filter/
-│   └── sub09_validation/
-├── archive/                           # Prior pipeline generations (tracked)
-│   ├── gen1/   (SRM-RDM — FAILED)
-│   ├── gen2/   (LOCO W-fixed — PARTIAL)
-│   ├── gen3/   (ΔRDM DiffEvo — FAILED)
-│   └── misc/   (ablation, visualization experiments)
-└── archive_legacy/                    # Pre-cone-shift filter work (untracked)
-    ├── scripts/  sbatch/  results/
-    ├── target_prevalidation/
-    └── loss_prevalidation/
-```
-
 ## Next Steps
 
 1. **Dual-filter behavioral comparison**: R+C vs 2-Component pre-image for sub-08
 2. **2-Component LOCO -> JND concordance**: Does the vulnerability profile predict behavioral JND?
-3. **LORO stability**: Fit on 5 runs, test on held-out run
-4. **LOHO robustness**: Sensitivity to individual HC outliers in mean-HC
+3. **LOHO robustness**: Sensitivity to individual HC in mean-HC
 
 ---
 

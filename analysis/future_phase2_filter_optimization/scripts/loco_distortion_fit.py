@@ -55,7 +55,7 @@ from utils_forward_model import (
 )
 from utils_distortion_models import get_design_matrix, MODELS
 from machado_simulator import machado_shifted_hue
-from retinal_cortical import machado_with_opponent_gain
+from retinal_cortical import machado_with_opponent_gain, machado_with_2d_rotation
 from step1_fit_loco_v2 import (
     simulate_mean_hc_loco_legacy,
     simulate_mean_hc_wfixed,
@@ -116,6 +116,12 @@ FILTER_MODELS = {
         'grid_step': [0.5, 0.25],
         'description': 'Machado Δλ + opponent R-G gain g',
     },
+    'rc_opponent_2d': {
+        'df': 3,
+        'bounds': [(0.0, 20.0), (-3.0, 3.0), (-3.0, 3.0)],
+        'grid_step': [1.0, 0.5, 0.5],  # 21 × 13 × 13 = 3,549 points
+        'description': 'Machado Δλ + R-G gain + B-Y gain (3-DOF symmetric)',
+    },
     'fourier_warp': {
         'df': 4,
         'bounds': [(-30.0, 30.0)] * 4,
@@ -147,6 +153,13 @@ def get_shifted_design(model_name, params, cvd_type, n_channels=N_CHANNELS):
     elif model_name == 'rc_opponent':
         dl, g = float(params[0]), float(params[1])
         _, hue_final, dt = machado_with_opponent_gain(dl, g, cvd_type)
+        basis_full = create_basis_full(n_channels, basis_type='fe')
+        idx = np.round(hue_final).astype(int) % 360
+        return basis_full[idx], dt
+
+    elif model_name == 'rc_opponent_2d':
+        dl, g_rg, g_yb = float(params[0]), float(params[1]), float(params[2])
+        _, hue_final, dt = machado_with_2d_rotation(dl, g_rg, g_yb, cvd_type)
         basis_full = create_basis_full(n_channels, basis_type='fe')
         idx = np.round(hue_final).astype(int) % 360
         return basis_full[idx], dt
@@ -287,6 +300,8 @@ def grid_search(model_name, hc_amps_dict, vuln_cvd, cvd_type,
         grid = [(x,) for x in axes[0]]
     elif len(axes) == 2:
         grid = [(x, y) for x in axes[0] for y in axes[1]]
+    elif len(axes) == 3:
+        grid = [(x, y, z) for x in axes[0] for y in axes[1] for z in axes[2]]
     else:
         raise ValueError(f'Grid search not supported for {len(axes)}-DOF')
 

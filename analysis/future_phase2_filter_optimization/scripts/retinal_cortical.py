@@ -104,6 +104,62 @@ def machado_with_opponent_gain(
     return hue_baseline, hue_final, delta_theta
 
 
+def machado_with_2d_rotation(
+    delta_lambda: float,
+    g_rg: float,
+    g_yb: float,
+    cvd_type: str,
+    alpha: float | None = None,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Machado retinal shift + 2-axis cortical rescale (R-G and B-Y).
+
+    Compensation structure (symmetric extension of R+C):
+        rg' = rg_ret + g_rg * (rg_ret - rg_base)
+        by' = by_ret + g_yb * (by_ret - by_base)
+
+    At Δλ=0, both axes collapse to baseline regardless of (g_rg, g_yb).
+    g_yb=0 reduces to standard R+C model (`machado_with_opponent_gain`).
+
+    Motivation:
+        notion §6-5 records sub-08 R+C g=±2.25 (extreme). Hypothesis:
+        single-axis g absorbs B-Y axis distortion; adding g_yb may
+        normalize g_rg into Tregillus-compatible range (20-40%).
+
+    Args:
+        delta_lambda: cone shift in nm (>= 0)
+        g_rg: opponent R-G gain factor on retinal-induced change
+        g_yb: opponent B-Y gain factor on retinal-induced change
+        cvd_type: 'protan', 'deutan', or 'normal'
+        alpha: optional severity (None = coupled to delta_lambda)
+
+    Returns:
+        hue_baseline: (8,) normal-vision hue angles in degrees
+        hue_final:    (8,) compensated hue angles in [0, 360)
+        delta_theta:  (8,) wrapped difference in [-180, 180]
+    """
+    hue_baseline, hue_retinal, _ = machado_shifted_hue(
+        delta_lambda, cvd_type, alpha=alpha)
+
+    if (g_rg == 0.0 and g_yb == 0.0) or delta_lambda == 0.0:
+        hue_final = hue_retinal % 360.0
+    else:
+        theta_base_rad = np.radians(hue_baseline)
+        theta_ret_rad = np.radians(hue_retinal)
+
+        rg_base = np.cos(theta_base_rad)
+        by_base = np.sin(theta_base_rad)
+        rg_ret = np.cos(theta_ret_rad)
+        by_ret = np.sin(theta_ret_rad)
+
+        rg_final = rg_ret + g_rg * (rg_ret - rg_base)
+        by_final = by_ret + g_yb * (by_ret - by_base)
+
+        hue_final = np.degrees(np.arctan2(by_final, rg_final)) % 360.0
+
+    delta_theta = _wrap_angle(hue_final - hue_baseline)
+    return hue_baseline, hue_final, delta_theta
+
+
 def machado_with_opponent_gain_at(
     delta_lambda: float,
     g: float,

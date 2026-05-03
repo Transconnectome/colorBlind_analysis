@@ -14,8 +14,8 @@ import numpy as np
 from pathlib import Path
 
 ROOT = Path('/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase2_filter_optimization')
-RES_VOX = ROOT / 'results/cycle_filter_refinement/cycle6_voxel_diag'
-RES_LAND = ROOT / 'results/cycle_filter_refinement'
+RES_VOX = ROOT / 'results/cycles/cycle6_voxel_diag'
+RES_LAND = ROOT / 'results/cycles'
 
 ROIS = ['V1', 'V2', 'V4']
 HC = ['01', '02', '03', '04', '05', '06']
@@ -199,7 +199,7 @@ def main():
         'common_best': common,
         'relaxed_best': relaxed,
     }
-    out_path = ROOT / 'results' / 'cycle_filter_refinement' / 'cycle7_dual_criterion.json'
+    out_path = ROOT / 'results' / 'cycles' / 'cycle7_dual_criterion.json'
     with open(out_path, 'w') as f:
         json.dump(out, f, indent=2)
     print(f'\n[Wrote] {out_path}')

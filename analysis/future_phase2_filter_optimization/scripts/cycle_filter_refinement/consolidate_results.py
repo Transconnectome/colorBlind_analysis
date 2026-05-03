@@ -20,7 +20,7 @@ from itertools import product
 
 ROOT = Path('/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/'
             'colorBlind_analysis/analysis/future_phase2_filter_optimization')
-RES = ROOT / 'results/cycle_filter_refinement'
+RES = ROOT / 'results/cycles'
 RES_VOX = RES / 'cycle6_voxel_diag'
 BOOT_DIR = RES / 'cycle8_voxel_bootstrap_server'
 

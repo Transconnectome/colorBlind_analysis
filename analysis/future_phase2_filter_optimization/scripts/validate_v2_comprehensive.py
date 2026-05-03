@@ -3,8 +3,8 @@
 validate_v2_comprehensive.py — Comprehensive validation using v2 results.
 
 Uses:
-  - results/2component_comprehensive_v2/ (2-Component with bootstrap, corrected baseline)
-  - results/step2c_retinal_cortical_v2/  (R+C model with LOCO validation)
+  - results/fits/canonical_2component_v2/ (2-Component with bootstrap, corrected baseline)
+  - results/fits/canonical_rc_opponent_v2/  (R+C model with LOCO validation)
   - results/2component_stockman/          (fallback for sub-10)
 
 Generates:
@@ -48,8 +48,8 @@ from stockman_cone_shift import COLOR_NAMES
 # Constants
 # ===========================================================================
 _PIPE_DIR = _SCRIPT_DIR.parent
-RESULTS_V2 = _PIPE_DIR / 'results' / '2component_comprehensive_v2'
-RESULTS_RC = _PIPE_DIR / 'results' / 'step2c_retinal_cortical_v2'
+RESULTS_V2 = _PIPE_DIR / 'results' / 'fits/canonical_2component_v2'
+RESULTS_RC = _PIPE_DIR / 'results' / 'fits/canonical_rc_opponent_v2'
 RESULTS_STK = _PIPE_DIR / 'results' / '2component_stockman'
 
 CVD_TYPE = {'08': 'deutan', '09': 'protan', '10': 'normal'}

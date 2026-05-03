@@ -7,7 +7,7 @@ angles (290°, 300°, 310°) plus the canonical filter pre-image, so sub-08
 can identify which variant reads as magenta/purple (vs current "dark sky").
 
 Output:
-  results/figures/filter_visualization/filter_viz_sub-08_c8variants.png
+  results/visualizations/filter_visualization/filter_viz_sub-08_c8variants.png
 """
 
 from __future__ import annotations

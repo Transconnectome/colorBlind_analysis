@@ -13,9 +13,9 @@ Figures:
 Usage:
     conda activate srm
     python scripts/visualize_preimage_filter.py \
-        --preimage_dir results/loco_filter/preimage \
-        --eval_dir results/loco_filter/preimage/evaluation \
-        --output_dir results/loco_filter/preimage/figures
+        --preimage_dir results/fits/preimage \
+        --eval_dir results/fits/preimage/evaluation \
+        --output_dir results/fits/preimage/figures
 """
 
 import argparse

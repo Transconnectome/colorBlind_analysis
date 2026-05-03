@@ -18,7 +18,7 @@ Usage (server):
     mpirun -np 1 python scripts/loco_distortion_fit.py \
         --subject 08 --roi V4 --method shift_at_both \
         --data_dir /scratch/connectome/haba6030/colorBlind/derivatives/full_dataset_C010 \
-        --output_dir results/loco_filter/phase_a
+        --output_dir results/fits/phase_a
 
 Usage (local — slower, for debugging):
     python scripts/loco_distortion_fit.py --subject 08 --roi V4 --method w_fixed
@@ -563,7 +563,7 @@ def main():
                         help='Models to fit')
     parser.add_argument('--data_dir', default=None,
                         help='Path to C010 data (auto-detect if omitted)')
-    parser.add_argument('--output_dir', default='results/loco_filter/phase_a',
+    parser.add_argument('--output_dir', default='results/fits/phase_a',
                         help='Output directory')
     parser.add_argument('--weights', nargs=4, type=float,
                         default=None, metavar=('A', 'B', 'D', 'E'),

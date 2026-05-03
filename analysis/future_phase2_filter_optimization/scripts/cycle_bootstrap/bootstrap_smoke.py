@@ -5,7 +5,7 @@ Goals:
 - Verify import / data wiring (read-only) on hV4 with sub-08.
 - Compute mean-HC ρ for full 7-HC and 7 LOHO leave-one-HC-out variants
   using the existing 2-component grid (single ROI, single subject, single model).
-- Output a small JSON to results/cycle_bootstrap/.
+- Output a small JSON to results/older_cycles/cycle_bootstrap/.
 
 Run (local, conda env: srm):
     python analysis/future_phase2_filter_optimization/scripts/cycle_bootstrap/bootstrap_smoke.py
@@ -165,7 +165,7 @@ def main():
     ap.add_argument('--n_loho', type=int, default=2,
                     help='smoke: number of LOHO variants to try (in addition to all7)')
     ap.add_argument('--output_dir', default=str(
-        _PHASE2_DIR / 'results' / 'cycle_bootstrap' / 'smoke'))
+        _PHASE2_DIR / 'results' / 'older_cycles/cycle_bootstrap' / 'smoke'))
     args = ap.parse_args()
 
     out_dir = Path(args.output_dir)

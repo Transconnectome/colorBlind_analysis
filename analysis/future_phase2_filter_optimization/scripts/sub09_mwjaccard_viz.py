@@ -13,7 +13,7 @@ Sub-09 (44, +54) is structurally different from existing candidates:
 
 Generate viz file for behavioral session 4-way comparison.
 
-Output: results/figures/filter_visualization/filter_viz_sub-09_mwjaccard.png
+Output: results/visualizations/filter_visualization/filter_viz_sub-09_mwjaccard.png
 """
 
 from __future__ import annotations

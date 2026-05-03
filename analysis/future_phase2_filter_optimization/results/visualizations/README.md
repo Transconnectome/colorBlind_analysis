@@ -1,4 +1,4 @@
-# figures/ — All visualizations
+# visualizations/ — All filter swatches, color geometry, diagnostics
 
 **Status**: ACTIVE
 **Last update**: 2026-05-03

@@ -20,8 +20,8 @@ Tiered evaluation:
 Usage (server):
     mpirun -np 1 python scripts/preimage_filter_search.py \
         --subject 08 --roi V4 --model rc_opponent \
-        --phase_a_dir results/loco_filter/phase_a \
-        --output_dir results/loco_filter/preimage
+        --phase_a_dir results/fits/phase_a \
+        --output_dir results/fits/preimage
 """
 
 import argparse
@@ -481,9 +481,9 @@ def main():
                         help='ROI (V4 for hV4)')
     parser.add_argument('--model', default=None,
                         help='Model name (default: auto-select primary)')
-    parser.add_argument('--phase_a_dir', default='results/loco_filter/phase_a',
+    parser.add_argument('--phase_a_dir', default='results/fits/phase_a',
                         help='Phase A results directory')
-    parser.add_argument('--output_dir', default='results/loco_filter/preimage',
+    parser.add_argument('--output_dir', default='results/fits/preimage',
                         help='Output directory')
     args = parser.parse_args()
 

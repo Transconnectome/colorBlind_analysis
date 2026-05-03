@@ -4,7 +4,7 @@ compare_2component_loco.py — Compare 2-Component LOCO results with existing mo
 
 Reads JSON results from phase_a/ (existing) and phase_a_2component/ (new),
 prints comparison table. Cross-references with ΔRDM results from
-results/2component_comprehensive_v2/.
+results/fits/canonical_2component_v2/.
 
 Usage (local):
     python scripts/compare_2component_loco.py
@@ -15,9 +15,9 @@ import numpy as np
 from pathlib import Path
 
 RESULTS_DIR = Path(__file__).resolve().parent.parent / 'results'
-PHASE_A = RESULTS_DIR / 'loco_filter' / 'phase_a'
-PHASE_A_2C = RESULTS_DIR / 'loco_filter' / 'phase_a_2component'
-DRDM_DIR = RESULTS_DIR / '2component_comprehensive_v2'
+PHASE_A = RESULTS_DIR / 'fits' / 'phase_a'
+PHASE_A_2C = RESULTS_DIR / 'fits' / 'phase_a_2component'
+DRDM_DIR = RESULTS_DIR / 'fits/canonical_2component_v2'
 
 # ΔRDM reference values (from comprehensive_2component_analysis.py)
 DRDM_REF = {

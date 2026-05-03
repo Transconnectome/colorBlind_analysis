@@ -12,7 +12,7 @@ Reads results from results/2component_stockman/*.json (corrected Stockman baseli
 
 Usage:
     conda activate srm
-    python scripts/validate_2component.py --output_dir results/validation_2component
+    python scripts/validate_2component.py --output_dir results/diagnostics/filter_validation_2comp_vs_rc
 """
 
 import argparse
@@ -776,7 +776,7 @@ def main():
     parser = argparse.ArgumentParser(
         description='Validation of 2-Component Angular Dilation model')
     parser.add_argument('--output_dir', type=str,
-                        default='results/validation_2component')
+                        default='results/diagnostics/filter_validation_2comp_vs_rc')
     parser.add_argument('--subjects', nargs='+', default=['08', '09', '10'])
     args = parser.parse_args()
 

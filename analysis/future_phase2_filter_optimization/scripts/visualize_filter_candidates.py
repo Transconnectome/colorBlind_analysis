@@ -96,13 +96,13 @@ DISPLAY_L_RANGE = (20.0, 97.0)
 DISPLAY_L_STEPS = 40
 DISPLAY_CHROMA_MAX = 150.0
 
-OUTDIR = _PHASE2_DIR / 'results' / 'figures' / 'filter_visualization'
+OUTDIR = _PHASE2_DIR / 'results' / 'visualizations' / 'filter_visualization'
 OUTDIR.mkdir(parents=True, exist_ok=True)
 
 # Subject metadata — per-subject best-fit params for each model
 # Sources:
-#   machado / rc : results/loco_filter/preimage/*.json  (phase_a fit)
-#   2comp        : results/2component_comprehensive_v2/*.json (best_params)
+#   machado / rc : results/fits/preimage/*.json  (phase_a fit)
+#   2comp        : results/fits/canonical_2component_v2/*.json (best_params)
 SUBJECTS = {
     '08': {
         'cvd':     'deutan',

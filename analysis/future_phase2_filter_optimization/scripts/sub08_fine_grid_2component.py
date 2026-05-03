@@ -10,7 +10,7 @@ Uses monkey-patch of FILTER_MODELS['2component'] before calling grid_search.
 Verified at loco_distortion_fit.py:290 — bounds/grid_step read at call time.
 
 Outputs:
-  results/loco_filter/phase_a_2component_finegrid/sub-08_V4_2component_finegrid.json
+  results/fits/phase_a_2component_finegrid/sub-08_V4_2component_finegrid.json
 """
 
 import json
@@ -126,7 +126,7 @@ for i, entry in enumerate(result['landscape']):
         print(f'  [{i+1}/{len(result["landscape"])}]')
 print(f'  Pre-image done in {time.time()-t0:.1f}s')
 
-baseline_path = (_SCRIPT_DIR.parent / 'results' / 'loco_filter'
+baseline_path = (_SCRIPT_DIR.parent / 'results' / 'fits'
                  / 'phase_a_2component'
                  / f'sub-{SUBJ}_{ROI}_2component.json')
 baseline_summary = None
@@ -153,7 +153,7 @@ result['note'] = (
     'gap_c5_c6 magnitude maintained for YG-C separability.'
 )
 
-out_dir = (_SCRIPT_DIR.parent / 'results' / 'loco_filter'
+out_dir = (_SCRIPT_DIR.parent / 'results' / 'fits'
            / 'phase_a_2component_finegrid')
 out_dir.mkdir(parents=True, exist_ok=True)
 out_path = out_dir / f'sub-{SUBJ}_{ROI}_2component_finegrid.json'

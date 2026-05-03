@@ -11,9 +11,9 @@ Takes Phase A best-fit distortion delta_fit(c) and produces:
 
 Usage (server):
     mpirun -np 1 python scripts/loco_filter_derive.py \
-        --subject 08 --phase_a_dir results/loco_filter/phase_a \
+        --subject 08 --phase_a_dir results/fits/phase_a \
         --data_dir /scratch/connectome/haba6030/colorBlind/derivatives/full_dataset_C010 \
-        --output_dir results/loco_filter/phase_b
+        --output_dir results/fits/phase_b
 
 Usage (local):
     python scripts/loco_filter_derive.py --subject 08
@@ -259,9 +259,9 @@ def main():
                         help='Model name (default: auto-select primary)')
     parser.add_argument('--method', default='shift_at_both',
                         choices=['shift_at_both', 'w_fixed'])
-    parser.add_argument('--phase_a_dir', default='results/loco_filter/phase_a')
+    parser.add_argument('--phase_a_dir', default='results/fits/phase_a')
     parser.add_argument('--data_dir', default=None)
-    parser.add_argument('--output_dir', default='results/loco_filter/phase_b')
+    parser.add_argument('--output_dir', default='results/fits/phase_b')
     parser.add_argument('--noharm_threshold', type=float,
                         default=NOHARM_VULN_THRESHOLD)
     parser.add_argument('--noharm_max_shift', type=float,

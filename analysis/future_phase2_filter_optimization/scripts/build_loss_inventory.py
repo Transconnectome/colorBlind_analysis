@@ -9,8 +9,8 @@ the argmin/argmax (β_s, β_c) per subject, then evaluate HC sanity:
   - Ratio = CVD_norm / HC_mean_norm  (should be > 1)
 
 Output:
-  results/loss_inventory.csv  — flat row-per-(loss, subject, ROI)
-  results/loss_inventory.md   — summary table + interpretation
+  results/inventory/loss_inventory.csv  — flat row-per-(loss, subject, ROI)
+  results/inventory/loss_inventory.md   — summary table + interpretation
 """
 
 import json
@@ -22,10 +22,10 @@ import numpy as np
 ROOT = Path('/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/'
             'colorBlind_analysis/analysis/future_phase2_filter_optimization')
 RES = ROOT / 'results'
-LANDSCAPE_DIR = RES / 'cycle_filter_refinement'
+LANDSCAPE_DIR = RES / 'cycles'
 
-OUT_CSV = RES / 'loss_inventory.csv'
-OUT_MD = RES / 'loss_inventory.md'
+OUT_CSV = RES / 'inventory' / 'loss_inventory.csv'
+OUT_MD = RES / 'inventory' / 'loss_inventory.md'
 
 HC = ['01', '02', '03', '04', '05', '06']
 CVD = ['08', '09']
@@ -76,7 +76,7 @@ def cycle14_loss(subj, alpha=1.0, beta=1.0):
     """
     if subj not in ('08', '09'):
         return None
-    p = RES / 'cycle_filter_refinement' / 'cycle14_v1_rdm_cross.json'
+    p = RES / 'cycles' / 'cycle14_v1_rdm_cross.json'
     if not p.exists():
         return None
     with open(p) as f:
@@ -177,7 +177,7 @@ for subj in HC + CVD:
 # 2.5. Cycle 15 mw_jaccard cross-criterion variants
 def cycle15_loss(subj, variant_key, alpha=2.0, beta=1.0):
     """Cycle 15 mw_jaccard cross variants."""
-    p = RES / 'cycle_filter_refinement' / 'cycle15_mwjaccard_cross.json'
+    p = RES / 'cycles' / 'cycle15_mwjaccard_cross.json'
     if not p.exists():
         return None
     with open(p) as f:

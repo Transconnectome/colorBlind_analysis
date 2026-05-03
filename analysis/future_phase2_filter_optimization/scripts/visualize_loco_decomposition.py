@@ -30,7 +30,7 @@ _SCRIPT_DIR = Path(__file__).resolve().parent
 _PIPELINE_DIR = _SCRIPT_DIR.parent
 _RESULT_DIR = _PIPELINE_DIR / 'results'
 _STEP0_DIR = _RESULT_DIR / 'step0_precompute'
-_LOCO_2COMP_DIR = _RESULT_DIR / 'loco_filter' / 'phase_a_2component'
+_LOCO_2COMP_DIR = _RESULT_DIR / 'fits' / 'phase_a_2component'
 
 # Forward model utils
 _FWD_DIR = str(_PIPELINE_DIR.parent / 'future_phase1_forward_model' / 'scripts')
@@ -326,7 +326,7 @@ def plot_summary(cases_data, out_dir):
 # ---------------------------------------------------------------------------
 
 def main():
-    out_dir = _RESULT_DIR / 'figures' / 'loco_decomposition'
+    out_dir = _RESULT_DIR / 'visualizations' / 'loco_decomposition'
     out_dir.mkdir(parents=True, exist_ok=True)
     print(f'Output: {out_dir}')
 

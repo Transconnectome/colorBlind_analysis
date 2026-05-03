@@ -10,7 +10,7 @@
 
 ## ⭐ Current Filter Candidates (2026-05-03)
 
-Per `results/loss_inventory.md` (12+ loss variants × HC sanity check). HC sanity = empirical p of CVD norm being above HC distribution; **lower = more CVD-distinct**. ✓✓ = both CVD distinct (sub-08, sub-09 each emp_p ≤ 0.20 = at most 1/6 HC above).
+Per `results/inventory/loss_inventory.md` (12+ loss variants × HC sanity check). HC sanity = empirical p of CVD norm being above HC distribution; **lower = more CVD-distinct**. ✓✓ = both CVD distinct (sub-08, sub-09 each emp_p ≤ 0.20 = at most 1/6 HC above).
 
 ### Sub-08 (deutan) candidates
 
@@ -42,7 +42,7 @@ Per `results/loss_inventory.md` (12+ loss variants × HC sanity check). HC sanit
 **Filter selection per CLAUDE.md §0**: LOCO-best descriptive fit + behavioral validation. Loss inventory (Cycle 15 mw_jaccard) provides **statistically robust candidates** (HC sanity ✓✓), but **behavioral PASS is final arbiter** (sub-08 §3 PASS for (38, −14) is the gold standard).
 
 **Visualization files for behavioral session**:
-- Sub-08: `results/figures/filter_visualization/filter_viz_sub-08_2comp.png` (canonical), `filter_visualization_phase3/phase3_sub-08_*.png` (3-way)
+- Sub-08: `results/visualizations/filter_visualization/filter_viz_sub-08_2comp.png` (canonical), `filter_visualization_phase3/phase3_sub-08_*.png` (3-way)
 - Sub-09: `filter_viz_sub-09_2comp.png` (Phase A), `filter_viz_sub-09_mwjaccard.png` (mw_jaccard winner), `filter_viz_sub-09_c8variants.png` (c8 magenta)
 
 ---

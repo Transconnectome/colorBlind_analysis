@@ -162,7 +162,7 @@ def z_against_pool(stat, mu, sd, eps=1e-9):
 
 # ---------------------------------------------------------------------------
 def main():
-    out_dir = _PHASE2 / 'results' / 'cycle_filter_refinement' / 'cycle6_voxel_diag'
+    out_dir = _PHASE2 / 'results' / 'cycles' / 'cycle6_voxel_diag'
     out_dir.mkdir(parents=True, exist_ok=True)
     data_dir = Path(LOCAL_DATA)
 

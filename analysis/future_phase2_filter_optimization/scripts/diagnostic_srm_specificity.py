@@ -24,8 +24,8 @@ from scipy.stats import spearmanr, mannwhitneyu, rankdata
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _PHASE2_DIR = _SCRIPT_DIR.parent
 _RESULTS_DIR = _PHASE2_DIR / 'results'
-_SRM_DIR = _RESULTS_DIR / 'srm_precompute'
-_CROSS_ROI_DIR = _RESULTS_DIR / 'srm_integrated_loco'
+_SRM_DIR = _RESULTS_DIR / 'diagnostics/srm_precompute'
+_CROSS_ROI_DIR = _RESULTS_DIR / 'diagnostics/srm_integrated_loco'
 _OUTPUT_DIR = _RESULTS_DIR / 'diagnostic_srm_specificity'
 
 HC_SUBJECTS = ['01', '02', '03', '04', '05', '06', '07']

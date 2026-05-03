@@ -231,7 +231,7 @@ def main():
     args = parser.parse_args()
 
     results_dir = Path(args.results_dir)
-    output_dir = Path(args.output_dir) if args.output_dir else results_dir / 'figures'
+    output_dir = Path(args.output_dir) if args.output_dir else results_dir / 'visualizations'
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Load HC results

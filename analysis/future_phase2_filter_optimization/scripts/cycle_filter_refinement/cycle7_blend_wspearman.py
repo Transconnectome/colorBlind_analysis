@@ -23,9 +23,9 @@ import numpy as np
 from pathlib import Path
 
 ROOT = Path('/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase2_filter_optimization')
-RES_LAND = ROOT / 'results/cycle_filter_refinement'
+RES_LAND = ROOT / 'results/cycles'
 sys.path.insert(0, str(ROOT / 'scripts'))
-sys.path.insert(0, str(ROOT / 'scripts' / 'cycle_loss_redesign'))
+sys.path.insert(0, str(ROOT / 'scripts' / 'older_cycles/cycle_loss_redesign'))
 PROJ = ROOT.parent.parent
 FWD = PROJ / 'analysis' / 'future_phase1_forward_model' / 'scripts'
 sys.path.insert(0, str(FWD))
@@ -211,7 +211,7 @@ def main():
         'hc_pool': hc_pool,
         'sweep': sweep, 'common_best': common, 'relaxed_best': relaxed,
     }
-    out_path = ROOT / 'results' / 'cycle_filter_refinement' / 'cycle7_blend_wspearman.json'
+    out_path = ROOT / 'results' / 'cycles' / 'cycle7_blend_wspearman.json'
     with open(out_path, 'w') as f:
         json.dump(out, f, indent=2, default=lambda o: float(o) if hasattr(o, 'item') else str(o))
     print(f'\n[Wrote] {out_path}')

@@ -11,7 +11,7 @@ For each HC subject (sub-01..07) × ROI {V1, V4} × cvd_type {deutan, protan}:
   - Fit 2-component model
   - Save results matching phase_a JSON format
 
-Output: results/loco_filter/phase_a_2component_hc_sanity/
+Output: results/fits/phase_a_2component_hc_sanity/
   - sub-XX_ROI_2component_{deutan,protan}.json
   - landscape JSONs (large)
 """
@@ -34,7 +34,7 @@ from loco_distortion_fit import (
 )
 from diagnostic_delta_rdm import compute_delta_rdm_obs
 
-OUT_DIR = (_SCRIPT_DIR.parent / 'results' / 'loco_filter'
+OUT_DIR = (_SCRIPT_DIR.parent / 'results' / 'fits'
            / 'phase_a_2component_hc_sanity')
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 

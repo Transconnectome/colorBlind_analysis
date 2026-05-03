@@ -18,7 +18,7 @@ Method:
 3. Load V4 l_topk landscape from cycle12.
 4. Combine and find argmin for several (α, β) weights.
 
-Output: results/cycle_filter_refinement/cycle14_v1_rdm_cross.json + .csv
+Output: results/cycles/cycle14_v1_rdm_cross.json + .csv
 """
 
 import json
@@ -44,7 +44,7 @@ from diagnostic_delta_rdm import (
 )
 
 ROOT = _PHASE2_SCRIPTS.parent
-RES = ROOT / 'results' / 'cycle_filter_refinement'
+RES = ROOT / 'results' / 'cycles'
 RES.mkdir(parents=True, exist_ok=True)
 
 OUT_JSON = RES / 'cycle14_v1_rdm_cross.json'

@@ -8,9 +8,9 @@ For each subject / ROI / held-out color:
   - confusion_delta  : color index difference (confusion_color - true_color), mod 8 with sign
 
 Output:
-  results/loco_confusion_direction/confusion_direction_all.csv   — full per-run detail
-  results/loco_confusion_direction/confusion_bias_summary.csv    — one row per subj/ROI/color
-  results/loco_confusion_direction/confusion_matrix_<subj>_<ROI>.csv  — 8×8 confusion count
+  results/diagnostics/loco_confusion_direction/confusion_direction_all.csv   — full per-run detail
+  results/diagnostics/loco_confusion_direction/confusion_bias_summary.csv    — one row per subj/ROI/color
+  results/diagnostics/loco_confusion_direction/confusion_matrix_<subj>_<ROI>.csv  — 8×8 confusion count
 """
 
 import json
@@ -27,7 +27,7 @@ LOCO_DIR = Path(
 OUT_DIR = Path(
     '/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/'
     'colorBlind_analysis/analysis/future_phase2_filter_optimization/'
-    'results/loco_confusion_direction'
+    'results/diagnostics/loco_confusion_direction'
 )
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 

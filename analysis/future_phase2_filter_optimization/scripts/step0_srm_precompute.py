@@ -12,14 +12,14 @@ Architecture:
     5. Project CVD into SRM space via SVD
     6. Compute SRM-space ΔRDM_obs = RDM(CVD_aligned) - RDM(mean HC_aligned)
 
-Output: results/srm_precompute/
+Output: results/diagnostics/srm_precompute/
   - srm_{roi}.npz: W_combined per HC, shared_space (s_), CVD aligned patterns
   - delta_rdm_obs_srm_{roi}.npz: per-CVD ΔRDM_obs in SRM space
   - manifest.json: config, K values, alpha values
 
 Usage (requires mpirun for BrainIAK):
     mpirun -np 1 python scripts/step0_srm_precompute.py \
-        --output_dir results/srm_precompute
+        --output_dir results/diagnostics/srm_precompute
 """
 
 import argparse
@@ -264,7 +264,7 @@ def main():
                         help='ROIs to process (default: V1 V2)')
     parser.add_argument('--data_dir', type=str, default=None)
     parser.add_argument('--output_dir', type=str,
-                        default='results/srm_precompute')
+                        default='results/diagnostics/srm_precompute')
     args = parser.parse_args()
 
     data_dir = auto_detect_data_dir(args.data_dir)

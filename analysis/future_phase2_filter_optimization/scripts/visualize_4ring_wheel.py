@@ -147,7 +147,7 @@ def draw_4ring_wheel(ax, original_angles, perceived_angles,
 # ---------------------------------------------------------------------------
 
 def main():
-    preimage_dir = _PIPELINE_DIR / 'results' / 'loco_filter' / 'preimage'
+    preimage_dir = _PIPELINE_DIR / 'results' / 'fits' / 'preimage'
     fig_dir = preimage_dir / 'figures'
     fig_dir.mkdir(parents=True, exist_ok=True)
 

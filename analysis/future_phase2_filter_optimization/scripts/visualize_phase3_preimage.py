@@ -55,7 +55,7 @@ DISPLAY_L_RANGE = (20.0, 97.0)
 DISPLAY_L_STEPS = 40
 DISPLAY_CHROMA_MAX = 150.0
 
-OUTDIR = _PHASE2_DIR / 'results' / 'figures' / 'filter_visualization_phase3'
+OUTDIR = _PHASE2_DIR / 'results' / 'visualizations' / 'filter_visualization_phase3'
 OUTDIR.mkdir(parents=True, exist_ok=True)
 
 # Phase 3 candidate cells (cycle8_preimage parameters)

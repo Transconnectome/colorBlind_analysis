@@ -10,7 +10,7 @@ Goal:
 
 Usage (local, conda srm):
     python loss_redesign_smoke.py --subjects 08 01 02 03 04 05 06 07 \\
-        --roi V4 --family deutan --output_dir ../../results/cycle_loss_redesign
+        --roi V4 --family deutan --output_dir ../../results/older_cycles/cycle_loss_redesign
 
 Family choice:
     For CVD subjects use their actual type (sub-08=deutan, sub-09=protan).
@@ -272,7 +272,7 @@ def main():
                         '(matches sub-08) for fair comparison')
     p.add_argument('--data_dir', default=str(LOCAL_DATA))
     p.add_argument('--output_dir',
-                   default=str(_PHASE2 / 'results' / 'cycle_loss_redesign'))
+                   default=str(_PHASE2 / 'results' / 'older_cycles/cycle_loss_redesign'))
     p.add_argument('--bs_step', type=float, default=2.0)
     p.add_argument('--bc_step', type=float, default=2.0)
     p.add_argument('--bs_max', type=float, default=50.0,

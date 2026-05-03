@@ -1,4 +1,4 @@
-# cycle_filter_refinement/ — Cycle 1~15 outputs
+# cycles/ — Cycle 1~15 selection-rule reformulation outputs
 
 **Status**: ACTIVE (core)
 **Last cycle**: Cycle 15 (2026-05-03)

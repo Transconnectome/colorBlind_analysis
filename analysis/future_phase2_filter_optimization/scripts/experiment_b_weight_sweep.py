@@ -378,7 +378,7 @@ def main():
 
     # SRM dir
     srm_dir = Path(args.srm_dir) if args.srm_dir else (
-        _PHASE2_DIR / 'results' / 'srm_precompute')
+        _PHASE2_DIR / 'results' / 'diagnostics/srm_precompute')
     if not srm_dir.exists():
         print(f'ERROR: SRM precompute dir not found: {srm_dir}')
         sys.exit(1)

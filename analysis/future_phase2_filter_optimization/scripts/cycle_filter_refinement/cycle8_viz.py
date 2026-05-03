@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 
 ROOT = Path('/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase2_filter_optimization')
-RES = ROOT / 'results/cycle_filter_refinement'
+RES = ROOT / 'results/cycles'
 FIG = RES / 'cycle8_figures'
 FIG.mkdir(parents=True, exist_ok=True)
 

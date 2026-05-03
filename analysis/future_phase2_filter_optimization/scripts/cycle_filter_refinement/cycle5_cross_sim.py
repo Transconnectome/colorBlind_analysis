@@ -17,7 +17,7 @@
       Mach  : (Δλ/30)²
 
 출력:
-  results/cycle_filter_refinement/cycle5_cross_sim_aggregate.json
+  results/cycles/cycle5_cross_sim_aggregate.json
   - simulator × subject: best l_topk + Tikh, ρ@best, best params, raw l_topk
   - sub-08 z (vs HC pool 6) per simulator
   - 변동성: max(z) - min(z), max(value) - min(value)
@@ -34,7 +34,7 @@ _HERE = Path(__file__).resolve().parent
 _PHASE2 = _HERE.parent.parent
 _PROJ = _PHASE2.parent.parent
 sys.path.insert(0, str(_PHASE2 / 'scripts'))
-sys.path.insert(0, str(_PHASE2 / 'scripts' / 'cycle_loss_redesign'))
+sys.path.insert(0, str(_PHASE2 / 'scripts' / 'older_cycles/cycle_loss_redesign'))
 
 _FWD = _PROJ / 'analysis' / 'future_phase1_forward_model' / 'scripts'
 sys.path.insert(0, str(_FWD))
@@ -176,7 +176,7 @@ SWEEPER = {
 
 
 def main():
-    out_dir = _PHASE2 / 'results' / 'cycle_filter_refinement'
+    out_dir = _PHASE2 / 'results' / 'cycles'
     out_dir.mkdir(parents=True, exist_ok=True)
     data_dir = Path(LOCAL_DATA)
 

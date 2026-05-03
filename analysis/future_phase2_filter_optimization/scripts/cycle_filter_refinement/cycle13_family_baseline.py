@@ -19,9 +19,9 @@ from pathlib import Path
 
 ROOT = Path('/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/'
             'colorBlind_analysis/analysis/future_phase2_filter_optimization')
-RES = ROOT / 'results/cycle_filter_refinement'
+RES = ROOT / 'results/cycles'
 RES_VOX = RES / 'cycle6_voxel_diag'
-BASELINE_CSV = ROOT / 'results/figures/diagnostic_protan_vs_deutan/neural_baseline_decomp.csv'
+BASELINE_CSV = ROOT / 'results/visualizations/diagnostic_protan_vs_deutan/neural_baseline_decomp.csv'
 OUT = RES / 'cycle13_family_baseline.json'
 
 HC = ['01', '02', '03', '04', '05', '06']

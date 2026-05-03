@@ -1,70 +1,91 @@
 # Results Layout — Phase 2 Filter Optimization
 
-Last updated: 2026-05-03 (cleanup: archived `paper_figures/`, `validation_v2/` → `_archive/`)
+Last updated: 2026-05-04 (full restructure: 15 dirs → 7 semantic categories)
 
-## Design Philosophy
-
-- **Active dirs**: referenced by current analysis workflows (CLAUDE.md, behav_validation.md, action_plans/).
-- **`_archive/`**: completed/superseded; moved out of main path. Deletion candidates pending user audit.
-- **Each subdir has a README.md** with: purpose, last-updated, current/deprecated status, generator script.
-
-## Current top-level layout
+## New top-level structure
 
 ```
 results/
-├── MANIFEST.md                          this map (you are here)
-├── loss_inventory.md / .csv             Loss variant × HC sanity table (NEW 2026-05-03)
+├── MANIFEST.md                          this file
 │
-├── _archive/                            superseded dirs (audit before deletion)
-│   ├── paper_figures/                      orphaned timestamp dir
-│   └── validation_v2/                      superseded by validation_2component
+├── inventory/                           CROSS-CUTTING SUMMARIES
+│   ├── loss_inventory.{md,csv}             12+ loss × HC sanity table
+│   ├── consolidated_phase2_results.{csv,json}  Cycle 10d 48-row aggregate
+│   └── consolidated_cross_roi.csv          Cycle 11 9-pair × 2-family
 │
-├── loco_filter/                         **CORE** — phase A fits + pre-images
-│   ├── phase_a/                            Machado, R+C, fourier_warp fits (CVD)
+├── fits/                                ALL MODEL FITS (was loco_filter + 2component_v2 + step2c_*)
+│   ├── phase_a/                            Machado, R+C, fourier_warp (CVD)
 │   ├── phase_a_2component/                 2-component fits (CVD)
-│   ├── phase_a_2component_finegrid/        sub-08 fine grid (B1, 2026-05-03)
-│   ├── phase_a_2component_hc_sanity/       HC fit (PARTIAL — pending server re-run)
-│   ├── phase_a_v2/, phase_b_v2/            older variants — keep for reference
+│   ├── phase_a_2component_finegrid/        sub-08 fine grid (B1)
+│   ├── phase_a_2component_hc_sanity/       HC fits (PARTIAL — server pending)
+│   ├── phase_a_v2/, phase_b_v2/            older variants — keep for ref
 │   ├── phase_a_test/                       test outputs
+│   ├── canonical_2component_v2/            (was 2component_comprehensive_v2)
+│   ├── canonical_rc_opponent_v2/           (was step2c_retinal_cortical_v2)
 │   ├── preimage/                           opponent-convention pre-images
-│   ├── preimage_2component/                opponent-convention pre-images (2-comp)
+│   ├── preimage_2component/                opponent-convention 2-comp pre-images
 │   └── roi_hierarchy/                      cross-ROI agreement
 │
-├── cycle_filter_refinement/             **CORE** — Cycle 1~15 outputs
+├── cycles/                              CYCLE 1~15 OUTPUTS (was cycle_filter_refinement)
 │   ├── sub-XX_ROI_landscape.json           per (subject, ROI) metric grids
-│   ├── cycle12_loss_cross_roi.{json,csv}   Cycle 12: V4 l_topk + V1 l_rank
-│   ├── cycle14_v1_rdm_cross.{json,csv}     Cycle 14: V4 l_topk + V1 ΔRDM cosine
-│   ├── cycle15_mwjaccard_cross.{json,csv}  **Cycle 15** (NEW): mw_jaccard cross variants
-│   ├── consolidated_phase2_results.csv     Cycle 10d aggregate (48 rows)
-│   ├── consolidated_cross_roi.csv          Cycle 11 9-pair × 2-family
-│   └── cycleX_*.json                       per-cycle aggregates
+│   ├── cycle12_loss_cross_roi.{json,csv}   V4 l_topk + V1 l_rank
+│   ├── cycle14_v1_rdm_cross.{json,csv}     V4 l_topk + V1 ΔRDM cosine
+│   ├── cycle15_mwjaccard_cross.{json,csv}  ★ Cycle 15 — current winner
+│   ├── cycle{1..13}_*.json/csv             per-cycle aggregates
+│   ├── bootstrap/, bootstrap_server/       bootstrap CIs
+│   └── cycle{6,8}_*/                        sub-analyses
 │
-├── 2component_comprehensive_v2/         Canonical 2-comp fits (Apr 7) — viz scripts ref
-├── step2c_retinal_cortical_v2/          Canonical R+C fits (Apr 7) — docs ref
-├── validation_2component/               Filter comparison: 2-comp vs R+C (Apr 7)
-│
-├── figures/                             ALL viz output
-│   ├── filter_visualization/               Sub-08, Sub-09 candidate filter swatches
-│   │   ├── filter_viz_sub-XX_2comp.png     Phase A LOCO best
-│   │   ├── filter_viz_sub-08_c8variants.png c8 magenta variants (B2, 2026-05-03)
-│   │   ├── filter_viz_sub-09_c8variants.png
-│   │   └── filter_viz_sub-09_mwjaccard.png mw_jaccard winner candidate (NEW)
+├── visualizations/                      ALL VIZ (was figures)
+│   ├── filter_visualization/               sub-08, sub-09 candidate filter swatches
 │   ├── filter_visualization_phase3/        cycle10d/cycle12 candidates (3-way)
-│   ├── color_structure/, loco_decomposition/, etc.
+│   ├── color_structure/, loco_decomposition/
 │   └── diagnostic_protan_vs_deutan/
 │
-├── decoder_loco/                        ForwardEncoding LOCO confusion matrices
-├── srm_integrated_loco/                 SRM+LOCO integration (Apr 12)
-├── srm_precompute/                      HC SRM W/A caches
-├── loco_confusion_direction/            Confusion direction extraction
-├── cycle_bootstrap/                     Bootstrap CI computations
-├── cycle_loss_redesign/                 Older cycle (referenced by cycle_filter_refinement scripts)
-└── cycle_math_framework/                Math framework experiments
+├── diagnostics/                         AD-HOC DIAGNOSTIC ANALYSES
+│   ├── decoder_loco/                       ForwardEncoding LOCO confusion (was results/decoder_loco)
+│   ├── srm_integrated_loco/                SRM + LOCO (was results/srm_integrated_loco)
+│   ├── srm_precompute/                     HC SRM W/A caches
+│   ├── loco_confusion_direction/           Confusion direction extraction
+│   ├── filter_validation_2comp_vs_rc/      (was validation_2component)
+│   └── cycle_math_framework/               Math framework experiments
+│
+├── older_cycles/                        OLDER CYCLE WORK (referenced by current scripts)
+│   ├── cycle_loss_redesign/                cycle 4 alt metrics
+│   └── cycle_bootstrap/                    older bootstrap (Apr 29)
+│
+└── _archive/                            DELETION CANDIDATES (audit pending)
+    ├── paper_figures/                      orphaned timestamp dir
+    └── validation_v2/                      superseded by validation_2component
 ```
 
-## Pending future migrations (not yet executed)
+## Migration log (2026-05-04)
 
-Per user agreement 2026-05-03, full restructure to `filter_fits/`, `preimages/`, `cross_roi/`, `diagnostics/`, `visualizations/`, `behavioral/` is planned for future session. Current cleanup limited to:
-- Archiving 2 clearly orphaned dirs (`paper_figures/`, `validation_v2/`)
-- Adding READMEs (this file + subdirs)
-- Documenting current candidate table in top-level `../README.md`
+| Old path | New path | Reason |
+|---|---|---|
+| `loco_filter/` | `fits/` | Semantic clarity |
+| `cycle_filter_refinement/` | `cycles/` | Shorter |
+| `figures/` | `visualizations/` | Standard naming |
+| `2component_comprehensive_v2/` | `fits/canonical_2component_v2/` | Group with fits |
+| `step2c_retinal_cortical_v2/` | `fits/canonical_rc_opponent_v2/` | Group with fits |
+| `decoder_loco/` | `diagnostics/decoder_loco/` | Group diagnostics |
+| `srm_integrated_loco/` | `diagnostics/srm_integrated_loco/` | Group diagnostics |
+| `srm_precompute/` | `diagnostics/srm_precompute/` | Group diagnostics |
+| `loco_confusion_direction/` | `diagnostics/loco_confusion_direction/` | Group diagnostics |
+| `validation_2component/` | `diagnostics/filter_validation_2comp_vs_rc/` | Renamed for clarity |
+| `cycle_math_framework/` | `diagnostics/cycle_math_framework/` | Group diagnostics |
+| `cycle_loss_redesign/` | `older_cycles/cycle_loss_redesign/` | Pre-Cycle 9 |
+| `cycle_bootstrap/` | `older_cycles/cycle_bootstrap/` | Older bootstrap workflow |
+| `loss_inventory.{md,csv}` | `inventory/loss_inventory.{md,csv}` | Group cross-cutting |
+| `cycle_filter_refinement/consolidated_*` | `inventory/consolidated_*` | Group cross-cutting |
+
+All Python scripts (~50 files) updated to use new paths via sed migration.
+
+## Design Philosophy
+
+- **`inventory/`**: cross-cutting summaries used across cycles
+- **`fits/`**: anything that runs the canonical L_LOCO / phase_a fitting
+- **`cycles/`**: cycle 1~15 selection-rule reformulation work
+- **`diagnostics/`**: ad-hoc analyses (HC specificity, decoder confusion, SRM, etc.)
+- **`older_cycles/`**: pre-Cycle 9 workflows still referenced by current scripts
+- **`_archive/`**: superseded; audit before deletion
+- **Each subdir has its own `README.md`** with: purpose, last-updated, generator script

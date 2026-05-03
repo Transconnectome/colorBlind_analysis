@@ -22,7 +22,7 @@ Cycle 3 가설:
   M3 — magnitude-weighted Spearman (Spearman of (sim, cvd) where both
        weighted by |c|^p, p=0.5)
 
-Output: results/cycle_filter_refinement/cycle3_aggregate.json
+Output: results/cycles/cycle3_aggregate.json
 """
 import json
 import sys
@@ -34,7 +34,7 @@ from scipy.stats import spearmanr, pearsonr
 
 _HERE = Path(__file__).resolve().parent
 _PHASE2 = _HERE.parent.parent
-_RESULTS = _PHASE2 / 'results' / 'cycle_filter_refinement'
+_RESULTS = _PHASE2 / 'results' / 'cycles'
 
 ROIS = ['V1', 'V2', 'V4']
 HC_SUBS = ['01', '02', '03', '04', '05', '06']

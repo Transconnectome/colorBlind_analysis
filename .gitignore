@@ -88,36 +88,38 @@ logs_backup/
 ## Previous results in main dir
 /results/
 
-## All results directories (including subdirectories)
-**/results/
-# But allow doc/manifest files inside results dirs to be tracked
-!**/results/
-!**/results/**/
-!**/results/README.md
-!**/results/MANIFEST.md
-!**/results/**/README.md
-!**/results/loss_inventory.md
-!**/results/loss_inventory.csv
+## All results directories under analysis/* (including subdirectories)
+analysis/**/results/
+# But allow doc/manifest files inside analysis/**/results dirs to be tracked
+!analysis/**/results/
+!analysis/**/results/**/
+!analysis/**/results/README.md
+!analysis/**/results/MANIFEST.md
+!analysis/**/results/**/README.md
+!analysis/**/results/loss_inventory.md
+!analysis/**/results/loss_inventory.csv
 # Re-ignore data file types inside the now-allowed dirs (track only docs)
-**/results/**/*.json
-**/results/**/*.npy
-**/results/**/*.npz
-**/results/**/*.png
-**/results/**/*.jpg
-**/results/**/*.pdf
-**/results/**/*.svg
-**/results/**/*.txt
-**/results/**/*.log
-**/results/**/*.html
-**/results/**/*.tsv
-**/results/**/*.pkl
-**/results/**/*.h5
-**/results/**/*.csv
-**/results/**/*.py
-**/results/**/*.sbatch
-**/results/**/*.sh
+analysis/**/results/**/*.json
+analysis/**/results/**/*.npy
+analysis/**/results/**/*.npz
+analysis/**/results/**/*.png
+analysis/**/results/**/*.jpg
+analysis/**/results/**/*.pdf
+analysis/**/results/**/*.svg
+analysis/**/results/**/*.txt
+analysis/**/results/**/*.log
+analysis/**/results/**/*.html
+analysis/**/results/**/*.tsv
+analysis/**/results/**/*.pkl
+analysis/**/results/**/*.h5
+analysis/**/results/**/*.csv
+analysis/**/results/**/*.py
+analysis/**/results/**/*.sbatch
+analysis/**/results/**/*.sh
 # Re-allow the specific whitelist (loss_inventory.csv — primary inventory artifact)
-!**/results/loss_inventory.csv
+!analysis/**/results/loss_inventory.csv
+!analysis/**/results/inventory/loss_inventory.csv
+!analysis/**/results/inventory/loss_inventory.md
 
 # ============================================
 # SLURM & Server Outputs

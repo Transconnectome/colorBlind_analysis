@@ -26,7 +26,7 @@ from itertools import product
 
 ROOT = Path('/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/'
             'colorBlind_analysis/analysis/future_phase2_filter_optimization')
-RES = ROOT / 'results/cycle_filter_refinement'
+RES = ROOT / 'results/cycles'
 RES_VOX = RES / 'cycle6_voxel_diag'
 OUT = RES / 'cycle11_per_term_cross_roi.json'
 

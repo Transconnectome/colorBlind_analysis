@@ -23,7 +23,7 @@ local lightweight implementations so the smoke run can execute on
 laptops without the full data tree.
 
 Outputs:
-    results/cycle_math_framework/
+    results/diagnostics/cycle_math_framework/
         hue_maps.csv            -- numerical theta -> theta' for all models
         commutator_norms.json   -- ||[R,S]||_F at varying scales
         fisher_loco.json        -- Hessian eigenvalues / cond. number

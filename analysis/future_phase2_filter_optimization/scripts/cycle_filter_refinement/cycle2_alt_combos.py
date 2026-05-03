@@ -9,9 +9,9 @@ Cycle 1 비판 → 도입 항목:
   (e) C1 secondary-min ratio + grid 변동 강건성 metric (best-arg variance)
 
 Reuses cycle1 landscape json files in
-  results/cycle_filter_refinement/sub-{ID}_{ROI}_landscape.json
+  results/cycles/sub-{ID}_{ROI}_landscape.json
 
-Output: results/cycle_filter_refinement/cycle2_aggregate.json
+Output: results/cycles/cycle2_aggregate.json
 """
 import json
 import sys
@@ -23,7 +23,7 @@ from scipy.stats import pearsonr
 
 _HERE = Path(__file__).resolve().parent
 _PHASE2 = _HERE.parent.parent
-_RESULTS = _PHASE2 / 'results' / 'cycle_filter_refinement'
+_RESULTS = _PHASE2 / 'results' / 'cycles'
 
 ROIS = ['V1', 'V2', 'V4']
 HC_SUBS = ['01', '02', '03', '04', '05', '06']

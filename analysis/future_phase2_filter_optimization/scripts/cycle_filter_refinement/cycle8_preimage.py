@@ -5,7 +5,7 @@ import numpy as np
 from pathlib import Path
 
 ROOT = Path('/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase2_filter_optimization')
-RES = ROOT / 'results/cycle_filter_refinement'
+RES = ROOT / 'results/cycles'
 
 CONF_AXIS = {'protan': 16.0, 'deutan': 150.0}
 HUE_8 = np.array([0.0, 45.0, 90.0, 135.0, 180.0, 225.0, 270.0, 315.0])

@@ -18,8 +18,8 @@ Families: protan, deutan
 
 Usage:
     python scripts/srm_integrated_loco.py \
-        --srm_dir results/srm_precompute \
-        --output_dir results/srm_integrated_loco
+        --srm_dir results/diagnostics/srm_precompute \
+        --output_dir results/diagnostics/srm_integrated_loco
 """
 
 import argparse
@@ -374,11 +374,11 @@ def main():
     parser.add_argument('--families', nargs='+', default=FAMILIES,
                         help='CVD families to sweep')
     parser.add_argument('--srm_dir', type=str,
-                        default='results/srm_precompute',
+                        default='results/diagnostics/srm_precompute',
                         help='Directory with step0_srm_precompute outputs')
     parser.add_argument('--data_dir', type=str, default=None)
     parser.add_argument('--output_dir', type=str,
-                        default='results/srm_integrated_loco')
+                        default='results/diagnostics/srm_integrated_loco')
     parser.add_argument('--weights', nargs=4, type=float, default=None,
                         metavar=('A', 'B', 'D', 'E'),
                         help='Loss weights: alpha beta delta epsilon')

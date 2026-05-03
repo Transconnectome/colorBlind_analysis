@@ -7,7 +7,7 @@
   - 분포 IQR / median / 95% CI 산출
   - C2 (variance) 정량화
 
-Output: results/cycle_filter_refinement/bootstrap/sub-{ID}_{ROI}.json
+Output: results/cycles/bootstrap/sub-{ID}_{ROI}.json
 
 서버 실행 (CPU heavy):
   conda activate nilearn
@@ -24,7 +24,7 @@ _HERE = Path(__file__).resolve().parent
 _PHASE2 = _HERE.parent.parent
 _PROJ = _PHASE2.parent.parent
 sys.path.insert(0, str(_PHASE2 / 'scripts'))
-sys.path.insert(0, str(_PHASE2 / 'scripts' / 'cycle_loss_redesign'))
+sys.path.insert(0, str(_PHASE2 / 'scripts' / 'older_cycles/cycle_loss_redesign'))
 
 _FWD = _PROJ / 'analysis' / 'future_phase1_forward_model' / 'scripts'
 sys.path.insert(0, str(_FWD))
@@ -101,7 +101,7 @@ def main():
     p.add_argument('--data_dir', default=str(LOCAL_DATA))
     p.add_argument('--output_dir',
                    default=str(_PHASE2 / 'results'
-                                / 'cycle_filter_refinement' / 'bootstrap'))
+                                / 'cycles' / 'bootstrap'))
     p.add_argument('--seed', type=int, default=42)
     args = p.parse_args()
 

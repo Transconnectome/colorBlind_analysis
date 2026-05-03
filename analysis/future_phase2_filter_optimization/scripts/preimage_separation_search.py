@@ -23,8 +23,8 @@ Algorithm:
 Usage (server):
     mpirun -np 1 python scripts/preimage_separation_search.py \
         --subject 09 --roi V4 --model machado_1way \
-        --preimage_dir results/loco_filter/preimage \
-        --output_dir results/loco_filter/preimage
+        --preimage_dir results/fits/preimage \
+        --output_dir results/fits/preimage
 """
 
 import argparse
@@ -584,10 +584,10 @@ def main():
     parser.add_argument('--model', default='machado_1way',
                         help='Model name')
     parser.add_argument('--preimage_dir',
-                        default='results/loco_filter/preimage',
+                        default='results/fits/preimage',
                         help='Pre-image results directory')
     parser.add_argument('--output_dir',
-                        default='results/loco_filter/preimage',
+                        default='results/fits/preimage',
                         help='Output directory')
     args = parser.parse_args()
 

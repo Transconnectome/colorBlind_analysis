@@ -1,4 +1,4 @@
-# loco_filter/ — Phase A LOCO fits + pre-images
+# fits/ — All model fit results (Phase A LOCO + canonical model fits)
 
 **Status**: ACTIVE (core)
 **Last fits**: 2026-04-09 (CVD canonical), 2026-05-03 (sub-08 fine grid)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """analyze_bootstrap.py — Cycle 1 analysis: robust estimators + specificity check.
 
-Reads JSONs from results/cycle_bootstrap/main/ and computes:
+Reads JSONs from results/older_cycles/cycle_bootstrap/main/ and computes:
 - mean / median / trimmed-mean / mode (KDE peak) of ρ
 - HC null mean+std → z-score for CVD
 - separation between sub-10 and sub-08/09
@@ -9,10 +9,10 @@ Reads JSONs from results/cycle_bootstrap/main/ and computes:
 
 Output:
   - Console table of robust estimators
-  - JSON summary at results/cycle_bootstrap/summary.json
+  - JSON summary at results/older_cycles/cycle_bootstrap/summary.json
 
 Usage:
-    python analyze_bootstrap.py --results_dir results/cycle_bootstrap/main
+    python analyze_bootstrap.py --results_dir results/older_cycles/cycle_bootstrap/main
 """
 
 from __future__ import annotations
@@ -112,9 +112,9 @@ def summarize_one(d):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--results_dir', default=str(
-        _PHASE2_DIR / 'results' / 'cycle_bootstrap' / 'main'))
+        _PHASE2_DIR / 'results' / 'older_cycles/cycle_bootstrap' / 'main'))
     ap.add_argument('--output_path', default=str(
-        _PHASE2_DIR / 'results' / 'cycle_bootstrap' / 'summary.json'))
+        _PHASE2_DIR / 'results' / 'older_cycles/cycle_bootstrap' / 'summary.json'))
     args = ap.parse_args()
 
     res_dir = Path(args.results_dir)

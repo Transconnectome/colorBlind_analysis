@@ -11,7 +11,7 @@ import numpy as np
 from pathlib import Path
 
 ROOT = Path('/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase2_filter_optimization')
-RES = ROOT / 'results/cycle_filter_refinement'
+RES = ROOT / 'results/cycles'
 
 # Load Task A and Task B results
 with open(RES / 'cycle7_dual_criterion.json') as f:

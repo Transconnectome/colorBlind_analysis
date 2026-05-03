@@ -22,9 +22,9 @@ _PHASE2_DIR = _SCRIPT_DIR.parent.parent
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--results_dir', default=str(
-        _PHASE2_DIR / 'results' / 'cycle_bootstrap' / 'main'))
+        _PHASE2_DIR / 'results' / 'older_cycles/cycle_bootstrap' / 'main'))
     ap.add_argument('--out_path', default=str(
-        _PHASE2_DIR / 'results' / 'cycle_bootstrap' / 'rho_distributions.png'))
+        _PHASE2_DIR / 'results' / 'older_cycles/cycle_bootstrap' / 'rho_distributions.png'))
     args = ap.parse_args()
 
     files = sorted(Path(args.results_dir).glob('sub-*_*_*.json'))

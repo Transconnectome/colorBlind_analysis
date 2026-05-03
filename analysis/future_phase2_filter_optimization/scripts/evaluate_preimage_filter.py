@@ -11,9 +11,9 @@ Also builds a comparison table: no-filter / simple-inverse / exact pre-image.
 
 Usage (server):
     mpirun -np 1 python scripts/evaluate_preimage_filter.py \
-        --preimage_dir results/loco_filter/preimage \
+        --preimage_dir results/fits/preimage \
         --data_dir /scratch/connectome/haba6030/colorBlind/derivatives/full_dataset_C010 \
-        --output_dir results/loco_filter/preimage/evaluation
+        --output_dir results/fits/preimage/evaluation
 """
 
 import argparse

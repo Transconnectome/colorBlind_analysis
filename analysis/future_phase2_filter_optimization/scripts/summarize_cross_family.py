@@ -342,7 +342,7 @@ def _write_specificity_md(stage2_rows: List[Dict],
     buf.append('## Interpretation')
     buf.append('')
     buf.append(
-        'See `results/figures/diagnostic_protan_vs_deutan/DIAGNOSIS.md` for the five-'
+        'See `results/visualizations/diagnostic_protan_vs_deutan/DIAGNOSIS.md` for the five-'
         'axis structural analysis that motivated this run. Key take-aways to '
         'cross-check against the tables above:')
     buf.append('')

@@ -29,7 +29,7 @@ from itertools import product
 
 ROOT = Path('/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/'
             'colorBlind_analysis/analysis/future_phase2_filter_optimization')
-RES = ROOT / 'results/cycle_filter_refinement'
+RES = ROOT / 'results/cycles'
 OUT = RES / 'cycle12_loss_cross_roi.json'
 OUT_CSV = RES / 'cycle12_loss_cross_roi.csv'
 

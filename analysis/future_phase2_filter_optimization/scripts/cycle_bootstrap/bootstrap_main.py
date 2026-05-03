@@ -17,7 +17,7 @@ Output (one JSON per (subject, roi, model)):
 
 Usage:
     python bootstrap_main.py --subject 08 --roi V4 --model 2component \\
-        --n_boot 200 --output_dir results/cycle_bootstrap/main
+        --n_boot 200 --output_dir results/older_cycles/cycle_bootstrap/main
 
 For SLURM: see sbatch/cycle_bootstrap/run_bootstrap_main.sbatch
 """
@@ -212,7 +212,7 @@ def main():
     ap.add_argument('--n_boot', type=int, default=200)
     ap.add_argument('--seed', type=int, default=42)
     ap.add_argument('--output_dir', default=str(
-        _PHASE2_DIR / 'results' / 'cycle_bootstrap' / 'main'))
+        _PHASE2_DIR / 'results' / 'older_cycles/cycle_bootstrap' / 'main'))
     ap.add_argument('--skip_loho', action='store_true')
     ap.add_argument('--skip_boot', action='store_true')
     ap.add_argument('--skip_hc_null', action='store_true')

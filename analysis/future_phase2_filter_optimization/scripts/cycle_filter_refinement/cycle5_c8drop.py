@@ -15,7 +15,7 @@
   - Tikhonov: λ=0.2 (cycle3 추천 단독 V4 best λ).
 
 출력:
-  results/cycle_filter_refinement/cycle5_c8drop_aggregate.json
+  results/cycles/cycle5_c8drop_aggregate.json
   - sub-08, sub-09, sub-10 각 ROI 의 z, p_emp (8-color vs 7-color 비교)
   - baseline_rho 8 vs 7
   - HC null 분포
@@ -34,7 +34,7 @@ _HERE = Path(__file__).resolve().parent
 _PHASE2 = _HERE.parent.parent
 _PROJ = _PHASE2.parent.parent
 sys.path.insert(0, str(_PHASE2 / 'scripts'))
-sys.path.insert(0, str(_PHASE2 / 'scripts' / 'cycle_loss_redesign'))
+sys.path.insert(0, str(_PHASE2 / 'scripts' / 'older_cycles/cycle_loss_redesign'))
 
 _FWD = _PROJ / 'analysis' / 'future_phase1_forward_model' / 'scripts'
 sys.path.insert(0, str(_FWD))
@@ -161,7 +161,7 @@ def sweep_subject(subj, roi, family, pool_W, pool_amps, vuln_target,
 
 
 def main():
-    out_dir = _PHASE2 / 'results' / 'cycle_filter_refinement'
+    out_dir = _PHASE2 / 'results' / 'cycles'
     out_dir.mkdir(parents=True, exist_ok=True)
     data_dir = Path(LOCAL_DATA)
 

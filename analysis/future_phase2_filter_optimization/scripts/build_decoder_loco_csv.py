@@ -2,7 +2,7 @@
 """Build decoder-LOCO long-format CSV from phase3_decoder_comparing results.
 
 Source:  analysis/phase3_decoder_comparing/results/loco/raw/sub-*_loco.json
-Output:  analysis/future_phase2_filter_optimization/results/decoder_loco/decoder_loco_long.csv
+Output:  analysis/future_phase2_filter_optimization/results/diagnostics/decoder_loco/decoder_loco_long.csv
          + decoder_loco_confusion_{model}.csv (8x8 confusion matrices, counts)
          + decoder_loco_summary.csv (per subject x roi x model: accuracy, adj-acc, mae)
 
@@ -28,7 +28,7 @@ import csv
 
 ROOT = Path(__file__).resolve().parents[3]
 SRC_DIR = ROOT / 'analysis' / 'phase3_decoder_comparing' / 'results' / 'loco' / 'raw'
-OUT_DIR = ROOT / 'analysis' / 'future_phase2_filter_optimization' / 'results' / 'decoder_loco'
+OUT_DIR = ROOT / 'analysis' / 'future_phase2_filter_optimization' / 'results' / 'diagnostics/decoder_loco'
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 
 SUBJECTS = [f"{i:02d}" for i in range(1, 11)]

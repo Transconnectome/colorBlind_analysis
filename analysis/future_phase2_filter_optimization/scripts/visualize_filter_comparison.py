@@ -151,11 +151,11 @@ def render_colors(cielab_angles_per_color):
 # Load pre-image data
 # ---------------------------------------------------------------------------
 def load_preimage(filename):
-    path = _PIPELINE_DIR / 'results' / 'loco_filter' / filename
+    path = _PIPELINE_DIR / 'results' / 'fits' / filename
     if not path.exists():
-        path = _PIPELINE_DIR / 'results' / 'loco_filter' / 'preimage_2component' / Path(filename).name
+        path = _PIPELINE_DIR / 'results' / 'fits' / 'preimage_2component' / Path(filename).name
     if not path.exists():
-        path = _PIPELINE_DIR / 'results' / 'loco_filter' / 'preimage' / filename
+        path = _PIPELINE_DIR / 'results' / 'fits' / 'preimage' / filename
     with open(path) as f:
         return json.load(f)
 
@@ -390,14 +390,14 @@ def main():
                bbox_to_anchor=(0.52, -0.01))
 
     # Save
-    out_dir = _PIPELINE_DIR / 'results' / 'loco_filter' / 'preimage_2component' / 'figures'
+    out_dir = _PIPELINE_DIR / 'results' / 'fits' / 'preimage_2component' / 'visualizations'
     out_dir.mkdir(parents=True, exist_ok=True)
     out_path = out_dir / 'filter_comparison_all_models.png'
     fig.savefig(out_path, dpi=200, bbox_inches='tight', facecolor='white')
     print(f'\nSaved: {out_path}')
     plt.close()
 
-    shared_dir = _PIPELINE_DIR / 'results' / 'loco_filter' / 'preimage' / 'figures'
+    shared_dir = _PIPELINE_DIR / 'results' / 'fits' / 'preimage' / 'visualizations'
     shared_path = shared_dir / 'filter_comparison_all_models.png'
     shutil.copy2(out_path, shared_path)
     print(f'Copied to: {shared_path}')

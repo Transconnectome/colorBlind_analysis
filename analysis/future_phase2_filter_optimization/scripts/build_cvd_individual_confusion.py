@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Per-CVD-subject × ROI confusion matrices + signed-error profiles.
 
-Input:  results/decoder_loco/decoder_loco_long.csv
-Output (in results/decoder_loco/per_cvd/):
+Input:  results/diagnostics/decoder_loco/decoder_loco_long.csv
+Output (in results/diagnostics/decoder_loco/per_cvd/):
   - sub-{ID}_{ROI}_confusion.csv       (8x8 row-normalized, ForwardEncoding only)
   - sub-{ID}_{ROI}_signed_error.csv    (per color: circular mean / sd of signed error)
   - sub-{ID}_summary.csv               (per color: accuracy, top-1 confusion target, mean signed error)
@@ -24,8 +24,8 @@ from pathlib import Path
 from collections import defaultdict
 
 ROOT = Path(__file__).resolve().parents[3]
-CSV_IN = ROOT / 'analysis' / 'future_phase2_filter_optimization' / 'results' / 'decoder_loco' / 'decoder_loco_long.csv'
-OUT = ROOT / 'analysis' / 'future_phase2_filter_optimization' / 'results' / 'decoder_loco' / 'per_cvd'
+CSV_IN = ROOT / 'analysis' / 'future_phase2_filter_optimization' / 'results' / 'diagnostics/decoder_loco' / 'decoder_loco_long.csv'
+OUT = ROOT / 'analysis' / 'future_phase2_filter_optimization' / 'results' / 'diagnostics/decoder_loco' / 'per_cvd'
 OUT.mkdir(parents=True, exist_ok=True)
 
 CVD = {

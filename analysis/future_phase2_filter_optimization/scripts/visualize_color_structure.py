@@ -31,7 +31,7 @@ warnings.filterwarnings('ignore', category=UserWarning)
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _PIPELINE_DIR = _SCRIPT_DIR.parent
 _RESULT_DIR = _PIPELINE_DIR / 'results'
-_LOCO_DIR = _RESULT_DIR / 'loco_filter'
+_LOCO_DIR = _RESULT_DIR / 'fits'
 _C010_ROOT = (_PIPELINE_DIR.parent / 'phase1_procrustes_decoding' /
               'results' / 'visualization' / 'full_dataset_C010_with_residuals')
 
@@ -486,7 +486,7 @@ def plot_loco_bars(ax, vuln_hc, vuln_cvd, models, subj_label):
 # ---------------------------------------------------------------------------
 
 def main():
-    out_dir = _RESULT_DIR / 'figures' / 'color_structure'
+    out_dir = _RESULT_DIR / 'visualizations' / 'color_structure'
     out_dir.mkdir(parents=True, exist_ok=True)
     print(f'Output: {out_dir}')
 

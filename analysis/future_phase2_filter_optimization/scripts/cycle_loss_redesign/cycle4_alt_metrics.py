@@ -246,7 +246,7 @@ def main():
                    "(hV4 → 'V4', V1, V2, V3)")
     p.add_argument('--data_dir', default=str(LOCAL_DATA))
     p.add_argument('--output_dir',
-                   default=str(_PHASE2 / 'results' / 'cycle_loss_redesign'
+                   default=str(_PHASE2 / 'results' / 'older_cycles/cycle_loss_redesign'
                                / 'cycle4_extended'))
     p.add_argument('--bs_step', type=float, default=2.0)
     p.add_argument('--bc_step', type=float, default=2.0)

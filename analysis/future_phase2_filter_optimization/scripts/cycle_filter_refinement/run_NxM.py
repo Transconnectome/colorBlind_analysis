@@ -17,7 +17,7 @@
     HC 는 deutan 으로 매칭.
 
 출력 위치
-  results/cycle_filter_refinement/
+  results/cycles/
     sub-{ID}_{ROI}_landscape.json     # per-cell landscape (gridsize x metrics)
     cycle1_aggregate.json             # 모든 cell 요약
     cycle1_C1_C2_C3_C4_C5_table.json  # 판단 기준
@@ -36,7 +36,7 @@ _HERE = Path(__file__).resolve().parent
 _PHASE2 = _HERE.parent.parent
 _PROJ = _PHASE2.parent.parent
 sys.path.insert(0, str(_PHASE2 / 'scripts'))
-sys.path.insert(0, str(_PHASE2 / 'scripts' / 'cycle_loss_redesign'))
+sys.path.insert(0, str(_PHASE2 / 'scripts' / 'older_cycles/cycle_loss_redesign'))
 
 _FWD = _PROJ / 'analysis' / 'future_phase1_forward_model' / 'scripts'
 sys.path.insert(0, str(_FWD))
@@ -200,7 +200,7 @@ def main():
     p.add_argument('--bs_min', type=float, default=0.0)
     p.add_argument('--data_dir', default=str(LOCAL_DATA))
     p.add_argument('--output_dir',
-                   default=str(_PHASE2 / 'results' / 'cycle_filter_refinement'))
+                   default=str(_PHASE2 / 'results' / 'cycles'))
     p.add_argument('--save_landscape', action='store_true',
                    help='Persist full metric grids per subject (~few MB each)')
     args = p.parse_args()

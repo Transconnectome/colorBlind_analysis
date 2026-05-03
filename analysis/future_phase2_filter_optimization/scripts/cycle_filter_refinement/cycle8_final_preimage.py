@@ -6,13 +6,13 @@ Subject-specific ROI:
   sub-09 (protan): V1+V4 결합 (β_s, β_c) bootstrap median 평균
 
 Source for (β_s, β_c) point estimates:
-  Cycle 6s server bootstrap (n_boot=200, results/cycle_filter_refinement/bootstrap_server)
+  Cycle 6s server bootstrap (n_boot=200, results/cycles/bootstrap_server)
 """
 import json, numpy as np
 from pathlib import Path
 
 ROOT = Path('/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase2_filter_optimization')
-RES = ROOT / 'results/cycle_filter_refinement'
+RES = ROOT / 'results/cycles'
 
 CONF_AXIS = {'protan': 16.0, 'deutan': 150.0}
 HUE_8 = np.array([0.0, 45.0, 90.0, 135.0, 180.0, 225.0, 270.0, 315.0])

@@ -14,8 +14,8 @@ import numpy as np
 
 HERE = Path(__file__).resolve().parent
 PHASE2 = HERE.parent.parent
-RES = PHASE2 / 'results' / 'cycle_filter_refinement' / 'cycle6_voxel_diag'
-OUT = PHASE2 / 'results' / 'cycle_filter_refinement'
+RES = PHASE2 / 'results' / 'cycles' / 'cycle6_voxel_diag'
+OUT = PHASE2 / 'results' / 'cycles'
 
 ROIS = ['V1', 'V2', 'V4']
 HC_SUBS = ['01', '02', '03', '04', '05', '06']  # sub-07 제외 (V4=16voxel catastrophic)

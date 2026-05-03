@@ -16,7 +16,7 @@ l_signed_jaccard는 top-k 관측 색 각각의 confusion DIRECTION(CW/CCW)이
   l_fit_new = l_topk_jaccard + l_signed_jaccard + 0.2·Tikh
 
 출력:
-  results/cycle_filter_refinement/cycle9_signed_jaccard.json
+  results/cycles/cycle9_signed_jaccard.json
     - per subject/ROI: old optimum vs new optimum (β_s, β_c, l_fit)
     - HC LOO: z_set change with new loss
     - direction match fraction at old/new optimum
@@ -39,8 +39,8 @@ from step1_fit_loco_v2 import load_cvd_loco_target
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
-RES_DIR   = _PHASE2 / 'results' / 'cycle_filter_refinement'
-BIAS_CSV  = _PHASE2 / 'results' / 'loco_confusion_direction' / 'confusion_bias_summary.csv'
+RES_DIR   = _PHASE2 / 'results' / 'cycles'
+BIAS_CSV  = _PHASE2 / 'results' / 'diagnostics/loco_confusion_direction' / 'confusion_bias_summary.csv'
 OUT_JSON  = RES_DIR / 'cycle9_signed_jaccard.json'
 
 # ---------------------------------------------------------------------------

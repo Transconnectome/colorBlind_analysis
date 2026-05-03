@@ -2,13 +2,52 @@
 
 **SRQ4**: Can we fit a physiologically grounded cone-shift model to CVD fMRI data and derive a stimulus-space color correction filter?
 
-**Status**: Active (Gen-4, Machado-anchored)
-**Subjects**: Sub-08 (deutan), Sub-09 (protan), Sub-10 (normal control)
-**Data**: C010 amplitudes (6 runs x 8 colors x n_voxels) from V1, V2, hV4
+**Status**: Active (Gen-4, Machado-anchored, mw_jaccard cross-criterion winner identified 2026-05-03)
+**Subjects**: Sub-08 (deutan), Sub-09 (protan); Sub-10 excluded (CVD-HC indistinguishable)
+**Data**: C010 amplitudes (6 runs × 8 colors × n_voxels) from V1, V2, hV4
 
 ---
 
-## Current Active Configuration (2026-04-16)
+## ⭐ Current Filter Candidates (2026-05-03)
+
+Per `results/loss_inventory.md` (12+ loss variants × HC sanity check). HC sanity = empirical p of CVD norm being above HC distribution; **lower = more CVD-distinct**. ✓✓ = both CVD distinct (sub-08, sub-09 each emp_p ≤ 0.20 = at most 1/6 HC above).
+
+### Sub-08 (deutan) candidates
+
+| 후보 | (β_s, β_c) | 출처 | HC sanity |
+|---|:---:|---|---|
+| **§3 canonical** | **(38°, −14°)** | Phase A LOCO ρ argmax | behav §3 PASS (YG-C 분리), HC fit pending server |
+| V4 cycle10d | (38°, +7°) | z_combined argmin (cycle10d Variant A) | (no inventory entry — not in cycle landscape) |
+| V1+V4 avg | (19°, +3.5°) | per-ROI argmin 산술평균 | (no entry — V1 (0,0) drags) |
+| Cycle 12 cross-ROI | (68°, −38°) | α·l_topk(V4) + β·l_rank(V1) | ✓ sub-08 perfect (0/6 HC above), sub-09 marginal |
+| **Cycle 15 opt2** ✓✓ | **(68°, −38°)** | 2·mw_jaccard(V4) + 1·l_rank(V1) | **✓✓ sub-08=0.00, sub-09=0.17 (winner)** |
+| mw_jaccard alone | (58°, −36°) | mw_jaccard_loss @ V4 | ✓✓ both CVD ep_p=0.17 |
+
+→ **Sub-08 (68, −38) confirmed by 2 independent loss formulations** (Cycle 12 + Cycle 15 opt2). §3 canonical (38, −14) is the only behaviorally PASS-validated. Behavioral session in progress.
+
+### Sub-09 (protan) candidates
+
+| 후보 | (β_s, β_c) | 출처 | HC sanity |
+|---|:---:|---|---|
+| Phase A LOCO | (6°, −22°) | LOCO ρ argmax (canonical) | ✓ but marginal (sub-09 ep_p=0.50 raw spearman) |
+| Cycle 12 cross-ROI | (30°, +26°) | α·l_topk(V4) + β·l_rank(V1) | ✓ but sub-09 ep_p=0.33 (one CVD only) |
+| Cycle 14 cross-ROI RDM | (32°, +22°) | α·l_topk(V4) + β·(1-cos(ΔRDM_V1)) | ≈ Cycle 12 (V1 metric 무관) |
+| **mw_jaccard alone** ✓✓ | **(44°, +54°)** | mw_jaccard_loss @ V4 | **✓✓ ep_p=0.17 (winner)** |
+| **Cycle 15 opt2** ✓✓ | **(44°, +54°)** | 2·mw_jaccard(V4) + 1·l_rank(V1) | **✓✓ ep_p=0.17 (cross-validated)** |
+
+→ **Sub-09 (44, +54) confirmed by 2 independent loss formulations**. Phase A LOCO (6, −22) is canonical baseline; behavioral test will determine which extracts true compensation pattern.
+
+### Selection rule
+
+**Filter selection per CLAUDE.md §0**: LOCO-best descriptive fit + behavioral validation. Loss inventory (Cycle 15 mw_jaccard) provides **statistically robust candidates** (HC sanity ✓✓), but **behavioral PASS is final arbiter** (sub-08 §3 PASS for (38, −14) is the gold standard).
+
+**Visualization files for behavioral session**:
+- Sub-08: `results/figures/filter_visualization/filter_viz_sub-08_2comp.png` (canonical), `filter_visualization_phase3/phase3_sub-08_*.png` (3-way)
+- Sub-09: `filter_viz_sub-09_2comp.png` (Phase A), `filter_viz_sub-09_mwjaccard.png` (mw_jaccard winner), `filter_viz_sub-09_c8variants.png` (c8 magenta)
+
+---
+
+## Current Active Configuration (2026-04-16, updated 2026-05-03)
 
 **Three models retained. One loss active. Luminance fix is visualization-only.**
 

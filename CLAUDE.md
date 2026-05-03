@@ -17,7 +17,12 @@
 
 ## 3. CURRENT FOCUS
 
-**`future_phase2_filter_optimization/`** — 작업은 기본적으로 이 폴더를 우선 참조·수정한다. 세부 진입점과 행동 규칙은 해당 폴더의 `CLAUDE.md`를 먼저 읽는다.
+**`future_phase2_filter_optimization/`** — 작업은 기본적으로 이 폴더를 우선 참조·수정한다. 작업 시작 전 다음 두 문서를 반드시 먼저 읽는다:
+
+1. **`future_phase2_filter_optimization/CLAUDE.md`** — §0(Framework Decision), §2(Pipeline Assumptions), §3(Per-Subject Status), §8(Anti-Pattern) 순서로 확인. **specificity claim 금지, selection-rule reformulation 금지** 정책 명시됨.
+2. **`future_phase2_filter_optimization/behav_validation.md`** — model class 결정의 ground truth. sub-08 2-component PASS / R+C FAIL 결정 사례.
+
+**Filter selection rule** (전 프로젝트 공통): subject별 LOCO-best descriptive fit + behavioral validation. Specificity는 **descriptive only**, selection criterion이 아님.
 
 ## 4. Environment
 

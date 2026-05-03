@@ -1582,3 +1582,974 @@ Reasoning:
 
 
 
+---
+
+### Cycle 9 — 2026-05-03 : l_signed_jaccard fitting loss 실험 — **REJECTED**
+
+#### 9-1. 동기
+
+기존 `l_topk_jaccard(k=3)`는 top-3 취약 색 집합만 매칭하고 confusion DIRECTION(CW/CCW)은 무시한다. LOCO confusion_bias_summary.csv에서 obs_signed_bias를 추출했고(Cycle 8s 종결 후), 2-component forward model의 analytic sim_bias = β_s·cos(θ_c−90°) + β_c·cos(θ_c−θ_conf)와 부호를 비교해 방향 불일치를 패널티하는 l_signed_jaccard를 Level 1 fitting loss에 추가 테스트.
+
+```
+l_signed_jaccard = mean over top-k obs colors of max(0, -sign_obs[c]·sign_sim[c])
+                  + max(0, |sim_bias[c]| < 5°)   ← "no prediction" = mismatch
+새 fitting loss: l_topk + l_signed + 0.2·Tikh
+```
+
+#### 9-2. 구현 세부
+
+- Script: `scripts/cycle_filter_refinement/cycle9_signed_jaccard.py`
+- Output: `results/cycle_filter_refinement/cycle9_signed_jaccard.json`
+- Grid: 동일 (41×61=2501, β_s∈[0,80], β_c∈[−60,60] step 2)
+- k=3, LAM=0.2 (기존과 동일)
+- **공간 정합 수정 (Option A)**: sim_bias 계산 시 Machado perceived hues (0.0 기준 shifting) → **stimulus angles [0,45,90,135,180,225,270,315]°** 로 변경. `cycle8_preimage.py`가 stimulus angles을 사용하는 것을 확인 후 적용. obs_bias(confusion_bias_summary.csv의 pred_hue−true_hue)도 동일 공간 → 공간 정합 올바름.
+- MIN_SIM_BIAS=5°: |sim_bias|<5°는 "no prediction"으로 처리. (β_s=0, β_c=0) 점에서 sim_bias=0 → sign(0)=0 → trivial l_signed=0 방지.
+
+#### 9-3. 결과
+
+##### CVD z_set
+
+| 피험자 | ROI | z_old (l_topk+Tikh) | z_new (l_topk+l_signed+Tikh) |
+|---|---|---:|---:|
+| sub-08 | V4 | **−4.54** | −1.01 |
+| sub-08 | V1 | −0.52 | +0.41 |
+| sub-08 | V2 | +0.04 | +0.69 |
+| sub-09 | V1 | −0.52 | +0.41 |
+| sub-09 | V2 | +2.69 | +3.12 |
+| sub-09 | V4 | +0.59 | +1.09 |
+
+**모든 cell에서 z_new > z_old (CVD 검출력 저하).**
+
+##### HC LOO z_set
+
+| 피험자 | ROI | z_old | z_new | 비고 |
+|---|---|---:|---:|---|
+| sub-02 | V4 | −3.80 FP | −0.89 | FP 해소 |
+| sub-03 | V2 | −2.94 FP | +0.35 | FP 해소 |
+| sub-02 | V2 | +0.03 | **−20.82 FP** | 신규 catastrophic FP |
+| sub-05 | V1 | −0.57 | **−8.24 FP** | 신규 FP |
+| 기타 | 전반 | 음수→양수 개선 | 일부 개선 | |
+
+기존 FP 2개 해소, 신규 FP 2개 발생. sub-02 V2 z=−20.82는 catastrophic.
+
+##### 방향 매칭 (direction_match_frac)
+
+- 기존 최적점에서 HC dir_old 대부분 0.00 (β_s=0,β_c=0에서 sim_bias=0)
+- l_signed 추가 후 HC 최적점이 이동해 dir_new=0.67~1.00 (HC가 자신의 confusion direction에 맞는 parameter 찾음)
+- sub-08 V4는 (58,−28) 유지, dir_old=dir_new=0.33 (top-3 중 1개만 매칭)
+
+#### 9-4. 실패 메커니즘 분석
+
+**구조적 결함** — 단순 parameter tuning으로 해결 불가.
+
+l_signed_jaccard는 "observed confusion direction과 sim_bias 방향 일치"를 최적화한다. **HC 피험자도 LOCO confusion direction이 있다** (noise이지만). 따라서:
+
+1. HC 피험자는 자신의 noisy obs_bias에 방향이 맞는 (β_s,β_c) 점을 탐색해 l_signed→0 달성 가능
+2. Tikhonov(λ=0.2)는 moderate (β_s,β_c)에서 ~0.02–0.10에 불과해 이를 막지 못함
+3. HC pool 전체의 new_min이 낮아지면서 HC pool mean 하락 → CVD z_set 분모 감소 → 검출력 저하
+4. sub-02 V2: (0,0)→(14,−16)으로 이동, dir_new=1.00, l_signed=0 → pool 내 이상치 low값 → z=−20.82
+
+**결론**: "confusion direction 매칭"은 CVD-specific한 criterion이 아니다. HC도 random confusion direction이 있어 같은 loss structure로 exploit 가능.
+
+λ 증가, MIN_SIM_BIAS 확대, top-k 수정 등 변형도 구조적 결함을 해결하지 못한다.
+
+#### 9-5. Option A(공간 정합) 확인
+
+공간 정합 수정 자체는 올바름:
+- 수정 전(Machado perceived space [299.9°, 288.4°, ...]) → yellow에서 sim_bias 부호 반전 위험
+- 수정 후(stimulus space [90°]) → yellow(β_s=38, β_c=7): sim_bias = 38×1.0 + 7×cos(90−150°) = 38+3.5 = +41.5° (CW), obs=+88.2° → MATCH
+- 부호 정합 정확함. 그럼에도 loss 자체가 실패 → 공간 정합과 loss 설계 실패는 독립적.
+
+#### 9-6. 결정
+
+**l_signed_jaccard fitting loss REJECTED.** 기존 `l_topk_jaccard + 0.2·Tikh` selection rule 유지.
+
+사후 diagnostic 활용 가능성:
+- l_topk 최적점에서 direction_match fraction 리포트 (landscape는 바꾸지 않음)
+- sub-08 V4 기존 최적점(58,−28): dir_match=0.33 (3개 중 1개 매칭) → 생리적 일관성 근거로 약함
+- 현재로서는 단순 진단 수치로만 보존, selection rule에 편입하지 않음
+
+```
+현행 유지: z_combined = z_set(l_topk+Tikh) + z_vox-axis(family-aware)
+           sub-08: V4 single-ROI z_combined ≈ −15.02
+           sub-09: V1+V4 z_sum z_combined ≈ −5.95
+```
+
+---
+
+### Cycle 10 — 2026-05-03 : z_vox-axis 단순화 variant 비교 — **부분 성공, sub-04 본질 문제 노출**
+
+#### 10-1. 동기
+
+Cycle 8 #4 finding: sub-04 yellow z_mean=+2.21 (sub-08과 부호 반대) 이지만 현행 selection rule의 |z_rdm_row|+|z_runc| 항이 부호 무관하게 큰 양수로 합산되어 false specificity 유도. PLAN04 §8 reformulation 후보 #2를 검증.
+
+#### 10-2. 변형 정의
+
+| Variant | L_vox 공식 | 비고 |
+|---|---|---|
+| A (현행) | −(sign·z_mean + \|z_rdm_row\| + \|z_runc\|) | Cycle 7 selection rule |
+| **B** | −(sign·z_mean) | mean only, 단순화 |
+| C | −(sign·z_mean + sign·z_runc) | runc도 signed |
+
+#### 10-3. 결과: HC FP rate (V1+V4 z_combined < −2)
+
+| Variant | deutan FP | protan FP | 합계 |
+|---|---|---|---|
+| A | 1/6 (sub-04) | 2/6 (sub-02, sub-04) | 2/6 명 |
+| **B** | 2/6 (sub-01, sub-04 해소) | 2/6 (sub-02, sub-04) | 3/6 명 |
+| C | 2/6 (sub-01, sub-04 해소) | 2/6 (sub-02, sub-04) | 3/6 명 |
+
+#### 10-4. 가설 검증
+
+| 가설 | 결과 |
+|---|---|
+| H1: Variant B에서 sub-04 deutan FP 해소 | **부분 성공** — sub-04 deutan z=−4.40→+2.84 ✓ but sub-01 deutan 신규 FP z=−3.25 |
+| H2: sub-08 deutan detection 유지 | **확인** — Variant B sub-08 deutan z=−17.31 (A: −19.32와 비등) |
+| H3: sub-09 protan detection 약화 | **확인** — Variant B sub-09 protan z=−5.95 → −4.48 (약화) |
+
+#### 10-5. CVD detection (Variant 비교)
+
+| 피험자 | Family | A | **B** | C |
+|---|---|---:|---:|---:|
+| sub-08 | deutan | −19.32 | **−17.31** | −6.17 |
+| sub-08 | protan | −4.74 | −5.46 | −4.74 |
+| sub-09 | deutan | −0.17 | +0.22 | −1.27 |
+| sub-09 | protan | **−5.95** | −4.48 | −6.25 |
+
+- **sub-08 deutan**: Variant A, B 모두 강한 검출 (B가 약간 약화됨)
+- **sub-09 protan**: Variant A 가장 강함 (−5.95). B는 약화됨 (−4.48)
+- **Cross-family (sub-08 protan, sub-09 deutan)**: 모든 variant에서 sub-08 protan z≈−5 발생 (selection rule이 family-specific 하지 않음, 기존 알려진 한계)
+
+#### 10-6. 단일 색 z_mean 진단 (V4_summary.json)
+
+| 피험자 | yellow z_mean (V1/V2/V4) | magenta z_mean (V1/V2/V4) | 해석 |
+|---|---|---|---|
+| sub-08 (deutan) | −0.62 / −3.31 / **−4.45** | +1.43 / +3.50 / −1.05 | yellow 강한 음수 outlier ✓ |
+| sub-09 (protan) | +0.75 / +1.54 / +0.20 | **+3.31 / +3.83 / +2.85** | magenta 강한 양수 outlier ✓ |
+| **sub-04** | **+1.98 / +2.41 / +0.77** | **+1.83 / +2.52 / +1.67** | **yellow 양수(sub-08과 부호반대), magenta 양수(sub-09과 일치)** |
+| sub-02 | −0.79 / −2.28 / +0.75 | +0.18 / −0.16 / +0.37 | V2 yellow 음수 outlier (deutan-like) |
+| sub-01 | −1.49 / −0.78 / −0.25 | +1.29 / +1.00 / +0.37 | V1 yellow moderate 음수 (B에서 신규 FP) |
+
+#### 10-7. 핵심 발견
+
+**1. Variant B는 sub-04 deutan만 specifically 해결**: yellow z_mean 부호 반대를 명시적 부호 인식으로 처리. 단 다른 HC subject에 대한 specificity 보장은 없음 (sub-01이 새 FP).
+
+**2. sub-02 protan FP는 z_vox 변형으로 해결 불가**:
+- 모든 variant에서 sub-02 protan z=−4.39~−4.88 유지
+- 원인: z_set(V4) ≈ −3.80 (l_topk landscape outlier)가 dominant
+- z_vox 항 변경은 z_set-driven FP에 영향 없음
+
+**3. sub-04 protan FP도 모든 variant에서 지속**:
+- 원인: sub-04 magenta z_mean이 *실제로* 양수 (V1: +1.83, V2: +2.52, V4: +1.67)
+- 이는 sub-09 protan signal 방향과 일치 → "데이터 자체"가 sub-04를 protan-like로 보임
+- z_vox 단순화로 해결 못함 (z_mean 부호 자체가 protan 일치)
+
+**4. sub-04 본질적 anomaly**:
+- Yellow: 양수 (sub-08과 반대) → deutan signal 아님
+- Magenta: 양수 (sub-09과 같은 방향) → protan-like
+- yellow z_runc V1: +4.66, magenta z_runc V1: +2.93 (sub-08 V1 yellow z_runc=+4.41와 유사 magnitude)
+- → sub-04는 일반 HC outlier가 아니라 *high-signal subject* (BOLD amplitude 큼) 또는 (b) magenta-direction shift 가진 사실상 mild CVD 후보
+
+#### 10-8. 결정
+
+**현행 Variant A 유지**, Cycle 10은 다음 결론으로 마감:
+
+1. **z_vox-axis 단순화는 net 개선 없음**: HC FP가 다른 피험자로 이동만 함 (sub-04 → sub-01)
+2. **sub-04는 "데이터 outlier"로 분류**: HC pool에서 별도 처리 검토 필요 (현행은 유지)
+3. **sub-09 protan filter는 약화 risk**: 단순화 시 detection power 손실 → A 유지가 안전
+4. **추가 검증 필요 항목**:
+   - sub-04 sensitivity analysis: pool에서 sub-04 제외 시 sub-08/09 specificity 변화
+   - sub-04 행동 데이터 확인 (Phase 3 trigger 시점에)
+
+**Phase 3 권장 (최종)**:
+- sub-08 V4 single-ROI: 가장 robust (sub-04 영향 적음, V4에서 sub-04 yellow z=+0.77로 weak)
+- sub-09 V1+V4: sub-04 V1 magenta=+1.83 vs sub-09 V1 magenta=+3.31 — magnitude 차이 1.5σ 정도, **bootstrap CI overlap 검증 필수**
+
+---
+
+### Cycle 10b — 2026-05-03 : sub-04 제외 sensitivity (Variant A)
+
+#### 10b-1. 동기
+
+Cycle 10에서 sub-04가 yellow/magenta 양쪽에서 anomalous 발견. sub-04를 HC pool에서 제외하면 selection rule이 어떻게 변하는가? CVD detection 강화 vs HC pool variance 변화 trade-off 정량화.
+
+#### 10b-2. CVD detection (V1+V4 z_combined)
+
+| 피험자 | Family | Pool n=6 (full) | Pool n=5 (no sub-04) | Δ |
+|---|---|---:|---:|---:|
+| sub-08 | deutan | −19.32 | **−21.96** | **−2.64** (강화) |
+| sub-08 | protan | −4.74 | −5.24 | −0.50 |
+| sub-09 | deutan | −0.17 | −0.08 | +0.09 (변화 없음) |
+| sub-09 | protan | −5.95 | **−8.62** | **−2.67** (강화) |
+
+→ sub-04 제외 시 sub-08 deutan, sub-09 protan 모두 detection 강화. sub-09는 fragile 했던 z=−5.95에서 z=−8.62로 robust 영역 진입.
+
+#### 10b-3. HC LOO FP (V1+V4 z_combined < −2)
+
+| 피험자 | Family | Pool n=5 (full LOO) | Pool n=4 (no sub-04 LOO) | 변화 |
+|---|---|---:|---:|---|
+| sub-01 | deutan | −1.87 | **−3.61** | 신규 FP |
+| sub-01 | protan | −0.68 | **−2.97** | 신규 FP |
+| sub-02 | protan | **−4.39 FP** | **−5.56 FP** | FP 유지/악화 |
+| sub-03 | both | pass | pass | 변화 없음 |
+| sub-05 | both | pass | pass | 변화 없음 |
+| sub-06 | both | pass | pass | 변화 없음 |
+
+→ sub-04 제외하면 sub-01이 신규 FP로 진입. sub-02 protan FP는 그대로 유지. **net FP 수: 2/6 → 3/6 (악화)**.
+
+#### 10b-4. Pool variance 변화
+
+| ROI | Metric | n=6 (full) | n=5 (no sub-04) | SD ratio |
+|---|---|---|---|---:|
+| V1 | L_vox[deutan] SD | 1.13 | 0.60 | 0.53 |
+| V1 | L_vox[protan] SD | 2.28 | 1.48 | 0.65 |
+| V2 | L_vox[deutan] SD | 0.71 | 0.69 | 0.97 |
+| V2 | L_vox[protan] SD | 0.96 | 0.68 | 0.71 |
+| V4 | L_vox[deutan] SD | 0.64 | 0.71 | 1.10 |
+| V4 | L_vox[protan] SD | 1.57 | 1.53 | 0.97 |
+
+→ V1 L_vox SD가 sub-04 제외 시 dramatic 감소 (deutan 절반 수준). 즉 sub-04 자체가 V1 pool variance의 큰 source. z-score 민감도 증가 → CVD 분리 강화 + HC marginal subjects의 FP 진입.
+
+#### 10b-5. 핵심 발견
+
+**sub-04 제외는 trade-off, net 개선 아님:**
+- CVD detection 강화 (sub-08 deutan, sub-09 protan 모두) ✓
+- HC FP rate 악화 (2/6 → 3/6) ✗
+- 원인: pool SD 감소가 z-score 분포 전체를 sharpen → CVD outlier 강화 + HC outlier도 강화
+
+**Fundamental data limit 확인**: n=6 HC pool은 너무 작아 robust selection rule 어려움. sub-04는 가장 큰 noise source이지만, 제외해도 sub-01 등 다른 high-variance subject가 노출됨.
+
+**Phase 3 implications**:
+- sub-08 deutan filter: 모든 pool 구성에서 z<−15 robust → 안전
+- sub-09 protan filter: full pool z=−5.95 (marginal), no-sub04 pool z=−8.62 (강함). bootstrap CI 검증 필수
+- HC specificity claim은 conservative하게: "z_combined < −5" threshold, 또는 effect-size 기반 reporting
+
+#### 10b-6. 결정 — Phase 2 selection rule 작업 종결
+
+1. **현행 selection rule (Variant A) 유지**, sub-04 제외 옵션은 sensitivity report로만 활용 (primary는 full pool)
+2. **Cycle 9 (l_signed) REJECTED**, **Cycle 10 (단순화) net 개선 없음**, **Cycle 10b (sub-04 제외) trade-off** — 이 세 cycle로 reformulation 옵션 모두 탐색 종료
+3. **다음 단계**: Phase 3 (behavioral validation)로 진행. neural-level specificity는 fundamental data limit이며, 행동 검증이 inverse filter 효과의 결정적 증거
+
+```
+Phase 3 trigger 상태:
+- sub-08 V4 filter (β_s=38, β_c=7): 가장 robust, 모든 sensitivity test 통과
+- sub-09 V1+V4 filter (β_s=30.5, β_c=12): full pool에서 marginal but no-sub04 pool에서 robust
+- HC sanity check: sub-10 z>0 유지 (already validated)
+```
+
+---
+
+### Cycle 10c — 2026-05-03 : Server bootstrap (n=200) + threshold envelope
+
+#### 10c-1. Server bootstrap 도착 (Jobs 98931, 98945)
+
+`results/cycle_filter_refinement/cycle8_voxel_bootstrap_server/` 12개 파일 (sub-02/04/08/09 × V1/V2/V4) 도착. n_boot=200, family-aware.
+
+**저장된 CI95의 정의** (중요):
+- `bootstrap_summary.L_vox.ci95` = **L_vox** (raw loss term: −(sign·z_mean + |z_rdm_row| + |z_runc|)) **의 voxel-resampling bootstrap CI95**
+- HC pool (n=6, sub-07 제외)는 fixed — bootstrap iteration마다 변하지 않음
+- 즉 "이 subject의 voxel 구성에 대한 L_vox 안정성"
+- **z_combined CI ≠ L_vox CI**: z_combined = z_set (point) + z_vox = z_set + (L_vox − μ_pool)/σ_pool. z_set은 bootstrap되지 않은 점추정.
+
+#### 10c-2. V4-only L_vox CI95
+
+| 피험자 | Family | Point | CI95 | 비고 |
+|---|---|---:|---|---|
+| **sub-09 V4** | protan | −7.15 | **[−14.66, −6.73]** | CVD signal |
+| **sub-04 V4** | deutan | −1.44 | **[−7.49, −0.46]** | HC LOO (FP risk) |
+| sub-08 V4 | deutan | −18.19 | [−58.86, −15.81] | CVD strong |
+| sub-02 V4 | protan | −2.10 | [−8.22, −1.30] | HC FP candidate |
+
+**Overlap region (sub-09 V4 protan vs sub-04 V4 deutan)**: [−7.49, −6.73] = 1 단위 (CI 폭 5~8 단위 대비 미미). **V4-only는 effectively disjoint** ✓.
+
+PLAN04 §5 local n=100 결과 ([-15.15, -6.75] vs [-5.38, -0.46]) 와 일치 — server n=200으로 robust 확인.
+
+#### 10c-3. V1+V4 합산의 instability
+
+| 피험자 | Family | V1 CI95 | V1+V4 point | V1+V4 ~std |
+|---|---|---|---:|---:|
+| sub-08 | deutan | [−16.81, −5.21] | −24.15 | 17 |
+| sub-09 | protan | [−25.92, −7.68] | −15.92 | 8 |
+| **sub-04** | deutan | **[−84.54, −3.98]** | **−5.42** | **110** |
+| sub-02 | protan | [−6.22, −0.48] | −3.65 | 4 |
+
+**핵심**: sub-04 V1 distribution은 heavy-tailed (lower bound −84.54). V1+V4 sum의 std ~110 → CI 사실상 무의미. sub-04 V1 instability가 V1+V4 selection rule의 reliability를 결정적으로 약화.
+
+→ **sub-09 protan filter는 V1+V4 sum이 아니라 V4-only로 사용하는 것이 더 안전** (CI overlap 명확히 작음). 단 V4-only sub-09 z=−2.85 (Cycle 7) — V1+V4 −5.95보다 weak. **Trade-off: stability vs strength**.
+
+#### 10c-4. Threshold envelope (z<−2 vs z<−6)
+
+§8 옵션 B 검토 — z_combined threshold 보수화 효과:
+
+| 피험자 | z_combined | z<−2 (현행) | z<−6 (보수) |
+|---|---:|---|---|
+| sub-08 deutan | −19.32 | detect | detect ✓ |
+| sub-09 protan | −5.95 | detect | **MISS** (marginal) |
+| sub-04 protan (HC FP) | −5.09 | FP | pass ✓ |
+| sub-02 protan (HC FP) | −4.39 | FP | pass ✓ |
+| sub-04 deutan (HC FP) | −4.40 | FP | pass ✓ |
+
+→ z<−6 threshold 적용 시:
+- HC FP 모두 해소 (3개 → 0개) ✓
+- sub-08 robust 유지 ✓
+- **sub-09 sacrifice** (always sits in marginal band)
+
+**Phase 3 framing 함의**:
+- "sub-08은 어떤 reasonable threshold에서도 robust"
+- "sub-09는 항상 marginal band [−6, −2] 에 위치 → behavioral validation에서 specific filter effect 입증 필요"
+
+#### 10c-5. 최종 상태 — Phase 2 종결
+
+**완료 cycles** (1~10c):
+- Cycle 1~8: selection rule 도출 (Variant A 확정)
+- Cycle 9: l_signed_jaccard fitting loss REJECTED (구조적 결함)
+- Cycle 10: z_vox 단순화 NET 개선 없음 (FP 다른 HC로 이동)
+- Cycle 10b: sub-04 제외 trade-off (CVD 강화 + HC FP 악화)
+- Cycle 10c: server bootstrap CI + threshold envelope 종합
+
+**미완 (untouched, low priority)**:
+- 부호 mismatch penalty (term 제거가 아닌 가중치 조정) — Cycle 10에서 단순 제거 시도했고 net 개선 없었음. 정교한 가중치 조정 가능하나 동일 한계 예상
+- sub-08 V1 origin Tikhonov sweep (§8 #3) — sub-08 V1은 이미 V4 single-ROI보다 약함, 부차
+
+**Phase 3 trigger 최종**:
+| 시나리오 | 권장 cell | confidence | 근거 |
+|---|---|---|---|
+| sub-08 deutan filter | V4 single-ROI (β_s=38, β_c=7) | **HIGH** | 모든 sensitivity test 통과, server CI [-58, -15] 압도적, threshold 보수화에서도 robust |
+| sub-08 deutan filter (강화) | V1+V4 (β_s 평균값) | high | 단 V1 contribution은 sub-04 V1 unstable과 비교 시 신중 |
+| sub-09 protan filter | **V4 single-ROI** (β_s=0, β_c=−24) | moderate | V4-only CI sub-04와 effectively disjoint. weaker than V1+V4 (z=−2.85 vs −5.95) but more reliable |
+| HC verification | sub-10 z>0 유지 | high | Cycle 1~7 일관 통과 |
+
+**Cycle 6s perfect set-match** (sub-09 V2): exploratory only, β_s grid 모서리.
+
+---
+
+### Cycle 10d — 2026-05-03 : 정확한 z_combined CI (CI 정의 수정 후 재계산)
+
+#### 10d-1. 동기
+
+Cycle 10c에서 보여준 L_vox CI overlap은 z_combined CI overlap과 다르다. z_set 점추정을 추가하고 pool stats로 정규화하여 정확한 z_combined CI 계산. HC pool stats는 cycle 10b 결과 사용.
+
+#### 10d-2. 변환식
+
+```
+z_vox CI95 = (L_vox CI95 − μ_pool) / σ_pool
+z_combined CI95 = z_set (point) + z_vox CI95
+```
+
+Pool stats (full HC n=6, from cycle10b):
+- V1 deutan: μ=−2.28, σ=1.13 ; V1 protan: μ=−2.19, σ=2.28
+- V2 deutan: μ=−2.03, σ=0.71 ; V2 protan: μ=−2.27, σ=0.96
+- V4 deutan: μ=−1.06, σ=0.64 ; V4 protan: μ=−1.29, σ=1.57
+
+#### 10d-3. z_combined CI 결과
+
+| 피험자 | ROI | family | z_combo point | **z_combined CI95** |
+|---|---|---|---:|---|
+| sub-08 | V4 | deutan | −31.30 | **[−94.85, −27.58]** |
+| sub-04 | V4 | deutan | −0.80 | [−10.25, +0.73] |
+| sub-09 | V4 | protan | −3.14 | [−7.92, −2.87] |
+| sub-02 | V4 | protan | −4.32 | [−8.22, −3.81] |
+| sub-08 | V1 | deutan | −3.77 | [−13.37, −3.11] |
+| sub-04 | V1 | deutan | −2.08 | **[−73.37, −2.08]** (heavy tail) |
+| sub-09 | V1 | protan | −3.41 | [−10.93, −2.93] |
+| sub-02 | V1 | protan | −0.29 | [−2.34, +0.18] |
+
+#### 10d-4. Same-family CVD vs HC overlap (정확한 z_combined)
+
+| Cell | CVD CI | HC CI | overlap | 판정 |
+|---|---|---|---:|---|
+| **V4 deutan**: sub-08 vs sub-04 | [−94.85, −27.58] | [−10.25, +0.73] | **0** | ✓ DISJOINT (gap 17 units) |
+| V4 protan: sub-09 vs sub-02 | [−7.92, −2.87] | [−8.22, −3.81] | **4.11** | ✗ FULL OVERLAP |
+| V1 deutan: sub-08 vs sub-04 | [−13.37, −3.11] | [−73.37, −2.08] | **10.26** | ✗ MASSIVE (sub-04 V1 heavy tail) |
+| **V1 protan**: sub-09 vs sub-02 | [−10.93, −2.93] | [−2.34, +0.18] | **0** | ✓ DISJOINT |
+| V1+V4 deutan (sum) | [−108, −31] | [−84, −1] | **53** | ✗ MASSIVE |
+| V1+V4 protan (sum) | [−19, −6] | [−11, −4] | **5** | ✗ overlap (4.75 units) |
+
+#### 10d-5. 핵심 finding — 이전 권장의 결정적 수정
+
+**이전 권장(Cycle 10c)**: sub-09 protan → V1+V4 (P=0.97 separation). 이는 **L_vox만 비교한 결과로 잘못된 결론**.
+
+**정확한 z_combined CI 계산 결과**:
+1. **sub-08 V4 deutan만 진정한 robust separation** (gap 17 units, no overlap)
+2. **sub-09 V1 protan은 disjoint** (sub-02 V1 protan은 거의 0에 머물러 분리됨)
+3. **sub-09 V4 protan은 sub-02 V4 protan과 FULL overlap** (4.11 units, sub-02 V4 z_set=−3.80 dominant)
+4. **sub-09 V1+V4 sum도 overlap 존재** (5 units) — 이전 P=0.97 분석은 z_set 고려 안 함
+5. **sub-08 V1 deutan**, **V1+V4 deutan**: sub-04 V1 heavy tail (CI [-84, -2])로 massive overlap
+
+#### 10d-6. 수정된 Phase 3 권장
+
+**진짜 robust한 cell은 두 개뿐**:
+
+| 시나리오 | 권장 cell | z_combined CI95 | confidence |
+|---|---|---|---|
+| **sub-08 deutan filter** | **V4 single-ROI** (β_s=38, β_c=7) | [−94.85, −27.58] vs HC [−10.25, +0.73] | **HIGH** |
+| **sub-09 protan filter** | **V1 single-ROI** (필터 파라미터 별도 추출 필요) | [−10.93, −2.93] vs HC [−2.34, +0.18] | moderate |
+
+**중요 caveat — sub-09 V1 filter parameters**:
+- Cycle 8 preimage JSON 확인: sub-09 V1 bs_med=0, bc_med=0 → **degenerate** (null filter)
+- 즉 V1 specificity는 통계적으로 robust하지만, V1 단독 forward model fit은 trivial solution
+- 이는 **specificity ≠ filter 추정 가능성**의 결정적 한계
+- sub-09 protan filter로는 V1+V4 avg (β_s=30.5, β_c=12) 또는 V4-only (β_s=0, β_c=−24) 사용 — 단 선택된 cell은 specificity overlap
+
+**최종 솔직한 평가**:
+- **sub-08 V4 filter는 행동 검증 가능** (specificity robust + filter parameters 명확 + pre-image exact)
+- **sub-09 protan filter는 fundamental gap 존재**: V1은 specificity robust but parameter degenerate, V4/V1+V4는 parameter 명확하지만 specificity overlap. 두 조건 모두 만족하는 cell 없음.
+- → sub-09는 Phase 3에서 **exploratory analysis only**, primary endpoint로 사용 불가
+
+---
+
+### Cycle 10e — 2026-05-03 : HC group distribution 비교 (개별 HC가 아닌 분포 기반)
+
+#### 10e-1. 동기
+
+이전 Cycle 10d 비교는 worst-case HC (sub-04, sub-02)를 picking하여 CVD와 비교했다. 옳은 framing은 **HC LOO 분포 전체 (n=6)** 의 mean ± SD/range vs CVD point + bootstrap CI. HC mean 기준 specificity 재평가.
+
+#### 10e-2. HC LOO z_combined 분포 (n=6)
+
+전체 transparency를 위해 각 HC LOO 값:
+
+```
+deutan family:
+  V4:    sub-01=-1.57, sub-02=-1.10, sub-03=+0.23, sub-04=+0.23, sub-05=+1.07, sub-06=-0.20
+  V1:    sub-01=-0.30, sub-02=+0.53, sub-03=-0.18, sub-04=-4.63, sub-05=+0.38, sub-06=+8.92
+  V1+V4: sub-01=-1.87, sub-02=-0.57, sub-03=+0.05, sub-04=-4.40, sub-05=+1.46, sub-06=+8.71
+
+protan family:
+  V4:    sub-01=-0.14, sub-02=-3.98, sub-03=+0.83, sub-04=-1.43, sub-05=+1.13, sub-06=+4.49
+  V1:    sub-01=-0.54, sub-02=-0.41, sub-03=+0.36, sub-04=-3.65, sub-05=+0.85, sub-06=+9.03
+  V1+V4: sub-01=-0.68, sub-02=-4.39, sub-03=+1.18, sub-04=-5.09, sub-05=+1.98, sub-06=+13.52
+```
+
+HC SD가 V1, V1+V4에서 매우 큼 (sub-06이 +8 ~ +13의 강한 양수 outlier). sub-04, sub-02가 음수 outlier. 분포 자체가 매우 broad.
+
+#### 10e-3. CVD vs HC distribution 정확한 비교
+
+| Cell | HC mean ± SD | HC range | CVD point | CVD CI95 | 판정 |
+|---|---|---|---:|---|---|
+| **sub-08 deutan V4** | -0.22 ± 0.97 | [-1.57, +1.07] | **-31.30** | [-94.85, -27.58] | ✓ outside HC range, CI disjoint |
+| sub-08 deutan V1 | +0.79 ± 4.42 | [-4.63, +8.92] | -3.77 | [-13.37, -3.11] | within HC range (sub-04 -4.63 더 음수) |
+| **sub-08 deutan V1+V4** | +0.56 ± 4.46 | [-4.40, +8.71] | **-35.08** | [-108, -31] | ✓ outside HC range, CI disjoint (sub-04 -4.40보다 8× 강함) |
+| **sub-09 protan V4** | +0.15 ± 2.83 | [-3.98, +4.49] | -3.14 | [-7.92, -2.87] | ✗ within HC range (**sub-02 -3.98이 sub-09 -3.14보다 더 음수**) |
+| sub-09 protan V1 | +0.94 ± 4.26 | [-3.65, +9.03] | -3.41 | [-10.93, -2.93] | within HC range |
+| sub-09 protan V1+V4 | +1.09 ± 6.73 | [-5.09, +13.52] | **-6.54** | [-18.85, -5.80] | sub-04 -5.09보다 약간 더 음수, but within HC SD |
+
+#### 10e-4. 결정적 finding
+
+**sub-09 V4-only specificity 무효 — sub-02가 sub-09보다 더 extreme**:
+- sub-09 V4 protan: -3.14
+- sub-02 V4 protan: **-3.98** (HC, 더 음수)
+- → V4-only로 sub-09를 specifically identify할 수 없음
+
+**sub-08 deutan은 robust 유지 (V4-only, V1+V4 모두)**:
+- V4-only z_combined CI [-94.85, -27.58] 대 HC range [-1.57, +1.07] → 27 unit gap
+- V1+V4 z_combined CI [-108, -31] 대 HC range [-4.40, +8.71] → 27 unit gap
+
+**sub-09 protan은 V1+V4에서만 marginal**:
+- z_combined -6.54 vs HC range max -5.09 (sub-04)
+- 1.45 unit difference, within HC SD 6.73
+- → "sub-04보다 1.5σ 미만 더 negative" — weak specificity claim
+
+#### 10e-5. 수정된 Phase 3 trigger (Cycle 10e 정식)
+
+| 시나리오 | 권장 cell | HC distribution 비교 | confidence |
+|---|---|---|---|
+| **sub-08 deutan filter (primary)** | V4-only (β_s=38, β_c=7) | CVD 27 unit below HC max | **HIGH** |
+| **sub-08 deutan filter (강화)** | V1+V4 (β_s=19, β_c=3.5) | CVD 27 unit below HC max | high (V1 fit degenerate caveat) |
+| sub-09 protan filter (exploratory) | V1+V4 (β_s=30.5, β_c=12) | CVD 1.5 unit below HC max, within SD | **EXPLORATORY** |
+| sub-09 protan V4-only | β_s=0, β_c=2 (near-trivial) | CVD within HC range, sub-02 더 extreme | **NOT recommended** |
+| HC verification | sub-10 z>0 | — | high |
+
+#### 10e-6. Phase 3 candidate 시각화 산출
+
+`results/figures/filter_visualization_phase3/` 4 figures:
+- `phase3_sub-08_V4only.png` (β_s=38, β_c=7) — primary filter
+- `phase3_sub-08_V1_V4avg.png` (β_s=19, β_c=3.5) — V1 degenerate 평균 효과
+- `phase3_sub-09_V4only.png` (β_s=0, β_c=2) — near-null filter (참고용)
+- `phase3_sub-09_V1_V4avg.png` (β_s=30.5, β_c=12) — exploratory filter
+
+각 figure: 4-column (Original / CVD perceives / Filtered / CVD(Filtered)) × 3 tier (8-stim ring / confusion anchors / sRGB primaries).
+
+생성 스크립트: `scripts/visualize_phase3_preimage.py`
+
+---
+
+### Cycle 10f — Per-term cross-ROI selection rule (UNTESTED, future candidate)
+
+#### 10f-1. 동기 (사용자 제기)
+
+현재 selection rule은:
+```
+z_combined(V1+V4) = z_set(V1) + z_set(V4) + z_vox(V1) + z_vox(V4)
+```
+즉 **각 ROI에서 같은 loss term을 계산하고 sum**. 단일 ROI per term 가정.
+
+**검증되지 않은 변형**: 각 loss term을 **다른 ROI에서** 추출
+```
+z_combined_cross = z_set(R_a) + z_vox(R_b)
+예: z_set(V4) + z_vox(V1)  — set match는 V4, voxel pattern은 V1
+```
+
+#### 10f-2. 가설 근거
+
+Cycle 6 voxel diagnostic 결과:
+- **V4**: l_topk_jaccard 강함 (sub-08 V4 z_set=-4.54, sub-09 V4 z_set=+0.59)
+- **V1**: voxel-pattern signal 강함 (sub-09 V1 voxel z=-3.18, V1 magenta z_mean +3.31)
+- **V2**: noisy, 양쪽 모두 weak
+
+이론적으로:
+- z_set(V4): hub-level set 매칭 (forward 모델 fit gold)
+- z_vox(V1): early-level voxel pattern (high voxel count, fine structure)
+- 두 ROI의 strength 결합 → cleaner specificity 가능?
+
+#### 10f-3. 우려 (untested 이유)
+
+1. **Multiple comparison explosion**: 3 ROI × 2 term × 2 family = 12 cells. multiple testing burden 큼
+2. **Theoretical basis 약함**: forward 모델은 특정 ROI 가정 — V4 set과 V1 voxel을 이질적으로 결합하는 mechanistic 정당화 불명확
+3. **Cycle 1~10에서 시도 안 됨**: ROI는 항상 단일 또는 z_sum 결합으로만 처리 (cycle1_NxM, cycle7_dual_criterion 모두 same-ROI per term)
+
+#### 10f-4. 잠재적 후속 cycle
+
+테스트한다면:
+- **z_set(V4) + z_vox(V1) for sub-09 deutan/protan**: V4 set이 약하고 V1 voxel이 강한 sub-09에 가장 적합 가능
+- **z_set(V4) + z_vox(V4) for sub-08**: 이미 robust → 대조용
+- HC LOO FP 평가: cross-ROI 결합이 same-ROI보다 specificity 강한지 검증
+- bootstrap CI: cross-ROI 결합의 stability
+
+**현재 status**: Phase 3 trigger 시점에 추가 분석으로 후순위. sub-08은 충분히 robust, sub-09 marginal status는 cross-ROI로 해결될지 불확실.
+
+---
+
+### Cycle 11 — 2026-05-03 : Per-term cross-ROI 실험 — **sub-09 specificity 회복 발견**
+
+#### 11-1. 실행
+
+9 (R_set, R_vox) pairs × 2 family × (CVD + HC LOO) 평가. Selection rule:
+```
+z_combined_cross(R_set, R_vox, family) = z_set(R_set) + z_vox-axis(R_vox, c_family)
+```
+
+스크립트: `scripts/cycle_filter_refinement/cycle11_per_term_cross_roi.py`
+결과: `results/cycle_filter_refinement/cycle11_per_term_cross_roi.json`
+
+#### 11-2. HC FP rate per pair (n=6)
+
+| R_set\R_vox | V1 | V2 | V4 |
+|---|:-:|:-:|:-:|
+| V1 | 1d/1p | 0d/1p | **1d/0p** |
+| V2 | 2d/2p | 0d/2p | 2d/1p |
+| V4 | 2d/2p | 1d/2p | **0d/1p** |
+
+(d=deutan FP, p=protan FP, /6, threshold z<-2)
+
+#### 11-3. CVD detection vs same-ROI baseline
+
+| 피험자 | family | Best pair | z_combined | HC FP | vs same-ROI baseline |
+|---|---|---|---:|---|---|
+| sub-08 | deutan | V4\|V4 (same) | −15.02 | 0/6 | baseline = best |
+| **sub-09** | protan | **V1\|V4 (cross)** | **−3.37** | **0/6** | **개선** vs V4\|V4 (z=−2.26, FP=1/6) |
+
+**메커니즘 확인 — sub-04가 cross-ROI에서 FP 안 됨**:
+- V1+V4 sum (기존 rule): sub-04 protan z=−5.09 (FP)
+- V1|V4 cross-ROI: sub-04 protan z=**−1.57** (PASS)
+- 원인: sub-04 V1 z_set 작음 + V4 z_vox 보통 → 합산이 V1+V4 sum의 4배 누적보다 약함
+
+#### 11-4. sub-09 V1|V4 cross-ROI 정확한 z_combined CI
+
+```
+z_combined = z_set(V1) [point] + z_vox(V4, magenta) [bootstrap CI]
+sub-09 V1|V4: pt = -4.25, CI95 = [-9.03, -3.99]
+HC LOO V1|V4 distribution (n=6):
+  sub-01: -0.62, sub-02: -0.73, sub-03: -0.42, sub-04: -1.57, sub-05: -0.71, sub-06: +10.71
+  mean +1.11 ± 4.72, range [-1.57, +10.71]
+Gap: sub-09 CI upper -3.99 < HC max -1.57 → 2.42 unit gap, CI 완전 disjoint ✓
+```
+
+**대조 — same-ROI V1+V4 sum에서는 marginal**:
+- sub-09 V1+V4 sum: pt -6.54, CI [-18.85, -5.80]
+- sub-04 V1+V4 sum: -5.09 (FP)
+- gap 0.71 unit (CVD CI top -5.80 vs HC max -5.09)
+
+→ Cross-ROI는 sub-09 specificity를 marginal에서 robust로 변환.
+
+#### 11-5. Caveat — Anti-sycophancy 점검
+
+1. **Multiple comparison**: 9 pairs × 2 family = 18 tests. Bonferroni α=0.05/18=0.0028. sub-09 V1|V4 z=-4.25 → p≈0.00001 (Gaussian) → post-Bonferroni 통과. 그러나 selection bias 명시 필수.
+2. **n=6 LOO FP=0/6**: Wilson 95% CI = [0%, 39%]. "FP rate 0"은 sample 우연 가능성.
+3. **Mechanistic justification (post-hoc)**:
+   - z_set(V1): sub-09 V1 forward fit 강함 (β_s=61, β_c=22, IQR moderate)
+   - z_vox(V4): sub-09 V4 voxel signal (cycle 7 V4 voxel z=-2.85)
+   - 두 ROI가 다른 evidence type 제공 (set match vs voxel pattern) → 결합이 noise correlation 감소
+4. **Bootstrap CI 검증 필요 (server data 부분)**: sub-09 V4 bootstrap 사용 가능. sub-09 V1 z_set은 point estimate만.
+
+#### 11-6. 수정된 Phase 3 권장 (Cycle 11 반영)
+
+| 시나리오 | 권장 cell | confidence | 근거 |
+|---|---|---|---|
+| **sub-08 deutan filter** | V4\|V4 same-ROI (β_s=38, β_c=7) | **HIGH** | 모든 framework에서 robust, gap 27 units |
+| **sub-09 protan filter** | **V1\|V4 cross-ROI** (filter param: V1+V4 avg β_s=30.5, β_c=12) | **moderate-to-good** | **Cross-ROI에서 specificity 회복** (CI disjoint, FP=0/6, Bonferroni 통과) |
+| sub-09 protan (대안) | V4\|V4 same-ROI (β_s=0, β_c=2) | weak | filter near-trivial, specificity within HC range |
+| HC verification | sub-10 z>0 | high | — |
+
+**중요한 framing 변경**:
+- 이전 (Cycle 10d): "sub-09는 fundamental gap, exploratory only"
+- 현재 (Cycle 11): "sub-09는 same-ROI에서 marginal but **cross-ROI rule에서 robust** specificity 회복"
+- → Phase 3에서 sub-09도 primary endpoint 후보 (filter parameters는 V1+V4 avg 사용, specificity는 cross-ROI rule로 보고)
+
+#### 11-7. 결정
+
+**Phase 2 selection rule 재정의**:
+```
+Selection rule (Cycle 11 cross-ROI version):
+  sub-08 deutan: z_combined = z_set(V4) + z_vox-axis(V4, yellow, sign=-1)
+  sub-09 protan: z_combined = z_set(V1) + z_vox-axis(V4, magenta, sign=+1)
+  필터 파라미터: 각각 forward 모델 fit best ROI 사용
+    sub-08: V4 forward fit (β_s=38, β_c=7)
+    sub-09: V1+V4 avg forward fit (β_s=30.5, β_c=12) — V1 단독은 β=61 stronger but degenerate IQR
+```
+
+Sub-09는 selection rule(V1|V4 cross)과 filter parameters(V1+V4 avg) 가 다른 ROI mix → manuscript framing에서 명시 필요.
+
+---
+
+### Cycle 11b — 2026-05-03 : Cross-ROI 이론적 정당성 검증 — **V1|V4 권장 철회**
+
+#### 11b-1. 사용자 제기 정당한 비판
+
+Cycle 11에서 sub-09 V1|V4 cross-ROI를 best로 선정한 것은 **9 pairs × 2 family = 18 tests에서 결과 보고 골랐음** → post-hoc selection bias.
+
+Specificity는 evaluation metric이므로 결과 보고 rule 변경 안 됨. 이론적 *a priori* 근거 필요.
+
+#### 11b-2. 이론적 framework (사용자 example)
+
+기존 분석으로부터:
+- **LOCO 강함 → V4** (forward 모델 gate, hV4 perm p=0.044, 2-comp p=0.004)
+- **RDM/SRM 강함 → V1, V2** (sub-09 V1 SRM p=0.007, sub-09 V1 xnobis p=0.007)
+
+z_set는 **LOCO-derived** (l_topk_jaccard from forward 모델 simulator vs LOCO observed) → R_set = V4
+z_vox-axis는 **RDM/pattern-derived** (|z_rdm_row|, z_mean amplitude, z_runc 포함) → R_vox = V1
+
+→ **이론적 cross-ROI = V4|V1** (z_set from V4, z_vox from V1)
+
+#### 11b-3. 이론 vs 경험 직접 대조
+
+| 피험자 | 이론적 V4\|V1 | 경험적 best V1\|V4 | Same-ROI V4\|V4 | 결론 |
+|---|---|---|---|---|
+| sub-08 deutan | z=−8.32, FP=**2/6** (sub-02, sub-04) | z=−11.00, FP=1/6 (sub-01) | z=−15.02, FP=**0/6** | V4\|V4 best (이론·경험 무관) |
+| sub-09 protan | z=−2.59, FP=**2/6** (sub-02, sub-04) | z=−3.37, FP=**0/6** | z=−2.26, FP=1/6 (sub-02) | **이론은 same-ROI보다 더 나쁨** |
+
+#### 11b-4. 결정적 finding
+
+**이론적 cross-ROI (V4|V1)는 sub-09 specificity 회복에 실패** (FP 2/6, same-ROI보다 악화).
+
+**경험적 best (V1|V4)는 이론과 정확히 반대** — z_set V1, z_vox V4 — post-hoc fishing.
+
+→ **Cycle 11 sub-09 V1|V4 cross-ROI primary 권장 철회**.
+
+#### 11b-5. 정정된 Phase 3 권장 (post-Cycle 11b)
+
+| 시나리오 | Selection rule | Filter parameters | confidence | 근거 |
+|---|---|---|---|---|
+| sub-08 deutan | **V4\|V4 same-ROI** | V4 (β_s=38, β_c=7) | **HIGH** | 모든 framework에서 robust, 이론적으로도 V4 LOCO 강함 |
+| sub-09 protan | **V4\|V4 same-ROI (revert)** | V1+V4 avg (β_s=30.5, β_c=12) | **EXPLORATORY** | marginal but principled (same-ROI rule, no post-hoc) |
+| sub-09 protan (alt) | V1\|V4 cross-ROI | V1+V4 avg | **post-hoc only** | manuscript에서 "exploratory, requires Phase 3 validation" 명시 |
+| HC verification | sub-10 z>0 | — | high | — |
+
+#### 11b-6. 데이터 저장 (재계산 방지)
+
+`scripts/cycle_filter_refinement/consolidate_results.py` 실행:
+- `results/cycle_filter_refinement/consolidated_phase2_results.csv` (48 rows: subject × ROI × family)
+- `results/cycle_filter_refinement/consolidated_cross_roi.csv` (144 rows: subject × family × R_set × R_vox)
+- `results/cycle_filter_refinement/consolidated_phase2_results.json` (구조화 JSON)
+
+이후 분석은 이 파일들에서 직접 로드 — JSON re-parsing 불필요.
+
+---
+
+### Cycle 11c — 2026-05-03 : Loss에 cross-ROI 적용 가능성 (사용자 제안)
+
+#### 11c-1. 동기
+
+사용자 제안: "각각 CVD가 유의미하게 달랐던 지표 이용해서" loss에 cross-ROI 적용.
+
+현재 구조:
+- **Loss (filter parameter fitting)**: per-ROI 단독, l_topk_jaccard(R, β_s, β_c) + 0.2·Tikh의 (β_s, β_c) 최솟값
+- **Specificity**: post-hoc, z_combined = z_set + z_vox
+
+cross-ROI loss가 가능한가?
+
+#### 11c-2. 기술적 제약
+
+**z_vox-axis는 (β_s, β_c)에 의존하지 않음**:
+- z_vox = -(sign·z_mean + |z_rdm_row| + |z_runc|) — 모두 *관찰된* CVD voxel 데이터에서 계산
+- forward 모델 시뮬레이션과 무관 → loss landscape에 활용 불가
+
+**Loss landscape에 들어갈 수 있는 (β_s, β_c)-dependent 항**:
+- l_topk_jaccard(R, β_s, β_c) — set match (LOCO predictions vs simulator)
+- l_rank(R, β_s, β_c) = 1 − Spearman(vuln_sim, vuln_cvd) (Cycle 1 L3)
+- l_dir(R, β_s, β_c) = 1 − Pearson (Cycle 1 L4)
+- xnobis_cosine(R, β_s, β_c) — RDM-based, 사용 가능
+- l_rdm(R, β_s, β_c) — Cycle 1에서 사용
+
+#### 11c-3. 제안 가능한 cross-ROI loss 형태
+
+```
+L_cross(β_s, β_c) = α · l_topk_jaccard(V4, β_s, β_c)         ← LOCO ROI
+                  + β · xnobis_cosine(V1, β_s, β_c)          ← RDM ROI
+                  + λ · Tikh(β_s, β_c)
+```
+
+또는:
+```
+L_cross(β_s, β_c) = α · l_rank(V4, β_s, β_c)
+                  + β · l_rdm(V1, β_s, β_c)
+                  + λ · Tikh
+```
+
+#### 11c-4. 우려 — 사용자 자체 비판 적용
+
+1. **여전한 selection bias**: "각 CVD가 유의미하게 달랐던 지표" — 어느 지표/ROI가 유의미했는지 자체가 prior data에서 골라짐. Per-subject custom loss = overfit risk
+2. **Pre-registration 필요**: Phase 3 행동 검증 *전에* loss 형태 고정해야 fair test
+3. **Cross-validation**: per-subject loss는 LOSO 또는 split-half로 검증 필요
+4. **개념적 타당성**: l_topk(V4)와 xnobis(V1)는 단위가 다름 → α, β 가중치 정당화 필요
+
+#### 11c-5. 신중한 구현 제안 (실행 전 사용자 결정 필요)
+
+**옵션 A — Pre-registered theoretical loss**:
+```
+모든 CVD subject에 동일하게 적용:
+L = l_topk_jaccard(V4) + xnobis_cosine(V1) + 0.2·Tikh
+근거: V4 = LOCO gate ROI, V1 = SRM/xnobis 강한 ROI (sub-08, sub-09 양쪽)
+```
+장점: pre-registered, fair across subjects
+단점: 한 가지 지표 조합만 사용
+
+**옵션 B — Per-subject 적응형 loss**:
+```
+sub-08: L = l_topk(V4) + xnobis(V1)  # V4 LOCO p=0.004, V1 LOCO p=0.001
+sub-09: L = l_topk(V4) + xnobis(V1)  # V4 LOCO p=0.035, V1 xnobis p=0.007
+```
+장점: 각 subject의 개별 signal 활용
+단점: per-subject tuning = degree of freedom 증가, manuscript framing 어려움
+
+**옵션 C — Multi-criterion landscape**:
+```
+각 ROI에서 l_topk, l_rank, l_rdm landscape 계산 (이미 Cycle 1에 있음)
+joint minimum 또는 Pareto frontier에서 (β_s, β_c) 선정
+```
+
+**옵션 D — 현행 유지 + cross-ROI 후속 시도**:
+- 현재 Phase 3 trigger는 same-ROI loss로 진행 (sub-08 V4, sub-09 V1+V4 avg)
+- cross-ROI loss는 Phase 3 후 별도 Cycle 12로 검증
+
+#### 11c-6. 권장 — 결정 보류
+
+**현 시점 권장 = 옵션 D**:
+1. Phase 3는 already-derived filter parameters로 진행 (이미 cycle8_preimage에 저장)
+2. cross-ROI loss 시도는 Phase 3 결과 후 → 행동 효과가 marginal일 때 reformulation 정당화
+3. 옵션 A (pre-registered theoretical loss)로 Cycle 12 후속 가능, 단 Phase 3 design fix 후
+
+이유: 현재 시점에서 loss reformulation을 하면 (a) selection bias 누적, (b) Phase 3 design 지연. Phase 3가 sub-08 강한 효과 보이고 sub-09 약하면, 그때 sub-09 specific loss 재설계가 정당화됨.
+
+---
+
+### Cycle 12 — 2026-05-03 : Pre-registered cross-ROI LOSS 실행 (사용자 결정)
+
+#### 12-1. 동기 (사용자 결정)
+
+옵션 A 진행. landscape JSON에 9개 metric × 2501 grid 모두 저장됨 → 비용 거의 0.
+
+**Pre-registered loss formula** (모든 CVD subject 동일, post-hoc 아님):
+```
+L_cross(β_s, β_c) = α · l_topk_jaccard(V4, β_s, β_c)   ← LOCO-derived
+                  + β · l_rank(V1, β_s, β_c)            ← RDM-like (1−Spearman)
+                  + λ · Tikh                             λ=0.2
+```
+
+**근거**:
+- l_topk(V4): forward LOCO p=0.044 (sub-08 V4 2-comp p=0.004, sub-09 V4 2-comp p=0.035)
+- l_rank(V1): SRM 개인 sub-09 V1 p=0.007, sub-08 V2 p=0.040 → V1/V2 RDM 차이 강함. xnobis_cosine과 동일 family
+
+**구현**: `scripts/cycle_filter_refinement/cycle12_loss_cross_roi.py`
+**산출**: `cycle12_loss_cross_roi.json`, `cycle12_loss_cross_roi.csv`
+
+#### 12-2. 결과 — Filter parameter shift
+
+| 피험자 | role | V4-only baseline (β_s, β_c) | Cross-ROI (α=β=1) | 변화 |
+|---|---|---|---|---|
+| **sub-09** | CVD | **(0, 0) — degenerate** | **(30, 26) — non-trivial** | **degeneracy 해소** ✓ |
+| sub-08 | CVD | (58, −28) | (68, −38) | (+10, −10) 같은 방향 강화 |
+| sub-04 | HC | (64, −36) | (18, 2) | null 방향 ✓ |
+| sub-06 | HC | (62, 36) | (0, 0) | null 방향 ✓ |
+| sub-01 | HC | (0, 0) | (48, 48) | non-trivial로 이동 (concern) |
+| sub-03 | HC | (0, 0) | (16, 10) | 작은 shift |
+| sub-05 | HC | (40, 10) | (56, −16) | shift |
+
+**핵심 발견**:
+1. **sub-09 V4-only degenerate (β=0,0) trap에서 빠져나옴** → (30, 26) non-trivial filter
+2. **sub-09 cross-ROI (30, 26)이 cycle8_preimage V1+V4 avg (30.5, 12)와 거의 일치** — 독립 derivation 수렴, 이전 결정 robust
+3. sub-08 cross-ROI (68, -38)는 V4-only (58, -28)와 같은 방향, 강화
+4. 일부 HC (sub-01, sub-05)는 non-trivial로 이동 — concern
+
+#### 12-3. Specificity (L_cross 직접 비교, n=6 HC)
+
+| 피험자 | role | z_V4_only (baseline) | z_cross_ROI | 비교 |
+|---|---|---:|---:|---|
+| **sub-08** | CVD | −4.54 | **−4.78** | 약간 강화 ✓ |
+| **sub-09** | CVD | +0.59 | **−0.46** | 여전히 within HC range (miss) |
+| **sub-02** | HC FP | **−3.80 (FP)** | **−0.83** | **FP 해소** ✓ |
+| sub-06 | HC | −0.28 | +3.92 | sub-06 cross-ROI fit 매우 나쁨 |
+
+**결정적 분리** — Cross-ROI loss는 **두 다른 역할** 함:
+- ✓ **더 좋은 parameter estimator**: sub-09 degeneracy 해소, sub-04/sub-06 null로 끌어당김
+- ✗ **더 좋은 specificity 지표는 아님**: sub-09 z=-0.46 여전히 not specific
+
+#### 12-4. Pre-image visualization
+
+`results/figures/filter_visualization_phase3/`:
+- `phase3_sub-09_cross_roi_loss_cycle12.png` (β_s=30, β_c=26): 의미 있는 hue shift (yellow→orange, green→yellow, blue→deep blue)
+- `phase3_sub-08_cross_roi_loss_cycle12.png` (β_s=68, β_c=-38): V4-only보다 강화된 shift
+
+대조: `phase3_sub-09_V4only.png` (β_s=0, β_c=2)는 trivial filter (Original ≈ Filtered)
+
+#### 12-5. 함의
+
+**Phase 3 권장 변경 가능성**:
+- sub-09 filter parameters: V1+V4 avg (30.5, 12) vs cross-ROI loss (30, 26) — 매우 가까움
+- 둘 중 어느 것을 사용해도 행동 효과 비슷할 것으로 예상
+- **두 derivation이 수렴한다는 사실이 중요** — sub-09 protan filter parameters에 대한 confidence ↑
+
+**Specificity는 별도 문제**:
+- L_cross로 sub-09를 HC와 분리 못함 → "filter parameters가 derived 됐다"와 "이게 진짜 CVD specific"은 다른 claim
+- Phase 3 행동 검증이 결정적
+
+**Sub-08 cross-ROI**:
+- (58,-28) → (68,-38): 동일 방향, 강도 ↑
+- Specificity 약간 강화 (-4.54 → -4.78)
+- 큰 변화 아님 — V4-only로 이미 충분
+
+#### 12-6. Caveat 명시
+
+1. α=β=1 default — 가중치 sensitivity sweep에서도 sub-09 best는 (30, 26) 영역으로 robust
+2. sub-01, sub-05가 cross-ROI에서 non-trivial filter로 이동 — HC FP 우려 가능 (단, L_cross specificity는 sub-02 FP 해소)
+3. l_rank(V1)는 xnobis_cosine과 다른 metric — 동일 family이지만 정확히 일치하지 않음
+4. Pre-registered loss (모든 subject 동일) → per-subject custom loss 아님, post-hoc bias 없음
+
+#### 12-7. 결정
+
+**Phase 3 권장 update**:
+| 시나리오 | Selection rule | Filter parameters | 근거 |
+|---|---|---|---|
+| sub-08 deutan | V4|V4 same-ROI z_combined | V4 (β_s=38, β_c=7) [cycle8_preimage bootstrap median] | robust 27 unit gap |
+| sub-09 protan | V4|V4 same-ROI z_combined | **(30, 26) [Cycle 12 cross-ROI loss]** OR V1+V4 avg (30.5, 12) [PLAN04 §6] — 두 derivation 수렴 | EXPLORATORY, 행동 검증 결정적 |
+
+**Cycle 12로 sub-09 filter parameters confidence 향상** (degenerate trap 회피, V1+V4 avg와 수렴). 단 specificity는 여전히 marginal.
+
+---
+
+### Cycle 13 — 2026-05-03 : Family assignment 검증 + baseline_sp confound 보정 — **CRITICAL FINDING**
+
+#### 13-1. 동기
+
+사용자가 제기한 두 critical issue:
+1. Family assignment (sub-08=deutan, sub-09=protan) 비검증
+2. Baseline_rho confound (HC LOCO FPR=100% from MEMORY)
+
+`scripts/cycle_filter_refinement/cycle13_family_baseline.py`
+
+#### 13-2. Family assignment — 검증 통과 ✓
+
+| 피험자 | True | V4|V4 margin (deut−prot) | V1|V4 margin | V1+V4 sum margin | data-driven | 일치 |
+|---|---|---:|---:|---:|---|---|
+| sub-08 | deutan | +11.11 | +11.11 | +14.58 | deutan | ✓ |
+| sub-09 | protan | −1.76 | −1.76 | −5.79 | protan | ✓ |
+
+→ 두 CVD 모두 data-driven family와 cone-test 결과 일치. Family assumption robust.
+
+단 sub-09 V4 단독 family margin은 -1.76 (V1+V4 sum −5.79와 비교 시 약함). 단일 ROI cell에서 family-specific signal 약함을 반영.
+
+#### 13-3. Baseline_sp confound — **CRITICAL CONFIRMED**
+
+각 (β_s, β_c) landscape의 spearman_r at (0,0) = **baseline LOCO Spearman correlation** (모델 적용 전 본질적 BOLD pattern quality).
+
+**baseline_sp per subject × ROI**:
+| subj | role | V1 | V2 | V4 |
+|---|---|---:|---:|---:|
+| sub-01 | HC | +0.167 | +0.476 | +0.619 |
+| sub-02 | HC | +0.214 | +0.667 | **+0.786** |
+| sub-03 | HC | +0.500 | +0.238 | −0.262 |
+| sub-04 | HC | +0.667 | +0.690 | −0.357 |
+| sub-05 | HC | +0.476 | +0.500 | **−0.738** |
+| sub-06 | HC | +0.095 | −0.167 | +0.024 |
+| sub-08 | CVD | +0.643 | +0.500 | +0.262 |
+| sub-09 | CVD | +0.357 | −0.524 | −0.357 |
+
+HC V4 baseline_sp 범위 [−0.738, +0.786] — 매우 변동적.
+
+#### 13-4. HC pool 회귀 보정 결과
+
+```
+HC: z_combined = slope · baseline_sp(R_set) + intercept
+CVD residual = z_combined_CVD − predicted
+z_residual = residual / SD(HC residuals)
+```
+
+| Cell | HC corr(baseline_sp, z) | sub-08 z_residual | sub-09 z_residual |
+|---|---:|---:|---:|
+| **V4|V4 deutan** | **−0.968** (massive confound) | **−58.93** ✓✓ specific | −3.49 (cross-family detect) |
+| V4|V4 protan | −0.439 | −1.39 NOT | **−1.25 NOT** |
+| **V1|V4 deutan** | −0.542 | **−2.74** ✓ specific | −0.80 NOT |
+| **V1|V4 protan** | −0.594 | +0.65 NOT | **−1.01 NOT** |
+| V1|V1 protan | −0.656 | +0.56 NOT | −1.43 NOT |
+
+#### 13-5. 결정적 finding
+
+**sub-08 deutan만 baseline-corrected에서 진정 specific**:
+- V4|V4 z_residual = −58.93 (baseline 보정 후에도 압도적)
+- V1|V4 cross z_residual = −2.74 (cross-ROI에서도 specific)
+- → 진짜 CVD-specific signal
+
+**sub-09 protan은 어떤 cell에서도 baseline 보정 후 NOT specific**:
+- V4|V4 protan: z_resid = −1.25
+- V1|V4 cross: z_resid = −1.01 (이전 raw z=−3.37의 specificity는 baseline_sp 우연 일치 결과)
+- V1|V1: z_resid = −1.43
+- → **sub-09 specificity claim은 baseline_sp confound의 산물**
+
+**HC corr(baseline_sp, z) = −0.968** for V4 deutan — 거의 완벽한 confound. 즉 우리의 z_combined는 V4에서 거의 전적으로 baseline_sp가 결정.
+
+#### 13-6. Cycle 11 V1|V4 cross-ROI 권장 최종 정정
+
+이전 cycle 11에서 sub-09 V1|V4 cross가 "specificity 회복"으로 보였던 이유:
+- sub-04 V1|V4 raw z = −1.80 (PASS, FP 안 됨)
+- sub-09 V1|V4 raw z = −3.37 (detect)
+- → "cross-ROI는 sub-04 noise 누적 회피"라고 해석
+
+**baseline_sp 보정 결과 진실**:
+- sub-04 V1 baseline_sp = +0.667, sub-09 V1 baseline_sp = +0.357 → 다른 baseline 위치
+- HC V1|V4 protan corr(baseline, z) = −0.594 → baseline_sp 회귀 후 sub-04와 sub-09 z_residual 거의 같음 (∼−1)
+- → V1|V4 cross-ROI는 sub-04 FP를 진짜로 해소한 게 아니라 baseline_sp 분포 차이를 이용
+
+#### 13-7. 최종 Phase 3 권장 (Cycle 13 정정)
+
+| 시나리오 | Selection rule | Specificity (baseline 보정) | confidence |
+|---|---|---|---|
+| **sub-08 deutan** | V4|V4 same-ROI | z_residual = −58.93 | **HIGH** ✓ |
+| sub-08 deutan (강화) | V1|V4 cross-ROI | z_residual = −2.74 | high (cross-ROI도 확인) |
+| **sub-09 protan** | **어느 cell도 baseline 보정 후 NOT specific** | best z_resid = −1.43 (V1|V1) | **EXPLORATORY only** |
+| HC verification | sub-10 (별도 분석 필요) | — | — |
+
+**Filter parameters는 별개 issue**:
+- Cycle 12에서 sub-09 cross-ROI loss로 (30, 26) 추출
+- 이것이 "real CVD signal" vs "baseline_sp pattern"인지 구별 불가
+- → Phase 3에서 행동 효과 보면 결정적 — neural specificity는 근거 부족
+
+#### 13-8. Methodological 함의 (manuscript 필수 명시)
+
+1. **n=6 HC pool은 baseline_sp 변동을 정확히 추정 못함** (V4 SD 0.6 정도)
+2. **baseline_sp confound가 우리 framework의 가장 critical methodological limit** — 모든 specificity claim은 baseline-corrected z_residual로 보고해야 함
+3. **sub-08 deutan은 어떤 framework (raw, baseline-corrected)에서도 robust** — 진짜 finding
+4. **sub-09 protan은 baseline 보정 시 신호 사라짐** — 행동 검증 없으면 claim 불가
+
+기록 산출:
+- `cycle13_family_baseline.json`
+- `consolidated_phase2_results.csv` (재계산 안 함, 기존 사용)
+

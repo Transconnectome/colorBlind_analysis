@@ -90,6 +90,34 @@ logs_backup/
 
 ## All results directories (including subdirectories)
 **/results/
+# But allow doc/manifest files inside results dirs to be tracked
+!**/results/
+!**/results/**/
+!**/results/README.md
+!**/results/MANIFEST.md
+!**/results/**/README.md
+!**/results/loss_inventory.md
+!**/results/loss_inventory.csv
+# Re-ignore data file types inside the now-allowed dirs (track only docs)
+**/results/**/*.json
+**/results/**/*.npy
+**/results/**/*.npz
+**/results/**/*.png
+**/results/**/*.jpg
+**/results/**/*.pdf
+**/results/**/*.svg
+**/results/**/*.txt
+**/results/**/*.log
+**/results/**/*.html
+**/results/**/*.tsv
+**/results/**/*.pkl
+**/results/**/*.h5
+**/results/**/*.csv
+**/results/**/*.py
+**/results/**/*.sbatch
+**/results/**/*.sh
+# Re-allow the specific whitelist (loss_inventory.csv — primary inventory artifact)
+!**/results/loss_inventory.csv
 
 # ============================================
 # SLURM & Server Outputs

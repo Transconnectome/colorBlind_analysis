@@ -1,0 +1,254 @@
+#!/usr/bin/env python3
+"""
+cycle14_v1_rdm_cross.py — V1 RDM cross-criterion variant of Cycle 12.
+
+Cycle 12 used:  L = a*l_topk(V4) + b*l_rank(V1) + 0.2*Tikh
+This variant:   L = a*l_topk(V4) + b*L_rdm_cosine(V1) + 0.2*Tikh
+
+Motivation: sub-09 V1 LOCO is NS but ΔRDM is sig (p=0.005, MEMORY 2026-03-23).
+l_rank uses Spearman of vulnerability (LOCO-derived). RDM cosine uses
+pairwise distance structure (different signal channel). Cycle 12 sub-09
+extracted (β_s=30, β_c=26); see if RDM-based extracts converging or different
+parameters, and whether sub-09 V4 (0,0) degenerate is escapable via V1 RDM.
+
+Method:
+1. Compute ΔRDM_obs(V1) for each subject (existing diagnostic_delta_rdm).
+2. For each (β_s, β_c) in cycle12 grid (41x61): compute ΔRDM_sim(V1) under
+   2-comp forward model, then L_rdm = 1 - cosine(sim, obs).
+3. Load V4 l_topk landscape from cycle12.
+4. Combine and find argmin for several (α, β) weights.
+
+Output: results/cycle_filter_refinement/cycle14_v1_rdm_cross.json + .csv
+"""
+
+import json
+import csv
+import sys
+import time
+from pathlib import Path
+
+import numpy as np
+
+_SCRIPT_DIR = Path(__file__).resolve().parent
+_PHASE2_SCRIPTS = _SCRIPT_DIR.parent
+sys.path.insert(0, str(_PHASE2_SCRIPTS))
+
+import loco_distortion_fit as ldf
+from loco_distortion_fit import (
+    HC_SUBJECTS, N_CHANNELS, HUE_ANGLES,
+    create_basis_full, precompute_hc_W, load_amplitudes,
+    get_shifted_design,
+)
+from diagnostic_delta_rdm import (
+    compute_delta_rdm_obs, compute_delta_rdm_sim, cosine_similarity,
+)
+
+ROOT = _PHASE2_SCRIPTS.parent
+RES = ROOT / 'results' / 'cycle_filter_refinement'
+RES.mkdir(parents=True, exist_ok=True)
+
+OUT_JSON = RES / 'cycle14_v1_rdm_cross.json'
+OUT_CSV = RES / 'cycle14_v1_rdm_cross.csv'
+
+CVD_TYPE_MAP = {'08': 'deutan', '09': 'protan'}
+SUBJECTS_TO_RUN = ['08', '09']
+
+_BS = np.arange(0.0, 81.0, 2.0)
+_BC = np.arange(-60.0, 61.0, 2.0)
+_BS_GRID, _BC_GRID = np.meshgrid(_BS, _BC, indexing='ij')
+NORM_GRID = (_BS_GRID / 80.0) ** 2 + (_BC_GRID / 60.0) ** 2
+
+LAM = 0.2
+
+print('=' * 70)
+print('Cycle 14: V1 RDM cross-criterion (variant of Cycle 12)')
+print(f'Grid: {len(_BS)} x {len(_BC)} = {len(_BS) * len(_BC)} points')
+print('=' * 70)
+
+data_dir = ldf.LOCAL_DATA
+print(f'Data: {data_dir}')
+
+ROI_V1 = 'V1'
+ROI_V4 = 'V4'
+
+print(f'\n--- Loading HC + CVD data ---')
+hc_amps_v1 = {hc: load_amplitudes(data_dir, hc, ROI_V1) for hc in HC_SUBJECTS}
+basis_full = create_basis_full(N_CHANNELS, basis_type='fe')
+C_baseline = basis_full[HUE_ANGLES]
+hc_W_v1, _ = precompute_hc_W(hc_amps_v1, C_baseline)
+print(f'  V1: {len(hc_amps_v1)} HC, V_s={hc_amps_v1["01"].shape[2]}')
+
+
+def compute_v1_rdm_landscape(subj, cvd_type):
+    print(f'\n--- Computing V1 ΔRDM landscape for sub-{subj} ({cvd_type}) ---')
+    cvd_amp = load_amplitudes(data_dir, subj, ROI_V1)
+    delta_rdm_obs, _, _, _ = compute_delta_rdm_obs(cvd_amp, hc_amps_v1)
+    print(f'  ΔRDM_obs(V1, sub-{subj}) computed (28 elements)')
+    print(f'    mean abs: {np.mean(np.abs(delta_rdm_obs)):.4f}, '
+          f'max abs: {np.max(np.abs(delta_rdm_obs)):.4f}')
+
+    landscape = np.zeros_like(_BS_GRID)
+    cosines = np.zeros_like(_BS_GRID)
+
+    t0 = time.time()
+    for i in range(_BS_GRID.shape[0]):
+        for j in range(_BS_GRID.shape[1]):
+            params = np.array([_BS_GRID[i, j], _BC_GRID[i, j]])
+            try:
+                C_shifted, _ = get_shifted_design(
+                    '2component', params, cvd_type)
+                drdm_sim_mean, _ = compute_delta_rdm_sim(
+                    hc_W_v1, C_shifted, C_baseline)
+                cos = cosine_similarity(drdm_sim_mean, delta_rdm_obs)
+                cosines[i, j] = cos
+                landscape[i, j] = 1.0 - cos
+            except Exception:
+                landscape[i, j] = 1.0
+                cosines[i, j] = 0.0
+        if (i + 1) % 10 == 0:
+            elapsed = time.time() - t0
+            rate = (i + 1) / elapsed if elapsed > 0 else 0
+            print(f'  row {i+1}/{_BS_GRID.shape[0]} '
+                  f'(min L_rdm so far = {landscape[:i+1].min():.4f}, '
+                  f'{rate*_BS_GRID.shape[1]:.1f} pt/s)')
+
+    elapsed = time.time() - t0
+    min_idx = np.unravel_index(np.argmin(landscape), landscape.shape)
+    print(f'  Done in {elapsed:.1f}s. '
+          f'V1 RDM min: bs={_BS[min_idx[0]]:.0f}, bc={_BC[min_idx[1]]:.0f}, '
+          f'L_rdm={landscape[min_idx]:.4f} (cos={cosines[min_idx]:+.4f})')
+
+    return {
+        'L_rdm_grid': landscape,
+        'cosine_grid': cosines,
+        'delta_rdm_obs': delta_rdm_obs.tolist(),
+    }
+
+
+def load_v4_l_topk(subj):
+    p = RES / f'sub-{subj}_{ROI_V4}_landscape.json'
+    if not p.exists():
+        print(f'  WARN: V4 landscape not found at {p}')
+        return None
+    with open(p) as f:
+        d = json.load(f)
+    return np.array(d['l_topk_jaccard'])
+
+
+def find_min(grid):
+    idx = np.unravel_index(np.argmin(grid), grid.shape)
+    return float(_BS[idx[0]]), float(_BC[idx[1]]), float(grid[idx]), idx
+
+
+WEIGHT_COMBOS = [(1.0, 1.0), (0.5, 1.0), (1.0, 0.5),
+                 (2.0, 1.0), (1.0, 2.0)]
+
+results = {
+    'meta': {
+        'cycle': 14,
+        'task': 'V1 RDM cross-criterion variant of Cycle 12',
+        'rule': ('L = alpha*l_topk_jaccard(V4) + '
+                 'beta*(1-cosine(ΔRDM_sim_V1, ΔRDM_obs_V1)) + 0.2*Tikh'),
+        'motivation': ('sub-09 V1 LOCO NS but ΔRDM p=0.005 (MEMORY). '
+                       'Test if RDM-based V1 metric extracts different '
+                       '(βs, βc) than Cycle 12 l_rank-based.'),
+        'grid_bs': _BS.tolist(),
+        'grid_bc': _BC.tolist(),
+        'lam': LAM,
+    },
+    'per_subject': {},
+    'csv_rows': [],
+}
+
+for subj in SUBJECTS_TO_RUN:
+    cvd_type = CVD_TYPE_MAP[subj]
+    print(f'\n{"=" * 70}\nProcessing sub-{subj} ({cvd_type})\n{"=" * 70}')
+
+    v1 = compute_v1_rdm_landscape(subj, cvd_type)
+    L_rdm_v1 = v1['L_rdm_grid']
+
+    L_topk_v4 = load_v4_l_topk(subj)
+    if L_topk_v4 is None:
+        print(f'  Skipping sub-{subj}: no V4 landscape')
+        continue
+
+    bs_v1, bc_v1, val_v1, _ = find_min(L_rdm_v1)
+    bs_v4, bc_v4, val_v4, _ = find_min(L_topk_v4 + LAM * NORM_GRID)
+    print(f'\n  V1 RDM min only:  bs={bs_v1:.0f}, bc={bs_v1:.0f} '
+          f'(actually bc={bc_v1:.0f}), L_rdm={val_v1:.4f}')
+    print(f'  V4 l_topk min only: bs={bs_v4:.0f}, bc={bc_v4:.0f}, '
+          f'L_topk+Tikh={val_v4:.4f}')
+
+    subj_entry = {
+        'cvd_type': cvd_type,
+        'v1_rdm_only': {'bs': bs_v1, 'bc': bc_v1, 'L_rdm': val_v1},
+        'v4_topk_only': {'bs': bs_v4, 'bc': bc_v4,
+                         'L_topk_plus_tikh': val_v4},
+        'cross_rdm_weights': {},
+        'delta_rdm_obs_meanabs': float(np.mean(np.abs(v1['delta_rdm_obs']))),
+    }
+
+    for alpha, beta in WEIGHT_COMBOS:
+        L_cross = alpha * L_topk_v4 + beta * L_rdm_v1 + LAM * NORM_GRID
+        bs, bc, val, idx = find_min(L_cross)
+        contrib = {
+            'l_topk_v4': float(L_topk_v4[idx]),
+            'l_rdm_v1': float(L_rdm_v1[idx]),
+            'tikh': float(LAM * NORM_GRID[idx]),
+            'cosine_v1': float(v1['cosine_grid'][idx]),
+        }
+        key = f'a{alpha}_b{beta}'
+        subj_entry['cross_rdm_weights'][key] = {
+            'bs': bs, 'bc': bc, 'L_total': val, **contrib,
+        }
+        print(f'  alpha={alpha}, beta={beta}: bs={bs:.0f}, bc={bc:.0f}, '
+              f'L={val:.4f} '
+              f'[topk={contrib["l_topk_v4"]:.3f}, '
+              f'rdm={contrib["l_rdm_v1"]:.3f}, '
+              f'cos={contrib["cosine_v1"]:+.3f}]')
+
+        results['csv_rows'].append({
+            'subject': f'sub-{subj}',
+            'cvd_type': cvd_type,
+            'alpha': alpha, 'beta': beta,
+            'bs': bs, 'bc': bc,
+            'L_total': round(val, 4),
+            'l_topk_v4': round(contrib['l_topk_v4'], 4),
+            'l_rdm_v1': round(contrib['l_rdm_v1'], 4),
+            'cosine_v1': round(contrib['cosine_v1'], 4),
+        })
+
+    results['per_subject'][subj] = subj_entry
+
+if results['csv_rows']:
+    with open(OUT_CSV, 'w', newline='') as f:
+        w = csv.DictWriter(f, fieldnames=list(results['csv_rows'][0].keys()))
+        w.writeheader()
+        w.writerows(results['csv_rows'])
+    print(f'\nSaved CSV: {OUT_CSV}')
+
+with open(OUT_JSON, 'w') as f:
+    json.dump(results, f, indent=2)
+print(f'Saved JSON: {OUT_JSON}')
+
+print('\n' + '=' * 70)
+print('COMPARISON WITH CYCLE 12 (l_rank-based) BEST PARAMS')
+print('=' * 70)
+cyc12_path = RES / 'cycle12_loss_cross_roi.json'
+if cyc12_path.exists():
+    with open(cyc12_path) as f:
+        c12 = json.load(f)
+    for subj in SUBJECTS_TO_RUN:
+        if subj not in c12['per_subject']:
+            continue
+        c12_sub = c12['per_subject'][subj]
+        c14_sub = results['per_subject'].get(subj)
+        if not c14_sub:
+            continue
+        c12_def = c12_sub['cross_roi_weights'].get('a1.0_b1.0', {})
+        c14_def = c14_sub['cross_rdm_weights'].get('a1.0_b1.0', {})
+        print(f'\nsub-{subj} ({CVD_TYPE_MAP[subj]}):')
+        print(f"  Cycle 12 (V1 l_rank, a=b=1):  bs={c12_def.get('bs')}, "
+              f"bc={c12_def.get('bc')}")
+        print(f"  Cycle 14 (V1 RDM,    a=b=1):  bs={c14_def.get('bs')}, "
+              f"bc={c14_def.get('bc')}")

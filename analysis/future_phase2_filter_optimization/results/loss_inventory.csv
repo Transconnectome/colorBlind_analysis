@@ -1,0 +1,145 @@
+loss_variant,description,subject,role,roi,mode,best_value,beta_s,beta_c,norm_raw,norm_grid
+l_rank,1 - Spearman ρ (V4),sub-01,HC,V4,argmin,0.381,0.0,-2.0,2.0,0.0333
+l_rank,1 - Spearman ρ (V4),sub-02,HC,V4,argmin,0.2143,0.0,-4.0,4.0,0.0667
+l_rank,1 - Spearman ρ (V4),sub-03,HC,V4,argmin,1.0238,2.0,24.0,24.08,0.4008
+l_rank,1 - Spearman ρ (V4),sub-04,HC,V4,argmin,0.3095,80.0,-54.0,96.52,1.3454
+l_rank,1 - Spearman ρ (V4),sub-05,HC,V4,argmin,0.7857,70.0,-28.0,75.39,0.9917
+l_rank,1 - Spearman ρ (V4),sub-06,HC,V4,argmin,0.6429,46.0,58.0,74.03,1.1248
+l_rank,1 - Spearman ρ (V4),sub-08,CVD,V4,argmin,0.0714,74.0,-60.0,95.27,1.3622
+l_rank,1 - Spearman ρ (V4),sub-09,CVD,V4,argmin,0.9286,0.0,58.0,58.0,0.9667
+l_topk_jaccard,Top-K Jaccard distance (V4),sub-01,HC,V4,argmin,0.8,0.0,-60.0,60.0,1.0
+l_topk_jaccard,Top-K Jaccard distance (V4),sub-02,HC,V4,argmin,0.5,0.0,-34.0,34.0,0.5667
+l_topk_jaccard,Top-K Jaccard distance (V4),sub-03,HC,V4,argmin,0.8,0.0,-60.0,60.0,1.0
+l_topk_jaccard,Top-K Jaccard distance (V4),sub-04,HC,V4,argmin,0.5,62.0,-48.0,78.41,1.1138
+l_topk_jaccard,Top-K Jaccard distance (V4),sub-05,HC,V4,argmin,0.8,22.0,58.0,62.03,1.005
+l_topk_jaccard,Top-K Jaccard distance (V4),sub-06,HC,V4,argmin,0.5,46.0,58.0,74.03,1.1248
+l_topk_jaccard,Top-K Jaccard distance (V4),sub-08,CVD,V4,argmin,0.0,58.0,-36.0,68.26,0.9411
+l_topk_jaccard,Top-K Jaccard distance (V4),sub-09,CVD,V4,argmin,0.8,0.0,-60.0,60.0,1.0
+l_dir,Directional loss (V4),sub-01,HC,V4,argmin,0.3046,0.0,-6.0,6.0,0.1
+l_dir,Directional loss (V4),sub-02,HC,V4,argmin,0.3084,0.0,-10.0,10.0,0.1667
+l_dir,Directional loss (V4),sub-03,HC,V4,argmin,0.9968,16.0,-14.0,21.26,0.3073
+l_dir,Directional loss (V4),sub-04,HC,V4,argmin,0.3708,80.0,-60.0,100.0,1.4142
+l_dir,Directional loss (V4),sub-05,HC,V4,argmin,0.9623,80.0,-38.0,88.57,1.1837
+l_dir,Directional loss (V4),sub-06,HC,V4,argmin,0.5366,2.0,-42.0,42.05,0.7004
+l_dir,Directional loss (V4),sub-08,CVD,V4,argmin,0.1354,78.0,-60.0,98.41,1.3966
+l_dir,Directional loss (V4),sub-09,CVD,V4,argmin,0.8929,0.0,60.0,60.0,1.0
+mw_jaccard_loss,Mann-Whitney Jaccard (V4),sub-01,HC,V4,argmin,0.5093,32.0,60.0,68.0,1.077
+mw_jaccard_loss,Mann-Whitney Jaccard (V4),sub-02,HC,V4,argmin,0.5,0.0,-34.0,34.0,0.5667
+mw_jaccard_loss,Mann-Whitney Jaccard (V4),sub-03,HC,V4,argmin,0.0,0.0,-60.0,60.0,1.0
+mw_jaccard_loss,Mann-Whitney Jaccard (V4),sub-04,HC,V4,argmin,0.0605,62.0,-48.0,78.41,1.1138
+mw_jaccard_loss,Mann-Whitney Jaccard (V4),sub-05,HC,V4,argmin,0.8607,22.0,58.0,62.03,1.005
+mw_jaccard_loss,Mann-Whitney Jaccard (V4),sub-06,HC,V4,argmin,0.5111,0.0,-60.0,60.0,1.0
+mw_jaccard_loss,Mann-Whitney Jaccard (V4),sub-08,CVD,V4,argmin,0.0,58.0,-36.0,68.26,0.9411
+mw_jaccard_loss,Mann-Whitney Jaccard (V4),sub-09,CVD,V4,argmin,0.5513,44.0,54.0,69.66,1.0548
+l_mag,Magnitude loss (V4),sub-01,HC,V4,argmin,0.0,60.0,-10.0,60.83,0.7683
+l_mag,Magnitude loss (V4),sub-02,HC,V4,argmin,0.0,78.0,32.0,84.31,1.1113
+l_mag,Magnitude loss (V4),sub-03,HC,V4,argmin,0.0,70.0,30.0,76.16,1.0078
+l_mag,Magnitude loss (V4),sub-04,HC,V4,argmin,0.0,32.0,-44.0,54.41,0.8353
+l_mag,Magnitude loss (V4),sub-05,HC,V4,argmin,0.0125,64.0,-42.0,76.55,1.063
+l_mag,Magnitude loss (V4),sub-06,HC,V4,argmin,0.0,52.0,8.0,52.61,0.6635
+l_mag,Magnitude loss (V4),sub-08,CVD,V4,argmin,0.011,44.0,58.0,72.8,1.1122
+l_mag,Magnitude loss (V4),sub-09,CVD,V4,argmin,0.0,72.0,38.0,81.41,1.1005
+norm_resid,Normalized residual (V4),sub-01,HC,V4,argmin,0.8848,34.0,-28.0,44.05,0.6312
+norm_resid,Normalized residual (V4),sub-02,HC,V4,argmin,0.5772,26.0,60.0,65.39,1.0515
+norm_resid,Normalized residual (V4),sub-03,HC,V4,argmin,0.923,80.0,60.0,100.0,1.4142
+norm_resid,Normalized residual (V4),sub-04,HC,V4,argmin,0.6927,80.0,-60.0,100.0,1.4142
+norm_resid,Normalized residual (V4),sub-05,HC,V4,argmin,1.498,76.0,-52.0,92.09,1.2859
+norm_resid,Normalized residual (V4),sub-06,HC,V4,argmin,0.8515,80.0,-60.0,100.0,1.4142
+norm_resid,Normalized residual (V4),sub-08,CVD,V4,argmin,1.0188,76.0,-60.0,96.83,1.3793
+norm_resid,Normalized residual (V4),sub-09,CVD,V4,argmin,1.1939,24.0,44.0,50.12,0.7923
+sign_agree,Sign agreement fraction (V4),sub-01,HC,V4,argmax,0.5,0.0,-60.0,60.0,1.0
+sign_agree,Sign agreement fraction (V4),sub-02,HC,V4,argmax,1.0,44.0,-8.0,44.72,0.5659
+sign_agree,Sign agreement fraction (V4),sub-03,HC,V4,argmax,0.875,74.0,56.0,92.8,1.3141
+sign_agree,Sign agreement fraction (V4),sub-04,HC,V4,argmax,0.75,72.0,60.0,93.72,1.3454
+sign_agree,Sign agreement fraction (V4),sub-05,HC,V4,argmax,0.75,74.0,58.0,94.02,1.3379
+sign_agree,Sign agreement fraction (V4),sub-06,HC,V4,argmax,0.75,0.0,-44.0,44.0,0.7333
+sign_agree,Sign agreement fraction (V4),sub-08,CVD,V4,argmax,0.5,10.0,58.0,58.86,0.9747
+sign_agree,Sign agreement fraction (V4),sub-09,CVD,V4,argmax,0.625,0.0,-60.0,60.0,1.0
+spearman_r,Spearman ρ (V4),sub-01,HC,V4,argmax,0.619,0.0,-2.0,2.0,0.0333
+spearman_r,Spearman ρ (V4),sub-02,HC,V4,argmax,0.7857,0.0,-4.0,4.0,0.0667
+spearman_r,Spearman ρ (V4),sub-03,HC,V4,argmax,-0.0238,2.0,24.0,24.08,0.4008
+spearman_r,Spearman ρ (V4),sub-04,HC,V4,argmax,0.6905,80.0,-54.0,96.52,1.3454
+spearman_r,Spearman ρ (V4),sub-05,HC,V4,argmax,0.2143,70.0,-28.0,75.39,0.9917
+spearman_r,Spearman ρ (V4),sub-06,HC,V4,argmax,0.3571,46.0,58.0,74.03,1.1248
+spearman_r,Spearman ρ (V4),sub-08,CVD,V4,argmax,0.9286,74.0,-60.0,95.27,1.3622
+spearman_r,Spearman ρ (V4),sub-09,CVD,V4,argmax,0.0714,0.0,58.0,58.0,0.9667
+pearson_r,Pearson r (V4),sub-01,HC,V4,argmax,0.6954,0.0,-6.0,6.0,0.1
+pearson_r,Pearson r (V4),sub-02,HC,V4,argmax,0.6916,0.0,-10.0,10.0,0.1667
+pearson_r,Pearson r (V4),sub-03,HC,V4,argmax,0.0032,16.0,-14.0,21.26,0.3073
+pearson_r,Pearson r (V4),sub-04,HC,V4,argmax,0.6292,80.0,-60.0,100.0,1.4142
+pearson_r,Pearson r (V4),sub-05,HC,V4,argmax,0.0377,80.0,-38.0,88.57,1.1837
+pearson_r,Pearson r (V4),sub-06,HC,V4,argmax,0.4634,2.0,-42.0,42.05,0.7004
+pearson_r,Pearson r (V4),sub-08,CVD,V4,argmax,0.8646,78.0,-60.0,98.41,1.3966
+pearson_r,Pearson r (V4),sub-09,CVD,V4,argmax,0.1071,0.0,60.0,60.0,1.0
+l_rank_V1,1 - Spearman ρ (V1),sub-01,HC,V1,argmin,0.3571,76.0,60.0,96.83,1.3793
+l_rank_V1,1 - Spearman ρ (V1),sub-02,HC,V1,argmin,0.5952,0.0,-60.0,60.0,1.0
+l_rank_V1,1 - Spearman ρ (V1),sub-03,HC,V1,argmin,0.3095,80.0,26.0,84.12,1.0899
+l_rank_V1,1 - Spearman ρ (V1),sub-04,HC,V1,argmin,0.2619,0.0,-48.0,48.0,0.8
+l_rank_V1,1 - Spearman ρ (V1),sub-05,HC,V1,argmin,0.381,52.0,-30.0,60.03,0.8201
+l_rank_V1,1 - Spearman ρ (V1),sub-06,HC,V1,argmin,0.881,0.0,34.0,34.0,0.5667
+l_rank_V1,1 - Spearman ρ (V1),sub-08,CVD,V1,argmin,0.0714,68.0,-38.0,77.9,1.06
+l_rank_V1,1 - Spearman ρ (V1),sub-09,CVD,V1,argmin,0.2381,38.0,38.0,53.74,0.7917
+l_topk_V1,Top-K Jaccard distance (V1),sub-01,HC,V1,argmin,0.5,12.0,60.0,61.19,1.0112
+l_topk_V1,Top-K Jaccard distance (V1),sub-02,HC,V1,argmin,0.5,0.0,-60.0,60.0,1.0
+l_topk_V1,Top-K Jaccard distance (V1),sub-03,HC,V1,argmin,0.5,0.0,-60.0,60.0,1.0
+l_topk_V1,Top-K Jaccard distance (V1),sub-04,HC,V1,argmin,0.5,0.0,-60.0,60.0,1.0
+l_topk_V1,Top-K Jaccard distance (V1),sub-05,HC,V1,argmin,0.5,0.0,-60.0,60.0,1.0
+l_topk_V1,Top-K Jaccard distance (V1),sub-06,HC,V1,argmin,0.8,0.0,-60.0,60.0,1.0
+l_topk_V1,Top-K Jaccard distance (V1),sub-08,CVD,V1,argmin,0.5,0.0,-60.0,60.0,1.0
+l_topk_V1,Top-K Jaccard distance (V1),sub-09,CVD,V1,argmin,0.5,0.0,-60.0,60.0,1.0
+cycle12_cross_roi,α·l_topk(V4) + β·l_rank(V1) + 0.2·Tikh (α=β=1),sub-01,HC,V4+V1,argmin,,48.0,48.0,67.88,1.0
+cycle12_cross_roi,α·l_topk(V4) + β·l_rank(V1) + 0.2·Tikh (α=β=1),sub-02,HC,V4+V1,argmin,,4.0,0.0,4.0,0.05
+cycle12_cross_roi,α·l_topk(V4) + β·l_rank(V1) + 0.2·Tikh (α=β=1),sub-03,HC,V4+V1,argmin,,16.0,10.0,18.87,0.2603
+cycle12_cross_roi,α·l_topk(V4) + β·l_rank(V1) + 0.2·Tikh (α=β=1),sub-04,HC,V4+V1,argmin,,18.0,2.0,18.11,0.2275
+cycle12_cross_roi,α·l_topk(V4) + β·l_rank(V1) + 0.2·Tikh (α=β=1),sub-05,HC,V4+V1,argmin,,56.0,-16.0,58.24,0.7491
+cycle12_cross_roi,α·l_topk(V4) + β·l_rank(V1) + 0.2·Tikh (α=β=1),sub-06,HC,V4+V1,argmin,,0.0,0.0,0.0,0.0
+cycle12_cross_roi,α·l_topk(V4) + β·l_rank(V1) + 0.2·Tikh (α=β=1),sub-08,CVD,V4+V1,argmin,,68.0,-38.0,77.9,1.06
+cycle12_cross_roi,α·l_topk(V4) + β·l_rank(V1) + 0.2·Tikh (α=β=1),sub-09,CVD,V4+V1,argmin,,30.0,26.0,39.7,0.5731
+cycle15_opt2_v4mwj_v1lrank,2·mw_jaccard(V4) + 1·l_rank(V1) + 0.2·Tikh,sub-01,HC,V4,argmin,,48.0,48.0,67.88,1.0
+cycle15_opt2_v4mwj_v1lrank,2·mw_jaccard(V4) + 1·l_rank(V1) + 0.2·Tikh,sub-02,HC,V4,argmin,,4.0,0.0,4.0,0.05
+cycle15_opt2_v4mwj_v1lrank,2·mw_jaccard(V4) + 1·l_rank(V1) + 0.2·Tikh,sub-03,HC,V4,argmin,,16.0,10.0,18.87,0.2603
+cycle15_opt2_v4mwj_v1lrank,2·mw_jaccard(V4) + 1·l_rank(V1) + 0.2·Tikh,sub-04,HC,V4,argmin,,62.0,-46.0,77.2,1.0901
+cycle15_opt2_v4mwj_v1lrank,2·mw_jaccard(V4) + 1·l_rank(V1) + 0.2·Tikh,sub-05,HC,V4,argmin,,56.0,-16.0,58.24,0.7491
+cycle15_opt2_v4mwj_v1lrank,2·mw_jaccard(V4) + 1·l_rank(V1) + 0.2·Tikh,sub-06,HC,V4,argmin,,0.0,0.0,0.0,0.0
+cycle15_opt2_v4mwj_v1lrank,2·mw_jaccard(V4) + 1·l_rank(V1) + 0.2·Tikh,sub-08,CVD,V4,argmin,,68.0,-38.0,77.9,1.06
+cycle15_opt2_v4mwj_v1lrank,2·mw_jaccard(V4) + 1·l_rank(V1) + 0.2·Tikh,sub-09,CVD,V4,argmin,,44.0,54.0,69.66,1.0548
+cycle15_opt3_v4mwj_v1mwj,1·mw_jaccard(V4) + 1·mw_jaccard(V1) + 0.2·Tikh,sub-01,HC,V4,argmin,,54.0,28.0,60.83,0.8206
+cycle15_opt3_v4mwj_v1mwj,1·mw_jaccard(V4) + 1·mw_jaccard(V1) + 0.2·Tikh,sub-02,HC,V4,argmin,,4.0,0.0,4.0,0.05
+cycle15_opt3_v4mwj_v1mwj,1·mw_jaccard(V4) + 1·mw_jaccard(V1) + 0.2·Tikh,sub-03,HC,V4,argmin,,0.0,0.0,0.0,0.0
+cycle15_opt3_v4mwj_v1mwj,1·mw_jaccard(V4) + 1·mw_jaccard(V1) + 0.2·Tikh,sub-04,HC,V4,argmin,,64.0,-36.0,73.43,1.0
+cycle15_opt3_v4mwj_v1mwj,1·mw_jaccard(V4) + 1·mw_jaccard(V1) + 0.2·Tikh,sub-05,HC,V4,argmin,,40.0,10.0,41.23,0.527
+cycle15_opt3_v4mwj_v1mwj,1·mw_jaccard(V4) + 1·mw_jaccard(V1) + 0.2·Tikh,sub-06,HC,V4,argmin,,0.0,0.0,0.0,0.0
+cycle15_opt3_v4mwj_v1mwj,1·mw_jaccard(V4) + 1·mw_jaccard(V1) + 0.2·Tikh,sub-08,CVD,V4,argmin,,58.0,-28.0,64.4,0.8622
+cycle15_opt3_v4mwj_v1mwj,1·mw_jaccard(V4) + 1·mw_jaccard(V1) + 0.2·Tikh,sub-09,CVD,V4,argmin,,0.0,0.0,0.0,0.0
+cycle15_opt4_v4mwj_v4spear,1·mw_jaccard(V4) + 1·(1-spearman_r)(V4) + 0.2·Tikh,sub-01,HC,V4,argmin,,0.0,0.0,0.0,0.0
+cycle15_opt4_v4mwj_v4spear,1·mw_jaccard(V4) + 1·(1-spearman_r)(V4) + 0.2·Tikh,sub-02,HC,V4,argmin,,0.0,0.0,0.0,0.0
+cycle15_opt4_v4mwj_v4spear,1·mw_jaccard(V4) + 1·(1-spearman_r)(V4) + 0.2·Tikh,sub-03,HC,V4,argmin,,6.0,-6.0,8.49,0.125
+cycle15_opt4_v4mwj_v4spear,1·mw_jaccard(V4) + 1·(1-spearman_r)(V4) + 0.2·Tikh,sub-04,HC,V4,argmin,,72.0,-42.0,83.35,1.1402
+cycle15_opt4_v4mwj_v4spear,1·mw_jaccard(V4) + 1·(1-spearman_r)(V4) + 0.2·Tikh,sub-05,HC,V4,argmin,,70.0,8.0,70.46,0.8851
+cycle15_opt4_v4mwj_v4spear,1·mw_jaccard(V4) + 1·(1-spearman_r)(V4) + 0.2·Tikh,sub-06,HC,V4,argmin,,0.0,-52.0,52.0,0.8667
+cycle15_opt4_v4mwj_v4spear,1·mw_jaccard(V4) + 1·(1-spearman_r)(V4) + 0.2·Tikh,sub-08,CVD,V4,argmin,,70.0,-52.0,87.2,1.2316
+cycle15_opt4_v4mwj_v4spear,1·mw_jaccard(V4) + 1·(1-spearman_r)(V4) + 0.2·Tikh,sub-09,CVD,V4,argmin,,24.0,32.0,40.0,0.6119
+cycle14_cross_roi_rdm,α·l_topk(V4) + β·(1-cos(ΔRDM_V1)) + 0.2·Tikh (α=β=1),sub-01,HC,V4+V1,argmin,,,,,
+cycle14_cross_roi_rdm,α·l_topk(V4) + β·(1-cos(ΔRDM_V1)) + 0.2·Tikh (α=β=1),sub-02,HC,V4+V1,argmin,,,,,
+cycle14_cross_roi_rdm,α·l_topk(V4) + β·(1-cos(ΔRDM_V1)) + 0.2·Tikh (α=β=1),sub-03,HC,V4+V1,argmin,,,,,
+cycle14_cross_roi_rdm,α·l_topk(V4) + β·(1-cos(ΔRDM_V1)) + 0.2·Tikh (α=β=1),sub-04,HC,V4+V1,argmin,,,,,
+cycle14_cross_roi_rdm,α·l_topk(V4) + β·(1-cos(ΔRDM_V1)) + 0.2·Tikh (α=β=1),sub-05,HC,V4+V1,argmin,,,,,
+cycle14_cross_roi_rdm,α·l_topk(V4) + β·(1-cos(ΔRDM_V1)) + 0.2·Tikh (α=β=1),sub-06,HC,V4+V1,argmin,,,,,
+cycle14_cross_roi_rdm,α·l_topk(V4) + β·(1-cos(ΔRDM_V1)) + 0.2·Tikh (α=β=1),sub-08,CVD,V4+V1,argmin,,58.0,-36.0,68.26,0.9411
+cycle14_cross_roi_rdm,α·l_topk(V4) + β·(1-cos(ΔRDM_V1)) + 0.2·Tikh (α=β=1),sub-09,CVD,V4+V1,argmin,,32.0,22.0,38.83,0.5426
+phase_a_L_LOCO_canonical,α·L_vuln + β·L_rank + δ·L_rdm + ε·L_smooth (canonical phase_a),sub-08,CVD,V4,argmin (weighted),0.881,38.0,-14.0,40.5,0.5292
+phase_a_L_LOCO_canonical,α·L_vuln + β·L_rank + δ·L_rdm + ε·L_smooth (canonical phase_a),sub-09,CVD,V4,argmin (weighted),0.69,6.0,-22.0,22.8,0.3743
+phase_a_L_LOCO_canonical,α·L_vuln + β·L_rank + δ·L_rdm + ε·L_smooth (canonical phase_a),sub-08,CVD,V1,argmin (weighted),,50.0,-14.0,51.92,0.6671
+phase_a_L_LOCO_canonical,α·L_vuln + β·L_rank + δ·L_rdm + ε·L_smooth (canonical phase_a),sub-09,CVD,V1,argmin (weighted),,23.0,3.0,23.19,0.2918
+phase_a_L_LOCO_canonical,α·L_vuln + β·L_rank + δ·L_rdm + ε·L_smooth (canonical phase_a),sub-01,HC,V1,argmin (weighted),,,,,
+phase_a_L_LOCO_canonical,α·L_vuln + β·L_rank + δ·L_rdm + ε·L_smooth (canonical phase_a),sub-01,HC,V4,argmin (weighted),,,,,
+phase_a_L_LOCO_canonical,α·L_vuln + β·L_rank + δ·L_rdm + ε·L_smooth (canonical phase_a),sub-02,HC,V1,argmin (weighted),,,,,
+phase_a_L_LOCO_canonical,α·L_vuln + β·L_rank + δ·L_rdm + ε·L_smooth (canonical phase_a),sub-02,HC,V4,argmin (weighted),,,,,
+phase_a_L_LOCO_canonical,α·L_vuln + β·L_rank + δ·L_rdm + ε·L_smooth (canonical phase_a),sub-03,HC,V1,argmin (weighted),,,,,
+phase_a_L_LOCO_canonical,α·L_vuln + β·L_rank + δ·L_rdm + ε·L_smooth (canonical phase_a),sub-03,HC,V4,argmin (weighted),,,,,
+phase_a_L_LOCO_canonical,α·L_vuln + β·L_rank + δ·L_rdm + ε·L_smooth (canonical phase_a),sub-04,HC,V1,argmin (weighted),,,,,
+phase_a_L_LOCO_canonical,α·L_vuln + β·L_rank + δ·L_rdm + ε·L_smooth (canonical phase_a),sub-04,HC,V4,argmin (weighted),,,,,
+phase_a_L_LOCO_canonical,α·L_vuln + β·L_rank + δ·L_rdm + ε·L_smooth (canonical phase_a),sub-05,HC,V1,argmin (weighted),,,,,
+phase_a_L_LOCO_canonical,α·L_vuln + β·L_rank + δ·L_rdm + ε·L_smooth (canonical phase_a),sub-05,HC,V4,argmin (weighted),,,,,
+phase_a_L_LOCO_canonical,α·L_vuln + β·L_rank + δ·L_rdm + ε·L_smooth (canonical phase_a),sub-06,HC,V1,argmin (weighted),,,,,
+phase_a_L_LOCO_canonical,α·L_vuln + β·L_rank + δ·L_rdm + ε·L_smooth (canonical phase_a),sub-06,HC,V4,argmin (weighted),,,,,

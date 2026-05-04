@@ -23,7 +23,7 @@ from pathlib import Path
 import numpy as np
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
-sys.path.insert(0, str(_SCRIPT_DIR))
+sys.path.insert(0, str(_SCRIPT_DIR.parent))
 
 import loco_distortion_fit as ldf
 from loco_distortion_fit import (
@@ -34,7 +34,7 @@ from loco_distortion_fit import (
 )
 from diagnostic_delta_rdm import compute_delta_rdm_obs
 
-OUT_DIR = (_SCRIPT_DIR.parent / 'results' / 'fits'
+OUT_DIR = (_SCRIPT_DIR.parent.parent / 'results' / 'fits'
            / 'phase_a_2component_hc_sanity')
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 

@@ -35,7 +35,7 @@ from scipy.stats import spearmanr, binom
 # ---------------------------------------------------------------------------
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _PHASE2_DIR = _SCRIPT_DIR.parent  # future_phase2_filter_optimization/
-sys.path.insert(0, str(_SCRIPT_DIR))
+sys.path.insert(0, str(_SCRIPT_DIR.parent))
 
 # Server has pipeline scripts under cone_shift_pipeline/scripts/
 _CONE_DIR = _PHASE2_DIR / 'cone_shift_pipeline' / 'scripts'

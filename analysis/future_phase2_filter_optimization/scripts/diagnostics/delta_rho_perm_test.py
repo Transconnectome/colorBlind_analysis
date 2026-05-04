@@ -43,7 +43,7 @@ from scipy.stats import spearmanr
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _PHASE2_DIR = _SCRIPT_DIR.parent
-sys.path.insert(0, str(_SCRIPT_DIR))
+sys.path.insert(0, str(_SCRIPT_DIR.parent))
 
 _CONE_DIR = _PHASE2_DIR / 'cone_shift_pipeline' / 'scripts'
 if _CONE_DIR.exists() and str(_CONE_DIR) not in sys.path:

@@ -27,7 +27,7 @@ from pathlib import Path
 import sys
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
-sys.path.insert(0, str(_SCRIPT_DIR))
+sys.path.insert(0, str(_SCRIPT_DIR.parent))
 
 _FWD_DIR = str(Path(__file__).resolve().parent.parent.parent.parent
                / 'future_phase1_forward_model' / 'scripts')

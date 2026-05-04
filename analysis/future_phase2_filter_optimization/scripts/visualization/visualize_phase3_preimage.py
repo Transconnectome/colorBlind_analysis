@@ -31,7 +31,7 @@ from scipy.optimize import brentq
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
 if str(_SCRIPT_DIR) not in sys.path:
-    sys.path.insert(0, str(_SCRIPT_DIR))
+    sys.path.insert(0, str(_SCRIPT_DIR.parent))
 
 _PHASE2_DIR = _SCRIPT_DIR.parent
 for _base in [_PHASE2_DIR.parent, _PHASE2_DIR.parent.parent]:

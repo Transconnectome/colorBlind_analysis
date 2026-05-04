@@ -19,7 +19,7 @@ from pathlib import Path
 import numpy as np
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
-sys.path.insert(0, str(_SCRIPT_DIR))
+sys.path.insert(0, str(_SCRIPT_DIR.parent))
 
 from visualize_filter_candidates import (
     cvd_response_lab, find_preimage, L_STAR, CHROMA, SUBJECTS,

@@ -39,7 +39,7 @@ _FWD_DIR = str(_PIPELINE_DIR.parent / 'future_phase1_forward_model' / 'scripts')
 if _FWD_DIR not in sys.path:
     sys.path.insert(0, _FWD_DIR)
 if str(_SCRIPT_DIR) not in sys.path:
-    sys.path.insert(0, str(_SCRIPT_DIR))
+    sys.path.insert(0, str(_SCRIPT_DIR.parent))
 
 # ---------------------------------------------------------------------------
 # Constants

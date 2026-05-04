@@ -41,7 +41,7 @@ _SCRIPT_DIR = Path(__file__).resolve().parent
 _FWD_DIR = str(_SCRIPT_DIR.parent.parent.parent / 'future_phase1_forward_model' / 'scripts')
 if _FWD_DIR not in sys.path:
     sys.path.insert(0, _FWD_DIR)
-sys.path.insert(0, str(_SCRIPT_DIR))
+sys.path.insert(0, str(_SCRIPT_DIR.parent))
 
 from stockman_cone_shift import COLOR_NAMES, HUE_ANGLES_DEG
 from utils_cone_3way import compute_shifted_hue_3way, compute_1way_hue_shift
@@ -118,7 +118,7 @@ def shift_stim_hue(delta_deg):
 # ============================================================================
 # Constants
 # ============================================================================
-RESULTS_BASE = _SCRIPT_DIR.parent / 'results'
+RESULTS_BASE = _SCRIPT_DIR.parent.parent / 'results'
 SIM_DIR = RESULTS_BASE / 'sim'
 CVD_TYPE = {'08': 'deutan', '09': 'protan', '10': 'normal'}
 

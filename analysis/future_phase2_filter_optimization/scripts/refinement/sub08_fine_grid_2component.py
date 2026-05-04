@@ -20,7 +20,7 @@ from pathlib import Path
 import numpy as np
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
-sys.path.insert(0, str(_SCRIPT_DIR))
+sys.path.insert(0, str(_SCRIPT_DIR.parent))
 
 import loco_distortion_fit as ldf
 from loco_distortion_fit import (
@@ -126,7 +126,7 @@ for i, entry in enumerate(result['landscape']):
         print(f'  [{i+1}/{len(result["landscape"])}]')
 print(f'  Pre-image done in {time.time()-t0:.1f}s')
 
-baseline_path = (_SCRIPT_DIR.parent / 'results' / 'fits'
+baseline_path = (_SCRIPT_DIR.parent.parent / 'results' / 'fits'
                  / 'phase_a_2component'
                  / f'sub-{SUBJ}_{ROI}_2component.json')
 baseline_summary = None
@@ -153,7 +153,7 @@ result['note'] = (
     'gap_c5_c6 magnitude maintained for YG-C separability.'
 )
 
-out_dir = (_SCRIPT_DIR.parent / 'results' / 'fits'
+out_dir = (_SCRIPT_DIR.parent.parent / 'results' / 'fits'
            / 'phase_a_2component_finegrid')
 out_dir.mkdir(parents=True, exist_ok=True)
 out_path = out_dir / f'sub-{SUBJ}_{ROI}_2component_finegrid.json'

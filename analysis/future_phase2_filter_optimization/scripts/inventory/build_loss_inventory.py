@@ -435,15 +435,31 @@ with open(OUT_MD, 'w') as f:
         bf_08 = bootstrap_cvd_vs_hc(s['hc_norms'], s08)
         bf_09 = bootstrap_cvd_vs_hc(s['hc_norms'], s09)
 
-        # Stat verdict: emp_p < 0.20 (at most 1/6 HC above) = sig
-        sig08 = (ep_08 is not None and ep_08 <= 0.20)
-        sig09 = (ep_09 is not None and ep_09 <= 0.20)
+        # CI-based stat verdict (robust to single outliers like sub-04):
+        # CVD norm vs bootstrap CI of HC mean.
+        # - CVD > ci_hi → significantly above HC mean (one-sided 95%)
+        # - CVD inside CI → not distinct
+        # Equivalent: bootstrap fraction (HC means below CVD) ≥ 0.975
+        SIG_FRAC = 0.975  # one-sided (CVD > HC mean) at α=0.025
+        sig08 = (bf_08 is not None and bf_08 >= SIG_FRAC)
+        sig09 = (bf_09 is not None and bf_09 >= SIG_FRAC)
+        # Marginal zone (0.90 ≤ frac < 0.975) — CVD likely above but not sig
+        marg08 = (bf_08 is not None and 0.90 <= bf_08 < SIG_FRAC)
+        marg09 = (bf_09 is not None and 0.90 <= bf_09 < SIG_FRAC)
         if sig08 and sig09:
-            sv = '✓✓ both CVD distinct from HC'
+            sv = '✓✓ both CVD > HC bootstrap CI'
+        elif sig08 and marg09:
+            sv = '✓+~ sub-08 sig, sub-09 marginal'
+        elif marg08 and sig09:
+            sv = '✓+~ sub-09 sig, sub-08 marginal'
         elif sig08 or sig09:
-            sv = '✓ one CVD distinct'
+            sv = '✓ one CVD sig (other inside CI)'
+        elif marg08 and marg09:
+            sv = '~~ both marginal'
+        elif marg08 or marg09:
+            sv = '~ one marginal'
         else:
-            sv = '✗ neither CVD distinct'
+            sv = '✗ neither sig (inside HC CI)'
 
         s08_str = f'{s08:.1f}' if s08 is not None else '—'
         s09_str = f'{s09:.1f}' if s09 is not None else '—'

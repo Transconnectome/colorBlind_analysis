@@ -42,21 +42,21 @@ Per user critique 2026-05-03: HC pool of n=6 sensitive to outliers (sub-04 in pa
 
 | Loss variant | ROI | boot_HC_CI | sub-08 | sub-09 | sub-08 emp_p | sub-08 CVD>boot | sub-09 emp_p | sub-09 CVD>boot | Stat verdict |
 |---|---|---|---:|---:|---:|---:|---:|---:|---|
-| `cycle12_cross_roi` | V4+V1 | [7.6, 48.3] | 77.9 | 39.7 | 0.00 (0/6) | 1.00 | 0.33 (2/6) | 0.87 | ✓ one CVD distinct |
-| `cycle15_opt2_v4mwj_v1lrank` | V4 | [13.5, 61.5] | 77.9 | 69.7 | 0.00 (0/6) | 1.00 | 0.17 (1/6) | 1.00 | ✓✓ both CVD distinct from HC |
-| `cycle15_opt3_v4mwj_v1mwj` | V4 | [7.5, 54.9] | 64.4 | 0.0 | 0.17 (1/6) | 1.00 | 1.00 (6/6) | 0.00 | ✓ one CVD distinct |
-| `cycle15_opt4_v4mwj_v4spear` | V4 | [10.1, 63.4] | 87.2 | 40.0 | 0.00 (0/6) | 1.00 | 0.50 (3/6) | 0.63 | ✓ one CVD distinct |
-| `l_dir` | V4 | [16.6, 75.3] | 98.4 | 60.0 | 0.17 (1/6) | 1.00 | 0.33 (2/6) | 0.85 | ✓ one CVD distinct |
-| `l_mag` | V4 | [58.2, 76.7] | 72.8 | 81.4 | 0.50 (3/6) | 0.87 | 0.17 (1/6) | 1.00 | ✓ one CVD distinct |
-| `l_rank` | V4 | [18.0, 74.9] | 95.3 | 58.0 | 0.17 (1/6) | 1.00 | 0.50 (3/6) | 0.77 | ✓ one CVD distinct |
-| `l_rank_V1` | V1 | [47.3, 80.4] | 77.9 | 53.7 | 0.33 (2/6) | 0.94 | 0.67 (4/6) | 0.14 | ✗ neither CVD distinct |
-| `l_topk_V1` | V1 | [60.0, 60.6] | 60.0 | 60.0 | 1.00 (6/6) | 0.00 | 1.00 (6/6) | 0.00 | ✗ neither CVD distinct |
-| `l_topk_jaccard` | V4 | [49.7, 71.5] | 68.3 | 60.0 | 0.33 (2/6) | 0.88 | 0.83 (5/6) | 0.38 | ✗ neither CVD distinct |
-| `mw_jaccard_loss` | V4 | [48.7, 70.5] | 68.3 | 69.7 | 0.17 (1/6) | 0.94 | 0.17 (1/6) | 0.97 | ✓✓ both CVD distinct from HC |
-| `norm_resid` | V4 | [64.9, 98.7] | 96.8 | 50.1 | 0.50 (3/6) | 0.93 | 0.83 (5/6) | 0.00 | ✗ neither CVD distinct |
-| `pearson_r` | V4 | [16.6, 75.3] | 98.4 | 60.0 | 0.17 (1/6) | 1.00 | 0.33 (2/6) | 0.85 | ✓ one CVD distinct |
-| `sign_agree` | V4 | [52.8, 88.0] | 58.9 | 60.0 | 0.67 (4/6) | 0.09 | 0.67 (4/6) | 0.09 | ✗ neither CVD distinct |
-| `spearman_r` | V4 | [18.0, 74.9] | 95.3 | 58.0 | 0.17 (1/6) | 1.00 | 0.50 (3/6) | 0.77 | ✓ one CVD distinct |
+| `cycle12_cross_roi` | V4+V1 | [7.6, 48.3] | 77.9 | 39.7 | 0.00 (0/6) | 1.00 | 0.33 (2/6) | 0.87 | ✓ one CVD sig (other inside CI) |
+| `cycle15_opt2_v4mwj_v1lrank` | V4 | [13.5, 61.5] | 77.9 | 69.7 | 0.00 (0/6) | 1.00 | 0.17 (1/6) | 1.00 | ✓✓ both CVD > HC bootstrap CI |
+| `cycle15_opt3_v4mwj_v1mwj` | V4 | [7.5, 54.9] | 64.4 | 0.0 | 0.17 (1/6) | 1.00 | 1.00 (6/6) | 0.00 | ✓ one CVD sig (other inside CI) |
+| `cycle15_opt4_v4mwj_v4spear` | V4 | [10.1, 63.4] | 87.2 | 40.0 | 0.00 (0/6) | 1.00 | 0.50 (3/6) | 0.63 | ✓ one CVD sig (other inside CI) |
+| `l_dir` | V4 | [16.6, 75.3] | 98.4 | 60.0 | 0.17 (1/6) | 1.00 | 0.33 (2/6) | 0.85 | ✓ one CVD sig (other inside CI) |
+| `l_mag` | V4 | [58.2, 76.7] | 72.8 | 81.4 | 0.50 (3/6) | 0.87 | 0.17 (1/6) | 1.00 | ✓ one CVD sig (other inside CI) |
+| `l_rank` | V4 | [18.0, 74.9] | 95.3 | 58.0 | 0.17 (1/6) | 1.00 | 0.50 (3/6) | 0.77 | ✓ one CVD sig (other inside CI) |
+| `l_rank_V1` | V1 | [47.3, 80.4] | 77.9 | 53.7 | 0.33 (2/6) | 0.94 | 0.67 (4/6) | 0.14 | ~ one marginal |
+| `l_topk_V1` | V1 | [60.0, 60.6] | 60.0 | 60.0 | 1.00 (6/6) | 0.00 | 1.00 (6/6) | 0.00 | ✗ neither sig (inside HC CI) |
+| `l_topk_jaccard` | V4 | [49.7, 71.5] | 68.3 | 60.0 | 0.33 (2/6) | 0.88 | 0.83 (5/6) | 0.38 | ✗ neither sig (inside HC CI) |
+| `mw_jaccard_loss` | V4 | [48.7, 70.5] | 68.3 | 69.7 | 0.17 (1/6) | 0.94 | 0.17 (1/6) | 0.97 | ~~ both marginal |
+| `norm_resid` | V4 | [64.9, 98.7] | 96.8 | 50.1 | 0.50 (3/6) | 0.93 | 0.83 (5/6) | 0.00 | ~ one marginal |
+| `pearson_r` | V4 | [16.6, 75.3] | 98.4 | 60.0 | 0.17 (1/6) | 1.00 | 0.33 (2/6) | 0.85 | ✓ one CVD sig (other inside CI) |
+| `sign_agree` | V4 | [52.8, 88.0] | 58.9 | 60.0 | 0.67 (4/6) | 0.09 | 0.67 (4/6) | 0.09 | ✗ neither sig (inside HC CI) |
+| `spearman_r` | V4 | [18.0, 74.9] | 95.3 | 58.0 | 0.17 (1/6) | 1.00 | 0.50 (3/6) | 0.77 | ✓ one CVD sig (other inside CI) |
 
 ## Per-subject details (HC dispersion check)
 

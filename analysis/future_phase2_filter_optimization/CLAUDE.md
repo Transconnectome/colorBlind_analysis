@@ -33,23 +33,38 @@
 | A11 | Single mechanism per subject | Per-subject 1개 model class만 채택. 모델 class 간 ensemble averaging 금지. |
 | A12 | 2-component은 CIELab opponent space 작동 | RGB/cone space 아님. C_baseline은 `machado_shifted_hue(0.0, family)` (CIELab nominal 각도 금지). |
 
-## 2.5. Loss Inventory + HC Sanity Check (NEW 2026-05-03)
+## 2.5. Loss Inventory + HC Sanity Check (NEW 2026-05-03, CI-revised 2026-05-04)
 
-**Document**: `results/loss_inventory.md` + `.csv` (12 loss variants × 8 subjects, bootstrap rank-based 통계)
+**Document**: `results/inventory/loss_inventory.{md,csv}` (15 loss variants × 8 subjects)
 
-**Sanity 원칙**: 좋은 loss는 HC subjects (β_s, β_c) ≈ (0,0) AND CVD subjects ≠ (0,0)이어야. Rank-based emp_p (CVD norm 위에 있는 HC fraction) ≤ 0.20 = sig.
+**Verdict 기준 (CI-based, robust to single HC outliers)**:
+- For each (loss × subject): bootstrap HC mean (10000 resamples) → `boot_frac` = fraction of HC means below CVD norm.
+- **✓✓ both sig** = both CVD `boot_frac` ≥ 0.975 (one-sided 95% CI)
+- **~~ marginal** = both CVD 0.90 ≤ `boot_frac` < 0.975
+- **✗ inside HC CI** = `boot_frac` < 0.90
 
-**Top results** (✓✓ verdict = 두 CVD 모두 통계 distinct):
+이전 rank-based emp_p (1/6, 2/6 등 discrete)는 sub-04 같은 outlier 1개에 sensitive — CI 기반으로 변경.
 
-1. **`cycle15_opt2_v4mwj_v1lrank`** = `2·mw_jaccard(V4) + 1·l_rank(V1) + 0.2·Tikh` — **overall winner**
-   - sub-08 emp_p=**0.00** (perfect — 0/6 HC above), sub-09 emp_p=0.17 (1/6 HC above)
-   - sub-08 (β_s=68, β_c=−38) — same as Cycle 12
-   - **sub-09 (β_s=44, β_c=+54)** — same as mw_jaccard_loss alone (cross-validation)
+**Top results**:
 
-2. **`mw_jaccard_loss`** @ V4 (alone) — sub-08 emp_p=0.17, sub-09 emp_p=0.17
+1. **`cycle15_opt2_v4mwj_v1lrank`** = `2·mw_jaccard(V4) + 1·l_rank(V1) + 0.2·Tikh`
+   - sub-08 boot_frac=**1.000** (HC 누구도 sub-08보다 위 아님)
+   - sub-09 boot_frac=**0.996** (CVD가 boot mean 분포의 99.6% 위)
+   - **caveat**: sub-09는 HC가 양극화 분포 (4 HC very low + sub-04/05 high) 덕분에 wide CI, sub-09 (norm 69.7)는 sub-04 (77.2) 옆 zone에 위치. sub-04 outlier 의존 (제외 시 boot_frac 1.000으로 더 강해짐).
+   - sub-08 (β_s=68, β_c=−38) — same as Cycle 12; sub-09 (β_s=44, β_c=+54) — same as mw_jaccard alone
 
-✓ one distinct: `cycle12_cross_roi`, `l_dir`, `pearson_r`, `spearman_r`, `l_rank`, `l_mag`, `cycle15_opt3`, `cycle15_opt4`
-✗ neither distinct: `l_topk_V1`, `sign_agree`, `norm_resid`, `l_topk_jaccard`
+2. **`mw_jaccard_loss`** @ V4 (alone) — **~~ marginal** (CI-based 강등)
+   - sub-08 boot_frac=0.94, sub-09 boot_frac=0.97 (둘 다 0.975 미달)
+   - HC 분포가 좁음 (34-78) → CVD가 같은 zone, distinct 약함
+   - 이전 ✓✓ 평가는 rank-based의 outlier-단감도 한계
+
+✓ one sig: `cycle12_cross_roi`, `l_dir`, `pearson_r`, `spearman_r`, `l_rank`, `l_mag`, `cycle15_opt3`, `cycle15_opt4`
+~~ marginal: `mw_jaccard_loss` (alone), `norm_resid`, `l_rank_V1`
+✗ inside CI: `l_topk_V1`, `sign_agree`, `l_topk_jaccard`
+
+**정직한 결론**:
+- **Sub-08**: 여러 loss가 strong distinct — robust signal across formulations
+- **Sub-09**: cycle15_opt2만 ✓ sig, 그러나 sub-04 HC outlier 위치에 의존. **어떤 loss도 sub-04 outlier-independent 한 strong distinct 만들지 못함**. 행동 검증 결정적.
 
 **중요한 함의**:
 1. 사용자 (Q3, 2026-05-03) 통찰 evidence-confirmed: **현재 모든 loss는 HC vs CVD 통계적 구별 weak** (단 mw_jaccard_loss 예외)

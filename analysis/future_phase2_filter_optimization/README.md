@@ -10,32 +10,34 @@
 
 ## ⭐ Current Filter Candidates (2026-05-03)
 
-Per `results/inventory/loss_inventory.md` (12+ loss variants × HC sanity check). HC sanity = empirical p of CVD norm being above HC distribution; **lower = more CVD-distinct**. ✓✓ = both CVD distinct (sub-08, sub-09 each emp_p ≤ 0.20 = at most 1/6 HC above).
+Per `results/inventory/loss_inventory.md` (15 loss variants × HC sanity check). HC sanity uses **bootstrap CI**: 10000 resamples of HC mean norm, then `boot_frac` = fraction of HC means below CVD norm. **✓✓ both sig** = both CVD `boot_frac` ≥ 0.975 (one-sided 95%). **~~ marginal** = 0.90 ≤ `boot_frac` < 0.975. CI-based replaces earlier rank emp_p (sensitive to single HC outliers like sub-04).
 
 ### Sub-08 (deutan) candidates
 
-| 후보 | (β_s, β_c) | 출처 | HC sanity |
+| 후보 | (β_s, β_c) | 출처 | HC sanity (CI-based) |
 |---|:---:|---|---|
 | **§3 canonical** | **(38°, −14°)** | Phase A LOCO ρ argmax | behav §3 PASS (YG-C 분리), HC fit pending server |
-| V4 cycle10d | (38°, +7°) | z_combined argmin (cycle10d Variant A) | (no inventory entry — not in cycle landscape) |
+| V4 cycle10d | (38°, +7°) | z_combined argmin (cycle10d Variant A) | (no inventory entry) |
 | V1+V4 avg | (19°, +3.5°) | per-ROI argmin 산술평균 | (no entry — V1 (0,0) drags) |
-| Cycle 12 cross-ROI | (68°, −38°) | α·l_topk(V4) + β·l_rank(V1) | ✓ sub-08 perfect (0/6 HC above), sub-09 marginal |
-| **Cycle 15 opt2** ✓✓ | **(68°, −38°)** | 2·mw_jaccard(V4) + 1·l_rank(V1) | **✓✓ sub-08=0.00, sub-09=0.17 (winner)** |
-| mw_jaccard alone | (58°, −36°) | mw_jaccard_loss @ V4 | ✓✓ both CVD ep_p=0.17 |
+| Cycle 12 cross-ROI | (68°, −38°) | α·l_topk(V4) + β·l_rank(V1) | ✓ sub-08 boot_frac=1.00, sub-09 inside CI |
+| **Cycle 15 opt2** | **(68°, −38°)** | 2·mw_jaccard(V4) + 1·l_rank(V1) | **✓✓ sub-08 boot_frac=1.00, sub-09 boot_frac=0.996** |
+| mw_jaccard alone | (58°, −36°) | mw_jaccard_loss @ V4 | ~~ both marginal (sub-08=0.94, sub-09=0.97) |
 
-→ **Sub-08 (68, −38) confirmed by 2 independent loss formulations** (Cycle 12 + Cycle 15 opt2). §3 canonical (38, −14) is the only behaviorally PASS-validated. Behavioral session in progress.
+→ **Sub-08 (68, −38) statistically robust** across 2 independent loss formulations (Cycle 12 + Cycle 15 opt2), boot_frac=1.000. **§3 canonical (38, −14) behaviorally validated** (PASS). Sub-08 has multiple convergent strong signals.
 
 ### Sub-09 (protan) candidates
 
-| 후보 | (β_s, β_c) | 출처 | HC sanity |
+| 후보 | (β_s, β_c) | 출처 | HC sanity (CI-based) |
 |---|:---:|---|---|
-| Phase A LOCO | (6°, −22°) | LOCO ρ argmax (canonical) | ✓ but marginal (sub-09 ep_p=0.50 raw spearman) |
-| Cycle 12 cross-ROI | (30°, +26°) | α·l_topk(V4) + β·l_rank(V1) | ✓ but sub-09 ep_p=0.33 (one CVD only) |
+| Phase A LOCO | (6°, −22°) | LOCO ρ argmax (canonical) | ~~ marginal (boot_frac near 0.5 for spearman) |
+| Cycle 12 cross-ROI | (30°, +26°) | α·l_topk(V4) + β·l_rank(V1) | one-CVD only (sub-09 inside HC CI) |
 | Cycle 14 cross-ROI RDM | (32°, +22°) | α·l_topk(V4) + β·(1-cos(ΔRDM_V1)) | ≈ Cycle 12 (V1 metric 무관) |
-| **mw_jaccard alone** ✓✓ | **(44°, +54°)** | mw_jaccard_loss @ V4 | **✓✓ ep_p=0.17 (winner)** |
-| **Cycle 15 opt2** ✓✓ | **(44°, +54°)** | 2·mw_jaccard(V4) + 1·l_rank(V1) | **✓✓ ep_p=0.17 (cross-validated)** |
+| mw_jaccard alone | (44°, +54°) | mw_jaccard_loss @ V4 | ~~ marginal (boot_frac=0.97, just below 0.975) |
+| **Cycle 15 opt2** | **(44°, +54°)** | 2·mw_jaccard(V4) + 1·l_rank(V1) | **✓ sub-09 boot_frac=0.996, BUT sub-04 outlier 의존** |
 
-→ **Sub-09 (44, +54) confirmed by 2 independent loss formulations**. Phase A LOCO (6, −22) is canonical baseline; behavioral test will determine which extracts true compensation pattern.
+→ **Sub-09 (44, +54)** is the **only candidate passing CI-based ✓ sig**, but with caveat: HC distribution is bimodal (sub-04 outlier at norm=77.2 vs others). Sub-09 (norm=69.7) sits in the high zone next to sub-04. Sub-04 제외 시 sub-09 boot_frac=1.000 (5 HC만으로는 신뢰도 약함). **No loss gives sub-04-independent strong distinct for sub-09**.
+
+**Honest summary**: sub-08 multiple convergent loss → robust. sub-09 single (44, +54) candidate (cross-validated by mw_jaccard alone + opt2) but statistically borderline due to small HC pool + sub-04 outlier. **Behavioral validation is decisive for sub-09**.
 
 ### Selection rule
 

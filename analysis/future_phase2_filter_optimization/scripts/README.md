@@ -23,6 +23,13 @@ Last updated: 2026-05-04 (subdir restructure: 65+ files → 9 semantic categorie
 - `step4_summary.py` — final summary
 - `comprehensive_2component_analysis.py` — 2-component canonical analysis
 
+**Active loss optimization** (cross-criterion losses for current candidates — promoted from cycles/ on 2026-05-04 since they define current main trial losses):
+- `cycle12_loss_cross_roi.py` — `L = α·l_topk(V4) + β·l_rank(V1) + 0.2·Tikh`
+- `cycle14_v1_rdm_cross.py` — `L = α·l_topk(V4) + β·(1-cos(ΔRDM_V1)) + 0.2·Tikh`
+- `cycle15_mwjaccard_cross.py` — **CURRENT WINNER**: `L = 2·mw_jaccard(V4) + 1·l_rank(V1) + 0.2·Tikh` → ✓✓ both CVD distinct from HC
+
+These read landscape data from `results/cycles/` and write outputs back there, but their .py is at top-level because they define the active main loss formulations.
+
 ## Subdirs (semantic categories)
 
 ```

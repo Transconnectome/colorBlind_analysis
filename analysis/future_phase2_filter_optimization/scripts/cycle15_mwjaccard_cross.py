@@ -24,7 +24,7 @@ import numpy as np
 _SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(_SCRIPT_DIR))
 
-LANDSCAPE_DIR = (_SCRIPT_DIR.parent.parent / 'results'
+LANDSCAPE_DIR = (_SCRIPT_DIR.parent / 'results'
                  / 'cycles')
 OUT_JSON = LANDSCAPE_DIR / 'cycle15_mwjaccard_cross.json'
 OUT_CSV = LANDSCAPE_DIR / 'cycle15_mwjaccard_cross.csv'

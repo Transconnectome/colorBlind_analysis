@@ -30,8 +30,8 @@ from pathlib import Path
 import numpy as np
 
 _SCRIPT_DIR = Path(__file__).resolve().parent
-_PHASE2_SCRIPTS = _SCRIPT_DIR.parent
-sys.path.insert(0, str(_PHASE2_SCRIPTS))
+_PHASE2_SCRIPTS = _SCRIPT_DIR  # now top-level scripts/
+sys.path.insert(0, str(_SCRIPT_DIR))
 
 import loco_distortion_fit as ldf
 from loco_distortion_fit import (
@@ -43,7 +43,7 @@ from diagnostic_delta_rdm import (
     compute_delta_rdm_obs, compute_delta_rdm_sim, cosine_similarity,
 )
 
-ROOT = _PHASE2_SCRIPTS.parent
+ROOT = _SCRIPT_DIR.parent  # future_phase2_filter_optimization/
 RES = ROOT / 'results' / 'cycles'
 RES.mkdir(parents=True, exist_ok=True)
 

@@ -101,6 +101,9 @@ analysis/**/results/
 # Re-ignore data file types inside the now-allowed dirs (track only docs)
 analysis/**/results/**/*.json
 analysis/**/results/**/*.npy
+# Allow primary preprocessed amplitude data (shared via git / git-lfs for onboarding)
+!analysis/phase1_procrustes_decoding/results/full_dataset_C010/**/*.npy
+!analysis/phase1_procrustes_decoding/results/visualization/full_dataset_C010_with_residuals/**/*.npy
 analysis/**/results/**/*.npz
 analysis/**/results/**/*.png
 analysis/**/results/**/*.jpg

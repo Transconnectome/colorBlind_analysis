@@ -1,0 +1,50 @@
+# colorBlind_analysis — Windows local environment
+#
+# ─── RECOMMENDED: WSL2 (Windows Subsystem for Linux) ───────────────────────
+# BrainIAK (SRM) is officially supported on Linux/macOS only.
+# For full pipeline compatibility, use WSL2 with Ubuntu 22.04:
+#   1. Enable WSL2: wsl --install -d Ubuntu-22.04
+#   2. Inside WSL2, install Miniconda and use environment_mac.yml instead.
+#
+# ─── NATIVE WINDOWS (no WSL2) ───────────────────────────────────────────────
+# All analysis EXCEPT SRM re-training runs fine on native Windows.
+# Preprocessed SRM outputs are already committed to the repository,
+# so you only need brainiak if you intend to re-run SRM from scratch.
+#
+# If you do need BrainIAK on native Windows:
+#   1. Install Microsoft MPI (MS-MPI):
+#      https://learn.microsoft.com/en-us/message-passing-interface/microsoft-mpi
+#   2. After env creation, run: pip install brainiak
+#
+# Install:
+#   conda env create -f environment_windows.yml
+#   conda activate colorblind
+#
+# Verify:
+#   python -c "import nilearn, nibabel, sklearn; print('Core packages OK')"
+
+name: colorblind
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.9
+  # Core scientific stack (all Windows-native)
+  - numpy>=1.24
+  - scipy>=1.13
+  - scikit-learn>=1.6
+  - matplotlib>=3.9
+  - pandas>=2.3
+  - seaborn>=0.13
+  - statsmodels>=0.14
+  - joblib>=1.5
+  - pillow>=10
+  - psutil>=5.9
+  # Neuroimaging (Windows-native via conda-forge)
+  - nibabel>=5.3
+  - nilearn>=0.12
+  # MPI + BrainIAK (optional — requires MS-MPI installed system-wide first)
+  # Uncomment if you have MS-MPI and need to re-run SRM:
+  # - mpi4py>=4.0
+  # - pip:
+  #   - brainiak>=0.12

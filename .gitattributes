@@ -1,0 +1,5 @@
+# Git LFS tracking for large preprocessed fMRI amplitude arrays
+# full_dataset_C010 (11 MB, max 324 KB/file) → plain git, no LFS needed
+# full_dataset_C010_with_residuals (186 MB, max 12 MB/file) → LFS
+
+analysis/phase1_procrustes_decoding/results/visualization/full_dataset_C010_with_residuals/**/*.npy filter=lfs diff=lfs merge=lfs -text

@@ -335,29 +335,74 @@ These were the original phase plans, now superseded by the SRM-based approach (P
 
 ### Requirements
 
-- Python 3.8+
-- Conda (recommended)
-- SLURM cluster (for large-scale analysis)
+- Python 3.9
+- Conda (Miniconda or Anaconda)
+- Git LFS (`git lfs install` — required for residual array files)
+- SLURM cluster (for server-side large-scale analysis only)
 
-### Setup
+### Quick Start
 
-1. **Clone repository**
-   ```bash
-   git clone https://github.com/yourusername/colorBlind_analysis.git
-   cd colorBlind_analysis
-   ```
+```bash
+git clone https://github.com/haba6030/colorBlind_analysis.git
+cd colorBlind_analysis
+git lfs pull          # download large residual arrays tracked by LFS
+```
 
-2. **Create conda environment**
-   ```bash
-   conda env create -f environment.yml
-   # Server: conda activate nilearn
-   # Local (SRM analysis): conda activate srm
-   ```
+### Environment Setup
 
-3. **Verify installation**
-   ```bash
-   python -c "import nilearn, nibabel, sklearn; print('Success!')"
-   ```
+#### Mac / Linux (full pipeline including BrainIAK SRM)
+
+```bash
+# macOS: install OpenMPI first
+brew install open-mpi
+
+# Ubuntu/Debian
+sudo apt install libopenmpi-dev
+
+conda env create -f environment_mac.yml
+conda activate colorblind
+```
+
+#### Windows (native — all analysis except SRM re-training)
+
+```bash
+conda env create -f environment_windows.yml
+conda activate colorblind
+```
+
+> **Windows + BrainIAK SRM**: BrainIAK is not officially supported on native Windows.
+> Install [MS-MPI](https://learn.microsoft.com/en-us/message-passing-interface/microsoft-mpi),
+> then uncomment the `mpi4py` / `brainiak` lines in `environment_windows.yml`.
+> For full compatibility, **WSL2 with Ubuntu** is strongly recommended — use `environment_mac.yml` inside WSL2.
+
+#### Server (`node3`, `nilearn` env)
+
+```bash
+conda activate nilearn          # pre-installed on the server
+# CRITICAL: always prefix BrainIAK scripts with mpirun
+mpirun -np 1 python script.py  # bare 'python' crashes with PMIx error
+```
+
+### Data Layout after Clone
+
+Preprocessed amplitude arrays are included directly in this repository:
+
+| Path | Size | Contents |
+|---|---|---|
+| `analysis/phase1_procrustes_decoding/results/full_dataset_C010/` | 11 MB | Procrustes-aligned amplitudes — **primary input for all analyses** |
+| `analysis/phase1_procrustes_decoding/results/visualization/full_dataset_C010_with_residuals/` | 186 MB | Same + 2nd-level residuals (Git LFS) |
+| `data/behavior/` | 320 KB | JND and 8-AFC behavioural data |
+
+Raw fMRI BIDS data (`data/sub-*/`) is **not** in this repository (IRB/privacy + 20 GB). Contact the PI for access.
+
+### Verify Installation
+
+```bash
+conda activate colorblind
+python -c "import nilearn, nibabel, sklearn, scipy; print('Core OK')"
+# If BrainIAK installed:
+mpirun -np 1 python -c "from brainiak.funcalign.srm import SRM; print('BrainIAK OK')"
+```
 
 ---
 

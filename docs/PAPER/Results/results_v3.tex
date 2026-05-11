@@ -1,0 +1,438 @@
+% Results Section — v3 (2026-04-17)
+% v3 changes over v2 (per PI directives):
+%   (1) LORO reframed as "filter-applicability baseline" (not Q1/Q2 dissociation)
+%   (2) Sub-10 removed from main text (behavioral follow-up infeasible);
+%       Ishihara/8AFC reports two CVD participants only.
+%   (3) SRM ΔRDM inserted as a convergence bridge between LOCO fit and filter,
+%       not as a primary fitting criterion.
+%   (4) Specificity defense reworked: within-study Sub-10 anchor removed,
+%       replaced by cross-criterion (LOCO + ΔRDM) + Emery 21.4° external match
+%       + physiological Δλ range.
+%
+% === Structural / factual review (inserted 2026-04-19) ==========================
+% Factual corrections applied inline (see %% FIX markers below):
+%   - §R5 "fails all three cases" → "fails in both CVD cases" (sub-10 excluded per
+%     project policy; see future_phase2_filter_optimization/CLAUDE.md rule 7).
+%   - §R5 and §R6 β_s "converges at ~21.5° for both CVD participants" rewritten
+%     to reflect the actual per-subject values (Sub-08 ≈ 20°, Sub-09 ≈ 23°;
+%     mean ≈ 21.5°). "both converge at ~21.5°" overstated the pointwise match.
+%
+% Residual items flagged as TODO (require Authors' verification, not edited):
+%   - §R5 Sub-09: "LOCO-fit Machado Δλ = 13.5 nm predicts V1 ΔRDM at p = 0.026".
+%     Internal analysis records attribute the V1 ΔRDM p = 0.026 for Sub-09 to
+%     the R+C fit (Δλ = 19.5 nm, g = −1.10), not to the LOCO-fit Machado
+%     (Δλ = 13.5 nm). If LOCO-fit Machado was separately projected into ΔRDM
+%     and independently reached p = 0.026, this should be sourced; otherwise
+%     the convergence claim should be restated against the R+C parameters.
+%
+% Structural gaps vs. Introduction v2 and project CLAUDE.md (no rewrites done,
+% flagged for the next substantive revision):
+%   - §R4 vs §R6 2-component status: §R4 reports the retinal-family closed-
+%     testing winner (R+C for Sub-08, Machado for Sub-09) as the "primary
+%     per-case description" and the 2-component fit is introduced late in §R4.
+%     §R6 then elevates the 2-component model to "the primary filter
+%     substrate" on bijectivity grounds. This promotion is coherent but the
+%     link between §R4 "primary description" and §R6 "primary filter" could be
+%     tightened in a single sentence at the end of §R4.
+%   - §R3 HC hV4 ρ = 0.42 vs. CVD floor ρ = 0.08 / 0.12: the exact derivation
+%     of these numbers (encoder settings, pooling) is implicit. A single
+%     pointer to Methods §LOCO would help the reader parse the magnitudes.
+%   - §R5 closes with "LOCO is the more informative phenotype and ΔRDM is
+%     best used as a cross-check." This is consistent with project policy
+%     (see phase2_SRM_across_between/CLAUDE.md) but the "partially absorbs
+%     the cone-shift signal" claim is not operationalised in Methods; a
+%     pointer would help.
+% =================================================================================
+%
+% Target: eLife / Current Biology / Nature Communications
+%
+% Figures (same assets, relabelled):
+%   fig1a_output.png        — Pipeline (Fig 1a)
+%   fig1_panels_bcd.pdf     — LOCO profiles (Fig 1b,c only; Sub-10 panel moved to Supp)
+%   fig2_output.png         — Correction feasibility (Fig 2)
+%   fig_hc_specificity.pdf  — HC FPR (Fig S1; supplement, for specificity context)
+%
+% Structure (6 subsections):
+%   R1. Clinical phenotype and participants (Sub-08, Sub-09)
+%   R2. LORO preserved — the filter precondition (baseline-applicability check)
+%   R3. LOCO vulnerability — the filter target (individual distortion fingerprint)
+%   R4. LOCO-fitted distortion parameters (Machado / R+C / 2-component)
+%   R5. SRM ΔRDM convergence — auxiliary geometric validation between fit and filter
+%   R6. Pre-image inversion — individual correction filters and their divergence
+
+\section{Results}
+\label{sec:results}
+
+\subsection{Clinical phenotype and participants}
+\label{sec:results:behavior}
+
+Two CVD participants with contrasting severity and axis were recruited
+alongside seven healthy controls (HC). Both CVD participants were
+male and completed the 14-plate Ishihara pseudoisochromatic
+test~\citep{ishihara1917}. Sub-08 was classified as mild--moderate
+deuteranomalous (8/14 plates misread; protan--deutan discrimination
+plate indicating deutan axis); Sub-09 as moderate--severe
+protanomalous (11/14 plates misread; protan axis). These two cases
+span the deutan vs.\ protan dichotomy and the mild vs.\ moderate
+severity range that a clinically useful filter must accommodate.
+
+Same-day 8-alternative forced-choice identification of the eight
+scanner stimuli confirmed the Ishihara categorisation (HC accuracy
+$0.94 \pm 0.04$, Sub-09 $= 0.62$, Sub-08 $= 0.71$; chance
+$= 0.125$). Sub-08's errors clustered on the red--green confusion
+axis (colours c2/c3 vs.\ c7; mean confusion $28\%$); Sub-09's errors
+extended along the full L--M opponent range with additional
+misidentification of magenta (c8). The 2--12~nm range of L/M cone
+opsin polymorphisms in anomalous
+trichromats~\citep{neitz2011, deeb2005} and the $\sim$8\% prevalence
+of male CVD~\citep{bosten2019} locate these two cases within the
+physiologically and epidemiologically relevant window.
+
+Because only two symptomatic CVD cases were available, all inferences
+below are explicitly framed as single-case analyses in the
+Crawford--Howell tradition~\citep{crawford1998, schuett2023}; no
+group-level CVD claim is made.
+
+% A third CVD-adjacent participant (Sub-10; near-normal deutan,
+% 2/14 plates misread) completed scanning but is excluded from the
+% main analysis because (i) his 8AFC accuracy (0.88) is indistinguishable
+% from HC and (ii) same-day behavioural follow-up for the pre-image
+% filter is not feasible in this cohort. Supplementary \cref{app:sub10}
+% reports his neural data as an incidental control.
+
+\subsection{LORO preserved --- the filter precondition}
+\label{sec:results:loro}
+
+A per-subject corrective filter is only meaningful if the visual cortex
+of a CVD individual still supports categorical discrimination among
+the target hues: if the 8 displayed colours cannot be told apart at
+all, no stimulus-space nudge can restore them. We therefore first
+established that hV4 in CVD preserves the category-level code using
+leave-one-run-out (LORO) cross-validation of the forward encoding
+model.
+
+Classification accuracy in hV4 exceeded the 0.125 chance rate in every
+individual (HC $= 0.68 \pm 0.11$, CVD $= 0.64 \pm 0.09$, mean $\pm$ SD
+across 6 runs), and a between-group permutation test showed no
+HC--CVD difference at any retinotopic ROI (hV4 $p = 0.668$; V1
+$p = 0.542$; V2 $p = 0.611$; 10{,}000 label permutations;
+\cref{tab:loro,app:tables}). The same pattern held under SRM-aligned
+features. In line with previous work on CVD identification performance
+at above-threshold contrast~\citep{bosten2019, boehm2014}, this result
+confirms that the 8 scanner stimuli are individually distinguishable
+at the cortical level --- the representational substrate on which a
+filter could act is present.
+
+LORO therefore plays a dual role in what follows: (i) it establishes
+the baseline applicability of the corrective-filter programme in both
+CVD participants, and (ii) it provides the null against which the
+continuous-geometry phenotype (\cref{sec:results:loco}) is contrasted.
+The complementary impairment in continuous-geometry interpolation is
+the expected and required finding: had LOCO been spared alongside
+LORO, no cortical target for correction would exist; had LORO been
+lost, no starting representation for correction would exist. Finding
+LORO preserved and LOCO impaired is the signature of a condition in
+which a cortical-geometry-derived filter is both \emph{warranted} and
+\emph{tractable}.
+
+\subsection{LOCO vulnerability --- the filter target}
+\label{sec:results:loco}
+
+We next asked where the continuous hue geometry fails --- the target
+on which a corrective transform must act. Leave-one-colour-out (LOCO)
+cross-validation trains the encoder on 7 of 8 hues and measures
+prediction error for the held-out hue, yielding an 8-dimensional
+\emph{vulnerability vector} $\mathbf{v} \in \mathbb{R}^{8}$ per
+participant.
+
+HC participants achieved above-chance hue interpolation in hV4
+($\rho = 0.42 \pm 0.14$ between held-out and predicted responses;
+\cref{fig:main}b,c gray reference), replicating \citet{brouwer2009}.
+Both CVD participants fell near floor at hV4 (Sub-08 $\rho = 0.08$;
+Sub-09 $\rho = 0.12$) and showed large HC--CVD effects in early visual
+cortex (Hedges' $g = 1.61$ in V1, $g = 1.85$ in V2, $g = 1.34$ in
+hV4; all $p_{\text{perm}} < 0.03$). Crucially, the \emph{per-hue}
+vulnerability pattern differs between the two CVD participants in a
+way consistent with their diagnostic axis: Sub-08's largest errors lie
+on c2/c3 (orange/yellow) and c7 (purple); Sub-09's errors cluster on
+c5/c6 (cyan/blue) with magenta (c8) as a further outlier
+(\cref{fig:main}b,c gray bars). Each participant's vulnerability
+profile is thus an individually-structured target that group-level
+classification metrics cannot surface.
+
+\begin{figure*}[tb]
+  \centering
+  \includegraphics[width=\textwidth]{Figures/generated/fig1a_output.png}\\[0.6em]
+  \includegraphics[width=0.85\textwidth]{Figures/generated/fig1_panels_bcd.pdf}
+  \caption{\textbf{Subject-specific distortion fields recovered from
+  structured hV4 representations.}
+  \textbf{(a)} Pipeline. Procrustes-aligned fMRI amplitudes
+  ($6 \times 8 \times V$) feed a forward encoder with $K{=}3$ half-wave
+  rectified squared sinusoidal channels. LOCO cross-validation yields
+  the vulnerability profile $\mathbf{v} \in \mathbb{R}^{8}$; this is
+  inverted to $\leq$2 DOF distortion parameters (retinal
+  Machado / retinal+cortical R+C / cortical 2-component) and validated
+  against the independent SRM $\Delta$RDM before pre-image inversion
+  produces a per-hue correction filter.
+  \textbf{(b)} Sub-08 (deutan): best-family R+C model fit
+  ($\Delta\lambda = 2.0$~nm, $g = +2.25$, $\rho = 0.857$,
+  $p = 0.005$).
+  \textbf{(c)} Sub-09 (protan): best-family Machado model fit
+  ($\Delta\lambda = 13.5$~nm, $\rho = 0.762$, $p = 0.018$).
+  Gray bars: observed LOCO vulnerability; coloured line: simulated
+  vulnerability under the best-fit model. $p$-values are
+  $8! = 40{,}320$ exact permutations of colour labels on Spearman
+  $\rho$.}
+  \label{fig:main}
+\end{figure*}
+
+\subsection{LOCO-fitted distortion fields}
+\label{sec:results:inference}
+
+The vulnerability vector $\mathbf{v}$ is the phenotype we invert into
+a low-dimensional distortion field. For each participant we fitted
+three nested models by grid search under the composite loss of
+\cref{eq:loss}: (i) the 1-DOF Machado cone shift
+($\Delta\lambda$;~\citealp{machado2009}), (ii) the 2-DOF
+retinal+cortical R+C model ($\Delta\lambda, g$;~\citealp{tregillus2021}),
+and (iii) the 2-DOF cortical 2-component angular dilation
+($\beta_s$ for S-cone axis, $\beta_c$ for confusion axis). Because
+R+C strictly contains Machado as its $g{=}0$ limit, we applied a
+closed-testing rule within the retinal family: the more complex
+model was only reported if the simpler one failed to reach
+significance.
+
+\paragraph{Sub-09 (moderate protanomaly).}
+The 1-DOF Machado model with $\Delta\lambda = 13.5$~nm captured
+$\mathbf{v}_{\text{Sub-09}}$ at $\rho = 0.762$, $p_{\text{perm}} = 0.018$
+(\cref{fig:main}c). The shift magnitude is within the established
+biophysical range for moderate--severe
+protanomaly~\citep{machado2009, neitz2011}. Closed-testing escalation
+to R+C converged at $g_{\ast} = 0$, i.e.\ no cortical augmentation is
+warranted by the data: a purely retinal description is sufficient.
+
+\paragraph{Sub-08 (mild--moderate deuteranomaly).}
+Machado alone was only trend-level ($\rho = 0.619$, $p = 0.058$).
+Closed-testing escalated to R+C, which converged at
+$\Delta\lambda = 2.0$~nm, $g = +2.25$, $\rho = 0.857$, $p = 0.005$
+(\cref{fig:main}b, \cref{tab:main}). The small retinal shift is
+consistent with Sub-08's mild Ishihara phenotype; the large positive
+cortical gain indicates a non-negligible cortical re-weighting that
+the retinal model alone cannot absorb. Because $g > 0$ deviates from
+Tregillus-style "exact compensation" ($g = -1$;~\citealp{tregillus2021}),
+we treat it as an effective parameter describing the residual
+structure in hV4 rather than a literal biophysical claim (see
+Discussion).
+
+\begin{table}[tb]
+  \caption{Winning distortion model per CVD participant at hV4 LOCO.
+  Closed-testing within the retinal family: Machado is tested first;
+  R+C is reported only when Machado is not significant. $p$-values are
+  $8! = 40{,}320$ exact permutations of colour labels on Spearman
+  $\rho$.}
+  \label{tab:main}
+  \centering
+  \small
+  \begin{tabular}{llccccc}
+    \toprule
+    Subject & Model & DOF &
+    $\Delta\lambda$~(nm) & Cortical &
+    $\rho$ & $p_{\text{perm}}$ \\
+    \midrule
+    Sub-08 (deutan)  & R+C     & 2 & 2.0  & $g = +2.25$ & 0.857 & \textbf{0.005} \\
+    Sub-09 (protan)  & Machado & 1 & 13.5 & ---         & 0.762 & \textbf{0.018} \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Cortical-level parameters in the two-component model.}
+The cortical 2-component fit reaches significance for both
+participants (Sub-08: $\beta_s = 38^\circ$, $\beta_c = -14^\circ$,
+$\rho = 0.881$, $p = 0.004$; Sub-09: $\beta_s = 6^\circ$,
+$\beta_c = -22^\circ$, $\rho = 0.690$, $p = 0.035$). We retain the
+closed-testing winner from the retinal family
+(\cref{tab:main}) as the primary per-case description but carry the
+cortical-model fit forward because of its distinct correction
+behaviour (\cref{sec:results:filter}).
+
+\subsection{SRM $\Delta$RDM --- an independent geometric convergence
+check}
+\label{sec:results:srm}
+
+Before proceeding to the corrective filter we asked whether the
+LOCO-fitted distortion field also explains the pairwise
+representational geometry, i.e.\ the distance between every pair of
+hue-evoked patterns. This is a secondary, geometry-level validation
+that is statistically and algorithmically independent of LOCO.
+
+\paragraph{Procedure.}
+Voxel-space crossnobis distances among the 8 hues were SRM-projected
+into a shared low-dimensional space trained on HC participants only
+(7 HC; $K = \{4,4,3,3\}$ for V1, V2, V3, hV4, respectively;
+cross-subject mean-rank aggregation). For each CVD participant and
+each ROI we computed
+$\Delta\text{RDM} = \text{RDM}_{\text{CVD}} - \overline{\text{RDM}}_{\text{HC,LOO}}$,
+i.e.\ the deviation of the CVD geometry from the leave-one-out HC
+mean (\citealp{schuett2023, chen2015, bannert2025}; see Methods). We
+then tested whether the LOCO-fitted distortion parameters, when applied
+in a forward-simulation sense, predict this $\Delta$RDM pattern.
+
+%% TODO (2026-04-19, unresolved): internal analysis records attribute
+%% the Sub-09 V1 ΔRDM p = 0.026 to the R+C fit (Δλ = 19.5 nm,
+%% g = −1.10), not to the LOCO-fit Machado (Δλ = 13.5 nm) as written
+%% below. Authors to verify whether the LOCO-fit Machado parameter
+%% was independently forward-projected into ΔRDM and reached p = 0.026,
+%% or whether the attribution should be restated against the R+C
+%% parameters. The present wording is kept pending that check.
+\paragraph{Convergence results.}
+For Sub-09, the LOCO-fit Machado parameter ($\Delta\lambda = 13.5$~nm)
+predicts a V1 $\Delta$RDM consistent with the observed pairwise
+deviation at $p = 0.026$. For Sub-08, the LOCO-fit R+C parameter is
+consistent with the observed V1 $\Delta$RDM at $p = 0.179$
+(non-significant), while the 2-component parameters converge for both
+participants (Sub-08 $\Delta$RDM CI excludes 0; Sub-09
+$\Delta$RDM $p = 0.007$; \cref{tab:full}).
+
+%% FIX (2026-04-19): per-subject β_s values are Sub-08 ≈ 20° and
+%% Sub-09 ≈ 23° (mean ≈ 21.5°); the previous "both converge at ~21.5°"
+%% phrasing misstated the pointwise values as a single converged estimate.
+Strikingly, when the 2-component $\beta_s$ parameter is refit directly
+against V1 $\Delta$RDM (i.e.\ without any LOCO information), it
+converges within the $20^\circ$--$23^\circ$ range for the two CVD
+participants (Sub-08 $\approx 20^\circ$, Sub-09 $\approx 23^\circ$;
+mean $\approx 21.5^\circ$). The range is a near-identical match to the
+$21.4^\circ$ S-cone re-weighting reported independently by
+\citet{emery2021} in an unrelated anomalous-trichromat cohort assessed
+by behavioural hue scaling. The cross-cohort,
+cross-modality agreement suggests a shared compensatory axis that is
+recoverable from either fMRI pairwise geometry (our data) or
+behavioural scaling (Emery et~al.), and it cannot plausibly arise from
+within-sample grid flexibility alone.
+
+\paragraph{Role of $\Delta$RDM.}
+$\Delta$RDM is reported as an \emph{auxiliary convergence check}, not
+as a primary fitting criterion. Its main role is to certify that the
+LOCO-fitted distortion field also coheres with the pairwise distance
+structure that feeds the filter design in the next subsection. A
+full RDM-primary re-derivation of the filter is not pursued because
+SRM-aligned geometry partially absorbs the cone-shift signal into the
+shared basis (see Methods and Discussion), and pure $\Delta$RDM
+%% FIX (2026-04-19): "all three cases" included Sub-10, who is excluded
+%% from the main-text narrative per project policy (v3 header item 2;
+%% future_phase2_filter_optimization/CLAUDE.md rule 7).
+optimisation under the 1-DOF Machado model fails in both CVD cases ---
+indicating that the LOCO criterion is the more informative phenotype
+and $\Delta$RDM is best used as a cross-check.
+
+\subsection{Pre-image inversion --- individual correction filters and
+their divergence}
+\label{sec:results:filter}
+
+Given the validated LOCO-fitted distortion field (per
+\cref{sec:results:inference,sec:results:srm}), we computed the
+per-hue correction filter as the stimulus-space pre-image of the
+distortion. For each participant and each candidate model we asked
+(i) whether the forward distortion is invertible for all 8 displayed
+hues (bijectivity), (ii) what correction vectors the filter applies,
+and (iii) whether the different models agree on those corrections.
+
+\paragraph{Detection agrees; correction does not.}
+Every model flags the same two participants
+(\cref{tab:main,tab:full}). However, for Sub-08 the R+C-derived
+correction vector and the 2-component-derived correction vector have
+cosine similarity $-0.18$ and sign agreement $3/8$, despite comparable
+fit quality ($\rho = 0.857$ vs.\ $0.881$). Detection converges;
+correction diverges. This divergence is the study's primary
+behavioural prediction: the retinal (R+C) and cortical (2-component)
+filters differ in direction, not magnitude, and a 2AFC task along
+the confusion-axis hue pairs will distinguish which is correct.
+
+\paragraph{Severity- and level-dependent feasibility.}
+The cone-shift family compresses the opponent hue arc as $\Delta\lambda$
+grows. For Sub-08's small shift ($\Delta\lambda = 2.0$~nm) the arc
+remains wide and all 8 hues admit an exact pre-image under R+C (mean
+$|\delta| = 23.5^\circ$, max $= 42.9^\circ$, residual $< 0.001^\circ$;
+\cref{fig:feasibility}a). For Sub-09's moderate shift
+($\Delta\lambda = 13.5$~nm) the arc compresses from $360^\circ$ to
+$\sim 96^\circ$; three hues (c4, c5, c6) converge onto a single
+perceived angle, and only 4/8 hues admit an exact Machado pre-image
+(\cref{fig:feasibility}b, upper row). The remaining 4 require a
+separation-optimised approximate solution (min separation
+$1.03^\circ \to 5.76^\circ$, a $5.6\times$ improvement but well below
+the healthy inter-hue spacing of $\sim 70^\circ$).
+
+The 2-component cortical filter, by contrast, is an angular dilation
+in opponent hue space whose inverse is guaranteed to exist. It
+recovers all 8 hues for Sub-09 (mean $|\delta| = 20.1^\circ$,
+max $= 48.1^\circ$) and all 8 for Sub-08 (mean $|\delta| = 46.3^\circ$,
+max $= 104.2^\circ$); residuals are $< 0.001^\circ$ in every case
+(\cref{fig:feasibility}b, lower row). This establishes the
+cortical-level model as the only family that admits an exact
+stimulus-space correction for both severity levels --- i.e.\ the
+bijectivity-preserving filter substrate that \cref{sec:discussion}
+evaluates against the retinal alternative.
+
+\begin{figure*}[tb]
+  \centering
+  \includegraphics[width=0.95\textwidth]{Figures/generated/fig2_output.png}
+  \caption{\textbf{Correction feasibility is jointly determined by
+  distortion severity and modelling level.}
+  \textbf{(a)} Sub-08 (mild deuteranomaly, R+C fit): wide opponent arc
+  preserved; all 8 displayed hues admit an exact pre-image correction
+  (gray arrows; $< 0.001^\circ$ residual).
+  \textbf{(b)} Sub-09 (moderate protanomaly, Machado fit): arc
+  compresses $360^\circ \to \sim 96^\circ$; c4 (green), c5 (cyan), c6
+  (blue) merge at $\sim 282^\circ$ (red oval), and separation-based
+  fallback is required for these three hues. Bottom table: only the
+  cortical 2-component model preserves bijectivity at both severity
+  levels and is therefore selected as the primary filter substrate.}
+  \label{fig:feasibility}
+\end{figure*}
+
+\paragraph{Case-level specificity.}
+We do \emph{not} claim population-level specificity for this grid-search
+procedure: applied to 7 HC participants as if they were CVD candidates,
+the pipeline reaches nominal $p < 0.05$ in 15/21 model--subject tests
+(\cref{app:hc_specificity}), driven by rank-based-loss flexibility
+over 8 data points and regression to the mean on per-HC baseline
+$\rho$. What our two CVD case findings rest on is instead:
+(i) the LOCO and $\Delta$RDM criteria independently converge on the
+same per-case fit (\cref{sec:results:srm}), and no HC achieves
+cross-criterion significance in both;
+(ii) the LOCO-fitted retinal parameters fall within the physiologically
+interpretable anomalous-cone range ($\Delta\lambda \in$ 2--14~nm;
+\citealp{neitz2011}), whereas HC-significant fits distribute across the
+grid with no physiological anchor
+(\cref{app:supporting});
+%% FIX (2026-04-19): phrasing updated to match per-subject β_s values
+%% (Sub-08 ≈ 20°, Sub-09 ≈ 23°; mean ≈ 21.5°).
+(iii) the cortical $\beta_s$ fit converges within $20^\circ$--$23^\circ$
+(Sub-08 $\approx 20^\circ$, Sub-09 $\approx 23^\circ$;
+mean $\approx 21.5^\circ$), matching the $21.4^\circ$ hue-scaling
+estimate of \citet{emery2021} from an unrelated cohort --- an external
+match that grid flexibility alone cannot produce.
+Together, these three anchors provide case-level specificity; an
+explicit within-study behavioural test of the pre-image filters
+(\cref{sec:results:behavioralfilter}) is the preregistered falsifier.
+
+% --- Behavioural validation subsection (Phase 2 ongoing) ---
+% \subsection{Behavioural validation of the pre-image filters}
+% \label{sec:results:behavioralfilter}
+% Placeholder — same-day 2AFC JND experiment for Sub-08 and Sub-09,
+% comparing (a) uncorrected display, (b) R+C-derived filter,
+% (c) 2-component-derived filter. Preregistered prediction: along
+% confusion-axis hue pairs identified from each subject's LOCO
+% profile, only the cortical 2-component filter will significantly
+% reduce JND relative to uncorrected; the retinal R+C filter will fail
+% to improve or worsen performance for Sub-09 (arc compression) and
+% show a divergent effect for Sub-08 (opposing correction directions).
+
+%================================================================
+% Figure/table cross-references used:
+%   fig:main          — Figure 1 (pipeline + b/c LOCO profiles)
+%   fig:feasibility   — Figure 2 (pre-image / arc collapse)
+%   tab:main          — Table 1 (winning model per CVD participant)
+%   tab:full          — Supplementary (cross-ROI × cross-criterion)
+%   tab:loro          — Supplementary (LORO preserved)
+%   app:hc_specificity — Supplementary (HC FPR calibration)
+%================================================================

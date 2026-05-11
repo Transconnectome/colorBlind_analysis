@@ -154,13 +154,16 @@ qc_runwise_sub-*.tsv
 *.vrb
 
 # Paper and documents
-docs/
+docs/*
+!docs/PAPER/
+
+# Extra LaTeX artifacts not covered by global patterns
+docs/PAPER/**/*.fff
+docs/PAPER/**/*.synctex*
 
 # But ignore other PDFs
 *.pdf
-
-# Exceptions: Keep specific important PDFs
-!final_IRB.pdf
+!docs/PAPER/**/*.pdf
 
 # ============================================
 # Archives & Backups
@@ -208,8 +211,6 @@ docs/prev/
 ## Archive outdated docs
 docs/archive/
 docs/trial_options/
-docs/OHBM_abstract/
-docs/PAPER/
 
 # ============================================
 # Images (selective - comment out if needed)

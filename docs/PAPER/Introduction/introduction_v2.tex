@@ -1,0 +1,201 @@
+% Introduction Section — v2 (2026-04-17)
+% Supersedes Introduction/introduction.tex (v1).
+%
+% Rewrite rationale:
+%   - Applies Gap 1-6 narrative structure from literature validation
+%     (see PLAN_ToC.md §10 and narrative validation report).
+%   - Incorporates 22 new citations added in bibliography.bib §10 batch.
+%   - PI directives applied:
+%       (1) LORO reframed as "filter precondition" (not surprising dissociation);
+%           LOCO as "filter target". See §Intro-4.
+%       (2) Sub-10 removed from main paper narrative; two CVD case
+%           demonstrations (Sub-08 deutan, Sub-09 protan).
+%       (3) SRM ΔRDM positioned as auxiliary convergence check between
+%           LOCO fit and filter (not as primary criterion).
+%       (4) Literature gaps explicitly articulated (Gap 1-6).
+%   - Critical revisions of PI annotations:
+%       - §Intro-3 "SRM 등 보완" accepted in restrained form (single-sentence
+%         mention of bannert2025); standalone §Intro-3b withdrawn (methodological
+%         precedents moved to Methods).
+%       - §Intro-5 "Q2 = filter feasibility" restructured. Q2 (LORO/LOCO
+%         dissociation) is a neural finding; filter-feasibility argument is
+%         placed in Q3. See §Intro-5.
+%
+% Structure (5 subsections, ~1050 words):
+%   §Intro-1  Opening: CVD as structured distortion of color perception
+%   §Intro-2  Current correction filters and their population-average ceiling
+%   §Intro-3  CVD at cortex: cortical compensation and the individual-level gap
+%   §Intro-4  Discrimination vs. interpolation: filter precondition and target
+%   §Intro-5  Three questions and contributions
+
+\section{Introduction}
+\label{sec:intro}
+
+%==============================================================================
+% §Intro-1: Opening — CVD as a structured distortion of color perception (~210w)
+%==============================================================================
+
+Color vision deficiency (CVD) affects approximately 8\% of males and
+0.5\% of females of Northern European descent~\citep{bosten2019} and
+arises from altered spectral sensitivity of the L- or M-cone
+photopigment, driven by X-linked opsin-gene
+polymorphisms~\citep{neitz2011, deeb2005}. In anomalous trichromats
+the deviant cone's peak sensitivity is displaced by approximately
+2--12~nm from its normal value, producing a reduction in the
+L--M cone-opponent signal rather than its abolition. The peripheral
+consequences --- reduced red--green discrimination, category
+confusions, and elevated just-noticeable differences along the
+L--M axis --- are the classical phenotype captured by the Ishihara
+test~\citep{ishihara1917} and by subsequent
+psychophysics~\citep{brettel1997, bosten2019}.
+
+Crucially, CVD is not an on/off loss: downstream cortical color
+machinery remains intact and receives a quantitatively reweighted
+but qualitatively similar input. This makes CVD a paradigmatic
+example of a condition in which a high-dimensional neural
+representation is not absent but \emph{structurally distorted}. The
+scientific and translational question is therefore not whether
+color information survives the retina --- it manifestly does --- but
+whether, and how, its cortical geometry is reshaped at the level of
+the individual. That question remains open, and it is the question
+an individualized assistive filter must answer before it can be
+designed.
+
+%==============================================================================
+% §Intro-2: Current filters and their population-average ceiling (~200w)
+%==============================================================================
+
+Commercial and academic CVD correction filters today are almost
+exclusively derived from population-average retinal models. The
+Brettel--Viénot--Mollon simulation~\citep{brettel1997} and its
+Daltonization inverse, the notch-filter approach used by commercial
+lenses, and more recent pixel-level neural
+reformulations~\citep{akalin2025} all share two properties: they
+operate on an \emph{average} model of the anomalous retina, and they
+apply the same transformation to every user. Accumulating behavioural
+evidence indicates that such population-average devices change the
+\emph{appearance} of color without substantively shifting
+discrimination thresholds at threshold contrast~\citep{somers2024},
+consistent with the observation that individual CVD phenotypes vary
+markedly even within a single diagnostic category~\citep{bosten2019,
+tregillus2021}. Approaches that sidestep the cortex altogether ---
+for example, large-language-model benchmarks of CVD-like color
+identification~\citep{hayashi2024} --- characterise performance but
+neither localise the deficit nor prescribe an intervention. What is
+missing from this landscape is a filter derived from, and validated
+on, the \emph{user's own} neural color geometry.
+
+%==============================================================================
+% §Intro-3: CVD at cortex — cortical compensation and individual-level gap (~260w)
+%==============================================================================
+
+Cortical color representation is now known to be a distributed,
+hierarchical computation~\citep{gegenfurtner2003, shapley2011,
+conway2018}, with early visual cortex carrying cone-opponent signals
+and higher-order regions --- in particular
+hV4~\citep{brouwer2009, bannert2018} --- supporting a population code
+for continuous hue that can be read out by forward encoding
+models~\citep{brouwer2009, parkes2009, kuriki2015}. Cross-subject
+shared-response modelling has recently been validated for healthy
+color decoding~\citep{bannert2025}, providing a methodological
+scaffold that the present clinical extension adopts.
+
+Behavioural work converges on the conclusion that anomalous
+trichromats do not merely discriminate less well; they compensate.
+Long-term cortical adaptation reshapes hue appearance
+\citep{tregillus2021, boehm2014, webster2015}, and hue-scaling
+experiments in anomalous trichromats reveal a reliable S-cone axis
+re-weighting of approximately $21.4^\circ$~\citep{emery2021,
+isherwood2020}. These results locate the key variance not at the
+retina alone but at the retinal--cortical interface.
+
+Yet three concrete gaps remain.
+\emph{(Gap 1)} Existing neural studies of color characterise
+population-mean geometry in healthy
+observers~\citep{brouwer2009, bannert2018, kuriki2015} or CVD group
+means at the level of activation
+magnitude; none has inverted the high-dimensional cortical signal
+into an interpretable, individualized distortion field.
+\emph{(Gap 2)} CVD neural work has relied principally on
+classification accuracy, which is a sufficient statistic for
+category identity but discards the continuous relational
+structure~\citep{brouwer2013} that downstream perceptual and
+translational tasks actually demand.
+\emph{(Gap 3)} Behavioural evidence for cortical compensation has not
+been translated into a concrete criterion for choosing between
+retinal-level and cortical-level correction strategies --- an
+omission that directly limits filter design.
+The present study addresses all three at once by recovering, per
+individual, a low-dimensional distortion field from the structured
+hV4 hue code and inverting that field into a correction filter whose
+validity rests jointly on neural, behavioural, and cross-cohort
+external evidence.
+
+%==============================================================================
+% §Intro-4: Discrimination vs. interpolation — filter precondition and target (~200w)
+%==============================================================================
+
+A principled filter for a continuous-hue condition must operate on
+continuous-hue representation, not on categorical labels. This
+observation motivates a complementary pair of cross-validation schemes
+on the same forward encoding model. Leave-one-run-out (LORO)
+cross-validation probes whether the 8 trained hues can be
+\emph{classified} from held-out runs; it measures category-level
+discriminability and is the minimum requirement for a filter to
+matter: if the target cortex cannot tell the displayed colors apart
+at all, no stimulus-space nudge can restore them. Leave-one-colour-out
+(LOCO) cross-validation, by contrast, probes whether the encoder
+\emph{interpolates} from its 7 training hues to a novel hue; it
+measures the integrity of the continuous manifold on which any hue
+correction must act.
+
+Predicted and empirically required, therefore, is a joint pattern:
+LORO \emph{preserved} in CVD (the filter precondition) together with
+LOCO \emph{impaired} (the filter target). Finding only the first would
+make a filter redundant; finding only the second would make a filter
+impossible. Finding both together defines the regime in which
+individual corrective filters are simultaneously warranted and
+tractable, and in which the per-hue LOCO vulnerability vector ---
+the subject-specific signature of where the continuous geometry
+fails --- becomes the phenotype to be inverted.
+
+%==============================================================================
+% §Intro-5: Three questions, three contributions (~210w)
+%==============================================================================
+
+We address three connected questions in two CVD individuals (one
+moderate deutan, one moderate--severe protan), framed as single-case
+analyses in the Crawford--Howell tradition~\citep{crawford1998,
+schuett2023} alongside a normative reference of seven healthy controls.
+
+\begin{enumerate}
+\item \textbf{Does the continuous cortical hue geometry in CVD carry
+    individually-structured distortion?}
+    We use the LORO/LOCO dissociation on hV4 forward encoding to
+    distinguish preserved discrimination from impaired interpolation,
+    and extract a per-hue vulnerability vector
+    $\mathbf{v} \in \mathbb{R}^{8}$ as each individual's geometric
+    fingerprint.
+\item \textbf{Can that distortion be expressed in a small number of
+    physiologically interpretable parameters, and does an independent
+    geometric criterion corroborate the fit?}
+    We infer 1--2 DOF parameters from $\mathbf{v}$ under three
+    mechanistic model families (retinal Machado, retinal--cortical
+    R+C, cortical 2-component) with closed testing, and then
+    cross-check the winning fit against the pairwise SRM-aligned
+    $\Delta$RDM and against an independent cross-cohort behavioural
+    estimate of the S-cone compensation angle~\citep{emery2021}.
+\item \textbf{Does the pre-image of the fitted distortion constitute
+    a testable corrective filter, and do retinal and cortical
+    hypotheses agree on what to display?}
+    We compute the per-hue pre-image of each fit and assess
+    bijectivity. Retinal and cortical fits converge on \emph{who} is
+    distorted but diverge on \emph{how} to correct --- generating a
+    falsifiable behavioural prediction to be tested in a same-day
+    2AFC discrimination experiment.
+\end{enumerate}
+
+Together these three steps constitute an individually-grounded,
+cortical-geometry-derived filter design pipeline, whose inputs,
+intermediate phenotype, and output are all testable at the level of
+the single CVD user.

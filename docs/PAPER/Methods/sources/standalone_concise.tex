@@ -1,0 +1,37 @@
+\documentclass[11pt, a4paper]{article}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage[hidelinks]{hyperref}
+\usepackage[style=apa, backend=biber, sorting=nyt]{biblatex}
+
+% Bibliography
+\addbibresource{../bibliography.bib}
+
+% Title
+\title{\textbf{Methods Section (Concise)}\\[0.5em]
+\large Neural Representation of Color in Color Vision Deficiency\\[0.5em]
+\normalsize \textit{Draft for PI Review}}
+
+\author{Jinil Kim}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\vspace{1em}
+\noindent\textbf{Note:} This concise version (target: 4-5 pages main + 3 pages supplementary) moves detailed equations and procedures to Supplementary Methods. Main methods focus on essential information for understanding the study design and analysis approach.
+
+\vspace{2em}
+
+\input{methods_concise}
+
+\clearpage
+\printbibliography
+
+\end{document}

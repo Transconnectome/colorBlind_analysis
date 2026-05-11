@@ -1,0 +1,130 @@
+{
+  "description": "Verification of pre-draft abstract key numbers for per-hue hV4 LOCO CVD statistics",
+  "date": "2026-05-11",
+  "predraft_claim": {
+    "source": "docs/PAPER/pre_draft_2026-05-10.md §4",
+    "text": "Fig 2: hV4 LOCO HC p=0.044; CVD failure at blue (d=1.37, p=0.046), purple (d=1.54, p=0.060)",
+    "values": {
+      "HC_hV4_LOCO_group_perm_p": 0.044,
+      "blue_d": 1.37,
+      "blue_p": 0.046,
+      "purple_d": 1.54,
+      "purple_p": 0.060
+    }
+  },
+  "verified_values": {
+    "HC_hV4_LOCO_group_perm_p": {
+      "status": "VERIFIED",
+      "value": 0.044,
+      "source": "results_streamlined.tex L81; phase_a_2component HC group permutation"
+    },
+    "blue_p": {
+      "status": "PARTIAL_MATCH — one-tailed p only",
+      "sub_08": {
+        "p_one_tailed_lower": 0.0465,
+        "p_two_tailed": 0.0931,
+        "d_cohens": 2.133,
+        "t_crawford_howell": -1.9948,
+        "x_cvd": -0.2506,
+        "hc_mean": 0.3725,
+        "hc_sd": 0.2922,
+        "note": "p_one ≈ 0.046 matches pre-draft, but d_cohens=2.133 ≠ pre-draft 1.37"
+      },
+      "sub_09": {
+        "p_one_tailed_lower": 0.0455,
+        "p_two_tailed": 0.0911,
+        "d_cohens": 2.149,
+        "t_crawford_howell": -2.0106,
+        "x_cvd": -0.2555,
+        "hc_mean": 0.3725,
+        "hc_sd": 0.2922,
+        "note": "p_one ≈ 0.046 matches pre-draft, but d_cohens=2.149 ≠ pre-draft 1.37"
+      }
+    },
+    "purple_p": {
+      "status": "MISMATCH",
+      "sub_08": {
+        "p_one_tailed_lower": 0.0330,
+        "p_two_tailed": 0.0661,
+        "d_cohens": 2.398,
+        "t_crawford_howell": -2.2431,
+        "x_cvd": -0.7588,
+        "hc_mean": 0.1861,
+        "hc_sd": 0.3941,
+        "note": "p_two=0.066 close to pre-draft 0.060; d_cohens=2.398 ≠ pre-draft 1.54"
+      },
+      "sub_09": {
+        "p_one_tailed_lower": 0.2681,
+        "p_two_tailed": 0.5362,
+        "d_cohens": 0.701,
+        "t_crawford_howell": -0.6560,
+        "x_cvd": -0.0902,
+        "hc_mean": 0.1861,
+        "hc_sd": 0.3941,
+        "note": "p=0.54 — completely inconsistent with pre-draft p=0.060"
+      }
+    }
+  },
+  "full_per_hue_statistics": {
+    "data_source": "analysis/future_phase1_forward_model/results/loco_reinforcement/per_color_breakdown.json",
+    "roi": "hV4",
+    "n_hc": 7,
+    "formula": "Crawford-Howell modified t: t = (x_cvd - hc_mean) / (hc_sd * sqrt((n+1)/n)); df=n-1=6; d_cohens = |x_cvd - hc_mean| / hc_sd",
+    "sub_08": {
+      "red":     {"x_cvd":  0.573, "hc_mean": 0.408, "hc_sd": 0.246, "t": 0.626, "p_one_lower": 0.723, "p_two": 0.554, "d": 0.670},
+      "orange":  {"x_cvd": -0.637, "hc_mean": 0.122, "hc_sd": 0.379, "t": -1.870, "p_one_lower": 0.055, "p_two": 0.111, "d": 1.999},
+      "yellow":  {"x_cvd": -0.733, "hc_mean": 0.070, "hc_sd": 0.418, "t": -1.800, "p_one_lower": 0.061, "p_two": 0.122, "d": 1.925},
+      "green":   {"x_cvd": -0.306, "hc_mean": 0.040, "hc_sd": 0.395, "t": -0.819, "p_one_lower": 0.222, "p_two": 0.444, "d": 0.876},
+      "cyan":    {"x_cvd":  0.250, "hc_mean": 0.113, "hc_sd": 0.296, "t":  0.434, "p_one_lower": 0.660, "p_two": 0.679, "d": 0.464},
+      "blue":    {"x_cvd": -0.251, "hc_mean": 0.373, "hc_sd": 0.292, "t": -1.995, "p_one_lower": 0.047, "p_two": 0.093, "d": 2.133},
+      "purple":  {"x_cvd": -0.759, "hc_mean": 0.186, "hc_sd": 0.394, "t": -2.243, "p_one_lower": 0.033, "p_two": 0.066, "d": 2.398},
+      "magenta": {"x_cvd": -0.334, "hc_mean": 0.150, "hc_sd": 0.332, "t": -1.364, "p_one_lower": 0.111, "p_two": 0.221, "d": 1.458}
+    },
+    "sub_09": {
+      "red":     {"x_cvd":  0.023, "hc_mean": 0.408, "hc_sd": 0.246, "t": -1.466, "p_one_lower": 0.097, "p_two": 0.193, "d": 1.567},
+      "orange":  {"x_cvd":  0.596, "hc_mean": 0.122, "hc_sd": 0.379, "t":  1.168, "p_one_lower": 0.857, "p_two": 0.287, "d": 1.249},
+      "yellow":  {"x_cvd":  0.322, "hc_mean": 0.070, "hc_sd": 0.418, "t":  0.564, "p_one_lower": 0.703, "p_two": 0.593, "d": 0.603},
+      "green":   {"x_cvd":  0.147, "hc_mean": 0.040, "hc_sd": 0.395, "t":  0.254, "p_one_lower": 0.596, "p_two": 0.808, "d": 0.272},
+      "cyan":    {"x_cvd": -0.451, "hc_mean": 0.113, "hc_sd": 0.296, "t": -1.779, "p_one_lower": 0.063, "p_two": 0.125, "d": 1.902},
+      "blue":    {"x_cvd": -0.256, "hc_mean": 0.373, "hc_sd": 0.292, "t": -2.011, "p_one_lower": 0.046, "p_two": 0.091, "d": 2.149},
+      "purple":  {"x_cvd": -0.090, "hc_mean": 0.186, "hc_sd": 0.394, "t": -0.656, "p_one_lower": 0.268, "p_two": 0.536, "d": 0.701},
+      "magenta": {"x_cvd": -0.575, "hc_mean": 0.150, "hc_sd": 0.332, "t": -2.041, "p_one_lower": 0.044, "p_two": 0.087, "d": 2.182}
+    }
+  },
+  "diagnosis": {
+    "p_values": {
+      "blue_p046": "sub-09 blue p_one=0.046 MATCHES pre-draft. sub-08 blue p_one=0.047 also close.",
+      "purple_p060": "sub-08 purple p_two=0.066 is the closest match; pre-draft p=0.060 is between p_one=0.033 and p_two=0.066. sub-09 purple p=0.54 — no match.",
+      "conclusion": "p-values are approximately reproducible for sub-09 blue (one-tailed) and sub-08 purple (two-tailed or marginal). The pre-draft appears to have mixed one-tailed and two-tailed thresholds."
+    },
+    "d_values": {
+      "mismatch": "Cohen's d from per_color_breakdown gives d=2.1-2.4 for blue/purple. Pre-draft claims d=1.37/1.54.",
+      "possible_explanations": [
+        "Pre-draft used a different effect size formula (e.g., Hedges' g with small-sample correction factor ~0.87 does not explain the gap: 2.13×0.87=1.85≠1.37)",
+        "Pre-draft values may be from an older analysis script with different HC baseline set (e.g., excluding sub-07 with only 16 hV4 voxels)",
+        "Pre-draft may have used a group-average CVD metric (mean of sub-08 + sub-09) rather than individual Crawford-Howell",
+        "Pre-draft 'd' may refer to |t_CH| = 1.99-2.01 for blue — still not 1.37",
+        "Values may be from the loco_srm-based analysis (SRM-projected) rather than loco_reinforcement (voxel-space)"
+      ]
+    },
+    "best_candidate_hues": {
+      "blue": {
+        "sub": "sub-09",
+        "p_one": 0.046,
+        "d_cohens": 2.149,
+        "recommendation": "Use sub-09 blue: p=0.046 (one-tailed Crawford-Howell), d=2.15. Report d as Cohen's d not 1.37."
+      },
+      "additional_vulnerable_hues": {
+        "sub_08_purple": "p_one=0.033, d=2.40 (significant one-tailed)",
+        "sub_08_blue": "p_one=0.047, d=2.13 (borderline one-tailed)",
+        "sub_09_magenta": "p_one=0.044, d=2.18 (borderline one-tailed)"
+      }
+    }
+  },
+  "verdict": {
+    "status": "PRE-DRAFT VALUES NOT REPRODUCIBLE AS STATED",
+    "action": "DO NOT add pre-draft d=1.37/d=1.54 values to manuscript without identifying source script and reconfirming. The p-values (0.046 for blue, ~0.060 for purple) are approximately reproducible, but d values differ substantially. The canonical data supports reporting: sub-09 blue p=0.046 (one-tailed CH), sub-08 purple p=0.066 (two-tailed CH). The d values to report are ~2.1-2.4, not 1.37/1.54.",
+    "recommended_update_to_predraft": "Revise pre-draft §4 abstract key numbers: 'CVD failure at blue (d=2.15, p=0.046 one-tailed, sub-09; Crawford-Howell), purple (d=2.40, p=0.066 two-tailed, sub-08)' OR use only p-values and describe direction (both subjects below HC range at blue).",
+    "data_source_to_use": "analysis/future_phase1_forward_model/results/loco_reinforcement/per_color_breakdown.json, hV4 section"
+  }
+}

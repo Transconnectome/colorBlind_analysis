@@ -1,0 +1,92 @@
+\documentclass[
+    a4paper,
+    man,
+    british
+]{apa6}
+
+\usepackage[british]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{csquotes}
+\usepackage[hidelinks]{hyperref}
+\usepackage{apacite}  % REQUIRED for BibTeX APA citations
+\usepackage[nameinlink]{cleveref}  % \cref{} — load after hyperref and apacite
+\usepackage{gensymb}  % \degree symbol
+\usepackage{booktabs} % \toprule, \midrule, \bottomrule in tables
+\usepackage{xcolor}   % \textcolor — load after hyperref is not needed; xcolor is safe here
+\newcommand{\todo}[1]{\textcolor{red}{#1}}
+\providecommand{\doi}[1]{\href{https://doi.org/#1}{doi:#1}}
+
+% CHANGED: biblatex → bibtex (80% faster, no Overleaf timeout)
+% \usepackage[
+%     style=apa,
+%     backend=biber,
+%     sortcites=true,
+%     sorting=nyt,
+% ]{biblatex}
+% \DeclareLanguageMapping{british}{british-apa}
+% \let \citeNP \cite
+% \let \citeA \textcite
+% \let \cite \parencite
+% \addbibresource{bibliography.bib}
+
+% BibTeX commands already work with apa6 class:
+% \citeA{} → Author (2020)
+% \citeNP{} → Author (2020)
+% \cite{} → (Author, 2020)
+
+% Graphics path
+\graphicspath{{Figures/}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Document Information
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Neural Representation of Color in Color Vision Deficiency: An fMRI Study}
+\shorttitle{Color Representation in CVD}
+\author{\todo{Your Name}}
+\affiliation{\todo{Your University}}
+
+\keywords{color vision deficiency, fMRI, shared response model, forward encoding model, representational similarity analysis}
+
+\abstract{
+\todo{Placeholder abstract. Replace this with your actual abstract text. This study investigated neural color representations in individuals with color vision deficiency (CVD) using functional MRI and computational modeling approaches.}
+}
+
+\begin{document}
+
+\maketitle
+
+% Introduction Section (작성 전 - 주석 처리)
+% \input{Introduction/introduction}
+
+% Methods Section
+\input{Methods/methods_v2}
+
+% Results Section
+\input{Results/results_v4}
+
+% Discussion Section (작성 전 - 주석 처리)
+% \input{Discussion/discussion}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% References
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\bibliographystyle{apacite}
+\bibliography{bibliography}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% Supplementary Methods
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\clearpage
+\section{Supplementary Methods}
+\input{Methods/supplementary_content}
+
+\end{document}

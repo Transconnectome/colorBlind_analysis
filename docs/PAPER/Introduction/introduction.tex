@@ -1,0 +1,29 @@
+% Introduction Section
+% To be included in main document via \input{Introduction/introduction}
+
+\section{Introduction}
+
+% Background on color vision deficiency
+Color vision deficiency (CVD) affects approximately 8\% of males and 0.5\% of females of Northern European descent. Despite its prevalence, the neural mechanisms underlying altered color perception in CVD remain incompletely understood. While genetic and psychophysical studies have characterized the photoreceptor-level basis of CVD, how these peripheral differences cascade into cortical color representations remains an open question.
+
+% Previous neuroimaging studies
+Previous neuroimaging studies have demonstrated that color information is represented throughout the visual hierarchy, from early visual cortex (V1, V2) to higher-order color-selective regions (V4, VO1). \textcite{brouwer2009} pioneered the use of forward encoding models to decode and reconstruct novel colors from V4 activity patterns, demonstrating that neural populations encode a continuous representation of hue space. This approach was extended by \textcite{brouwer2013}, who showed categorical clustering of color representations in ventral temporal cortex. More recently, multivariate pattern analysis has revealed that color information can be decoded from distributed patterns across the visual hierarchy \cite{haxby2011}. However, most studies have focused on individuals with typical color vision, leaving open questions about how CVD alters these neural representations.
+
+% Gap in knowledge
+While behavioral studies have characterized perceptual differences in CVD \cite{brettel1997}, the neural basis of these alterations has not been systematically investigated using multivariate pattern analysis and computational modeling approaches. Critically, it remains unknown whether CVD affects only the discriminability of individual colors or also distorts the geometric structure of neural color space. Specifically, three questions remain unresolved:
+
+\begin{enumerate}
+\item Do neural color representations in CVD differ from healthy controls at the population level, and can these differences be characterized in a common representational space?
+\item Is color discrimination (distinguishing trained colors) preserved while color interpolation (generalizing to novel colors) is impaired in CVD?
+\item Can forward encoding models predict and correct for CVD-related distortions in neural color space?
+\end{enumerate}
+
+% Study objectives
+The present study addresses these questions by combining functional magnetic resonance imaging (fMRI) with shared response modeling \cite{chen2015}---a dimension-reduction technique that enables comparison of neural representations across individuals---and forward encoding models \cite{brouwer2009}. We tested the hypothesis that CVD participants would show systematic deviations in neural color representations compared to healthy controls, particularly in color-selective regions of visual cortex. Crucially, we distinguished between discrimination (distinguishing trained colors) and interpolation (generalizing to novel colors) using leave-one-color-out cross-validation.
+
+% Significance
+Understanding the neural basis of CVD has both theoretical and practical implications. Theoretically, it provides insights into how genetic variation in photoreceptor spectral sensitivity shapes cortical color representations, addressing long-standing questions about the relationship between peripheral and central color coding. Practically, characterizing neural distortions in CVD could inform the development of personalized color correction filters that restore not only color discrimination but also the geometric structure of perceptual color space.
+
+% TODO: Add epidemiology citation for CVD prevalence (line 7)
+% TODO: Consider adding citations for categorical perception (line 12)
+% TODO: Add citation for psychophysical CVD studies (line 17)

@@ -1,0 +1,117 @@
+% Methods Section - Concise Version (4-5 pages)
+% Detailed methods moved to Supplementary
+
+\section{Data collection}
+
+\subsection*{Participants}
+
+Twelve volunteers (IRB \#2510/002-023) completed the study. Color vision was assessed using the Ishihara test \cite{ishihara1917}: 7 healthy controls (HC; 3 females, age $22.7 \pm 2.5$ years) and 2 with color vision deficiency (CVD; 1 deuteranomaly, 1 protanomaly, both male). Three participants were excluded for incomplete data. Given the small CVD sample, results are interpreted as individual case demonstrations using \textcite{crawford1998} single-case statistics.
+
+\subsection*{fMRI experiment}
+
+Participants viewed eight colors (0°--315° in CIE $L^*a^*b^*$ space \cite{cie1986}) plus gray, presented in a rapid serial visual presentation (RSVP) detection task \cite{brouwer2009}. Each 1.5s stimulus was followed by letter strings; participants detected consecutive 'K's. Stimulus order was optimized using Neurodesign \cite{durnez2018}. ISIs varied (3--6s). Each run (7 min) included 8 repetitions per color across 6 runs per session. CVD participants completed two sessions: original stimuli and filtered conditions.
+
+MRI data were acquired on a Siemens 3T scanner (24 oblique slices perpendicular to calcarine sulcus \cite{ryu2024}; 1.5s TR, 30ms TE, $2 \times 2 \times 2$ mm voxels).
+
+\section{Preprocessing and response estimation}
+
+Data were converted to BIDS format \cite{levitas2024} and coregistered using mutual information optimization \cite{maes1997, wells1996} via FreeSurfer. T1w-to-MNI normalization used FLIRT \cite{jenkinson2002} and FNIRT \cite{andersson2007} (2mm resolution).
+
+Bilateral V1, V2, V3, and hV4 were defined using the Wang atlas \cite{wang2015} (50\% probability threshold). Voxel counts: V1 $655 \pm 214$, V2 $451 \pm 145$, V3 $103 \pm 29$, hV4 $63 \pm 22$ (mean $\pm$ SD).
+
+Neural responses were estimated via finite impulse response (FIR) modeling \cite{dale1999, brouwer2009} to extract ROI-specific HRFs (8 TRs), followed by GLM fitting with HRF and temporal derivative. Top 50\% of voxels by variance explained were retained (V1 $328 \pm 107$, V2 $226 \pm 73$, V3 $52 \pm 15$, hV4 $32 \pm 11$). Responses were aligned across runs using Procrustes transformation \cite{gower1975} without scaling, improving cross-run correlation from $r = 0.54$ to $r = 0.71$.
+
+\section{Shared representational space}
+
+Cross-subject alignment used shared response modeling \cite{chen2015}, projecting individual voxel patterns into a low-dimensional common space $S \in \mathbb{R}^{k \times c}$ where $k$ is the reduced dimension and $c = 8$ colors. For participant $i$ with voxel responses $X_i$:
+
+\begin{equation}
+X_i = W_i S + E_i, \quad \text{s.t.} \quad W_i^T W_i = I_k
+\end{equation}
+
+The common space was estimated from HC participants only; CVD data were projected into this HC-derived space. To quantify HC-CVD disparity, we used leave-one-out (LOO) references: for each fold, both the held-out HC and CVD participants were compared to the mean of remaining six HC participants, ensuring unbiased comparisons. Significance was assessed via \textcite{crawford1998} modified $t$-tests. Representational dissimilarity matrices (RDMs) used correlation distance; color pair deviations were tested via 95\% bootstrap CIs (1,000 iterations).
+
+Dimension $k$ was selected via LOSO cross-validation maximizing split-half RDM reliability \cite{cunningham2014}: V1 $k = 4$ (0.60), V2 $k = 4$ (0.57), V3 $k = 3$ (0.55), hV4 $k = 3$ (0.32).
+
+\section{Forward encoding model}
+
+We modeled hue-selective responses using six half-wave rectified squared sinusoidal channels \cite{brouwer2009, brouwer2013, freeman1991}: $r_k(\theta) = \max(0, \cos(\theta - \theta_k))^2$. Voxel responses $B$ were modeled as $B = WC$, where $C$ are channel outputs and $W$ is the weight matrix estimated via ridge regression with regularization parameter selected by generalized cross-validation \cite{golub1979}.
+
+Three cross-validation schemes tested model generalization:
+
+\textbf{LORO (discrimination):} Leave-one-run-out tested color discriminability. Weight matrix $W$ was trained on 5 runs, tested on the held-out run.
+
+\textbf{LOCO (interpolation):} Leave-one-color-out tested whether the model could interpolate to novel colors. $W$ was trained on 7 colors, tested on the held-out color—assessing preservation of circular hue geometry.
+
+\textbf{LOSO (zero-shot):} Leave-one-subject-out tested cross-subject generalization using SRM-aligned data.
+
+Evaluation metrics: (1) mean absolute error (MAE; chance = 90°) and categorization accuracy (chance = 12.5\%) for decoding; (2) Pearson correlation for voxel prediction. Significance via permutation tests (10,000 iterations; \cite{nichols2002}).
+
+\section{Behavioral tasks}
+
+Participants completed same-different discrimination to estimate JND thresholds \cite{levitt1971} using adaptive staircases (two per color pair, eight reversals). Eight color pairs were selected from RDM analysis: three differing in both CVD types, two per CVD type only, and one control. An 8-AFC color identification task assessed categorical perception.
+
+\section{Reproducibility}
+
+Analyses used Python 3.10 (numpy 1.24.3, scipy 1.11.3, scikit-learn 1.3.0, BrainIAK 0.11). Code: \url{https://github.com/haba6030/colorBlind_analysis}. Data available upon request.
+
+\clearpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% SUPPLEMENTARY METHODS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section*{Supplementary Methods}
+
+\subsection*{S1. Preprocessing details}
+
+\textbf{Confound regression:} Head motion was estimated via rigid-body realignment. No temporal filtering or confound regression was applied; slow drift was modeled via linear per-run regressors in GLM.
+
+\textbf{Registration QC:} ROI coverage averaged 84.3\% (SD = 21.7\%); GLM valid ratio 99.6\%. Sub-07 showed 30.8\% coverage due to anatomical variability but was retained.
+
+\textbf{Voxel counts:} Detailed per-subject voxel counts in Table S1. Variability reflects individual anatomy and registration quality.
+
+\subsection*{S2. Procrustes alignment details}
+
+Runs 2--6 were aligned to run 1 via orthogonal transformation $X_{\text{aligned}} = XQ$ where $Q$ minimizes $\|X_{\text{ref}} - XQ\|_F$. Scaling was prohibited to preserve response magnitudes. Cross-run correlation (15 pairs) improved from 0.54 to 0.71.
+
+\subsection*{S3. SRM mathematical details}
+
+SRM minimizes reconstruction error across participants:
+\begin{equation}
+\min_{W_i, S} \sum_{i=1}^N \|X_i - W_i S\|_F^2 \quad \text{s.t.} \quad W_i^T W_i = I_k
+\end{equation}
+
+CVD projection: $W_{\text{CVD}} = U V^T$ where $U \Sigma V^T = \text{SVD}(X_{\text{CVD}} \cdot S^\dagger)$. LOO procedure: for fold $i$, reference $R_{-i}$ is mean of remaining six HC. Disparity: $d(\text{participant}, R_{-i})$ using correlation distance.
+
+\subsection*{S4. Forward model equations}
+
+Channel outputs for hue $\theta$: $C_k(\theta) = \max(0, \cos(\theta - \theta_k))^2$ for $k = 1, \ldots, 6$.
+
+Ridge regression: $\hat{W} = B_1 C_1^T (C_1 C_1^T + \alpha I)^{-1}$
+
+GCV criterion: $\text{GCV}(\alpha) = \frac{1}{n} \|y - \hat{y}\|_2^2 / (1 - \text{tr}(H)/n)^2$ where $H = X(X^T X + \alpha I)^{-1}X^T$
+
+Color decoding: $\hat{C} = (\hat{W}^T \hat{W})^{-1} \hat{W}^T B_2$; hue estimate via $\arg\min_\theta \|\hat{C} - C(\theta)\|_2$
+
+Voxel prediction: $\hat{B} = \hat{W} C_2$
+
+\subsection*{S5. SRM consistency validation}
+
+SRM was compared to PCA and standard Procrustes. SRM yielded higher cross-subject RDM correlations (mean = 0.51) vs. PCA (0.38) and Procrustes (0.42), confirming its suitability.
+
+\subsection*{S6. Mean activation analysis}
+
+Mean response amplitudes across colors did not differ between HC and CVD (all $p > .10$), confirming that representational differences were independent of overall activation magnitude.
+
+\subsection*{S7. Filter design}
+
+CVD distortion was modeled as cone-specific spectral shift ($\Delta\lambda$ in nm) applied to stimulus hue angles \cite{brettel1997}. Details pending Phase 2 completion.
+
+\subsection*{S8. Statistical analysis}
+
+Significance threshold $\alpha = 0.05$ with FDR correction \cite{benjamini1995} ($q = 0.05$) for RDM comparisons (28 pairs). Crawford-Howell modified $t$-test: $t^* = (x_{\text{CVD}} - \bar{x}_{\text{HC}}) / (\text{SD}_{\text{HC}} \times \sqrt{(n+1)/n})$, $df = 6$. Effect sizes via Hedges' $g$. Permutation tests: 10,000 iterations (group), 1,000 (color-level).
+
+\subsection*{S9. Behavioral-neural concordance}
+
+Full concordance analysis pending behavioral data completion (current $n$ = 5 HC, 2 CVD). Preliminary data suggest correspondence between LOCO performance and elevated JND thresholds.

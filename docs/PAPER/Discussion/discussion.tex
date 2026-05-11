@@ -1,0 +1,127 @@
+% Discussion Section
+% To be included in main document via \input{Discussion/discussion}
+%
+% === Structural / factual review (inserted 2026-04-19) ==========================
+% This file (last edited 2026-04-04) predates Introduction v2 and Results v3
+% (both 2026-04-17). Factual corrections applied inline (see %% FIX markers);
+% structural gaps below require a next-pass revision, not fixed here:
+%
+%   Gap D1 — Framing mismatch. Intro v2 and Results v3 are organised around
+%     three cone-shift model families (retinal Machado, retinal+cortical R+C,
+%     cortical 2-component). This Discussion refers to "the cone-shift model"
+%     in the singular, flattening the three-model structure. The §Summary
+%     paragraph has been patched inline; later sections still need harmonising.
+%
+%   Gap D2 — Missing "detection agrees; correction diverges" message. Results
+%     §R6 establishes that all three models agree on WHO is distorted but
+%     disagree on HOW to correct, and this is the study's primary
+%     falsifiable prediction (Intro §Intro-5 Q3). The Discussion does not
+%     currently articulate this dichotomy.
+%
+%   Gap D3 — Missing 2-component bijectivity argument. Results §R6 selects
+%     the 2-component cortical model as the primary filter substrate on
+%     bijectivity grounds (exact pre-image for both severity levels, whereas
+%     Machado arc-compresses for Sub-09). The Discussion does not reflect
+%     this selection criterion.
+%
+%   Gap D4 — Missing HC specificity limitation + three-anchor defence.
+%     Results §R6 explicitly disclaims population-level specificity and rests
+%     case-level specificity on (i) cross-criterion convergence,
+%     (ii) physiological Δλ range, (iii) external Emery 21.4° match. The
+%     Discussion's "Limitations" section does not mention the HC FPR issue
+%     or the three-anchor defence.
+%
+%   Gap D5 — ΔRDM role. Results §R5 frames ΔRDM as an auxiliary convergence
+%     check, not a primary fitting criterion. The Discussion's "Dissociation"
+%     section does not adopt this framing explicitly.
+%
+%   Gap D6 — Behavioural validation status. Intro v2 §Intro-5 Q3 commits to
+%     a same-day 2AFC discrimination experiment as the preregistered falsifier.
+%     The Discussion mentions this only as generic "future work"; it should
+%     be positioned as the registered test of the detection-vs-correction
+%     divergence.
+%
+%   Gap D7 — Conclusions do not map back to Intro Q1–Q3. The Intro ends with
+%     three explicit questions; the Conclusions paragraph should address each.
+% =================================================================================
+
+\section{Discussion}
+
+\subsection{Summary of Main Findings}
+
+%% FIX (2026-04-19): rewritten to match Intro v2 / Results v3.
+%% Changes:
+%%  - "individuals ... (CVD)" → "two CVD participants" (sub-10 excluded).
+%%  - "systematic deviations ... V1, V2" softened to reflect actual stats
+%%    (group trending, individual significant; see phase2_SRM_across_between).
+%%  - "the cone-shift model" (singular) → three model families (plural),
+%%    matching Intro §Intro-5 Q2 and Results §R4.
+%%  - Added detection-vs-correction sentence (Intro §Intro-5 Q3 / Results §R6).
+The present study investigated neural color representations in two
+individuals with color vision deficiency (CVD) using forward encoding,
+representational geometry, and pre-image inversion. Our key findings
+were threefold. First, each CVD participant showed an
+individually-structured deviation from the HC-derived representational
+geometry --- trending at the group level in early visual cortex
+(V1 $p = 0.062$; V2 $p = 0.075$) and significant at the individual
+level for the protan case in V1 ($p = 0.007$) and the deutan case in
+V2 ($p = 0.040$). Second, while category-level color discrimination
+(LORO) was preserved in both CVD participants, continuous-hue
+interpolation (LOCO) was impaired in early visual areas and reached a
+floor at hV4, yielding an individually-structured per-hue vulnerability
+profile. Third, three mechanistic model families (retinal Machado,
+retinal+cortical R+C, cortical 2-component) fit each vulnerability
+profile; they agree on \emph{who} is distorted but diverge on
+\emph{how} to correct --- with only the 2-component cortical model
+admitting an exact stimulus-space pre-image at both severity levels.
+
+\subsection{Neural Representations in CVD: Comparison with Previous Literature}
+
+Our finding of altered neural color representations in CVD extends previous behavioral and computational modeling studies by demonstrating that perceptual differences have measurable neural correlates throughout the visual hierarchy. The pattern of results---preserved discrimination but impaired interpolation---suggests that CVD affects the geometric structure of color space rather than simply reducing the discriminability of individual colors. This finding is consistent with computational models of CVD that emphasize distortions in color space rather than mere confusion between colors \cite{brettel1997}.
+
+These findings build directly on the seminal work of \textcite{brouwer2009}, who demonstrated successful novel-color reconstruction in V4/VO1 using forward encoding models in individuals with typical color vision. Our results extend this framework by showing that interpolation capability is selectively impaired in CVD despite preserved classification performance. Critically, \textcite{brouwer2009} did find that V1 showed weaker interpolation compared to V4 even in typical observers, consistent with our finding that early visual areas may encode local color discriminability without fully representing the continuous structure of color space.
+
+More recent work by \textcite{brouwer2013} demonstrated categorical clustering of neural color representations in ventral temporal cortex. Our findings are complementary: while categorical boundaries may be preserved in CVD (as evidenced by intact discrimination), the continuous metric structure between categories appears distorted. This dissociation between categorical and continuous aspects of color coding deserves further investigation in future work.
+
+\subsection{Dissociation Between Geometric and Functional Distortions}
+
+Importantly, we observed a dissociation between SRM-based geometric distortion (which was modest) and LOCO-based functional impairment (which was pronounced). This finding has important methodological implications. Representational dissimilarity matrices (RDMs), while widely used to characterize neural representational geometry \cite{haxby2011}, may not fully capture functional consequences of representational distortions. In our data, only LOCO performance---a direct measure of interpolation capacity---predicted behavioral JND thresholds. This suggests that RDMs reflect metric properties of neural space, while cross-validated model performance reflects functional interpolation capacity. Future studies should carefully distinguish between these complementary measures.
+
+The hyperalignment framework developed by \textcite{haxby2011} and extended by \textcite{guntupalli2016} provides a powerful approach for comparing representations across individuals. Our finding that LOSO performance did not differ between HC and CVD validates the use of HC-derived common spaces for CVD comparisons and suggests that the fundamental structure of neural color coding is shared across individuals despite peripheral differences in cone spectral sensitivities.
+
+\subsection{Hierarchical Organization of Color Interpolation}
+
+The dissociation between LORO (discrimination) and LOCO (interpolation) performance is theoretically significant. It demonstrates that neural populations in V1/V2 can discriminate colors they cannot interpolate---suggesting that these regions encode local color contrasts but may not represent the full geometric structure of perceptual color space. %% FIX (2026-04-19): HC vs. CVD clarified (Results §R3: HC hV4 ρ ≈ 0.42;
+%% both CVD participants fell near floor at hV4, ρ = 0.08 / 0.12).
+In HC, hV4 showed above-chance continuous-hue interpolation, consistent with proposals that this region serves as a perceptual hub for color processing; in the two CVD cases, hV4 interpolation fell to floor, which is precisely the vulnerability target on which the pre-image filter acts. This hierarchical organization mirrors findings in other domains, such as object recognition, where early visual areas encode local features while higher areas encode more abstract, generalizable representations \cite{guntupalli2016}.
+
+%% FIX (2026-04-19): "hV4 showed positive correlations" is inconsistent
+%% with the project's encoder K* selection (hV4 optimum at K = 3, V3 at
+%% K = 8; see future_phase1_forward_model/README.md). The sign of the
+%% k–LOCO relation is negative for V1/V2 and non-monotonic for higher
+%% areas, with an intermediate optimum for hV4.
+Our analysis of different basis functions revealed a tradeoff between dimensionality and interpolation performance. V1/V2 showed negative correlations between $k$ (number of channels) and LOCO performance, whereas hV4 and V3 reached their optima at intermediate-to-large $k$ ($K^{\ast}_{hV4} = 3$, $K^{\ast}_{V3} = 8$). This pattern suggests that optimal channel configurations differ across the visual hierarchy---consistent with proposals that early areas encode color with high resolution but limited generalization, while higher areas trade resolution for generalizability.
+
+\subsection{Cone-Shift Model and Clinical Implications}
+
+%% FIX (2026-04-19):
+%%  - "Our cone-shift model" → three cone-shift model families (match Intro/Results).
+%%  - "(100% concordance)" qualified to the six HC1-reference hue-pair JND
+%%    tests (see behav_validation.md and phase3 CLAUDE.md).
+Our three cone-shift models --- retinal Machado, retinal+cortical R+C, and cortical 2-component --- provide a principled framework for designing personalized color correction filters. Unlike previous approaches that rely solely on perceptual matching or heuristic transformations, our method uses neural data to optimize filter parameters, potentially enabling more effective correction of CVD-related distortions. The finding that LOCO vulnerability predicted the six hue-pair JND thresholds of the HC1 reference cohort at $6/6$ concordance --- while SRM-based metric distortion predicted only $2/6$ --- validates this functional criterion and suggests that neural interpolation capacity, and not metric representational geometry, is the useful biomarker for perceptual discrimination.
+
+However, an important caveat is that our cone-shift model was validated only on neural data, not in behavioral experiments with actual corrective filters. Future work must test whether filters optimized to restore neural interpolation actually improve perceptual discrimination in real-world settings. This validation is critical before clinical applications can be pursued.
+
+\subsection{Limitations and Future Directions}
+
+The primary limitation of this study is the small CVD sample size ($n$ = 2). While we used single-case statistics \cite{crawford1998} to rigorously test individual effects, replication in a larger sample is needed to establish population-level conclusions. Future studies should recruit larger samples of both deuteranopes and protanomalous individuals to test whether CVD subtype modulates neural representations. Our preliminary data suggest differential patterns (e.g., sub-08 deutan vs. sub-09 protan showed different color pair distortions), but more participants are needed to draw firm conclusions.
+
+We focused on half-wave rectified sinusoidal basis functions following \textcite{brouwer2009} and \textcite{brouwer2013}. While we compared multiple basis configurations, nonlinear models or data-driven approaches (e.g., deep neural networks) may capture additional structure in neural color representations. However, our permutation analyses suggest that linear models provide a good first-order approximation, and the theoretical interpretability of basis function models remains a significant advantage for hypothesis testing.
+
+Although we used CIE $L^*a^*b^*$ space to define stimuli, this space is designed for typical color vision and may not optimally describe CVD color perception. Future work could investigate whether CVD-specific perceptual spaces (e.g., based on multidimensional scaling of behavioral judgments) better align with neural representations. However, using a standard color space facilitates comparison with prior literature and enables principled stimulus design.
+
+Finally, while our cone-shift model showed promising results in predicting neural distortions, validation of designed filters in behavioral and neural experiments is an important next step. This would test whether filters optimized to restore neural interpolation also improve perceptual discrimination and whether neural changes predict behavioral improvements.
+
+\subsection{Conclusions}
+
+Color vision deficiency alters neural color representations in a systematic and hierarchically organized manner. While color discrimination is preserved, the geometric structure of color space is distorted, particularly in early visual cortex. Forward encoding models provide a powerful framework for characterizing these distortions and may enable personalized approaches to color correction. These findings advance our understanding of how genetic variation in photoreceptor spectral sensitivity shapes cortical color representations and demonstrate that multivariate fMRI analysis can reveal functional consequences of sensory deficits that are not apparent in simple activation measures.

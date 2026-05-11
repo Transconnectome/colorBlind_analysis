@@ -1,0 +1,312 @@
+% Methods Section — v2 (2026-05-11)
+% Aligned with results_v4.tex:
+%   - LORO metric: LDA acc_exact (SRM-aligned), not FE Pearson r
+%   - LOCO metric: adjacent accuracy (adj_acc, ±1 hue step) + vulnerability vector
+%   - Statistics: Crawford & Howell (1998) for individual CVD; 40,320 permutations for model fit
+%   - $\Delta$RDM: LOO-consistent, Crawford & Howell for disparity elevation
+%   - Sections reordered to match Results narrative (LORO → LOCO → $\Delta$RDM → 2-comp → filter)
+
+\section{Methods}
+\label{sec:methods}
+
+% ──────────────────────────────────────────────────────────────────────────────
+\subsection{Participants}
+\label{sec:methods:participants}
+% ──────────────────────────────────────────────────────────────────────────────
+
+Twelve volunteers were recruited under Institutional Review Board approval
+(\#2510/002-023) and provided written informed consent. Color vision was
+screened using the 14-plate Ishihara pseudoisochromatic test
+\cite{ishihara1917}. Participants identifying $\geq 13$ plates correctly were
+classified as healthy controls (HC; $n = 7$, 3 female, age $22.7 \pm 2.5$
+years). Two male participants scoring below this threshold were classified as
+CVD: sub-08 (deuteranomalous, 8/14 plates misread) and sub-09 (protanomalous,
+11/14 plates misread). Sub-10 (2/14 plates misread; near-normal deutan) was
+retained as a within-study control. Three additional participants were excluded
+for failing to complete the full scanning protocol. All CVD results are
+interpreted as single-case demonstrations using the
+\citeA{crawford1998} modified $t$-test; no population-level inference is made.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\subsection{Stimuli and task}
+\label{sec:methods:stimuli}
+% ──────────────────────────────────────────────────────────────────────────────
+
+Eight isoluminant chromatic stimuli were drawn from CIE $L^{*}a^{*}b^{*}$
+space at equal angular spacing ($0^\circ$--$315^\circ$, $45^\circ$ steps;
+$L^{*} = 75$, chroma $= 40$) \cite{cie1986}, spanning red, orange, yellow,
+green, cyan, blue, purple, and magenta (Figure~\ref{fig:paradigm}A). A gray
+filler ($a^{*} = b^{*} = 0$) served as a null condition.
+
+Stimuli were presented in a Rapid Serial Visual Presentation (RSVP) design
+\cite{brouwer2009} to sustain attention and fixation. A circular patch
+(1.5 s per stimulus) was shown in pseudo-random order optimised with
+Neurodesign \cite{durnez2018}. Participants detected a consecutive-letter
+target embedded in a letter stream above the patch (button press on double
+`K'). Each run contained eight repetitions of all eight hues ($+$ gray);
+inter-stimulus intervals were drawn from $\{3, 4.5, 6\}$ s. Each session
+comprised six runs ($\approx 7$ min each). The experiment was coded in
+PsychoPy 2022.2.5 \cite{peirce2019}.
+
+CVD participants completed a second session to evaluate the stimulus-space
+filters: two runs each under (i) unmodified stimuli, (ii) the
+2-component-derived filter, and (iii) a generic Windows-accessibility filter,
+presented in counterbalanced order.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\subsection{MRI acquisition and preprocessing}
+\label{sec:methods:mri}
+% ──────────────────────────────────────────────────────────────────────────────
+
+Data were acquired on a Siemens 3T MAGNETOM Cima.X scanner with BioMatrix 3T
+coils. To constrain coverage to posterior occipital cortex we used 24 oblique
+slices perpendicular to the calcarine sulcus \cite{ryu2024} (TR 1.5 s, TE
+30 ms, FA $75^\circ$, $2 \times 2 \times 2$ mm, $96 \times 80$ matrix).
+
+Data were converted to BIDS format and defaced with ezBIDS \cite{levitas2024}.
+Functional images were registered to the T1w image via mutual-information
+coregistration (FreeSurfer \texttt{mri\_coreg}; \citeNP{maes1997, wells1996}).
+T1w-to-MNI normalisation used 12-DOF affine (FSL FLIRT; \citeNP{jenkinson2002})
+followed by nonlinear warping (FNIRT; \citeNP{andersson2007}), yielding 2 mm
+isotropic MNI-space BOLD data.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\subsection{ROI definition and response estimation}
+\label{sec:methods:roi}
+% ──────────────────────────────────────────────────────────────────────────────
+
+Bilateral V1, V2, V3, and hV4 were defined from the Wang probabilistic atlas
+\cite{wang2015} at $> 50\%$ probability, intersected with each participant's
+BOLD brain mask (voxel counts: V1 $655 \pm 214$; V2 $451 \pm 145$;
+V3 $103 \pm 29$; hV4 $63 \pm 22$; mean $\pm$ SD).
+
+Single-trial response amplitudes were estimated with a two-stage GLM
+\cite{dale1999, brouwer2009, brouwer2013}. First, an ROI-level hemodynamic
+response function (HRF) was extracted from a finite-impulse-response (FIR)
+model (8-TR basis set). Voxels in the top 50\% of variance explained by the
+mean ROI HRF were retained (V1 $328 \pm 107$; V2 $226 \pm 73$;
+V3 $52 \pm 15$; hV4 $32 \pm 11$ voxels). Second, the estimated HRF was
+convolved with per-color design matrices and fitted by ridge regression to
+yield one amplitude per (voxel, color, run), organized as a
+$6 \times 8 \times V$ array per subject.
+
+Voxel amplitudes were aligned across runs using within-subject Procrustes
+rotation \cite{gower1975}: runs 2--6 were mapped to run 1 via the
+orthogonal transformation minimising $\|X_\text{ref} - XQ\|_F$ (scaling
+prohibited). This step preserves color representational geometry while
+attenuating run-to-run measurement noise.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\subsection{Shared Response Model}
+\label{sec:methods:srm}
+% ──────────────────────────────────────────────────────────────────────────────
+
+Cross-subject alignment and dimensionality reduction were performed with the
+Shared Response Model (SRM; \citeNP{chen2015, haxby2011, guntupalli2016}).
+SRM estimates per-participant orthonormal mappings $W_i \in \mathbb{R}^{V
+\times k}$ and a group-shared response matrix $S \in \mathbb{R}^{k \times 8}$:
+
+\begin{equation}
+  \min_{W_i,\,S}\;\sum_{i=1}^N \|X_i - W_i S\|_F^2
+  \quad\text{s.t.}\quad W_i^\top W_i = I_k
+\end{equation}
+
+SRM was trained exclusively on the seven HC participants to avoid circular
+inference in CVD comparisons. Each CVD participant was subsequently projected
+into the fixed HC-derived space by solving $W_\text{CVD} = UV^\top$ where
+$U\Sigma V^\top = \text{SVD}(X_\text{CVD}\cdot S^\dagger)$. Reduced
+dimensions were chosen by mean-rank aggregation of leave-one-subject-out
+cross-validated LOCO performance: V1 $k = 4$; V2 $k = 4$; V3 $k = 3$;
+hV4 $k = 3$.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\subsection{Discrimination decoding (LORO)}
+\label{sec:methods:loro}
+% ──────────────────────────────────────────────────────────────────────────────
+
+Categorical discrimination was assessed with leave-one-run-out (LORO)
+cross-validation in SRM-aligned space. For each of the six runs, a linear
+discriminant analysis (LDA) classifier was trained on the remaining five runs
+(mean-subtracted SRM projections; shrinkage regularisation) and tested on the
+held-out run. Performance was summarised as the 8-class exact accuracy
+(acc\_exact; chance $= 1/8 = 0.125$), averaged across six folds.
+
+Group-level HC--CVD comparison used a Mann--Whitney $U$ test on
+cross-subject generalization scores: the LDA model trained on each HC
+participant's data was applied to every other participant, yielding 28
+HC-to-HC and 12 HC-to-CVD pair-wise scores. The omnibus test (all ROIs
+pooled) characterised whether CVD subjects fell outside the HC
+generalization distribution. Within-ROI single-case tests used the
+\citeA{crawford1998} modified $t$-test (one-tailed, lower).
+
+% ──────────────────────────────────────────────────────────────────────────────
+\subsection{Interpolation decoding (LOCO) and vulnerability profile}
+\label{sec:methods:loco}
+% ──────────────────────────────────────────────────────────────────────────────
+
+Continuous hue interpolation was assessed with leave-one-color-out (LOCO)
+cross-validation using the forward encoding model (ForwardEncoding). Each
+of the 8 hues was held out in turn; the encoder was trained on the remaining
+7 hues using all 6 runs (pooled $42$-sample design matrix), and the held-out
+hue was predicted by nearest-neighbour matching in channel-output space.
+
+\paragraph{Adjacent accuracy.}
+The primary LOCO metric was adjacent accuracy (adj\_acc): the proportion of
+predictions that fell within $\pm 1$ hue step ($45^\circ$) of the target hue,
+averaged across the 6 runs of each test color (range $0$--$1$; chance level
+under a uniform random predictor $= 3/8 = 0.375$; exact-accuracy chance
+$= 1/8 = 0.125$). For HC above-chance testing and for pairwise HC--CVD
+comparisons at hV4, $p$-values were obtained from 1,000 random color-label
+permutations and from the \citeA{crawford1998} modified $t$-test
+(one-tailed, lower), respectively.
+
+\paragraph{Vulnerability profile.}
+The 8-dimensional vector of per-hue adj\_acc values,
+$\mathbf{v} \in [0,1]^8$, constitutes each participant's \emph{hue
+vulnerability profile}. This profile is the phenotype inverted by the
+distortion model in Section~\ref{sec:methods:filter}. For group-level
+display, we additionally report Spearman $\rho$ between predicted and
+observed $\mathbf{v}$ as the model-fit statistic (see below).
+
+Per-hue group comparisons (Figure~\ref{fig:loco}C) used the
+\citeA{crawford1998} modified $t$-test (one-tailed, uncorrected); reported
+effect sizes are Hedges' $d$ with the Crawford--Howell correction for
+small-$n$ comparisons.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\subsection{Representational geometry: $\Delta$RDM and disparity}
+\label{sec:methods:rdm}
+% ──────────────────────────────────────────────────────────────────────────────
+
+To characterise the geometric basis of LOCO impairment we computed two
+complementary measures in SRM-aligned space.
+
+\paragraph{Pairwise disparity.}
+For each participant and ROI, the representational dissimilarity matrix (RDM)
+was computed as the $8 \times 8$ matrix of pairwise correlation distances
+($1 - \text{Pearson}\,r$). Mean pairwise disparity was defined as the
+average of all 28 upper-triangle elements. HC disparity was estimated with a
+leave-one-subject-out (LOO) procedure to remove the within-subject diagonal
+bias. Individual CVD disparity was compared to the HC LOO distribution using
+the \citeA{crawford1998} modified $t$-test (one-tailed, upper; significance
+at $p < 0.05$).
+
+\paragraph{$\Delta$RDM.}
+The deviation of CVD representational geometry from the HC mean was quantified
+as $\Delta\text{RDM} = \text{RDM}_\text{CVD} - \overline{\text{RDM}}_
+\text{HC,LOO}$, where $\overline{\text{RDM}}_\text{HC,LOO}$ is the HC mean
+RDM excluding the left-out subject. $\Delta$RDM was visualised as a heatmap over all
+28 color pairs (Figure~\ref{fig:geometry}A). To test whether a cone-shift
+model predicts the observed $\Delta$RDM structure, we computed the Spearman $\rho$
+between the upper-triangle of the predicted $\Delta\text{RDM}_\text{model}$
+and the observed $\Delta\text{RDM}$, and assessed significance against
+1,000 random sign-flip permutations of the upper-triangle elements.
+
+Note that pairwise-disparity tests (Crawford \& Howell) and $\Delta$RDM permutation
+tests are statistically independent: the former tests whether absolute
+pairwise distances are elevated; the latter tests whether a specific
+distortion model accounts for the \emph{structure} of those deviations.
+A significant pairwise-disparity finding does not imply a significant
+$\Delta$RDM result and vice versa.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\subsection{Two-component distortion model and parameter estimation}
+\label{sec:methods:twocomp}
+% ──────────────────────────────────────────────────────────────────────────────
+
+CVD hue distortion was modelled as a two-component angular shift in
+Stockman opponent-color space:
+
+\begin{equation}
+  \delta\theta = \beta_s \cos(h - 90^\circ) +
+                 \beta_c \cos(h - \theta_{\rm conf})
+  \label{eq:2comp}
+\end{equation}
+
+where $h$ is the opponent-hue angle of the stimulus and $\theta_{\rm conf}$
+is the CVD-subtype confusion axis ($16^\circ$ protan; $150^\circ$ deutan).
+$\beta_s$ parameterises distortion along the S-cone axis, motivated by
+behavioral evidence that CVD errors concentrate at S-cone loci
+\cite{emery2021}; $\beta_c$ parameterises rotation along the confusion
+axis, capturing partial cortical compensation \cite{tregillus2021}.
+Opponent-hue angles were derived from the Machado simulation framework at
+zero spectral shift \cite{machado2009}.
+
+Parameters were estimated by exhaustive grid search over
+$\beta_s \in [0^\circ, 50^\circ]$ and $\beta_c \in [-50^\circ, 50^\circ]$
+($26 \times 51 = 1{,}326$ combinations at $2^\circ$ resolution). The
+pair $(\hat{\beta}_s, \hat{\beta}_c)$ maximising the Spearman $\rho$
+between the simulated and observed hV4 vulnerability profiles
+$\mathbf{v}$ was retained. Significance was assessed against $8! =
+40{,}320$ exact permutations of color labels on the observed
+$\mathbf{v}$ (Figure~\ref{fig:twocomp}B).
+
+For comparison, a 1-DOF Machado cone-shift model ($\Delta\lambda$ only) and
+a 2-DOF retinal+cortical R+C model \cite{tregillus2021} were fitted
+identically. Model preference was based on the combination of
+(i) permutation-significant fit and (ii) exact pre-image existence for all
+8 hues (see below).
+
+% ──────────────────────────────────────────────────────────────────────────────
+\subsection{Stimulus-space filter: pre-image computation}
+\label{sec:methods:filter}
+% ──────────────────────────────────────────────────────────────────────────────
+
+The personalized correction filter was derived as the pre-image of the fitted
+2-component transform $T(\hat{\beta}_s, \hat{\beta}_c)$. For each of the
+8 displayed hues $\theta_k$, we solved for the input angle
+$\tilde{\theta}_k$ such that $T(\tilde{\theta}_k) = \theta_k$, yielding a
+per-hue correction $\delta\theta_k = \tilde{\theta}_k - \theta_k$. A CVD
+observer viewing $\tilde{\theta}_k$ thus receives the same cortical hue
+representation as a healthy control observer viewing $\theta_k$.
+
+Pre-images were computed numerically: 1,440 candidate values were evaluated
+on the forward map, a sign-change bracket was identified, and
+Brent's method was applied for refinement. Bijectivity was confirmed by
+verifying $|T(\tilde{\theta}_k) - \theta_k| < 0.001^\circ$ for all 8 hues
+and both CVD participants. Because $T$ is a smooth, single-valued circular
+function, a non-unique solution indicates arc compression (multiple inputs
+mapping to the same output) and inversion failure; this occurred for the
+Machado model for sub-09 (3 of 8 hues; Figure~\ref{fig:filter}B) but not for
+the 2-component model.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\subsection{Behavioral concordance}
+\label{sec:methods:behavioral}
+% ──────────────────────────────────────────────────────────────────────────────
+
+Participants completed two behavioral tasks under display conditions identical
+to the scanner experiment.
+
+\paragraph{Just-noticeable difference (JND).}
+Color discrimination thresholds were estimated for eight hue pairs using
+two-interleaved 1-up/1-down adaptive staircases, each terminating after
+eight reversals \cite{levitt1971}. Pairs spanned three categories:
+(i) three pairs hypothesised as universally difficult for both CVD types
+(yellow--purple, blue--purple, red--orange),
+(ii) two pairs hypothesised as deutan-specific
+(orange--yellow, yellow--green),
+(iii) two pairs hypothesised as protan-specific
+(cyan--magenta, green--blue), and
+(iv) one control pair (red--cyan).
+LOCO--JND concordance was assessed by asking whether each pair's
+LOCO-vulnerability classification (above vs.\ below HC range)
+agreed with the JND-impairment classification (above vs.\ below HC range).
+
+\paragraph{8AFC color identification.}
+Participants selected the matching hue from eight options identical to the
+scanner stimulus set. Same-day performance confirmed Ishihara classifications
+(reported in Section~\ref{sec:results:participants}).
+
+% ──────────────────────────────────────────────────────────────────────────────
+\subsection{Reproducibility}
+\label{sec:methods:repro}
+% ──────────────────────────────────────────────────────────────────────────────
+
+All analyses were conducted in Python 3.10 (numpy 1.24.3, scipy 1.11.3,
+scikit-learn 1.3.0, BrainIAK 0.11). Random seeds were fixed (\texttt{seed=42})
+for all permutation tests and bootstrap resampling. Analysis code and
+preprocessing scripts are available at
+\url{https://github.com/haba6030/colorBlind\_analysis}.
+Anonymised preprocessed data are available on reasonable request to the
+corresponding author.

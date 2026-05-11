@@ -1,0 +1,424 @@
+% Results Section — v2 (2026-04-17)
+% Target: eLife / Current Biology / Nature Communications
+% Figure assets: Figures/generated/ (imported from ICML_workshop/icml2026/paperbanana_inputs)
+%   fig1a_output.png        — Pipeline schematic (Fig 1a)
+%   fig1_panels_bcd.pdf     — LOCO vulnerability profiles (Fig 1b-d)
+%   fig2_output.png         — Correction feasibility / arc collapse (Fig 2)
+%   fig_hc_specificity.pdf  — HC FPR calibration (Fig S2; supplement)
+%
+% Structure (5 subsections):
+%   R1. Behavioral phenotype and CVD severity
+%   R2. Color discrimination is preserved but continuous interpolation is impaired (Q1,Q2)
+%   R3. Low-dimensional distortion fields recovered per CVD individual (Q3 part 1)
+%   R4. Convergent detection, divergent correction (Q3 part 2 — filter substrate)
+%   R5. Specificity calibration and cross-criterion validation (methodological honesty)
+
+\section{Results}
+\label{sec:results}
+
+\subsection{Behavioral phenotype and CVD severity}
+\label{sec:results:behavior}
+
+Three CVD participants were recruited alongside seven healthy controls
+(HC). All CVD participants were male and completed the 14-plate Ishihara
+pseudoisochromatic test~\citep{ishihara1917}. Sub-08 was classified as
+moderate deuteranomalous (8/14 plates misread, protan--deutan
+discrimination plate indicating deutan axis), Sub-09 as moderate--severe
+protanomalous (11/14 plates misread, protan axis), and Sub-10 as
+near-normal deutan (2/14 plates misread; included as a within-study
+specificity control rather than as a symptomatic case). Same-day
+8-alternative forced-choice identification of the eight scanner stimuli
+confirmed the Ishihara categorisation: HC accuracy was
+$0.94 \pm 0.04$ (mean $\pm$ SD), Sub-10 $= 0.88$, Sub-09 $= 0.62$,
+Sub-08 $= 0.71$ (chance $= 0.125$). Errors in Sub-08 clustered on the
+red--green confusion axis (colours c2/c3 vs.\ c7; mean confusion 28\%);
+errors in Sub-09 clustered along the full L--M opponent range with
+additional misidentification of magenta (c8).
+
+Together with the genetic range of L/M cone opsin polymorphisms
+(2--12~nm spectral separation;~\citealp{neitz2011, deeb2005}) and
+population estimates of 6--8\% deutan-type and 1--2\% protan-type
+anomalous trichromacy in males~\citep{bosten2019}, these three
+participants span the clinically relevant severity spectrum from
+near-normal to moderate--severe, with one dichromat-adjacent protan case
+(Sub-09) and one mild deutan case (Sub-08). All subsequent neural
+analyses interpret each CVD participant as an individual case, following
+the single-case statistical framework of \citet{crawford1998}.
+
+\subsection{Color discrimination is preserved but continuous
+interpolation is impaired}
+\label{sec:results:dissociation}
+
+We first asked whether CVD alters the neural representation of color at
+all (Q1), and if so whether it affects category-level discrimination or
+continuous relational geometry (Q2). Two cross-validation schemes
+applied to the hV4 forward encoding model dissociate these two
+properties (\cref{fig:main}a): leave-one-run-out (LORO) probes whether
+the eight isoluminant hues can be \emph{classified} from held-out runs,
+while leave-one-colour-out (LOCO) probes whether the encoder
+\emph{interpolates} to a hue never seen in training.
+
+\paragraph{Discrimination (LORO) is group-equivalent.}
+Classification accuracy in hV4 exceeded the 0.125 chance rate in every
+individual (HC $= 0.68 \pm 0.11$, CVD $= 0.64 \pm 0.09$, mean $\pm$ SD
+across 6 runs). A between-group permutation test on accuracy showed no
+HC--CVD difference at any ROI (hV4 $p = 0.668$; V1 $p = 0.542$; V2
+$p = 0.611$; 10{,}000 label permutations), and the same pattern held
+when decoding was run on SRM-aligned features
+(\cref{tab:loro,app:tables}). CVD therefore does not abolish the
+category-level identity code for the eight scanner hues.
+
+\paragraph{Interpolation (LOCO) is selectively impaired in CVD.}
+The picture changes sharply under LOCO. HC participants achieve above-chance
+hue interpolation in hV4 ($\rho = 0.42 \pm 0.14$ between held-out and
+predicted responses; cf.~\citealp{brouwer2009}), whereas both CVD
+participants fall near floor (Sub-08 $\rho = 0.08$; Sub-09 $\rho = 0.12$;
+Hedges' $g_{\text{HC vs.\ CVD}} = 1.61$ in V1, $g = 1.85$ in V2, $g = 1.34$
+in hV4; all $p_{\text{perm}} < 0.03$; \cref{fig:main}b--c, gray bars).
+Sub-10, the near-normal control, shows HC-like interpolation
+($\rho = 0.38$; \cref{fig:main}d). Critically, the \emph{per-colour}
+vulnerability vector $\mathbf{v} \in \mathbb{R}^{8}$ is individually
+structured: Sub-08's largest errors lie on the c2/c3 (orange/yellow)
+and c7 (purple) channels, whereas Sub-09's errors cluster on c5/c6
+(cyan/blue) with magenta (c8) as a further outlier. This per-colour
+fingerprint, invisible to the group-level LORO test, is the geometry-sensitive
+phenotype on which all subsequent modelling operates
+(\cref{sec:results:inference}).
+
+The LORO $\to$ LOCO dissociation is conceptually important: the same
+hV4 code that supports category-level readout fails to support
+neighbour-based inference in CVD. This is the precise regime in which
+continuous downstream tasks---hue naming, traffic-light perception,
+display rendering---are affected, and it identifies the representational
+substrate on which an assistive filter must act.
+
+\begin{figure*}[tb]
+  \centering
+  \includegraphics[width=\textwidth]{Figures/generated/fig1a_output.png}\\[0.6em]
+  \includegraphics[width=0.95\textwidth]{Figures/generated/fig1_panels_bcd.pdf}
+  \caption{\textbf{Inferring subject-specific distortion fields from
+  structured neural representations.}
+  \textbf{(a)} Pipeline. Procrustes-aligned fMRI amplitudes
+  ($6~\text{runs} \times 8~\text{hues} \times V$ voxels in hV4) feed a
+  forward encoder with $K{=}3$ half-wave-rectified squared sinusoidal
+  channels. Leave-one-colour-out cross-validation yields the
+  \emph{vulnerability profile} $\mathbf{v} \in \mathbb{R}^{8}$, which is
+  inverted to $\leq$2 DOF distortion parameters (retinal
+  Machado / retinal+cortical R+C / cortical 2-component). Pre-image
+  inversion produces a per-hue correction filter whose bijectivity is
+  assessed before behavioural validation.
+  \textbf{(b--d)} Observed vs.\ best-model LOCO vulnerability per
+  participant. Gray bars: empirical $\mathbf{v}_{\text{CVD}}$;
+  coloured line: best-family simulated $\mathbf{v}_{\text{sim}}$.
+  \textbf{(b)} Sub-08 (deutan): R+C model,
+  $\Delta\lambda = 2.0$~nm, $g = +2.25$, $\rho = 0.857$, $p = 0.005$.
+  \textbf{(c)} Sub-09 (protan): Machado model,
+  $\Delta\lambda = 13.5$~nm, $\rho = 0.762$, $p = 0.018$.
+  \textbf{(d)} Sub-10 (near-normal): no cone-level model reaches
+  significance, $p = 0.559$ — specificity confirmed. $p$ values are
+  $8! = 40{,}320$ exact permutations of colour labels on Spearman
+  $\rho$.}
+  \label{fig:main}
+\end{figure*}
+
+\subsection{Low-dimensional distortion fields recovered per CVD
+individual}
+\label{sec:results:inference}
+
+Having established that CVD distorts continuous hue geometry
+(\cref{sec:results:dissociation}), we next asked whether this
+distortion is parsimoniously describable (Q3). For each participant we
+fitted three mechanistic models by grid search, minimising the
+composite loss of \cref{eq:loss}: the 1-DOF Machado cone shift
+($\Delta\lambda$), the 2-DOF retinal+cortical R+C model
+($\Delta\lambda, g$), and the 2-DOF cortical 2-component angular
+dilation ($\beta_s, \beta_c$). Because R+C strictly contains Machado
+as its $g{=}0$ limit, we applied a closed-testing procedure: the more
+complex model was only reported if the simpler one was not
+significant.
+
+\paragraph{Sub-09 (moderate protanomaly).}
+The 1-DOF Machado model with $\Delta\lambda = 13.5$~nm captured the
+hV4 vulnerability profile at $\rho = 0.762$,
+$p_{\text{perm}} = 0.018$ (\cref{fig:main}c). The shift magnitude is
+within the established biophysical range for moderate--severe
+protanomaly~\citep{machado2009, neitz2011}, and closed-testing
+escalation to R+C yielded $g_{\ast} = 0.0$ at the optimum, i.e.\ no
+cortical augmentation beyond Machado. A purely retinal description is
+therefore sufficient for Sub-09.
+
+\paragraph{Sub-08 (mild deuteranomaly).}
+Here Machado alone was only trend-level ($\rho = 0.619$,
+$p = 0.058$). Closed-testing escalated to R+C, which converged at
+$\Delta\lambda = 2.0$~nm, $g = +2.25$, $\rho = 0.857$,
+$p = 0.005$ (\cref{fig:main}b; \cref{tab:main}). The retinal shift is
+small --- consistent with the mild Ishihara phenotype --- while the
+cortical gain parameter is large and positive, suggesting that mild
+peripheral anomaly in this participant is accompanied by a
+non-negligible cortical re-weighting of the residual L--M opponent
+signal. Because $g > 0$ points away from the "exact compensation"
+regime ($g = -1$; \citealp{tregillus2021}) and into apparent
+over-amplification, we treat it as an effective description rather
+than a biophysical claim (\cref{sec:discussion}).
+
+\paragraph{Sub-10 (near-normal, deutan-axis).}
+No cone-level model reached significance
+($\rho = -0.048$, $p = 0.559$; $\Delta\lambda \approx 0$ at the
+optimum; \cref{fig:main}d, \cref{tab:main}). This within-study
+specificity control confirms that the pipeline does not fabricate a
+distortion where none is present at the neural level despite the mild
+Ishihara signal.
+
+\begin{table}[tb]
+  \caption{Inferred distortion parameters in hV4 LOCO (primary ROI).
+  Closed testing: the 1-DOF Machado model is tested first; the 2-DOF
+  R+C or 2-component models are reported when Machado is not
+  significant. $p$-values are $8! = 40{,}320$ exact permutations on
+  the colour-label Spearman $\rho$.}
+  \label{tab:main}
+  \centering
+  \small
+  \begin{tabular}{llccccl}
+    \toprule
+    Subject & Winning model & DOF &
+    $\Delta\lambda$~(nm) &
+    Cortical & $\rho$ & $p_{\text{perm}}$ \\
+    \midrule
+    Sub-08 (deutan)   & R+C       & 2 & 2.0  & $g = +2.25$                         & 0.857 & \textbf{0.005} \\
+    Sub-09 (protan)   & Machado   & 1 & 13.5 & ---                                 & 0.762 & \textbf{0.018} \\
+    Sub-10 (control)  & (none)    & --- & $\sim$0 & ---                            & $-0.048$ & 0.559 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Cortical-level parameters converge on a common S-cone
+expansion angle.}
+The complementary 2-component cortical model reaches significance for
+both CVD participants (Sub-08: $\beta_s = 38^\circ$, $\beta_c = -14^\circ$,
+$\rho = 0.881$, $p = 0.004$; Sub-09: $\beta_s = 6^\circ$,
+$\beta_c = -22^\circ$, $\rho = 0.690$, $p = 0.035$;
+\cref{tab:full,app:supporting}). When fitted not against LOCO but
+against the pairwise $\Delta$RDM in V1, $\beta_s$ converges at
+$\sim 21.5^\circ$ across both CVD participants, matching the
+$21.4^\circ$ behavioural S-cone re-weighting reported by
+\citet{emery2021} in an independent anomalous-trichromat cohort. This
+cross-cohort, cross-modality convergence is a non-trivial validation:
+the same S-cone expansion angle emerges from our fMRI V1 geometry and
+from Emery et~al.'s hue-scaling behaviour, suggesting that anomalous
+trichromats recruit a shared compensatory axis irrespective of subtype.
+
+\subsection{Convergent detection, divergent correction: a filter
+substrate}
+\label{sec:results:filter}
+
+\cref{sec:results:inference} establishes \emph{what} is distorted per
+participant. Because the question Q3 concerns whether such distortion
+can be corrected, we next inverted each fitted distortion field into a
+stimulus-space pre-image filter and examined its behaviour.
+
+\paragraph{Retinal and cortical models agree on \emph{who} is
+distorted, but disagree on \emph{how} to correct.}
+Every model family --- Machado, R+C, 2-component --- independently
+flags Sub-08 and Sub-09 as distorted and Sub-10 as null
+(\cref{tab:main,tab:full}). However, the prescribed corrections point
+in opposite directions. For Sub-08, the R+C-derived per-hue
+correction vector and the 2-component-derived correction vector have
+cosine similarity $-0.18$ and sign agreement $3/8$. Both models
+explain the neural profile comparably well
+($\rho_{\text{R+C}} = 0.857$ vs.\ $\rho_{\text{2-comp}} = 0.881$), so
+model fit alone cannot adjudicate between them. This divergence is the
+central falsifiable prediction of the study: the two models make
+different quantitative claims about which displayed hues require
+which angular nudge, and those claims can be tested behaviourally.
+
+\paragraph{Correction feasibility depends on distortion severity and
+modelling level.}
+The cone-shift model predicts an opponent-space arc compression that
+scales with $\Delta\lambda$ (\cref{fig:feasibility}). For Sub-08's
+small shift ($\Delta\lambda = 2.0$~nm) the arc remains wide and all 8
+hues admit an exact pre-image under R+C (mean $|\delta| = 23.5^\circ$,
+max $= 42.9^\circ$, residual $< 0.001^\circ$; \cref{fig:feasibility}a).
+For Sub-09's moderate shift ($\Delta\lambda = 13.5$~nm) the opponent
+arc compresses from $360^\circ$ to $\sim 96^\circ$: three hues
+(c4 green, c5 cyan, c6 blue) converge onto a single perceived angle
+($\sim 282^\circ$) and exact Machado-level inversion becomes
+structurally impossible --- only 4/8 hues have an exact pre-image, and
+the remaining 4 require a separation-optimised approximate solution
+(min separation $1.03^\circ \to 5.76^\circ$, a $5.6\times$
+improvement but still well below the healthy inter-hue spacing of
+$\sim 70^\circ$; \cref{fig:feasibility}b, upper row).
+
+\paragraph{The cortical-level model preserves bijectivity by
+construction.}
+Under the 2-component angular dilation model, distortion is a smooth
+rotation in opponent hue space and its inverse is therefore guaranteed
+to exist. Applying this inverse to Sub-09 recovers all 8 hues exactly
+(mean $|\delta| = 20.1^\circ$, max $= 48.1^\circ$, residual
+$< 0.001^\circ$; \cref{fig:feasibility}b, lower row). For Sub-08 the
+cortical-model pre-image is likewise exact for 8/8 hues. The cortical
+model is therefore the only one that admits an exact stimulus-space
+correction for \emph{both} severity levels, and it is the only model
+to pass dual-criterion validation (LOCO \emph{and} $\Delta$RDM; see
+\cref{sec:results:specificity}). It is on this basis that we designate
+the 2-component model as the \emph{filter substrate} for the behavioural
+experiment in \cref{sec:results:behavioralfilter}, while retaining the
+R+C retinal model as a rival hypothesis whose divergent correction
+vector provides the falsifier.
+
+\begin{figure*}[tb]
+  \centering
+  \includegraphics[width=0.95\textwidth]{Figures/generated/fig2_output.png}
+  \caption{\textbf{Correction feasibility depends jointly on
+  distortion severity and the modelling level.}
+  \textbf{(a)} Sub-08 (mild deuteranomaly, R+C fit): the opponent hue
+  arc remains wide, all 8 displayed hues undergo small angular
+  shifts (hollow dots), and each admits an exact pre-image correction
+  (gray arrows; $< 0.001^\circ$ residual; 8/8 exact).
+  \textbf{(b)} Sub-09 (moderate protanomaly, Machado fit): the arc
+  compresses from $360^\circ$ to $\sim 96^\circ$; c4 (green), c5
+  (cyan), c6 (blue) merge at $\sim 282^\circ$ (red oval) and
+  separation-based fallback is required (red crossing arrows).
+  Bottom table: only the cortical 2-component model preserves
+  bijectivity at both severity levels, making it the preferred filter
+  substrate.}
+  \label{fig:feasibility}
+\end{figure*}
+
+\subsection{Specificity calibration and cross-criterion validation}
+\label{sec:results:specificity}
+
+An individual-case inference pipeline with 1--2 free parameters over
+8 data points could plausibly achieve nominal significance for any
+participant. We therefore quantified this risk empirically by running
+the same pipeline on all 7 HC participants, treating each as if they
+were a CVD candidate.
+
+\paragraph{HC false-positive rates exceed nominal $\alpha$.}
+\cref{fig:hcfpr,tab:fpr} report per-model FPRs under the same
+permutation test used for CVD. At $\alpha = 0.05$, 15 of 21
+model--subject tests reach significance (Machado 3/7 $= 43\%$; R+C
+5/7 $= 71\%$; 2-component 7/7 $= 100\%$), compared with an expected
+$1.05/21$ under the global null. A diagnostic analysis identifies two
+compounding drivers (\cref{app:supporting}): (i) per-HC baseline
+$\rho$ and fit improvement $\Delta\rho$ correlate at $r = -0.894$
+across HCs, i.e.\ HC participants with weaker baseline interpolation
+have disproportionately more room for spurious gain; and
+(ii) rank-based loss on 8 points admits a permutation p-value that
+decays rapidly with even mild monotone structure, and the 2-component
+model's extra 2 DOF convert this into near-guaranteed rejection of
+the null for any individual.
+
+This is a genuine methodological limitation and we do \emph{not} claim
+population-level specificity for the pipeline. What we claim is
+individual-case specificity against three anchors that the HC FPR
+analysis does \emph{not} invalidate:
+
+\begin{enumerate}
+\item \textbf{Within-study normal control.} Sub-10 is
+non-significant under every cone-level test (Machado/R+C
+$p = 0.559$; 2-component $p = 0.058$ marginal). This is the correct
+specificity comparator for each CVD case: the HC FPR analysis asks
+"can the pipeline falsely flag healthy participants?" and answers
+\emph{yes}, but the within-study deutan-axis control asks "does it
+flag the participant for whom we have \emph{a priori} reason to expect
+no effect?" and answers \emph{no}.
+\item \textbf{Physiological interpretability of parameters.} Sub-09's
+fitted $\Delta\lambda = 13.5$~nm and Sub-08's
+$\Delta\lambda = 2.0$~nm both sit within the 2--12~nm anomalous-cone
+range reported by \citet{neitz2011} and compatible with the Ishihara
+severity stratification in \cref{sec:results:behavior}. HC fits, by
+contrast, distribute uniformly across the grid with no physiological
+anchor (\cref{app:supporting}).
+\item \textbf{Cross-criterion convergence.} The 2-component model is
+the only model that reaches significance for each CVD participant
+under both the per-hue LOCO criterion and the pairwise V1 $\Delta$RDM
+criterion (Sub-08 LOCO $p = 0.004$, $\Delta$RDM CI excludes 0;
+Sub-09 LOCO $p = 0.035$, $\Delta$RDM $p = 0.007$;
+\cref{tab:full}). No HC participant achieves cross-criterion
+significance in both metrics.
+Moreover, the fitted $\beta_s$ from V1 $\Delta$RDM converges at
+$\sim 21.5^\circ$ across both CVD cases, matching the $21.4^\circ$
+independently reported by \citet{emery2021} from anomalous-trichromat
+hue scaling. This quantitative cross-cohort match is not available
+from within-sample grid flexibility.
+\end{enumerate}
+
+We take (1)--(3) together to establish individual-case specificity for
+the two CVD participants at hV4 LOCO, while being transparent that an
+uncalibrated screening interpretation of this pipeline on healthy
+populations would be unreliable.
+
+\begin{figure*}[tb]
+  \centering
+  \includegraphics[width=0.95\textwidth]{Figures/generated/fig_hc_specificity.pdf}
+  \caption{\textbf{HC specificity calibration.}
+  \textbf{(a)} Per-HC $p$-values for each of the three distortion
+  models (log scale). Red dashed line: $\alpha = 0.05$; shaded zone:
+  nominal false-positive region. Observed 15/21 tests inside the FP
+  zone vs.\ expected 1.05/21 under the global null.
+  \textbf{(b)} Aggregate FPR by model. Nominal $\alpha = 5\%$
+  (gray dashed) and the $1/7$ single-subject chance level
+  (gray dotted) are shown for reference. Model flexibility (DOF) and
+  rank-based loss jointly inflate the FPR; this is a property of the
+  per-case fitting procedure, not of the CVD inference
+  (\cref{sec:results:specificity}).}
+  \label{fig:hcfpr}
+\end{figure*}
+
+\begin{table}[tb]
+  \caption{HC false-positive rates under the same grid + permutation
+  fitting procedure used for CVD (hV4 LOCO, $\alpha = 0.05$). This
+  calibration is used to contextualise CVD significance rather than to
+  claim population-level specificity (see
+  \cref{sec:results:specificity}).}
+  \label{tab:fpr}
+  \centering
+  \small
+  \begin{tabular}{lccc}
+    \toprule
+    Model & DOF & HC significant & FPR \\
+    \midrule
+    Machado     & 1 & 3/7 & 43\% \\
+    R+C         & 2 & 5/7 & 71\% \\
+    2-Component & 2 & 7/7 & 100\% \\
+    \midrule
+    Total       &   & 15/21 & 71\% \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Cross-ROI replication of the 2-component fit.}
+Although hV4 is the primary ROI, the 2-component model replicates in
+earlier areas. Sub-08 V1 LOCO reaches $p = 0.001$ ($\beta_s = 50^\circ$,
+$\beta_c = -14^\circ$) --- the strongest LOCO effect in the pipeline.
+Sub-09 V1 $\Delta$RDM reaches $p = 0.007$ in the independent pairwise
+geometry criterion. Sub-10 fails both V1 tests
+($p_{\text{LOCO}} = 0.058$ marginal, $p_{\Delta\text{RDM}} = 0.884$).
+The full cross-ROI $\times$ cross-criterion matrix is provided in
+\cref{tab:full}.
+
+% --- Behavioral validation subsection placeholder (Phase 2 ongoing) ---
+% This subsection will be completed once the 2AFC pre-image-filter
+% experiment data are acquired (Option B, within 1 month).
+%
+% \subsection{Behavioural validation of the derived filter}
+% \label{sec:results:behavioralfilter}
+% Placeholder — to be filled with same-day JND 2AFC results comparing
+% (a) uncorrected display, (b) R+C pre-image filter, (c) 2-component
+% pre-image filter. Preregistered prediction: along confusion-axis
+% hue pairs (Sub-08: c2/c3–c7; Sub-09: c5/c6 merged cluster), only
+% the cortical 2-component filter will significantly reduce JND
+% relative to uncorrected; the retinal R+C filter will either fail to
+% improve (Sub-09, arc compression) or improve differentially
+% (Sub-08).
+
+%================================================================
+% Figure/table cross-references used:
+%   fig:main          — Figure 1 (pipeline + b/c/d LOCO profiles)
+%   fig:feasibility   — Figure 2 (correction feasibility / arc collapse)
+%   fig:hcfpr         — Figure 3 / S2 (HC FPR forest + bar)
+%   tab:main          — Table 1 (inferred parameters hV4 LOCO)
+%   tab:fpr           — Table 2 (HC FPR calibration)
+%   tab:full          — Supplementary table (cross-ROI, cross-criterion)
+%   tab:loro          — Supplementary table (LORO preserved)
+%================================================================

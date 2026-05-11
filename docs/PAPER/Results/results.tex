@@ -1,0 +1,64 @@
+% Results Section
+% To be included in main document via \input{Results/results}
+
+\section{Results}
+
+\subsection{Behavioral Performance}
+
+All participants successfully completed the attention task during fMRI scanning (mean accuracy: HC = XX\%, CVD = XX\%). Response times did not differ significantly between groups ($t$ = XX, $p$ = XX), indicating comparable task engagement and alertness throughout the scanning session.
+
+In the post-scan color identification task, HC participants correctly identified XX\% of colors on average, while CVD participants showed reduced accuracy (XX\%), particularly for colors along the red-green axis. Just noticeable difference (JND) thresholds, estimated using adaptive staircases \cite{levitt1971}, revealed elevated thresholds for CVD participants on specific color pairs identified from the neural RDM analysis (see below).
+
+% TODO: Add actual behavioral statistics
+% TODO: Add JND threshold table (Table 1)
+
+\subsection{Neural Color Representations in Shared Space}
+
+We compared neural color representations between HC and CVD participants using shared response modeling \cite{chen2015}, which projects individual voxel patterns into a low-dimensional common space. Following the approach of \textcite{haxby2011} and \textcite{guntupalli2016}, we estimated a common space from HC participants only and subsequently projected CVD data into this HC-derived space.
+
+Individual CVD participants showed increased disparity from the HC-derived common space compared to leave-one-out HC controls. Using \textcite{crawford1998} modified $t$-tests appropriate for single-case comparisons, we found significant deviations in early visual cortex: V1 (CVD-1: $t$(6) = XX, $p$ = XX; CVD-2: $t$(6) = XX, $p$ = XX) and V2 (CVD-1: $t$(6) = XX, $p$ = XX; CVD-2: $t$(6) = XX, $p$ = XX).
+
+Representational dissimilarity matrix (RDM) analysis, quantified using correlation distance, revealed specific color pairs that differed significantly between CVD and HC groups. Significance was assessed via 95\% bootstrap confidence intervals (1,000 iterations), resampling HC participants with replacement to account for small sample variability. In V1, CVD participants showed altered dissimilarity for [specific color pairs determined by empirical analysis]. Similar patterns emerged in V2 and hV4, with effect sizes largest in early visual areas.
+
+% ROI-specific findings
+\textbf{V1:} [Insert specific results with effect sizes]
+
+\textbf{V2:} [Insert specific results with effect sizes]
+
+\textbf{V3:} [Insert specific results with effect sizes]
+
+\textbf{hV4:} [Insert specific results with effect sizes]
+
+% TODO: Add actual SRM disparity values and statistics
+% TODO: Add Figure showing RDM differences (Figure 2)
+% TODO: Add supplementary table with all pairwise RDM comparisons
+
+\subsection{Forward Encoding Model Performance}
+
+We evaluated forward encoding models using three complementary cross-validation schemes, following the approach of \textcite{brouwer2009} and \textcite{brouwer2013}. Models were estimated via ridge regression with the regularization parameter selected by generalized cross-validation \cite{golub1979}.
+
+\subsubsection{Color Discrimination: Leave-One-Run-Out (LORO)}
+
+Leave-one-run-out cross-validation demonstrated that individual colors could be successfully decoded from voxel responses in all ROIs. Decoding accuracy exceeded chance (12.5\%) for both HC (V1: XX\%, V2: XX\%, V3: XX\%, hV4: XX\%) and CVD participants (V1: XX\%, V2: XX\%, V3: XX\%, hV4: XX\%). Importantly, group comparisons via nonparametric permutation tests \cite{nichols2002} revealed no significant differences in LORO performance ($p$ > .05 for all ROIs), indicating that color discrimination per se was preserved in CVD.
+
+\subsubsection{Color Interpolation: Leave-One-Color-Out (LOCO)}
+
+Leave-one-color-out cross-validation tested whether forward encoding models could interpolate to novel, held-out colors---a critical test of whether the geometric structure of neural color space is preserved. HC participants showed successful interpolation in higher-order visual areas (hV4: $r$ = XX, $p$ < .001), replicating prior findings \cite{brouwer2009}. However, CVD participants showed significantly reduced LOCO performance compared to HC in early visual areas: V1 (Hedges' $g$ = XX, $p$ = XX) and V2 (Hedges' $g$ = XX, $p$ = XX). This dissociation---preserved discrimination (LORO) but impaired interpolation (LOCO)---suggests that CVD distorts the continuous structure of neural color space rather than simply reducing color discriminability.
+
+\subsubsection{Zero-Shot Generalization: Leave-One-Subject-Out (LOSO)}
+
+Leave-one-subject-out analysis tested whether the HC group-derived common space \cite{chen2015} supported zero-shot generalization to novel individuals. Consistent with prior hyperalignment studies \cite{haxby2011, guntupalli2016}, LOSO performance was above chance in hV4 (HC: $r$ = XX; CVD: $r$ = XX). Critically, there was no significant difference between HC and CVD in LOSO performance ($p$ = XX), indicating that the shared representational space was equally applicable to both groups. This finding validates our use of an HC-derived common space for CVD comparisons and suggests that the fundamental structure of neural color coding is shared across individuals despite peripheral differences.
+
+% TODO: Add actual decoding performance values
+% TODO: Add Figure comparing LORO vs. LOCO across ROIs and groups (Figure 3)
+% TODO: Add permutation test details in supplement
+
+\subsection{Cone-Shift Model Validation}
+
+[To be completed based on Phase 2 cone-shift pipeline results]
+
+Using a cone-specific spectral shift model \cite{brettel1997}, we tested whether CVD-related neural distortions could be predicted by simulating altered cone spectral sensitivities. [Add specific results here after analysis completion.]
+
+% TODO: Add cone-shift model fitting results
+% TODO: Add behavioral-neural concordance analysis
+% TODO: Add Figure showing filter performance (Figure 4)

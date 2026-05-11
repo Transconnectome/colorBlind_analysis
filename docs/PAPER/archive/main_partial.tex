@@ -1,0 +1,90 @@
+\documentclass[
+    a4paper,
+    man,
+    british
+]{apa6}
+
+\usepackage[british]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{epstopdf}
+\usepackage{csquotes}
+\usepackage[hidelinks]{hyperref}
+\usepackage[
+    style=apa,
+    backend=biber,
+    sortcites=true,
+    sorting=nyt,
+]{biblatex}
+
+\DeclareLanguageMapping{british}{british-apa}
+
+% maps apacite commands to biblatex commands
+\let \citeNP \cite
+\let \citeA \textcite
+\let \cite \parencite
+
+\addbibresource{bibliography.bib}
+
+% Graphics path
+\graphicspath{{Figures/}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PARTIAL COMPILATION CONTROL
+% Comment/uncomment sections as needed
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \includeonly{Introduction/introduction}
+% \includeonly{Methods/methods}
+% \includeonly{Results/results}
+% \includeonly{Discussion/discussion}
+
+% Compile everything (comment out to enable selective compilation)
+\includeonly{%
+    Introduction/introduction,%
+    Methods/methods,%
+    Results/results,%
+    Discussion/discussion%
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Document Information
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\title{Neural Representation of Color in Color Vision Deficiency: An fMRI Study}
+\shorttitle{Color Representation in CVD}
+\author{Your Name}
+\affiliation{Your University}
+
+\keywords{color vision deficiency, fMRI, shared response model, forward encoding model, representational similarity analysis}
+
+\abstract{
+Placeholder abstract. Replace this with your actual abstract text. This study investigated neural color representations in individuals with color vision deficiency (CVD) using functional MRI and computational modeling approaches.
+}
+
+\begin{document}
+
+\maketitle
+
+% NOTE: Use \include instead of \input for \includeonly to work
+\include{Introduction/introduction}
+\include{Methods/methods}
+\include{Results/results}
+\include{Discussion/discussion}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% References
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\printbibliography
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% Appendix (optional)
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \appendix
+% \input{appendix}
+
+\end{document}

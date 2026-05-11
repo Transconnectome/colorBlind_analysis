@@ -1,0 +1,195 @@
+% Supplementary Methods
+% Extracted from methods.tex (2026-04-06)
+% Contains detailed methodological information not included in main text
+
+\documentclass[a4paper,11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[british]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{apacite}
+
+\title{Supplementary Methods}
+\author{}
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\section*{Overview}
+
+This document contains supplementary methodological details referenced in the main Methods section. These include quality control procedures, statistical analysis details, and consistency validation tests.
+
+
+% ========== Section 1: Supplementary: Confound regression and temporal filtering ==========
+
+\subsection*{Supplementary: Confound regression and temporal filtering}
+
+Within-run head motion was estimated via rigid-body realignment. No temporal filtering or confound regression was applied; slow drift was modeled via linear per-run regressors in the general linear model.
+
+
+
+% ========== Section 2: Supplementary -- quality control ==========
+
+\subsection*{Supplementary -- quality control}
+
+Registration quality was evaluated by computing the intersection between the Wang Atlas ROIs (V1, V2, V3, hV4) and the BOLD brain mask in MNI space. Across 10 subjects, mean ROI coverage was 84.3\% (SD = 21.7\%), and GLM valid ratio (percentage of ROI voxels with reliable stimulus-evoked responses) was 99.6\%. We evaluated all subjects' data suitable for downstream analysis, though sub-07 showed reduced coverage (30.8\%) due to individual anatomical variability.
+
+
+
+% ========== Section 3: Supplementary -- Voxel counts range ==========
+
+\subsection*{Supplementary -- Voxel counts range}
+
+Saved in markdown.
+
+
+
+% ========== Section 4: Supplementary: Consistency test -- PCA, norm procrustes (TBA) ==========
+
+\subsection*{Supplementary: Consistency test -- PCA, norm procrustes (TBA)}
+
+
+
+% ========== Section 5: Supplementary: Mean activation analysis ==========
+
+\subsection*{Supplementary: Mean activation analysis}
+
+We conducted mean voxel response amplitudes analysis to identify whether SRM-based differences rely on the activation. We checked mean amplitudes across all colors and for each color.
+
+
+
+% ========== Section 6: Supplementary: Statistical Analysis ==========
+
+\section*{Supplementary: Statistical Analysis}
+
+All tests used a significance threshold of $\alpha = 0.05$ with False Discovery Rate correction \cite{benjamini1995}; $q = 0.05$ applied to RDM color-pair comparisons (28 pairs per participant). Individual CVD participants were compared to the HC distribution using \citeA{crawford1998} modified t-tests:
+
+\begin{equation}
+t^* = \frac{x_{\text{CVD}} - \bar{x}_{\text{HC}}}{\text{SD}_{\text{HC}} \times \sqrt{(n+1)/n}}, \quad df = n-1 = 6
+\end{equation}
+
+with one-tailed p-values testing the directional hypothesis that CVD disparity exceeds HC. Effect sizes were quantified via Hedges' g. Group-level permutation tests (10,000 iterations) were used for HC-CVD comparisons by permuting subject labels; color-level permutation tests (1,000 iterations) were used for LOCO/LORO validation by permuting color labels within subjects.
+
+
+
+% ========== Section 7: K-selection procedure ==========
+
+\section*{Supplementary: Dimensionality Selection}
+
+The reduced dimension $k$ for SRM was determined via leave-one-subject-out (LOSO) cross-validation based on within-subject representational dissimilarity matrix (RDM) reliability \cite{cunningham2014}. For each candidate $k$ (range: 1--8) and fold, reliability was quantified as the Spearman correlation between RDMs computed from even runs (2,4,6) versus odd runs (1,3,5) of the held-out participant in SRM space. We selected $k$ maximizing mean reliability across seven folds. The selected values and their associated cross-subject RDM Spearman correlations were:
+
+\begin{itemize}
+\item V1: $k = 4$ (cross-subject RDM correlation = 0.60)
+\item V2: $k = 4$ (cross-subject RDM correlation = 0.57)
+\item V3: $k = 3$ (cross-subject RDM correlation = 0.55)
+\item hV4: $k = 3$ (cross-subject RDM correlation = 0.32)
+\end{itemize}
+
+
+% ========== Section 8: Generalized Cross-Validation (GCV) Details ==========
+
+\section*{Supplementary: Generalized Cross-Validation for Ridge Regression}
+
+The regularization parameter $\alpha$ for ridge regression was selected via Generalized Cross-Validation (GCV; \citeNP{golub1979}). GCV provides a computationally efficient approximation to leave-one-out cross-validation for selecting $\alpha$. The optimal $\alpha$ minimizes the GCV score:
+
+\begin{equation}
+\text{GCV}(\alpha) = \frac{1}{n} \|y - \hat{y}\|_2^2 / \left(1 - \frac{\text{tr}(H)}{n}\right)^2
+\end{equation}
+
+where $X$ denotes the design matrix, $y$ is the observed response vector, $\hat{y}$ is the ridge-predicted response, $H = X(X^T X + \alpha I)^{-1}X^T$ is the hat matrix, and $n$ is the number of training samples.
+
+
+% ========== Section 9: LOO-Consistent Disparity Procedure ==========
+
+\section*{Supplementary: Leave-One-Out Consistent Disparity Estimation}
+
+To quantify HC-CVD disparity with unbiased references, we used a leave-one-out (LOO) consistent procedure: for each fold $i$ (leaving out HC participant $i$), a reference pattern $R_{-i}$ was computed as the mean of the remaining six HC participants' aligned data. Both the held-out $\text{HC}_i$ and both CVD participants were compared against this same reference $R_{-i}$, yielding disparity scores $d(\text{HC}_i, R_{-i})$ and $d(\text{CVD}_j, R_{-i})$. This ensures HC and CVD disparities are measured against identical references within each fold. Individual CVD disparity significance was assessed via \citeA{crawford1998} modified t-tests comparing each CVD participant's mean disparity (averaged across 7 folds) to the HC distribution ($n=7$, $df=6$).
+
+
+% ========== Section 10: Cross-Validation Details ==========
+
+\section*{Supplementary: Cross-Validation Procedures}
+
+\subsection*{Leave-One-Run-Out (LORO)}
+
+LORO evaluated whether individual colors could be distinguished from voxel response amplitudes, testing the consistency of neural color encoding across runs. For each of six runs, the corresponding response matrices ($B$, $C$) were held out as the test set, $W$ was trained on the remaining five runs. Both color decoding and voxel response prediction were evaluated on the held-out run.
+
+\subsection*{Leave-One-Color-Out (LOCO)}
+
+LOCO tested whether geometric relationships of circular hue space were preserved in neural representation by evaluating interpolation to held-out colors. For each color, all six run response matrices of the target color were held out. $W$ was trained on the remaining seven colors, and the model predicted either the held-out color from voxel responses or voxel responses from the held-out color's channel outputs.
+
+\subsection*{Leave-One-Subject-Out (LOSO)}
+
+LOSO evaluated zero-shot generalization to held-out participants. As LOSO requires cross-subject prediction, SRM-transformed data were used to align voxel spaces across participants. For each HC participant, $W$ was trained on the remaining HC participants' shared-space data and tested on the held-out participant. This assessed whether the HC group-derived common space supported generalization to novel individuals.
+
+
+% ========== Section 11: Evaluation Metrics Details ==========
+
+\section*{Supplementary: Evaluation Metrics}
+
+\subsection*{Color Decoding Metrics}
+
+Color decoding was evaluated using (1) mean absolute error (MAE) between predicted and true hue angles (chance = 90°, expected from a uniform random predictor on a circle), and (2) categorization accuracy with $\pm 22.5$° bins around each of the eight colors (chance = 12.5\% = 1/8).
+
+\subsection*{Voxel Prediction Metrics}
+
+Voxel response prediction was evaluated using Pearson correlation between predicted and observed response vectors, computed across all voxels and colors in the test set.
+
+\subsection*{Statistical Significance}
+
+Statistical significance of group comparisons (HC vs CVD) and individual CVD analyses was assessed using nonparametric permutation tests (10,000 iterations; \citeNP{nichols2002}).
+
+
+% ========== Section 12: Additional SRM Details ==========
+
+\section*{Supplementary: Shared Response Model Residuals}
+
+Each participant's residuals in the SRM model reflect the extent to which their data are not captured by the common structure, including inherent geometric differences. The orthogonal constraint ($W_i^T W_i = I_k$) helps preserve geometric relationships between colors---distances and angles---in the common space.
+
+Additionally, global between-subject RDM similarity was quantified using Spearman correlation across all 28 color pairs.
+
+
+% ========== Section 13: Spatial Normalization Details ==========
+
+\section*{Supplementary: Image Orientation Initialization}
+
+Image orientation was first initialized according to the scanner-defined obliquity information in the NIfTI header. The mutual-information cost function was then optimized to maximize the statistical dependence between T1w and BOLD intensity distribution within the overlapping region.
+
+
+% ========== Section 14: Procrustes Preprocessing Rationale ==========
+
+\section*{Supplementary: Procrustes Alignment Benefits}
+
+This preprocessing reduces measurement noise across runs while preserving color representational geometry, thereby improving the quality of subsequent SRM fitting.
+
+
+% ========== Section 15: Future Analyses ==========
+
+\section*{Supplementary: Planned Analyses (TBA)}
+
+\subsection*{Behavioral-Neural Concordance}
+
+Behavioral-neural concordance between RDM deviations and JND thresholds will be reported following completion of data collection.
+
+\subsection*{Filter Design}
+
+\begin{itemize}
+\item Cone-gain model (Fig 2b.)
+\item Fitting Criteria
+\begin{itemize}
+\item Loss function \& Validation
+\end{itemize}
+\item Evaluation
+\begin{itemize}
+\item Permutation test
+\end{itemize}
+\end{itemize}
+
+
+\bibliographystyle{apacite}
+\bibliography{bibliography}
+
+\end{document}

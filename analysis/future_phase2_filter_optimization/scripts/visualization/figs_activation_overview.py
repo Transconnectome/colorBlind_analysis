@@ -9,7 +9,7 @@ Layout: 2-row figure
   Row 2 (2 panels): (a) Group test bar (mean |activation| HC vs CVD per ROI, with t-test p)
                      (b) Modulation depth HC vs CVD per ROI
 
-Output: results/visualizations/meeting/activation_overview.png
+Output: presentation/figures/data/activation_overview.png
 """
 from __future__ import annotations
 
@@ -22,10 +22,10 @@ import numpy as np
 
 # --------------------------------------------------------------------- paths
 SCRIPT = Path(__file__).resolve()
-PROJECT = SCRIPT.parents[3]  # …/colorBlind_analysis
+PROJECT = SCRIPT.parents[4]  # …/colorBlind_analysis
 SRC = (PROJECT / "analysis" / "phase2_SRM_across_between" / "results" /
        "activation_prior" / "activation_prior_results.json")
-OUT = (SCRIPT.parents[1] / "results" / "visualizations" / "meeting" /
+OUT = (SCRIPT.parents[2] / "presentation" / "figures" / "data" /
        "activation_overview.png")
 OUT.parent.mkdir(parents=True, exist_ok=True)
 
@@ -84,19 +84,21 @@ for roi in ROIS:
     }
 
 # --------------------------------------------------------------------- figure
-fig = plt.figure(figsize=(13.5, 7.5), dpi=160, facecolor=BG)
-fig.suptitle("Activation Overview  —  per-color tuning (HC vs CVD) and group magnitudes",
+fig = plt.figure(figsize=(16, 9), dpi=160, facecolor=BG)
+fig.suptitle("Activation Overview  —  Per-color tuning + group magnitude",
              fontsize=14, fontweight="bold", color=ACCENT, y=0.965)
-fig.text(0.5, 0.93,
-         "Top row: per-color mean activation curves (z-units, HC pool n=7 IQR band).   "
-         "Bottom row: HC vs CVD group means.   No significant magnitude difference (all p > 0.3) "
-         "→ CVD deficit is not signal loss.",
+fig.text(0.5, 0.935,
+         "Top: per-color mean activation curves (z-units, HC pool n=7 IQR band).   "
+         "Bottom: HC vs CVD group means (all p > 0.3, n.s.) → CVD deficit is not signal loss.",
          ha="center", fontsize=9.5, color="#444", style="italic")
 
 # Row 1: per-color tuning per ROI
 xs = np.arange(8)
+legend_handles = None
+legend_labels = None
 for i, roi in enumerate(ROIS):
-    ax = fig.add_axes([0.045 + i * 0.235, 0.50, 0.205, 0.34])
+    # Slightly narrower panels with more spacing; leave horizontal room.
+    ax = fig.add_axes([0.05 + i * 0.235, 0.56, 0.20, 0.30])
     if hc_color.get(roi) is None or hc_color[roi].size == 0:
         ax.set_title(f"{roi}: no data"); continue
     arr = hc_color[roi]
@@ -112,8 +114,9 @@ for i, roi in enumerate(ROIS):
                 alpha=0.9, label=CVD_LABEL[s], zorder=4)
     ax.axhline(0, color="#bbb", linestyle=":", linewidth=0.8)
     ax.set_xticks(xs)
-    ax.set_xticklabels([f"c{c+1}\n{COLOR_NAMES[c]}" for c in range(8)],
-                       fontsize=7.2, rotation=0)
+    # Short codes only; full color names redundant with hue-colored ticks.
+    ax.set_xticklabels([f"c{c+1}" for c in range(8)],
+                       fontsize=9, rotation=0)
     for tick, hue in zip(ax.get_xticklabels(), HUE_RGB):
         tick.set_color(hue)
         tick.set_fontweight("bold")
@@ -123,11 +126,19 @@ for i, roi in enumerate(ROIS):
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     ax.grid(axis="y", linestyle=":", alpha=0.4)
-    if i == 3:
-        ax.legend(loc="upper right", fontsize=6.8, frameon=True, framealpha=0.9)
+    # Capture legend handles from last panel — emit a single shared figure
+    # legend BELOW the top row so it does not overlap any data.
+    if i == len(ROIS) - 1:
+        legend_handles, legend_labels = ax.get_legend_handles_labels()
+
+if legend_handles is not None:
+    fig.legend(legend_handles, legend_labels,
+               loc="lower center", bbox_to_anchor=(0.5, 0.495),
+               ncol=5, fontsize=8.5, frameon=True, framealpha=0.9,
+               handlelength=2.0, columnspacing=1.5)
 
 # Row 2 (a): mean |activation| group bars
-ax_a = fig.add_axes([0.06, 0.10, 0.42, 0.33])
+ax_a = fig.add_axes([0.06, 0.10, 0.42, 0.30])
 roi_x = np.arange(len(ROIS))
 hc_means = [group_metrics[r]["mean_abs_act"][0] for r in ROIS]
 hc_sds   = [group_metrics[r]["mean_abs_act"][1] for r in ROIS]
@@ -144,17 +155,23 @@ ax_a.set_xticklabels(ROIS, fontsize=10, fontweight="bold")
 ax_a.set_ylabel("mean |activation|  (a.u.)", fontsize=9.5)
 ax_a.set_title("(a)  Group magnitude per ROI  —  no HC vs CVD difference",
                fontsize=10.5, color=ACCENT, fontweight="bold", loc="left", pad=8)
+# Place p-values ABOVE bars (with vertical headroom) instead of inside.
+_a_top = max(hc_means[i] + hc_sds[i] for i in range(len(ROIS)))
+_a_top = max(_a_top, max(cvd_means[i] + cvd_sds[i] for i in range(len(ROIS))))
 for x, p in zip(roi_x, ps):
-    ax_a.text(x, max(hc_means[int(x)], cvd_means[int(x)]) +
-              max(hc_sds[int(x)], cvd_sds[int(x)]) + 0.001,
-              f"p = {p:.2f}\n(n.s.)", ha="center", fontsize=7.5, color="#666")
+    bar_top = max(hc_means[int(x)] + hc_sds[int(x)],
+                  cvd_means[int(x)] + cvd_sds[int(x)])
+    ax_a.text(x, bar_top + _a_top * 0.04,
+              f"p={p:.2f} (n.s.)", ha="center", va="bottom",
+              fontsize=9, color="#444")
+ax_a.set_ylim(top=_a_top * 1.22)
 ax_a.legend(loc="upper left", fontsize=8.5)
 ax_a.spines["top"].set_visible(False)
 ax_a.spines["right"].set_visible(False)
 ax_a.grid(axis="y", linestyle=":", alpha=0.4)
 
 # Row 2 (b): modulation depth (color-tuning amplitude)
-ax_b = fig.add_axes([0.55, 0.10, 0.42, 0.33])
+ax_b = fig.add_axes([0.55, 0.10, 0.42, 0.30])
 hc_md = [group_metrics[r]["modulation_depth"][0] for r in ROIS]
 hc_md_sd = [group_metrics[r]["modulation_depth"][1] for r in ROIS]
 cvd_md = [group_metrics[r]["modulation_depth"][2] for r in ROIS]
@@ -169,20 +186,27 @@ ax_b.set_xticklabels(ROIS, fontsize=10, fontweight="bold")
 ax_b.set_ylabel("modulation depth  (color-tuning amplitude)", fontsize=9.5)
 ax_b.set_title("(b)  Color-tuning amplitude per ROI  —  no group difference",
                fontsize=10.5, color=ACCENT, fontweight="bold", loc="left", pad=8)
+# p-values ABOVE bars with sufficient headroom.
+_b_top = max(hc_md[i] + hc_md_sd[i] for i in range(len(ROIS)))
+_b_top = max(_b_top, max(cvd_md[i] + cvd_md_sd[i] for i in range(len(ROIS))))
 for x, p in zip(roi_x, ps_md):
-    ax_b.text(x, max(hc_md[int(x)], cvd_md[int(x)]) +
-              max(hc_md_sd[int(x)], cvd_md_sd[int(x)]) + 0.0003,
-              f"p = {p:.2f}\n(n.s.)", ha="center", fontsize=7.5, color="#666")
+    bar_top = max(hc_md[int(x)] + hc_md_sd[int(x)],
+                  cvd_md[int(x)] + cvd_md_sd[int(x)])
+    ax_b.text(x, bar_top + _b_top * 0.04,
+              f"p={p:.2f} (n.s.)", ha="center", va="bottom",
+              fontsize=9, color="#444")
+ax_b.set_ylim(top=_b_top * 1.22)
 ax_b.legend(loc="upper left", fontsize=8.5)
 ax_b.spines["top"].set_visible(False)
 ax_b.spines["right"].set_visible(False)
 ax_b.grid(axis="y", linestyle=":", alpha=0.4)
 
-# Footer
-fig.text(0.5, 0.02,
-         "Source: analysis/phase2_SRM_across_between/results/activation_prior/activation_prior_results.json   "
+# Footer — pull text up from very bottom and use slightly smaller font; the
+# bbox_inches='tight' below preserves margin so it never gets clipped.
+fig.text(0.5, 0.025,
+         "Source: phase2_SRM_across_between/results/activation_prior/activation_prior_results.json   "
          "·  generator: scripts/figs_activation_overview.py   *sub-10 = near-normal control.",
          ha="center", fontsize=7.5, color="#777", style="italic")
 
-plt.savefig(OUT, dpi=160, bbox_inches="tight", facecolor=BG)
+plt.savefig(OUT, dpi=160, bbox_inches="tight", pad_inches=0.25, facecolor=BG)
 print(f"saved → {OUT}")

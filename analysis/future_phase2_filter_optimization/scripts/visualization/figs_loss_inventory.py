@@ -7,7 +7,7 @@ Renders 3 panels:
 
 Source: results/inventory/loss_inventory.csv  +  loss_inventory.md (rank-based emp_p stats)
 
-Output: results/visualizations/meeting/loss_inventory_summary.png
+Output: presentation/figures/data/loss_inventory_summary.png
 """
 from __future__ import annotations
 
@@ -18,9 +18,9 @@ import matplotlib.patches as mpatches
 import numpy as np
 import pandas as pd
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 SRC = ROOT / "results" / "inventory" / "loss_inventory.csv"
-OUT = ROOT / "results" / "visualizations" / "meeting" / "loss_inventory_summary.png"
+OUT = ROOT / "presentation" / "figures" / "data" / "loss_inventory_summary.png"
 OUT.parent.mkdir(parents=True, exist_ok=True)
 
 ACCENT = "#1f4e79"
@@ -103,18 +103,18 @@ for i, loss in enumerate(loss_order):
                      edgecolor="white", linewidth=0.8, zorder=5,
                      label="sub-09 (protan)" if i == 0 else None)
 
-    # verdict tag
+    # verdict tag — moved to far-left margin (outside data area)
     sym, col, _ = verdict[loss]
-    ax_l.add_patch(mpatches.Rectangle((-25, yp - 0.35), 22, 0.7,
+    ax_l.add_patch(mpatches.Rectangle((-58, yp - 0.35), 22, 0.7,
                                        facecolor=col, edgecolor="none", alpha=0.18))
-    ax_l.text(-14, yp, sym, ha="center", va="center",
+    ax_l.text(-47, yp, sym, ha="center", va="center",
               fontsize=8.5, color=col, fontweight="bold")
 
 ax_l.set_yticks(y_positions)
 ax_l.set_yticklabels([l.replace("_", "\n") if len(l) > 18 else l for l in loss_order],
                      fontsize=8.5)
 ax_l.set_xlabel("‖ (β_s, β_c) ‖   (degrees)", fontsize=10, color="#222")
-ax_l.set_xlim(-30, 130)
+ax_l.set_xlim(-62, 130)
 ax_l.set_ylim(-0.7, len(loss_order) - 0.3)
 ax_l.spines["top"].set_visible(False)
 ax_l.spines["right"].set_visible(False)
@@ -151,14 +151,16 @@ for src, sub, bs, bc, mk, col, tag in cands:
                   edgecolor="black", linewidth=0.7, alpha=0.85, zorder=4)
     if tag == "NEW":
         ax_rt.annotate(f"NEW\n({bs}°,{bc:+}°)",
-                       xy=(bs, bc), xytext=(bs + 8, bc + 8),
+                       xy=(bs, bc), xytext=(bs - 22, bc + 12),
                        fontsize=7.5, color=AMBER, fontweight="bold",
-                       arrowprops=dict(arrowstyle="-", color=AMBER, lw=0.8))
+                       arrowprops=dict(arrowstyle="->", color=AMBER, lw=0.8,
+                                       shrinkA=2, shrinkB=4))
     elif tag == "behav PASS":
         ax_rt.annotate(f"canonical\n({bs}°,{bc:+}°)",
-                       xy=(bs, bc), xytext=(bs - 30, bc - 12),
+                       xy=(bs, bc), xytext=(bs - 38, bc - 26),
                        fontsize=7.5, color=GREEN, fontweight="bold",
-                       arrowprops=dict(arrowstyle="-", color=GREEN, lw=0.8))
+                       arrowprops=dict(arrowstyle="->", color=GREEN, lw=0.8,
+                                       shrinkA=2, shrinkB=4))
 
 ax_rt.axhline(0, color="#bbb", linestyle=":", linewidth=0.8)
 ax_rt.axvline(0, color="#bbb", linestyle=":", linewidth=0.8)
@@ -189,14 +191,20 @@ ax_rb.text(0.0, 1.005, "HC sanity verdict   (emp_p <= 0.20  =>  CVD distinct fro
            fontsize=10.5, color=ACCENT, fontweight="bold",
            transform=ax_rb.transAxes, ha="left", va="bottom")
 
-col_x = [0.0, 0.50, 0.66, 0.82]
-col_w = [0.50, 0.16, 0.16, 0.18]
+col_x = [0.0, 0.55, 0.71, 0.87]
+col_w = [0.55, 0.16, 0.16, 0.13]
 hdr_y = 0.80
 ax_rb.add_patch(mpatches.Rectangle((-0.005, hdr_y - 0.04), 1.005, 0.07,
                                    facecolor=ACCENT, edgecolor="none"))
-for x, h in zip(col_x, ["Loss variant", "sub-08 emp_p", "sub-09 emp_p", "Verdict"]):
-    ax_rb.text(x + 0.005, hdr_y - 0.005, h, fontsize=9, fontweight="bold",
-               color="white", va="center")
+hdr_align = ["left", "center", "center", "center"]
+hdr_xpos  = [col_x[0] + 0.005,
+             col_x[1] + col_w[1] / 2,
+             col_x[2] + col_w[2] / 2,
+             col_x[3] + col_w[3] / 2]
+for xp, ha, h in zip(hdr_xpos, hdr_align,
+                     ["Loss variant", "sub-08\nemp_p", "sub-09\nemp_p", "Verdict"]):
+    ax_rb.text(xp, hdr_y - 0.005, h, fontsize=8.5, fontweight="bold",
+               color="white", va="center", ha=ha, linespacing=1.0)
 
 for i, loss in enumerate(loss_order):
     yy = hdr_y - 0.10 - i * 0.125
@@ -207,9 +215,9 @@ for i, loss in enumerate(loss_order):
     p08, p09 = emp_p[loss]
 
     nm = loss.replace("_", " ").replace("v4mwj v1lrank", "v4-mwj + v1-rank")
-    ax_rb.text(col_x[0] + 0.005, yy + 0.015, nm, fontsize=8.0, color="#222",
+    ax_rb.text(col_x[0] + 0.005, yy + 0.015, nm, fontsize=9.0, color="#222",
                fontweight="bold" if sym == "✓✓" else "normal")
-    ax_rb.text(col_x[0] + 0.005, yy - 0.022, descr, fontsize=7.0, color=GREY, style="italic")
+    ax_rb.text(col_x[0] + 0.005, yy - 0.022, descr, fontsize=7.5, color=GREY, style="italic")
 
     pcol08 = GREEN if p08 <= 0.20 else (AMBER if p08 <= 0.50 else RED)
     pcol09 = GREEN if p09 <= 0.20 else (AMBER if p09 <= 0.50 else RED)

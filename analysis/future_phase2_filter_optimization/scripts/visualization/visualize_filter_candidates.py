@@ -78,6 +78,10 @@ from stockman_cone_shift import (                              # noqa: E402
     _compute_spectral_shift_lms, lab_to_xyz, D65_XYZ,
 )
 
+# STIM_LAB rendering (screenshot-derived; matches actual MRI projector display)
+sys.path.insert(0, str(_SCRIPT_DIR.parent))
+from stim_lab_render import render_at_hue as _render_stim_lab  # noqa: E402
+
 # -------------------------------------------------------------------
 # Constants
 # -------------------------------------------------------------------
@@ -292,12 +296,9 @@ def dt_rc(theta: float, cvd: str, delta_lambda: float, g: float) -> float:
 
 
 def dt_2comp(theta: float, cvd: str, beta_s: float, beta_c: float) -> float:
-    hue_base, _, _ = machado_shifted_hue_at(
-        0.0, cvd, float(theta), L_star=L_STAR, chroma=CHROMA)
-    hb = _scalar(hue_base)
-    theta_conf = CONF_AXIS[cvd]
-    return (beta_s * np.cos(np.radians(hb - 90.0))
-            + beta_c * np.cos(np.radians(hb - theta_conf)))
+    """Delegates to forward_models.dt_2comp (P1 consolidation 2026-05-10)."""
+    from forward_models import dt_2comp as _canonical_dt_2comp
+    return _canonical_dt_2comp(theta, cvd, beta_s, beta_c, L_star=L_STAR, chroma=CHROMA)
 
 
 def forward_perceived(theta: float, model: str, cvd: str, params: dict):
@@ -444,41 +445,39 @@ def render_figure(model: str, subj_id: str, outpath: Path) -> None:
     for ax, title in zip(axes[0], col_titles):
         ax.set_title(title, fontsize=9)
 
-    # Luminance anchor: always use the subject's Machado Δλ fit so the
-    # CVD columns carry the same cone-shift-derived ΔL* across all three
-    # model figures. 2-comp has no Δλ of its own; Machado/R+C use their
-    # own fit, but we read it from the Machado entry for consistency.
-    dlam_cvd = float(SUBJECTS[subj_id]['machado']['delta_lambda'])
+    # ΔL* per model: 2-comp = 0 (stimulus-space dilation, no cone shift).
+    # Machado / R+C: use the model's own Δλ to compute hue-dependent ΔL*.
+    if model == '2comp':
+        dlam_for_dL = 0.0
+    elif model == 'machado':
+        dlam_for_dL = float(params['delta_lambda'])
+    elif model == 'rc':
+        dlam_for_dL = float(params['delta_lambda'])
+    else:
+        dlam_for_dL = 0.0
+
+    def _dL_at(th):
+        """ΔL* relative to L*=75 from cone-shift (0 if 2-comp)."""
+        if dlam_for_dL == 0.0:
+            return 0.0
+        L_cvd = float(cvd_response_lab(th, cvd, dlam_for_dL)[0])
+        return L_cvd - L_STAR
 
     last_tier = None
     for i, (tier, theta, label) in enumerate(rows):
         ax_row = axes[i]
 
-        # Original & pre-image stimulus swatches (vivid, for anchoring)
-        rgb_orig = angle_to_rgb_vivid(theta)
+        # Pre-image and perceived hues
         theta_pre, resid = find_preimage(theta, model, cvd, params)
-        rgb_pre = angle_to_rgb_vivid(theta_pre)
-
-        # CVD-perceived: Machado-derived luminance at (θ, Δλ), hue from
-        # the active model. Preserves experimental chroma at C*=40.
         theta_cvd, dt = forward_perceived(theta, model, cvd, params)
-        lab_cvd_anchor = cvd_response_lab(theta, cvd, dlam_cvd)
-        L_cvd = float(lab_cvd_anchor[0])
-        rgb_cvd = lab_to_rgb_display(
-            L_cvd,
-            CHROMA * np.cos(np.deg2rad(theta_cvd)),
-            CHROMA * np.sin(np.deg2rad(theta_cvd)))
-
-        # CVD(Filtered): same luminance machinery applied to the filter
-        # output (stimulus at θ_pre). The filter can only re-place the
-        # stimulus on the L*=75 ring; residual CVD luminance drop remains.
         theta_cvd_of_pre, _ = forward_perceived(theta_pre, model, cvd, params)
-        lab_cvd_of_pre = cvd_response_lab(theta_pre, cvd, dlam_cvd)
-        L_cvd_of_pre = float(lab_cvd_of_pre[0])
-        rgb_cvd_of_pre = lab_to_rgb_display(
-            L_cvd_of_pre,
-            CHROMA * np.cos(np.deg2rad(theta_cvd_of_pre)),
-            CHROMA * np.sin(np.deg2rad(theta_cvd_of_pre)))
+
+        # All 4 columns: STIM_LAB-interpolated (L*, chroma) at the relevant hue.
+        # Matches actual MRI display (screenshot-derived from utils_color_decoding).
+        rgb_orig       = _render_stim_lab(theta,            dL=0.0)
+        rgb_pre        = _render_stim_lab(theta_pre,        dL=0.0)
+        rgb_cvd        = _render_stim_lab(theta_cvd,        dL=_dL_at(theta))
+        rgb_cvd_of_pre = _render_stim_lab(theta_cvd_of_pre, dL=_dL_at(theta_pre))
 
         ax_row[0].add_patch(Rectangle((0, 0), 1, 1, color=rgb_orig))
         ax_row[1].add_patch(Rectangle((0, 0), 1, 1, color=rgb_cvd))

@@ -176,12 +176,12 @@ def get_shifted_design(model_name, params, cvd_type, n_channels=N_CHANNELS):
         return basis_full[idx], dt
 
     elif model_name == '2component':
+        # P1 consolidation 2026-05-10: delegate to forward_models.two_component
+        from forward_models.two_component import dt_2comp_8colors
         bs, bc = float(params[0]), float(params[1])
+        dt = dt_2comp_8colors(cvd_type, bs, bc)
         hue_base, _, _ = machado_shifted_hue(0.0, cvd_type)
-        theta_conf = CONF_AXIS[cvd_type]
-        dt = (bs * np.cos(np.radians(hue_base - 90.0))
-              + bc * np.cos(np.radians(hue_base - theta_conf)))
-        hue_shifted = (hue_base + dt) % 360.0
+        hue_shifted = (np.asarray(hue_base, dtype=float) + dt) % 360.0
         basis_full = create_basis_full(n_channels, basis_type='fe')
         idx = np.round(hue_shifted).astype(int) % 360
         return basis_full[idx], dt

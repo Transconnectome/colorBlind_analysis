@@ -76,10 +76,10 @@ def two_component_delta_theta(beta_s, beta_c, cvd_type):
 
     Returns: (8,) delta_theta in degrees
     """
+    # P1 consolidation 2026-05-10: delegate to forward_models.two_component
+    from forward_models.two_component import dt_2comp_8colors
     hue_base, _, _ = machado_shifted_hue(0.0, cvd_type)
-    theta_conf = CONF_AXIS[cvd_type]
-    dt = (beta_s * np.cos(np.radians(hue_base - 90.0))
-          + beta_c * np.cos(np.radians(hue_base - theta_conf)))
+    dt = dt_2comp_8colors(cvd_type, beta_s, beta_c)
     return dt, hue_base
 
 

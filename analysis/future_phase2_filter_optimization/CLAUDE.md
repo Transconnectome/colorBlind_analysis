@@ -72,6 +72,25 @@
 3. **Phase A canonical L_LOCO HC fit 빠짐** — re-run 필요 (sub-01~07 V1, V4 2-component fit)
 4. HC pool sub-04 outlier가 most loss에서 mean 왜곡 — bootstrap이 이를 robust하게 평가
 
+## 2.6. HC Specificity Check Mandate (2026-05-10)
+
+Any new filter (β_s, β_c) MUST be checked before behavioral testing.
+
+```bash
+python scripts/hc_specificity_check.py --beta_s <val> --beta_c <val> --cvd_type deutan --roi V4
+```
+
+Verdicts: ✓✓ boot_frac≥0.975 | ~~ 0.90–0.975 | ✗ <0.90
+
+**§0 rule: DESCRIPTIVE ONLY — cannot override behavioral validation.**
+
+Known results (V4, deutan, boot 10000):
+| Filter | norm | boot_frac | Verdict |
+|---|---|---|---|
+| Canonical (38,−14) | 40.5° | 0.517 | ✗ |
+| V4-only (38,+7) | 38.6° | 0.299 | ✗ |
+| Cycle14 (58,−36) | 68.3° | 1.000 | ✓✓ |
+
 ## 3. Per-Subject Status (UPDATED 2026-05-03)
 
 ### sub-08 deutan

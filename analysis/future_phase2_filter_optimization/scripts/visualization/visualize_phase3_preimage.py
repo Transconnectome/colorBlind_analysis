@@ -47,6 +47,10 @@ from stockman_cone_shift import (
     _compute_spectral_shift_lms, lab_to_xyz, D65_XYZ,
 )
 
+# STIM_LAB-based rendering (screenshot-derived; matches actual MRI projector)
+sys.path.insert(0, str(_SCRIPT_DIR.parent))
+from stim_lab_render import render_at_hue as _render_stim_lab
+
 # ------------------------------------------------------------------- Constants
 CONF_AXIS = {'protan': 16.0, 'deutan': 150.0}
 L_STAR = 75.0
@@ -166,10 +170,19 @@ def _scalar(x):
 
 
 def dt_2comp(theta, cvd, beta_s, beta_c):
-    """δθ = β_s·cos(θ−90°) + β_c·cos(θ−θ_conf), θ in stimulus angle space."""
-    theta_conf = CONF_AXIS[cvd]
-    return (beta_s * np.cos(np.radians(float(theta) - 90.0))
-            + beta_c * np.cos(np.radians(float(theta) - theta_conf)))
+    """δθ for 2-component model.
+
+    DEPRECATED 2026-05-10 (P2): Original implementation used CIELab nominal θ
+    directly in the trig (frame mismatch with Stockman θ_conf). This produced
+    different visualizations than the canonical h_base-based formula in
+    visualize_filter_candidates.py at the same (β_s, β_c), causing the
+    F3 vs F4 paradox documented in behav_sub08_6way_implications.md §7.
+
+    Now delegates to forward_models.dt_2comp (single source of truth, matches
+    fitting code in loco_distortion_fit.py and comprehensive_2component_analysis.py).
+    """
+    from forward_models import dt_2comp as _canonical_dt_2comp
+    return _canonical_dt_2comp(theta, cvd, beta_s, beta_c, L_star=L_STAR, chroma=CHROMA)
 
 
 def forward_perceived(theta, cvd, beta_s, beta_c):
@@ -218,7 +231,8 @@ PALETTE = [('Tier 1: fMRI 8-stim ring', TIER1),
 def render_figure(cell, outpath):
     cvd = cell['cvd']
     beta_s, beta_c = cell['beta_s'], cell['beta_c']
-    dlam_cvd = cell['dlam_anchor']
+    # NOTE: dlam_cvd (Machado anchor) NOT used — 2-comp ΔL*=0 by definition.
+    # STIM_LAB rendering applied to all 4 columns (matches actual MRI display).
     rows = [(tier, theta, label) for tier, colors in PALETTE for theta, label in colors]
     n_rows = len(rows)
     fig_height = 0.55 * n_rows + 2.0
@@ -226,7 +240,8 @@ def render_figure(cell, outpath):
                              gridspec_kw={'hspace': 0.08, 'wspace': 0.08})
     fig.suptitle(
         f'2-Component (stimulus-space dilation)  —  sub-{cell["subj"]} ({cvd}), {cell["roi_label"]}\n'
-        f'β_s = {beta_s}°, β_c = {beta_c}°    [{cell["note"]}]',
+        f'β_s = {beta_s}°, β_c = {beta_c}°    [{cell["note"]}]\n'
+        f'Render: STIM_LAB (utils_color_decoding) — screenshot-derived MRI display',
         fontsize=10, y=0.995)
     col_titles = ['Original', 'CVD perceives', 'Filtered (pre-image)', 'CVD(Filtered)']
     for ax, title in zip(axes[0], col_titles):
@@ -234,23 +249,18 @@ def render_figure(cell, outpath):
     last_tier = None
     for i, (tier, theta, label) in enumerate(rows):
         ax_row = axes[i]
-        rgb_orig = angle_to_rgb_vivid(theta)
+        # Pre-image and perceived hues
         theta_pre, resid = find_preimage(theta, cvd, beta_s, beta_c)
-        rgb_pre = angle_to_rgb_vivid(theta_pre)
         theta_cvd, dt = forward_perceived(theta, cvd, beta_s, beta_c)
-        lab_cvd_anchor = cvd_response_lab(theta, cvd, dlam_cvd)
-        L_cvd = float(lab_cvd_anchor[0])
-        rgb_cvd = lab_to_rgb_display(
-            L_cvd,
-            CHROMA * np.cos(np.deg2rad(theta_cvd)),
-            CHROMA * np.sin(np.deg2rad(theta_cvd)))
         theta_cvd_of_pre, _ = forward_perceived(theta_pre, cvd, beta_s, beta_c)
-        lab_cvd_of_pre = cvd_response_lab(theta_pre, cvd, dlam_cvd)
-        L_cvd_of_pre = float(lab_cvd_of_pre[0])
-        rgb_cvd_of_pre = lab_to_rgb_display(
-            L_cvd_of_pre,
-            CHROMA * np.cos(np.deg2rad(theta_cvd_of_pre)),
-            CHROMA * np.sin(np.deg2rad(theta_cvd_of_pre)))
+
+        # All 4 columns: STIM_LAB-interpolated (L*, chroma) at the relevant hue.
+        # 2-comp model: ΔL* = 0 (no cone-shift in stimulus-space dilation).
+        rgb_orig          = _render_stim_lab(theta,            dL=0.0)
+        rgb_cvd           = _render_stim_lab(theta_cvd,        dL=0.0)
+        rgb_pre           = _render_stim_lab(theta_pre,        dL=0.0)
+        rgb_cvd_of_pre    = _render_stim_lab(theta_cvd_of_pre, dL=0.0)
+
         ax_row[0].add_patch(Rectangle((0,0),1,1,color=rgb_orig))
         ax_row[1].add_patch(Rectangle((0,0),1,1,color=rgb_cvd))
         ax_row[2].add_patch(Rectangle((0,0),1,1,color=rgb_pre))

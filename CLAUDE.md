@@ -81,3 +81,12 @@ DERIVATIVES=/scratch/connectome/haba6030/colorBlind/derivatives
 ## 9. BrainIAK / SRM Note
 
 BrainIAK은 mpi4py `MPI_Init_thread`를 호출. 인터랙티브/non-PMIx 환경에선 `mpirun -np 1 python script.py` (bare `python` 금지).
+
+## 10. Experiment Script
+
+**PsychoPy experiment**: `/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind/colorBlind_test.py`
+
+- 8 equiluminant DKL hues (L*=75, equal chroma on a*-b* circle): color_1=Red(0°) → color_8=Magenta(315°), counterclockwise in 45° steps
+- Sinusoidal grating: 5 radial cycles, drifting at 0.3 cyc/s, duration 0.8s
+- RSVP oddball-K task: detect letter 'K' among distractor letters
+- Design: 6 runs × 8 colours/run

@@ -38,6 +38,10 @@
 % \citeNP{} → Author (2020)
 % \cite{} → (Author, 2020)
 
+% natbib-style aliases for files authored with \citep/\citet
+\let\citep\cite
+\let\citet\citeA
+
 % Graphics path
 \graphicspath{{Figures/}}
 
@@ -45,7 +49,7 @@
 % Document Information
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\title{Neural Representation of Color in Color Vision Deficiency: An fMRI Study}
+\title{Preserved Discrimination but Impaired Interpolation in hV4 Identifies the Correctable Distortion in Colour Vision Deficiency}
 \shorttitle{Color Representation in CVD}
 \author{\todo{Your Name}}
 \affiliation{\todo{Your University}}
@@ -60,8 +64,8 @@
 
 \maketitle
 
-% Introduction Section (작성 전 - 주석 처리)
-% \input{Introduction/introduction}
+% Introduction Section
+\input{Introduction/introduction_v2}
 
 % Methods Section
 \input{Methods/methods_v2}
@@ -69,8 +73,8 @@
 % Results Section
 \input{Results/results_v4}
 
-% Discussion Section (작성 전 - 주석 처리)
-% \input{Discussion/discussion}
+% Discussion Section
+\input{Discussion/discussion_v2}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -80,6 +84,13 @@
 \bibliographystyle{apacite}
 \bibliography{bibliography}
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% Appendix A — Alternative Model Comparison (Results supplement)
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\clearpage
+\input{Results/appendix_alternative_models}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % Supplementary Methods

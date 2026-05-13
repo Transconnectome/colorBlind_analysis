@@ -154,7 +154,7 @@ false-positive rate reflects (i) rank-based loss with only 8 data points
 and (ii) regression to the mean on per-HC baseline $\rho$
 (hV4 $K = 3$, 63 voxels; individual HC baselines span $[-0.36, +0.69]$).
 Case-level specificity therefore rests on the three converging anchors
-described in \cref{sec:results:filter}, not on per-subject permutation
+described in Section~\ref{sec:results:filter}, not on per-subject permutation
 significance alone.
 
 % ========== Section 16: Retinal-Family Model Comparison ==========
@@ -163,7 +163,7 @@ significance alone.
 \label{app:retinal_family}
 
 Two retinal-family models were evaluated alongside the 2-component model
-by the same grid-search and permutation procedure (see \cref{sec:methods:filter}).
+by the same grid-search and permutation procedure (see Section~\ref{sec:methods:filter}).
 
 \textbf{Models.}
 The 1-DOF Machado model~\citeNP{machado2009} shifts the L/M cone spectral
@@ -237,6 +237,69 @@ requires it most.
     \bottomrule
   \end{tabular}
 \end{table}
+
+% ========== Section 17: HC Permutation under the HYBRID Loss ==========
+
+\subsection*{\textbf{S17. HC Permutation under the HYBRID Loss}}
+\label{app:hc_perm}
+
+The 2-component grid search under the HYBRID loss
+(Equation~\ref{eq:hybrid}; main-text Section~\ref{sec:methods:twocomp})
+was applied to each of the 7 HC participants treated as a CVD
+candidate. Of the 6 HCs that pass the hV4 voxel-count threshold
+(sub-07 excluded; 16 voxels, $K = 3$ produces \texttt{nan}), all 6
+reach nominal $p < 0.05$ under the label-permutation null --- and the
+property generalises to the full HC pool (HC FPR = 7/7 at nominal
+$\alpha = 0.05$).
+
+This high false-positive rate cannot be removed by reformulating the
+fitting criterion: thirteen successive reformulations within the
+voxel-prediction loss family
+($L_\mathrm{LOCO}$, $L_\mathrm{mse}$, $L_\mathrm{rdm}$, cross-ROI
+combinations, baseline-$\rho$ correction, top-$K$ Jaccard) all
+yielded the same outcome (project log, Cycles 9--13). It reflects two
+structural properties of the available data:
+(i) the 8-hue resolution provides limited degrees of freedom for
+distinguishing specific from non-specific fits at the single-subject
+level, and (ii) the relevant null hypothesis (``no CVD-specific
+distortion'') is not isomorphic to label permutation on a single
+participant's vulnerability profile, since a non-trivial fit can be
+obtained for any sufficiently smooth 8-point pattern under the
+2-DOF model class.
+
+Consequently, per-subject p-values reported alongside the HYBRID
+argmin in Figure~\ref{fig:twocomp} and
+Section~\ref{sec:results:twocomp} are presented as
+\emph{descriptive} fits of representational geometry, not as
+CVD-specificity statements. Two case-level anchors support
+biological interpretation despite this caveat:
+(i) parameter-norm comparison --- both CVD subjects'
+$\|\hat{\beta}\|$ (43.1\degree, 32.3\degree) fall \emph{below} the
+HC leave-one-out range $[49.0^\circ, 65.3^\circ]$, consistent with
+CVD geometry requiring less aggressive 2-component correction than
+the HC permutation null;
+(ii) directional consistency with literature anchors
+($\hat{\beta}_c$ sign matching Brettel's L--M polarity;
+$\hat{\beta}_s > 0$ in both subjects, consistent with Emery's
+S-cone-axis hV4 RDM finding). Quantitative specificity claims
+require an external behavioural endpoint such as the Phase-3 2AFC
+arm (Methods~\ref{sec:methods:behavioral}, last paragraph; data not
+yet collected at the time of writing).
+
+% ========== Section 18: Effect Sizes ==========
+
+\subsection*{\textbf{S18. Effect Sizes for Single-Case Comparisons}}
+\label{app:effect_sizes}
+
+Crawford--Howell single-case comparisons used the modified $t$
+\citeNP{crawford1998}; the corresponding case-control effect size is
+$d_{cc} = (x_{\rm case} - \bar{x}_{\rm HC}) / s_{\rm HC} =
+t \cdot \sqrt{(n+1)/n}$ where $n$ is the HC sample size used in the
+test. Mann--Whitney $U$ tests are reported with rank-biserial
+correlation $r_{\rm rb}$ as effect size. Full per-test statistics
+($t$, $U$, $p$, $d_{cc}$, $r_{\rm rb}$) for every Crawford--Howell
+and Mann--Whitney comparison reported in the main text are tabulated
+in the online repository (\texttt{statistics/effect\_sizes.csv}).
 
 % NOTE: Bibliography는 main.tex에서 처리됨
 

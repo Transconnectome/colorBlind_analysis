@@ -8,7 +8,7 @@
 
 - **Specificity claim은 selection criterion이 아니다.** HC FPR 100% (`hc_specificity/`), baseline_ρ confound (HC corr=−0.894, `baseline_delta_rho/`), n=6 HC pool 한계 모두 확인됨. 어떤 selection-rule reformulation도 voxel-prediction L_LOCO measurement family 내에서 specificity를 만들 수 없다 — Cycle 9~13에서 13회 사이클로 확정 (action_plans/PLAN04, project memory `project_phase2_closure.md`).
 - **Specificity는 descriptive reporting으로만 기술.** "HC와 비교했을 때 sub-XX의 fit은 distribution의 X percentile" 형식. p-value/FPR claim은 보류.
-- **Behavioral validation이 ground truth.** behav_validation.md §3 PASS/FAIL이 model class 결정을 override. sub-08은 2-component (행동검증 PASS), sub-09는 미검증 → behavioral 결정 대기.
+- **Behavioral validation 잠정 보류** (2026-05-13): behav_validation §3 "PASS"는 색 구별가능성(discriminability) 기준이며, P1/P2a (원래 색 정확 복원) 기준 아님. P2a-restoration 기준으로 재평가 필요. 현재 sub-08·sub-09 모두 P2a-validated 필터 미확정.
 - **새로운 selection rule 변형 금지.** `z_combined`, `cross-ROI`, `baseline_sp 보정`, `family-aware 가중치` 등 모든 reformulation은 Cycle 9~13에서 시도되어 NET 개선 없음 확인.
 - **Override 절차**: 위 결정을 재방문하려면 사용자가 세션 시작 시 명시적으로 "override §0"를 적시해야 한다. "새로운 framing"이라는 암묵적 합리화는 override가 아니다.
 
@@ -23,12 +23,12 @@
 | A1 | Post-cortical mapping은 HC = CVD 동일 | 프로젝트 핵심 전제. CVD 차이는 (a) retinal cone shift, (b) cortical opponent gain, (c) stimulus-space dilation 중 하나. |
 | A2 | 3 model classes: Machado 1-way / R+C / 2-component | 각 mechanistic level (retinal / cortical gain / stimulus-space). 추가/제거 금지. |
 | A3 | Forward fit = ridge_gcv encoder + voxel-prediction LOCO ρ primary | behav_validation §3가 LOCO와 행동의 100% concordance 확인. ΔRDM/SRM은 부차. |
-| A4 | Per-subject best model = behavioral PASS 우선, 없으면 LOCO ρ best | sub-08에서 R+C → 2-component 전환 사례 (R+C는 LOCO 양호하나 behavioral FAIL). |
+| A4 | Per-subject best model = LOCO ρ best (primary). 행동검증은 P2a-restoration 기준으로 재정의 필요 — 기존 discriminability-PASS는 보류. | (2026-05-13 revision) |
 | A5 | Pre-image = forward model의 exact 수치 역함수 | 8/8 exact 못 풀면 subject-model 조합 **기각**. 2-comp는 sub-08/09 모두 8/8 exact 확인. |
 | A6 | HC pool n=7 nominal (sub-01~07), hV4 effective n=6 (sub-07 16 voxels → nan) | 추가 모집 불가. specificity statistical claim 불가능. descriptive 위치만. |
 | A7 | sub-10 (near-normal) 분석 제외 | CVD-HC 차이 미포착, downstream 분석에서 제외. |
 | A8 | 8-color resolution은 model 표현력 상한 | 8 colors / 4 ROIs = 32 dof로 다중 mechanism 분리 한계. orange (45°) / magenta (315°) 같은 narrow-band 색은 fine grid로도 회복 안 될 수 있음. |
-| A9 | Behavioral validation은 model class 결정 권한 | 행동 PASS/FAIL이 LOCO ρ 우위를 override (sub-08 2-comp 사례). |
+| A9 | Behavioral validation은 model class 결정 권한 (단 P2a-restoration 기준 필요) | discriminability-PASS는 보류 (2026-05-13); P2a 기반 검증 프로토콜로 재설계 필요. |
 | A10 | Encoder = ridge_gcv (fixed) | smooth_tikh는 3회 rescue 시도 후 REJECTED (MEMORY 2026-03-11). 대안 encoder 제안 금지. |
 | A11 | Single mechanism per subject | Per-subject 1개 model class만 채택. 모델 class 간 ensemble averaging 금지. |
 | A12 | 2-component은 CIELab opponent space 작동 | RGB/cone space 아님. C_baseline은 `machado_shifted_hue(0.0, family)` (CIELab nominal 각도 금지). |
@@ -94,7 +94,7 @@ Known results (V4, deutan, boot 10000):
 ## 3. Per-Subject Status (UPDATED 2026-05-03)
 
 ### sub-08 deutan
-- **§3 canonical filter** (LOCO ρ argmax, behav PASS 2026-04-17): 2-component hV4 (β_s=38°, β_c=−14°). YG-C 4-way collapse 해소 확인.
+- **§3 LOCO-canonical filter** (LOCO ρ argmax): 2-component hV4 (β_s=38°, β_c=−14°). YG-C 4-way collapse 해소는 discriminability 기준이며, P2a-restoration 기준 검증은 미완 (2026-05-13). P2a-max는 (26, +34)로 β_c 부호 반대 — 신경 정보만으로 도달 불가.
 - **Active 3-way 행동테스트** (2026-05-03 사용자 의뢰):
   - V4-only (cycle10d z_combined argmin): β_s=38°, β_c=**+7°** — β_c 부호 반대
   - V1+V4 avg: β_s=19°, β_c=+3.5° (V1 (0,0) degenerate가 평균을 끌어내림)
@@ -143,7 +143,7 @@ Known results (V4, deutan, boot 10000):
 
 ## 6. Results & Documentation Map
 
-- `behav_validation.md` — **READ FIRST**: model class 결정의 1차 근거 (sub-08 2-comp PASS)
+- `behav_validation.md` — 참고만 (discriminability 기준 PASS이며 P2a-restoration 기준은 아님, 2026-05-13 보류)
 - `notion.md` — 모델·피팅·pre-image 전체 서술
 - `LOCO_FILTER_PLAN.md`, `LOCO_FILTER_RESULTS.md` — 필터 디자인 결정
 - `COMPREHENSIVE_MODEL_RESULTS.md` — 3 모델 비교
@@ -163,7 +163,7 @@ Known results (V4, deutan, boot 10000):
 6. **Specificity claim 금지** — descriptive ("HC distribution의 X percentile")만 허용.
 7. **Sub-10 분석 시도 금지** — CVD-HC 차이 미포착, downstream 제외.
 8. **Selection rule reformulation 금지** — Cycle 9~13에서 13회 시도, 동일 한계 확인.
-9. **Behavioral validation이 model class 결정 override** (sub-08 R+C → 2-comp 사례).
+9. **Behavioral validation 보류** (2026-05-13). discriminability-PASS는 P2a-restoration 검증을 의미하지 않음. P2a 기반 protocol 재설계 전까지 model class 결정은 LOCO ρ만 사용.
 10. SLURM: hV4 전체 fit은 CPU-heavy → node2 `%5~10`, `--mem=16G`.
 11. 결과 저장: flat `results/<analysis_name>/` (timestamp 서브디렉토리 금지), per-subject json, batch당 `config.json` 1개.
 

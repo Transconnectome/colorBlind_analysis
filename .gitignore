@@ -284,3 +284,42 @@ analysis/make_zscore_heatmap.py
 # Future Phase 2: Legacy filter optimization (superseded by cone-shift pipeline)
 # ============================================
 analysis/future_phase2_filter_optimization/archive_legacy/
+
+# ============================================
+# Cleanup archives (internal, regenerable; too large to track)
+# ============================================
+analysis/future_phase2_filter_optimization/results/_archive/
+analysis/future_phase2_filter_optimization/scripts/_archive/
+
+# ============================================
+# Consolidated binary data (regenerable via consolidate_landscapes_to_parquet.py)
+# ============================================
+analysis/future_phase2_filter_optimization/results/landscapes_consolidated.parquet
+*.parquet
+
+# ============================================
+# Phase 0 preprocessing results (registration QC, large)
+# ============================================
+analysis/phase0_preprocessing/results/
+
+# ============================================
+# Behavioral analysis illustrative images (WIP, large PNGs)
+# ============================================
+analysis/future_phase3_behavioral_analysis/images/
+
+# ============================================
+# IRB / scan logs / sensitive experiment documents
+# ============================================
+experiments/
+
+# ============================================
+# WIP sketches / draft slides
+# ============================================
+colorblind_sketch.pptx
+*.pptx
+
+# ============================================
+# IDE / agent local state
+# ============================================
+.gemini/
+.claude/scheduled_tasks.lock

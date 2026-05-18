@@ -12,6 +12,21 @@
 - **새로운 selection rule 변형 금지.** `z_combined`, `cross-ROI`, `baseline_sp 보정`, `family-aware 가중치` 등 모든 reformulation은 Cycle 9~13에서 시도되어 NET 개선 없음 확인.
 - **Override 절차**: 위 결정을 재방문하려면 사용자가 세션 시작 시 명시적으로 "override §0"를 적시해야 한다. "새로운 framing"이라는 암묵적 합리화는 override가 아니다.
 
+### §0.1 P2a/P1 reporting policy (2026-05-16, USER DECISION)
+
+- **P2a/P1는 loss 모색을 위한 *보조지표만*.** Paper에 P2a/P1 수치를 *primary endpoint*로 보고하지 않는다. 이유: 사전 수집된 sub-08/09 color naming report와 filter prediction을 같은 데이터에서 fit↔validate → **circular**.
+- **Paper에는 다음만 보고**:
+  - 신경 fit 결과 (β params, ρ, perm_p, HC-comparison percentiles as descriptive)
+  - R+C decomposition (retinal Δλ + cortical g)
+  - Pre-image mathematics (8/8 exact)
+  - **별도 수집된 behavioral test** (filter 적용 자극 → 색 명명/구별 → no-filter 통제 대비) — TO BE COLLECTED
+- **P2a/P1는 loss 설계 가이드용으로만 사용**: 어떤 loss formulation이 신경적으로 sensible한 (β_s, β_c)를 줄 때, 그 (β_s, β_c)가 P2a/P1 plateau 안에 떨어지는지 *예측 가드레일*로 활용. P2a/P1를 fitting objective 또는 selection criterion으로 쓰지 않는다.
+- **Loss/filter selection의 새 기준 (Nat Comms / top neuro journal 대비)**:
+  1. **Neural-based**: loss는 fMRI data로부터 도출 (P2a/P1 미포함)
+  2. **Statistically valid**: 각 loss component가 CVD-HC distinct (Bonferroni-style sig) AND HC specificity 통과 (boot_frac ≥ 0.975, robust to sub-04 outlier)
+  3. **P1/P2a speculation**: filter (β_s, β_c)가 P1/P2a plateau 또는 R+C-predicted region에 들어감으로 *예상 effectiveness* 추정 (paper 보고는 X, internal selection 가드만)
+- **이 정책은 §A4(behavioral validation 보류)와 일관**: discriminability/restoration 모두 사전 수집 데이터로는 circular. *별도 behavioral test 수집*만이 paper-reportable validation.
+
 ## 1. Objective
 
 (B) CVD simulator 피팅 + (C) 역문제(pre-image) → **stimulus-space 색 보정 필터**. 각 CVD 개인에 대해 δ(θ) 함수.
@@ -91,34 +106,28 @@ Known results (V4, deutan, boot 10000):
 | V4-only (38,+7) | 38.6° | 0.299 | ✗ |
 | Cycle14 (58,−36) | 68.3° | 1.000 | ✓✓ |
 
-## 3. Per-Subject Status (UPDATED 2026-05-03)
+## 3. Per-Subject Status (UPDATED 2026-05-17 — Phase 2 closed, LOCO-canonical adopted)
 
-### sub-08 deutan
-- **§3 LOCO-canonical filter** (LOCO ρ argmax): 2-component hV4 (β_s=38°, β_c=−14°). YG-C 4-way collapse 해소는 discriminability 기준이며, P2a-restoration 기준 검증은 미완 (2026-05-13). P2a-max는 (26, +34)로 β_c 부호 반대 — 신경 정보만으로 도달 불가.
-- **Active 3-way 행동테스트** (2026-05-03 사용자 의뢰):
-  - V4-only (cycle10d z_combined argmin): β_s=38°, β_c=**+7°** — β_c 부호 반대
-  - V1+V4 avg: β_s=19°, β_c=+3.5° (V1 (0,0) degenerate가 평균을 끌어내림)
-  - Cross-ROI loss (cycle12, α=β=1): β_s=68°, β_c=−38° — 극단 파라미터
-- **권고**: 4번째 비교로 §3 canonical (38, −14) 추가하면 cycle10d/cycle12 selection rule 정당화 직접 평가 가능.
-- **Open refinement** (non-blocking):
-  - [x] Fine grid β_s∈[32,44]×β_c∈[−18,−10] @ 1° → c2 orange 회복 **불가능** 확정 (B1, behav §7)
-  - [ ] c8 variant: pre-image θ ∈ {290°, 300°, 310°} (B2 viz 생성됨)
+**Source of truth (machine-readable)**: `results/BEST_summary.json`
+**Narrative**: `results/SUMMARY.md`
+**Forward pipeline writeup**: `results/c3_relabel/SCIENTIFIC_NARRATIVE_2026-05-16.md`
+**Rejected candidates (records only)**: `results/c3_relabel/NEAR_CONTROLS.md`
 
-### sub-09 protan
-- **Candidate filter (Phase A LOCO)**: 2-component V4 (β_s=6°, β_c=−22°), pre-image 8/8 exact
-- **Alternative candidates from loss inventory** (2026-05-03):
-  - Cycle 12 cross-ROI loss: (β_s=30, β_c=+26) — V4 single이 (0,0) degenerate일 때 cross가 추출
-  - Cycle 14 cross-ROI RDM: (β_s=32, β_c=+22) — Cycle 12와 거의 동일
-  - **mw_jaccard_loss V4: (β_s=44, β_c=+54)** — 유일한 ✓✓ both CVD distinct loss에서 추출
-- **Behavioral evidence**: 미검증
-- **Critical next step**: behavioral protocol mirroring §3 sub-08 template; mw_jaccard_loss 후보를 추가 비교 권고
-- **Predictions to falsify**:
-  - PASS: c1 protan 보정, c5/c6 cyan/blue-cyan 분리, sub-09 c8 magenta 이상 (MEMORY z=−5.59) 재현 여부
-  - FAIL on c8 only → c8-only variant (sub-08 §3-4 mirror)
-  - FAIL globally → Machado-only 또는 R+C 시도 (model class 재선택)
+This section is a **redirect, not a duplicate**. Numbers live in `BEST_summary.json` to avoid drift. Below: only the load-bearing decisions every session must respect.
 
-### sub-10 (제외)
-- 분석 대상 아님 (Rule §7).
+### Phase 2 final filter (2026-05-17)
+- Filter form: **2-component standalone** (cortical opponent rotation in CIELab)
+- Loss: `L_fit = α·L_vuln + β·L_rank + δ·L_rdm + ε·L_smooth` @ V4 hV4 LOCO (`loco_distortion_fit.py:200`)
+- Per-subject (β_s, β_c): see `BEST_summary.json` ★ canonical source
+- Pre-image: 8/8 exact for both subjects
+
+### Deprecated (DO NOT REVERT)
+- **Option C** (40,+26)/(12,−28) adopted 2026-05-13 — corrected-label P2a is 0.500/0.887; **deprecated 2026-05-17**.
+- **R+C 2-stage as filter form** (advisor 2026-05-16 1st call) — empirically falsified by Check 4 (P2a 0.588/0.787 < LOCO-canonical 0.750/0.975); **advisor reversal 2026-05-16 2nd call**.
+- R+C decomposition (Δλ, g) RETAINED as paper diagnostic — explains differential per-subject etiology — NOT as filter form.
+
+### sub-10 (제외, §A7 unchanged)
+- 분석 대상 아님.
 
 ## 4. Active Deliverables (Phase 2 종결 전)
 

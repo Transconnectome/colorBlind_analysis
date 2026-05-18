@@ -44,7 +44,7 @@ Server: `haba6030@node3:/scratch/connectome/haba6030/colorBlind` (SSH/SCP = node
 
 ## 6. Data Paths & Subjects
 
-**Subjects**: HC sub-01~07 (N=7), CVD sub-08 deutan, sub-09 protan, sub-10 deutan(mild/normal control).
+**Subjects**: HC sub-01~07 (N=7), CVD sub-08 deutan, sub-09 protan, sub-10 deutan.
 
 **Server paths (method3_header_mi)**:
 ```

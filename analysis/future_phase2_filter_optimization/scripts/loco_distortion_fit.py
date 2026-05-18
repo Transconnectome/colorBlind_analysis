@@ -134,6 +134,12 @@ FILTER_MODELS = {
         'grid_step': [2.0, 2.0],
         'description': '2-Component angular dilation: β_s (S-cone) + β_c (confusion axis)',
     },
+    '3component': {
+        'df': 3,
+        'bounds': [(0.0, 30.0), (0.0, 50.0), (-50.0, 50.0)],
+        'grid_step': [2.5, 2.0, 2.0],
+        'description': '3-Component cascade: Δλ (Machado retinal) → β_s + β_c (2-comp cortical)',
+    },
 }
 
 
@@ -180,6 +186,17 @@ def get_shifted_design(model_name, params, cvd_type, n_channels=N_CHANNELS):
         from forward_models.two_component import dt_2comp_8colors
         bs, bc = float(params[0]), float(params[1])
         dt = dt_2comp_8colors(cvd_type, bs, bc)
+        hue_base, _, _ = machado_shifted_hue(0.0, cvd_type)
+        hue_shifted = (np.asarray(hue_base, dtype=float) + dt) % 360.0
+        basis_full = create_basis_full(n_channels, basis_type='fe')
+        idx = np.round(hue_shifted).astype(int) % 360
+        return basis_full[idx], dt
+
+    elif model_name == '3component':
+        # Cascade: Machado retinal Δλ → 2-comp cortical β_s, β_c
+        from forward_models.three_component import dt_3comp_8colors
+        dl, bs, bc = float(params[0]), float(params[1]), float(params[2])
+        dt, _, _ = dt_3comp_8colors(cvd_type, dl, bs, bc)
         hue_base, _, _ = machado_shifted_hue(0.0, cvd_type)
         hue_shifted = (np.asarray(hue_base, dtype=float) + dt) % 360.0
         basis_full = create_basis_full(n_channels, basis_type='fe')

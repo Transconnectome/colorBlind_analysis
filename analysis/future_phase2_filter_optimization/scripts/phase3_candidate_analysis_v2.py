@@ -1,5 +1,19 @@
 """phase3_candidate_analysis_v2.py — REVISED candidate evaluation.
 
+⚠️ LABEL SCHEME WARNING (added 2026-05-16) ⚠️
+This file defines HC_NAME_BINS (13-bin) and SUB08_ORIGINAL_HC_EQUIV under the
+OLD label scheme. These were SUPERSEDED on 2026-05-16 by the CORRECTED scheme
+in scripts/c3_relabel_p2a.py and scripts/c3_relabel_both_subjects.py:
+    - HC_NAME_BINS_NEW (9 bins matching STIM_LAB renderer)
+    - SUB08_ORIG_NEW, SUB09_ORIG_NEW
+
+Rank-reversals between schemes have been documented; any P2a value computed
+via this file's HC_NAME_BINS or SUB08_ORIGINAL_HC_EQUIV is potentially wrong
+under current labels. For all NEW work, import from c3_relabel_p2a instead.
+
+See results/LABEL_CLEANUP_PLAN_2026-05-16.md and
+results/c3_relabel/SCIENTIFIC_NARRATIVE_2026-05-16.md (CORRECTION NOTE).
+
 Changes from v1:
 1. P2a: HC color naming at θ_cvd vs sub-08 verbal's HC-equivalent target
    (was: circular perception-map lookup)
@@ -100,14 +114,17 @@ def hc_match_score(predicted_name: str, target_name: str) -> float:
 # What HC color name does sub-08's verbal correspond to?
 # This is the canonical sub-08 deutan distortion pattern.
 SUB08_ORIGINAL_HC_EQUIV = {
-    0:   "pink",         # "빨강에 분홍 섞인" — pink-red, between red and magenta
-    45:  "red",          # "연한 빨강" — deutan signature: orange seen as red
-    90:  "yellow-green", # "연두"
-    135: "yellow",       # "노랑" — deutan signature: green seen as yellow
-    180: "yellow",       # "웜톤 아이보리" — desaturated, closest to warm yellow family
-    225: "sky",          # "하늘"
-    270: "sky",          # "더 진한 하늘" — sub-08 sees blue as darker sky
-    315: "blue",         # "진파랑" — sub-08 sees magenta as deep blue
+    # Updated 2026-05-13 — actual MRI color rendering (raw_behav.md "Original")
+    # Key change: C2 orange now reported as "초록" (green), not "red"
+    #             C7 purple now distinctly "파랑" (blue), not "sky"
+    0:   "pink",          # "핑크"
+    45:  "green",         # "초록" — under MRI rendering, orange collapses to green family
+    90:  "green",         # "초록"
+    135: "yellow-green",  # "연두"
+    180: "yellow",        # "아이보리" — desaturated warm-yellow family
+    225: "sky",           # "탁한 하늘"
+    270: "blue",          # "파랑"
+    315: "blue",          # "진한 파랑"
 }
 
 # HC target color (what filter should produce in col4)

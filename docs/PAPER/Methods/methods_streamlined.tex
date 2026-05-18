@@ -97,7 +97,7 @@ Both were evaluated using Pearson correlation between predicted and observed res
 \section{Filter design}
 \label{sec:methods:filter}
 
-CVD color distortion was modeled as a two-component hue dilation in Stockman opponent-color space (Equation~\ref{eq:2comp}):
+CVD color distortion was modeled as a two-component hue dilation in CIELab opponent-color space (Equation~\ref{eq:2comp}):
 
 \begin{equation}
 \delta\theta = \beta_s \cos(h - 90^\circ) +
@@ -105,7 +105,7 @@ CVD color distortion was modeled as a two-component hue dilation in Stockman opp
 \label{eq:2comp}
 \end{equation}
 
-where $h$ is the opponent-hue angle of the stimulus, and $\theta_{\rm conf}$ is the CVD-subtype confusion axis in Stockman space (protan: $16^\circ$; deutan: $150^\circ$). $\beta_s$ weights distortion along the S-cone opponent axis, motivated by behavioral evidence that CVD perceptual errors concentrate near S-cone confusion loci \cite{emery2021}. $\beta_c$ weights distortion along the CVD-type confusion axis, capturing the partial cortical compensation documented in V2/V3 \cite{tregillus2021}. Opponent-hue angles $h$ were derived from CIELab coordinates using the Machado simulation framework at zero spectral shift \cite{machado2009}. The perceived hue was $\theta' = (\theta + \delta\theta) \bmod 360^\circ$. Parameters were estimated by a grid search over $\beta_s \in [0^\circ, 50^\circ]$ and $\beta_c \in [-50^\circ, 50^\circ]$ (26 $\times$ 51 = 1,326 combinations, $2^\circ$ resolution). The pair maximizing hV4 LOCO Pearson $r$ was retained. Permutation significance testing followed the same procedure as for the encoding model.
+where $h$ is the opponent-hue angle of the stimulus, derived from CIELab coordinates using the Machado simulation framework at zero spectral shift \cite{machado2009}; and $\theta_{\rm conf}$ is the CVD-subtype confusion axis in CIELab $a^*$-$b^*$ space (protan: $16^\circ$; deutan: $150^\circ$), obtained by projecting each subtype's missing-cone axis in LMS space \cite{brettel1997} through the Stockman--Sharpe cone fundamental matrix \cite{stockman2000} onto the $a^*$-$b^*$ plane at $L^* = 75$. $\beta_s$ weights distortion along the S-cone opponent axis ($90^\circ$), motivated by behavioral evidence that CVD perceptual errors concentrate near S-cone confusion loci \cite{emery2021}. $\beta_c$ weights distortion along the CVD-type confusion axis, capturing partial cortical compensation documented in V2/V3 \cite{tregillus2021}. The perceived hue was $\theta' = (\theta + \delta\theta) \bmod 360^\circ$. Parameters were estimated by a grid search over $\beta_s \in [0^\circ, 50^\circ]$ and $\beta_c \in [-50^\circ, 50^\circ]$ (26 $\times$ 51 = 1,326 combinations, $2^\circ$ resolution). The pair maximizing hV4 LOCO Pearson $r$ was retained. Permutation significance testing followed the same procedure as for the encoding model.
 
 The personalized stimulus-space filter was derived as the inverse of the fitted transformation $T(\hat{\beta}_s, \hat{\beta}_c)$. For each stimulus hue $\theta_k$, the pre-image $\tilde{\theta}_k$ satisfies $T(\tilde{\theta}_k) = \theta_k$. A CVD observer viewing $\tilde{\theta}_k$ thus perceives the same cortical hue as a healthy observer viewing $\theta_k$. Pre-images were computed numerically by dense-grid initialization (1,440 candidate values) followed by Brent's method refinement at the sign-change bracket. Numerical accuracy was verified by confirming $|T(\tilde{\theta}_k) - \theta_k| < 0.001^\circ$ for all eight hues and both CVD participants.
 

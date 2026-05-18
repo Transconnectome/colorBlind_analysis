@@ -1,55 +1,32 @@
 % Appendix A — Alternative model comparison
-% Updated 2026-05-13: main text adopts HYBRID loss (Eq. eq:hybrid).
-% This appendix retains alternative model classes as historical reference
-% under the LOCO-Spearman-$\rho$ argmax criterion used in earlier drafts.
+% Updated 2026-05-14: main text adopts the four-term neural-primary
+% loss (Eq. eq:hybrid). Retains LOCO-rho-argmax fits and the
+% Machado/R+C cone-shift baselines.
 
 \section*{Appendix A: Alternative Model Comparison}
 \label{app:altmodels}
 
-For comparison with the 2-component cortical model adopted in the main
-text (Section~\ref{sec:results:twocomp}, fit under the HYBRID loss of
-Equation~\ref{eq:hybrid}), we report two cone-shift baselines:
+The main text adopts a 2-component cortical model (Section~\ref{sec:results:twocomp}, fit under the four-term neural-primary loss of Equation~\ref{eq:hybrid}).
+Here we report two cone-shift baselines as reference comparisons:
 
 \begin{itemize}
-  \item \textbf{Machado (1-DOF)} --- a single retinal cone-spectral shift
-    $\Delta\lambda$ \citeNP{machado2009}.
-  \item \textbf{Retinal + Cortical (R+C, 2-DOF)} --- retinal shift
-    $\Delta\lambda$ plus a cortical compensation gain $g$
-    \citeNP{tregillus2021}.
+  \item \textbf{Machado (1-DOF)} --- a single retinal cone-spectral shift $\Delta\lambda$ \citeNP{machado2009}.
+  \item \textbf{Retinal + Cortical (R+C, 2-DOF)} --- retinal shift $\Delta\lambda$ plus a cortical compensation gain $g$ \citeNP{tregillus2021}.
 \end{itemize}
 
 \subsection*{A.1 Fit results (LOCO Spearman $\rho$ argmax, historical reference)}
 
-Under the LOCO-$\rho$ argmax criterion used in earlier drafts (40{,}320
-label permutations), the Machado model reached significance for sub-09
-($\Delta\lambda = 13.5$~nm, $\rho_\text{V4} = 0.76$, $p = 0.018$) but not
-for sub-08 ($\rho_\text{V4} = 0.62$, $p = 0.058$, n.s.). The R+C model
-did not improve on either single-component model in either subject under
-the same criterion. These results are reported as historical reference
-for the main-text HYBRID fit (Section~\ref{sec:results:twocomp}); we
-note that HYBRID and LOCO-$\rho$ argmax need not agree, since HYBRID
-optimises a combination of first-order pattern similarity and
-second-order RDM similarity rather than rank-order monotonicity.
+Under the LOCO-$\rho$ argmax criterion used in earlier drafts (40{,}320 label permutations), the Machado model reached significance for sub-09 ($\Delta\lambda = 13.5$~nm, $\rho_\text{V4} = 0.76$, $p = 0.018$) but not for sub-08 ($\rho_\text{V4} = 0.62$, $p = 0.058$, n.s.).
+The R+C model did not improve on either single-component model in either subject under the same criterion.
+These results are reported as historical reference for the main-text 2-component fit (Section~\ref{sec:results:twocomp}); we note that the present neural-primary loss and LOCO-$\rho$ argmax need not agree, since the present loss optimises a combination of hV4 top-$K$ vulnerability agreement, first-order pattern similarity, and V1 SRM-RDM similarity rather than rank-order monotonicity at hV4 alone.
 
 \subsection*{A.2 Inverse-mapping (pre-image) behaviour}
 
-The angular form of the 2-component model is bijective by construction:
-a stimulus-space pre-image $\theta + \delta\theta$ exists for any target
-hue. The 1-DOF Machado fit for sub-09, by contrast, collapses three hues
-(green $135^\circ$, cyan $180^\circ$, blue $225^\circ$) onto a single
-pre-image angle ($\sim 127^\circ$), which mathematically prevents exact
-inversion at those positions. This arc-compression failure is a
-structural property of the 1-DOF retinal-shift model and is
-independent of the fitting criterion (LOCO-$\rho$ or HYBRID); it
-disqualifies the Machado baseline for the stimulus-space filter task
-of Section~\ref{sec:results:filter}.
+The angular form of the 2-component model is bijective by construction: a stimulus-space pre-image $\theta + \delta\theta$ exists for any target hue.
+The 1-DOF Machado fit for sub-09, by contrast, collapses three hues (green $135^\circ$, cyan $180^\circ$, blue $225^\circ$) onto a single pre-image angle ($\sim 127^\circ$), which mathematically prevents exact inversion at those positions.
+This arc-compression failure is a structural property of the 1-DOF retinal-shift model and is independent of the fitting criterion; it disqualifies the Machado baseline for the stimulus-space filter task of Section~\ref{sec:results:filter}.
 
 \subsection*{A.3 R+C model}
 
-The R+C model is retained here as a 2-DOF baseline. Because the cortical
-gain term $g$ acts as a uniform amplitude scaling without generating the
-angular distortion captured by the 2-component model's
-$\beta_c \cos(h - \theta_{\rm conf})$ term, R+C does not match the
-observed hV4 LOCO vulnerability pattern beyond what the retinal
-$\Delta\lambda$ term alone provides; this conclusion is consistent
-across the LOCO-$\rho$ and HYBRID criteria.
+The R+C model is retained here as a 2-DOF baseline.
+Because the cortical gain term $g$ acts as a uniform amplitude scaling without generating the angular distortion captured by the 2-component model's $\beta_c \cos(h - \theta_{\rm conf})$ term, R+C does not match the observed hV4 LOCO vulnerability pattern beyond what the retinal $\Delta\lambda$ term alone provides; this conclusion is consistent across loss criteria.

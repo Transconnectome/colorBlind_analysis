@@ -31,32 +31,34 @@ Generated: 2026-05-11. All captions target eLife style.
 
 ---
 
-## Figure 4 | A neural-primary HYBRID-loss fit recovers per-subject 2-component distortion at hV4
+## Figure 4 | Per-subject 2-component loss landscape at hV4
 
-Two rows: sub-08 (deutan), sub-09 (protan).
+Option C loss `L_C(β_s, β_c) = 0.3·L_topk(V4) + 0.3·L_mse(V4) + 0.3·L_rdmV1(SRM) + 3.0·L_Tikh` evaluated on the 26 × 51 = 1,326-cell grid (β_s ∈ [0°, 50°], β_c ∈ [−50°, +50°], step 2°).
 
-**(A)** Per-hue LOCO vulnerability profiles at hV4. Filled circles: observed CVD vulnerability (HC-trained ForwardEncoding); colored line: 2-component model prediction at the HYBRID argmin (β̂_s, β̂_c). X-axis hue labels (DKL, 45° spacing): R=red, O=orange, Y=yellow, G=green, C=cyan, B=blue, P=purple, M=magenta.
+**Left.** Sub-08 (deutan, S-cone-axis 150°). White star: argmin (β̂_s, β̂_c) = (40°, +26°), ‖β̂‖ = 47.7°.
 
-**(B)** HYBRID-loss component decomposition at the per-subject argmin. Bar height: value of L_mse, L_rdm, and the Tikhonov penalty under weighting (w_pat, w_rdm, μ) = (0.7, 0.3, 2.0) (Eq. eq:hybrid). Post-hoc Spearman ρ at the same point — sub-08: 0.38 (n.s., p=0.18); sub-09: −0.26 (n.s., p=0.75) — is annotated in text for reference but is not part of the loss being optimized. HYBRID jointly weighs first-order pattern similarity and second-order RDM similarity rather than rank-order monotonicity.
+**Right.** Sub-09 (protan, S-cone-axis 16°). White star: argmin (β̂_s, β̂_c) = (12°, −28°), ‖β̂‖ = 30.5°.
 
-**(C)** HYBRID-loss landscape L(β_s, β_c) over β_s ∈ [0°, 50°], β_c ∈ [−50°, 50°] (1,326 cells at 2° resolution). White star: per-subject argmin — sub-08: (16°, +40°); sub-09: (12°, −30°). Colormap shows low L (good fit) in red, high L in blue (preserves visual continuity with earlier ρ-coloured landscapes).
+Colormap (`viridis_r`): low L_C in yellow (good fit), high L_C in dark purple (poor fit). The Tikhonov weight (μ = 3.0) was calibrated on HC leave-one-out cross-validation against a β = 0 ground truth (Methods).
 
-**Caveats and consistency anchors.** The 2-component HYBRID fit achieves nominal LOCO significance for 7/7 HCs under label permutation, so per-subject p-values are descriptive of representational-geometry fit, not CVD-specificity claims (full HC distributions in Supplementary §HC permutation). Sub-09 (single protan participant) results are exploratory single-case observations requiring independent replication. The recovered β̂_c sign is positive for sub-08 (deutan) and negative for sub-09 (protan), aligning with the L–M opponent-axis polarity predicted by Brettel's cone-physiology model [Brettel et al. 1997]; both subjects' β̂_s are directionally consistent with Emery's S-cone-axis hV4 RDM finding [Emery et al. 2021]. These are post-hoc directional consistency checks, not quantitative validations — the latter is deferred to a Phase-3 2AFC behavioral arm. Comparison with alternative model classes (1-DOF Machado, 2-DOF R+C) under the historical LOCO-ρ argmax criterion is reported in Appendix A.
+**Caveats and consistency anchors.** The 2-component fit achieves nominal LOCO significance for 7/7 HCs under label permutation, so per-subject p-values are descriptive of representational-geometry fit, not CVD-specificity claims (full HC distributions in Supplementary §HC permutation). Sub-09 (single protan participant) results are exploratory single-case observations requiring independent replication. The recovered β̂_c sign is positive for sub-08 (deutan) and negative for sub-09 (protan), emergent from the neural likelihood under the calibrated Tikhonov penalty without an explicit sign prior. Comparison with alternative model classes (1-DOF Machado, 2-DOF R+C) under the historical LOCO-ρ argmax criterion is reported in Appendix A.
 
 ---
 
-## Figure 5 | HYBRID-derived per-subject stimulus-space filter: 4-column rendering
+## Figure 5 | Per-subject stimulus-space filter: 4-column rendering, side-by-side
 
-Two rows: sub-08 (deutan) at (β̂_s, β̂_c) = (16°, +40°), ‖β̂‖ = 43.1°; sub-09 (protan) at (12°, −30°), ‖β̂‖ = 32.3°. For each subject, columns are:
+**Left block.** Sub-08 (deutan) at (β̂_s, β̂_c) = (40°, +26°), ‖β̂‖ = 47.7°.
 
-1. **Original** — HC percept of the 8 displayed stimuli (DKL hues, 45° apart).
-2. **CVD perceives** — simulated CVD percept of the *original* stimulus under the per-subject 2-component model.
+**Right block.** Sub-09 (protan) at (β̂_s, β̂_c) = (12°, −28°), ‖β̂‖ = 30.5°.
+
+Within each block, eight rows correspond to the eight displayed DKL hues (c1 red 0° → c8 magenta 315°, 45° spacing). Columns (left → right):
+
+1. **Original** — HC percept of the displayed stimulus.
+2. **CVD percept** — simulated CVD percept of the *original* stimulus under the per-subject 2-component model.
 3. **Filtered** — stimulus after applying the per-subject stimulus-space correction δθ_filter, computed as the exact numerical pre-image of −δθ(·; β̂_s, β̂_c) via Brent's method on the forward map (8/8 pre-images exact, residual < 0.001° for both subjects).
-4. **CVD(Filtered)** — simulated CVD percept of the filtered stimulus, qualitatively closer to the HC percept of the original.
+4. **CVD(Filt.)** — simulated CVD percept of the filtered stimulus.
 
-Per-hue correction magnitudes |δθ_filter|, signed correction profiles, and the cosine similarity between the two subjects' filters are reported in Supplementary §Filter details.
-
-Rendering coordinate space: STIM_LAB CIELab (project convention, `scripts/stim_lab_render.py`). Closeness of column 4 to column 1 is *qualitative*; quantitative behavioral validation of filter efficacy is deferred to the Phase-3 2AFC arm (Methods, last paragraph). Comparison with the arc-compression failure of the 1-DOF Machado pre-image (sub-09 only) is reported in Appendix A.
+Rendering coordinate space: STIM_LAB CIELab (project convention, `scripts/stim_lab_render.py`). Quantitative behavioral validation of filter efficacy is deferred to the Phase-3 2AFC arm (Methods, last paragraph) and will be added to this figure once data are collected.
 
 ---
 

@@ -2,7 +2,7 @@
 """
 Figure 2 — LORO (discrimination) vs LOCO (interpolation) dissociation in CVD
 =============================================================================
-Panel A: LORO LDA accuracy (SRM) — discrimination preserved in CVD
+Panel A: LORO ForwardEncoding accuracy (SRM) — discrimination preserved in CVD
 Panel B: LOCO adjacent_acc (ForwardEncoding) — interpolation impaired in hV4
 Panel C: Per-hue adjacent_acc at hV4
 
@@ -110,7 +110,7 @@ for sub in SUBS_HC + SUBS_CVD:
     srm = d["results"]["srm"]
     loro_acc[sub] = {}
     for roi in ROIS:
-        folds = srm[roi]["LDA"]
+        folds = srm[roi]["ForwardEncoding"]
         loro_acc[sub][roi] = np.mean([fold["acc_exact"] for fold in folds])
 
 loco_hc_mean = np.array([np.mean([loco_acc[s][r] for s in SUBS_HC]) for r in ROIS])

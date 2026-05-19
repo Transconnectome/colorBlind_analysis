@@ -135,10 +135,8 @@ Both $\hat\beta_c$ values are negative; the etiological asymmetry between partic
 We deliberately do \emph{not} interpret either $\hat\beta_c$ sign as instantiating a Brettel-style cone-physiology prediction, since the Brettel--Vi\'enot--Mollon dichromat algorithm describes spectral collapse onto a missing-cone half-plane and, in our cosine parameterization, predicts $\beta_c \approx 0$ rather than a subtype-specific polarity (see the \nameref{sec:methods:twocomp} section).
 The non-zero $\hat\beta_s$ is directionally consistent with Emery and colleagues' \cite{emery2021} report of S-cone-axis dominance in CVD hV4 RDM geometry, but the two quantities are defined on different physical scales and we make no numerical comparison.
 
-Filter validity is a behavioral question: it asks whether stimulating each $\tilde{\theta}_k = T^{-1}(\theta_k)$ restores the corresponding HC percept for the CVD observer.
-We therefore do not report fit-validity $p$-values for the per-subject $(\hat\beta_s, \hat\beta_c)$ from within-cohort permutation tests, since such tests address only whether the loss landscape has a non-trivial argmin on this participant's vulnerability profile, not whether the inverted filter restores HC-equivalent perception.
+We checked the optimal distortion magnitude against an HC leave-one-out distribution under the same loss for validation (Supplementary~\ref{app:hc_perm}); sub-08's case-level distinctness rests on the R+C diagnostic (Appendix~\ref{app:altmodels}) and on the per-color filter profile (Figure~\ref{fig:filter}) rather than on $\|\hat\beta\|$ alone.
 Quantitative filter validation is deferred to the Phase-3 2AFC arm (Methods).
-As a descriptive HC-LOO comparison (not a hypothesis test): across $n = 6$ effective HC leave-one-out refits under the same loss, $\|\hat{\beta}\|$ ranged from $49.0^\circ$ to $65.3^\circ$ (mean $54.8^\circ$); both CVD subjects fit with \emph{smaller} parameter magnitude than any HC, consistent with the CVD geometry requiring less aggressive 2-component correction than HC self-similarity nulls.
 
 The model-class expressiveness has a closed-form upper bound: $|\delta\theta|$ at $\theta = 45^\circ$ is bounded by $|0.71\,\hat\beta_s - 0.26\,\hat\beta_c|$, so corrective shifts exceeding $\sim\!51^\circ$ at the deutan mid-axis (e.g.\ an orange-to-green excursion of $\gtrsim 85^\circ$) lie outside the 2-component class for any biologically plausible $\hat\beta$ and would require an additional mechanism (e.g.\ saturation/lightness) outside the present scope.
 Per-hue correction vectors are visualized in Figure~\ref{fig:filter}; behavioral validation is deferred to the Phase-3 2AFC arm (Methods).
@@ -153,7 +151,7 @@ Per-hue correction vectors are visualized in Figure~\ref{fig:filter}; behavioral
   Left: sub-08 (deutan, Stockman S-cone confusion axis $150^\circ$). Right: sub-09 (protan, Stockman axis $16^\circ$).
   White star: per-subject argmin --- sub-08 $(\hat\beta_s, \hat\beta_c) = (38^\circ, -14^\circ)$, $\|\hat\beta\| = 40.5^\circ$; sub-09 $(6^\circ, -22^\circ)$, $\|\hat\beta\| = 22.8^\circ$.
   Both $\hat\beta_c$ values are negative; the inter-subject asymmetry resides in the S-cone-axis magnitude ($\hat\beta_s = 38^\circ$ vs.\ $6^\circ$).
-  Quantitative filter validation is deferred to the Phase-3 2AFC arm (Methods); within-cohort label-permutation $p$-values, which assess fit-landscape non-triviality rather than filter restoration, are not reported.
+  Quantitative filter validation is deferred to the Phase-3 2AFC arm (Methods).
   See Appendix~\ref{app:altmodels} for the historical LOCO-$\rho$ comparison and Machado/R+C cone-shift baselines.}
   \label{fig:twocomp}
 \end{figure*}

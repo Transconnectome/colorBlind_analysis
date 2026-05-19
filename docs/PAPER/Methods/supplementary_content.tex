@@ -166,16 +166,6 @@ The mutual-information cost function was then optimized to maximize the statisti
 This preprocessing reduces measurement noise across runs while preserving color representational geometry, thereby improving the quality of subsequent SRM fitting.
 
 
-% ========== Section 15: Why fit-validity permutation p-values are not reported ==========
-
-\subsection*{\textbf{S15. Why per-subject fit-validity permutation $p$-values are not reported}}
-\label{app:hc_specificity}
-
-Label-permutation $p$-values for the per-subject $(\hat\beta_s, \hat\beta_c)$ argmin assess whether the loss landscape contains a non-trivial minimum on a single participant's vulnerability profile under random permutations of the 8-color label assignment.
-They do not assess whether the inverted filter $\delta\theta^{\rm filt}_k = \tilde\theta_k - \theta_k$ restores HC-equivalent perception at the stimulus level.
-Because filter validity is the substantive claim of this paper, fit-landscape permutation $p$-values are omitted from the main text and the per-subject $(\hat\beta_s, \hat\beta_c)$ are reported as descriptive fits.
-Quantitative filter validity is established by the pre-registered Phase-3 2AFC discrimination arm (see the \nameref{sec:methods:behavioral} section, last paragraph).
-
 % ========== Section 16: Retinal-Family Model Comparison ==========
 
 \subsection*{\textbf{S16. Comparison with Retinal-Family Distortion Models}}
@@ -200,8 +190,7 @@ These three collapsed hues fall within Sub-09's LOCO vulnerability cluster (c5/c
 
 \begin{table}[ht]
   \caption{All distortion model fits at hV4 LOCO for both CVD participants.
-  Retinal-family fits are reported under the historical LOCO-$\rho$ argmax criterion (Section~A.1 of Appendix A); $\rho$ is Spearman correlation between simulated and observed per-color vulnerability.
-  Fit-validity permutation $p$-values are not reported (see Supplementary~\ref{app:hc_specificity}).}
+  Retinal-family fits are reported under the historical LOCO-$\rho$ argmax criterion (Section~A.1 of Appendix A); $\rho$ is Spearman correlation between simulated and observed per-color vulnerability.}
   \label{tab:S1}
   \centering
   \small
@@ -215,9 +204,9 @@ These three collapsed hues fall within Sub-09's LOCO vulnerability cluster (c5/c
 \subsection*{\textbf{S17. HC leave-one-out magnitude-anchor distribution}}
 \label{app:hc_perm}
 
-Each of $n = 6$ effective HC participants (excluding sub-07 for low hV4 voxel count) was refit under the canonical V4 LOCO loss $L_\text{fit}$ (Equation~\ref{eq:lfit}) with the remaining HC pool as reference, yielding an HC leave-one-out distribution of fitted-parameter magnitudes $\|\hat\beta\|$ ranging $49.0^\circ$ to $65.3^\circ$ (mean $54.8^\circ$).
-This range is reported as a magnitude anchor for the CVD estimates (sub-08 $\|\hat\beta\| = 40.5^\circ$; sub-09 $\|\hat\beta\| = 22.8^\circ$, both below the HC range), not as a hypothesis test of CVD-versus-HC specificity.
-Within-cohort permutation $p$-values for the per-subject argmin are omitted from the main text for the reasons given in Supplementary~\ref{app:hc_specificity}.
+Each of $n = 6$ effective HC participants was refit under the canonical V4 LOCO loss $L_\text{fit}$ (Equation~\ref{eq:lfit}) with the remaining HC pool as reference, yielding an HC leave-one-out distribution of fitted-parameter magnitudes $\|\hat\beta\|$ ranging $26.3^\circ$ to $49.2^\circ$ (mean $40.1^\circ$).
+Sub-07 was excluded because its hV4 ROI contained only 16 voxels (versus 67--70 for the remaining HC), which precluded a stable forward-encoder LOCO target vector at this ROI; the exclusion arises in filter-fit space and is unrelated to the SRM dimensionality choice.
+This range is reported as a magnitude anchor for the CVD estimates (sub-08 $\|\hat\beta\| = 40.5^\circ$, falling near the HC mean; sub-09 $\|\hat\beta\| = 22.8^\circ$, below the HC minimum), not as a hypothesis test of CVD-versus-HC specificity.
 
 % ========== Section 18: Effect Sizes ==========
 

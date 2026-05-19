@@ -176,6 +176,7 @@ CVD hue distortion was modelled as a two-component angular shift in Stockman opp
 \end{equation}
 
 where $h$ is the opponent-hue angle of the stimulus in CIELab space and $\theta_{\rm conf}$ is the CVD-subtype confusion axis ($16^\circ$ protan; $150^\circ$ deutan), derived from the Brettel--Vi\'enot--Mollon dichromatic simulation \cite{brettel1997} applied to Stockman \& Sharpe LMS cone fundamentals \cite{stockman2000}. $\beta_s$ parameterizes distortion along the S-cone axis ($h = 90^\circ$), motivated by cortical-RDM evidence that CVD errors concentrate at S-cone loci \cite{emery2021}. $\beta_c$ parameterizes rotation along the confusion axis, with both signs unconstrained as free parameters of the fit.
+We compared this model with retinal-shift-based alternatives (Machado, R+C retinal family); see Appendix~\ref{app:altmodels}.
 
 Per-subject parameters $(\beta_s, \beta_c)$ were recovered by minimizing a four-term, neural-primary loss derived from the V4 LOCO forward model:
 
@@ -197,14 +198,9 @@ $L_\text{smooth} = \tfrac{1}{8 \cdot 32400}\,\sum_c (\delta\theta_{c+1} - \delta
 All four terms are computed at hV4 (V4 on disk).
 We fit at hV4 rather than V1--V3 because hV4 is the only ROI in this dataset whose HC group LOCO interpolation exceeds the permutation null ($p = 0.044$ at hV4 vs.\ NS at V1/V2/V3; \nameref{sec:results:loco}), and because hV4 is the canonical cortical hub for hue representation in the ventral stream (\citeNP{brouwer2009, bannert2018, kuriki2015}); cone-shift parameters fit on an encoder that cannot interpolate held-out colors lack a voxel-level cone-shift interpretation.
 
-\paragraph{Search and HC-LOO calibration.}
-Parameters were searched by exhaustive grid over $\beta_s \in [0^\circ, 50^\circ]$ and $\beta_c \in [-50^\circ, 50^\circ]$ ($26 \times 51 = 1{,}326$ cells at $2^\circ$ resolution); $(\hat\beta_s, \hat\beta_c) = \arg\min L_\text{fit}$ was retained per subject.
-For descriptive comparison, each of $n = 6$ effective HC participants (excluding sub-07 for low hV4 voxel count) was refit under the same loss with the remaining HC pool as reference, yielding an HC $\|\hat\beta\|$ leave-one-out distribution that we report alongside the CVD estimates as a magnitude anchor, not as a hypothesis test.
-We do not report within-cohort label-permutation $p$-values for the per-subject argmin: such tests assess whether the loss landscape has a non-trivial minimum on a participant's vulnerability profile, not whether the resulting filter restores HC-equivalent perception.
-Quantitative filter validation is provided by the Phase-3 2AFC behavioral arm (see the \nameref{sec:methods:behavioral} section, last paragraph).
-
-The 2-component class has an angular expressiveness limit $|\delta\theta|(\theta\!=\!45^\circ) = |0.71\,\beta_s - 0.26\,\beta_c|$, so hue translations exceeding $\sim\!51^\circ$ at the deutan mid-axis (e.g.\ orange $\to$ green) lie outside the model class for any biologically plausible $\beta$ (see the \nameref{sec:results:twocomp} section).
-Comparison with alternative model classes (1-DOF Machado cone-shift; 2-DOF retinal+cortical) is reported in Appendix~\ref{app:altmodels}.
+\paragraph{Per-subject distortion fit.}
+Parameters were searched by exhaustive grid over $\beta_s \in [0^\circ, 50^\circ]$ and $\beta_c \in [-50^\circ, 50^\circ]$ ($26 \times 51 = 1{,}326$ cells at $2^\circ$ resolution); $(\hat\beta_s, \hat\beta_c) = \arg\min L_\text{fit}$ was retained per CVD subject.
+We checked the optimal distortion magnitude against an HC leave-one-out distribution under the same loss for validation (Supplementary~\ref{app:hc_perm}); quantitative filter validity is established by the Phase-3 2AFC behavioral arm (see the \nameref{sec:methods:behavioral} section, last paragraph).
 
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{Stimulus-space filter}
@@ -215,9 +211,7 @@ The subject-specific correction filter was derived as the pre-image of the fitte
 For each of the 8 displayed hues $\theta_k$, we solved for the input angle $\tilde{\theta}_k$ such that $T(\tilde{\theta}_k) = \theta_k$, yielding a per-hue correction $\delta\theta_k^{\rm filt} = \tilde{\theta}_k - \theta_k$.
 A CVD observer viewing $\tilde{\theta}_k$ thus receives, under the model, the same cortical hue representation as a healthy control observer viewing $\theta_k$.
 
-Pre-images were computed numerically: 1,440 candidate values were evaluated on the forward map, a sign-change bracket was identified, and Brent's method was applied for refinement.
-Inversion was verified by $|T(\tilde{\theta}_k) - \theta_k| < 0.001^\circ$ for all 8 hues and both CVD participants.
-Behavior of alternative model classes under pre-image inversion is detailed in Appendix~\ref{app:altmodels}.
+Pre-images were computed by numerical inversion of the forward map (Brent's-method root-finding); inversion was exact ($|T(\tilde{\theta}_k) - \theta_k| < 0.001^\circ$) for all 8 hues in both CVD participants.
 
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{Behavioral concordance}
@@ -248,5 +242,5 @@ A two-alternative forced-choice (2AFC) discrimination arm targeting filter-induc
 
 All analyzes were conducted in Python 3.10 (numpy 1.24.3, scipy 1.11.3, scikit-learn 1.3.0, BrainIAK 0.11).
 Random seeds were fixed (\texttt{seed=42}) for all permutation tests and bootstrap resampling.
-Analysis code and preprocessing scripts are available at \url{https://github.com/haba6030/colorBlind\_analysis}.
+Analysis code and preprocessing scripts are available at \url{https://github.com/Transconnectome/colorBlind_analysis}.
 Anonymised preprocessed data are available on reasonable request to the corresponding author.

@@ -35,13 +35,13 @@ Generated: 2026-05-11. All captions target eLife style.
 
 Canonical V4 LOCO loss `L_fit(β_s, β_c) = 1.0·L_vuln + 0.5·L_rank + 0.2·L_rdm + 0.1·L_smooth` (Methods, Eq. eq:lfit) evaluated on the 26 × 51 = 1,326-cell grid (β_s ∈ [0°, 50°], β_c ∈ [−50°, +50°], step 2°). All four terms are computed at hV4 (V4 on disk); each term is normalised to [0, 1] before weighting.
 
-**Left.** Sub-08 (deutan, Stockman S-cone confusion axis 150°). White star: argmin (β̂_s, β̂_c) = (38°, −14°), ‖β̂‖ = 40.5°, p_perm = 0.004.
+**Left.** Sub-08 (deutan, Stockman S-cone confusion axis 150°). White star: argmin (β̂_s, β̂_c) = (38°, −14°), ‖β̂‖ = 40.5°.
 
-**Right.** Sub-09 (protan, Stockman axis 16°). White star: argmin (β̂_s, β̂_c) = (6°, −22°), ‖β̂‖ = 22.8°, p_perm = 0.035.
+**Right.** Sub-09 (protan, Stockman axis 16°). White star: argmin (β̂_s, β̂_c) = (6°, −22°), ‖β̂‖ = 22.8°.
 
 Colormap (`viridis_r`): low L_fit in yellow (good fit), high L_fit in dark purple (poor fit). Loss-term roles: L_vuln = per-colour MSE of simulated vs observed V4 LOCO vulnerability (primary fit); L_rank = Spearman rank-ordering tiebreaker; L_rdm = ΔRDM cosine geometric convergence at hV4; L_smooth = circular smoothness regulariser on the per-colour shift vector (Methods).
 
-**Caveats and consistency anchors.** The 2-component fit yields nominal label-permutation significance for 7/7 HCs at hV4 under L_fit, so per-subject p-values are descriptive of representational-geometry fit, not CVD-specificity claims (full HC distributions in Supplementary §S17 HC Permutation). Both CVD subjects' ‖β̂‖ fall below the HC leave-one-out range [49.0°, 65.3°], consistent with CVD geometry requiring less aggressive 2-component correction than HC label-permutation nulls. Sub-09 (single protan participant) results are exploratory single-case observations requiring independent replication. Both β̂_c values are negative; the inter-subject asymmetry resides in the S-cone-axis magnitude (β̂_s = 38° vs 6°). The per-subject R+C diagnostic decomposition (Appendix A) recovers cortical-dominant etiology for sub-08 (Δλ ≈ 2.5 nm, g = −2.25) and retinal-dominant etiology for sub-09 (Δλ ≈ 19.5 nm, g = −1.10). Comparison with alternative model classes (1-DOF Machado, 2-DOF R+C) under the historical LOCO-ρ argmax criterion is reported in Appendix A.
+**Caveats and consistency anchors.** Both CVD subjects' ‖β̂‖ fall below the HC leave-one-out range [49.0°, 65.3°], a magnitude anchor that the CVD geometry requires less aggressive 2-component correction than HC self-similarity nulls — descriptive comparison, not a hypothesis test. Within-cohort label-permutation p-values for the per-subject argmin are not reported: they assess whether the loss landscape has a non-trivial minimum on a participant's vulnerability profile, not whether the inverted filter restores HC-equivalent perception. Quantitative filter validity is deferred to the Phase-3 2AFC behavioural arm. Sub-09 (single protan participant) results are exploratory single-case observations requiring independent replication. Both β̂_c values are negative; the inter-subject asymmetry resides in the S-cone-axis magnitude (β̂_s = 38° vs 6°). The per-subject R+C diagnostic decomposition (Appendix A) recovers cortical-dominant etiology for sub-08 (Δλ ≈ 2.5 nm, g = −2.25) and retinal-dominant etiology for sub-09 (Δλ ≈ 19.5 nm, g = −1.10).
 
 ---
 

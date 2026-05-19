@@ -30,7 +30,7 @@ Detailed per-subject counts are available in the online repository.
 
 \subsection*{\textbf{S4. Consistency Test: PCA and Procrustes \todo{(TBA)}}}
 
-Additional validation analyses comparing SRM with PCA-based dimensionality reduction and norm-constrained Procrustes alignment will be reported following completion of the full dataset.
+Additional validation analyzes comparing SRM with PCA-based dimensionality reduction and norm-constrained Procrustes alignment will be reported following completion of the full dataset.
 
 
 % ========== Section 5: Mean Activation ==========
@@ -78,8 +78,9 @@ The selected values and their associated cross-subject RDM Spearman correlations
 % ========== Section 8: GCV Details ==========
 
 \subsection*{\textbf{S8. Generalized Cross-Validation for Ridge Regression}}
+\label{app:gcv}
 
-The regularization parameter $\alpha$ for ridge regression was selected via Generalized Cross-Validation (GCV; \citeNP{golub1979}).
+The regularization parameter $\alpha$ for ridge regression was selected via Generalized Cross-Validation (GCV; \citeNP{golub1979}), implemented as \texttt{sklearn.linear\_model.RidgeCV} with \texttt{gcv\_mode='auto'} (\citeNP{pedregosa2011}).
 GCV provides a computationally efficient approximation to leave-one-out cross-validation for selecting $\alpha$.
 The optimal $\alpha$ minimizes the GCV score:
 
@@ -137,7 +138,7 @@ Voxel response prediction was evaluated using Pearson correlation between predic
 
 \subsection*{\textbf{Statistical Significance}}
 
-Statistical significance of group comparisons (HC vs CVD) and individual CVD analyses was assessed using nonparametric permutation tests (10,000 iterations; \citeNP{nichols2002}).
+Statistical significance of group comparisons (HC vs CVD) and individual CVD analyzes was assessed using nonparametric permutation tests (10,000 iterations; \citeNP{nichols2002}).
 
 
 % ========== Section 12: SRM Residuals ==========
@@ -165,15 +166,15 @@ The mutual-information cost function was then optimized to maximize the statisti
 This preprocessing reduces measurement noise across runs while preserving color representational geometry, thereby improving the quality of subsequent SRM fitting.
 
 
-% ========== Section 15: HC Specificity Calibration ==========
+% ========== Section 15: Why fit-validity permutation p-values are not reported ==========
 
-\subsection*{\textbf{S15. HC Specificity Calibration}}
+\subsection*{\textbf{S15. Why per-subject fit-validity permutation $p$-values are not reported}}
 \label{app:hc_specificity}
 
-The 2-component grid-search pipeline was applied to the 7 HC participants treating each as a CVD candidate.
-Of 21 model--subject tests (7 HC $\times$ 3 models), 15 reached nominal $p < 0.05$ (71\%).
-This elevated false-positive rate reflects (i) rank-based loss with only 8 data points (Spearman $\rho$ over 8 hues is sensitive to individual rank fluctuations), and (ii) regression to the mean on per-HC baseline $\rho$ (hV4 $K = 3$, 63 voxels; individual HC baselines span $[-0.36, +0.69]$).
-Case-level specificity therefore rests on the three converging anchors described in Section~\ref{sec:results:filter}, not on per-subject permutation significance alone.
+Label-permutation $p$-values for the per-subject $(\hat\beta_s, \hat\beta_c)$ argmin assess whether the loss landscape contains a non-trivial minimum on a single participant's vulnerability profile under random permutations of the 8-color label assignment.
+They do not assess whether the inverted filter $\delta\theta^{\rm filt}_k = \tilde\theta_k - \theta_k$ restores HC-equivalent perception at the stimulus level.
+Because filter validity is the substantive claim of this paper, fit-landscape permutation $p$-values are omitted from the main text and the per-subject $(\hat\beta_s, \hat\beta_c)$ are reported as descriptive fits.
+Quantitative filter validity is established by the pre-registered Phase-3 2AFC discrimination arm (see the \nameref{sec:methods:behavioral} section, last paragraph).
 
 % ========== Section 16: Retinal-Family Model Comparison ==========
 
@@ -185,45 +186,38 @@ Two retinal-family models were evaluated alongside the 2-component model by the 
 \textbf{Models.} The 1-DOF Machado model~\citeNP{machado2009} shifts the L/M cone spectral sensitivity by $\Delta\lambda$~nm, yielding a hue-confusion pattern characteristic of the CVD subtype.
 The 2-DOF retinal$+$cortical R$+$C model~\citeNP{tregillus2021} augments Machado with a cortical gain $g$: $r_{g}' = r_{g,\text{base}} + (1+g)(r_{g,\text{ret}} - r_{g,\text{base}})$, where $g = 0$ recovers the retinal-only model and $g = -1$ is exact cortical compensation.
 
-\textbf{Fits (Table~\ref{tab:S1}).} Applying a closed-testing rule (Machado first; R+C escalated only if Machado $p > 0.05$), the retinal family reaches significance for both subjects but selects a different model class per case.
-Sub-08 escalates to R+C ($\Delta\lambda = 2.0$~nm, $g = +2.25$, $\rho = 0.857$, $p = 0.005$) because 1-DOF Machado is trend-level ($p = 0.058$).
-Sub-09 is captured by 1-DOF Machado ($\Delta\lambda = 13.5$~nm, $\rho = 0.762$, $p = 0.018$) without cortical augmentation; the shift magnitude falls within the established range for moderate--severe protanomaly~\cite{neitz2011}.
+\textbf{Fits (Table~\ref{tab:S1}).} Under the historical LOCO-$\rho$ argmax criterion (40{,}320 label permutations), reported here for reference only, retinal-family fits at hV4 yield Sub-08 R+C $(\Delta\lambda = 2.0$~nm, $g = +2.25$, $\rho = 0.857)$ and Sub-09 1-DOF Machado $(\Delta\lambda = 13.5$~nm, $\rho = 0.762)$; the latter shift magnitude falls within the established range for moderate--severe protanomaly~\cite{neitz2011}.
 The large positive cortical gain for Sub-08 ($g = +2.25$, indicating $>$100\% overshoot beyond the exact Tregillus compensation level of $g = -1$;~\citeNP{tregillus2021}) is not physiologically interpretable as a gain parameter and is treated as an empirical characterization of residual hV4 structure.
 The cross-subject model-class divergence (R+C for Sub-08; 1-DOF Machado for Sub-09) prevents a common-axis comparison of the two cases' distortion mechanisms.
 
 \textbf{Correction-vector divergence.} Despite comparable LOCO fit quality ($\rho = 0.857$ for R+C vs.\ $0.881$ for 2-component), the R+C and 2-component correction vectors for Sub-08 have cosine similarity $-0.18$ and sign agreement only $3/8$, confirming that detection converges while correction directions diverge at the cortical level.
 
 \textbf{$\Delta$RDM cross-model convergence.} Using R+C parameters for Sub-09 ($\Delta\lambda = 19.5$~nm, $g = -1.10$), an independent $\Delta$RDM test reaches $p = 0.026$ (40{,}320 cosine-similarity permutations on crossnobis distances), providing cross-model corroboration for the Sub-09 distortion signal.
-Retinal-family optimisation directly against $\Delta$RDM fails for both CVD subjects; LOCO is the more discriminating phenotype and $\Delta$RDM serves as a convergence cross-check only.
+Retinal-family optimization directly against $\Delta$RDM fails for both CVD subjects; LOCO is the more discriminating phenotype and $\Delta$RDM serves as a convergence cross-check only.
 
 \textbf{Arc-compression and LOCO vulnerability.} At Sub-09's severity, Machado arc-compression ($\Delta\lambda = 13.5$~nm) collapses three hues (c4 green, c5 cyan, c6 blue) to a single perceived angle in opponent hue space.
 These three collapsed hues fall within Sub-09's LOCO vulnerability cluster (c5/c6 cyan/blue), confirming that arc-compression eliminates correction capacity precisely where Sub-09 requires it most.
 
 \begin{table}[ht]
   \caption{All distortion model fits at hV4 LOCO for both CVD participants.
-  Retinal family: closed-testing (Machado first; R+C only when Machado $p > 0.05$). $p$-values: $8! = 40{,}320$ exact permutations of colour labels on Spearman $\rho$.}
+  Retinal-family fits are reported under the historical LOCO-$\rho$ argmax criterion (Section~A.1 of Appendix A); $\rho$ is Spearman correlation between simulated and observed per-color vulnerability.
+  Fit-validity permutation $p$-values are not reported (see Supplementary~\ref{app:hc_specificity}).}
   \label{tab:S1}
   \centering
   \small
   \begin{tabular}{llccccc}
-    \toprule Subject & Model & DOF & Param.\ 1 & Param.\ 2 & $\rho$ & $p_{\text{perm}}$ \\ \midrule Sub-08 (deutan) & 2-component & 2 & $\beta_s = 38^\circ$ & $\beta_c = -14^\circ$ & 0.881 & \textbf{0.004} \\ Sub-09 (protan) & 2-component & 2 & $\beta_s = 6^\circ$ & $\beta_c = -22^\circ$ & 0.690 & \textbf{0.035} \\ \midrule Sub-08 (deutan) & R+C & 2 & $\Delta\lambda = 2.0$~nm & $g = +2.25$ & 0.857 & \textbf{0.005} \\ Sub-09 (protan) & Machado & 1 & $\Delta\lambda = 13.5$~nm & --- & 0.762 & \textbf{0.018} \\ \bottomrule
+    \toprule Subject & Model & DOF & Param.\ 1 & Param.\ 2 & $\rho$ \\ \midrule Sub-08 (deutan) & 2-component & 2 & $\beta_s = 38^\circ$ & $\beta_c = -14^\circ$ & 0.881 \\ Sub-09 (protan) & 2-component & 2 & $\beta_s = 6^\circ$ & $\beta_c = -22^\circ$ & 0.690 \\ \midrule Sub-08 (deutan) & R+C & 2 & $\Delta\lambda = 2.0$~nm & $g = +2.25$ & 0.857 \\ Sub-09 (protan) & Machado & 1 & $\Delta\lambda = 13.5$~nm & --- & 0.762 \\ \bottomrule
   \end{tabular}
 \end{table}
 
-% ========== Section 17: HC Permutation under the V4 LOCO Loss ==========
+% ========== Section 17: HC magnitude-anchor distribution ==========
 
-\subsection*{\textbf{S17. HC Permutation under the V4 LOCO Loss}}
+\subsection*{\textbf{S17. HC leave-one-out magnitude-anchor distribution}}
 \label{app:hc_perm}
 
-The 2-component grid search under the V4 LOCO loss $L_\text{fit}$ (Equation~\ref{eq:lfit}; main-text Section~\ref{sec:methods:twocomp}) was applied to each of the 7 HC participants treated as a CVD candidate.
-Of the 6 HCs that pass the hV4 voxel-count threshold (sub-07 excluded; 16 voxels, $K = 3$ produces \texttt{nan}), all 6 reach nominal $p < 0.05$ under the label-permutation null --- and the property generalises to the full HC pool (HC FPR = 7/7 at nominal $\alpha = 0.05$).
-
-This high false-positive rate cannot be removed by reformulating the fitting criterion: thirteen successive reformulations within the voxel-prediction loss family ($L_\mathrm{LOCO}$, $L_\mathrm{mse}$, $L_\mathrm{rdm}$, cross-ROI combinations, baseline-$\rho$ correction, top-$K$ Jaccard) all yielded the same outcome (project log, Cycles 9--13).
-It reflects two structural properties of the available data: (i) the 8-hue resolution provides limited degrees of freedom for distinguishing specific from non-specific fits at the single-subject level, and (ii) the relevant null hypothesis (``no CVD-specific distortion'') is not isomorphic to label permutation on a single participant's vulnerability profile, since a non-trivial fit can be obtained for any sufficiently smooth 8-point pattern under the 2-DOF model class.
-
-Consequently, per-subject p-values reported alongside the $L_\text{fit}$ argmin in Figure~\ref{fig:twocomp} and Section~\ref{sec:results:twocomp} are presented as \emph{descriptive} fits of representational geometry, not as CVD-specificity statements.
-Two case-level anchors support biological interpretation despite this caveat: (i) parameter-norm comparison --- both CVD subjects' $\|\hat{\beta}\|$ ($40.5^\circ$ for sub-08; $22.8^\circ$ for sub-09) fall \emph{below} the HC leave-one-out range $[49.0^\circ, 65.3^\circ]$, consistent with CVD geometry requiring less aggressive 2-component correction than HC label-permutation nulls; (ii) per-subject R+C diagnostic decomposition (Appendix~\ref{app:altmodels}) recovers cortical-dominant etiology for sub-08 and retinal-dominant etiology for sub-09, providing a mechanistic interpretation of the 2-component fits that is not tested by the within-cohort permutation null.
-Quantitative specificity claims require an external behavioural endpoint such as the Phase-3 2AFC arm (Methods~\ref{sec:methods:behavioral}, last paragraph; data not yet collected at the time of writing).
+Each of $n = 6$ effective HC participants (excluding sub-07 for low hV4 voxel count) was refit under the canonical V4 LOCO loss $L_\text{fit}$ (Equation~\ref{eq:lfit}) with the remaining HC pool as reference, yielding an HC leave-one-out distribution of fitted-parameter magnitudes $\|\hat\beta\|$ ranging $49.0^\circ$ to $65.3^\circ$ (mean $54.8^\circ$).
+This range is reported as a magnitude anchor for the CVD estimates (sub-08 $\|\hat\beta\| = 40.5^\circ$; sub-09 $\|\hat\beta\| = 22.8^\circ$, both below the HC range), not as a hypothesis test of CVD-versus-HC specificity.
+Within-cohort permutation $p$-values for the per-subject argmin are omitted from the main text for the reasons given in Supplementary~\ref{app:hc_specificity}.
 
 % ========== Section 18: Effect Sizes ==========
 

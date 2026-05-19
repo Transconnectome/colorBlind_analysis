@@ -17,9 +17,8 @@ Here we report two cone-shift baselines as reference comparisons:
 
 \subsection*{A.1 Fit results (LOCO Spearman $\rho$ argmax, historical reference)}
 
-Under the LOCO-$\rho$ argmax criterion used in earlier drafts (40{,}320 label permutations), the Machado model reached significance for sub-09 ($\Delta\lambda = 13.5$~nm, $\rho_\text{V4} = 0.76$, $p = 0.018$) but not for sub-08 ($\rho_\text{V4} = 0.62$, $p = 0.058$, n.s.).
-The R+C model did not improve on either single-component model in either subject under the same criterion.
-These results are reported as historical reference for the main-text 2-component fit (Section~\ref{sec:results:twocomp}); the present $L_\text{fit}$ loss (Equation~\ref{eq:lfit}) and LOCO-$\rho$ argmax need not agree, since $L_\text{fit}$ optimises a combination of per-colour V4 vulnerability MSE, Spearman rank ordering, $\Delta$RDM cosine, and a smoothness regulariser rather than the rank-order monotonicity of $\rho$ at hV4 alone.
+Under the LOCO-$\rho$ argmax criterion used in earlier drafts, the Machado model fit Sub-09 at $\Delta\lambda = 13.5$~nm with $\rho_\text{V4} = 0.76$ and Sub-08 at $\rho_\text{V4} = 0.62$ (lower fit quality); the R+C model did not improve on either single-component model in either subject.
+These fits are reported as historical reference for the main-text 2-component fit (Section~\ref{sec:results:twocomp}); the present $L_\text{fit}$ loss (Equation~\ref{eq:lfit}) and LOCO-$\rho$ argmax need not agree, since $L_\text{fit}$ optimizes a combination of per-color V4 vulnerability MSE, Spearman rank ordering, $\Delta$RDM cosine, and a smoothness regularizer rather than the rank-order monotonicity of $\rho$ at hV4 alone.
 
 \paragraph{R+C decomposition as a diagnostic.}
 Although the R+C 2-stage model is not adopted as the filter form (see \nameref{sec:results:filter}), the R+C parameter fit at hV4 under $L_\text{fit}$ is retained as a per-subject etiological diagnostic.
@@ -27,7 +26,7 @@ For sub-08, the R+C decomposition recovers $\Delta\lambda = 2.5$~nm (near-zero r
 For sub-09, the R+C decomposition recovers $\Delta\lambda = 19.5$~nm (within the published protan cone-shift range) with $g = -1.10$ (near-physiological cortical compensation, no overshoot), consistent with a retinal-dominant CVD.
 This per-subject cortical-vs-retinal asymmetry is reported as a mechanistic interpretation of the 2-component fit, not as an independent test.
 
-\subsection*{A.2 Inverse-mapping (pre-image) behaviour}
+\subsection*{A.2 Inverse-mapping (pre-image) behavior}
 
 The angular form of the 2-component model is bijective by construction: a stimulus-space pre-image $\theta + \delta\theta$ exists for any target hue.
 The 1-DOF Machado fit for sub-09, by contrast, collapses three hues (green $135^\circ$, cyan $180^\circ$, blue $225^\circ$) onto a single pre-image angle ($\sim 127^\circ$), which mathematically prevents exact inversion at those positions.

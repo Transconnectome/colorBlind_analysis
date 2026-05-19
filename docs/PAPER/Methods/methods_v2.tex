@@ -183,7 +183,6 @@ $L_\text{smooth} = \tfrac{1}{8 \cdot 32400}\,\sum_c (\delta\theta_{c+1} - \delta
 \paragraph{ROI scope.}
 All four terms are computed at hV4 (V4 on disk).
 We fit at hV4 rather than V1--V3 because hV4 is the only ROI in this dataset whose HC group LOCO interpolation exceeds the permutation null ($p = 0.044$ at hV4 vs.\ NS at V1/V2/V3; \nameref{sec:results:loco}), and because hV4 is the canonical cortical hub for hue representation in the ventral stream (\citeNP{brouwer2009, bannert2018, kuriki2015}); cone-shift parameters fit on an encoder that cannot interpolate held-out colours lack a voxel-level cone-shift interpretation.
-V1 and V2 fits are reported in the project methods documentation.
 
 \paragraph{Search and HC-LOO calibration.}
 Parameters were searched by exhaustive grid over $\beta_s \in [0^\circ, 50^\circ]$ and $\beta_c \in [-50^\circ, 50^\circ]$ ($26 \times 51 = 1{,}326$ cells at $2^\circ$ resolution); $(\hat\beta_s, \hat\beta_c) = \arg\min L_\text{fit}$ was retained per subject.

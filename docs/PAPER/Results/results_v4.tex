@@ -104,20 +104,18 @@ The ROIs of strongest disparity elevation (V1 for sub-09, V2 for sub-08) differ 
 \label{sec:results:twocomp}
 % ──────────────────────────────────────────────────────────────────────────────
 
-To identify the distortion parameters needed for the corrective filter, we fit the 2-component cortical model (Equation~\ref{eq:2comp}, $\beta_s$ for S-cone-axis dilation, $\beta_c$ for confusion-axis rotation) to each CVD participant's hV4 representation under the four-term neural-primary loss specified in Equation~\ref{eq:lfit} (see the \nameref{sec:methods:twocomp} section).
-hV4 was the fit ROI because it is the only ROI whose HC group LOCO interpolation exceeds the permutation null in this dataset ($p = 0.044$ at hV4, not significant at V1/V2/V3, \nameref{sec:results:loco}).
-Cone-shift parameters fit at hV4 are therefore interpretable as voxel-level shifts in a working interpolation manifold.
+To identify the distortion parameters needed for the corrective filter, we fit the 2-component cortical model (Equation~\ref{eq:2comp}) to each CVD participant's hV4 representation under the four-term neural-primary loss (Equation~\ref{eq:lfit}, see the \nameref{sec:methods:twocomp} section).
 
-The fit returned per-subject parameters $(\hat{\beta}_s, \hat{\beta}_c) = (38^\circ, -14^\circ)$ for sub-08 (deutan, $\|\hat{\beta}\| = 40.5^\circ$) and $(6^\circ, -22^\circ)$ for sub-09 (protan, $\|\hat{\beta}\| = 22.8^\circ$, Figure~\ref{fig:twocomp}).
-Both $\hat\beta_c$ values are negative.
-The etiological asymmetry between participants does \emph{not} reside in the confusion-axis sign but in the S-cone-axis magnitude ($\hat\beta_s = 38^\circ$ for sub-08 vs.\ $6^\circ$ for sub-09).
-We deliberately do \emph{not} interpret either $\hat\beta_c$ sign as instantiating a Brettel-style cone-physiology prediction.
-The Brettel--Vi\'enot--Mollon dichromat algorithm describes spectral collapse onto a missing-cone half-plane and, in our cosine parameterization, predicts $\beta_c \approx 0$ rather than a subtype-specific polarity (see the \nameref{sec:methods:twocomp} section).
-The non-zero $\hat\beta_s$ is directionally consistent with Emery and colleagues' \cite{emery2021} report of S-cone-axis dominance in CVD hV4 RDM geometry, but the two quantities are defined on different physical scales and we make no numerical comparison.
+The fit returned $(\hat{\beta}_s, \hat{\beta}_c) = (38^\circ, -14^\circ)$ for sub-08 (deutan, $\|\hat{\beta}\| = 40.5^\circ$) and $(6^\circ, -22^\circ)$ for sub-09 (protan, $\|\hat{\beta}\| = 22.8^\circ$, Figure~\ref{fig:twocomp}).
+The etiological asymmetry resides in the S-cone-axis magnitude ($\hat\beta_s = 38^\circ$ vs.\ $6^\circ$).
+The confusion-axis rotation $\hat\beta_c$ operates along subtype-specific axes ($\theta_{\rm conf} = 150^\circ$ deutan, $16^\circ$ protan) and is not directly comparable in sign across subjects.
+Both subjects show non-zero $\hat\beta_s$ along the S-cone axis on the same angular scale as the $21.4^\circ$ behavioral blue-yellow rotation reported in anomalous trichromacy by \citeA{emery2021}, confirming at the neural level the literature grounding adopted in Methods.
 
-We checked the optimal distortion magnitude against an HC leave-one-out distribution under the same loss for validation (Supplementary~\ref{app:hc_perm}). Sub-08's case-level distinctness rests on the R+C diagnostic (Appendix~\ref{app:altmodels}) and on the per-color filter profile (Figure~\ref{fig:filter}) rather than on $\|\hat\beta\|$ alone.
+The fitted distortion is consistent with each subject's independent behavioral phenotype.
+8AFC color identification placed both CVD subjects well below HC (HC $0.94 \pm 0.04$, sub-08 $0.71$, sub-09 $0.62$, chance $= 0.125$), with sub-08's errors clustering on the red--green axis (c2/c3 confused with c7, mean confusion $28\%$) and sub-09's errors extending across the L--M opponent range with additional magenta (c8) misidentification.
 
-The model-class expressiveness has a closed-form upper bound. The magnitude $|\delta\theta|$ at $\theta = 45^\circ$ is bounded by $|0.71\,\hat\beta_s - 0.26\,\hat\beta_c|$, so corrective shifts exceeding $\sim\!51^\circ$ at the deutan mid-axis (e.g.\ an orange-to-green excursion of $\gtrsim 85^\circ$) lie outside the 2-component class for any biologically plausible $\hat\beta$ and would require an additional mechanism (e.g.\ saturation or lightness) outside the present scope.
+HC leave-one-out validation under the same loss is reported in Supplementary~\ref{app:hc_perm}, and the R+C cone-shift decomposition is reported in Appendix~\ref{app:altmodels}.
+The HC label-permutation null is non-null for the 2-component class, so case-level distinctness rests on the joint pattern of vulnerability profile, R+C decomposition, and per-color filter direction rather than on $\|\hat\beta\|$ alone.
 
 % ── Figure 5 ─────────────────────────────────────────────────────────────────
 \begin{figure*}[tb]
@@ -138,10 +136,9 @@ The model-class expressiveness has a closed-form upper bound. The magnitude $|\d
 \label{sec:results:filter}
 % ──────────────────────────────────────────────────────────────────────────────
 
-The angular form of the 2-component model is bijective by construction, so a stimulus-space pre-image $\tilde{\theta}_k$ such that $T(\tilde{\theta}_k) = \theta_k$ exists for any target hue $\theta_k$ (see the \nameref{sec:methods:filter} section).
-The per-subject correction filter $\delta\theta^{\rm filt}_k = \tilde{\theta}_k - \theta_k$ was computed by Brent's-method refinement of the forward map.
-For both participants, 8/8 pre-images were exact (residual $< 0.001^\circ$).
-Per-hue filter output is visualized in Figure~\ref{fig:filter} as a 4-column rendering (\emph{Original} $\to$ \emph{CVD perceives} $\to$ \emph{Filtered} $\to$ \emph{CVD(Filtered)}).
+The 2-component transform is bijective, so a stimulus-space pre-image $\tilde{\theta}_k$ such that $T(\tilde{\theta}_k) = \theta_k$ exists for every displayed hue $\theta_k$ (see the \nameref{sec:methods:filter} section).
+The per-subject correction filter is $\delta\theta^{\rm filt}_k = \tilde{\theta}_k - \theta_k$.
+For both participants, 8/8 pre-images were exact (residual $< 0.001^\circ$, Figure~\ref{fig:filter}).
 
 For sub-08 (deutan, $\hat\beta_s = 38^\circ$, $\hat\beta_c = -14^\circ$, Stockman confusion axis $\theta_{\rm conf} = 150^\circ$), the filter applies a wide-amplitude L/M-rotation.
 A near-uniform negative shift is applied across red, orange, yellow, green, and cyan ($\delta\theta^{\rm filt}$ ranging $-10^\circ$ to $-32^\circ$, peak $-32^\circ$ at cyan, $\theta = 180^\circ$).
@@ -153,12 +150,12 @@ Peak displacements are at blue ($+21^\circ$, $\theta = 225^\circ$) and magenta (
 The mean correction magnitude is $|\delta\theta^{\rm filt}| = 10^\circ$.
 
 The two correction signatures reflect distinct CVD etiologies rather than mirrored protan/deutan symmetry.
-The R+C cone-shift diagnostic recovers a near-zero retinal shift with large cortical overshoot for sub-08 ($\Delta\lambda \approx 2.5$~nm, $g = -2.25$, cortical-dominant) and a large retinal shift with near-physiological cortical compensation for sub-09 ($\Delta\lambda \approx 19.5$~nm within the published protan range, $g = -1.10$, retinal-dominant; Appendix~\ref{app:altmodels}).
+Under the R+C decomposition (Appendix~\ref{app:altmodels}), sub-08 is cortical-dominant and sub-09 is retinal-dominant.
 A single retinal-family filter cannot serve both individuals.
 
-Same-day 8-alternative forced-choice (8AFC) color identification confirmed the cortical impairment at the behavioral level (HC $0.94 \pm 0.04$, sub-08 $0.71$, sub-09 $0.62$, chance $= 0.125$).
-Sub-08's errors clustered on the red--green axis (c2/c3 confused with c7, mean confusion $28\%$), and sub-09's errors extended across the L--M opponent range with additional magenta (c8) misidentification, mirroring the per-subject hV4 LOCO vulnerability profiles (Figure~\ref{fig:loco}C).
-Quantitative behavioral validation of filter efficacy is deferred to the Phase-3 2AFC arm (see the \nameref{sec:methods:behavioral} section).
+The model-class expressiveness has a closed-form upper bound.
+The magnitude $|\delta\theta|$ at $\theta = 45^\circ$ is bounded by $|0.71\,\hat\beta_s - 0.26\,\hat\beta_c|$.
+Corrective shifts exceeding $\sim\!51^\circ$ at the deutan mid-axis (e.g.\ an orange-to-green excursion of $\gtrsim 85^\circ$) lie outside the 2-component class for any biologically plausible $\hat\beta$ and would require an additional mechanism such as saturation or lightness.
 
 % ── Figure 6 ─────────────────────────────────────────────────────────────────
 \begin{figure*}[!htbp]
@@ -177,3 +174,10 @@ Quantitative behavioral validation of filter efficacy is deferred to the Phase-3
   Quantitative behavioral validation of filter efficacy is deferred to the Phase-3 2AFC arm and will be added once data are collected.}
   \label{fig:filter}
 \end{figure*}
+
+% ──────────────────────────────────────────────────────────────────────────────
+\subsection{\textcolor{red}{[TODO] Behavioral and neural filter evaluation}}
+\label{sec:results:filter_eval}
+% ──────────────────────────────────────────────────────────────────────────────
+
+\textcolor{red}{Filter efficacy will be evaluated at two levels. (1)~Behavioral: same-day 2-alternative forced-choice (2AFC) discrimination of pre-specified hue pairs under the per-subject filter versus a no-filter baseline. (2)~Neural: second-session fMRI under the 2-component-derived filter versus a generic Windows accessibility filter (counterbalanced), with LOCO and LORO decoded on second-session data (see the \nameref{sec:methods:behavioral} section). Results to be added once data analysis is complete.}

@@ -18,6 +18,20 @@ First, the fMRI neural signature of each CVD participant's hue-processing defici
 Second, a two-component cortical distortion model fits these neural observations by simulating the joint effect of a retinal cone shift and a cortical orientation gain on HC-trained neural representations (see the \nameref{sec:methods:twocomp} section).
 Third, the fitted distortion is analytically inverted to yield a stimulus-space pre-image filter that maps the distorted hue coordinates back towards the HC percept (see the \nameref{sec:methods:filter} section).
 
+% ── Figure 1 ─────────────────────────────────────────────────────────────────
+\begin{figure*}[tb]
+  \centering
+  \includegraphics[width=\textwidth]{fig1_paradigm}
+  \caption{\textbf{Experimental paradigm and analysis pipeline.} \textbf{(A)} Stimulus set: 8 isoluminant CIE $L^{*}a^{*}b^{*}$ hues at 45\degree\ angular spacing ($L^{*} = 75$, chroma $= 40$; red--magenta).
+  \textbf{(B)} Retinotopic ROIs: V1, V2, V3, hV4 (standard retinotopic mapping).
+  \textbf{(C)} Analysis pipeline.
+  Stage A: two-stage GLM single-trial $\beta$ amplitudes, Procrustes-aligned across runs, projected into an SRM space trained on HC participants only.
+  Decoding: LORO (discrimination), LOCO (interpolation).
+  CVD characterization: 2-component model with retinal ($\beta_s$) and cortical ($\beta_c$) components. Pre-image yields per-subject stimulus-space filter.
+  HC: $n = 7$ (sub-01--07); deutan: sub-08; protan: sub-09.}
+  \label{fig:paradigm}
+\end{figure*}
+
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{Participants}
 \label{sec:methods:participants}
@@ -100,7 +114,7 @@ A weight matrix $W \in \mathbb{R}^{F \times V}$ is estimated by ridge regression
 Decoding inverts the encoding direction: for a held-out voxel pattern $\mathbf{x}$, channel activations are reconstructed as $\hat{\mathbf{c}} = W\mathbf{x}$, and the candidate hue whose basis vector has the highest Pearson correlation with $\hat{\mathbf{c}}$ is returned as the decoded color (Figure~\ref{fig:forward}).
 Alternative decoders evaluated during model selection are described in Appendix~\ref{app:altmodels}.
 
-% ── Forward encoding model schematic ─────────────────────────────────────────
+% ── Figure 2 ─────────────────────────────────────────────────────────────────
 \begin{figure*}[!htbp]
   \centering
   \includegraphics[width=\textwidth]{fig_forward_encoder}

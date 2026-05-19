@@ -1,11 +1,13 @@
 % Results Section — v4 (2026-05-14)
 % Changes from v3:
-%   - Figure numbering: Fig 1 (paradigm), Fig 2 (LORO/LOCO), Fig 3 (geometry),
-%                       Fig 4 (2-component), Fig 5 (filter)
+%   - Figure numbering: Fig 1 (paradigm), Fig 2 (forward encoder),
+%                       Fig 3 (LORO/LOCO), Fig 4 (geometry),
+%                       Fig 5 (2-component), Fig 6 (filter)
+%   - Fig 1 (paradigm) moved to Methods to render before Fig 2 (forward encoder).
 %   - Primary model: 2-component throughout; Machado and R+C comparisons moved to Appendix A
 %   - LOCO metric updated: adjacent accuracy (adj_acc, 0–1, higher = better)
 %     replacing circular correlation rho
-%   - Fig 3 (SRM geometry/ΔRDM) added as separate figure
+%   - Fig 4 (SRM geometry/ΔRDM) added as separate figure
 %   - Fig 1 is a PowerPoint-generated schematic: placeholder box below
 %   - All captions from FIGURE_CAPTIONS.md (2026-05-11 revision)
 % 2026-05-14 update (Option C adoption):
@@ -20,61 +22,38 @@
 \label{sec:results}
 
 % ──────────────────────────────────────────────────────────────────────────────
-\subsection{Participants and behavioral phenotype}
-\label{sec:results:participants}
-% ──────────────────────────────────────────────────────────────────────────────
-
-Two CVD participants spanning the deutan--protan dichotomy were recruited alongside seven healthy controls (HC; sub-01--07).
-Sub-08 (male) was classified as mild--moderate deuteranomalous (8/14 Ishihara plates misread; deutan axis confirmed by protan--deutan discrimination item); Sub-09 (male) as moderate--severe protanomalous (11/14 plates misread; protan axis).
-Same-day 8-alternative forced-choice (8AFC) identification of the eight scanner hue stimuli confirmed the Ishihara classification (HC: $0.94 \pm 0.04$; Sub-08: $0.71$; Sub-09: $0.62$; chance $= 0.125$).
-Sub-08's errors clustered on the red--green axis (c2/c3 vs.\ c7; mean confusion $28\%$); Sub-09's errors extended across the L--M opponent range with additional misidentification of magenta (c8).
-Because only two symptomatic CVD cases were available, all inferences are framed as single-case analyzes following \citeA{crawford1998} and \citeA{schuett2023}; no population-level CVD claim is made.
-The experimental paradigm and full analysis pipeline are summarized in Figure~\ref{fig:paradigm}.
-
-% ── Figure 1 ─────────────────────────────────────────────────────────────────
-\begin{figure*}[tb]
-  \centering
-  \includegraphics[width=\textwidth]{fig1_paradigm}
-  \caption{\textbf{Experimental paradigm and analysis pipeline.} \textbf{(A)} Stimulus set: 8 isoluminant CIE $L^{*}a^{*}b^{*}$ hues at 45\degree\ angular spacing ($L^{*} = 75$, chroma $= 40$; red--magenta).
-  \textbf{(B)} Retinotopic ROIs: V1, V2, V3, hV4 (standard retinotopic mapping).
-  \textbf{(C)} Analysis pipeline.
-  Stage A: two-stage GLM single-trial $\beta$ amplitudes, Procrustes-aligned across runs, projected into an SRM space trained on HC participants only.
-  Decoding: LORO (discrimination), LOCO (interpolation).
-  CVD characterization: 2-component model with retinal ($\beta_s$) and cortical ($\beta_c$) components; pre-image yields per-subject stimulus-space filter.
-  HC: $n = 7$ (sub-01--07); deutan: sub-08; protan: sub-09.}
-  \label{fig:paradigm}
-\end{figure*}
-
-% ──────────────────────────────────────────────────────────────────────────────
 \subsection{Color discrimination is preserved across all ROIs in both CVD cases}
 \label{sec:results:loro}
 % ──────────────────────────────────────────────────────────────────────────────
 
 A corrective stimulus-space filter is valid only if the visual cortex of a CVD individual retains categorical discrimination among the target hues.
-We verified this precondition using leave-one-run-out (LORO) cross-validation of a linear discriminant classifier applied to SRM-aligned responses.
+We verified this precondition using leave-one-run-out (LORO) cross-validation of the forward encoding model in SRM-aligned space.
 
 Both CVD participants exceeded the 0.125 exact-accuracy chance level at every ROI (Figure~\ref{fig:loco}A).
-A cross-subject LDA generalization test (HC-to-HC vs.\ HC-to-CVD pair-wise cross-decoding, all ROIs pooled) showed no HC--CVD difference (Mann--Whitney $U$ test, 21 HC-to-HC vs.\ 14 HC-to-CVD pairs, $p = 0.668$; rank-biserial effect size and exact test statistic in Supplementary~\ref{app:effect_sizes}).
-The same null held at the within-ROI level at hV4 (Crawford \& Howell $t$-test: both CVD subjects within the HC range; $p = 0.142$).
-In line with prior work on CVD above-threshold identification \citeA{bosten2019, boehm2014}, the 8 scanner stimuli are individually distinguishable at the cortical level in both CVD participants; the representational substrate on which a corrective filter could act is present.
+A cross-subject generalization test of the same forward encoding model (HC-to-HC vs.\ HC-to-CVD pair-wise cross-decoding, all ROIs pooled) showed no HC--CVD difference (Mann--Whitney $U$ test, 21 HC-to-HC vs.\ 14 HC-to-CVD pairs, $p = 0.668$, rank-biserial effect size and exact test statistic in Supplementary~\ref{app:effect_sizes}).
+The same null held at the within-ROI level at hV4 (Crawford \& Howell $t$-test, both CVD subjects within the HC range, $p = 0.142$).
+The 8 scanner stimuli are therefore individually distinguishable at the cortical level in both CVD participants, in line with prior work on CVD above-threshold identification \cite{bosten2019, boehm2014}.
+The representational substrate on which a corrective filter could act is present.
 
 % ──────────────────────────────────────────────────────────────────────────────
-\subsection{hV4 color interpolation is impaired in both CVD cases}
+\subsection{Color interpolation is impaired in both CVD cases}
 \label{sec:results:loco}
 % ──────────────────────────────────────────────────────────────────────────────
 
-We next asked where continuous hue geometry fails --- the functional target of the corrective transform.
-Leave-one-color-out (LOCO) decoding trains the encoder on 7 of 8 hues and measures whether the held-out hue is predicted from the remaining representational structure, yielding an 8-dimensional vulnerability profile per participant.
-
-Among the four retinotopic ROIs, only hV4 supported above-chance hue interpolation in HC (adjacent accuracy $0.47 \pm 0.05$, mean $\pm$ SEM; $p = 0.044$ under $8! = 40{,}320$ exact label permutations; V1--V3 did not exceed chance despite preserving cross-run discrimination).
+We next localized where continuous hue interpolation fails, which defines the functional target of the corrective transform, using leave-one-color-out (LOCO) decoding of the forward encoding model.
+Among the four retinotopic ROIs, only hV4 supported above-chance hue interpolation in HC (adjacent accuracy $0.47 \pm 0.05$, mean $\pm$ SEM, $p = 0.044$ under $8! = 40{,}320$ exact label permutations).
+V1--V3 did not exceed chance despite preserving cross-run discrimination.
 This confirms hV4 as the primary interpolation gate, replicating \citeA{brouwer2009}.
 
-Both CVD participants fell at or below the adjacent-accuracy chance level at hV4 (Sub-08: adjacent accuracy $0.25$, Crawford \& Howell $t = -1.58$, $p = 0.082$, n.s., $d_{cc} = -1.71$; Sub-09: $0.13$, $t = -2.48$, $p = 0.024$, $d_{cc} = -2.68$; effect size $d_{cc} = t \cdot \sqrt{(n+1)/n}$ with $n = 6$ effective HC leave-one-out at hV4; Figure~\ref{fig:loco}B).
-The impairment was not uniform across hues: both participants showed near-zero adjacent accuracy specifically for S-cone intermediate colors (blue, purple, magenta at hV4; per-hue Crawford \& Howell tests: blue, Sub-08 $d = 2.13$, $p = 0.047$; Sub-09 $d = 2.15$, $p = 0.046$; purple, Sub-08 $d = 2.40$, $p = 0.033$; Figure~\ref{fig:loco}C).
+Both CVD participants fell at or below the adjacent-accuracy chance level at hV4 (Figure~\ref{fig:loco}B).
+Sub-08 reached adjacent accuracy $0.25$ (Crawford \& Howell $t = -1.58$, $p = 0.082$, n.s., $d_{cc} = -1.71$).
+Sub-09 reached $0.13$ ($t = -2.48$, $p = 0.024$, $d_{cc} = -2.68$).
+The impairment was not uniform across hues.
+Both participants showed near-zero adjacent accuracy specifically for S-cone intermediate colors at hV4, namely blue, purple, and magenta (Figure~\ref{fig:loco}C).
+Per-hue Crawford \& Howell tests reached significance for blue (sub-08 $d = 2.13$, $p = 0.047$; sub-09 $d = 2.15$, $p = 0.046$) and for purple (sub-08 $d = 2.40$, $p = 0.033$).
+These per-hue accuracies form each participant's hue vulnerability profile $\mathbf{v} \in [0,1]^8$.
 
-This per-hue impairment pattern is consistent with both participants' behavioral error distributions from the 8AFC task and with the JND confusion pairs identified in the pre-scanner session (LOCO--JND concordance 100\%, 6/6 pairs; SRM geometry--JND concordance 33\%, 2/6 pairs), establishing LOCO as the functional phenotype that predicts behavioral color discrimination failure.
-
-% ── Figure 2 ─────────────────────────────────────────────────────────────────
+% ── Figure 3 ─────────────────────────────────────────────────────────────────
 \begin{figure*}[tb]
   \centering
   \includegraphics[width=\textwidth]{fig2_loro_loco}
@@ -90,23 +69,23 @@ This per-hue impairment pattern is consistent with both participants' behavioral
 \end{figure*}
 
 % ──────────────────────────────────────────────────────────────────────────────
-\subsection{Color representation geometry is distorted in a
-  subject-specific, ROI-specific pattern in both CVD cases}
+\subsection{Color geometry is distorted at a distinct ROI in each CVD case}
 \label{sec:results:geometry}
 % ──────────────────────────────────────────────────────────────────────────────
 
 To characterize the geometric basis of the LOCO impairment, we compared the pairwise representational structure of CVD and HC participants in a shared SRM-aligned space.
-For each CVD participant we computed the RDM difference ($\Delta\text{RDM} = \text{RDM}_\text{CVD} - \overline{\text{RDM}}_\text{HC}$) and the mean pairwise correlation distance (disparity).
+For each CVD participant we computed disparity and the per-pair RDM deviation from the HC mean ($\Delta\text{RDM} = \text{RDM}_\text{CVD} - \overline{\text{RDM}}_\text{HC}$).
 
+The ROI specificity of elevated disparity diverges between the two CVD participants, with V2-dominant disparity in deutan and V1-dominant disparity in protan, inconsistent with a shared group-level gain mechanism (Figure~\ref{fig:geometry}B).
 Sub-08 showed significantly elevated disparity specifically at V2 (Crawford \& Howell $p = 0.040$), with no significant elevation at V1, V3, or hV4.
-Sub-09 showed significantly elevated disparity specifically at V1 ($p = 0.007$).
+Sub-09 showed significantly elevated disparity specifically at V1 ($p = 0.007$), with no significant elevation at V2, V3, or hV4.
 Full test statistics and effect sizes ($t$, $d_{cc}$) for these Crawford--Howell comparisons are reported in Supplementary~\ref{app:effect_sizes}.
-The ROI specificity diverges between the two CVD participants --- V2-dominant for deutan, V1-dominant for protan --- and is inconsistent with a shared group-level gain mechanism (Figure~\ref{fig:geometry}B).
 
-The $\Delta$RDM heatmaps (Figure~\ref{fig:geometry}A) reveal subject-specific distortion structures: Sub-08 shows elevated distances among S-cone intermediate pairs at V2; Sub-09 shows a broader reorganization of pairwise distances at V1.
+The $\Delta$RDM heatmaps (Figure~\ref{fig:geometry}A) reveal subject-specific distortion structures.
+Sub-08 shows elevated distances among S-cone intermediate pairs at V2, and sub-09 shows a broader reorganization of pairwise distances at V1.
 The ROIs of strongest disparity elevation (V1 for sub-09, V2 for sub-08) differ from the ROI used as the distortion-model loss target (hV4, see the \nameref{sec:methods:twocomp} section). Mean pairwise disparity is an existence statement about absolute geometric perturbation in early visual cortex. The filter loss instead targets the hV4 LOCO functional readout, which is the quantity the corrective filter must invert, so disparity elevation at V1/V2 is parallel geometric evidence rather than a competing fit target.
 
-% ── Figure 3 ─────────────────────────────────────────────────────────────────
+% ── Figure 4 ─────────────────────────────────────────────────────────────────
 \begin{figure*}[tb]
   \centering
   \includegraphics[width=\textwidth]{fig3_geometry}
@@ -121,27 +100,26 @@ The ROIs of strongest disparity elevation (V1 for sub-09, V2 for sub-08) differ 
 \end{figure*}
 
 % ──────────────────────────────────────────────────────────────────────────────
-\subsection{A neural-primary fit recovers a 2-component
-  distortion at hV4 and yields a per-subject stimulus-space filter}
+\subsection{A 2-component cortical distortion fits both CVD cases at hV4}
 \label{sec:results:twocomp}
 % ──────────────────────────────────────────────────────────────────────────────
 
-To identify the distortion parameters needed to build a corrective filter, we fit the 2-component cortical model (Equation~\ref{eq:2comp}; $\beta_s$ for S-cone-axis dilation, $\beta_c$ for confusion-axis rotation) to each CVD participant's hV4 representation under a four-term neural-primary loss derived from the V4 LOCO forward model (Equation~\ref{eq:lfit}).
-The loss combines a per-color vulnerability MSE ($L_\text{vuln}$; primary fit to the V4 LOCO predictability profile), a Spearman rank term ($L_\text{rank}$; ordering of vulnerable colors), a $\Delta$RDM cosine term ($L_\text{rdm}$; pairwise-distance geometric convergence at V4), and a circular-smoothness regularizer on the per-color shift vector ($L_\text{smooth}$); each term is normalized to $[0,1]$ and weighted to make $L_\text{vuln}$ dominant (Methods).
-V4 was the fit ROI because it is the only ROI whose HC group LOCO interpolation exceeds the permutation null in this dataset ($p = 0.044$ at hV4 vs.\ NS at V1/V2/V3; \nameref{sec:results:loco}), so cone-shift parameters fit at hV4 are interpretable as voxel-level shifts in a working interpolation manifold.
+To identify the distortion parameters needed for the corrective filter, we fit the 2-component cortical model (Equation~\ref{eq:2comp}, $\beta_s$ for S-cone-axis dilation, $\beta_c$ for confusion-axis rotation) to each CVD participant's hV4 representation under the four-term neural-primary loss specified in Equation~\ref{eq:lfit} (see the \nameref{sec:methods:twocomp} section).
+hV4 was the fit ROI because it is the only ROI whose HC group LOCO interpolation exceeds the permutation null in this dataset ($p = 0.044$ at hV4, not significant at V1/V2/V3, \nameref{sec:results:loco}).
+Cone-shift parameters fit at hV4 are therefore interpretable as voxel-level shifts in a working interpolation manifold.
 
-The fit returned per-subject parameters $(\hat{\beta}_s, \hat{\beta}_c) = (38^\circ, -14^\circ)$ for sub-08 (deutan; $\|\hat{\beta}\| = 40.5^\circ$) and $(6^\circ, -22^\circ)$ for sub-09 (protan; $\|\hat{\beta}\| = 22.8^\circ$; Figure~\ref{fig:twocomp}).
-Both $\hat\beta_c$ values are negative; the etiological asymmetry between participants does \emph{not} reside in the confusion-axis sign but in the S-cone-axis magnitude ($\hat\beta_s = 38^\circ$ for sub-08 vs.\ $6^\circ$ for sub-09).
-We deliberately do \emph{not} interpret either $\hat\beta_c$ sign as instantiating a Brettel-style cone-physiology prediction, since the Brettel--Vi\'enot--Mollon dichromat algorithm describes spectral collapse onto a missing-cone half-plane and, in our cosine parameterization, predicts $\beta_c \approx 0$ rather than a subtype-specific polarity (see the \nameref{sec:methods:twocomp} section).
+The fit returned per-subject parameters $(\hat{\beta}_s, \hat{\beta}_c) = (38^\circ, -14^\circ)$ for sub-08 (deutan, $\|\hat{\beta}\| = 40.5^\circ$) and $(6^\circ, -22^\circ)$ for sub-09 (protan, $\|\hat{\beta}\| = 22.8^\circ$, Figure~\ref{fig:twocomp}).
+Both $\hat\beta_c$ values are negative.
+The etiological asymmetry between participants does \emph{not} reside in the confusion-axis sign but in the S-cone-axis magnitude ($\hat\beta_s = 38^\circ$ for sub-08 vs.\ $6^\circ$ for sub-09).
+We deliberately do \emph{not} interpret either $\hat\beta_c$ sign as instantiating a Brettel-style cone-physiology prediction.
+The Brettel--Vi\'enot--Mollon dichromat algorithm describes spectral collapse onto a missing-cone half-plane and, in our cosine parameterization, predicts $\beta_c \approx 0$ rather than a subtype-specific polarity (see the \nameref{sec:methods:twocomp} section).
 The non-zero $\hat\beta_s$ is directionally consistent with Emery and colleagues' \cite{emery2021} report of S-cone-axis dominance in CVD hV4 RDM geometry, but the two quantities are defined on different physical scales and we make no numerical comparison.
 
-We checked the optimal distortion magnitude against an HC leave-one-out distribution under the same loss for validation (Supplementary~\ref{app:hc_perm}); sub-08's case-level distinctness rests on the R+C diagnostic (Appendix~\ref{app:altmodels}) and on the per-color filter profile (Figure~\ref{fig:filter}) rather than on $\|\hat\beta\|$ alone.
-Quantitative filter validation is deferred to the Phase-3 2AFC arm (Methods).
+We checked the optimal distortion magnitude against an HC leave-one-out distribution under the same loss for validation (Supplementary~\ref{app:hc_perm}). Sub-08's case-level distinctness rests on the R+C diagnostic (Appendix~\ref{app:altmodels}) and on the per-color filter profile (Figure~\ref{fig:filter}) rather than on $\|\hat\beta\|$ alone.
 
-The model-class expressiveness has a closed-form upper bound: $|\delta\theta|$ at $\theta = 45^\circ$ is bounded by $|0.71\,\hat\beta_s - 0.26\,\hat\beta_c|$, so corrective shifts exceeding $\sim\!51^\circ$ at the deutan mid-axis (e.g.\ an orange-to-green excursion of $\gtrsim 85^\circ$) lie outside the 2-component class for any biologically plausible $\hat\beta$ and would require an additional mechanism (e.g.\ saturation/lightness) outside the present scope.
-Per-hue correction vectors are visualized in Figure~\ref{fig:filter}; behavioral validation is deferred to the Phase-3 2AFC arm (Methods).
+The model-class expressiveness has a closed-form upper bound. The magnitude $|\delta\theta|$ at $\theta = 45^\circ$ is bounded by $|0.71\,\hat\beta_s - 0.26\,\hat\beta_c|$, so corrective shifts exceeding $\sim\!51^\circ$ at the deutan mid-axis (e.g.\ an orange-to-green excursion of $\gtrsim 85^\circ$) lie outside the 2-component class for any biologically plausible $\hat\beta$ and would require an additional mechanism (e.g.\ saturation or lightness) outside the present scope.
 
-% ── Figure 4 ─────────────────────────────────────────────────────────────────
+% ── Figure 5 ─────────────────────────────────────────────────────────────────
 \begin{figure*}[tb]
   \centering
   \includegraphics[width=\textwidth,height=0.55\textheight,keepaspectratio]{fig4_twocomp}
@@ -150,24 +128,39 @@ Per-hue correction vectors are visualized in Figure~\ref{fig:filter}; behavioral
   $L_\text{fit}(\beta_s, \beta_c) = 1.0\,L_\text{vuln} + 0.5\,L_\text{rank} + 0.2\,L_\text{rdm} + 0.1\,L_\text{smooth}$ (Equation~\ref{eq:lfit}; Methods) evaluated on the $26 \times 51 = 1{,}326$-cell grid ($\beta_s \in [0^\circ, 50^\circ]$, $\beta_c \in [-50^\circ, +50^\circ]$, step $2^\circ$).
   Left: sub-08 (deutan, Stockman S-cone confusion axis $150^\circ$). Right: sub-09 (protan, Stockman axis $16^\circ$).
   White star: per-subject argmin --- sub-08 $(\hat\beta_s, \hat\beta_c) = (38^\circ, -14^\circ)$, $\|\hat\beta\| = 40.5^\circ$; sub-09 $(6^\circ, -22^\circ)$, $\|\hat\beta\| = 22.8^\circ$.
-  Both $\hat\beta_c$ values are negative; the inter-subject asymmetry resides in the S-cone-axis magnitude ($\hat\beta_s = 38^\circ$ vs.\ $6^\circ$).
-  Quantitative filter validation is deferred to the Phase-3 2AFC arm (Methods).
+  Both $\hat\beta_c$ values are negative. The inter-subject asymmetry resides in the S-cone-axis magnitude ($\hat\beta_s = 38^\circ$ vs.\ $6^\circ$).
   See Appendix~\ref{app:altmodels} for the historical LOCO-$\rho$ comparison and Machado/R+C cone-shift baselines.}
   \label{fig:twocomp}
 \end{figure*}
 
-\paragraph{Stimulus-space filter}
+% ──────────────────────────────────────────────────────────────────────────────
+\subsection{Per-subject stimulus-space filter}
 \label{sec:results:filter}
+% ──────────────────────────────────────────────────────────────────────────────
+
 The angular form of the 2-component model is bijective by construction, so a stimulus-space pre-image $\tilde{\theta}_k$ such that $T(\tilde{\theta}_k) = \theta_k$ exists for any target hue $\theta_k$ (see the \nameref{sec:methods:filter} section).
-The per-subject correction filter $\delta\theta^{\rm filt}_k = \tilde{\theta}_k - \theta_k$ was computed by Brent's-method refinement of the forward map; for both participants, 8/8 pre-images were exact (residual $< 0.001^\circ$).
+The per-subject correction filter $\delta\theta^{\rm filt}_k = \tilde{\theta}_k - \theta_k$ was computed by Brent's-method refinement of the forward map.
+For both participants, 8/8 pre-images were exact (residual $< 0.001^\circ$).
 Per-hue filter output is visualized in Figure~\ref{fig:filter} as a 4-column rendering (\emph{Original} $\to$ \emph{CVD perceives} $\to$ \emph{Filtered} $\to$ \emph{CVD(Filtered)}).
-For sub-08 (deutan, $\hat\beta_s = 38^\circ$, $\hat\beta_c = -14^\circ$, Stockman confusion axis $\theta_{\rm conf} = 150^\circ$), the filter applies a wide-amplitude L/M-rotation: a near-uniform negative shift across red, orange, yellow, green and cyan ($\delta\theta^{\rm filt}$ ranging $-10^\circ$ to $-32^\circ$, peak compression $-32^\circ$ at cyan, $\theta = 180^\circ$), with a large opposite-sign rotation at purple ($+29^\circ$, $\theta = 270^\circ$) and magenta ($+19^\circ$, $\theta = 315^\circ$) (mean $|\delta\theta^{\rm filt}| = 22^\circ$).
-For sub-09 (protan, $\hat\beta_s = 6^\circ$, $\hat\beta_c = -22^\circ$, Stockman axis $\theta_{\rm conf} = 16^\circ$), the correction is a far smaller monotonic rotation along the protan confusion axis, with peak displacements at blue ($+21^\circ$, $\theta = 225^\circ$) and magenta ($-21^\circ$, $\theta = 315^\circ$) and near-zero shifts at green and cyan (mean $|\delta\theta^{\rm filt}| = 10^\circ$).
-The two correction signatures are not mirror images of each other but reflect distinct CVD etiologies: the R+C cone-shift diagnostic recovers a near-zero retinal shift and large cortical overshoot for sub-08 ($\Delta\lambda \approx 2.5$~nm, $g = -2.25$; cortical-dominant) and a large retinal shift with near-physiological cortical compensation for sub-09 ($\Delta\lambda \approx 19.5$~nm within the published protan range, $g = -1.10$; retinal-dominant; Appendix~\ref{app:altmodels}), so a single retinal-family filter cannot serve both individuals.
 
-Quantitative behavioral validation of the recovered filters is deferred to the Phase-3 2AFC arm (see the \nameref{sec:methods:behavioral} section, last paragraph; data not yet collected at the time of writing).
+For sub-08 (deutan, $\hat\beta_s = 38^\circ$, $\hat\beta_c = -14^\circ$, Stockman confusion axis $\theta_{\rm conf} = 150^\circ$), the filter applies a wide-amplitude L/M-rotation.
+A near-uniform negative shift is applied across red, orange, yellow, green, and cyan ($\delta\theta^{\rm filt}$ ranging $-10^\circ$ to $-32^\circ$, peak $-32^\circ$ at cyan, $\theta = 180^\circ$).
+A large opposite-sign rotation is applied at purple ($+29^\circ$, $\theta = 270^\circ$) and magenta ($+19^\circ$, $\theta = 315^\circ$).
+The mean correction magnitude is $|\delta\theta^{\rm filt}| = 22^\circ$.
 
-% ── Figure 5 ─────────────────────────────────────────────────────────────────
+For sub-09 (protan, $\hat\beta_s = 6^\circ$, $\hat\beta_c = -22^\circ$, Stockman axis $\theta_{\rm conf} = 16^\circ$), the correction is a far smaller monotonic rotation along the protan confusion axis.
+Peak displacements are at blue ($+21^\circ$, $\theta = 225^\circ$) and magenta ($-21^\circ$, $\theta = 315^\circ$), with near-zero shifts at green and cyan.
+The mean correction magnitude is $|\delta\theta^{\rm filt}| = 10^\circ$.
+
+The two correction signatures reflect distinct CVD etiologies rather than mirrored protan/deutan symmetry.
+The R+C cone-shift diagnostic recovers a near-zero retinal shift with large cortical overshoot for sub-08 ($\Delta\lambda \approx 2.5$~nm, $g = -2.25$, cortical-dominant) and a large retinal shift with near-physiological cortical compensation for sub-09 ($\Delta\lambda \approx 19.5$~nm within the published protan range, $g = -1.10$, retinal-dominant; Appendix~\ref{app:altmodels}).
+A single retinal-family filter cannot serve both individuals.
+
+Same-day 8-alternative forced-choice (8AFC) color identification confirmed the cortical impairment at the behavioral level (HC $0.94 \pm 0.04$, sub-08 $0.71$, sub-09 $0.62$, chance $= 0.125$).
+Sub-08's errors clustered on the red--green axis (c2/c3 confused with c7, mean confusion $28\%$), and sub-09's errors extended across the L--M opponent range with additional magenta (c8) misidentification, mirroring the per-subject hV4 LOCO vulnerability profiles (Figure~\ref{fig:loco}C).
+Quantitative behavioral validation of filter efficacy is deferred to the Phase-3 2AFC arm (see the \nameref{sec:methods:behavioral} section).
+
+% ── Figure 6 ─────────────────────────────────────────────────────────────────
 \begin{figure*}[!htbp]
   \centering
   \includegraphics[width=\textwidth,height=0.85\textheight,keepaspectratio]{fig5_preimage}

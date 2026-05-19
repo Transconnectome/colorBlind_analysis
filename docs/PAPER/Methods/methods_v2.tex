@@ -218,22 +218,29 @@ Pre-images were computed by numerical inversion of the forward map (Brent's-meth
 \label{sec:methods:behavioral}
 % ──────────────────────────────────────────────────────────────────────────────
 
+Behavioral tasks were held on the same day as the MRI acquisition.
+
 \paragraph{Just-noticeable difference (JND)}
 Color discrimination thresholds were estimated for eight hue pairs using two-interleaved 1-up/1-down adaptive staircases, each terminating after eight reversals \cite{levitt1971}.
 Pairs spanned three categories: (i) three pairs hypothesized as universally difficult for both CVD types (yellow--purple, blue--purple, red--orange), (ii) two pairs hypothesized as deutan-specific (orange--yellow, yellow--green), (iii) two pairs hypothesized as protan-specific (cyan--magenta, green--blue), and (iv) one control pair (red--cyan).
-LOCO--JND concordance was assessed by asking whether each pair's LOCO-vulnerability classification (above vs.\ below HC range) agreed with the JND-impairment classification (above vs.\ below HC range).
+
+For each pair, the CVD JND threshold was compared to the HC distribution and assigned a behavioral impairment label: \emph{hypo} when the CVD threshold fell above the HC range (CVD/HC ratio $> 1$; discrimination worse than HC), or \emph{hyper} when it fell below (CVD/HC ratio $< 1$; discrimination preserved or better than HC). This pairwise hypo/hyper classification quantified where CVD behavior diverged from HC.
+
+\paragraph{Simulator--JND concordance}
+The fitted 2-component simulator was tested against the behavioral labels by comparing each pair's hypo/hyper classification with the simulator's predicted per-pair angular distortion under the fitted parameters $(\hat\beta_s, \hat\beta_c)$.
+For a pair $(\theta_a, \theta_b)$, the simulator's predicted distortion magnitude was the sum of the per-color shifts applied to its two members, $|\delta\theta(\theta_a;\hat\beta_s,\hat\beta_c)| + |\delta\theta(\theta_b;\hat\beta_s,\hat\beta_c)|$.
+The simulator and behavior were called concordant when hypo-labeled pairs corresponded to larger simulator-predicted distortions than hyper-labeled pairs, providing a direct neural-to-behavioral check independent of the fit loss.
 
 \paragraph{8AFC color identification}
-Participants selected the matching hue from eight options identical to the scanner stimulus set.
-Same-day identifications were compared to Ishihara classifications post-hoc.
+Participants performed six trials per color (48 trials per participant in total). Both the order of presented colors and the order of the eight answer options were randomized across trials. Identifications were compared to Ishihara classifications post-hoc.
 
 \paragraph{Filter evaluation session (CVD only)}
 CVD participants completed a second scanning session after the main experiment.
 Three runs were acquired under the 2-component-derived stimulus-space filter and three runs under a generic Windows accessibility filter, presented in counterbalanced order.
 LOCO decoding and LORO classification were repeated on second-session data to assess filter efficacy.
 
-\paragraph{Planned validation}
-A two-alternative forced-choice (2AFC) discrimination arm targeting filter-induced perceptual restoration is pre-registered for Phase 3 (data not collected at the time of writing).
+\paragraph{\textcolor{red}{[TODO] Planned validation}}
+\textcolor{red}{A two-alternative forced-choice (2AFC) discrimination arm targeting filter-induced perceptual restoration is pre-registered for Phase 3 (data not collected at the time of writing).}
 
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{Reproducibility}

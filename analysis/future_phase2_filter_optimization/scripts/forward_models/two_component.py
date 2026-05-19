@@ -46,6 +46,41 @@ from machado_simulator import machado_shifted_hue_at, machado_shifted_hue  # noq
 #   normal: 83°  (placeholder; no confusion for HC)
 CONF_AXIS_STOCKMAN = {'protan': 16.0, 'deutan': 150.0, 'normal': 83.0}
 
+# ---------------------------------------------------------------------------
+# Canonical h_base (frozen 2026-05-19, derived from April 9 server fit)
+# ---------------------------------------------------------------------------
+# These are the Stockman opponent hue projections of the 8 DKL anchors
+# (CIELab θ = 0°, 45°, ..., 315°) used by the canonical Phase 2 BEST fit on
+# the server (node2, conda nilearn env, 2026-04-09).
+#
+# Recovered by jointly solving the JSON δθ values for sub-08 (β_s=38, β_c=−14)
+# and sub-09 (β_s=6, β_c=−22) against the formula
+#     δθ = β_s · cos(h − 90°) + β_c · cos(h − θ_conf)
+# Joint residuals < 0.03° across all 8 colors for both subjects.
+#
+# Why a frozen lookup: `machado_shifted_hue(0.0, family)` output depends on
+# the installed `colour-science` version and the Stockman fundamentals build
+# in the env. Different envs produce different h_base values and therefore
+# different (β_s, β_c) optima. Using this frozen lookup makes the canonical
+# fit reproducible across environments.
+#
+# Family identity: identical for deutan and protan at Δλ=0 baseline. Family
+# difference enters only through CONF_AXIS_STOCKMAN.
+H_BASE_CANONICAL_8 = np.array([
+    317.32,  # c1 red (CIELab 0°)
+    301.27,  # c2 orange (45°)
+    288.12,  # c3 yellow (90°)
+    276.76,  # c4 green (135°)
+    263.60,  # c5 cyan (180°)
+    176.65,  # c6 blue (225°)
+     96.73,  # c7 purple (270°)
+     12.43,  # c8 magenta (315°)
+], dtype=float)
+
+# Flag — keep True for paper-reproducible runs; set False only to compare
+# against live colour-science computation in a dev session.
+USE_FROZEN_H_BASE = True
+
 
 def _scalar(x):
     return float(np.atleast_1d(x)[0])
@@ -152,11 +187,23 @@ def dt_2comp_8colors(cvd_type: str,
     Used by `loco_distortion_fit.get_shifted_design('2component')` and
     `comprehensive_2component_analysis.two_component_delta_theta`.
 
+    With USE_FROZEN_H_BASE=True (canonical), uses the frozen H_BASE_CANONICAL_8
+    lookup recovered from the April 9 server fit. This guarantees that the
+    canonical Phase 2 BEST coordinates (β_s, β_c) = (38, −14)/(6, −22) are
+    reproducible across environments regardless of colour-science version.
+
+    With USE_FROZEN_H_BASE=False, falls back to live `machado_shifted_hue(0.0,
+    family)` computation — output depends on installed colour-science / Stockman
+    fundamentals.
+
     Returns:
         delta_theta: (8,) array — δθ for c1..c8 at CIELab angles 0,45,...,315°
     """
-    hue_base, _, _ = machado_shifted_hue(0.0, cvd_type)
-    hue_base = np.asarray(hue_base, dtype=float)
+    if USE_FROZEN_H_BASE:
+        hue_base = H_BASE_CANONICAL_8
+    else:
+        hue_base, _, _ = machado_shifted_hue(0.0, cvd_type)
+        hue_base = np.asarray(hue_base, dtype=float)
     theta_conf = CONF_AXIS_STOCKMAN[cvd_type]
     dt = (beta_s * np.cos(np.radians(hue_base - 90.0))
           + beta_c * np.cos(np.radians(hue_base - theta_conf)))

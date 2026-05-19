@@ -62,7 +62,7 @@ from utils_distortion_models import get_design_matrix
 
 LOCAL_BASELINE = _PHASE2_DIR.parent / 'phase1_preprocess_decoding' / 'results' / 'full_dataset_C010'
 
-CVD_TYPE = {'08': 'deutan', '09': 'protan', '10': 'normal'}
+CVD_TYPE = {'08': 'deutan', '09': 'protan', '10': 'deutan'}  # sub-10 is mild deutan per project CLAUDE.md §6
 
 COLOR_NAMES = ['red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple', 'magenta']
 

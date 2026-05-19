@@ -25,7 +25,13 @@ for _base in [_PHASE2_DIR.parent, _PHASE2_DIR.parent.parent]:
         break
 
 from utils_forward_model import create_basis_full, HUE_ANGLES, N_CHANNELS
-from utils_cone_3way import compute_shifted_hue_3way
+try:
+    from utils_cone_3way import compute_shifted_hue_3way
+except ModuleNotFoundError:
+    def compute_shifted_hue_3way(*args, **kwargs):  # pragma: no cover
+        raise ModuleNotFoundError(
+            "utils_cone_3way not installed; 'cone_3way' model unavailable. "
+            "Use machado_1way / 2component / 3component / rc_opponent instead.")
 
 # Gen-4 Machado simulator (physiologically anchored cone shift)
 _SCRIPT_DIR = Path(__file__).resolve().parent

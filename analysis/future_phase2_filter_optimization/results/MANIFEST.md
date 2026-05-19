@@ -1,6 +1,6 @@
 # Phase 2 Filter Optimization — Results Manifest
 
-**Last updated**: 2026-05-18 (post-refactor — paper-draft-ready state)
+**Last updated**: 2026-05-19 (narrative cleanup — cc-matrix Bonferroni anchor removed; scripts/ reorganized: BEST at root, candidates → filter_ops, rest → _archive)
 
 ---
 
@@ -27,33 +27,36 @@ future_phase2_filter_optimization/
 ├── mathematical_basis.md       Theory foundation
 ├── index.md                    Literature positioning
 │
-├── scripts/                    19 canonical .py at root + 6 subdirs
-│   ├── loco_distortion_fit.py     Core fitting (L_fit + grid + perm)
-│   ├── machado_simulator.py       Retinal cone shift sim
-│   ├── retinal_cortical.py        R+C standalone (diagnostic only, not filter)
-│   ├── c3_relabel_p2a.py          NEW labels (9-bin STIM_LAB matching)
-│   ├── c3_relabel_both_subjects.py  Per-subject NEW target maps
-│   ├── stim_lab_render.py         Color rendering
-│   ├── render_loco_canonical_4col.py   BEST viz generator
-│   ├── render_rc_2stage_4col.py        R+C 2-stage Phase 4 preview viz
-│   ├── multi_roi_confusion_diagnostic.py   Paper finding: V4-specific confusion
-│   ├── hc_specificity_check.py    HC LOO bootstrap (descriptive only)
-│   ├── diagnostic_delta_rdm.py    ΔRDM diagnostic
-│   ├── delta_L_specificity_check.py  HC specificity variant
-│   ├── landscape_loader.py        Parquet-backed landscape access
-│   ├── consolidate_landscapes_to_parquet.py   30 JSONs → parquet
-│   ├── consolidate_phase_a_to_csv.py          70 fit JSONs → CSV
-│   ├── step1_fit_loco_v2.py       LOCO simulator (used by loco_distortion_fit)
-│   ├── utils_distortion_models.py Forward model utilities
-│   ├── p2amax_option_C_visualize.py  Render util (inlined OLD-stub helpers)
-│   ├── phase3_candidate_analysis_v2.py  provides pre_image_2comp (with warning header)
-│   ├── forward_models/            two_component, three_component, opponent_gain, etc.
-│   ├── diagnostics/               18 diagnostic scripts (baseline_ρ, validate_2comp, etc.)
-│   ├── filter_ops/                5 filter operation scripts
-│   ├── inventory/                 6 inventory builders
-│   ├── visualization/             20 figure-generation scripts (figs_*, visualize_*)
-│   ├── slurm/                     6 .sh submission scripts
-│   └── _archive/                  All archived exploration/cycle scripts (200+ files)
+├── scripts/                    11 canonical .py at root + 6 subdirs (post 2026-05-19 reorg)
+│   ├── # Canonical Phase 2 pipeline (produces BEST)
+│   ├── loco_distortion_fit.py        Core fitting (L_fit + grid + perm) — canonical entry
+│   ├── machado_simulator.py          Stockman fundamentals + machado_shifted_hue (h_base)
+│   ├── utils_distortion_models.py    Model interface (get_design_matrix etc.)
+│   ├── step1_fit_loco_v2.py          Helpers: precompute_hc_W, load_cvd_loco_target
+│   ├── diagnostic_delta_rdm.py       ΔRDM_obs/_sim used by canonical L_rdm
+│   ├── c3_relabel_p2a.py             NEW 9-bin labels (canonical P2a)
+│   ├── c3_relabel_both_subjects.py   Per-subject NEW target maps
+│   ├── render_loco_canonical_4col.py BEST 4-col viz generator
+│   ├── stim_lab_render.py            Color rendering helper
+│   ├── landscape_loader.py           Parquet-backed landscape access
+│   ├── retinal_cortical.py           R+C functions (paper Tier 2 diagnostic; imported by validate_2comp diagnostics)
+│   │
+│   ├── forward_models/               two_component (canonical), three_component, opponent_gain, rc_2stage
+│   ├── filter_ops/                   Candidate alternative filters + multi-ROI confusion (paper comparison)
+│   │   ├── render_rc_2stage_4col.py     R+C 2-stage viz (rejected filter form, retained for paper Discussion)
+│   │   ├── voxel_level_fit.py           Phase 4 voxel-level direct MSE (failed alternative)
+│   │   ├── multi_roi_confusion_diagnostic.py  Per-pair V1/V2/V4 confusion z-scores (paper supporting)
+│   │   ├── loco_filter_derive.py
+│   │   ├── loco_filter_feasibility.py
+│   │   ├── compare_2component_loco.py
+│   │   └── evaluate_preimage_filter.py
+│   ├── diagnostics/                  18 diagnostic scripts (baseline_ρ, validate_2comp, etc.)
+│   ├── inventory/                    Inventory builders
+│   ├── visualization/                Figure-generation scripts
+│   ├── slurm/                        SLURM submission scripts
+│   └── _archive/                     Archived exploration/cycle scripts
+│       └── cleanup_2026-05-19_scripts_root/   Latest reorg batch (11 files: HC specificity descriptives,
+│           Option C deprecated viz, sub-10 paper-excluded analyses, OLD-scheme P2a, one-shot data prep)
 │
 └── results/                    (~165 MB, mostly archive)
     ├── BEST_summary.json                                  Canonical filter params
@@ -81,6 +84,19 @@ future_phase2_filter_optimization/
     │   ├── l_dir_one_shot_test.json                       L_dir loss FAIL test
     │   └── 3comp_viz/                                     3-comp 4-col + landscape viz
     │
+    ├── voxel_level_fit/                                   Phase 4 preview — voxel-level direct MSE (2026-05-18)
+    │   ├── voxel_landscape_sub-08.json                    argmin (4,4), ratio 0.017 (flat), P2a 0.688
+    │   ├── voxel_landscape_sub-09.json                    argmin (0,+36), ratio 0.601 (sharp, wrong sign), P2a 0.775
+    │   └── timing_sub-08.json                             0.1 s/subject (W precomputed once)
+    │
+    ├── sub10_mild_deutan/                                 Sub-10 (mild deutan, axis=150°) canonical 2comp fit (2026-05-18)
+    │   ├── sub-10_V4_2component.json                      argmin (10,+22), L_fit=0.127, perm_p=0.018 ★ — TP (CVD detected); β_c sign flips vs sub-08
+    │   └── sub-10_V4_2component_landscape.json            Within-family inconsistency evidence (NOT a false positive)
+    │
+    ├── sub10_null_control_WRONG_cvd_normal_2026-05-18/    DEPRECATED — wrong axis (83° normal); sub-10 is deutan per CLAUDE.md §6
+    │   ├── sub-10_V4_2component.json                      argmin (30,−24), perm_p=0.180 — DO NOT USE
+    │   └── sub-10_V4_2component_landscape.json            Kept for traceability of the CVD_TYPE bug fix
+    │
     ├── fits/                                              Neural fit JSONs (label-independent)
     ├── old_formula/                                       Landscape JSONs (data only, viz archived)
     ├── axis_3way/                                         Stockman axis landscapes
@@ -100,7 +116,7 @@ future_phase2_filter_optimization/
 
 **Removed/archived from results/**: parameter_recovery/, sub10_diagnostic_*/, unified_pipeline/, today's test JSONs moved to phase4_preview/
 **Kept at results/ root**: BEST_summary, BEST viz, MANIFEST, SUMMARY, parquet+CSVs, MD docs, multi_roi_confusion.json
-**results/ subdirs preserved**: c3_relabel/, phase4_preview/, fits/, old_formula/, axis_3way/, CANDIDATE/, _archive/, _superseded/
+**results/ subdirs preserved**: c3_relabel/, phase4_preview/, voxel_level_fit/, sub10_mild_deutan/, sub10_null_control_WRONG_cvd_normal_2026-05-18/, fits/, old_formula/, axis_3way/, CANDIDATE/, _archive/, _superseded/
 
 **Total**: scripts/ 1.7 MB, results/ 165 MB (mostly _archive/)
 
@@ -130,8 +146,9 @@ python scripts/consolidate_landscapes_to_parquet.py  # parquet refresh
 
 ## Caveats (per CLAUDE.md §0)
 
-- All filter selection is **descriptive** — specificity claims forbidden under HC FPR=100%
+- All filter selection is **descriptive** — specificity claims forbidden under HC FPR=100% (HC subjects pass label permutation under canonical loss; `hc_specificity_check.py`)
 - L_rank artifact (L@id inversion) documented as methodological subtlety (correlation + HC LOO + small n)
-- 3-component Phase 4 preview shows: better neural fit, worse P2a (sub-09 Machado c6 wraparound) → 2-comp standalone retained as Phase 2 filter form
+- **Three convergent failures** (L_dir, 3-comp joint, voxel-level direct MSE) — all pre-committed criteria failed; richer neural metrics yield argmins that either flatten the landscape or sharpen toward parameters that degrade behavioral P2a. 2-comp standalone retained as Phase 2 filter form; convergence reframed as paper Discussion claim (neural fit ≠ behavioral filter quality).
+- **Sub-10 within-family inconsistency** — sub-10 (mild deutan, sub-10 IS CVD) yields (10, +22), β_c sign opposite to sub-08 severe deutan (38, −14); L_fit at sub-10 lower than sub-08/09. Earlier "sub-10 FP" framing (MEMORY 2026-04-11, 2026-03-23) assumed sub-10 was normal and is superseded — sub-10 perm_p=0.018 is a true positive (CVD detected in CVD), not a false positive. The genuine issue is that (β_s, β_c) is not a stable per-family signature and L_fit does not track severity.
 - Per-pair V4 cc-matrix confusion direction (sub-08 cyan-violet z=+2.49, sub-09 green-violet z=+3.13) reported as descriptive evidence of CVD-specific representational geometry, NOT classifier
 - Behavioral validation requires **pre-registered independent acquisition** (Phase 3 — TBD)

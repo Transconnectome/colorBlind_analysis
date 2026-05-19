@@ -73,7 +73,7 @@ from diagnostic_delta_rdm import (
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
-CVD_TYPE = {'08': 'deutan', '09': 'protan', '10': 'normal'}
+CVD_TYPE = {'08': 'deutan', '09': 'protan', '10': 'deutan'}  # sub-10 is mild deutan per project CLAUDE.md §6 (not normal)
 CONF_AXIS = {'protan': 16.0, 'deutan': 150.0, 'normal': 83.0}  # Stockman confusion axes
 HUE_ANGLES_FLOAT = np.array([0, 45, 90, 135, 180, 225, 270, 315], dtype=float)
 

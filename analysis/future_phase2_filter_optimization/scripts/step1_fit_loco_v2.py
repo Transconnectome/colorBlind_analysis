@@ -57,7 +57,7 @@ from utils_distortion_models import (
 LOCAL_BASELINE = _PHASE2_DIR.parent / 'phase1_preprocess_decoding' / 'results' / 'full_dataset_C010'
 FWD_RESULTS = _PHASE2_DIR.parent / 'future_phase1_forward_model' / 'results'
 
-CVD_TYPE = {'08': 'deutan', '09': 'protan', '10': 'normal'}
+CVD_TYPE = {'08': 'deutan', '09': 'protan', '10': 'deutan'}  # sub-10 is mild deutan per project CLAUDE.md §6
 
 FIT_MODELS = ['cone_1way', 'cone_3way', 'fourier', 'per_color']
 

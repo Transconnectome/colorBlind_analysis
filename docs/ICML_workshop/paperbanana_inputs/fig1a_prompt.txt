@@ -1,0 +1,21 @@
+Create a compact horizontal pipeline diagram for an ICML single-column academic figure (aspect ratio 4:3). Clean, minimal, publication-quality style with white background.
+
+The diagram shows 4 stages connected left-to-right by arrows in a single row:
+
+Stage 1 — "Structured Representation": A small brain/cortex icon with 8 colored dots (red, orange, yellow, green, cyan, blue, purple, magenta) arranged in a circle. Below: "hV4, K=3 channels". Arrow labeled "LOCO CV" connects to Stage 2.
+
+Stage 2 — "Vulnerability Profile": A small 8-bar chart silhouette showing positive and negative bars (the vulnerability vector v in R^8). Below: "per-color interpolation error". Arrow labeled "Grid search" connects to Stage 3.
+
+Stage 3 — "Distortion Parameters": Two branches side by side. Left branch labeled "Retinal" with parameters (Delta-lambda, g). Right branch labeled "Cortical" with parameters (beta_s, beta_c). Below: "1–2 DOF, permutation test". Arrow labeled "Pre-image" connects to Stage 4.
+
+Stage 4 — "Correction Filter": A checkmark icon for "bijective" and a cross icon for "collapsed". Below: "stimulus-space filter".
+
+Visual requirements:
+- Each stage is a rounded rectangle with a light colored background (different subtle color per stage)
+- Arrows between stages are thick, dark gray, with small text labels above them
+- All text is black, sans-serif, readable at print size
+- The entire diagram fits in one horizontal row, no wrapping
+- No decorative elements, purely informational
+- Academic methodology diagram style matching ICML venue standards
+
+Caption: Structured inverse inference pipeline. fMRI hue responses in hV4 are encoded via K=3 basis channels (Step 1), evaluated by leave-one-color-out cross-validation to produce a per-color vulnerability profile (Step 2), fitted to low-dimensional distortion models via grid search with permutation testing (Step 3), and inverted to assess correction feasibility (Step 4).

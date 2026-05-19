@@ -164,24 +164,33 @@ CVD hue distortion was modelled as a two-component angular shift in Stockman opp
 
 where $h$ is the opponent-hue angle of the stimulus in CIELab space and $\theta_{\rm conf}$ is the CVD-subtype confusion axis ($16^\circ$ protan; $150^\circ$ deutan), derived from the Brettel--Vi\'enot--Mollon dichromatic simulation \cite{brettel1997} applied to Stockman \& Sharpe LMS cone fundamentals \cite{stockman2000}. $\beta_s$ parameterises distortion along the S-cone axis ($h = 90^\circ$), motivated by cortical-RDM evidence that CVD errors concentrate at S-cone loci \cite{emery2021}. $\beta_c$ parameterises rotation along the confusion axis, with both signs unconstrained as free parameters of the fit.
 
-Per-subject parameters $(\beta_s, \beta_c)$ were recovered by minimising a four-term, neural-primary loss with Tikhonov regularisation:
+Per-subject parameters $(\beta_s, \beta_c)$ were recovered by minimising a four-term, neural-primary loss derived from the V4 LOCO forward model:
 
 \begin{equation}
-  L(\beta_s, \beta_c) = w\!\left[ L_{\rm topk}^{\rm hV4} + L_{\rm mse}^{\rm hV4} + L_{\rm rdm}^{\rm V1,SRM} \right] + \mu \cdot (\beta_s^2 + \beta_c^2)
-  \label{eq:hybrid}
+  L_\text{fit}(\beta_s, \beta_c) = 1.0\,L_\text{vuln} + 0.5\,L_\text{rank} + 0.2\,L_\text{rdm} + 0.1\,L_\text{smooth}
+  \label{eq:lfit}
 \end{equation}
 
-with $(w, \mu) = (0.3, 3.0)$.
-The simulated vulnerability $\mathbf{v}_{\rm sim}(\beta_s, \beta_c) = f_{\rm forward}\!\bigl(C(\theta + \delta\theta(\,\cdot\,;\beta_s,\beta_c));\,W\bigr)$ is obtained by re-applying the HC-trained encoding weights $W$ to the design matrix $C$ shifted by the candidate distortion.
-The three neural terms are estimated from fMRI data only. $L_{\rm topk}^{\rm hV4}$ is the Jaccard distance between the simulated and observed top-$K$ vulnerable colours at hV4 (K = 3 per \citeNP{khaligh2014}), capturing which hues the encoding model misses.
-$L_{\rm mse}^{\rm hV4}$ enforces amplitude agreement between $\mathbf{v}_{\rm sim}$ and $\mathbf{v}_{\rm obs} \in [0,1]^{8}$.
-$L_{\rm rdm}^{\rm V1,SRM}$ is the cosine distance between the simulated and observed $\Delta$RDM at V1 in SRM-aligned space (\citeNP{kriegeskorte2008}); V1 is chosen because it hosts the cleanest pairwise-geometry signal in this sample (see the \nameref{sec:results:geometry} section).
-The Tikhonov term penalizes the squared parameter norm; $\mu = 3.0$ was set by HC leave-one-out cross-validation against the ground truth $\beta = 0$ for healthy controls.
+with each term normalised to $[0,1]$ before weighting.
+Let $\mathbf{v}_\text{sim}(\beta_s, \beta_c) = f_\text{forward}\!\bigl(C(\theta + \delta\theta(\,\cdot\,;\beta_s,\beta_c));\,W\bigr) \in [0,1]^8$ be the simulated per-colour V4 LOCO vulnerability ($1 - \rho$) obtained by re-applying the HC-trained ridge-GCV encoding weights $W$ to the design matrix $C$ shifted by the candidate distortion, and let $\mathbf{v}_\text{obs} \in [0,1]^8$ be the observed CVD per-colour vulnerability.
 
-Parameters were searched by exhaustive grid over $\beta_s \in [0^\circ, 50^\circ]$ and $\beta_c \in [-50^\circ, 50^\circ]$ ($26 \times 51 = 1{,}326$ cells at $2^\circ$ resolution).
-The pair $(\hat{\beta}_s, \hat{\beta}_c) = \arg\min L$ was retained per subject.
-Per-subject p-values are reported as descriptive fits of representational geometry, not specificity statements (see Supplementary~\ref{app:hc_perm}).
-The 2-component class has an angular expressiveness limit $\delta\theta_{\rm max}(\theta\!=\!45^\circ) = 0.71\,\beta_s - 0.26\,\beta_c$, so hue translations exceeding $\sim\!51^\circ$ at the deutan mid-axis (e.g.\ orange $\to$ green) lie outside the model class for any biologically plausible $\beta$ (see the \nameref{sec:results:twocomp} section).
+\paragraph{Loss-term roles.}
+$L_\text{vuln} = \tfrac{1}{8 \cdot 4}\,\|\mathbf{v}_\text{sim} - \mathbf{v}_\text{obs}\|^2$ (per-colour MSE, normaliser $4.0$ for $[0,1]$ amplitude range) is the primary fit term: it forces the simulated vulnerability profile to match the per-colour LOCO breakdown that the CVD encoder exhibits, which is the operative neural quantity for the corrective filter (see the \nameref{sec:discussion} section for the LOCO--behaviour concordance evidence underlying this choice).
+$L_\text{rank} = (1 - \rho_\text{Spearman}(\mathbf{v}_\text{sim}, \mathbf{v}_\text{obs}))/2$ is an ordering term that breaks ties when the MSE landscape is locally flat by penalising rank-reordering of vulnerable colours; it is downweighted to $0.5$ because amplitude (MSE) is the operative signal.
+$L_\text{rdm} = (1 - \cos(\Delta\text{RDM}_\text{sim}, \Delta\text{RDM}_\text{obs}))/2$ is a geometric convergence check on the 28-pair upper-triangle of the CVD-minus-HC representational dissimilarity-matrix difference at hV4 ($\Delta\text{RDM} = \text{RDM}_\text{CVD} - \overline{\text{RDM}}_\text{HC,LOO}$, correlation distance; \citeNP{kriegeskorte2008}); it is downweighted to $0.2$ because the RDM and per-colour vulnerability signals partially overlap.
+$L_\text{smooth} = \tfrac{1}{8 \cdot 32400}\,\sum_c (\delta\theta_{c+1} - \delta\theta_c \mod \pm 180)^2$ is a circular-smoothness regulariser on the per-colour shift vector $\delta\theta \in \mathbb{R}^8$ produced by the candidate $(\beta_s, \beta_c)$; it is downweighted to $0.1$ as a weak prior favouring smooth filters over discontinuous per-colour shifts.
+
+\paragraph{ROI scope.}
+All four terms are computed at hV4 (V4 on disk).
+We fit at hV4 rather than V1--V3 because hV4 is the only ROI in this dataset whose HC group LOCO interpolation exceeds the permutation null ($p = 0.044$ at hV4 vs.\ NS at V1/V2/V3; \nameref{sec:results:loco}), and because hV4 is the canonical cortical hub for hue representation in the ventral stream (\citeNP{brouwer2009, bannert2018, kuriki2015}); cone-shift parameters fit on an encoder that cannot interpolate held-out colours lack a voxel-level cone-shift interpretation.
+V1 and V2 fits are reported in the project methods documentation.
+
+\paragraph{Search and HC-LOO calibration.}
+Parameters were searched by exhaustive grid over $\beta_s \in [0^\circ, 50^\circ]$ and $\beta_c \in [-50^\circ, 50^\circ]$ ($26 \times 51 = 1{,}326$ cells at $2^\circ$ resolution); $(\hat\beta_s, \hat\beta_c) = \arg\min L_\text{fit}$ was retained per subject.
+Statistical descriptors are reported per subject as: (i) label-permutation $p_\text{perm}$ (1,000 permutations of the 8-colour label assignment) for fit validity on real CVD data, and (ii) HC leave-one-out descriptive refit, where each of $n = 6$ effective HC participants (excluding sub-07 for low hV4 voxel count) is refit under the same loss with the remaining HC pool as reference, yielding a descriptive HC $\|\hat\beta\|$ distribution.
+Per-subject p-values are descriptive of representational-geometry fit, not specificity statements: the HC label-permutation false-positive rate at hV4 under Equation~\ref{eq:lfit} reaches $7/7$ (see Supplementary~\ref{app:hc_perm} and the \nameref{sec:discussion} section for the statistical-framework caveats).
+
+The 2-component class has an angular expressiveness limit $|\delta\theta|(\theta\!=\!45^\circ) = |0.71\,\beta_s - 0.26\,\beta_c|$, so hue translations exceeding $\sim\!51^\circ$ at the deutan mid-axis (e.g.\ orange $\to$ green) lie outside the model class for any biologically plausible $\beta$ (see the \nameref{sec:results:twocomp} section).
 Comparison with alternative model classes (1-DOF Machado cone-shift; 2-DOF retinal+cortical) is reported in Appendix~\ref{app:altmodels}.
 
 % ──────────────────────────────────────────────────────────────────────────────

@@ -210,19 +210,19 @@ These three collapsed hues fall within Sub-09's LOCO vulnerability cluster (c5/c
   \end{tabular}
 \end{table}
 
-% ========== Section 17: HC Permutation under the HYBRID Loss ==========
+% ========== Section 17: HC Permutation under the V4 LOCO Loss ==========
 
-\subsection*{\textbf{S17. HC Permutation under the HYBRID Loss}}
+\subsection*{\textbf{S17. HC Permutation under the V4 LOCO Loss}}
 \label{app:hc_perm}
 
-The 2-component grid search under the HYBRID loss (Equation~\ref{eq:hybrid}; main-text Section~\ref{sec:methods:twocomp}) was applied to each of the 7 HC participants treated as a CVD candidate.
+The 2-component grid search under the V4 LOCO loss $L_\text{fit}$ (Equation~\ref{eq:lfit}; main-text Section~\ref{sec:methods:twocomp}) was applied to each of the 7 HC participants treated as a CVD candidate.
 Of the 6 HCs that pass the hV4 voxel-count threshold (sub-07 excluded; 16 voxels, $K = 3$ produces \texttt{nan}), all 6 reach nominal $p < 0.05$ under the label-permutation null --- and the property generalises to the full HC pool (HC FPR = 7/7 at nominal $\alpha = 0.05$).
 
 This high false-positive rate cannot be removed by reformulating the fitting criterion: thirteen successive reformulations within the voxel-prediction loss family ($L_\mathrm{LOCO}$, $L_\mathrm{mse}$, $L_\mathrm{rdm}$, cross-ROI combinations, baseline-$\rho$ correction, top-$K$ Jaccard) all yielded the same outcome (project log, Cycles 9--13).
 It reflects two structural properties of the available data: (i) the 8-hue resolution provides limited degrees of freedom for distinguishing specific from non-specific fits at the single-subject level, and (ii) the relevant null hypothesis (``no CVD-specific distortion'') is not isomorphic to label permutation on a single participant's vulnerability profile, since a non-trivial fit can be obtained for any sufficiently smooth 8-point pattern under the 2-DOF model class.
 
-Consequently, per-subject p-values reported alongside the HYBRID argmin in Figure~\ref{fig:twocomp} and Section~\ref{sec:results:twocomp} are presented as \emph{descriptive} fits of representational geometry, not as CVD-specificity statements.
-Two case-level anchors support biological interpretation despite this caveat: (i) parameter-norm comparison --- both CVD subjects' $\|\hat{\beta}\|$ (43.1\degree, 32.3\degree) fall \emph{below} the HC leave-one-out range $[49.0^\circ, 65.3^\circ]$, consistent with CVD geometry requiring less aggressive 2-component correction than the HC permutation null; (ii) directional consistency with literature anchors ($\hat{\beta}_c$ sign matching Brettel's L--M polarity; $\hat{\beta}_s > 0$ in both subjects, consistent with Emery's S-cone-axis hV4 RDM finding).
+Consequently, per-subject p-values reported alongside the $L_\text{fit}$ argmin in Figure~\ref{fig:twocomp} and Section~\ref{sec:results:twocomp} are presented as \emph{descriptive} fits of representational geometry, not as CVD-specificity statements.
+Two case-level anchors support biological interpretation despite this caveat: (i) parameter-norm comparison --- both CVD subjects' $\|\hat{\beta}\|$ ($40.5^\circ$ for sub-08; $22.8^\circ$ for sub-09) fall \emph{below} the HC leave-one-out range $[49.0^\circ, 65.3^\circ]$, consistent with CVD geometry requiring less aggressive 2-component correction than HC label-permutation nulls; (ii) per-subject R+C diagnostic decomposition (Appendix~\ref{app:altmodels}) recovers cortical-dominant etiology for sub-08 and retinal-dominant etiology for sub-09, providing a mechanistic interpretation of the 2-component fits that is not tested by the within-cohort permutation null.
 Quantitative specificity claims require an external behavioural endpoint such as the Phase-3 2AFC arm (Methods~\ref{sec:methods:behavioral}, last paragraph; data not yet collected at the time of writing).
 
 % ========== Section 18: Effect Sizes ==========

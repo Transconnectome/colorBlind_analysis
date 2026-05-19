@@ -1,0 +1,32 @@
+## Model-Dependent Correction Feasibility
+
+Correction feasibility depends jointly on distortion severity and the modeling level (retinal vs cortical).
+
+### Sub-08 (Mild Deuteranomaly) — Panel (a)
+Under the R+C model (Delta-lambda=2.0nm, g=+2.25), the opponent-space hue arc remains wide. All 8 stimulus colors (red, orange, yellow, green, cyan, blue, purple, magenta, equally spaced at 0, 45, 90, 135, 180, 225, 270, 315 degrees in CIELab) undergo small angular distortions but remain well-separated. Pre-image inversion restores all 8 colors with < 0.001 degree error. Mean correction magnitude is 23.5 degrees, max is 42.9 degrees.
+
+This is shown as a circular opponent hue space diagram with:
+- 8 solid colored dots on the circle at original (healthy) positions spanning full 360 degrees
+- 8 hollow dots at slightly offset distorted positions (small shifts, clearly separated)
+- Short gray arrows from each distorted dot back to its original position (correction direction)
+- All arrows are well-separated with no crossing or merging
+- Below: horizontal bar chart showing per-color correction magnitudes, all moderate height, green badge "8/8 exact"
+
+### Sub-09 (Moderate Protanomaly) — Panel (b)
+Under the Machado model (Delta-lambda=13.5nm), the opponent-space arc dramatically compresses from 360 degrees to approximately 96 degrees. Three colors — c4 (green, 135 deg), c5 (cyan, 180 deg), and c6 (blue, 225 deg) — converge to nearly the same perceived angle at approximately 282 degrees. This makes exact pre-image inversion structurally impossible for these merged colors.
+
+This is shown as the same circular diagram but with:
+- 8 solid colored dots at original positions (full 360 degrees)
+- 8 hollow dots compressed into roughly 96 degrees of arc (approximately the 240-336 degree region)
+- c4, c5, c6 clustered together at about 282 degrees, highlighted with a RED dashed oval
+- Arrows from the merged cluster back to their widely-separated original positions CROSS each other (drawn in RED)
+- Below: Two rows of correction bars:
+  Row 1 "Retinal (Machado)": c4,c5,c6 bars are RED with X marks (no pre-image), others green. Label "4/8 exact only. Fallback: 5.6x improvement, 48% of HC separation."
+  Row 2 "Cortical (2-Comp)": All 8 bars green, all solvable. Mean correction 20.1 degrees, max 48.1 degrees. Label "8/8 exact, bijectivity preserved."
+
+### Bottom comparison strip
+A compact table spanning the full width:
+| | Sub-08 (Mild) | Sub-09 (Moderate) |
+| Retinal model | Checkmark Exact (R+C) | X 4/8 collapse (Machado) |
+| Cortical model | Checkmark Exact (2-Comp) | Checkmark Exact (2-Comp) |
+Conclusion arrow: "Only cortical-level model preserves bijectivity across severity levels"

@@ -1,0 +1,46 @@
+{
+  "figure_type": "forest_plot_plus_bar",
+  "figure_size": {"width_inches": 6.75, "height_inches": 2.8},
+  "dpi": 300,
+  "panels": [
+    {
+      "panel_label": "(a)",
+      "type": "forest_plot",
+      "title": "HC per-subject p-values",
+      "width_ratio": 1.6,
+      "subjects": ["Sub-01", "Sub-02", "Sub-03", "Sub-04", "Sub-05", "Sub-06", "Sub-07"],
+      "x_scale": "log",
+      "x_range": [0.0005, 1.2],
+      "x_label": "p-value (log scale)",
+      "threshold_line": {"x": 0.05, "color": "#E74C3C", "style": "dashed", "label": "α = 0.05"},
+      "fp_zone": {"x_min": 0, "x_max": 0.05, "color": "#E74C3C", "alpha": 0.08, "label": "FP zone"},
+      "series": [
+        {"label": "Machado (1 DOF)", "marker": "o", "color": "#3498DB",
+         "values": [0.085, 0.042, 0.001, 0.065, 0.001, 0.001, 0.072]},
+        {"label": "R+C (2 DOF)", "marker": "s", "color": "#E67E22",
+         "values": [0.023, 0.005, 0.001, 0.018, 0.001, 0.001, 0.023]},
+        {"label": "2-Comp (2 DOF)", "marker": "^", "color": "#2ECC71",
+         "values": [0.023, 0.005, 0.001, 0.018, 0.001, 0.001, 0.023]}
+      ],
+      "footer": "Expected FP at α=0.05: 1.05/21.  Observed: 15/21"
+    },
+    {
+      "panel_label": "(b)",
+      "type": "bar_chart",
+      "title": "False Positive Rate",
+      "width_ratio": 1.0,
+      "categories": ["Machado", "R+C", "2-Comp"],
+      "values_percent": [42.9, 71.4, 100.0],
+      "fraction_labels": ["3/7", "5/7", "7/7"],
+      "colors": ["#3498DB", "#E67E22", "#2ECC71"],
+      "y_label": "False Positive Rate (%)",
+      "y_range": [0, 115],
+      "reference_lines": [
+        {"y": 5, "label": "Nominal α=5%", "style": "dashed"},
+        {"y": 14.3, "label": "1/7", "style": "dotted"}
+      ],
+      "footer": "Higher DOF → higher FP.\n2-Comp specificity requires caution."
+    }
+  ],
+  "notes": "ICML full-width appendix figure (6.75in). All text must be fully visible — no clipping at edges. Reference line labels must not be cut off."
+}

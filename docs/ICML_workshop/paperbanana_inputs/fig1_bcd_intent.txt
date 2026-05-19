@@ -1,0 +1,15 @@
+Create a 3-panel bar chart (panels b, c, d side-by-side) for an ICML single-column figure (3.25 x 1.7 inches, 300 DPI).
+
+Each panel shows an 8-color LOCO vulnerability profile:
+- Gray bars: observed CVD vulnerability per color (8 bars)
+- Colored line with small markers: model-predicted vulnerability (overlay on bars)
+- Panel (d) has no model line, just a dashed zero reference
+
+Key requirements:
+- Panels share the same y-axis (range -0.9 to 0.7), labeled "LOCO vulnerability (corr.)" on leftmost only
+- X-axis: colored squares (red, orange, yellow, green, cyan, blue, purple, magenta) instead of text labels
+- Panel labels (b), (c), (d) above each panel, bold, well-separated from titles
+- Compact legend (one instance, not per-panel) showing "Observed" and model fit
+- Annotation text (correlation and p-value) in upper-right of each panel, right-aligned
+- Minimal whitespace, no spines on top/right, publication-quality typography
+- All text must be fully visible with no overlap or clipping

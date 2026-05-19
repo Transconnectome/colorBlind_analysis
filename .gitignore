@@ -156,14 +156,26 @@ qc_runwise_sub-*.tsv
 # Paper and documents
 docs/*
 !docs/PAPER/
+!docs/OHBM_abstract/
+!docs/ICML_workshop/
 
 # Extra LaTeX artifacts not covered by global patterns
 docs/PAPER/**/*.fff
 docs/PAPER/**/*.synctex*
+docs/OHBM_abstract/**/*.fff
+docs/OHBM_abstract/**/*.synctex*
+docs/ICML_workshop/**/*.fff
+docs/ICML_workshop/**/*.synctex*
+
+# Block large OHBM files (>10MB; tracked via figures/ or share separately)
+docs/OHBM_abstract/Figures.pptx
+docs/OHBM_abstract/priorworks/Rina(pre)_fMRI_CVDwisediff.pdf
 
 # But ignore other PDFs
 *.pdf
 !docs/PAPER/**/*.pdf
+!docs/OHBM_abstract/**/*.pdf
+!docs/ICML_workshop/**/*.pdf
 
 # ============================================
 # Archives & Backups

@@ -1,0 +1,47 @@
+{
+  "figure_type": "grouped_bar_with_overlay_line",
+  "figure_size": {"width_inches": 3.25, "height_inches": 1.7},
+  "dpi": 300,
+  "shared_y_axis": true,
+  "y_range": [-0.9, 0.7],
+  "y_label": "LOCO vulnerability (corr.)",
+  "x_categories": ["red", "orange", "yellow", "green", "cyan", "blue", "purple", "magenta"],
+  "x_category_colors": ["#E74C3C", "#E67E22", "#F1C40F", "#2ECC71", "#1ABC9C", "#3498DB", "#9B59B6", "#E91E9B"],
+  "x_display": "color_squares_only",
+  "panels": [
+    {
+      "panel_label": "(b)",
+      "title": "Sub-08 (deutan)",
+      "bar_values": [0.573, -0.637, -0.733, -0.306, 0.250, -0.251, -0.759, -0.334],
+      "bar_color": "#BDC3C7",
+      "bar_label": "Observed CVD",
+      "line_values": [0.276, 0.100, 0.089, 0.141, 0.110, 0.214, -0.062, 0.119],
+      "line_color": "#E67E22",
+      "line_label": "R+C model fit",
+      "annotation": "R+C: ρ=.857\np=.005**"
+    },
+    {
+      "panel_label": "(c)",
+      "title": "Sub-09 (protan)",
+      "bar_values": [0.023, 0.596, 0.322, 0.147, -0.451, -0.256, -0.090, -0.575],
+      "bar_color": "#BDC3C7",
+      "bar_label": "Observed CVD",
+      "line_values": [0.278, 0.119, 0.134, 0.078, 0.058, 0.066, -0.080, -0.101],
+      "line_color": "#E74C3C",
+      "line_label": "Machado model fit",
+      "annotation": "Machado: ρ=.762\np=.018*"
+    },
+    {
+      "panel_label": "(d)",
+      "title": "Sub-10 (control)",
+      "bar_values": [-0.006, 0.160, 0.069, 0.293, 0.508, 0.183, -0.028, -0.085],
+      "bar_color": "#BDC3C7",
+      "bar_label": "Observed",
+      "line_values": null,
+      "line_label": null,
+      "annotation": "n.s.\np=.559",
+      "show_zero_line": true
+    }
+  ],
+  "notes": "ICML single-column figure (3.25in wide). X-axis uses colored squares instead of text labels. Each panel shows gray bars (observed LOCO vulnerability) with colored line overlay (model fit). Panel (d) has no model fit line, only a dashed zero reference. Legend should appear once, compactly."
+}

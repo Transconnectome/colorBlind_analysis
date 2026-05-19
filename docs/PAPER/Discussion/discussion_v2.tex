@@ -7,7 +7,7 @@
 \label{sec:discussion}
 
 In this study, we tested whether \emph{individual hV4 colour geometry} is sufficiently structured to ground a person-specific corrective filter in colour vision deficiency.
-We found that two CVD adults retained 8-class hue discrimination at hV4 but selectively lost continuous-hue interpolation, and that the residual distortion was captured by a 2-component angular-dilation model whose pre-image was exact for all eight hues in both participants (sub-08 mean $|\delta| = 46.3^\circ$; sub-09 mean $|\delta| = 20.1^\circ$).
+We found that two CVD adults retained 8-class hue discrimination at hV4 but selectively lost continuous-hue interpolation, and that the residual distortion was captured by a 2-component angular-dilation model whose pre-image was exact for all eight hues in both participants (sub-08 mean $|\delta| = 22.2^\circ$; sub-09 mean $|\delta| = 10.2^\circ$).
 These results suggest that the cortical site at which CVD colour information is geometrically distorted is also the site at which it can be inverted into a stimulus-space correction.
 
 The dissociation between LOCO interpolation capacity and SRM $\Delta$RDM geometric distance --- $100\%$ vs.\ $33\%$ concordance with same-day JND thresholds --- identifies which cortical quantity is the operative corrective target.
@@ -20,10 +20,12 @@ The S-cone axis component ($\beta_s$) of the fitted distortion field is structur
 \citeA{emery2021} reported that CVD perceptual errors concentrate near S-cone confusion loci in behavioural hue-scaling tasks, and \citeA{tregillus2021} showed that V2/V3 BOLD responses in anomalous trichromats include a cortical gain component ($g$) that partially compensates the retinal cone shift.
 These individually structured hV4 residuals may reflect cone-class-specific differences in V2/V3 compensation gain that survive into hV4, where the incompletely cancelled L--M signal manifests as a person-specific distortion of the continuous hue code.
 This suggests that the present 2-component model extends earlier population-mean findings to the individual hV4 level: the residual distortion that survives V2/V3 compensation reaches hV4 as an individually structured pattern.
-The correction vectors for Sub-08 (deutan) and Sub-09 (protan) are mutually divergent --- cosine similarity $< 0$ across hue pairs --- demonstrating directly that a population-average retinal model cannot simultaneously serve both CVD individuals.
-Where Machado-based correction predicts a shared spectral shift for a given CVD subtype, the cortical residual is individually signed and of opposite direction between the two cases.
+The two CVD participants in fact present qualitatively distinct correction signatures rather than mirror-image realisations of a single mechanism.
+Sub-08 (deutan) exhibits a wide-amplitude L/M-rotation with large $\hat\beta_s = 38^\circ$ and a confusion-axis term $\hat\beta_c = -14^\circ$; the R+C diagnostic decomposition recovers a near-zero retinal shift ($\Delta\lambda \approx 2.5$~nm) coupled with a large cortical overshoot ($g = -2.25$), pointing to a cortical-dominant CVD etiology.
+Sub-09 (protan), by contrast, exhibits a far smaller monotonic rotation along the protan confusion axis (small $\hat\beta_s = 6^\circ$, $\hat\beta_c = -22^\circ$); the R+C diagnostic recovers a large retinal shift ($\Delta\lambda \approx 19.5$~nm, within the published protan cone-shift range \cite{tregillus2021}) and a near-physiological cortical compensation ($g = -1.10$), pointing to a retinal-dominant etiology.
+This cortical-vs-retinal etiological dissociation is what a population-average retinal model, applied uniformly to all members of a given CVD subtype, fails to capture: in sub-09 a retinal cone-shift correction matches the diagnosed mechanism, whereas in sub-08 the residual distortion is generated downstream of the cone shift and cannot be neutralised by a spectral filter alone.
 
-All distortion models --- 1-DOF Machado, 2-DOF R+C, and 2-component --- identify the same two participants as requiring correction, but their prescribed correction vectors diverge in direction (cosine similarity $< 0$; Appendix~\ref{app:retinal_family}).
+All distortion models --- 1-DOF Machado, 2-DOF R+C, and 2-component --- identify the same two participants as requiring correction, but their prescribed correction vectors diverge in direction (Appendix~\ref{app:altmodels}).
 This detection--correction dissociation constitutes the study's primary falsifiable prediction.
 In a 2AFC experiment comparing the 2-component and retinal-family filter conditions for each participant's most LOCO-vulnerable hue pairs, only the cortically-grounded 2-component filter should significantly reduce JND.
 If the retinal-family filter matches or exceeds the 2-component filter in reducing discrimination thresholds, the cortical distortion account would require revision.
@@ -33,12 +35,16 @@ An alternative reading is that the hV4 LOCO impairment merely reflects reduced V
 The preserved LORO accuracy at hV4 argues against this account: classification and interpolation read out from the same upstream cortical input, so a generic input-variance reduction should degrade both.
 The observed dissociation instead localises the distortion to the continuous-hue manifold readout, consistent with hV4 as the cortical site of integration over cone-opponent signals~\cite{brouwer2009, bannert2018}.
 
-Three considerations bound the proof-of-concept scope of these findings.
+Four considerations bound the proof-of-concept scope of these findings.
 First, the CVD sample is $N = 2$; single-case statistics \cite{crawford1998} permit individual-level inference but population-level claims about deutan or protan subtypes require replication with larger samples.
 Second, the confusion-axis component ($\beta_c$) is statistically significant for Sub-08 only.
 For Sub-09, the bootstrap confidence interval for $\beta_c$ includes zero, and the 2-component model reduces to an effectively 1-component fit.
 The \emph{2-component} label should not be read as confirming a two-mechanism account for both participants; power-adequate replication or hierarchical-Bayes pooling across deutan and protan subtypes is required to determine whether the second component is genuinely absent in protan.
-Third, case-level specificity rests on three converging anchors --- cross-criterion significance, physiological fit magnitude, and S-cone axis grounding --- rather than on permutation significance alone, because the pipeline reaches nominal $p < 0.05$ in $71\%$ of HC model--subject tests (Supplementary~\ref{app:hc_specificity}); external cross-cohort hue-scaling and Phase-3 2AFC discrimination data will arbitrate cortical-level specificity beyond the within-cohort permutation null.
+Third, the voxel-prediction LOCO loss family under which the 2-component model is fit yields a $100\%$ false-positive rate when applied to HC participants under label permutation (HC FPR $= 7/7$; Supplementary~\ref{app:hc_specificity}).
+We therefore report per-subject p-values as descriptive of representational-geometry fit, not as specificity statements that distinguish CVD from HC.
+The effective HC pool ($n = 6$ at hV4 after excluding sub-07 for low voxel count) is too small to anchor a formal specificity test, and the per-subject $\Delta\rho$ statistic is dominated by a baseline correlation confound (HC distribution Pearson $r = -0.894$ between baseline $\rho$ and $\Delta\rho$) that precludes within-cohort selectivity claims.
+Case-level confidence therefore rests on convergence across multiple anchors --- cross-criterion fit significance, physiological fit magnitude relative to HC LOO refits, and S-cone axis grounding --- rather than on a single permutation-based test.
+Fourth, external cross-cohort hue-scaling and Phase-3 2AFC discrimination data will arbitrate cortical-level specificity beyond the within-cohort permutation null.
 
 This pipeline constitutes a proof-of-concept that \emph{individual hV4 colour geometry}, measured via fMRI LOCO decoding and inverted through an angular-dilation model, can ground a colour correction that is architecturally distinct from population-average retinal approaches.
 Where Machado-type correction applies a fixed spectral shift to all individuals of a given CVD subtype, the present approach encodes each individual's hV4 distortion field and inverts it exactly --- without assuming population homogeneity.

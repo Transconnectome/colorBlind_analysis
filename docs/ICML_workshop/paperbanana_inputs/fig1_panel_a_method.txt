@@ -1,0 +1,17 @@
+## Structured Phenotype Extraction and Inverse Inference
+
+We extract a geometry-sensitive phenotype from structured fMRI neural representations and invert it into parsimonious, interpretable distortion fields.
+
+### Step 1: Structured Neural Representation
+fMRI hue responses in area hV4 are modeled with K=3 half-wave rectified squared sinusoidal basis channels. Weight matrix W maps channels to voxel responses via ridge regression with GCV.
+
+### Step 2: Geometry-Sensitive Phenotype (LOCO Vulnerability)
+Leave-one-color-out cross-validation: W is trained on 7 of 8 colors, prediction error for the held-out color is recorded. The per-color errors define an 8-element vulnerability vector v in R^8 capturing which hues are poorly interpolated.
+
+### Step 3: Inverse Inference of Distortion Parameters
+Given v, we infer low-dimensional parameters (1-2 DOF) via grid search. Two model families: (a) Cone-based retinal models (Machado 1-DOF cone shift, R+C 2-DOF retinal+cortical), (b) Cortical opponent-axis model (2-Component angular dilation). Parameters selected by minimizing composite loss with 8!=40,320 exact permutation test.
+
+### Step 4: Correction Assessment
+Pre-image inversion to derive stimulus-space correction filter. Assess bijectivity (can all 8 colors be exactly restored?). Behavioral 2AFC validation as future test.
+
+This is a COMPACT horizontal pipeline diagram with 4 stages connected by arrows, suitable for a single-column ICML figure (3.25 inches wide). The diagram should flow left-to-right in a single row. Below the pipeline are three small bar charts (panels b, c, d).

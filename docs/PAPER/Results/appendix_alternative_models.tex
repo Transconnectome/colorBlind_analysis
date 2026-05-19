@@ -1,12 +1,13 @@
 % Appendix A — Alternative model comparison
-% Updated 2026-05-14: main text adopts the four-term neural-primary
-% loss (Eq. eq:hybrid). Retains LOCO-rho-argmax fits and the
-% Machado/R+C cone-shift baselines.
+% Updated 2026-05-19: main text adopts the V4 LOCO neural-primary
+% loss L_fit (Eq. eq:lfit). Retains LOCO-rho-argmax fits and the
+% Machado/R+C cone-shift baselines as historical reference; R+C
+% decomposition is retained as a diagnostic of per-subject etiology.
 
 \section*{Appendix A: Alternative Model Comparison}
 \label{app:altmodels}
 
-The main text adopts a 2-component cortical model (Section~\ref{sec:results:twocomp}, fit under the four-term neural-primary loss of Equation~\ref{eq:hybrid}).
+The main text adopts a 2-component cortical model (Section~\ref{sec:results:twocomp}, fit under the V4 LOCO neural-primary loss $L_\text{fit}$ of Equation~\ref{eq:lfit}).
 Here we report two cone-shift baselines as reference comparisons:
 
 \begin{itemize}
@@ -18,7 +19,13 @@ Here we report two cone-shift baselines as reference comparisons:
 
 Under the LOCO-$\rho$ argmax criterion used in earlier drafts (40{,}320 label permutations), the Machado model reached significance for sub-09 ($\Delta\lambda = 13.5$~nm, $\rho_\text{V4} = 0.76$, $p = 0.018$) but not for sub-08 ($\rho_\text{V4} = 0.62$, $p = 0.058$, n.s.).
 The R+C model did not improve on either single-component model in either subject under the same criterion.
-These results are reported as historical reference for the main-text 2-component fit (Section~\ref{sec:results:twocomp}); we note that the present neural-primary loss and LOCO-$\rho$ argmax need not agree, since the present loss optimises a combination of hV4 top-$K$ vulnerability agreement, first-order pattern similarity, and V1 SRM-RDM similarity rather than rank-order monotonicity at hV4 alone.
+These results are reported as historical reference for the main-text 2-component fit (Section~\ref{sec:results:twocomp}); the present $L_\text{fit}$ loss (Equation~\ref{eq:lfit}) and LOCO-$\rho$ argmax need not agree, since $L_\text{fit}$ optimises a combination of per-colour V4 vulnerability MSE, Spearman rank ordering, $\Delta$RDM cosine, and a smoothness regulariser rather than the rank-order monotonicity of $\rho$ at hV4 alone.
+
+\paragraph{R+C decomposition as a diagnostic.}
+Although the R+C 2-stage model is not adopted as the filter form (see \nameref{sec:results:filter}), the R+C parameter fit at hV4 under $L_\text{fit}$ is retained as a per-subject etiological diagnostic.
+For sub-08, the R+C decomposition recovers $\Delta\lambda = 2.5$~nm (near-zero retinal shift) with $g = -2.25$ (large cortical overshoot), consistent with a cortical-dominant CVD.
+For sub-09, the R+C decomposition recovers $\Delta\lambda = 19.5$~nm (within the published protan cone-shift range) with $g = -1.10$ (near-physiological cortical compensation, no overshoot), consistent with a retinal-dominant CVD.
+This per-subject cortical-vs-retinal asymmetry is reported as a mechanistic interpretation of the 2-component fit, not as an independent test.
 
 \subsection*{A.2 Inverse-mapping (pre-image) behaviour}
 

@@ -1,0 +1,49 @@
+## Overview: Structured Inverse Inference Pipeline for Color Vision Deficiency
+
+We present a framework that infers low-dimensional distortion fields from structured fMRI neural representations of color, using color vision deficiency (CVD) as a case study.
+
+### Core Assumption
+If applying a cone-shift or cortical-axis rotation to healthy-control (HC) neural data reproduces the observed CVD distortion pattern, then the inverse of that transformation should restore CVD color perception toward HC-like perception. This prediction is validated by a behavioral 2AFC experiment.
+
+### Pipeline (left-to-right flow, two parallel streams merging)
+
+**Stream A — LOCO pathway (PRIMARY, blue):**
+Procrustes-aligned fMRI amplitudes (6 runs x 8 colors x V voxels) -> Forward encoding model (ridge-GCV, K=3 half-wave rectified squared sinusoidal channels) -> Leave-One-Color-Out cross-validation -> LOCO vulnerability profile v in R^8 (per-color interpolation error). This is the PRIMARY criterion for filter design.
+
+**Stream B — RDM pathway (AUXILIARY, orange):**
+SRM-aligned representations (Shared Response Model, K=3, HC-only training) -> Crossnobis pairwise distances -> Delta-RDM = RDM_CVD - mean(RDM_HC), a 28-dimensional pairwise deviation vector. This serves as a CROSS-VALIDATION criterion.
+
+**Merge point:**
+Both streams feed into distortion model fitting via composite loss:
+L_fit = 1.0 * L_vuln + 0.5 * L_rank + 0.2 * L_rdm + 0.1 * L_smooth
+
+Where L_vuln and L_rank come from LOCO (Procrustes stream), and L_rdm comes from Delta-RDM (SRM stream).
+
+### Three Candidate Distortion Models
+
+1. **Machado Cone Shift (1 DOF, RETINAL level):** Anomalous cone spectral peak shifted by Delta-lambda in [0,20] nm. Predicts hue distortion through altered L-M opponency. Equation: theta' = Machado(theta, Delta-lambda).
+
+2. **Retinal + Cortical Gain, R+C (2 DOF, RETINAL + CORTICAL):** Extends Machado with cortical opponent gain g. Equation: rg' = rg_base + (1+g)(rg_ret - rg_base). g=0 is pure retinal, g=-1 is exact compensation, g<-1 is overcompensation.
+
+3. **2-Component Angular Dilation (2 DOF, CORTICAL level):** Parameterizes distortion along S-cone axis (beta_s at 90 deg) and confusion axis (beta_c at 16 deg protan / 150 deg deutan). Equation: theta'(c) = theta(c) + beta_s * cos(theta - 90) + beta_c * cos(theta - theta_conf).
+
+### Fitting Procedure (shift_at_both)
+For each candidate parameter set (grid search): generate shifted design matrix C(theta + delta) -> for each of 7 HC subjects, retrain W via ridge-GCV -> compute LOCO vulnerability per color -> average across HC to get v_sim -> compute L_fit(v_sim, v_CVD) -> select parameters minimizing L_fit.
+
+Statistical validation: 8! = 40,320 exact permutation test on color labels. Specificity: normal control must be non-significant.
+
+### Model Selection (closed testing)
+If Machado 1-DOF p < 0.05, use Machado (most parsimonious). Else test R+C or 2-Component.
+
+### Pre-image Inversion
+Given fitted distortion D(theta), compute inverse filter delta_filter = -D(theta) to correct CVD stimulus presentation. Assess whether all 8 colors admit exact pre-image solutions (bijectivity).
+
+### Results Summary (3 subjects)
+
+**Sub-08 (deuteranomaly, mild):** R+C model wins (Delta-lambda=2.0nm, g=+2.25), rho=0.857, p=0.005**. Pre-image: 8/8 exact. But R+C and 2-Component prescribe OPPOSITE corrections (cosine=-0.18).
+
+**Sub-09 (protanomaly, moderate):** Machado wins (Delta-lambda=13.5nm), rho=0.762, p=0.018*. Pre-image: Machado 4/8 only (arc collapse 360 to 96 deg), 2-Component 8/8 exact.
+
+**Sub-10 (normal control):** All models non-significant (p=0.559). Specificity PASS.
+
+**Key findings:** Detection CONVERGES across models (same 2 individuals identified). Correction DIVERGES (opposite directions). Cortical model preserves bijectivity for both CVD subjects. Behavioral 2AFC with dual filters needed to adjudicate processing level.

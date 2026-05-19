@@ -1,0 +1,37 @@
+Create a wide academic diagram (aspect ratio 21:9) showing geometric collapse and correction limits for color vision deficiency. Two panels side by side, clean white background, publication-quality style for an ICML appendix figure.
+
+PANEL (a) — "Sub-08: Mild Distortion" (left half):
+A circular opponent-color hue space diagram:
+- A light gray circle representing the 360-degree hue space
+- 8 solid colored dots ON the circle at equally spaced positions (0, 45, 90, 135, 180, 225, 270, 315 degrees): red, orange, yellow, green, cyan, blue, purple, magenta
+- 8 hollow/outline dots at SLIGHTLY offset positions (small angular shifts, all still well-separated around the circle)
+- Short gray arrows from each hollow dot pointing back to its corresponding solid dot (correction direction)
+- All arrows are short and clearly separated — no crossing
+- A green badge or label: "8/8 exact"
+- Title above: "Sub-08 (mild deuteranomaly)"
+
+PANEL (b) — "Sub-09: Moderate Distortion" (right half):
+Same circular hue space diagram but with dramatic compression:
+- 8 solid colored dots at original positions (full 360-degree circle, same as panel a)
+- 8 hollow dots COMPRESSED into roughly 96 degrees of arc (clustered in the 240–336 degree region of the circle)
+- THREE colors (green at 135, cyan at 180, blue at 225) are merged together at approximately 282 degrees — highlight this cluster with a RED dashed oval or circle
+- Arrows from the merged cluster back to their widely-separated original positions CROSS EACH OTHER — draw these crossing arrows in RED to emphasize structural impossibility
+- Other arrows (non-crossing) remain gray
+- A red badge or label: "3 colors merge → inversion impossible"
+- Title above: "Sub-09 (moderate protanomaly)"
+
+BOTTOM STRIP spanning full width:
+A compact 2x2 comparison table:
+|                | Sub-08 (Mild)              | Sub-09 (Moderate)              |
+| Retinal model  | Green checkmark, "8/8 exact" | Red X, "4/8 only (arc collapse)" |
+| Cortical model | Green checkmark, "8/8 exact" | Green checkmark, "8/8 exact"     |
+Below the table: an arrow or annotation: "Only the cortical-level model preserves bijectivity across severity levels"
+
+Visual requirements:
+- Clean academic style, white background, minimal decoration
+- Colors of the dots must match their actual hue names (red dot is red, blue dot is blue, etc.)
+- The contrast between panel (a) (wide arc, no crossing) and panel (b) (compressed arc, red crossing arrows) should be immediately visually striking
+- All text readable at print size, sans-serif font
+- ICML venue academic style
+
+Caption: Geometric collapse and correction limits. (a) Mild distortion: wide opponent arc preserved, all 8 colors admit exact pre-image inversion. Solid dots = healthy positions; hollow dots = distorted positions; gray arrows = correction directions. (b) Moderate distortion: arc compresses from 360 to 96 degrees; green, cyan, blue merge at ~282 degrees (red highlight), making exact inversion impossible. Red crossing arrows emphasize the structural impossibility. Bottom: the retinal Machado model achieves exact correction only for mild cases, while the cortical 2-Component model preserves bijectivity for both.

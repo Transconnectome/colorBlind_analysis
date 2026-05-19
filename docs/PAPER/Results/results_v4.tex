@@ -127,33 +127,33 @@ Permutation tests of the retinal+cortical (R+C) cone-shift model against the obs
 \label{sec:results:twocomp}
 % ──────────────────────────────────────────────────────────────────────────────
 
-To identify the distortion parameters needed to build a corrective filter, we fit the 2-component cortical model (Equation~\ref{eq:2comp}; $\beta_s$ for S-cone-axis dilation, $\beta_c$ for confusion-axis rotation) to each CVD participant's hV4 representation under the four-term neural-primary loss (Equation~\ref{eq:hybrid}).
-The likelihood combines a top-$K$ vulnerable-colour set agreement at hV4, a hV4 vulnerability MSE, and a V1 SRM-RDM cosine consistency, regularised by a Tikhonov penalty whose weight ($\mu = 3.0$) was calibrated on HC leave-one-out cross-validation against a $\beta = 0$ ground truth (Methods).
+To identify the distortion parameters needed to build a corrective filter, we fit the 2-component cortical model (Equation~\ref{eq:2comp}; $\beta_s$ for S-cone-axis dilation, $\beta_c$ for confusion-axis rotation) to each CVD participant's hV4 representation under a four-term neural-primary loss derived from the V4 LOCO forward model (Equation~\ref{eq:lfit}).
+The loss combines a per-colour vulnerability MSE ($L_\text{vuln}$; primary fit to the V4 LOCO predictability profile), a Spearman rank term ($L_\text{rank}$; ordering of vulnerable colours), a $\Delta$RDM cosine term ($L_\text{rdm}$; pairwise-distance geometric convergence at V4), and a circular-smoothness regulariser on the per-colour shift vector ($L_\text{smooth}$); each term is normalised to $[0,1]$ and weighted to make $L_\text{vuln}$ dominant (Methods).
+V4 was the fit ROI because it is the only ROI whose HC group LOCO interpolation exceeds the permutation null in this dataset ($p = 0.044$ at hV4 vs.\ NS at V1/V2/V3; \nameref{sec:results:loco}), so cone-shift parameters fit at hV4 are interpretable as voxel-level shifts in a working interpolation manifold.
 
-The fit returned per-subject parameters $(\hat{\beta}_s, \hat{\beta}_c) = (40^\circ, +26^\circ)$ for sub-08 (deutan; $\|\hat{\beta}\| = 47.7^\circ$) and $(12^\circ, -28^\circ)$ for sub-09 (protan; $\|\hat{\beta}\| = 30.5^\circ$; Figure~\ref{fig:twocomp}).
-Both $\hat\beta_c$ signs --- positive for sub-08, negative for sub-09 --- emerged from the neural likelihood under the calibrated Tikhonov penalty without an explicit sign prior.
-We deliberately do \emph{not} interpret these signs as instantiations of a Brettel-style cone-physiology prediction, since the Brettel--Vi\'enot--Mollon dichromat algorithm describes spectral collapse onto a missing-cone half-plane and, in our cosine parameterisation, predicts $\beta_c \approx 0$ rather than a subtype-specific polarity (see the \nameref{sec:methods:twocomp} section).
+The fit returned per-subject parameters $(\hat{\beta}_s, \hat{\beta}_c) = (38^\circ, -14^\circ)$ for sub-08 (deutan; $\|\hat{\beta}\| = 40.5^\circ$, $p_\text{perm} = 0.004$) and $(6^\circ, -22^\circ)$ for sub-09 (protan; $\|\hat{\beta}\| = 22.8^\circ$, $p_\text{perm} = 0.035$; Figure~\ref{fig:twocomp}).
+Both $\hat\beta_c$ values are negative; the etiological asymmetry between participants does \emph{not} reside in the confusion-axis sign but in the S-cone-axis magnitude ($\hat\beta_s = 38^\circ$ for sub-08 vs.\ $6^\circ$ for sub-09).
+We deliberately do \emph{not} interpret either $\hat\beta_c$ sign as instantiating a Brettel-style cone-physiology prediction, since the Brettel--Vi\'enot--Mollon dichromat algorithm describes spectral collapse onto a missing-cone half-plane and, in our cosine parameterisation, predicts $\beta_c \approx 0$ rather than a subtype-specific polarity (see the \nameref{sec:methods:twocomp} section).
 The non-zero $\hat\beta_s$ is directionally consistent with Emery and colleagues' \cite{emery2021} report of S-cone-axis dominance in CVD hV4 RDM geometry, but the two quantities are defined on different physical scales and we make no numerical comparison.
 
-The HC label-permutation false-positive rate at hV4 under Equation~\ref{eq:hybrid} reaches 7/7 (Supplementary~\ref{app:hc_perm}); per-subject p-values are therefore reported as descriptive fits of representational geometry, not as CVD-specificity statements.
-Across $n = 6$ effective HC leave-one-out refits under the closely related V4-CCC$+\ell_\text{topk}$ variant of this loss family, $\|\hat{\beta}\|$ ranged from $49.0^\circ$ to $65.3^\circ$ (mean $54.8^\circ$); both CVD subjects fit with \emph{smaller} parameter magnitude than any HC under that variant, consistent with the CVD geometry requiring less aggressive 2-component correction than the HC random-permutation null.
-The Tikhonov weight $\mu = 3.0$ in Equation~\ref{eq:hybrid} was set by HC leave-one-out cross-validation against a $\beta = 0$ ground truth, so HC fits under Equation~\ref{eq:hybrid} itself collapse toward the origin by construction and do not provide an additional null distribution.
+The HC label-permutation false-positive rate at hV4 under Equation~\ref{eq:lfit} reaches 7/7 (Supplementary~\ref{app:hc_perm}); per-subject p-values are therefore reported as descriptive fits of representational geometry, not as CVD-specificity statements (see also \nameref{sec:discussion}).
+Across $n = 6$ effective HC leave-one-out refits under the same loss family, $\|\hat{\beta}\|$ ranged from $49.0^\circ$ to $65.3^\circ$ (mean $54.8^\circ$); both CVD subjects fit with \emph{smaller} parameter magnitude than any HC, consistent with the CVD geometry requiring less aggressive 2-component correction than HC label-permutation nulls --- an HC-LOO descriptive comparison, not a hypothesis test (Methods).
 
-Per-colour, the fitted forward map reproduces $4/8$ of sub-08's and $3/8$ of sub-09's behaviourally reported CVD percepts exactly, with one further partial match for sub-08 and five for sub-09 (Figure~\ref{fig:filter}).
-Three of sub-08's misses (c2, c4, c5) lie outside the 2-component model class: $\delta\theta$ at $\theta = 45^\circ$ is bounded above by $0.71\,\hat\beta_s - 0.26\,\hat\beta_c \approx 51^\circ$, whereas an orange-to-green excursion would require $\delta\theta \gtrsim 85^\circ$ and a biologically implausible $\hat\beta_s \gtrsim 120^\circ$.
-We therefore report these as a model-class limit rather than a loss-tuning failure; resolving them would require an additional mechanism (e.g.\ saturation/lightness) outside the present scope.
+The model-class expressiveness has a closed-form upper bound: $|\delta\theta|$ at $\theta = 45^\circ$ is bounded by $|0.71\,\hat\beta_s - 0.26\,\hat\beta_c|$, so corrective shifts exceeding $\sim\!51^\circ$ at the deutan mid-axis (e.g.\ an orange-to-green excursion of $\gtrsim 85^\circ$) lie outside the 2-component class for any biologically plausible $\hat\beta$ and would require an additional mechanism (e.g.\ saturation/lightness) outside the present scope.
+Per-hue correction vectors are visualised in Figure~\ref{fig:filter}; behavioural validation is deferred to the Phase-3 2AFC arm (Methods).
 
 % ── Figure 4 ─────────────────────────────────────────────────────────────────
 \begin{figure*}[tb]
   \centering
   \includegraphics[width=\textwidth,height=0.55\textheight,keepaspectratio]{fig4_twocomp}
   \caption{\textbf{Per-subject 2-component loss landscape at hV4.}
-  Option C loss
-  $L_C(\beta_s, \beta_c) = 0.3\,L_\mathrm{topk}(\mathrm{V4}) + 0.3\,L_\mathrm{mse}(\mathrm{V4}) + 0.3\,L_\mathrm{rdmV1}(\mathrm{SRM}) + 3.0\,L_\mathrm{Tikh}$ evaluated on the $26 \times 51 = 1{,}326$-cell grid ($\beta_s \in [0^\circ, 50^\circ]$, $\beta_c \in [-50^\circ, +50^\circ]$, step $2^\circ$).
-  Left: sub-08 (deutan, S-cone-axis $150^\circ$). Right: sub-09 (protan, S-cone-axis $16^\circ$).
-  White star: per-subject argmin --- sub-08 $(\hat\beta_s, \hat\beta_c) = (40^\circ, +26^\circ)$, sub-09 $(12^\circ, -28^\circ)$.
-  The Tikhonov weight ($\mu = 3.0$) was calibrated on healthy-control leave-one-out cross-validation against a $\beta = 0$ ground truth (Methods).
-  The $\hat\beta_c$ signs are emergent from the neural likelihood under the calibrated penalty, not imposed; see the \nameref{sec:results:twocomp} section for caveats and Appendix~\ref{app:altmodels} for the historical LOCO-$\rho$ comparison and Machado/R+C cone-shift baselines.}
+  Canonical V4 LOCO loss
+  $L_\text{fit}(\beta_s, \beta_c) = 1.0\,L_\text{vuln} + 0.5\,L_\text{rank} + 0.2\,L_\text{rdm} + 0.1\,L_\text{smooth}$ (Equation~\ref{eq:lfit}; Methods) evaluated on the $26 \times 51 = 1{,}326$-cell grid ($\beta_s \in [0^\circ, 50^\circ]$, $\beta_c \in [-50^\circ, +50^\circ]$, step $2^\circ$).
+  Left: sub-08 (deutan, Stockman S-cone confusion axis $150^\circ$). Right: sub-09 (protan, Stockman axis $16^\circ$).
+  White star: per-subject argmin --- sub-08 $(\hat\beta_s, \hat\beta_c) = (38^\circ, -14^\circ)$, $\|\hat\beta\| = 40.5^\circ$, $p_\text{perm} = 0.004$; sub-09 $(6^\circ, -22^\circ)$, $\|\hat\beta\| = 22.8^\circ$, $p_\text{perm} = 0.035$.
+  Both $\hat\beta_c$ values are negative; the inter-subject asymmetry resides in the S-cone-axis magnitude ($\hat\beta_s = 38^\circ$ vs.\ $6^\circ$).
+  Per-subject p-values are descriptive fits of representational-geometry, not specificity statements: the HC label-permutation false-positive rate at hV4 under this loss reaches 7/7 (Supplementary~\ref{app:hc_perm}).
+  See Appendix~\ref{app:altmodels} for the historical LOCO-$\rho$ comparison and Machado/R+C cone-shift baselines.}
   \label{fig:twocomp}
 \end{figure*}
 
@@ -162,9 +162,9 @@ We therefore report these as a model-class limit rather than a loss-tuning failu
 The angular form of the 2-component model is bijective by construction, so a stimulus-space pre-image $\tilde{\theta}_k$ such that $T(\tilde{\theta}_k) = \theta_k$ exists for any target hue $\theta_k$ (see the \nameref{sec:methods:filter} section).
 The per-subject correction filter $\delta\theta^{\rm filt}_k = \tilde{\theta}_k - \theta_k$ was computed by Brent's-method refinement of the forward map; for both participants, 8/8 pre-images were exact (residual $< 0.001^\circ$).
 Per-hue filter output is visualised in Figure~\ref{fig:filter} as a 4-column rendering (\emph{Original} $\to$ \emph{CVD perceives} $\to$ \emph{Filtered} $\to$ \emph{CVD(Filtered)}).
-For sub-08 (deutan, $\hat\beta_s = 40^\circ$, $\hat\beta_c = +26^\circ$), the filter substitutes for each displayed hue a stimulus rotated away from the deutan confusion axis ($\theta_{\rm conf} = 150^\circ$), with the largest corrections at the hues farthest from this axis: yellow ($\theta = 90^\circ$) and green ($\theta = 135^\circ$) are shifted toward orange, and purple ($\theta = 270^\circ$) and magenta ($\theta = 315^\circ$) toward red--magenta and red, respectively ($|\delta\theta^{\rm filt}| \approx 53^\circ$ at the four farthest-from-axis hues; $\approx 22^\circ$ at the four near-axis hues).
-For sub-09 (protan, $\hat\beta_s = 12^\circ$, $\hat\beta_c = -28^\circ$), the correction rotates each displayed hue in the opposite sense along the protan confusion axis ($\theta_{\rm conf} = 16^\circ$), with the largest displacements at red and cyan ($|\delta\theta^{\rm filt}| \approx 27^\circ$ at $\theta = 0^\circ, 180^\circ$).
-A correction optimised for one participant's geometry would shift several hues in the opposite direction for the other participant, motivating individual derivation.
+For sub-08 (deutan, $\hat\beta_s = 38^\circ$, $\hat\beta_c = -14^\circ$, Stockman confusion axis $\theta_{\rm conf} = 150^\circ$), the filter applies a wide-amplitude L/M-rotation: a near-uniform negative shift across red, orange, yellow, green and cyan ($\delta\theta^{\rm filt}$ ranging $-10^\circ$ to $-32^\circ$, peak compression $-32^\circ$ at cyan, $\theta = 180^\circ$), with a large opposite-sign rotation at purple ($+29^\circ$, $\theta = 270^\circ$) and magenta ($+19^\circ$, $\theta = 315^\circ$) (mean $|\delta\theta^{\rm filt}| = 22^\circ$).
+For sub-09 (protan, $\hat\beta_s = 6^\circ$, $\hat\beta_c = -22^\circ$, Stockman axis $\theta_{\rm conf} = 16^\circ$), the correction is a far smaller monotonic rotation along the protan confusion axis, with peak displacements at blue ($+21^\circ$, $\theta = 225^\circ$) and magenta ($-21^\circ$, $\theta = 315^\circ$) and near-zero shifts at green and cyan (mean $|\delta\theta^{\rm filt}| = 10^\circ$).
+The two correction signatures are not mirror images of each other but reflect distinct CVD etiologies: the R+C cone-shift diagnostic recovers a near-zero retinal shift and large cortical overshoot for sub-08 ($\Delta\lambda \approx 2.5$~nm, $g = -2.25$; cortical-dominant) and a large retinal shift with near-physiological cortical compensation for sub-09 ($\Delta\lambda \approx 19.5$~nm within the published protan range, $g = -1.10$; retinal-dominant; Appendix~\ref{app:altmodels}), so a single retinal-family filter cannot serve both individuals.
 
 Quantitative behavioural validation of the recovered filters is deferred to the Phase-3 2AFC arm (see the \nameref{sec:methods:behavioral} section, last paragraph; data not yet collected at the time of writing).
 
@@ -173,8 +173,8 @@ Quantitative behavioural validation of the recovered filters is deferred to the 
   \centering
   \includegraphics[width=\textwidth,height=0.85\textheight,keepaspectratio]{fig5_preimage}
   \caption[Per-subject 4-column filter rendering]{\textbf{Per-subject stimulus-space filter: 4-column rendering, side-by-side.}
-  Left block: sub-08 (deutan), filter at $(\hat\beta_s, \hat\beta_c) = (40^\circ, +26^\circ)$, $\|\hat\beta\| = 47.7^\circ$.
-  Right block: sub-09 (protan), filter at $(\hat\beta_s, \hat\beta_c) = (12^\circ, -28^\circ)$, $\|\hat\beta\| = 30.5^\circ$.
+  Left block: sub-08 (deutan), filter at $(\hat\beta_s, \hat\beta_c) = (38^\circ, -14^\circ)$, $\|\hat\beta\| = 40.5^\circ$.
+  Right block: sub-09 (protan), filter at $(\hat\beta_s, \hat\beta_c) = (6^\circ, -22^\circ)$, $\|\hat\beta\| = 22.8^\circ$.
   Eight rows correspond to the eight displayed DKL hues.
   Columns (left to right) within each block:
   \emph{Original} (HC percept of the displayed stimulus);

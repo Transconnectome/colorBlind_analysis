@@ -1,0 +1,21 @@
+Create a 2-panel figure for an ICML full-width appendix (6.75 x 2.8 inches, 300 DPI).
+
+Panel (a) — Forest plot (wider, ratio 1.6):
+- 7 HC subjects on y-axis, p-value on x-axis (log scale)
+- Three marker series: Machado (circle, blue), R+C (square, orange), 2-Comp (triangle, green)
+- Vertical dashed red line at p=0.05 with light red shading for FP zone (left of line)
+- "FP zone" italic label inside the shaded area
+- Legend inside panel, compact
+- Footer text below x-axis: "Expected FP at α=0.05: 1.05/21. Observed: 15/21"
+
+Panel (b) — Bar chart (narrower, ratio 1.0):
+- 3 bars: Machado (3/7=43%), R+C (5/7=71%), 2-Comp (7/7=100%)
+- Fraction labels (3/7, 5/7, 7/7) above each bar
+- Dashed reference line at 5% ("Nominal α=5%") and dotted line at 14.3% ("1/7")
+- Reference line labels must be FULLY VISIBLE (not clipped at right edge)
+- Footer: "Higher DOF → higher FP. 2-Comp specificity requires caution."
+
+Key requirements:
+- All text and labels must be fully visible with no clipping or overlap
+- Clean academic style, no top/right spines
+- Publication-quality at 300 DPI

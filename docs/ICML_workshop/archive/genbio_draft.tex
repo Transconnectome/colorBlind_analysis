@@ -1,0 +1,389 @@
+%%%%%%%% GenBio @ ICML 2026 — Workshop Draft %%%%%%%%%%%%%%%%%
+
+\documentclass{article}
+
+% Recommended, but optional, packages for figures and better typesetting:
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage{subcaption}
+\usepackage{booktabs} % for professional tables
+
+\usepackage{hyperref}
+
+\newcommand{\theHalgorithm}{\arabic{algorithm}}
+
+% Use the following line for the initial blind version submitted for review:
+\usepackage{icml2026}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{amsthm}
+\usepackage{xcolor}
+
+\usepackage[capitalize,noabbrev]{cleveref}
+
+% Placeholder command for figures not yet created
+\newcommand{\figplaceholder}[2]{%
+  \begin{center}
+    \fbox{\parbox{#1}{\centering\vspace{2em}\textcolor{gray}{\textbf{[FIGURE PLACEHOLDER]}\\#2}\vspace{2em}}}
+  \end{center}
+}
+
+\icmltitlerunning{Retina-Inspired Forward Models for Neural Color Distortions}
+
+\begin{document}
+
+\twocolumn[
+  \icmltitle{Retina-Inspired Forward Models Reveal Subject-Specific \\
+    Neural Color Distortions and Their Restoration Limits}
+
+  \icmlsetsymbol{equal}{*}
+
+  \begin{icmlauthorlist}
+    \icmlauthor{Anonymous Authors}{anon}
+  \end{icmlauthorlist}
+
+  \icmlaffiliation{anon}{Anonymous Institution}
+
+  \icmlcorrespondingauthor{Anonymous Author}{anonymous@example.com}
+
+  \icmlkeywords{color vision deficiency, forward encoding model, fMRI, cortical representation, personalized correction}
+
+  \vskip 0.3in
+]
+
+\printAffiliationsAndNotice{}
+
+\begin{abstract}
+Color vision deficiency (CVD) produces measurable distortions in cortical color geometry, yet the degree to which these distortions can be corrected through stimulus-space interventions remains poorly understood.
+We fit three mechanistic forward models---a retinal cone-shift model, a retinal-plus-cortical gain model, and a cortical angular dilation model---to fMRI data from 10 participants (7 healthy controls, 3 CVD) across visual areas V1, V2, and hV4, evaluating each model against two complementary criteria: per-color interpolation accuracy (LOCO) and pairwise distance geometry ($\Delta$RDM).
+All models converge on \emph{detecting} distortion in CVD subjects while diverging in the \emph{direction} of prescribed corrections.
+Critically, the cortical 2-component model is the only model achieving dual validation across both criteria for both CVD subjects, and the only model for which exact stimulus-space restoration is mathematically guaranteed via bijective pre-image inversion.
+The retinal cone-shift model, despite higher interpolation accuracy for one subject, produces irreversible arc compression (360$^\circ \to$ 96$^\circ$) that precludes exact restoration---reducing the problem to discriminability recovery.
+These findings reveal that geometry-fitting alone does not guarantee cognitive or behavioral utility, and that individual differences in collapse severity expose biologically meaningful heterogeneity in CVD that determines whether full restoration or only partial correction is achievable.
+\end{abstract}
+
+%==============================================================================
+\section{Introduction}
+\label{sec:intro}
+%==============================================================================
+
+Color vision deficiency (CVD) affects approximately 8\% of males and 0.5\% of females worldwide, arising from altered spectral sensitivity of retinal cone photoreceptors \cite{placeholder_machado2009}.
+While the retinal basis of CVD is well characterized, how these retinal changes propagate through cortical visual processing---and whether they can be reversed---remains an open question with direct implications for assistive technology design.
+
+Commercial spectral filter approaches (e.g., EnChroma-type glasses) operate at the pre-retinal level, applying a fixed, generic spectral notch.
+Recent evidence suggests these filters improve \emph{appearance} but fail to improve \emph{discrimination} \cite{placeholder_somers2024}, motivating the search for individually-tailored, cortical-aware correction strategies.
+
+In this work, we pursue a complementary approach: fitting mechanistic forward models that map stimulus hue angles through retinal and cortical processing stages, then inverting these models to derive subject-specific stimulus-space corrections.
+Our key contributions are:
+\begin{enumerate}
+    \item A systematic comparison of three nested forward models (1--2 DOF each) evaluated against two complementary neural criteria---per-color interpolation accuracy (LOCO) and pairwise distance geometry ($\Delta$RDM)---revealing that detection converges across models but correction direction diverges.
+    \item Demonstration that a cortical-level 2-component model achieves \emph{dual validation} across both criteria for both CVD subjects, while the physiologically-grounded cone-shift model fails structurally for one subject due to opponent-space arc compression.
+    \item A severity-dependent restoration framework showing that the feasibility of exact correction depends critically on whether distortion is modeled at the retinal or cortical level---with practical implications for when stimulus-space correction suffices versus when spectral intervention is required.
+\end{enumerate}
+
+%==============================================================================
+\section{Methods}
+\label{sec:methods}
+%==============================================================================
+
+\subsection{Data and Preprocessing}
+
+We acquired fMRI data from 10 participants (7 healthy controls [HC], 3 CVD: sub-08 deutan, sub-09 protan, sub-10 mild deutan) viewing 8 equiluminant hues spanning the CIELab color wheel (45$^\circ$ spacing) across 6 runs.
+Data were preprocessed with fMRIPrep and projected to retinotopically-defined ROIs (V1, V2, hV4).
+Voxel-level beta amplitudes were Procrustes-aligned across subjects, and a Shared Response Model (SRM; $K$=3--4) was trained on HC data only to provide a common evaluation space \cite{placeholder_chen2015}.
+
+\subsection{Forward Models}
+
+We compared three forward models of increasing mechanistic specificity (see \cref{fig:models}):
+
+\paragraph{Machado Cone Shift (1 DOF).}
+A physiological model of anomalous trichromacy \cite{placeholder_machado2009}:
+\begin{equation}
+L_a(\lambda) = \alpha \cdot L(\lambda - \Delta\lambda) + (1-\alpha) \cdot k_L \cdot M(\lambda)
+\label{eq:machado}
+\end{equation}
+where $\Delta\lambda \in [0, 20]$~nm captures the spectral peak shift of the affected cone class. This model operates at the retinal level and predicts hue distortion through altered cone opponency.
+
+\paragraph{Retinal + Cortical Gain (R+C, 2 DOF).}
+Extends the cone-shift model with a cortical opponent-channel gain parameter $g$:
+\begin{equation}
+rg' = rg_{\text{base}} + (1+g) \cdot (rg_{\text{ret}} - rg_{\text{base}})
+\label{eq:rc}
+\end{equation}
+where $g=0$ is pure retinal, $g=-1$ is exact cortical compensation, and $g<-1$ indicates overcompensation consistent with long-term adaptation \cite{placeholder_tregillus2021}.
+
+\paragraph{2-Component Angular Dilation (2 DOF).}
+A cortical-level effective model:
+\begin{equation}
+\theta'(c) = \theta(c) + \beta_s \cos(\theta(c) - 90^\circ) + \beta_c \cos(\theta(c) - \theta_{\text{conf}})
+\label{eq:2comp}
+\end{equation}
+where $\beta_s$ captures S-cone axis expansion and $\beta_c$ captures CVD family-specific confusion-axis modulation ($\theta_{\text{conf}} = 16^\circ$ protan, $150^\circ$ deutan).
+
+\begin{figure}[t]
+  \vskip 0.2in
+  \figplaceholder{\columnwidth}{%
+    \textbf{Figure 1: Forward Model Pipeline}\\[0.5em]
+    \small Schematic: Stimulus $\theta$ $\to$ Retinal processing (Machado $\Delta\lambda$) $\to$ Cortical gain (R+C $g$) / Angular dilation (2-Comp $\beta_s, \beta_c$) $\to$ Predicted distortion $\theta'$ $\to$ Forward encoding $\hat{y}$ $\to$ LOCO \& $\Delta$RDM evaluation.
+    Three nested models shown with increasing cortical involvement.
+  }
+  \caption{Pipeline schematic. Stimulus hue angles pass through retinal and cortical processing stages. Each model predicts a distorted hue angle $\theta'$, which is projected to neural activity via a forward encoding model (ridge regression on Fourier basis channels) and evaluated against observed CVD patterns using two complementary criteria.}
+  \label{fig:models}
+  \vskip -0.1in
+\end{figure}
+
+\subsection{Evaluation Criteria}
+
+We evaluate models against two complementary neural criteria:
+
+\paragraph{LOCO (Leave-One-Color-Out).}
+A forward encoding model (ridge regression on Fourier basis channels) is trained on 7 of 8 colors and predicts the held-out color's voxel pattern.
+The multi-objective loss $\mathcal{L}_{\text{LOCO}} = \alpha \mathcal{L}_{\text{vuln}} + \beta \mathcal{L}_{\text{rank}} + \delta \mathcal{L}_{\text{rdm}} + \epsilon \mathcal{L}_{\text{smooth}}$ measures per-color interpolation vulnerability, directly relevant to filter design.
+Statistical significance is assessed via 8! exact permutation tests.
+
+\paragraph{$\Delta$RDM (Representational Distance Matrix Difference).}
+The pairwise distance structure $\Delta\text{RDM} = \text{RDM}_{\text{CVD}} - \overline{\text{RDM}}_{\text{HC}}$ captures geometric distortion.
+We maximize the cosine similarity between simulated and observed $\Delta$RDMs, with significance via exact permutation and bootstrap confidence intervals ($n=500$).
+
+\subsection{Pre-Image Filter Derivation}
+
+Given a fitted forward model $D: \theta \to \theta'$, we seek the pre-image $\theta_{\text{in}}^* = \arg\min_\theta |D(\theta) - \theta_{\text{target}}|$ via coarse grid search (1$^\circ$ resolution over 360$^\circ$) followed by Brent refinement.
+This yields a per-color stimulus correction lookup table implementable on any digital display.
+
+%==============================================================================
+\section{Results}
+\label{sec:results}
+%==============================================================================
+
+\subsection{Detection Converges, Correction Diverges}
+
+All three models successfully detect hue interpolation distortion in both CVD subjects while correctly identifying the control subject as undistorted (\cref{tab:detection}).
+However, the per-color correction directions ($\delta\theta$) prescribed by each model diverge substantially (Spearman $\rho = -0.714$ between R+C and 2-component, $p = 0.047$), with only 4/8 colors showing sign agreement (\cref{fig:divergence}).
+
+\begin{table}[t]
+  \caption{Detection-level convergence: hV4 LOCO permutation $p$-values across models.  All models detect CVD distortion while maintaining specificity for the control subject.}
+  \label{tab:detection}
+  \begin{center}
+    \begin{small}
+      \begin{tabular}{lccc}
+        \toprule
+        Model & Sub-08 & Sub-09 & Sub-10 \\
+              & (deutan) & (protan) & (control) \\
+        \midrule
+        Machado (1 DOF)    & 0.058    & \textbf{0.018*} & 0.559 \\
+        R+C (2 DOF)        & \textbf{0.005**}  & 0.018*          & ---   \\
+        2-Comp (2 DOF)     & \textbf{0.004**}  & 0.035*          & 0.058 \\
+        Fourier (4 DOF)    & 0.0002$^\dagger$  & 0.018*          & ---   \\
+        \bottomrule
+      \end{tabular}
+    \end{small}
+  \end{center}
+  {\footnotesize $^\dagger$Overfitting ceiling (4 DOF on 8 colors). Bold: $p < 0.01$.}
+  \vskip -0.1in
+\end{table}
+
+\begin{figure}[t]
+  \vskip 0.2in
+  \figplaceholder{\columnwidth}{%
+    \textbf{Figure 2: Detection--Correction Dissociation}\\[0.5em]
+    \small Left: Radar/bar plot of per-color $\delta\theta$ for sub-08 across Machado, R+C, and 2-Component.
+    Sign agreement in 4/8 colors only.
+    Right: Spearman rank correlation of vulnerability profiles across models (high) vs.\ $\delta\theta$ direction correlation (negative).
+  }
+  \caption{All models agree on \emph{which} colors are vulnerable (vulnerability rank $\rho > 0.7$) but disagree on \emph{how} to correct them ($\delta\theta$ Spearman $\rho = -0.714$). This dissociation between detection and correction is a central finding.}
+  \label{fig:divergence}
+  \vskip -0.1in
+\end{figure}
+
+\subsection{Dual Validation: 2-Component as the Only Cross-Criterion Model}
+
+The 2-component angular dilation model is the only model achieving statistical significance on \emph{both} LOCO and $\Delta$RDM criteria for \emph{both} CVD subjects (\cref{tab:dual}).
+For sub-08, it achieves the strongest hV4 LOCO fit ($\rho = 0.881$, $p = 0.004$) and V1 LOCO ($\rho = 0.929$, $p = 0.001$).
+For sub-09, it achieves the strongest V1 $\Delta$RDM result in the entire pipeline (crossnobis $p = 0.007$).
+
+\begin{table}[t]
+  \caption{Dual validation: model $\times$ criterion coverage. The 2-component model is the only one significant across both LOCO and $\Delta$RDM for both CVD subjects.}
+  \label{tab:dual}
+  \begin{center}
+    \begin{small}
+      \begin{tabular}{lcc}
+        \toprule
+        & \multicolumn{2}{c}{Sub-08 (deutan)} \\
+        \cmidrule(lr){2-3}
+        Model & hV4 LOCO & V1 $\Delta$RDM \\
+        \midrule
+        Machado    & 0.058        & $-0.275^\ddagger$ \\
+        R+C        & 0.005**      & 0.179      \\
+        2-Comp     & \textbf{0.004**}  & CI excl.\ 0 \\
+        \midrule
+        & \multicolumn{2}{c}{Sub-09 (protan)} \\
+        \cmidrule(lr){2-3}
+        Model & hV4 LOCO & V1 $\Delta$RDM \\
+        \midrule
+        Machado    & 0.018*       & 0.091$^\ddagger$ \\
+        R+C        & $=$ Machado  & \textbf{0.026*} \\
+        2-Comp     & 0.035*       & \textbf{0.007***} \\
+        \bottomrule
+      \end{tabular}
+    \end{small}
+  \end{center}
+  {\footnotesize $^\ddagger$Cosine similarity value (not $p$); negative = anti-correlated.}
+  \vskip -0.1in
+\end{table}
+
+A remarkable cross-subject convergence emerges in the $\beta_s$ (S-cone expansion) parameter: sub-08 (deutan) $\beta_s = 20.0^\circ \pm 8.0^\circ$, sub-09 (protan) $\beta_s = 23.0^\circ \pm 10.2^\circ$, yielding a cross-subject mean of $\sim$21.5$^\circ$---within 0.1$^\circ$ of the 21.4$^\circ$ B-Y rotation independently reported from behavioral hue-scaling in CVD individuals \cite{placeholder_emery2021}.
+
+\subsection{Severity-Dependent Restoration Feasibility}
+
+The most consequential finding concerns restoration feasibility (\cref{fig:preimage}).
+Under the Machado cone-shift model, a $\Delta\lambda = 13.5$~nm protan shift compresses the 360$^\circ$ opponent-space arc to approximately 96$^\circ$, merging three hues (green, cyan, blue) into a single perceived angle ($\sim$282$^\circ$).
+This compression is \emph{irreversible}: no stimulus rearrangement can map three distinct target angles to a single perceived output.
+Only 4/8 colors admit exact pre-image solutions; the remaining 4 require discriminability-oriented optimization (min-separation maximization), achieving 5.6$\times$ improvement over the unfiltered state but reaching only 48\% of the theoretical maximum.
+
+In contrast, the 2-component model operates via angular dilation in opponent hue space, a transformation that is bijective by construction.
+Both CVD subjects achieve 8/8 exact pre-image solutions with residual error $< 0.001^\circ$ (\cref{tab:preimage}).
+
+\begin{table}[t]
+  \caption{Pre-image filter feasibility across models. The 2-component model achieves exact restoration for both subjects, while the Machado model fails structurally for sub-09 due to arc compression.}
+  \label{tab:preimage}
+  \begin{center}
+    \begin{small}
+      \begin{tabular}{lccc}
+        \toprule
+        Model & Sub-08 & Sub-09 & Guarantee \\
+        \midrule
+        Machado   & 8/8 exact  & 4/8 (FAIL)  & Severity-dependent \\
+        R+C       & 8/8 exact  & $=$ Machado & Severity-dependent \\
+        2-Comp    & 8/8 exact  & 8/8 exact   & \textbf{Always bijective} \\
+        \bottomrule
+      \end{tabular}
+    \end{small}
+  \end{center}
+  \vskip -0.1in
+\end{table}
+
+\begin{figure}[t]
+  \vskip 0.2in
+  \figplaceholder{\columnwidth}{%
+    \textbf{Figure 3: Pre-Image Restoration}\\[0.5em]
+    \small Top: Sub-08 color wheel---inner ring = original stimulus, middle = modified (pre-image), outer = expected perceived.
+    All 8 colors restored ($<0.001^\circ$ error).\\
+    Bottom: Sub-09 under Machado---arc compression from $360^\circ$ to $\sim96^\circ$.
+    Colors c4--c7 collapse to $\sim282^\circ$; exact inversion impossible for 4/8 colors.
+    Separation-optimized filter achieves $5.6\times$ improvement but cannot fully restore.
+  }
+  \caption{Severity-dependent filter feasibility. Mild CVD (sub-08) admits exact correction under all models. Moderate CVD (sub-09) is restorable only under the 2-component cortical model; the retinal cone-shift model produces irreversible arc compression.}
+  \label{fig:preimage}
+  \vskip -0.1in
+\end{figure}
+
+\subsection{Biological Plausibility and Parameter Interpretation}
+
+The fitted parameters show mixed biological plausibility (\cref{tab:bio}).
+Sub-09's retinal shift ($\Delta\lambda = 13.5$~nm) and cortical gain ($g = -1.10$, i.e., 10\% overcompensation) fall within established ranges \cite{placeholder_machado2009, placeholder_tregillus2021}.
+However, sub-08's hV4 gain ($g = +2.25$, 3.25$\times$ amplification) has no direct precedent, and the sign flip between V1 ($g < 0$, overcompensation) and hV4 ($g > 0$, amplification) suggests hierarchical processing that current models do not mechanistically explain.
+
+\begin{table}[t]
+  \caption{Biological plausibility of fitted parameters.}
+  \label{tab:bio}
+  \begin{center}
+    \begin{small}
+      \begin{tabular}{lccc}
+        \toprule
+        Parameter & Value & Literature & Match \\
+        \midrule
+        Sub-08 $\Delta\lambda$ & 2.0 nm & 1--4 nm & \checkmark \\
+        Sub-09 $\Delta\lambda$ & 13.5 nm & 9--14 nm & \checkmark \\
+        $\beta_s$ (both) & 20--23$^\circ$ & 21.4$^\circ$ & \checkmark \\
+        Sub-09 $g$ (V1) & $-1.10$ & 20--40\% overcomp & \checkmark \\
+        Sub-08 $g$ (hV4) & $+2.25$ & No precedent & $\times$ \\
+        \bottomrule
+      \end{tabular}
+    \end{small}
+  \end{center}
+  \vskip -0.1in
+\end{table}
+
+%==============================================================================
+\section{Discussion}
+\label{sec:discussion}
+%==============================================================================
+
+\subsection{Critical Assessment of the Framework}
+
+Our results demonstrate that retina-inspired forward models can capture subject-specific neural color distortions, but several limitations temper the strength of these conclusions.
+
+\paragraph{Small sample size.}
+With only 3 CVD subjects (2 affected, 1 control), we cannot draw population-level inferences.
+The framework demonstrates proof-of-concept at the individual level, but generalization requires larger cohorts.
+
+\paragraph{Model identifiability.}
+The 2-component model's dual validation does not imply mechanistic correctness.
+Its parameters ($\beta_s$, $\beta_c$) are effective descriptors of angular distortion, not direct measurements of physiological quantities.
+The convergence of $\beta_s \approx 21.5^\circ$ with behavioral literature \cite{placeholder_emery2021} is striking but could reflect a shared confound (e.g., common perceptual geometry) rather than a common mechanism.
+
+\paragraph{Detection--correction gap.}
+Our central finding---that all models detect the same distortion but prescribe divergent corrections---has a sobering implication: \emph{fitting neural geometry does not uniquely determine the optimal intervention}.
+The correction depends critically on the model's mechanistic assumptions (retinal vs.\ cortical locus), and behavioral validation (not yet conducted) is required to arbitrate between competing filter prescriptions.
+
+\paragraph{Bijectivity is necessary but not sufficient.}
+The 2-component model guarantees exact pre-image inversion because its forward map is bijective.
+However, bijectivity ensures only mathematical invertibility, not perceptual correctness.
+If the forward model is misspecified---i.e., the true distortion is not an angular dilation---then the exact pre-image of a wrong model is an exact wrong correction.
+The lower LOCO $\rho$ of 2-component vs.\ Machado for sub-09 (0.690 vs.\ 0.762) highlights this tension: the more \emph{accurate} forward model (Machado) is the one whose inverse \emph{does not exist}.
+
+\paragraph{Heterogeneity as a feature, not a limitation.}
+The dissociation between sub-08 (mild deutan: exact correction under all models) and sub-09 (moderate protan: correction depends on modeling level) is not merely a limitation of small samples.
+It reflects genuine biological heterogeneity: the degree of cortical geometric collapse---determined by CVD severity and type---fundamentally constrains what correction strategies are feasible.
+This individual variability is precisely what generic commercial filters cannot address.
+
+\subsection{Relation to Prior Work}
+
+Our approach extends the seminal forward encoding framework of Brouwer \& Heeger, who demonstrated leave-one-color-out reconstruction in V4 and VO1 for healthy observers \cite{placeholder_brouwer2009}.
+We add to this framework (i) application to CVD with individual-level fitting, (ii) mechanistic models spanning retinal-to-cortical processing stages, and (iii) explicit pre-image inversion for filter derivation.
+The distinction between discrimination (preserved in CVD; LORO $p = 0.668$) and continuous interpolation (impaired; LOCO hV4 $p = 0.017$) aligns with findings that CVD individuals maintain categorical but not continuous color representations \cite{placeholder_bannert2018}.
+
+%==============================================================================
+\section{Conclusion}
+\label{sec:conclusion}
+%==============================================================================
+
+We present a framework for fitting, comparing, and inverting mechanistic forward models of color vision deficiency at the neural level.
+Our findings support three conclusions: (1) retinal cone-shift signatures leave measurable traces in cortical color geometry that can be captured by mechanistic models; (2) however, geometry-fitting accuracy does not uniquely determine the optimal correction, as models with comparable detection performance prescribe divergent interventions; and (3) individual differences in severity and distortion type determine whether exact restoration (mild CVD, or cortical-level modeling) or discriminability-oriented correction (severe CVD under retinal models) is the achievable outcome.
+
+The critical remaining step is behavioral validation: comparing the filter prescriptions of competing models in a perceptual discrimination task to determine which mathematical correction actually improves human color vision.
+
+\begin{figure*}[t]
+  \vskip 0.2in
+  \figplaceholder{\textwidth}{%
+    \textbf{Figure 4: Summary --- The Restoration Feasibility Landscape}\\[0.5em]
+    \small A 2$\times$2 matrix: (rows) modeling level [retinal vs.\ cortical]; (columns) CVD severity [mild vs.\ moderate--severe].\\
+    Mild + Retinal: Exact restoration (8/8). Mild + Cortical: Exact restoration (8/8), larger corrections.\\
+    Moderate + Retinal: Arc compression $\to$ 4/8 only, discriminability optimization. Moderate + Cortical: Exact restoration (8/8), bijective.\\
+    Arrow: ``The choice of modeling level determines the feasibility boundary, not just the accuracy.''
+  }
+  \caption{The restoration feasibility landscape. CVD severity and modeling level jointly determine whether exact stimulus-space correction is achievable. The retinal cone-shift model (top row) produces irreversible arc compression for moderate--severe CVD, while the cortical angular dilation model (bottom row) maintains bijectivity regardless of severity. This interaction reveals that the modeling level is not merely a methodological choice but a substantive claim about the locus of distortion.}
+  \label{fig:landscape}
+  \vskip -0.1in
+\end{figure*}
+
+%==============================================================================
+\section*{Impact Statement}
+%==============================================================================
+
+This work develops personalized neural models of color vision deficiency with the goal of informing assistive technology design.
+Potential positive impacts include individually-tailored color corrections for digital displays, AR/VR systems, and accessibility tools.
+We note that our framework currently requires fMRI data acquisition, limiting near-term clinical scalability.
+Any future deployment should include careful behavioral validation and informed consent, as incorrect color corrections could impair rather than improve visual function.
+The finding that commercial spectral filters may not improve discrimination underscores the importance of evidence-based evaluation of assistive technologies.
+
+%==============================================================================
+% References — placeholder entries; real citations to be added
+%==============================================================================
+
+\bibliography{genbio_draft}
+\bibliographystyle{icml2026}
+
+\end{document}

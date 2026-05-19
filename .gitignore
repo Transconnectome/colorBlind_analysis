@@ -171,6 +171,14 @@ docs/ICML_workshop/**/*.synctex*
 docs/OHBM_abstract/Figures.pptx
 docs/OHBM_abstract/priorworks/Rina(pre)_fMRI_CVDwisediff.pdf
 
+# Block all citation/prior-work PDFs anywhere in docs/
+# (literature references should be cited via DOI in tex, not committed as binaries)
+docs/**/priorworks/
+docs/**/Prior_works/
+docs/**/priorwork/
+docs/**/citations/
+docs/**/references/
+
 # But ignore other PDFs
 *.pdf
 !docs/PAPER/**/*.pdf

@@ -83,7 +83,7 @@ Total free parameters: 1 (g)
 | **Cone spectral sensitivity formula** | Lamb 1995 — pigment template formula | Cited in Boehm 2014 (NB verified) |
 | **Multiplicative cortical gain (mechanism)** | Boehm, MacLeod & Bosten 2014 | NB verified (date 2026-05-20): "applying a multiplicative gain (an elliptical stretch of the color space), which boosts saturation" — 단 *exact equation form* 은 NB 발췌 내 부재 |
 | **Cortical hierarchy (V1 reduction → V2v/V3v amplification)** | Tregillus et al. 2021 | NB verified: "reduced L versus M signal strength is proportional to the reduction in L versus M contrast detection thresholds" |
-| **Post-receptoral gain mechanism (theoretical scaffold)** | Emery, Isherwood & Webster 2022 (JOSA A "Gaining the system") | ⏳ NB added 2026-05-21, full verification pending |
+| **Post-receptoral gain mechanism (theoretical scaffold)** | Emery, Isherwood & Webster 2022 (JOSA A "Gaining the system") | ★ NB verified 2026-05-21 (subagent verification): theoretical scaffold for cortical gain mechanism, citation upgrade only |
 
 ### §2.3 정당성 — 각 component 의 직접 quote
 
@@ -107,6 +107,13 @@ Boehm 2014 (NB verified):
 > "postreceptoral amplification, operating prior to the compressive transformation, that makes the normal and anomalous postreceptoral representations of color quantitatively comparable"
 
 Tregillus 2021 (NB verified): V2v/V3v 에서 sc > 1 (cortical amplification 직접 측정).
+
+Emery, Isherwood & Webster 2022 (NB-verified 2026-05-21, Fig 1 legend):
+> "Gain on the L-M responses independently increased twenty-fold in order to match the range of responses for luminance and chromatic signals"
+>
+> (p.5) "residual loss in chromatic contrast and an increased response to achromatic contrast"
+
+→ Emery 2022 는 *forward simulation* 으로 post-receptoral gain 의 *상대 민감도 변화 + achromatic axis-leak* 을 직접 보여줌. 우리 g 의 *theoretical scaffold* (mechanism class 의 존재성 grounding) — *parametric value comparison 아님* (NB verified citation upgrade only).
 
 → 우리 g 는 *post-receptoral 보상* 의 *conceptual* same role. **단 mathematical form 의 *완전한* literature equivalence 는 미입증** (§2.5 참조).
 
@@ -275,25 +282,38 @@ NotebookLM + 광범위 외부 검색 (2 search agents) 결과:
 └──────────────────────────────────────────────────────┘
 ```
 
-### §4.1 AICc-based model comparison (사용자 #1 요구)
+### §4.1 AICc + BIC-based model comparison (DOF-fair) (사용자 #1 요구)
 
-DOF 가 다른 두 model 의 *fair* 비교 위해 AICc:
+DOF 가 다른 두 model 의 *fair* 비교 위해 AICc + BIC 둘 다 reporting:
 
 ```
 AICc = n · log(RSS/n) + 2k + 2k(k+1)/(n-k-1)
+BIC  = n · log(RSS/n) + k · log(n)
        n = data points (8 colors), k = free parameters
        RSS = residual sum of squares
 
-For R+C (k=1):  AICc_RC = 8·log(RSS_RC/8) + 2 + 6/(8-1-1)
+For R+C (k=1):    AICc_RC = 8·log(RSS_RC/8) + 2 + 6/(8-1-1)
+                  BIC_RC  = 8·log(RSS_RC/8) + 1·log(8)
 For 2-Comp (k=2): AICc_2C = 8·log(RSS_2C/8) + 4 + 12/(8-2-1)
+                  BIC_2C  = 8·log(RSS_2C/8) + 2·log(8)
 
 ΔAICc = AICc_RC − AICc_2C
   < -2: R+C decisively preferred
   -2 ~ +2: indistinguishable
   > +2: 2-Comp preferred
+
+ΔBIC = BIC_RC − BIC_2C
+  < -6:  R+C strongly preferred
+  -6 ~ -2: R+C moderately preferred
+  -2 ~ +2: indistinguishable
+  +2 ~ +6: 2-Comp moderately preferred
+  > +6:  2-Comp strongly preferred
+  > +10: very strong evidence for 2-Comp
 ```
 
-**Per-subject 별도 AICc** + **per-fold (LOO HC) 별도 AICc** 보고. *DOF-penalty fair comparison* 으로 PI 우려 직격.
+**BIC vs AICc**: BIC 의 k penalty 는 `log(n)` (n=8 → ~2.08), AICc 의 base penalty 는 `2` (asymptotic). **n=8 일 때 BIC penalty 가 AICc base penalty 의 ~약 1.04 배**; AICc 의 small-sample correction term `2k(k+1)/(n−k−1)` (k=2, n=8 일 때 +2.4) 까지 합하면 R+C(k=1) 와 2-Comp(k=2) DOF 차이 penalty 는 AICc 의 경우 ΔPenalty ≈ +5.4, BIC 의 경우 ΔPenalty ≈ +2.08. → **AICc 가 R+C(parsimonious) 쪽으로 더 강한 penalty 차이 부과**; BIC 는 large-n 에서 parsimony bias 가 더 강하나 n=8 small-sample 에서는 AICc 의 finite-sample correction 이 더 보수적. **두 criterion 이 *agree* 하면 결론 strength 더 강함** (criterion-independence robustness).
+
+**Per-subject 별도 AICc + BIC** + **per-fold (LOO HC) 별도 AICc + BIC** 보고. *DOF-penalty fair comparison* 으로 PI 우려 직격.
 
 ### §4.2 *predicted δθ(c)* 의 cross-model convergence
 
@@ -373,7 +393,7 @@ Per-color difference: MAE = (1/8) Σ |δθ_RC(c) − δθ_2C(c)|
 1. Boehm, A. E., MacLeod, D. I. A., & Bosten, J. M. (2014). Compensation for red-green contrast loss in anomalous trichromats. *Journal of Vision*, 14(13):19.
 2. Boehm, A. E., Bosten, J. M., & MacLeod, D. I. A. (2021). Color discrimination in anomalous trichromacy: Experiment and theory. *Vision Research*, 188, 85-95. **[limitation citation]**
 3. DeMarco, P., Pokorny, J., & Smith, V. C. (1992). Full-spectrum cone sensitivity functions for X-chromosome-linked anomalous trichromats. *JOSA A*, 9(9), 1465-1476.
-4. Emery, K. J., Isherwood, Z. J., & Webster, M. A. (2022). Gaining the system: limits to compensating color deficiencies through post-receptoral gain changes. *JOSA A*, 40(3), A16-A25. **[NB added 2026-05-21, verification pending]**
+4. Emery, K. J., Isherwood, Z. J., & Webster, M. A. (2022). Gaining the system: limits to compensating color deficiencies through post-receptoral gain changes. *JOSA A*, 40(3), A16-A25. **[NB verified 2026-05-21: theoretical scaffold / citation upgrade only — no parametric value comparison]**
 5. Krauskopf, J., Williams, D. R., & Heeley, D. W. (1982). Cardinal directions of color space. *Vision Research*, 22(9), 1123-1131. **[2-Comp cardinal axis source]**
 6. Lamb, T. D. (1995). Photoreceptor spectral sensitivities: Common shape in the long-wavelength region. *Vision Research*, 35(22), 3083-3091.
 7. Stockman, A., & Sharpe, L. T. (2000). The spectral sensitivities of the middle- and long-wavelength-sensitive cones derived from measurements in observers of known genotype. *Vision Research*, 40(13), 1711-1737.
@@ -396,9 +416,9 @@ Per-color difference: MAE = (1/8) Σ |δθ_RC(c) − δθ_2C(c)|
 
 ---
 
-## §8. AICc + cross-model comparison details (사용자 #1 신규 추가)
+## §8. AICc + BIC + cross-model comparison details (사용자 #1 신규 추가)
 
-### §8.1 AICc 계산
+### §8.1 AICc + BIC 계산
 
 ```python
 def compute_AICc(rss, n_data, k_params):
@@ -410,21 +430,48 @@ def compute_AICc(rss, n_data, k_params):
     aic = n_data * np.log(rss / n_data) + 2 * k_params
     correction = 2 * k_params * (k_params + 1) / (n_data - k_params - 1)
     return aic + correction
+
+
+def compute_BIC(rss, n_data, k_params):
+    """
+    Parallel form to compute_AICc.
+    BIC = n · log(RSS/n) + k · log(n)
+    Note: BIC k-penalty is log(n), heavier than AICc base penalty 2
+    when n > e^2 ≈ 7.39. For n=8: log(8)≈2.08, so per-k penalty is
+    slightly heavier than AICc base; but AICc adds finite-sample
+    correction 2k(k+1)/(n-k-1) on top, so AICc differs more strongly
+    by DOF in small-n regime.
+    """
+    return n_data * np.log(rss / n_data) + k_params * np.log(n_data)
 ```
 
-### §8.2 Per-subject AICc reporting
+### §8.2 Per-subject AICc + BIC reporting
 
 ```
-Subject  | Model     | k | RSS    | AICc   | ΔAICc | Verdict
-sub-08   | R+C 1-DOF | 1 | TBD    | TBD    | -     | (R+C 재fit 후)
-sub-08   | 2-Comp    | 2 | 0.XX   | XX.XX  | XX    |
-sub-09   | R+C 1-DOF | 1 | TBD    | TBD    | -     |
-sub-09   | 2-Comp    | 2 | 0.XX   | XX.XX  | XX    |
+Subject  | Model     | k | RSS    | AICc   | ΔAICc | BIC    | ΔBIC  | Verdict
+sub-08   | R+C 1-DOF | 1 | TBD    | TBD    | -     | TBD    | -     | (R+C 재fit 후)
+sub-08   | 2-Comp    | 2 | 0.XX   | XX.XX  | XX    | XX.XX  | XX    |
+sub-09   | R+C 1-DOF | 1 | TBD    | TBD    | -     | TBD    | -     |
+sub-09   | 2-Comp    | 2 | 0.XX   | XX.XX  | XX    | XX.XX  | XX    |
 ```
 
-ΔAICc < -2: R+C decisively preferred (despite extra DOF disadvantage)
-ΔAICc ∈ [-2, +2]: indistinguishable
-ΔAICc > +2: 2-Comp preferred
+**ΔAICc interpretation**:
+- ΔAICc < -2: R+C decisively preferred (despite extra DOF disadvantage)
+- ΔAICc ∈ [-2, +2]: indistinguishable
+- ΔAICc > +2: 2-Comp preferred
+
+**ΔBIC interpretation** (Kass & Raftery 1995 convention):
+- ΔBIC < -10: very strong evidence for R+C
+- ΔBIC ∈ [-10, -6]: strong evidence for R+C
+- ΔBIC ∈ [-6, -2]: moderate (positive) evidence for R+C
+- ΔBIC ∈ [-2, +2]: indistinguishable
+- ΔBIC ∈ [+2, +6]: moderate evidence for 2-Comp
+- ΔBIC ∈ [+6, +10]: strong evidence for 2-Comp
+- ΔBIC > +10: very strong evidence for 2-Comp
+
+**Joint AICc + BIC verdict**:
+- *Both agree* (same sign, both pass respective thresholds) → **robust conclusion** (criterion-independent).
+- *Disagree* (AICc one way, BIC other) → report 둘 다, paper 본문에 *criterion sensitivity* 명시. BIC 가 parsimony 더 강하게 favor → typical pattern: BIC favors R+C, AICc favors 2-Comp 면 결론 *DOF-sensitive*, conservative reading = R+C.
 
 ### §8.3 LOO HC cross-model AICc
 

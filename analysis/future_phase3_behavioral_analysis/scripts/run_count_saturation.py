@@ -64,10 +64,17 @@ N_VALUES = [2, 3, 4, 5, 6]
 # ---------------------------------------------------------------------------
 # Core: per-subset metrics
 # ---------------------------------------------------------------------------
-def loco_rho_mean(amp: np.ndarray, C: np.ndarray) -> float:
-    """Mean LOCO ρ across 8 colors. amp: (n_runs, 8, V)."""
+def loco_rho_full(amp: np.ndarray, C: np.ndarray) -> dict:
+    """LOCO ρ per color + alpha distribution. amp: (n_runs, 8, V).
+
+    Returns dict with:
+        rho_per_color: list[float] of length 8
+        rho_mean: float (mean of rho_per_color)
+        alpha_per_fold: list[float] of length 8 (selected GCV α per held-out color)
+    """
     n_runs, _, V = amp.shape
     per_color = np.zeros(N_COLORS)
+    alphas = np.zeros(N_COLORS)
     for color in range(N_COLORS):
         train_colors = [c for c in range(N_COLORS) if c != color]
         X_train = amp[:, train_colors].reshape(-1, V)
@@ -77,7 +84,17 @@ def loco_rho_mean(amp: np.ndarray, C: np.ndarray) -> float:
         Y_pred = C[color:color + 1] @ W
         Y_test = amp[:, color].mean(axis=0, keepdims=True)
         per_color[color] = float(voxel_pattern_correlation(Y_pred, Y_test)[0])
-    return float(per_color.mean())
+        alphas[color] = float(alpha)
+    return {
+        "rho_per_color": per_color.tolist(),
+        "rho_mean": float(per_color.mean()),
+        "alpha_per_fold": alphas.tolist(),
+    }
+
+
+def loco_rho_mean(amp: np.ndarray, C: np.ndarray) -> float:
+    """Backwards-compatible wrapper. Returns mean only."""
+    return loco_rho_full(amp, C)["rho_mean"]
 
 
 def crossnobis_splithalf_mean_r(amp: np.ndarray) -> dict:
@@ -156,7 +173,7 @@ def main():
 
         t0 = time.time()
         outputs = Parallel(n_jobs=N_JOBS, verbose=0)(
-            delayed(loco_rho_mean)(amp_sub, C) for (_, _, _, _, amp_sub) in jobs
+            delayed(loco_rho_full)(amp_sub, C) for (_, _, _, _, amp_sub) in jobs
         )
         elapsed = time.time() - t0
         print(f"  LOCO ρ: {len(jobs)} cells done in {elapsed:.1f}s")
@@ -168,7 +185,9 @@ def main():
                 roi_out[n][subj] = {}
             roi_out[n][subj][f"subset_{sub_idx:02d}"] = {
                 "runs": list(subset),
-                "rho": result,
+                "rho": result["rho_mean"],
+                "rho_per_color": result["rho_per_color"],
+                "alpha_per_fold": result["alpha_per_fold"],
             }
         loco_results["per_roi"][roi] = roi_out
 

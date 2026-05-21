@@ -4,6 +4,10 @@
 
 ## 0. Framework Decision (READ FIRST — 절대 재논의 금지)
 
+> **📎 prior-works mapping** — 모델 관련 작업 시작 전 `prior-works.md` 를 반드시 먼저 읽는다. paper draft / presentation / README 의 prior-art claim 은 본 문서와 일치해야 함.
+>
+> **📎 PI feedback tracking** — Model & Loss selection validation 의 진행 추적은 `PI-feedback-priorwork.md` (living tracker). 
+
 **Filter selection = LOCO-best descriptive fit per subject + behavioral validation.**
 
 - **Specificity claim은 selection criterion이 아니다.** HC FPR 100% (`hc_specificity/`), baseline_ρ confound (HC corr=−0.894, `baseline_delta_rho/`), n=6 HC pool 한계 모두 확인됨. 어떤 selection-rule reformulation도 voxel-prediction L_LOCO measurement family 내에서 specificity를 만들 수 없다 — Cycle 9~13에서 13회 사이클로 확정 (action_plans/PLAN04, project memory `project_phase2_closure.md`).

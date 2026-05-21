@@ -157,9 +157,11 @@ rg_final = rg_baseline + (1 + g) * (rg_ret - rg_baseline)
 ```
 
 - `g = 0`: pure retinal (= Machado)
-- `g = -1`: exact cortical compensation
-- `g < -1`: overcompensation (Tregillus et al. 2021)
+- `g = -1`: exact cortical compensation (dimensionless opponent gain)
+- `g < -1`: overcompensation
 - `g > 0`: amplification (novel for hV4)
+
+> Note: Tregillus 2021 의 cortical compensation 은 BOLD CRF 의 contrast scaling factor (sc, contrast multiplier 단위) — *얼개와 단위 모두 g 와 다름*. Tregillus 는 retinal shift 를 generative form 으로 두지 않고 행동 threshold ratio (t) 로 *고정 입력* 처리. 우리 R+C 의 (Δλ, g) cascade 는 Tregillus 에 직접 대응되지 않음. 자세한 매핑은 [`prior-works.md`](prior-works.md) §1, §3.
 
 ### 3. 2-Component Angular Dilation (2 DOF)
 
@@ -277,16 +279,19 @@ Sub-09:      0.026* (SIG)   0.197 (NS)      <- geometry > per-color accuracy
 
 The two criteria share RDM information (L_LOCO includes L_rdm at delta=0.2) but weight it differently. This is a **sensitivity difference**, not a true dissociation.
 
-### beta_s Cross-Subject Convergence
+### beta_s Cross-Subject Values (xnobis bootstrap — diagnostic only)
 
 ```
-Sub-08 (deutan): beta_s = 20.0 +/- 8.0 deg
-Sub-09 (protan): beta_s = 23.0 +/- 10.2 deg
+Sub-08 (deutan): beta_s = 20.0 +/- 8.0 deg  [from comprehensive_2component_analysis xnobis V1]
+Sub-09 (protan): beta_s = 23.0 +/- 10.2 deg [from comprehensive_2component_analysis xnobis V1]
 Cross-subject mean: ~21.5 deg
-Literature (Emery et al. 2021): 21.4 deg B-Y rotation
 ```
 
-Independent methods (behavioral hue-scaling vs fMRI ΔRDM fitting) converge within 0.1 deg.
+> ⚠️ **NOT a literature convergence claim** — see [`prior-works.md`](prior-works.md) §3 and project memory `feedback_convergence_claims.md` / `feedback_physiological_grounding.md`.
+>
+> Emery 2021 의 21.4° 는 hue-scaling cosine fit 의 B-Y axis phase rotation (descriptive perceptual model, in MacLeod-Boynton color space). 우리 β_s 는 stimulus-space angular dilation 의 amplitude (CIELab opponent space, generative cortical hypothesis). **두 양은 색공간, layer, 측정 양식 (행동 vs xnobis bootstrap) 이 모두 다른 quantity**. 수치적 근접은 두 모델 모두 1st-harmonic descriptor 라는 *구조적 공통점* 의 결과지, parameter-level convergence 가 아님.
+>
+> 또한 **shipped filter 의 (β_s, β_c)** (sub-08: 38°/−14°, sub-09: 6°/−22°; see `BEST_summary.json`) 는 xnobis 값 (20–23°) 와 다른 LOCO L_fit argmin 에서 옴 — 즉 이 절의 20–23° 값은 *시각 결과* 가 아닌 *diagnostic analysis*.
 
 ### Pre-Image Filter Results
 
@@ -302,13 +307,13 @@ Independent methods (behavioral hue-scaling vs fMRI ΔRDM fitting) converge with
 
 ### Biological Plausibility
 
-| Parameter               | Our Value | Literature          | Match            |
-|------------------------|-----------|---------------------|------------------|
-| Sub-08 Delta_lambda    | 2.0 nm    | 1-4 nm (very mild)  | In range         |
-| Sub-09 Delta_lambda    | 13.5 nm   | 9-14 nm (moderate)  | In range         |
-| beta_s (both subjects) | 20-23 deg | 21.4 deg (Emery 2021) | **Within 0.1-3 deg** |
-| Sub-09 g (V1)          | -1.10     | 20-40% overcomp     | Below, plausible |
-| Sub-08 g (hV4)         | +2.25     | No precedent        | Novel            |
+| Parameter               | Our Value | Literature reference  | Status |
+|------------------------|-----------|-----------------------|---|
+| Sub-08 Delta_lambda    | 2.0 nm    | Machado 2009 mild range 1-4 nm | In Machado-physiological range (cone fundamental shift) |
+| Sub-09 Delta_lambda    | 13.5 nm   | Machado 2009 moderate range 9-14 nm | In Machado-physiological range |
+| beta_s (xnobis, diagnostic) | 20-23 deg | **Not directly comparable** to Emery 21.4° (different color space, layer, measurement modality — see [`prior-works.md`](prior-works.md) §3) | Structural-family co-occurrence (1st-harmonic descriptor), not parameter convergence |
+| Sub-09 g (V1)          | -1.10     | Tregillus 2021 reports cortical compensation sc=6.39 (V2v) / 7.82 (V3v) but units/layer differ — *not commensurate*. R+C g is dimensionless opponent gain, Tregillus sc is contrast multiplier. | Same direction (cortical compensation), incommensurable magnitude |
+| Sub-08 g (hV4)         | +2.25     | No precedent and out of Tregillus's range when made commensurable. Likely 2-DOF/8-data overfit. | Diagnostic flag — see project memory `R+C g=-2.25 non-physiological` |
 
 ### Rejected Approaches
 

@@ -198,9 +198,11 @@ $$
 - $g < -1$ → overcompensation (over-correction beyond baseline).
 - $g > 0$ → retinal distortion 증폭 (cortex makes it worse).
 
-(MEMORY 기록: sub-08 deutan g = -2.25 → 125% overshoot, non-physiological; sub-09 protan g = -1.10 → Tregillus-range 10% overshoot.)
+(MEMORY 기록: sub-08 deutan g = -2.25 → non-physiological; sub-09 protan g = -1.10 → cortical-compensation range.)
 
-**신경학적 site (Tregillus 2021, Curr Biol)**: AT 의 univariate BOLD amplitude 분석 결과 V1 은 cone-deficit reduction 그대로, V2v/V3v 에서 cortical amplification (CRF contrast scaling factor > 1) 이 동정됨. 따라서 본 모델의 $g$ 는 ROI-specific, V1 ≈ 0, extrastriate 에서 |g| > 0 이 문헌 prediction. 단 Tregillus 의 observable 은 mean β on cardinal-axis 자극이고 본 프로젝트의 observable 은 8-hue 의 multivariate pattern 이므로 직접 비교 불가, complementary 관계.
+> ⚠️ **Tregillus 의 "20-40% overcompensation" 같은 수치 범위 와 g 의 직접 비교 금지** — 단위와 layer 가 다름. Tregillus 의 sc 는 BOLD CRF 의 contrast scaling factor (contrast multiplier 단위), 우리 g 는 dimensionless opponent gain. 자세한 매핑은 [`prior-works.md`](prior-works.md) §1.
+
+**신경학적 site (Tregillus 2021, Curr Biol) 에서 차용하는 *가설 구조* (parameter convergence 아님)**: Tregillus 는 AT 의 BOLD CRF 분석에서 V1 은 cone-deficit reduction 그대로, V2v/V3v 에서 cortical amplification 을 *측정*. 본 모델의 $g$ 는 같은 *가설* (cortex 에서의 후-수용체 보상) 을 different observable (8-hue multivariate angular shift) 로 다른 generative form 으로 구현. Tregillus 의 sc 값 자체와 비교할 수 없으나, **"V1 에서 g ≈ 0, extrastriate (hV4) 에서 |g| > 0"** 의 hierarchy 가설은 *Tregillus 와 우리의 공통 prediction*.
 
 ---
 
@@ -305,10 +307,10 @@ $$
 
 **핵심**: $\beta$ 의 부호는 named axis ($\theta_{\mathrm{axis}}$, $\theta_{\mathrm{axis}}+180°$) 의 dilation 이 아니라, **perpendicular 방향** ($\theta_{\mathrm{axis}}\pm 90°$) 의 asymmetric 압축/팽창을 결정한다. 시각화: `results/visualizations/meeting/two_comp_stretch_anatomy.png` (`figs_2comp_stretch.py`).
 
-| Term | Reference axis | 압축/팽창 일어나는 위치 | 신경학적 framing (loose) |
+| Term | Reference axis | 압축/팽창 일어나는 위치 | Cardinal-axis 선택 출처 (NOT parameter convergence) |
 |---|---|---|---|
-| $\beta_s \cos(\theta - 90°)$ | S-(L+M) cardinal (90°/270°) | L-M 축 (0°/180°) 양쪽 asymmetric | $\beta_s$ 부호 = L+/L- 영역 표현 밀도 비대칭 (Emery 2021 framework borrow) |
-| $\beta_c \cos(\theta - \theta_{\mathrm{conf}})$ | CVD confusion axis | confusion-axis perpendicular 양쪽 asymmetric | $\beta_c$ 부호 = CVD-perpendicular 표현 밀도 비대칭 |
+| $\beta_s \cos(\theta - 90°)$ | S-(L+M) cardinal (90°/270°) | L-M 축 (0°/180°) 양쪽 asymmetric | Cardinal axis 위치 (S at 90°) = Krauskopf-Williams-Heeley 1982 cone-opponent convention. Emery 2021 도 동일 axis 를 사용하지만 *측정 방식 (hue-scaling cosine, MacLeod-Boynton) 과 layer (perceptual descriptive) 가 다름* — see [`prior-works.md`](prior-works.md) §1-§3. $\beta_s$ 값 자체는 Emery 21.4° 와 직접 비교 불가. |
+| $\beta_c \cos(\theta - \theta_{\mathrm{conf}})$ | CVD confusion axis | confusion-axis perpendicular 양쪽 asymmetric | Confusion axis 위치 (protan 16°, deutan 150°) = Stockman & Sharpe cone fundamentals 의 isochromatic confusion line. |
 
 **경고**: "S-cone pathway upregulation" 이나 "confusion-axis dilation" 같은 mechanistic 매핑은 1차 근사 framing 일 뿐, 모델의 실제 효과는 위 stretch table 이 정확하다. 미팅·논문에서 "dilation along the named axis" 표현 금지.
 

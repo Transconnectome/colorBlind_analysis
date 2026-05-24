@@ -319,18 +319,43 @@ P(response = j | stim = i; params, σ) ∝ exp(−|hue_perceived(i) − hue_targ
 
 **Joint fit 폐기 rationale**: (δθ, σ) likelihood landscape 가 *isolikelihood contour valley* — same 8AFC accuracy 가 (large δθ, small σ) 와 (small δθ, large σ) 둘 다 만족. Joint fit 의 argmin 도 *non-unique on contour*. Grid resolution 증가로 해결 안 됨.
 
-**Fixed σ 의 정당화 — dual anchor**:
+**Fixed σ 의 정당화 — empirical primary + literature plausibility (NOT dual anchor)**:
 
-1. **Empirical anchor** (HC pooled, our data): **σ_HC = 21.0°**
+> ⚠️ **Honest framing correction (사용자 catch, 2026-05-22)**:
+> 이전 표현 "dual anchor" 는 *overstatement*. Literature 값들은 우리와 *동일 측정* 의 independent replication 이 아니다. 따라서 *plausibility check* 으로만 사용하고, 진정한 anchor 는 (1) HC empirical pooled fit 과 (3) σ-sensitivity sweep.
+
+**1. Primary empirical anchor** (HC pooled, our own paradigm): **σ_HC = 20.96° ≈ 21.0°**
    - N=4 HC (sub-01, 03, 06, 07) × 64 trials = 255 trials pooled
-   - sub-01 degenerate 제외 시 mean = 21.62°
-   - 우리 task 와 정확히 same paradigm
-   
-2. **Literature anchor**: TBD from literature search (in progress, subagent)
-   - Witzel & Gegenfurtner 2018 (DKL hue discrimination)
-   - Bae et al. 2015 (color memory SD)
-   - Schurgin et al. 2020 (TCC model)
-   - 결과 받으면 σ_lit reference 와 σ_HC=21° 의 *order-of-magnitude consistency* 확인
+   - sub-01 degenerate (100% accuracy → σ unidentified at floor) 제외 시 mean = 21.62°
+   - **우리 task = 8AFC RSVP grating identification (drift 0.8s), Stockman opponent hue space** — σ 정의/단위 직접 일치
+
+**2. Literature plausibility range (NOT independent measurement of same quantity)**:
+
+   각 literature 가 우리와 *차원/개념 다름* 을 명시:
+
+   | Source | Task | Quantity reported | 우리와 차이 |
+   |---|---|---|---|
+   | Schurgin et al. 2020 (TCC) | Color **working memory** continuous report (CIELAB wheel) | recall SD = encoding + maintenance + recall noise | WM ≠ immediate perception; CIELAB ≠ Stockman |
+   | Bae et al. 2015 | Color **working memory** delay-dependent SD | 동상, *delay-dependent* | 동상 |
+   | Witzel & Gegenfurtner 2018 | DKL **2AFC threshold** (JND) | 75% accuracy difference (deg) | metric ≠ softmax σ; DKL ≠ Stockman |
+
+   → Literature reports σ-like quantities ∈ **18-25°** in *non-equivalent paradigms*.
+
+   **Claim 가능한 것**: "σ_HC = 21° 는 color discrimination/memory literature 의 *order of magnitude* 와 양립 (10° 도 아니고 100° 도 아님)."
+
+   **Claim 불가능한 것**: "literature 가 σ=21° 를 *replicates*". 다른 task, 다른 noise component, 다른 stim space.
+
+**3. Real robustness defense — σ-sensitivity sweep** (paper-level primary defense):
+```
+σ candidates ∈ {15°, 18°, 21°, 24°, 28°}
+For each σ_value, all fits (R+C + 2-Comp × all losses) repeat
+Primary verdict 가 σ choice 에 invariant 인지 검증
+→ If invariant: σ=21° 결과 robust (paper claim 유지)
+→ If σ-sensitive: paper limitation 명시 + range of estimates 보고
+```
+
+**Reviewer 대응 framing** (Nat Comms / top neuro journal):
+- "What is the basis of σ=21°?" → "Primary: our HC pooled 8AFC fit (n=4, 255 trials, same paradigm). Secondary: sensitivity sweep ∈ {15-28°} shows verdict invariance. We do *not* claim equivalence to working-memory or threshold literatures, which measure different quantities in different paradigms; their range (18-25°) is reported only as plausibility context."
 
 **Robustness sensitivity sweep**:
 ```

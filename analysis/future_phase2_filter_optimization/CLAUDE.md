@@ -110,25 +110,47 @@ Known results (V4, deutan, boot 10000):
 | V4-only (38,+7) | 38.6° | 0.299 | ✗ |
 | Cycle14 (58,−36) | 68.3° | 1.000 | ✓✓ |
 
-## 3. Per-Subject Status (UPDATED 2026-05-17 — Phase 2 closed, LOCO-canonical adopted)
+## 3. Per-Subject Status (RE-OPENED 2026-05-23 — model-loss selection sprint active)
 
-**Source of truth (machine-readable)**: `results/BEST_summary.json`
+**Source of truth (machine-readable)**: `results/BEST_summary.json` (previous closure, candidate state)
 **Narrative**: `results/SUMMARY.md`
 **Forward pipeline writeup**: `results/c3_relabel/SCIENTIFIC_NARRATIVE_2026-05-16.md`
 **Rejected candidates (records only)**: `results/c3_relabel/NEAR_CONTROLS.md`
 
-This section is a **redirect, not a duplicate**. Numbers live in `BEST_summary.json` to avoid drift. Below: only the load-bearing decisions every session must respect.
+### Status (2026-05-24, USER DIRECTIVE — sprint 번호 재정렬)
+**적합 모델·loss 미확정.** 2026-05-17 Phase 2 closure (2-component standalone @ V4)는 **단일 후보로 강등** — Loss combination + HC subset resample sprint (S7) 진행 중. R+C (Δλ, g)와 2-component (β_s, β_c) 모두 후보.
 
-### Phase 2 final filter (2026-05-17)
-- Filter form: **2-component standalone** (cortical opponent rotation in CIELab)
+**Sprint label mapping (PIPELINE_RESULT.md)**:
+- **S6** (was S7, line 793): Convergence matrix (complete)
+- **S7** (NEW, line 1564): Loss combination + HC subset resample sprint, Stage A-E + 5 research questions
+- **S8** (placeholder, line 1757): Filter candidates per model — trigger when S7 RQ1-RQ4 pass
+- **S9** (placeholder, line 1776): Integrated defenses (S9_old + S10_old 통합, subagent task)
+- **S11_legacy** (line 1386): LOO+train-test (S7 의 직전 단계, 결과는 prior 로 활용, S7 가 supersede)
+
+**Active sprint = S7**: 2 models × 11 loss configs (4 single + 6 pair + 1 triple) × 4 ROIs × 3 subjects × HC subset resample k∈{4,5,6} all C(7,k) subsets
+- Stage A: single-loss subset stability (RQ1)
+- Stage B: loss combination value (RQ2)
+- Stage C: neural unique contribution λ sweep (RQ3) — 3 probes: L_γ+λ·L_LOCO, L_γ+λ·L_RDM, L_γ+λ·(L_LOCO+L_RDM)/2
+- Stage D: train-test MSE (RQ4)
+- Stage E: post-selection color-perm (RQ5, final 1 cell only)
+- Selection criteria: (a) parameter SD, (b) CVD-HC separation rate, (d) inter-loss Pearson r, (e) train-test MSE. **(c) P1/P2a guardrail = descriptive only, criterion 아님 (사용자 결정 2026-05-23).**
+- L_α 수식 포함 (Stage A/B), Stage C λ sweep probe 에서는 제외 (8AFC degenerate)
+- §0 framework 은 유지 (specificity claim 금지, descriptive only). 본 sprint는 specificity reformulation 이 아니라 loss-component 평가.
+
+### Previous closure (2026-05-17, NOW SUPERSEDED PENDING S7)
+- Filter form: 2-component standalone (cortical opponent rotation in CIELab)
 - Loss: `L_fit = α·L_vuln + β·L_rank + δ·L_rdm + ε·L_smooth` @ V4 hV4 LOCO (`loco_distortion_fit.py:200`)
-- Per-subject (β_s, β_c): see `BEST_summary.json` ★ canonical source
+- Per-subject (β_s, β_c): see `BEST_summary.json`
 - Pre-image: 8/8 exact for both subjects
+- **이 결정은 LOO 검증 없이 single-fit point estimate 기반.** S7 결과 도착 시 re-validation.
 
 ### Deprecated (DO NOT REVERT)
 - **Option C** (40,+26)/(12,−28) adopted 2026-05-13 — corrected-label P2a is 0.500/0.887; **deprecated 2026-05-17**.
 - **R+C 2-stage as filter form** (advisor 2026-05-16 1st call) — empirically falsified by Check 4 (P2a 0.588/0.787 < LOCO-canonical 0.750/0.975); **advisor reversal 2026-05-16 2nd call**.
-- R+C decomposition (Δλ, g) RETAINED as paper diagnostic — explains differential per-subject etiology — NOT as filter form.
+- R+C decomposition (Δλ, g) is **active candidate again** in S8 — not as filter form by default, but LOO+train-test 결과에 따라 선정 가능.
+
+### S5' procedural-bias caveat (2026-05-23)
+HC pool g 산출 시 CVD-prior Δλ를 HC에 강제 대입 → 모델 misspecification. V4 protan small-Δλ L4 RDM에서 HC mean=2.43-2.61 boundary high는 procedural artifact. CVD g≈3 주장은 paper에서 **procedural bias caveat 동반** 또는 제외.
 
 ### sub-10 (제외, §A7 unchanged)
 - 분석 대상 아님.

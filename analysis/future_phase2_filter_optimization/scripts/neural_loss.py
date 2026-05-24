@@ -39,7 +39,7 @@ from diagnostic_delta_rdm import (
 )
 
 HC_SUBJS = ['sub-01', 'sub-02', 'sub-03', 'sub-04', 'sub-05', 'sub-06', 'sub-07']
-ROI_K = {'V1': 4, 'V2': 4, 'V3': 3, 'V4': 3}  # K basis channels per ROI
+ROI_K = {'V1': 6, 'V2': 6, 'V3': 6, 'V4': 6}  # FE-6 uniform (Phase 1 baseline, 2026-05-22 fix from SRM-K override; see memory/feedback_k_uniform_fe6.md)
 
 
 # ============================================================================

@@ -68,9 +68,9 @@ Plus sub-08 RT artifact (1 trial with rt = -2.56s).
 
 - **Script**: `scripts/lambda_3source.py`
 - **3 sources**:
-  - (b) DPS 1992 literature constants (protan 10 nm, deutan 6 nm)
-  - (c) Boehm 2014 severity grid {3, 8, 13 nm}
-  - (d) **JND-Lamb inverse fit (Option B: all-pair joint via Machado forward model)**
+  - (b) DPS 1992 literature constants (protan 10 nm, deutan 6 nm) — *PRIMARY anchor, no fit*
+  - (c) Boehm 2014 severity grid {3, 8, 13 nm} — *robustness, no fit*
+  - (d) **JND-Lamb inverse fit (Option B: all-pair joint via Machado forward model)** — *only this source involves a fit*
 - **Output**: `results/lambda_3source/{subject}_lambda.json`, `hc_negative_control.json`
 
 **Implementation notes**:
@@ -79,6 +79,99 @@ Plus sub-08 RT artifact (1 trial with rt = -2.56s).
 - Initial coord mismatch bug fixed (baseline_hues at Δλ=0 used for d_phys instead of canonical 0/45/.../315)
 - HC pool baseline computed across 7 HC subjects per pair
 - `conda srm` env required (colour-science 0.4.4)
+
+#### Fitting method (Option B: all-pair joint)
+
+**Mechanism** — JND ratio prediction under cone shift hypothesis:
+
+For a CVD subject (family ∈ {protan, deutan}) with retinal cone shift Δλ, each color pair p = (θ_a, θ_b) is predicted to have an *altered* JND relative to HC baseline:
+
+- **HC baseline** (Δλ=0): JND_HC(p) measured empirically from N=7 HC pool
+- **CVD prediction**: JND_AT(p; Δλ) = JND_HC(p) × (d_phys(p) / d_perc(p; Δλ))
+  - d_phys(p) = baseline hue distance in *Stockman opponent space* (Δλ=0 Machado output, **not** DKL canonical 0°/45°/.../315°)
+  - d_perc(p; Δλ) = post-Machado hue distance under Δλ
+  - If Δλ compresses the perceptual gap (d_perc < d_phys) → JND inflates (HYPO discriminability)
+
+**Loss function** (HC-SD-weighted MSE across N=8 pairs):
+
+```
+L_JND(Δλ) = (1/N) · Σ_p [(JND_pred(p; Δλ) − JND_obs(p)) / σ_HC(p)]²
+```
+
+where σ_HC(p) = standard deviation of HC pool JND at pair p (per-pair noise normalization → z-MSE).
+
+**Grid**: Δλ ∈ [0, 30] nm, step 0.5 nm = 61 grid points.
+
+**Best Δλ** = argmin_{Δλ ∈ grid} L_JND(Δλ).
+
+#### Evaluation criteria (Stage 2 PASS gates)
+
+| Criterion | Threshold | Purpose |
+|---|---|---|
+| **Improvement-over-null** | L(Δλ*) < L(0) | Cone-shift hypothesis explains JND better than HC-equivalent |
+| **Boundary check (low)** | best_idx > 0 | Fit not pinned at Δλ=0 (cone-shift required) |
+| **Boundary check (high)** | best_idx < 60 | Δλ_max=30 nm not saturating |
+| **Finite loss** | all losses finite | No numerical pathology |
+| **HC negative control** | HC pool Δλ ≈ 0 under each family assumption | Forward model returns null on HC |
+
+#### Pseudocode
+
+```python
+# === SETUP ===
+PAIR_HUES = {
+    'red-orange':    (0°,   45°),    'orange-yellow':  (45°,  90°),
+    'yellow-green':  (90°, 135°),    'green-blue':    (135°, 225°),  # skip cyan
+    'blue-purple':   (225°,270°),    'yellow-purple': (90°,  270°),
+    'cyan-magenta':  (180°,315°),    'red-cyan':      (0°,   180°),
+}
+DELTA_GRID = arange(0.0, 30.5, 0.5)         # 61 points
+
+# === HC POOL BASELINE (n=7) ===
+for pair p in PAIR_HUES:
+    JND_HC[p]   = mean({sub-XX_jnd_mean[p] : XX in 01..07})    # baseline per pair
+    sigma_HC[p] = std({sub-XX_jnd_mean[p] : XX in 01..07}, ddof=1)
+
+# === PER CVD SUBJECT FIT ===
+for (subject, family) in [('sub-08', 'deutan'), ('sub-09', 'protan')]:
+    JND_obs = load_per_pair(subject)                  # 8 pairs
+
+    # Stockman-coord baseline at Δλ=0 (avoid DKL/Stockman coord mismatch)
+    hue_baseline = machado_shifted_hue(0.0, family)    # (8,) hues in Stockman
+
+    losses = zeros(61)
+    for i, Δλ in enumerate(DELTA_GRID):
+        hue_shifted = machado_shifted_hue(Δλ, family)   # (8,) hues under cone shift
+        loss_sum = 0
+        for pair (θ_a, θ_b) in PAIR_HUES:
+            idx_a, idx_b = round(θ_a/45°), round(θ_b/45°)   # canonical 0..7
+            d_phys = modular_hue_distance(hue_baseline[idx_a], hue_baseline[idx_b])
+            d_perc = modular_hue_distance(hue_shifted[idx_a],  hue_shifted[idx_b])
+            ratio  = d_phys / max(d_perc, 1e-3)
+            JND_pred = JND_HC[pair] * ratio
+            z = (JND_pred - JND_obs[pair]) / max(sigma_HC[pair], 1e-3)
+            loss_sum += z**2
+        losses[i] = loss_sum / 8                        # mean-z² loss
+
+    best_idx     = argmin(losses)
+    Δλ_JND_Lamb  = DELTA_GRID[best_idx]
+    boundary_hit = (best_idx == 0) or (best_idx == 60)
+
+    save_json({
+        'b_dps_lit':    {protan: 10.0, deutan: 6.0}[family],
+        'c_boehm_grid': [3.0, 8.0, 13.0],
+        'd_jnd_lamb':   {'delta_lambda': Δλ_JND_Lamb,
+                         'loss_at_best': losses[best_idx],
+                         'loss_at_zero': losses[0],
+                         'boundary_hit': boundary_hit, ...}
+    })
+
+# === HC NEGATIVE CONTROL (forward-model sanity) ===
+for hc in sub-01..sub-07:
+    for assumed_family in ['protan', 'deutan']:
+        # Pretend this HC has CVD; refit Δλ
+        # Expectation: argmin near 0 (HC has no cone shift)
+        Δλ_HC = fit_jnd_lamb(hc, assumed_family)
+```
 
 ### Stage 2 — Validation
 
@@ -93,10 +186,35 @@ Plus sub-08 RT artifact (1 trial with rt = -2.56s).
 
 ### Stage 3 — Interpretation
 
-| Subject | (b) DPS lit | (c) Boehm grid | (d) JND-Lamb fit | Cross-source verdict |
-|---|---|---|---|---|
-| **sub-08 (deutan)** | 6.0 nm | {3, 8, 13} → mid 8 | **6.5 nm** | ★ **STRONG CONVERGENCE** (5-8 nm) |
-| **sub-09 (protan)** | 10.0 nm | {3, 8, 13} → low 3 | **1.5 nm** | ⚠ **DIVERGENCE** (DPS 10 vs JND-derived 1.5) |
+#### CVD results
+
+| Subject | (b) DPS lit | (c) Boehm grid | (d) JND-Lamb fit | L(Δλ*) | L(Δλ=0) | Δ improvement | Cross-source verdict |
+|---|---|---|---|---|---|---|---|
+| **sub-08 (deutan)** | 6.0 nm | {3, 8, 13} → mid 8 | **6.5 nm** | 7.972 | 10.416 | 23.5% reduction | ★ **STRONG CONVERGENCE** (5-8 nm) |
+| **sub-09 (protan)** | 10.0 nm | {3, 8, 13} → low 3 | **1.5 nm** | 0.558 | 1.210 | 53.9% reduction | ⚠ **DIVERGENCE** (DPS 10 vs JND-derived 1.5) |
+
+#### HC negative control (n=7 per family, sanity check)
+
+Each HC subject re-fit under both protan/deutan assumption — forward model must return Δλ ≈ 0:
+
+| Family | n | Mean Δλ (nm) | SD | Range | Δλ=0 boundary hits |
+|---|---|---|---|---|---|
+| protan assumed | 7 | **0.43** | 0.53 | [0, 1.0] | 4/7 |
+| deutan assumed | 7 | **1.07** | 1.34 | [0, 2.5] | 4/7 |
+
+Per-subject breakdown (Δλ in nm; protan / deutan):
+
+| HC | protan | deutan |
+|---|---|---|
+| sub-01 | 1.0 | 2.5 |
+| sub-02 | 0.0 (boundary) | 0.0 (boundary) |
+| sub-03 | 0.0 (boundary) | 0.0 (boundary) |
+| sub-04 | 1.0 | 2.5 |
+| sub-05 | 1.0 | 2.5 |
+| sub-06 | 0.0 (boundary) | 0.0 (boundary) |
+| sub-07 | 0.0 (boundary) | 0.0 (boundary) |
+
+→ HC pool returns near-zero Δλ under both family assumptions (mean ≤ 1.07 nm; 4/7 hit exact 0 boundary). Forward model behaves as expected on null. Note: residual ≤ 2.5 nm in sub-01/04/05 reflects within-HC JND noise rather than mis-specified cone shift.
 
 **Sub-08 convergence**: 3 sources within 5-8 nm range → robust population-equivalent Δλ.
 
@@ -147,22 +265,86 @@ Plus sub-08 RT artifact (1 trial with rt = -2.56s).
   - g=3 → δθ_RC = −δθ_Machado (overcompensation, opposite direction)
   - g=0 → δθ_RC = 2·δθ_Machado (cortical attenuation, doubled distortion)
 - **Grid**: g ∈ [0, 3], step 0.05 = 61 points
-- **σ = 21° fixed** (HC pooled, S0 결과)
+- **σ = 21° fixed** (HC pooled, S0 결과 — 도출 출처는 아래)
 - **Provides infrastructure** for S5 (combined with S3, S4 loss callables)
 - **Compensation magnitude**: M = max(0, g−1) · Δλ (retinal-equivalent nm)
 - **Output**: `results/rc_1dof/self_test_results.json`
 
+#### σ = 21° fixed — 출처 및 도출 (lock-in 2026-05-21, framing 정정 2026-05-22)
+
+**왜 fixed인가** (joint fit 폐기 rationale):
+(δθ, σ) likelihood landscape 는 *isolikelihood contour valley* — 동일 8AFC accuracy 가 (large δθ, small σ) 와 (small δθ, large σ) 둘 다에서 동일하게 달성됨. Joint fit의 argmin이 contour 위에서 *non-unique* → grid resolution 증가로 해결 안 됨. ⇒ σ를 외부 anchor로 고정하고 δθ만 추정.
+
+> ⚠️ **Honest framing correction (사용자 catch, 2026-05-22)**:
+> 이전 표현 "dual anchor (empirical + literature)" 는 *overstatement*. Literature 값들은 working-memory SD 또는 2AFC threshold 로, 우리 8AFC immediate identification σ 와 *측정 차원이 다름*. 따라서:
+> - **진정한 anchor = (1) empirical HC pooled fit + (3) σ-sensitivity sweep**
+> - **Literature 는 plausibility check 만** — "order of magnitude 가 비현실적이지 않다" 정도
+
+**(1) PRIMARY empirical anchor — HC pooled, our paradigm**:
+
+Script: `scripts/fit_sigma_hc_8afc.py`. 4 HC × 64 trial = 255 trial pooled 8×8 confusion matrix.
+
+```
+P(response = j | stim = i; σ, δθ=0)  ∝  exp(−|hue_i − hue_j|² / σ²)
+σ_HC = argmin_σ  Σ_{i,j} [P_pred(σ)[i,j] − confusion_pooled[i,j]]²
+```
+
+| Subject | N trials | Accuracy | σ_fit (°) | Notes |
+|---|---|---|---|---|
+| sub-01 | 64 | 100.00% | 6.39 | degenerate floor (0 error → σ unidentified) |
+| sub-03 | 64 | 95.31% | 22.19 | |
+| sub-06 | 63 | 98.41% | 20.51 | |
+| sub-07 | 64 | 96.88% | 22.15 | |
+| **Pooled HC (combined 8×8)** | **255** | **97.65%** | **σ_HC = 20.96°** | **★ primary anchor** |
+| Mean (excl. sub-01) | — | — | **21.62°** | sub-01 degenerate 제거 시 |
+
+→ **σ_HC = 21.0°** (pooled fit 반올림). 단위/paradigm = 우리 8AFC RSVP, Stockman opponent space, immediate identification → δθ 추정과 직접 호환.
+
+**(2) Literature plausibility range — NOT independent replication**:
+
+각 source 의 paradigm/quantity 가 우리와 *다름* 을 명시:
+
+| Source | Task | Quantity | 우리와 dimension 차이 |
+|---|---|---|---|
+| Schurgin et al. 2020 (TCC) | color **working memory** continuous report (CIELAB wheel) | recall SD (encoding + maintenance + recall noise) | WM ≠ immediate; CIELAB ≠ Stockman |
+| Bae et al. 2015 | color **working memory** delay SD | 동상, delay-dependent | 동상 |
+| Witzel & Gegenfurtner 2018 | DKL **2AFC threshold** (JND) | 75% accuracy stim difference | 2AFC threshold ≠ 8AFC σ; DKL ≠ Stockman |
+
+Range reported in literature ≈ **18-25°**.
+
+- ✅ Claim 가능: "σ_HC=21° 는 related color literature 의 *order of magnitude* 와 양립 (10° / 100° 이 아님)."
+- ❌ Claim 불가능: "Literature 가 σ=21° 를 replicate". 측정 차원이 다름.
+
+**(3) REAL robustness defense — σ-sensitivity sweep**:
+```
+σ ∈ {15°, 18°, 21°, 24°, 28°}
+R+C / 2-Comp × 모든 loss × 양 피험자 × 양 family 전체 fit 반복
+→ Primary verdict 의 σ-invariance 검증
+```
+σ uncertainty 에 대한 진짜 paper-level 방어. 인프라 구축 완료.
+
+**Paper-level caveat (advisor catch + 사용자 catch 통합)**:
+- σ fixed = "deficit 이 모두 δθ 로 attribution 된다" 가정 → "Estimates assume HC-equivalent response noise. If CVD response variability differs, δθ may be overestimated."
+- "Literature anchor" 라는 용어 paper 에서 *사용 금지*. 정확한 framing: "primary empirical estimate from our own HC pool, validated by sensitivity sweep, with order-of-magnitude consistency relative to related (non-equivalent) color discrimination/memory literatures."
+
+**Reviewer-defensible answer to "What is the basis of σ=21°?"**:
+> "Primary: our HC pooled 8AFC fit (n=4 HC, 255 trials, identical paradigm and stimulus space). Secondary defense: σ-sensitivity sweep ∈ {15, 18, 21, 24, 28°} shows verdict invariance. We do not claim measurement equivalence to working-memory or 2AFC-threshold literatures; their reported range (18-25°) provides only plausibility context."
+
 ### Stage 2 — Validation (7/7 PASS)
 
-| Test | Description | Result |
-|---|---|---|
-| 1 | HC baseline (Δλ=0, g=1) → δθ ≈ 0 | ✓ PASS (max\|δθ\|=0.000°) |
-| 2 | Full compensation (Δλ=10, g=2) → δθ ≈ 0 | ✓ PASS (max\|δθ\|=0.000°) |
-| 3 | Raw Machado (Δλ=10, g=1) → δθ non-trivial | ✓ PASS (RMS 35.27°) |
-| 4 | Linear scaling (g=0.5) → δθ = 1.5·δθ_Machado | ✓ PASS (max diff=0.000°) |
-| 5 | Dummy grid search (sum δθ² loss) → g* ≈ 2 | ✓ PASS (g_best=2.000) |
-| 6 | Forward bijection at typical fit (Δλ=10, g=1.5) | ✓ PASS (min pair=23.54° > 1°) |
-| 7 | Boundary detection (biased loss → g=0) | ✓ PASS (boundary_low=True) |
+각 self-test 의 **원리** = "이 코드가 R+C 1-DOF 의 어떤 *수학적 속성* 을 보장해야 하는가" 의 명시적 unit assertion. Loss 함수 없이 (loss-agnostic) forward model 자체의 무결성을 검증.
+
+| # | 검증 명제 | 입력 | 예상 결과 | 원리 (왜 이 결과가 나와야 하나) |
+|---|---|---|---|---|
+| 1 | **HC baseline** | Δλ=0, g=1 (deutan) | δθ = **0** 벡터 | Δλ=0 → Machado가 항등사상 → δθ_Machado=0. (2−g)·0 = 0. CVD 가정 X = HC. |
+| 2 | **Full compensation** | Δλ=10, g=2 (protan) | δθ = **0** 벡터 | g=2 → (2−g)=0 → 모든 retinal distortion 이 cortical 보상에 의해 zeroed out. 행동학적으로 HC 동등성 회복. |
+| 3 | **Raw Machado 비-trivial** | Δλ=10, g=1 (protan) | RMS > 1° | g=1 → (2−g)=1 → δθ_RC = δθ_Machado. 10 nm protan 은 substantive distortion (실측 RMS = **35.27°**, max\|δθ\| ≈ 76°). |
+| 4 | **Linear (2−g) scaling** | Δλ=10, g=0.5 (protan) | δθ = 1.5 × δθ_Machado(10nm) | Cascade form 의 *linearity in g* 검증. (2−0.5)=1.5 → 정확히 1.5배 scaling 이어야 함. max diff = 0.000° → 코드가 본인 정의를 정확히 구현. |
+| 5 | **Grid 수렴성 (dummy loss)** | Loss = Σδθ² (compensation 압력) | g* ≈ 2 | sum-of-squares 최소화 압력 하에서 grid search 가 정확히 *full compensation* 지점을 탐색해야 함. g_best = 2.000 → 61-point grid + argmin 무결성 확인. |
+| 6 | **Forward bijection** | Δλ=10, g=1.5 (protan) | min perceived pair dist > 1° | 8 canonical hue 가 forward 후에도 *unique* 8 출력 ⇒ inverse 존재 가능. min pair = 23.54° (>>1°) → 충돌 없음, 필터(inverse)가 well-posed. |
+| 7 | **Boundary detection** | Loss = −Σδθ² (분리 압력) | g* = 0, boundary_low flag | Grid 끝점에 fit 이 핀 처리되면 *misspecification 신호* 로 flag 되어야 함. boundary_low = True → S5 결과에서 boundary hit 자동 감지 가능 (sub-08 bimodal bootstrap 진단의 근거). |
+
+**모두 PASS (7/7)** → R+C forward 함수, grid search, inverse 가능성 모두 수학적 정합성 확인 완료. S5 단계에서 실제 loss 와 결합하여 g* 를 추정할 준비 완료.
 
 ### Stage 3 — Interpretation
 
@@ -265,7 +447,7 @@ Plus sub-08 RT artifact (1 trial with rt = -2.56s).
 
 ---
 
-## S4: neural_loss.py (✅ Complete 2026-05-21)
+## S4: neural_loss.py (✅ Complete 2026-05-21, ⚠️ K=6 re-run 2026-05-22)
 
 ### Stage 1 — Implementation
 
@@ -280,8 +462,27 @@ Plus sub-08 RT artifact (1 trial with rt = -2.56s).
   L_LOCO = mean(1 − ρ(c))
   ```
 - **L_RDM**: `1 − cos(ΔRDM_sim, ΔRDM_obs)`, correlation distance primary + Crossnobis robustness
+  ```
+  # Observed ΔRDM (data side, V-free)
+  For each HC s:
+    rdm_HC[s] = pdist(mean_runs(amp_HC[s]), metric=corr)        # in s's own V_s → 28-vec
+  rdm_HC_mean = mean(rdm_HC[s] for s in HC)
+  rdm_CVD     = pdist(mean_runs(amp_CVD), metric=corr)          # in CVD's V_s → 28-vec
+  ΔRDM_obs    = rdm_CVD − rdm_HC_mean
+
+  # Simulated ΔRDM (model side, W-fixed per HC)
+  For each HC s:
+    Y_shift = C(θ + δθ) @ W_HC[s]                               # W_HC[s] precomputed (HC ridge_gcv)
+    Y_base  = C(θ)       @ W_HC[s]                              # baseline = machado_shifted_hue(0.0)
+    ΔRDM_sim[s] = pdist(Y_shift, metric=corr) − pdist(Y_base, metric=corr)
+  ΔRDM_sim    = mean(ΔRDM_sim[s] for s in HC)                   # per-HC ΔRDM, THEN mean
+
+  L_RDM = 1 − cos(ΔRDM_sim, ΔRDM_obs)                            # ∈ [0, 2]
+  ```
   - V_s-invariant (RDM is 28-vec dissimilarity, voxel dimension absent)
   - Per-HC RDM in own V_s, then average ΔRDM across HCs
+  - Distance metric: `corr` = 1 − Pearson r (canonical, `diagnostic_delta_rdm.py:80`); `crossnobis` swappable for robustness check (LOO-run whitened, lines 124–175)
+  - Identity (δθ = 0) ⇒ ΔRDM_sim ≡ 0 ⇒ cos undefined → fallback `cos := 0`, L_RDM = 1.0 (Stage 2 baseline cell)
 - **L_neural composite**: 0.5·L_LOCO + 0.5·L_RDM
 
 ### V_s mismatch resolution (사용자 + advisor 논의)
@@ -370,22 +571,48 @@ Plus sub-08 RT artifact (1 trial with rt = -2.56s).
 
 ### Stage 3 — Interpretation
 
-#### L8 PRIMARY results
+#### L8 PRIMARY + L3 LOCO + L4 RDM 비교 (K=6 uniform, 2026-05-22 corrected)
 
-| Subject | ROI | Model | Δλ src | params | loss | M_comp |
+각 fit 의 *L8 (modality 5050)*, *L3 LOCO 단독*, *L4 RDM 단독* 결과 병기 → loss-dependent g\* / (β_s, β_c) 분기 진단.
+
+| Subject | ROI | Model | Δλ src | **L8 (modality)** | L3 LOCO | L4 RDM |
 |---|---|---|---|---|---|---|
-| sub-08 | V4 | R+C | DPS 6 | g=2.25 | 5.60 | 7.50 nm |
-| sub-08 | V4 | R+C | Boehm 8 | g=2.20 | 5.61 | 9.60 nm |
-| sub-08 | V4 | R+C | JND-Lamb 6.5 | g=2.25 | 5.59 | 8.12 nm |
-| sub-08 | V4 | 2-Comp | — | β_s=48, β_c=-36 | **3.42** | — |
-| sub-08 | V1 | R+C | DPS 6 | g=2.25 | 5.61 | 7.50 nm |
-| sub-08 | V1 | 2-Comp | — | β_s=48, β_c=-36 | **3.47** | — |
-| sub-09 | V4 | R+C | DPS 10 | g=2.60 | 0.71 | **16.00 nm** |
-| sub-09 | V4 | R+C | Boehm 3 | g=3.00 ⚠ | 0.72 | 6.00 nm (boundary) |
-| sub-09 | V4 | R+C | JND-Lamb 1.5 | g=3.00 ⚠ | 0.87 | 3.00 nm (boundary) |
-| sub-09 | V4 | 2-Comp | — | β_s=28, β_c=0 | **0.68** | — |
-| sub-09 | V1 | R+C | DPS 10 | g=2.60 | 0.78 | **16.00 nm** |
-| sub-09 | V1 | 2-Comp | — | β_s=26, β_c=4 | **0.68** | — |
+| sub-08 | V1 | R+C | DPS 6 | **g=2.25** | g=0 ⚠ | g=2.15 ✅ |
+| sub-08 | V1 | R+C | Boehm 8 | g=2.15 | g=0 ⚠ | g=2.10 ✅ |
+| sub-08 | V1 | R+C | JND-L 6.5 | g=2.25 | g=0 ⚠ | g=2.05 ✅ |
+| sub-08 | V1 | 2-Comp | — | **(48, −36)** | (50, 50) ⚠ | (0, +22) |
+| sub-08 | V4 | R+C | DPS 6 | **g=2.30** | g=1.10 | g=1.25 |
+| sub-08 | V4 | R+C | Boehm 8 | g=2.20 | g=0.05 | g=0.30 |
+| sub-08 | V4 | R+C | JND-L 6.5 | g=**0.00** ⚠ | g=0 ⚠ | g=0 ⚠ |
+| sub-08 | V4 | 2-Comp | — | **(48, −36)** | (2, −10) | (0, +26) |
+| sub-09 | V1 | R+C | DPS 10 | **g=2.60** | g=3.00 ⚠ | g=2.30 ✅ |
+| sub-09 | V1 | R+C | Boehm 3 | g=3.00 ⚠ | g=1.40 | g=0 ⚠ |
+| sub-09 | V1 | R+C | JND-L 1.5 | g=3.00 ⚠ | g=0.80 | g=2.45 ✅ |
+| sub-09 | V1 | 2-Comp | — | **(26, +6)** | (50, 50) ⚠ | (10, −14) |
+| sub-09 | V4 | R+C | DPS 10 | **g=2.60** | g=0.50 | g=1.05 |
+| sub-09 | V4 | R+C | Boehm 3 | g=3.00 ⚠ | g=0 ⚠ | g=0.15 |
+| sub-09 | V4 | R+C | JND-L 1.5 | g=3.00 ⚠ | g=0 ⚠ | g=0 ⚠ |
+| sub-09 | V4 | 2-Comp | — | **(26, +6)** | (38, −50) ⚠ | (28, −28) |
+
+**Loss-stability 진단**:
+
+| 측면 | 안정 (consistent across loss) | 불안정 (loss-dependent) |
+|---|---|---|
+| **R+C V1 g\*** (sub-08, sub-09) | L8 ↔ L4 RDM: ~2.05-2.30 일치 ✅ | L3 LOCO 만 boundary (g=0 또는 g=3) |
+| R+C V4 g\* | L8 dominant (g≈2.30/2.60), L3/L4 weak | L3, L4 모두 V4 에서 weak |
+| **2-Comp β_s** (sub-08) | L8 (48) ≈ L3 (50 corner), L4 (0) | L4 RDM 만 β_s=0 |
+| **2-Comp β_c sign** (sub-08) | L8 (−36) 와 L4 RDM (+22~+26): **부호 충돌** ⚠ | L4 RDM 의 sign 이 L8 과 *반대* |
+| 2-Comp β_s, β_c (sub-09) | L8 (26, +6), L3 corner, L4 weak | L3 corner (50, 50) |
+
+**핵심 관찰**:
+
+1. **R+C V1 의 안정성**: L8 g 와 L4 RDM g 가 ~2.05-2.30 으로 *수렴*. L3 LOCO 만 boundary → L8 의 V1 g\* 는 *behavioral + RDM 의 합의값*, LOCO 는 outlier.
+
+2. **2-Comp β_c 부호 충돌 (sub-08)**: L8 (β_c=−36) vs L4 RDM (β_c=+22~+26) — **opposite sign**. *behavioral + LOCO 의 합의* (β_c<0 confusion axis rotation) vs *RDM 단독* (β_c>0 다른 방향). Paper-relevant dissociation evidence.
+
+3. **V4 의 일관된 weakness**: 두 모델 모두 V4 에서 L3/L4 단독은 R+C g<1.3 / 2-Comp β_s≈0-28 의 weak fit. L8 만 강한 g≈2.30-2.60. → V4 의 neural signal 자체가 약함 (project memory: hV4 67 voxels K=3 baseline variance).
+
+4. **L8 의 의미 재확인**: L8 fitted params 가 *반드시 L3/L4 단독과 일치 안 함*. L8 = behavioral (0.5) + 0.25 LOCO + 0.25 RDM 의 *weighted compromise* — §"Acknowledged Loss-Design Constraints" (2) 의 직접 evidence.
 
 #### Key findings
 
@@ -411,20 +638,130 @@ Plus sub-08 RT artifact (1 trial with rt = -2.56s).
 - Sub-09 (β_s=26~28, β_c=0~4): S-cone cardinal rotation dominant, β_c ≈ 0 (confusion axis weak)
 - → Sub-09's **β_c ≈ 0** is *qualitatively different* from sub-08's strong β_c=-36 → subtype-specific signature
 
-#### Loss-dependence (sub-09 V1 R+C with DPS Δλ=10)
+#### Loss-dependence (sub-09 V1 R+C with DPS Δλ=10, K=6 corrected)
 
 | Loss | g_best | M_comp_nm |
 |---|---|---|
 | L1 (8AFC) | 2.00 | 10.00 |
 | L2 (JND) | 2.60 | 16.00 |
 | L3 (LOCO) | 3.00 ⚠ | 20.00 (boundary) |
-| L4 (RDM) | 2.25 | 12.50 |
+| L4 (RDM) | 2.30 | 13.00 |
 | L5 (behav) | 2.60 | 16.00 |
-| L6 (neural) | 2.25 | 12.50 |
+| L6 (neural) | 3.00 ⚠ | 20.00 (boundary) |
 | L7 (all-equal) | 2.55 | 15.50 |
 | **L8 (modality)** | **2.60** | **16.00** |
 
 → Loss-cluster structure: behavioral (L1, L2, L5) and neural (L4, L6) give similar g*, with L3 (LOCO) often boundary. **L8 primary aligns with L2 (γ-dominant)** — expected since L8 weights L_γ at 0.5.
+
+#### Loss-dependence across all 4 cells (sub-08/09 × V1/V4) — patterns
+
+위 표는 단일 cell (sub-09 V1 R+C DPS) 만 보여줌. 4개 cells 모두 (32 fits 각각) 의 raw 결과는 `results/s5_all_paths/{subject}_{roi}_sigma21.json` 에 저장. 핵심 패턴 3가지:
+
+**(A) R+C 의 L3 LOCO 가 일관되게 boundary hit, L4 RDM 은 부분적 clean fit** (K=6 corrected, 2026-05-22 정정):
+
+| Cell | L3 LOCO (3 Δλ) | L4 RDM (3 Δλ) | L6 neural composite (3 Δλ) |
+|---|---|---|---|
+| sub-08 V1 | **3/3 g=0 ⚠** | **3/3 clean** (g=2.05, 2.10, 2.15) ✅ | 1/3 boundary (Boehm) |
+| sub-08 V4 | 2/3 boundary (DPS g=1.10 clean) | 2/3 weak (g=0.30, 1.25, 0) | mixed |
+| sub-09 V1 | 1/3 boundary (DPS g=3.00 ⚠) | **2/3 clean** (DPS 2.30, JND-L 2.45; Boehm g=0 ⚠) | 1/3 boundary (DPS g=3.00) |
+| sub-09 V4 | 2/3 boundary | 2/3 weak (g=0.15, 1.05, 0) | mixed |
+
+→ **R+C 1-DOF 가 neural *LOCO* (voxel-level prediction) 를 일관되게 설명 못 함** — sub-08 V1 에서 모든 Δλ source 에서 g=0 boundary. 반면 **R+C *RDM* (pairwise distance geometry) 은 sub-08 V1 에서 clean fit (g≈2.05-2.15)** — R+C cone-shift 가 V1 의 *coarse relational geometry* 와 일치. Behavioral loss (L1, L2, L5) 도 안정적 g ≈ 2.0-2.6.
+
+**이게 LOCO vs RDM dissociation 의 *방향성* 의미**:
+- R+C cone-shift = sub-08 V1 의 *pairwise distance structure* (28-vec RDM) 에는 fit
+- 그러나 *voxel-level reconstruction* (LOCO) 은 R+C 1-DOF 로 부족 → 2-Comp 또는 추가 mechanism 필요
+- → **R+C 의 적용범위 = behavioral + coarse RDM geometry; voxel-level fine detail 은 misspecified**
+
+**(B) 2-Comp 의 (β_s, β_c) 가 ROI 간 + Cycle history 와 일치** — 4 cells L8 primary:
+
+- sub-08: V1 (48, −36) ≈ V4 (48, −36) → ROI-invariant
+- sub-09: V1 (26, +4) ≈ V4 (28, 0) → ROI-invariant
+- Cycle history (sub-08: 58/−36, 68/−38; sub-09 V4: 28/+4) 와 모두 ±5° 이내 일치
+- 단 L3 LOCO 단독은 2-Comp 도 grid corner (50, 50) 등 boundary issue 존재 — *LOCO 단독 fitting 은 두 모델 모두 불안정*, L8 weighted combination 이 더 stable.
+
+**(C) R+C Δλ source 변화에 대한 robustness — subject-dependent**:
+
+- sub-08 V1/V4: L8 g* = 2.20-2.25 across 3 Δλ sources → 매우 안정 ✅
+- sub-09 V1/V4: L8 g* = 2.60 (DPS only clean) / 3.00 ⚠ (Boehm) / 3.00 ⚠ (JND-Lamb) → **DPS hypothesis 에서만 clean fit**
+
+→ Sub-09 의 mild Δλ (1.5-3 nm) 에서 R+C 1-DOF 는 g=3 boundary 에 핀. *DPS Δλ=10 + g=2.60* 또는 *2-Comp* 만 sub-09 의 valid 설명.
+
+#### 4-cell L8 PRIMARY 요약 표 (K=6 corrected, 2026-05-22 정정)
+
+| Subject | ROI | R+C DPS g* | 2-Comp (β_s, β_c) | L3 LOCO | L4 RDM | 2-Comp ROI 일치? |
+|---|---|---|---|---|---|---|
+| sub-08 | V1 | g=2.25 ✅ | (48, **−36**) | ⚠ g=0 boundary | **✅ clean (g=2.15)** | ✅ |
+| sub-08 | V4 | g=2.30 ✅ | (48, **−36**) | partial (DPS g=1.10) | partial (DPS g=1.25) | ✅ (β identical) |
+| sub-09 | V1 | g=2.60 ✅ | (26, **+6**) | ⚠ g=3 boundary (DPS) | **✅ clean (g=2.30)** | ✅ |
+| sub-09 | V4 | g=2.60 ✅ | (26, **+6**) | partial (DPS g=0.50) | partial (DPS g=1.05) | ✅ (β identical) |
+
+→ L3 LOCO 가 일관되게 boundary, L4 RDM 은 sub-08/09 V1 에서 R+C cone-shift hypothesis 와 일치 (g≈2.15-2.30 clean).
+
+→ **Behavioral path: 두 모델 모두 단일점 fit 안정 + ROI-invariant. Neural path: L4 RDM 은 R+C V1 에서만 clean, 그 외는 ROI-비안정 (R+C V4 weak, 2-Comp L4 단독 4 cells 모두 발산).** Paper-level claim "subtype-specific 2-Comp signature (sub-08 β_c=−36 vs sub-09 β_c≈0)" 는 *L8 점추정에 한해 4 cells robust*. (이전 서술 *"Neural path: R+C 가 모든 cells boundary, 2-Comp 가 안정"* 은 line 585/662 자기 모순 + JSON 불일치 — 사용자 catch 2026-05-24 정정.)
+
+#### CVD 단일점 fit 안정 매트릭스 (2×2, K=6 JSON 직접 확인, 2026-05-24 신설)
+
+| | behav path (L2 γ) | RDM path (L4 단독) |
+|---|---|---|
+| **R+C** | sub-08 V1/V4 g=2.25/2.25; sub-09 V1/V4 g=2.60/2.60 → **안정 ✅** ROI-invariant | sub-08 V1=2.15 / V4=1.25; sub-09 V1=2.30 / V4=1.05 → **V1만 안정 ⚠** ROI-비안정 |
+| **2-Comp** | sub-08 (48,−36); sub-09 (26,+4) at V1=V4 → **안정 ✅** (단 U6 caveat: L8 50% L_γ weight) | sub-08 V1 (0,+2) / V4 (50,−32); sub-09 V1 (2,+50) / V4 (0,+4) → **불안정 ✗** β_c sign이 L8과 충돌 |
+
+→ **CVD 단일점 fit 기준에서는 (R+C, behav), (2-Comp, behav), (R+C × V1 한정 RDM) 3 칸만 안정.** 나머지 (R+C × V4 RDM, 2-Comp × RDM 4 cells)은 ROI-비안정.
+
+##### Behav path 모델 간 δθ 유사도 (필수 추가 조건, 2026-05-24)
+
+행동 손실 하의 점추정 안정만으로는 *"모델-손실함수 안정성"* 주장 불충분. 두 모델 (R+C / 2-Comp)이 L2 에서 산출하는 *변환 색 값 δθ 8-vec* 이 유의미 유사해야 함:
+
+| Cell | R+C δθ ‖·‖ | 2-Comp δθ ‖·‖ | cos | MAE | sign-agree | Verdict |
+|---|---|---|---|---|---|---|
+| sub-08 V1 | 22.7° | 86.5° | **+0.54** | 23.1° | 7/8 | **marginal** — 부호 일치도 높음, 크기 4× 차이 |
+| sub-08 V4 | 22.7° | 86.5° | +0.54 | 23.1° | 7/8 | marginal (V1 동일) |
+| sub-09 V1 | 59.9° | 54.7° | **+0.07** | 21.1° | 6/8 | **fail** — 두 δθ 사실상 무관, 크기는 유사하나 방향 다름 |
+| sub-09 V4 | 59.9° | 54.7° | +0.07 | 21.1° | 6/8 | fail (V1 동일) |
+
+→ **sub-08 의 behav-path 모델 안정성은 marginal** (방향 같지만 magnitude 4배 차이). **sub-09 는 behav-path 모델 안정성 실패** (cos≈0).
+
+**Loss 값 비교 (정정 2026-05-24, identifiability 과장 회수)**:
+
+| Cell | R+C L2 loss | 2-Comp L2 loss |
+|---|---|---|
+| sub-08 V1/V4 | 10.23 | 5.78 |
+| sub-09 V1/V4 | 0.56 | 0.39 |
+
+두 모델은 *같은 loss 값* 을 produce 하지 않음 — 각자 own parameter space 안에서 unique minimum. cross-model δθ 발산은 **identifiability failure 가 아니라 model-class prediction 비등가성** — δθ 예측이 model 선택에 의존.
+
+**sub-09 의 발산 원인 = angular shape, not magnitude** (정정 2026-05-24, "너무 조금 이동" 가설 기각):
+
+- sub-09 R+C ‖δθ‖ = 59.9° (sub-08 R+C ‖δθ‖ = 22.7° 보다 2.6× 큼) — magnitude는 충분.
+- sub-09 R+C δθ: `[5, 6, 2, -2, -9, -46, +37, -1]` — c6/c7 집중 (Machado protan 180–225° 압축 특성).
+- sub-09 2-Comp δθ: `[4, +22, +27, +16, -4, -22, -27, -16]` — sin-like 균등 분포 (β_s=26° S-cone 축 회전).
+- 같은 magnitude 를 다른 angular pattern 에 배분 → cos≈0. sub-08 은 둘 다 "warm preserved / cool shifted" 라 부호 7/8 일치, 단 magnitude 4× 차.
+
+→ Paper-level 함의 (정정): "behav loss 만으로는 *model-class-dependent* δθ — R+C (retinal cone-shift) 와 2-Comp (cortical opponent rotation) 가 같은 L_γ 를 minimize 하면서도 다른 색 변환을 predict. 따라서 mechanism 단정 전 model class 비교 필수."
+
+**L8 ROI-invariance 의 메커니즘 (정정: artifact → L_γ-dominated 으로 강화)**: L8 magnitude 분해 (sub-08 V1):
+- 0.5 × L_γ(5.78) = 2.89 → **L8 magnitude 의 ~88%**
+- 0.25 × L_LOCO(0.88) = 0.22
+- 0.25 × L_RDM(0.76) = 0.19
+
+L_γ 가 L8 의 ~88% 차지 → V1/V4 의 L_LOCO/L_RDM 차이가 L_γ optimum 을 밀어내지 못함 → L8 (β_s, β_c) = L2 (β_s, β_c) 정확히. 따라서 **L8 ROI-invariance 는 mechanism convergence 가 아니라 L_γ-dominance 의 직접 귀결** (U6 + Loss-Design Constraints (1)+(2) 의 정량 evidence). neural path (L_RDM, L_LOCO) 가 L8 minimum 위치에 거의 영향 안 줌.
+
+##### Visualization (2026-05-24, 4-col color figure 컨벤션)
+
+기존 4-col 컨벤션 (`p2amax_option_C_visualize.render_4col`) 동일 형식: 8 colors × 4 columns (Original / CVD perceives / Filtered pre-image / CVD(Filtered)), STIM_LAB 색 렌더링.
+
+- `results/s5_all_paths/S5_BEHAV_4col_RC_sub-08.{png,pdf}` — R+C (Δλ=6, g=2.25, deutan)
+- `results/s5_all_paths/S5_BEHAV_4col_RC_sub-09.{png,pdf}` — R+C (Δλ=10, g=2.60, protan)
+- `results/s5_all_paths/S5_BEHAV_4col_2Comp_sub-08.{png,pdf}` — 2-Comp (β_s=48, β_c=−36); **marginal model-stability (cos=+0.54, ‖2C‖/‖R+C‖=3.8×)**
+- ⊘ 2-Comp sub-09 skip — cos(R+C, 2-Comp)=+0.07 → behav-stability fail (사용자 rule: 모델 안정 시에만 2-Comp 시각화)
+
+Figure 의 P2a 수치는 §0.1 policy 에 따라 *descriptive only* (paper primary endpoint 아님).
+Script: `scripts/s5_viz_behav_4col.py`
+
+##### Pending: HC subset resample (S6')
+
+위 *"안정"* 진단은 **CVD 본인의 single-point fit** 에만 근거. HC pool composition 흔들림에서도 δθ가 보존되는지는 S6' (line 708) 미실행 → 모든 안정 claim 은 HC reference dependence quantification 후 재확인 필요.
 
 ### Stage 4 — Verdict: ✅ PASS
 
@@ -450,136 +787,169 @@ Plus sub-08 RT artifact (1 trial with rt = -2.56s).
 
 ---
 
-## S5': HC pool g fit (T-2 Form B) (✅ Complete 2026-05-21)
+## S6': HC subset resample for L_RDM / L_γ baseline variance (2026-05-24 신설, S5'/S6 대체)
 
-### Stage 1 — Implementation
+> **Background (사용자 catch 2026-05-24)**: 기존 S5' 와 S6 는 두 가지 critical 약점 보유 — (1) S5' 는 HC 에 *CVD-prior Δλ 강제 대입* (Constraint #5 procedural bias), (2) S6 는 *CVD 본인의 single point g\* 의 trial-level bootstrap* 으로 measurement stability 만 측정 (true g uncertainty 아님). 두 sprint 모두 **paper 의 main HC comparison evidence 로는 약함**. 두 섹션 모두 *문서 최하단 아카이브로 이동* (`§Archive`). 본 S6' 는 사용자 제안 **HC subset resample design** 으로 두 sprint 의 의도를 통합 보강한다.
 
-- **Script**: `scripts/s5p_hc_pool_g_fit.py`
-- **Form B**: HC 가 가상의 CVD-family Δλ 하에서 g fit (Δλ=0 unidentifiability 회피)
-- **Logic**: HC 의 behavior 가 "no distortion" → g=2 가 *perfect compensation of hypothetical Δλ*
-- **Compare CVD g* vs HC g_HC distribution**: Tregillus reduction null 의 우리 등가
+### S6'.1 Motivation
 
-### Stage 2 — Validation
+S5 의 L8 fit 자체가 HC reference 를 내장:
+- **L_RDM**: HC pool mean RDM (LOO 7 명의 mean) 을 reference 로 사용 → CVD vs HC distance structure 차이 측정
+- **L_γ (JND)**: HC HYPO baseline (per-pair HC pool JND mean) 을 reference 로 사용
+- **L_α (8AFC)**: HC 100% accuracy target (constant)
 
-- All 7 HC fit successfully under both protan (Δλ=10) and deutan (Δλ=6) assumptions
-- sub-07 deutan g=0.95 (outlier, single HC) — sub-07 의 unusually low JND 가 fit 영향
+따라서 **별도 HC 가상 Δλ fit (S5' Form B) 은 불필요**. 그러나 *"HC pool composition 이 g\* 추정에 얼마나 영향을 주는가"* 는 검증 필요. 사용자 design:
 
-### Stage 3 — Interpretation
+> "HC 7명에 대해 ΔRDM, behav diff 를 *여러 번 추출* — HC subset 을 random 으로 골라서 baseline reference 를 다시 만들고, CVD g\* 가 어떻게 흔들리나 본다."
 
-**HC pool g distribution**:
+### S6'.2 Design
 
-| Family assumption | N | g_HC mean ± SD | Range | Median |
-|---|---|---|---|---|
-| protan (Δλ=10) | 7 | **2.086 ± 0.149** | [1.85, 2.30] | 2.10 |
-| deutan (Δλ=6) | 7 | 1.929 ± 0.456 | [0.95, 2.20] | 2.15 |
+**Resample unit = HC subset, not trial**:
 
-**Mean g_HC ≈ 2** matches expectation: HC behavior near-normal → g=2 (perfect compensation of assumed hypothetical retinal shift).
+```
+For k in {4, 5, 6}:
+    subsets = all C(7, k) combinations of HC subjects
+    
+    For each subset S:
+        # Re-compute HC reference using only HC in S
+        ΔRDM_ref_S = mean(RDM_h for h in S)
+        JND_HC_S   = mean(JND_h for h in S)     # per-pair
+        sigma_HC_S = mean(8AFC_sigma_h for h in S)
+        
+        # Re-fit CVD g* using these references (loss = L_γ, L_RDM, or composite)
+        g*_S = argmin_g  L(g; HC_ref_S, CVD_data)
+    
+    Output: g* distribution across subsets → SD, range, 95% percentile CI
+```
 
-**CVD vs HC comparison**:
+**Coverage**:
+- k=4: C(7,4)=35 subsets — wide variance estimate
+- k=5: C(7,5)=21 — paper-defensible mid
+- k=6: C(7,6)=7 = LOO (S11 에서 이미 산출됨)
 
-| Subject | Family | g_CVD | HC mean ± SD | Z-score | Percentile |
-|---|---|---|---|---|---|
-| **sub-09** | protan | 2.60 | 2.09 ± 0.15 | **+3.45** | 100% (>all HC) |
-| sub-08 | deutan | 2.25 | 1.93 ± 0.46 | +0.70 | 100% (>all HC, but wide HC range) |
+**비교**:
+- *Subset SD* = HC pool composition 의 g\* 불안정성
+- *Trial-level SD (S6 구)* = CVD 본인 measurement noise
+- *S5' z=+3.45 (구)* = CVD-prior Δλ 강제 misspec hold 후 single g_HC
 
-### Key findings
+S6' 는 첫 번째만 측정 — *paper-relevant HC reference dependence*.
 
-1. **Sub-09 z = +3.45**: 강한 cortical compensation evidence — HC pool 의 어떤 individual 보다도 큰 g (1.85-2.30 range 모두 < 2.60)
-2. **Sub-08 z = +0.70**: mild elevation, HC range 안에 있음 (단 percentile 100% 인 이유는 sub-07 outlier 0.95 가 mean 끌어내려)
-3. **HC pool g ≈ 2.0 confirms baseline R+C structure**: 어떤 Δλ 가정 하에서도 HC behavior 는 g=2 (cortical perfect cancellation)
-4. **N=7 HC pool 한계**: descriptive percentile reporting 만, statistical claim 제한 (project §0 policy)
+### S6'.3 Expected outputs (sprint 시행 시)
 
-### Stage 4 — Verdict: ✅ PASS
+| Output | Format |
+|---|---|
+| g\*\_subset distribution per (subject, ROI, loss, k) | JSON: `results/s6p_hc_subset/g_distribution.json` |
+| Subset CI (percentile [2.5, 97.5]) | per cell, compared to point estimate g\* |
+| Visualization | histogram per (subject, ROI, loss), k 별 panel |
 
-- HC pool g distribution well-characterized
-- Sub-09 의 강한 z-score (+3.45) 가 compensation hypothesis evidence
-- Sub-08 의 mild z-score (+0.70) descriptive only (sub-07 outlier 영향)
-- **FLAG**: N=7 small pool → SD estimates noisy
+### S6'.4 Status
 
-### Files
+- **Implementation**: Pending (Phase 3 trigger 전에 시행, 또는 S12 sprint 와 통합)
+- **Sample size considerations**: k=4 의 35 subsets 이 statistical power 측면에서 sufficient (B≈35-100 range bootstrap practice 상회는 marginal gain)
+- **S11 LOO 와의 관계**: S11 (k=6 LOO) 가 이미 partial S6'. S6' 는 *k smaller 까지 확장* 으로 더 넓은 HC-composition variance 측정.
 
-- `scripts/s5p_hc_pool_g_fit.py`
-- `results/s5p_hc_pool/g_HC_pool.json`
+### S6'.5 Paper framing replacement
 
----
+기존 S5' Form B 의 *"sub-09 z=+3.45 vs HC pool"* claim 은 S6' subset percentile 로 대체:
 
-## S6: Bootstrap CI of g — T-1 Form A (✅ Complete 2026-05-21)
+> **NEW (S6' 기반)**: "Sub-09 의 g\* = 2.60 는 HC pool 의 35 subset (k=4) 중 가장 큰 g\_HC 값을 포함하는 어떤 subset 에서 산출한 reference 와도 robust 하게 산출됨 — HC composition 영향 < X% of g\* point estimate"
 
-### Stage 1 — Implementation
+vs.
 
-- **Script**: `scripts/s6_bootstrap_g_ci.py`
-- **Bootstrap**: B=1000 resamples of (JND 8-pair + 8AFC 8-color) per CVD
-- Per resample: re-fit g on L_behav under DPS Δλ
-- **Test**: H0 g=1 (no compensation) vs H1 g≠1
-- HC pool bootstrap baseline (Tregillus reduction null)
+> **OLD (S5' Form B)**: "HC pool g distribution 의 z=+3.45" — procedural bias 영향 받은 misspecified fit 산출값.
 
-### Stage 2 — Validation
+### S6' Files (sprint 시행 시)
 
-- Bootstrap converges (B=50 → B=1000 stable, CI tightens for sub-09)
-- HC pool bootstrap distribution computed for both protan/deutan family assumptions
+- Script: `scripts/s6p_hc_subset_resample.py`
+- Results: `results/s6p_hc_subset/{g_distribution.json, subset_percentile_ci.json}`
+- Viz: `results/s6p_hc_subset/viz_subset_g_hist_{subject}_{roi}.png`
 
-### Stage 3 — Interpretation
+### S6' Status
 
-**CVD bootstrap results (B=1000)**:
-
-| Subject | g mean | g SD | 95% CI | P(g>1) | P(g>2) | Compensation evidence |
-|---|---|---|---|---|---|---|
-| sub-08 | 1.676 | 1.265 | **[0.000, 3.000]** | 0.655 | 0.651 | ✗ Bimodal fit instability |
-| **sub-09** | 2.375 | 0.411 | **[1.300, 2.600]** | **1.000** | 0.864 | ✓ Compensation (g>1 CI excludes) |
-
-**HC pool bootstrap (Tregillus reduction null)**:
-
-| Family | Pool g mean | Pool g SD | Pool 95% CI |
-|---|---|---|---|
-| protan (Δλ=10) | 2.001 | 0.331 | [1.000, 2.350] |
-| deutan (Δλ=6) | 1.857 | 0.571 | [0.000, 3.000] |
-
-**CVD vs HC pool**:
-
-| Subject | Δg (CVD - HC) | Two-sample z | CI separation? |
-|---|---|---|---|
-| sub-08 | -0.18 | -0.13 | ✗ Overlap (both bimodal full-range) |
-| sub-09 | +0.37 | +0.71 | ✗ Overlap [1.30-2.35] |
-
-### Key findings
-
-**1. Sub-09 individual-level compensation evidence ROBUST**:
-- 95% CI [1.30, 2.60] strongly excludes g=1.0 (no compensation)
-- P(g>1) = 1.000 across 1000 bootstrap resamples
-- 단 overcompensation (g>2) 약함 (P=0.86, CI includes 2.0)
-
-**2. Sub-08 bimodal fit instability — paper limitation**:
-- 65% of resamples → g near 3 (max boundary)
-- 35% → g near 0 (low boundary)
-- ≈ 0.4% in middle [1, 2] range
-- 원인: L_α (8AFC error pattern) 과 L_γ (JND yellow-HYPO) 의 *internal disagreement*
-- 각 resample 에서 어떤 loss component 가 dominant 인지에 따라 g 가 극단으로 이동
-- **Paper-level**: sub-08 의 behavioral 측정 *mechanism incongruence* — 8AFC errors 와 JND HYPO 가 *서로 다른 cone shift scenario* 지지
-
-**3. CVD vs HC pool null — cannot distinguish (advisor's HC FPR=100% confirmed)**:
-- HC pool bootstrap CI 가 매우 wide (특히 deutan: full grid range)
-- → Group-level "CVD distinct from HC" claim BLOCKED (project memory의 HC FPR=100% 와 일관)
-- **Paper-level reframe**: per-subject compensation evidence (sub-09 strong) > group-level specificity (blocked)
-
-### Stage 4 — Verdict: ✅ PASS (with major findings)
-
-- ✓ Sub-09 strong individual compensation evidence (CI excludes 1.0)
-- ⚠ Sub-08 fit instability (bimodal) — paper limitation
-- ✗ Group-level HC null exceeded — known from project memory, primary defense moves to §6.3 transfer test (deferred to S7-S8 or paper-only)
-
-### Primary defense locked at S7-S8
-
-S6 bootstrap = *per-subject compensation evidence* (Form A T-1).
-Primary double-dipping defense remains §6.3 transfer test / §5.4 equivalence test — covered in S7.
-
-### Files
-
-- `scripts/s6_bootstrap_g_ci.py`
-- `results/s6_bootstrap/g_bootstrap.json`
+⏸ **Pending implementation** — Phase 3 trigger 또는 paper revision 시점에 시행. 현재 S11 LOO (k=6) 결과로 부분 cover 가능.
 
 ---
 
-## S7: Convergence matrix (✅ Complete 2026-05-21)
+---
+
+## S6 (renamed from S7, 2026-05-24): Convergence matrix (✅ Complete 2026-05-21, framing 정정 2026-05-22)
+
+> ⚠️ **Framing 정정 (사용자 catch 2026-05-22)**: "Δλ source convergence" 라는 표현은 misleading. 같은 quantity 의 *다른 추정* 이 수렴하는 게 아니라 — **3 외부/내부 Δλ assumption (DPS 상수 + Boehm 상수 + JND-Lamb data-driven fit) 하에서 g\* 가 얼마나 robust 한가** 의 sensitivity check. 정확한 용어: "**Δλ-prior robustness**".
+
+### Stage 0 — 판단 기준 + 수식 정의 (2026-05-22 added per 사용자 요구)
+
+본 sprint 가 평가하는 3 종류의 *convergence/robustness* 와 각각의 정의:
+
+#### (A) Within-model loss convergence (per Δλ source × per subject-ROI)
+
+**정의**: 같은 모델/같은 Δλ assumption 하에서, 8 loss target 의 fitted g\* 가 얼마나 일치하는가.
+
+```
+For (subject, ROI, Δλ_source) fixed:
+   g_set = {g*(L_k) for k in 1..8}  ← 8 fitted g values
+   metric_A1 = std(g_set)            ← spread
+   metric_A2 = max(g_set) − min(g_set)  ← range
+```
+
+**판단 threshold**:
+- ✅ tight: SD ≤ 0.2, range ≤ 0.5
+- ✓ acceptable: SD ≤ 0.4, range ≤ 1.0
+- ⚠ loose: SD > 0.4 또는 range > 1.0
+- ⚠⚠ catastrophic: range > 2.0 (full grid)
+
+**해석**:
+- Tight → 모델/Δλ가 *robust to loss choice* (model 자체가 strong constraint)
+- Loose → loss-dependent, *L8 weighted compromise 의미 강함*
+
+#### (B) Δλ-prior robustness — 사용자 의도 정정 (2026-05-24)
+
+> ⚠️ **Framing 정정 (사용자 catch 2026-05-24)**: 기존 (B) 정의는 *per loss × 3 Δλ 의 g\* range*. 사용자가 원했던 것은 **반대 방향** — *per Δλ source × 8 loss 의 g\* spread* — 즉 "**어느 Δλ assumption 이 loss-choice 에 가장 stable 한 fit 을 주는가**". 결과는 §S7-B 결과 표 (Stage 3) 참조.
+
+**(B-new) 정의**: 같은 모델/같은 Δλ assumption 하에서, 8 loss target 의 fitted g\* 가 얼마나 일치하는가 (= (A) 의 *per-Δλ* 분리 산출).
+
+```
+For (subject, ROI, Δλ_source) fixed:
+   g_set = {g*(L_k) for k in 1..8}    ← 8 fitted g (per Δλ)
+   metric_B1 = SD(g_set)
+   metric_B2 = stable_count = #{g_k ∈ [0.5, 2.8]}  (interior, non-boundary)
+```
+
+**판단 threshold**:
+- ✅ Δλ-stable: SD ≤ 0.2
+- ✓ acceptable: SD ≤ 0.4
+- ⚠ loose: SD > 0.4 (loss-dependent, Δλ가 보호 못함)
+
+**해석**:
+- ✅ → Δλ assumption 이 *loss-choice 와 무관한 stable fit* 제공 → paper-defensible Δλ
+- ⚠ → 같은 Δλ 하에서도 loss 따라 g\* 크게 흔들림 → Δλ assumption 보호력 부족, *모델 자체의 한계* 또는 *data information 약함*
+
+#### (C) Cross-model δθ alignment (R+C vs 2-Comp per subject-ROI)
+
+**정의**: 같은 (subject, ROI, L8) 하에서, R+C 와 2-Comp 가 산출하는 8-vec δθ 가 얼마나 같은 모양인가.
+
+```
+For (subject, ROI) fixed with L8 modality 5050:
+   δθ_RC   = (8,) from R+C(Δλ_DPS, g*)        # R+C-fitted
+   δθ_2C   = (8,) from 2-Comp(β_s*, β_c*)     # 2-Comp-fitted
+   
+   metric_C1 = Spearman_ρ(δθ_RC, δθ_2C)
+   metric_C2 = cos_sim(δθ_RC, δθ_2C) = ⟨δθ_RC, δθ_2C⟩ / (‖δθ_RC‖·‖δθ_2C‖)
+   metric_C3 = MAE = mean(|δθ_RC[c] − δθ_2C[c]|)
+   
+   Bootstrap CI of Spearman_ρ:
+     B=1000 resamples of {1..8} indices with replacement
+     ρ_b for each, percentile [2.5, 97.5]
+```
+
+**판단 threshold**:
+- ✅ strong convergence: ρ ≥ 0.7 AND CI excludes 0 AND cos ≥ 0.7
+- ✓ moderate: 0.4 ≤ ρ < 0.7 AND CI excludes 0
+- ⚠ weak/inconclusive: ρ < 0.4 OR CI includes 0
+- ✗ divergent: ρ < 0 (anti-correlation)
+
+**해석**:
+- ✅ → R+C / 2-Comp 가 *같은 distortion* 의 다른 parameterization
+- ⚠/✗ → 두 모델이 *서로 다른 information* 추정 → paper 가 complementary 로 framing
 
 ### Stage 1 — Implementation
 
@@ -597,7 +967,36 @@ Primary double-dipping defense remains §6.3 transfer test / §5.4 equivalence t
 
 ### Stage 3 — Interpretation
 
-#### R+C Δλ-source convergence per loss
+#### (B-new) Per-Δλ loss-stability (2026-05-24 사용자 catch, S7-B 재산출)
+
+**Question**: 어느 Δλ assumption 이 8 loss 의 g\* 를 가장 stable 하게 묶는가?
+
+| Cell | Δλ source | Δλ (nm) | SD(g) | range | Stable / 8 | Boundary | Verdict |
+|---|---|---|---|---|---|---|---|
+| sub-08 V1 | DPS | 6.0 | 0.722 | 2.250 | 7/8 | 1 | ⚠ loose |
+| sub-08 V1 | Boehm | 8.0 | 0.922 | 2.200 | 6/8 | 2 | ⚠ loose |
+| sub-08 V1 | **JND-Lamb** | 6.5 | **0.712** | 2.250 | 7/8 | 1 | ⚠ loose (best of 3) |
+| sub-08 V4 | **DPS** | 6.0 | **0.509** | 1.200 | 8/8 | 0 | ⚠ loose (best of 3) |
+| sub-08 V4 | Boehm | 8.0 | 0.943 | 2.150 | 5/8 | 1 | ⚠ loose |
+| sub-08 V4 | JND-Lamb | 6.5 | 1.083 | 2.250 | 4/8 | 4 | ⚠ loose |
+| sub-09 V1 | **DPS** | 10.0 | **0.310** | 1.000 | 6/8 | 2 | ✓ **acceptable** ★ |
+| sub-09 V1 | Boehm | 3.0 | 1.005 | 3.000 | 3/8 | 5 | ⚠⚠ catastrophic |
+| sub-09 V1 | JND-Lamb | 1.5 | 0.719 | 2.200 | 4/8 | 4 | ⚠ loose |
+| sub-09 V4 | **DPS** | 10.0 | **0.814** | 2.100 | 8/8 | 0 | ⚠ loose (best of 3) |
+| sub-09 V4 | Boehm | 3.0 | 1.346 | 3.000 | 1/8 | 5 | ⚠⚠ catastrophic |
+| sub-09 V4 | JND-Lamb | 1.5 | 1.392 | 3.000 | 1/8 | 7 | ⚠⚠ catastrophic |
+
+**Key findings**:
+
+1. **★ Sub-09 V1 DPS Δλ=10 가 8 cell × 3 source = 24 조합 중 유일하게 "acceptable" 통과** (SD=0.310, 6/8 interior). Sub-09 의 paper-defensible Δλ assumption 은 **오직 DPS=10nm**.
+
+2. **Sub-09 Boehm/JND-L 의 catastrophic instability**: Small Δλ (3 / 1.5 nm) 에서 R+C 1-DOF 가 *L_α/L_γ 는 g≈2 정상*, *L3 LOCO 는 g=0*, *L4 RDM 은 g=3* — 같은 Δλ 하에서 *loss 따라 g 가 grid 양 끝으로 split*. Boundary hit 5-7/8. **Paper 에 "Boehm/JND-L Δλ 는 procedurally fragile 로 flag"**.
+
+3. **Sub-08 은 어떤 Δλ 도 acceptable 못함** (SD 최저 V4 DPS = 0.509). 즉 sub-08 의 R+C g 는 *Δλ assumption 이 아닌 loss choice 에 본질적으로 의존* — model 자체의 한계 (single-DOF 가 sub-08 8-color pattern 을 못 잡음).
+
+4. **(B-구) Δλ-prior robustness 와의 대조**: 기존 (B-구) 는 *per loss × 3 Δλ* — behavioral robust / neural sensitive. **(B-new) 는 *per Δλ × 8 loss* — sub-09 DPS 만 loss-stable**. 두 관점이 함께 paper 의 sub-09 결론 (DPS Δλ=10 + cortical g≈2.6 가 유일 robust path) 을 확정.
+
+#### (B-구) R+C Δλ-source convergence per loss
 
 | Loss | sub-08 V4 range | sub-09 V1 range | sub-09 V4 range |
 |---|---|---|---|
@@ -628,25 +1027,80 @@ Primary double-dipping defense remains §6.3 transfer test / §5.4 equivalence t
 - Sub-08: warm-side compression (β_s≈25, β_c≈-16) on average, but range up to ±36°
 - Sub-09: S-cone rotation dominant (β_s≈25), β_c near zero with high variance
 
-#### Cross-model δθ alignment (R+C L8 DPS vs 2-Comp L8)
+#### Cross-model δθ agreement (R+C L8 DPS vs 2-Comp L8) — 2026-05-24 metric overhaul
 
-| Subject ROI | Spearman ρ | p | Bootstrap 95% CI | Cosine | MAE (deg) |
-|---|---|---|---|---|---|
-| sub-08 V4 | 0.595 | 0.120 | [-0.28, 1.00] | 0.544 | 23.12 |
-| sub-09 V1 | 0.119 | 0.779 | [-0.73, 0.92] | 0.074 | 21.12 |
-| sub-09 V4 | -0.048 | 0.910 | [-0.78, 0.77] | 0.014 | 23.15 |
+> ⚠️ **Metric 정정 (사용자 catch 2026-05-24)**: Spearman ρ 는 rank-only → magnitude 무시 (e.g. R+C blue=−22° vs 2-C blue=−43° 가 *same rank* 로 처리). 두 모델 distortion pattern 의 *방향 + 크기 모두 일치* 평가에 부적절. **대체**: Lin's CCC (concordance with identity line, method-agreement gold standard) + Bland-Altman per-color + linear regression slope.
 
-**Cross-model δθ alignment WEAK** — Spearman bootstrap CI includes 0 for all subjects/ROIs.
-- R+C and 2-Comp fit *different δθ patterns* even under same L8 loss
-- Sub-08 V4 shows moderate positive correlation (ρ=0.595) but CI [-0.28, 1.00] inconclusive
-- Sub-09: essentially no correlation (ρ≈0)
+##### Primary metric: Lin's Concordance Correlation Coefficient (CCC)
+
+CCC = 2·cov(X,Y) / [var(X) + var(Y) + (μ_X − μ_Y)²]
+
+CCC penalizes:
+1. Linear correlation 부족 (Pearson r 와 동일 성질)
+2. Identity line (y=x) 으로부터의 deviation (scale + location shift)
+
+| Lin 1989 threshold | Range | Interpretation |
+|---|---|---|
+| ≥ 0.99 | excellent | almost perfect agreement |
+| 0.95 - 0.99 | substantial | paper-defensible "same distortion" |
+| 0.90 - 0.95 | moderate | partial agreement |
+| < 0.90 | poor | distinct estimates |
+
+##### S7 (C) main result table (4 cells)
+
+| Subject | ROI | R+C g\* | 2-Comp (β_s, β_c) | Pearson r | **CCC** | CCC 95% CI | slope | intercept | MAE (°) | BA bias (°) |
+|---|---|---|---|---|---|---|---|---|---|---|
+| sub-08 | V1 | 2.25 | (48, −36) | **+0.55** | **+0.27** ⚠ | bootstrap | **+2.14** | −2.0° | 23.1 | +1.4 |
+| sub-08 | V4 | 2.30 | (48, −36) | **+0.55** | **+0.31** ⚠ | bootstrap | **+1.78** | −0.4° | 22.5 | +1.7 |
+| sub-09 | V1 | 2.60 | (26, +6) | **+0.10** | **+0.10** ✗ | bootstrap | **+0.10** | +6.4° | 20.6 | +1.1 |
+| sub-09 | V4 | 2.60 | (26, +6) | **+0.10** | **+0.10** ✗ | bootstrap | **+0.10** | +6.4° | 20.6 | +1.1 |
+
+(Bootstrap CI from B=2000 paired index resampling; full CI in `results/s7_convergence/rc_vs_2comp_agreement.json`)
+
+##### Key findings — CCC 가 노출한 새 정보
+
+1. **Sub-08 CCC ≈ +0.30 → 두 모델 "poor agreement"**. Pearson r=+0.55 는 *linear association 있음* (slope=+2.14, +1.78 → 2-C 가 R+C 의 ~2배 크기). 즉 **방향은 일치, magnitude 가 2배 다름** — Spearman 의 ρ=0.60 이 *이 critical magnitude 차이를 가렸음*. Identity line 으로부터 멀리 떨어진 disagreement.
+
+2. **Sub-09 CCC = +0.10 → "disagreement"**. Slope = +0.10 (almost flat) — 2-C 가 R+C 와 거의 무관한 distortion pattern. **두 모델이 서로 다른 mechanism 추정**:
+   - R+C: blue (−45.7°), purple (+36.5°) 의 *cone-shift driven extreme*
+   - 2-C: yellow (+27.7°), orange (+23.6°) 의 *S-cone rotation dominant*
+   - Pearson r=+0.10 도 동의 → 진정한 model divergence
+
+3. **Sub-08 V1/V4 의 CCC 차이 (0.27 vs 0.31)**: 정확히 다름. **R+C g\* 가 V1 (2.25) ≠ V4 (2.30)** → δθ_RC magnitude 가 V4 에서 살짝 더 큼 → 2-C 와의 slope 가 V4 에서 더 1.0 에 가까움. Spearman 의 ROI 동일 결과는 *rank 만 같았을 뿐*, magnitude 정보로 V1≠V4.
+
+##### Bland-Altman per-color disagreement
+
+| Cell | bias (°) | ±1.96 SD LoA (°) | 큰 outlier (|diff−bias| > 1.96 SD) |
+|---|---|---|---|
+| sub-08 V1 | +1.42 | ±56.7 | none (모든 점 LoA 내) |
+| sub-08 V4 | +1.70 | ±55.6 | none |
+| sub-09 V1 | +1.10 | ±57.8 | **purple** (diff = −64.2°, LoA 초과) |
+| sub-09 V4 | +1.10 | ±57.8 | **purple** (diff = −64.2°, LoA 초과) |
+
+→ **Sub-09 purple 이 유일한 statistical outlier**. 다른 색들은 LoA 안 (단 LoA 가 ±57° 로 매우 넓음 → 두 모델 차이의 본질적 magnitude).
+
+##### Paper-level interpretation update
+
+- **OLD (Spearman 기반)**: "R+C 와 2-Comp 는 weak alignment (CI 0 포함), complementary"
+- **NEW (CCC 기반)**: "R+C 와 2-Comp 는 **distinctly different distortion estimates** (CCC ≤ 0.31 both subjects). Sub-08 에서 direction 일치하나 magnitude 가 2× 다름. Sub-09 에서 direction 자체 다름 (purple 이 핵심 disagreement)."
+- → **Paper claim**: "Two models capture **different mechanisms**, not complementary parameterizations of the same distortion". 이 framing 이 §5 의 §1 paper finding "Subtype-specific 2-Comp signature" 와 일관 — sub-09 의 β_c≈0 (S-cone only) 가 R+C cone-shift 와 *근본적으로 다른 mechanism*.
+
+##### Files
+- Script: `scripts/s7c_rc_vs_2comp_agreement.py`
+- Results: `results/s7_convergence/{rc_vs_2comp_agreement.json, SUMMARY_agreement.md}`
+- Viz: `results/s7_convergence/viz_bland_altman.png` (4 panel Bland-Altman)
+- Per-color δθ viz: `results/s5_all_paths/viz_rc_vs_2comp_delta_theta.png` (bar + polar)
+
+##### ROI-invariance 의 출처 (참조)
+
+Cross-model δθ agreement 는 forward output (=δθ 8-vec) 만 비교 — voxel data 직접 입력 안 함. L8 fit 의 50% behavioral component 가 ROI 무관 → fitted params 거의 ROI-invariant. 이 ROI-invariance 자체가 §"Acknowledged Constraints (2) L8 weighted compromise" 의 direct empirical evidence.
 
 ### Key findings
 
 1. **Behavioral loss = robust to Δλ assumption** (per-subject param stability)
 2. **Neural loss = Δλ-source dependent** (L3, L4 sensitive)
 3. **2-Comp parameters are loss-dependent** (no stable point estimate without loss specification)
-4. **Cross-model δθ alignment weak** — R+C and 2-Comp are *complementary*, not redundant
+4. **Cross-model δθ agreement poor (CCC ≤ 0.31)** — R+C and 2-Comp capture *different mechanisms*, not complementary parameterizations of same distortion (2026-05-24 metric overhaul)
 
 ### Stage 4 — Verdict: ✅ PASS (with major paper findings)
 
@@ -669,7 +1123,9 @@ Primary double-dipping defense remains §6.3 transfer test / §5.4 equivalence t
 
 ---
 
-## S8: Selection + Cross-subtype + Form C permutation (✅ Complete 2026-05-21)
+## [Archived 2026-05-24] S8_old: Selection + Cross-subtype + Form C permutation (✅ Complete 2026-05-21)
+
+> **Archive note (2026-05-24)**: S12 design 에서 color-label permutation 이 S12 main flow criterion 에서 제거됨 (사용자 catch: positive characterization vs null rejection 별개). 본 sprint 의 selection 결정은 **S7 (new) 에 의해 supersede**. Content 보존 — color-perm methodology 와 historical decisions 참고용.
 
 ### Stage 1 — Implementation
 
@@ -768,7 +1224,9 @@ Primary double-dipping defense remains §6.3 transfer test / §5.4 equivalence t
 
 ---
 
-## S9: Retroactive defenses (사용자 catch 2026-05-21, ✅ Complete)
+## [Archived 2026-05-24] S9_old: Retroactive defenses (사용자 catch 2026-05-21, ✅ Complete) — (content consolidated into new S9, 2026-05-24)
+
+> **Consolidation note (2026-05-24)**: 본 sprint 와 S10_old (Advisor corrections) 가 새 **S9: Integrated defenses** (line 1776) 으로 통합 완료. 본 section 은 historical record 로 보존.
 
 ### Context
 
@@ -845,7 +1303,93 @@ Primary double-dipping defense remains §6.3 transfer test / §5.4 equivalence t
 
 ---
 
-## PHASE 2 COMPLETE — Final per-subject filter recommendations
+## [Archived 2026-05-24] S10_old: Advisor-driven critical corrections (✅ 2026-05-21) — (content consolidated into new S9, 2026-05-24)
+
+> **Consolidation note (2026-05-24)**: S9_old 와 함께 새 **S9: Integrated defenses** (line 1776) 으로 통합 완료. 본 section 은 historical record 로 보존.
+
+### Context
+
+Advisor evaluation after S9 surface 5 critical concerns:
+1. "FPR=0.000" misleading — actually point percentile, n=7 HC only
+2. Transfer (Y) JND 4.59× not normalized by ‖δθ‖²
+3. (X) LOCO ≈ 1.0 misinterpreted as "noise" (correctly: test uninformative)
+4. Cross-subtype asymmetry artifact concern unresolved
+5. Permutation p=0.000 over-destructive
+
+### Stage 3 — Results
+
+#### (1) ‖δθ‖²-normalized transfer test — Subtype-specific claim COLLAPSES
+
+| Model | sub-08 raw | sub-08 ‖δθ‖² | **sub-08 norm** | sub-09 raw | sub-09 ‖δθ‖² | **sub-09 norm** |
+|---|---|---|---|---|---|---|
+| R+C | 0.96 | 516 | 0.00186 | 1.86 | 3583 | 0.00052 |
+| 2-Comp | 4.59 | 7488 | **0.00061** | 1.82 | 3136 | **0.00058** |
+
+**Sub-08 2-Comp normalized (0.00061) ≈ Sub-09 2-Comp normalized (0.00058)**.
+
+→ "Sub-08 2-Comp subtype-specific 4.59× degradation" was **‖δθ‖²=7488 magnitude artifact**, NOT subtype-specific signal.
+
+#### (2) Specificity reframe — FPR=0.000 → CI overlap
+
+| Subject | Point: N HC ≥ CVD | CVD bootstrap CI | HC pool bootstrap CI | CI overlap? |
+|---|---|---|---|---|
+| sub-08 | 0/7 | [0.000, 3.000] | [0.000, 3.000] | ✓ Complete overlap |
+| sub-09 | 0/7 | [1.300, 2.600] | [1.000, 2.350] | ✓ Overlap [1.30, 2.35] |
+
+→ "FPR=0.000" → **"0/7 point fits exceed CVD (descriptive percentile), bootstrap CI overlap at margin"**.
+
+Project §0 policy: "Specificity claim 금지, descriptive percentile OK" — must apply.
+
+#### (3) AICc/BIC precision — earlier claim "ΔAICc=-30" WAS WRONG
+
+| Subject | R+C AICc | 2-Comp AICc | **ΔAICc** | Kass-Raftery |
+|---|---|---|---|---|
+| sub-08 | -22.40 | -22.81 | **+0.41** | <2: indistinguishable |
+| sub-09 | -44.17 | -51.43 | **+7.27** | 6-10: strong |
+
+→ I previously read 2-Comp AICc absolute value (-22.81) as "Δ=-22". Real Δ is +0.41 (sub-08 indistinguishable) and +7.27 (sub-09 strong).
+
+#### (4) Cross-subtype Δ analysis INVERTS the asymmetric claim
+
+| Direction | L_within | L_cross | **Δ (cross-within)** | Ratio |
+|---|---|---|---|---|
+| sub-08 → sub-09 | 0.560 | 0.881 | +0.32 (smaller abs) | 1.57 |
+| sub-09 → sub-08 | 5.151 | 5.672 | **+0.52 (larger abs)** | 1.10 |
+
+→ Under Δ: **sub-09→sub-08 transfer is *larger* absolute error**. "Sub-09 mechanism transferable, sub-08 subtype-specific" claim **INVERTS** — was ratio artifact of base loss magnitude.
+
+#### (5) Loss-assignment permutation null (less destructive)
+
+| Subject | S8 color-perm p | **S10 loss-assign perm p** | Verdict |
+|---|---|---|---|
+| sub-08 | 0.150 | 0.130 | NS in both — robust limitation |
+| sub-09 | 0.000 | **0.000** | Significant in BOTH — robust evidence |
+
+→ Sub-09 permutation evidence survives less destructive null (✓ robust); sub-08 fails in both.
+
+### Stage 4 — Verdict: ✅ PASS (with substantial paper claim revisions)
+
+**Paper claims SURVIVE**:
+- ✓ Sub-09 individual-level g > 1 (Bootstrap CI [1.30, 2.60] excludes 1.0)
+- ✓ Sub-09 permutation p=0.000 robust under two null forms (S8 + S10)
+- ✓ Sub-09 mild protan (JND-Lamb 1.5 nm + Ishihara 9/14 + V1 LOCO p=0.007)
+- ✓ Sub-08 2-Comp captures structural distortion (β_s=48, β_c=-36)
+- ✓ Sub-08 R+C 1-DOF misspecified (bimodal bootstrap, boundary mass)
+
+**Paper claims COLLAPSE (must remove)**:
+- ✗ "Group-level CVD vs HC specificity recovered (FPR=0)" — only descriptive percentile, CI overlap
+- ✗ "2-Comp subtype-specific transfer (4.59× sub-08)" — ‖δθ‖² magnitude artifact
+- ✗ "Asymmetric subtype-specificity (sub-08 specific, sub-09 generic)" — INVERTS under Δ analysis
+- ✗ "ΔAICc=-30 very strong evidence" — actually +0.41 (sub-08) and +7.27 (sub-09)
+
+### Files
+
+- `scripts/s10_advisor_fixes.py`
+- `results/s10_advisor_fixes/` (logs in script output)
+
+---
+
+## PHASE 2 COMPLETE (Final, advisor-corrected) — Per-subject filter recommendations
 
 ### Sub-09 filter recommendation (paper-ready)
 - **2-Comp PRIMARY**: β_s=26 (V1) or β_s=28 (V4), β_c ≈ 0-4 (S-cone rotation dominant)
@@ -862,3 +1406,660 @@ Primary double-dipping defense remains §6.3 transfer test / §5.4 equivalence t
 - Sub-09 filter behavioral validation (filter-on vs filter-off 8AFC/JND)
 - Sub-08 filter behavioral validation
 - (Optional) Cross-subtype filter swap to test mechanism specificity
+
+---
+
+## K-robustness Final Report (2026-05-22)
+
+Following user catch on K mismatch (SRM K-values were inadvertently used as FE basis K in `neural_loss.py:42`), all S4–S10 sprints were re-run with **FE-6 uniform** (Phase 1 baseline).
+
+### Method
+- `neural_loss.py:42` `ROI_K = {V1:6, V2:6, V3:6, V4:6}` (previously {4, 4, 3, 3}).
+- All downstream sprints (S5/S5'/S6/S7/S8/S9/S10) re-executed sequentially. Total wall time ≈ 12 min.
+
+### Results table (K=3-4 SRM-override → K=6 FE-uniform)
+
+| Metric | K=3-4 (old) | **K=6 (corrected)** | Verdict |
+|---|---|---|---|
+| Sub-09 R+C g* (DPS, V1) | 2.60 | **2.60** | ✅ identical |
+| Sub-08 R+C g* (DPS, V1) | 2.25 | **2.25** | ✅ identical |
+| Sub-08 2-Comp V1 (β_s, β_c) | (48, −36) | **(48, −36)** | ✅ identical |
+| Sub-08 2-Comp V4 (β_s, β_c) | (48, −36) | **(48, −36)** | ✅ identical |
+| Sub-09 2-Comp V1 (β_s, β_c) | (26, +4) | **(26, +6)** | ✅ sign preserved |
+| Sub-09 2-Comp V4 (β_s, β_c) | (28, 0) | **(26, +6)** | ⚠ 0 → +6 (positive) |
+| **Subtype dichotomy (β_c sign)** | sub-08<0, sub-09≥0 | **sub-08<0, sub-09>0** | ✅ **K-robust at all 4 cells** |
+| Sub-09 Bootstrap CI of g | [1.30, 2.60] | **[1.30, 2.60]** | ✅ identical |
+| Sub-09 Bootstrap p (excludes g=1) | p < 0.001 | **p < 0.001 (fraction>1 = 1.000)** | ✅ |
+| Sub-08 Bootstrap shape | bimodal, boundary mass 0.65 | **bimodal, boundary mass 0.65** | ✅ identical |
+| Sub-09 perm p (S8 color-perm) | 0.0000 | **0.0000** | ✅ |
+| Sub-08 perm p (S8 color-perm) | 0.150 | **0.140** | ✅ NS in both |
+| ΔAICc(sub-08 R+C − 2-Comp) | +0.41 | **+0.38** | ✅ <2 indistinguishable |
+| ΔAICc(sub-09 R+C − 2-Comp) | +7.27 | **+7.05** | ✅ 6-10 strong |
+| Cross-subtype Δ inversion (sub-09→08 > sub-08→09) | +0.52 > +0.32 | **+0.50 > +0.26** | ✅ inversion preserved |
+| ‖δθ‖²-norm sub-08 2-Comp | 0.00061 | **0.00061** | ✅ identical |
+| ‖δθ‖²-norm sub-09 2-Comp | 0.00058 | **0.00058** | ✅ identical |
+| CVD-HC CI overlap (sub-09) | [1.30, 2.35] | **[1.30, 2.35]** | ✅ identical |
+
+### Surviving / collapsing paper claims — K=6 unchanged
+
+| Claim | K-robust? |
+|---|---|
+| ✓ Sub-09 individual-level g > 1 (CI excludes 1.0) | ✅ K=6 confirms |
+| ✓ Sub-09 perm p=0.000 robust (S8 + S10 loss-assign) | ✅ K=6 confirms |
+| ✓ Sub-09 mild protan (JND-L 1.5nm + Ishihara 9/14 + V1 LOCO p=0.007) | ✅ K-invariant by design |
+| ✓ Sub-08 2-Comp (β_s=48, β_c=−36) descriptor | ✅ K=6 identical |
+| ✓ Sub-08 R+C 1-DOF misspecified (bimodal bootstrap) | ✅ K=6 identical |
+| ✗ Subtype-specific transfer (4.59×) | ✅ still collapses |
+| ✗ Asymmetric subtype-specificity | ✅ still inverts under Δ |
+| ✗ Group-level CVD-vs-HC specificity (FPR=0) | ✅ still CI-overlapped |
+
+### New observations at K=6 (paper limitation candidates)
+
+1. **Sub-08 V4 R+C JND-Lamb** boundary hit (g=0) at K=6 (was clean g=2.25 at K=3) — K-sensitive secondary path. Paper primary remains DPS (clean fit), JND-Lamb is sensitivity supplement only.
+2. **Sub-09 V4 2-Comp β_c**: 0 (K=3) → +6° (K=6). Sign positive preserved; magnitude shift small.
+3. Cross-model δθ Spearman improved (K=3-4: ρ≈−0.71 per MEMORY; K=6: ρ=0.119, p=0.78, MAE=20.6°). K=6 reduces R+C-vs-2Comp divergence but they remain decoupled.
+
+### Verdict
+
+> **Phase 2 의 모든 paper-defensible surviving claims 는 K=6 FE-uniform 에서 robust.** Phase 1 baseline 일치 (K=6) + Phase 2 결과 변경 거의 없음 + collapsed claims 도 동일하게 collapse. K mismatch 는 **method consistency 문제이지 substantive finding 변경 아님**. Limitation: sub-08 V4 R+C JND-Lamb path 의 K-sensitivity (paper 의 primary DPS hypothesis 에는 영향 없음).
+
+---
+
+## [Legacy / S7 prep] S11_legacy: Model-Loss Selection Sprint — LOO + Train-Test (2026-05-23 USER DIRECTIVE)
+
+> **Legacy note (2026-05-24)**: 본 sprint 는 **새 S7 (Loss combination + HC subset resample)** 의 직전 단계. 7-fold LOO 만으로는 inter-loss correlation, λ trace, multi-k stability 측정 불가 → S7 으로 확장. 본 S11 의 결과 (sub-09 R+C L_γ V4 dominant, sub-08 2-comp L_γ V1) 는 S7 의 prior 로 활용. **S7 결과로 final candidates supersede.**
+
+**CLAUDE.md §3 RE-OPENED**. Phase 2 적합 모델·loss 미확정. 본 sprint 의 결과로 model-loss pair 후보를 평가.
+
+### S11.1 Design
+
+- **Models**: R+C 1-DOF (Δλ, g), 2-Component (β_s, β_c)
+- **Losses (standalone)**: L_γ (JND), L_α (8AFC), L_LOCO (within-W voxel), L_RDM (HC-pool ΔRDM cosine)
+- **ROIs**: V1, V2, V3, V4 (FE-6 uniform)
+- **Subjects**: sub-08 deutan, sub-09 protan
+- **LOO**: 7-fold over HC (sub-01..sub-07)
+- **R+C Δλ**: 3 sources × 2 family (DPS_lit, Boehm grid, JND-Lamb)
+- **Script**: `scripts/s8_loo_train_test.py` (이전 sprint 의 S8 명과 script 명 충돌 — 새 sprint label = S11)
+- **Compute**: 184 s
+
+### S11.2 5 selection criteria
+
+| Criterion | 정의 |
+|---|---|
+| (a) parameter SD | CVD parameter 의 7-fold SD (stability) |
+| (b) separation rate | %folds CVD > 95th %ile of held-out HC parameter (distinctness, train-test-aware) |
+| (c) P1/P2a guardrail | filter 의 behavioral plausibility — **internal sanity only**, 본 sprint 보고 안 함 (§0.1) |
+| (d) inter-loss Pearson r | 4 losses × 7 folds 의 vector 간 correlation (convergence) |
+| (e) train-test MSE | held-out HC parameter 의 across-fold variance (generalization) |
+
+### S11.3 Key results — sub-09 protan
+
+#### R+C 1-DOF (Δλ=DPS_lit=10nm)
+| Loss | mean g | SD (a) | sep rate (b) | HC mean | MSE (e) |
+|---|---|---|---|---|---|
+| **L_γ** | **2.59** | **0.06** | **1.00** | 1.97 | **0.078** (V4) / **0.166** (V1) |
+| L_α | 2.00 | 0.00 | 0.00 | 1.98 | 0.002 (degenerate ceiling — 8AFC=100% acc) |
+| L_LOCO V1 | 3.00 | 0.00 (boundary) | 1.00 | 1.71 | 0.560 |
+| L_LOCO V2-V4 | 0.5–1.05 | 0.00 (boundary) | 0.00 | 1.03–1.36 | 0.34–0.77 |
+| L_RDM V1 | 2.28 | 0.75 | 0.29 | 1.89 | 1.095 (high) |
+| L_RDM V4 | 1.12 | 0.38 | 0.00 | 0.88 | 0.905 |
+
+#### 2-Component
+| Loss | mean norm | SD (a) | β_s SD | β_c SD | sep rate (b) | MSE (e) |
+|---|---|---|---|---|---|---|
+| L_γ | 26.7 | 2.0 | 1.8 | 1.5 | 0.14 | 148 |
+| L_α | 0.0 | 0.0 | 0.0 | 0.0 | 0.00 | 22 (degenerate) |
+| **L_LOCO V1** | **70.7** | **0.0 (boundary)** | 0.0 | 0.0 | **1.00** | 427 (high) |
+| L_LOCO V2 | 70.7 | 0.0 (boundary) | 0.0 | 0.0 | 0.29 | 670 |
+| L_RDM V1 | 48.6 | 1.8 | 1.8 | 1.9 | **0.71** | 330 |
+
+**sub-09 분석**:
+- **R+C g L_γ** = 최고 stable (SD=0.06), 모든 ROI 에서 SEP=1.00, V4 MSE=0.078 (가장 generalizable). **신경 정보 추가 없이도 robust.**
+- **L_LOCO/L_RDM 은 ROI-dependent boundary hit** — degenerate solutions.
+- 2-comp L_RDM V1 SEP=0.71, 비-boundary (norm SD=1.8) → 신경 정보 활용 가능한 유일 후보지만 MSE=330 (large generalization error).
+
+### S11.4 Key results — sub-08 deutan
+
+#### R+C 1-DOF (Δλ=DPS_lit=6nm)
+| Loss | mean g | SD (a) | sep rate (b) | HC mean | MSE (e) |
+|---|---|---|---|---|---|
+| L_γ | 1.61 | 1.10 | 0.43 | 1.64 | 0.633 (high SD → unstable) |
+| L_α | 2.00 | 0.00 | 0.00 | 2.00 | 0.000 (degenerate) |
+| L_LOCO | 0.00 | 0.00 (boundary) | 0.00 | 1.03–1.18 | 0.70–1.10 (overcorrection direction) |
+| **L_RDM V1** | **2.15** | **0.00** (boundary mid) | 0.14 | 1.59 | 0.641 |
+| L_RDM V2 | 3.00 | 0.00 (boundary) | **1.00** | 1.52 | 0.595 (both high, ceiling) |
+
+#### 2-Component
+| Loss | mean norm | SD (a) | sep rate (b) | MSE (e) |
+|---|---|---|---|---|
+| **L_γ** | **59.7** | **2.9** | **1.00** | 231 (high MSE 단, sep robust) |
+| L_α | 17.9 | 0.0 | 1.00 | 17 (degenerate but separating) |
+| L_LOCO V1-V4 | 55.5–70.7 | 0.0 (boundary) | 0.0–0.29 | 334–866 |
+| L_RDM V1 | 2.0 | 0.0 (degenerate small) | 0.00 | 407 |
+| L_RDM V2 | 22.4 | 15.6 | 0.00 | 439 |
+
+**sub-08 분석**:
+- **R+C L_γ unstable** (SD=1.10) — sub-08 의 JND 가 HC pool 구성에 sensitive (deutan ambiguity).
+- **2-comp L_γ stable** (norm SD=2.9) AND SEP=1.00 across all ROIs — robust separation.
+- **L_LOCO boundary low** (g=0) — 신경 데이터가 *anti-Machado direction* 으로 끌림 (cortical compensation 약함 또는 단순 noise).
+- **L_RDM V1 g=2.15 stable** but SEP=0.14 (HC 도 2.15 근처).
+
+### S11.5 Inter-loss correlation (d) — pool-independence 가 진짜 원인 (advisor 정정 2026-05-23)
+
+**초기 진단 오류**: "L_α ceiling + L_LOCO boundary → SD=0 → Pearson undefined" 는 부분적으로만 옳음. 진짜 원인:
+
+#### Root cause: pool-independence by construction
+
+`scripts/s8_loo_train_test.py:make_loss_fns()` 의 closure 정의:
+
+```python
+def L_alpha_fn(delta_rc):    # CVD 의 8AFC + SIGMA_HC 만 사용 — pool 미사용
+    return L_behav_alpha(delta_rc, target_8afc, SIGMA_HC)
+
+def L_loco_fn(delta_rc):     # CVD 의 own data + own W 만 사용 — pool 미사용
+    return L_LOCO(delta_rc, target_amp, target_loco_W, K)
+```
+
+**L_α 와 L_LOCO 는 pool 인자 받지 않음** → HC pool 구성 (LOO axis) 이 두 loss 값에 영향 **없음** → 7-fold 결과 **완전 동일** (sub-09 V1 L_α 7-fold 모두 g=2.0000, L_LOCO 모두 g=3.0000 실측 확인).
+
+#### 함의 (advisor catch)
+
+- **(a) `cvd_param_sd` 의 L_α/L_LOCO SD=0 은 tautology** — "stability evidence" 보고 금지.
+- **(d) Inter-loss correlation NaN** — HC LOO axis 가 pool-independent loss 의 variation 유도 못함 이 본질.
+- Pool-dependent losses (L_γ, L_RDM) 만 7-fold 에서 real variation:
+  - L_γ sub-09 V1 g range = [2.50, 2.65] (tight)
+  - L_γ sub-08 V1 g range = [0.00, 2.30] (bimodal — sub-04/sub-06 hold-out 시 collapse, task #12 진단)
+  - L_RDM sub-09 V1 g range = [0.75, 3.00]
+- **L_LOCO g=0 boundary 는 substantive negative result, not noise**: CVD 의 own voxel 신호가 cone-shift δθ 방향과 *anti-correlate* — "cone-shift model 이 CVD voxel signal 에 의해 거부됨" 의 직접 evidence. S11.4 framing 정정 필요.
+
+#### 측정 가능한 inter-loss correlation (pool-dependent pair 만)
+
+| Subject-ROI | Pair | r |
+|---|---|---|
+| sub-08 V2 2-comp | L_γ ↔ L_RDM | -0.79 (anti-correlated) |
+| sub-09 V1 R+C | L_γ ↔ L_RDM | +0.44 |
+| sub-09 V1 2-comp | L_γ ↔ L_RDM | -0.45 (R+C 와 sign flip) |
+| sub-09 V2-V4 R+C | L_γ ↔ L_RDM | 0.02–0.14 (no relation) |
+
+#### 올바른 inter-loss correlation 측정 방법 (별도 sprint, task #13)
+
+HC LOO axis 가 4-loss-correlation 에 부적합. Advisor 권장 3가지 대안:
+
+1. **Trial-level CVD bootstrap (B=200)**: CVD 자신의 JND/8AFC trial + fMRI run resample → 4 loss 모두 per-bootstrap variation 생김 → Pearson r 정의 가능.
+2. **Cross-cell parameter agreement**: ROI × Δλ source 12 cell 에 대한 Spearman ρ across losses.
+3. **Direct λ-trace** (가장 직접적): L_γ alone → θ_γ vs L_γ + λ·L_RDM (λ ∈ [0, 1] 스윕) → θ(λ) 추적. θ shift 여부로 "신경 info unique contribution?" 답.
+
+**S11 본 sprint 의 inter-loss correlation 은 invalid framework**. 결론 "신경 정보 unique contribution?" 은 별도 sprint (S12) 로 재산출 필수.
+
+**연구 질문 ANSWER (S11 단독으로는 ANSWER 불가)**:
+- Pool-dependent loss pair (L_γ ↔ L_RDM) 만 7-fold 에서 변동 → 1-pair correlation 측정 가능
+- L_α / L_LOCO 는 HC LOO axis 에서는 비교 불가 → 별도 sprint 필요
+- 잠정: L_γ ↔ L_RDM r 부호 일관성 없음 (subject/ROI/model 별 +/-/null 혼재) → behavioral 과 neural relational geometry 가 *cell-specific* 으로 합의/반대 — single direction 결론 불가
+
+### S11.6 Single filter recommendation (Phase 3 후보) — **BLOCKED 2026-05-23 advisor catch**
+
+⚠ **CIRCULARITY BLOCK**: 아래 권장은 §0.1 P2a/P1 정책과 동일한 circularity (filter 를 behavioral data 로 fit → behavioral 로 validate) 에 빠짐. **Paper draft / Phase 3 실험 trigger 전 다음 중 하나 해결 필수**:
+- (a) "interim, awaiting non-circular validation" 으로 qualify
+- (b) L_γ 제외, **L_RDM 만으로** separation + train-test MSE 재산출 → 단 L_RDM 은 Constraint #5 (HC procedural bias) 영향
+- (c) 별도 수집한 *non-fit* behavioral test (filter 적용 자극 vs no-filter) 확보 후 validation
+
+이하 잠정 권장 (BLOCK 해소 전):
+
+**Sub-09 (protan)** — **R+C 1-DOF, L_γ, ROI=V4, Δλ=DPS_lit=10nm**:
+- g = 2.59 ± 0.06 (가장 stable)
+- SEP rate = 1.00 (모든 fold CVD > HC)
+- Train-test MSE = 0.078 (가장 generalizable)
+- **단점**: 신경 정보 없음. R+C model 은 paper-diagnostic only (filter form 으로는 미정).
+- 2-comp L_γ 도 stable (SD=2.0, SEP=1.00 R+C 대비 작음, MSE=148) → 2-comp 으로 filter 변환 시 alternative.
+
+**Sub-08 (deutan)** — **2-Component, L_γ, ROI=V1**:
+- norm = 59.7 ± 2.9 (β_s SD=5.0, β_c SD=2.7)
+- SEP rate = 1.00 (all folds)
+- Train-test MSE = 231 (높은 generalization error 단, separation robust)
+- R+C L_γ 는 sub-08 에서 unstable (SD=1.10) → R+C 선정 불가.
+- 신경 L_RDM 추가는 L_γ 와 anti-correlated → complementary info 있을 가능, 단 사전 명확화 필요.
+
+### S11.7 Caveats + Open issues
+
+1. **L_α (8AFC) degenerate**: sub-09 100% ceiling, sub-08 sub-uniform. 정보 가치 limited; 분석에서 informative pair 차감.
+2. **L_LOCO boundary hit dominance**: 거의 모든 cell 에서 g=0 또는 (β_s, β_c) boundary 로 수렴. 즉 CVD 의 within-subject LOCO 가 *unique optimum* 못 갖는 flat landscape — discrete cone-shift model 의 한계.
+3. **Inter-loss correlation NaN**: degenerate-dominance 의 직접 결과. (d) criterion 사실상 정보 비효율 — L_γ ↔ L_RDM 1-pair 만 의미 측정.
+4. **§0.1 P2a/P1 guardrail (c)** 본 sprint 미적용 — separate validation needed (TBD).
+5. **2-comp L_LOCO V1 sub-09 SEP=1.00 boundary**: 격자 (β_s, β_c) 가 (50, 50) corner 로 수렴 → 격자 확장 시 결과 달라질 가능.
+6. **HC procedural bias caveat (Constraint #5)**: sub-09 V4 protan small-Δλ L_RDM 결과는 procedural artifact 일부 포함 가능 — V4 결과는 보고 시 명시.
+
+### S11.8 Verdict (잠정)
+
+- **Sub-09**: R+C L_γ V4 (또는 2-comp L_γ V4) 가 dominant 후보. 신경 loss 가 add value 못함.
+- **Sub-08**: 2-comp L_γ V1 가 가장 stable. R+C 는 sub-08 에 부적합. 신경 loss 의 추가 가치는 limited.
+- **공통**: behavioral L_γ 가 두 피험자 모두에서 핵심 signal. 신경 loss 는 *Sub-08 V2 L_RDM* 1 cell 에서만 L_γ 와 complementary correlation (r=-0.79) 관찰 — 추가 sprint 필요.
+
+**Phase 3 권장**: 두 피험자 모두 **L_γ 기반 filter** 가 LOO+train-test 통과한 유일 후보. 모델은 R+C (sub-09) / 2-comp (sub-08) 로 *피험자별 다름* — paper 에는 두 모델 family 의 *unified description* 으로 보고.
+
+### S11 Files
+
+- Script: `scripts/s8_loo_train_test.py`, `scripts/s8_analysis.py`
+- Results: `results/s8_loo_train_test/{loo_results.json, selection_metrics.json, inter_loss_correlation.json, SELECTION_REPORT.md}`
+
+---
+
+## S7: Loss combination + HC subset resample sprint (2026-05-24 USER DIRECTIVE, ACTIVE)
+
+> **Sprint origin**: 사용자 directive 2026-05-24. S6' (HC subset resample) + S11_legacy (LOO+train-test) 한계 통합 해결. Color-label perm 은 main flow 에서 제외 (positive characterization 의 selection 기준 부적합) — 최종 cell 에만 post-hoc 적용.
+
+### S7.1 Design + Research Questions
+
+**5 Research Questions**:
+- **RQ1** Single-loss stability: best param\* 가 HC pool composition 에 robust 한가?
+- **RQ2** Combination value: pair/triple 이 single 대비 stability/separation 개선?
+- **RQ3** Neural unique contribution: L_γ baseline 대비 L_LOCO/L_RDM 의 *unique* info?
+- **RQ4** Generalization: held-out HC subset 에 generalize?
+- **RQ5** Specificity (post-selection only): random JND assignment 와 구별?
+
+**Factorial**: 11 loss configs (4 single + 6 pair + 1 triple) × 2 models (R+C 1-DOF, 2-Component) × 4 ROIs (V1, V2, V3, V4 FE-6) × 3 subjects (sub-08/09 CVD + sub-10 null). R+C Δλ: 3 sources (DPS_lit, Boehm grid, JND-Lamb) × 2 family. **HC subset resample**: k ∈ {4, 5, 6}, all C(7,k) subsets (35 + 21 + 7 = 63 per cell).
+
+### S7.2 Methods (Stages A–E)
+
+| Stage | Hypothesis | Variables | Statistics | Pass criterion |
+|---|---|---|---|---|
+| A: single-loss stability (RQ1) | L_γ/L_α/L_LOCO/L_RDM 각각 subset robust? | param\*_median, 95% CI, SD_k, CoV_k, SEP_rate | percentile CI, no NHST | CoV_5 < 0.10 AND SEP_rate ≥ 0.80 AND CI width < 0.5 |
+| B: combination value (RQ2) | combo 가 single 대비 개선? | Δparam\*, ΔCoV, ΔSEP (paired by S, n=21) | paired Wilcoxon, p<0.05 uncorrected | |Δparam\*| < 0.1 AND ΔCoV ≤ 0 AND ΔSEP ≥ 0 |
+| C: λ sweep (RQ3) | 신경 채널 unique info? 3 probes: L_γ+λ·L_LOCO, L_γ+λ·L_RDM, L_γ+λ·(L_LOCO+L_RDM)/2; λ ∈ {0, 0.25, 0.5, 0.75, 1.0} | param\*(λ), CoV(λ), \|Δparam\*(λ=0→0.5)\| | paired Wilcoxon, Bonferroni 12 tests (α=0.00417) | \|Δparam\*\| > 0.2 AND p_corr < 0.05 AND CoV stable |
+| D: train-test MSE (RQ4) | k=5 train / k=2 test generalize? | MSE_test_median, Overfit ratio | percentile CI | Overfit ratio < 1.5 AND CI lower ≥ 0 |
+| E: color-label perm (RQ5, deferred) | random JND 와 구별? B=200 shuffle | empirical p | one-tailed | p<0.05 (descriptive only) |
+
+**L_α 처리**: Stage A/B 수식 포함, Stage C λ probe 에서는 제외 (8AFC degenerate). **Sub-10 null control**: 전 stage 동일 절차, SEP_rate(k=5) < 0.5 면 procedural specificity 확보.
+
+### S7.3 Results — Single-LOO + Nested-LOO
+
+**Single-LOO** (`results/s7_loss_combo_subset/lambda_optimal_behav_rdm.json`):
+
+| Cell | Model | Optimal λ | param\* | CoV | Notes |
+|---|---|---|---|---|---|
+| sub-09 V1/V2/V3 | R+C DPS | 0.00 | g=2.60 | 0.029 | stable, non-boundary |
+| sub-09 V1/V2/V3 | 2-comp | 0.00 | (β_s=26.3, β_c=4.3), norm=26.3 | 0.12 | stable, non-boundary |
+| sub-08 V1 | R+C DPS | 0.25 | g=2.15 | 0.022 | stable |
+| sub-08 V2/V3/V4 | R+C DPS | mixed | g=0.35–2.70 | high | param 변동 큼 |
+| sub-08 all ROIs | 2-comp | — | — | — | **all cells λ-degenerate** (boundary > 0.5) |
+
+**Nested-LOO** (outer 7-fold × inner C(6,4)=15, `results/s7_nested_loo/SELECTION_REPORT_NESTED.md`):
+
+| Cell | Model | Single-LOO opt | Nested-LOO opt | Drift? |
+|---|---|---|---|---|
+| sub-09 V1/V2/V3 | R+C DPS | g=2.60 | g=1.36 (V1/V3 λ=0), g=2.14 (V2 λ=0.25) | YES |
+| sub-09 V1/V2/V3 | 2-comp | (26.3, 4.3) | (26.3, 4.3) | NO (robust) |
+| sub-09 V4 (new) | 2-comp | NA | (β_s=24.3, β_c=4.6), CoV=0.15 | new fit |
+| sub-08 V4 (new) | 2-comp | degenerate | **(β_s=34.3, β_c=−39.4), CoV=0.10** | **non-degenerate** |
+| sub-08 V1–V3 | 2-comp | degenerate | degenerate | unchanged |
+
+**Key findings**:
+- Sub-09 R+C *g* drifts 1.36–2.14 across outer folds → CoV inflates 0.03 → 0.10–0.30 (3.3× single-LOO underestimate).
+- Sub-09 2-comp (β_s≈26, β_c≈4) survives outer LOO unchanged across V1/V2/V3 — **most robust** result in S7.
+- Sub-08 V4 2-comp **first non-degenerate fit anywhere** (single-LOO showed ALL sub-08 cells 2-comp degenerate) → suggests sub-08 boundary degeneracy is partly a single-LOO artifact. Phase 3 candidate.
+
+### S7.4 Model comparison — AIC/BIC + Param distance + Forward δθ
+
+**AIC/BIC deviance correction** (n_pairs=8, L_γ × n_pairs = deviance):
+
+```
+Deviance_RC = 0.6896 × 8 = 5.517   (k_RC=1)
+Deviance_2C = 0.4771 × 8 = 3.817   (k_2C=2)
+AIC_RC = 5.517 + 2·1 = 7.517   |   AIC_2C = 3.817 + 2·2 = 7.817   →   ΔAIC = −0.30 (R+C marginal)
+BIC_RC = 5.517 + 1·log(8) = 7.596   |   BIC_2C = 3.817 + 2·log(8) = 7.976   →   ΔBIC = −0.38 (tie)
+AICc_RC = 7.517 + 4/6 = 8.184   |   AICc_2C = 7.817 + 12/5 = 10.217   →   ΔAICc = −2.03 (R+C marginal under small-n)
+```
+
+⚠️ Previous `fair_model_comparison.json` reports ΔAIC=+1.79 (omitted ×n_pairs deviance step) — **corrected ΔAIC=+0.30**, decisively inside noise floor.
+
+**Param distance** (train k=5 vs test k=2, median across n=21 subsets, `results/s7_loss_combo_subset/param_distance.json`):
+
+| Cell | Model | dist_median | Relative | Pass (thr) | Verdict |
+|---|---|---|---|---|---|
+| sub-09 V1/V2/V3 | R+C DPS | 0.30 g | 11.5% | PASS (0.3) | generalizes |
+| sub-09 V1/V2/V3 | 2-comp | 11.31° | 43% | FAIL (10°) | borderline — large CI [4.2°, 28.9°] |
+| sub-08 V1 | R+C DPS | 0.10 g | 4.7% | PASS (caveat: CI [0, 2.70]) | |
+| sub-08 V3 | R+C DPS | 0.45 g | 129% | FAIL | g drifts 0.35↔1.80 |
+| sub-08 V4 | R+C DPS | 2.15 g | 105% | FAIL | g bimodal 0↔2.7 |
+
+**Forward δθ mechanism comparison** (sub-09 R+C g=2.60 vs 2-comp (β_s=26, β_c=4)):
+- Cosine similarity of δθ vectors = **0.074 (near-orthogonal)** — same fit, different mechanism.
+- R+C produces blue-purple centered distortion (c6=−45.7°, c7=+36.5°).
+- 2-comp produces sinusoidal balanced (β_s dominant, β_c≈0 → effectively 1-DOF).
+- 2/8 colors show sign flip between models.
+- **At n=8 JND pairs, ΔAIC=0.30 and ΔAICc=2.03 cannot distinguish mechanisms.** Phase 3 (separate behavioral filter test) is the arbitrator.
+
+### S7.5 Final selection — per-subject + mechanism interpretation
+
+⚠️ **CRITICAL REFRAMING (사용자 catch 2026-05-24)**: **Sub-08 raw JND deviation Σz² = 83.33 vs sub-09 Σz² = 9.68 — sub-08 deviation is 8.6× larger than sub-09**. Previous "deutan near-fully compensated" framing was a **fitting artifact** (R+C g≈2 hits degenerate optimum). Sub-08 has *localized yellow-centered distortion* (yellow-purple +6.7σ, yellow-green +4.3σ, orange-yellow +4.2σ) that **all current models underfit**.
+
+| Subject | Final selection | Mechanism note |
+|---|---|---|
+| **sub-09 protan** | R+C g≈2.6 (composite) OR 2-comp (β_s≈26, β_c≈4); both candidates valid, n=8 cannot distinguish | **Distributed distortion**, both models fit; Phase 3 = arbitrator |
+| **sub-08 deutan** | R+C composite λ=0.25 V1 g=2.15 *as best available* | **All models underfit** (Σz²=83.33). *Localized yellow-centered distortion* (yellow-purple +6.7σ dominant) needs richer model family (future work) |
+| sub-10 deutan (null) | JND data absent → L_γ unavailable. V2 shows false-positive pattern (consistent with prior memory) | null control partially works |
+
+### S7.6 Limitations + PI feedback status
+
+| # | Limitation | Status |
+|---|---|---|
+| 1 | Double-dipping | **Partially resolved (40%)** — nested LOO confirms single-LOO R+C CoV 0.03 → 0.10 (3.3× inflation). True external validation = Phase 3 |
+| 2 | n=8 JND pairs cannot distinguish mechanisms | ΔAICc=2.03 marginal, decisive evidence absent |
+| 3 | Behavioral baseline systematic comparison | **NOT done (15%)** — Brouwer-Heeger / Parkes cited only, numeric comparison section absent |
+| 4 | End-to-end model + weight LOO | **NOT done (25%)** — sequential only, joint outer-LOO grid pending |
+| 5 | Stage D raw-loss metric ceiling | Param distance is fair generalization metric (§S7.4) |
+
+**PI feedback resolution: ~40%.** Unresolved = (i) Phase 3 behavioral filter test design (true arbitrator), (ii) systematic behavioral literature comparison, (iii) joint end-to-end LOO.
+
+Phase 2 deliverable = *exploratory selection* (R+C and 2-comp both candidates per subject). Phase 3 = *confirmatory evaluation* via behavioral filter test (P1, P2a). Manuscript must frame S7 outputs as candidate set, not single best.
+
+**Status** [in_progress]: scripts complete (`scripts/s7_loss_combo_subset.py`, nested-LOO), single-LOO + nested-LOO results in. **Pending**: PARAM_DISTANCE_REPORT consolidation into paper Methods; S8 trigger when Phase 3 protocol locked.
+
+---
+
+## S8: Filter candidates per model (PLACEHOLDER, 2026-05-24 trigger pending)
+
+> **Trigger**: S7 의 RQ1–RQ4 모두 통과한 (model, loss combo, ROI) 가 sub-08, sub-09 각각에서 ≥1개 존재 시 자동 진입.
+
+### S8.0 Plan (sketch)
+
+각 model × subject 별 best loss combination 으로 **stimulus-space filter** 도출:
+
+- **R+C 1-DOF**: δθ_RC(c) = (2−g)·δθ_Machado(c, Δλ, family) → filter = inverse mapping in DKL hue
+- **2-Component**: δθ_2C(c) = β_s·cos(θ_c − 90°) + β_c·cos(θ_c − θ_conf) → filter = inverse 2-DOF rotation
+
+Per subject 2 filters (R+C, 2-comp) — paper 에 *both* 보고하고 dual-filter behavioral test 권장 (Phase 3).
+
+### S8.1 Status
+
+- [pending] S7 결과 대기
+
+---
+
+## S9: Integrated defenses (✅ Consolidated 2026-05-24)
+
+> **Origin**: S9_old (Retroactive defenses, 사용자 catch 2026-05-21, line 1145) + S10_old (Advisor corrections, 2026-05-21, line 1224) 통합. 본 section 이 single source of truth; 두 old section 은 archive 로 보존 (header 에 consolidation note 추가됨).
+>
+> **Scope note**: S9_old/S10_old 가 다룬 7-fold HC transfer test + L_behav FPR test + advisor 5 corrections 를 *full treatment* 으로 통합. 추가로 사용자/advisor catch 중 별도 section 에 이미 living 인 content (W asymmetry, L8 interpretation, sampling unit, Δλ assumption, HC procedural bias → **§Acknowledged Loss-Design Constraints**, line 1798; pool-independence → **§S11.5**, line 1465; circularity block → **§S11.6**, line 1517) 는 *cross-reference 만* — 중복 작성 금지.
+
+### S9.0 Plan
+
+S9 통합 목적: 사용자 catch 과 advisor catch 가 *같은 issue 의 양면* 을 지적한 경우가 다수 — 두 trail 을 thematic 으로 통합하고, 변경 순서는 chronological audit log 로 별도 유지. 통합 후 paper-defensible claim 의 *current state* 가 명확해야 함.
+
+원칙:
+1. Thematic grouping (S9.1 user catches, S9.2 advisor catches) + chronological audit log (S9.4) 양면 모두 제공
+2. 사용자/advisor 가 같은 문제를 다른 각도에서 catch 한 경우 → 통합 entry, 양쪽 attribution 명시
+3. Paper-defensible claim 변경은 S9.3 (Applied fixes) 에 모음
+4. 별도 section 에 full detail 이 living 인 항목은 cross-reference 만 (2-3 줄 summary + line pointer)
+
+### S9.1 Thematic: User catches
+
+#### U1. §6.3 transfer test 미실행 + V_s mismatch 잘못 해석 (2026-05-21)
+- **Catch**: §6.3 PRIMARY plan (CVD's δθ → HC h, 7-fold) 실행 안 됨. V_s mismatch 를 "feasible 안 함" 으로 잘못 처리.
+- **Reality**: (X) within-HC LOCO 는 scalar (V_s 무관), (Y) ΔRDM 은 28-vec V_s-invariant, (Z) 8AFC 는 W-independent → 모두 feasible.
+- **Fix**: `scripts/s9_retroactive_defenses.py` Part 1 = 7-fold HC transfer test (V4 + V1, 2 CVD × 2 model = 28 tests/ROI).
+- **Result (V4, raw ratios)**: (X) LOCO ≈ 1.0 across HCs (test uninformative — not "noise"); (Y) JND ratios sub-08 R+C 0.96 / 2-Comp 4.59, sub-09 R+C 1.86 / 2-Comp 1.82; (Z) 8AFC ratios large but interpretable only relative.
+- **Subsequent advisor correction**: see **A2** — raw (Y) ratios are ‖δθ‖² magnitude artifact.
+
+#### U2. Group-level CVD vs HC FPR 새 framework 재검증 안 됨 (2026-05-21)
+- **Catch**: 프로젝트 memory FPR=100% claim 은 *voxel-prediction L_LOCO* measurement family (Cycle 9-13). 새 **L_behav primary framework** 에서는 재검증 필요.
+- **Fix**: `scripts/s9_retroactive_defenses.py` Part 2 = each HC treated as fake CVD, point fit R+C g, bootstrap.
+- **Raw result**: sub-08 g\*=2.25 vs HC pool max 2.20 (0/7); sub-09 g\*=2.60 vs HC max 2.30 (0/7). Point FPR = 0.000 for both.
+- **Subsequent advisor correction**: see **A1** — "FPR=0.000" was misleading; only descriptive percentile + CI overlap.
+
+#### U3. Bootstrap sampling unit (color vs trial) (2026-05-22)
+- **Catch**: 기존 S6 는 8 colors / 8 pairs 를 bootstrap unit 으로 사용 → color set 은 fixed design element 이므로 *true measurement uncertainty* 아님. Color-specific distortion bias 혼입.
+- **Fix**: Trial-level bootstrap (`scripts/s6_bootstrap_g_ci_trial.py`): unit = individual trial (JND staircase rows / 8AFC trial responses), color set 보존.
+- **Impact**: Sub-09 CI 5× narrow (1.30-2.60 → 2.35-2.60), P(g>1)=1.00 robust; Sub-08 P(g>1) 0.66 → 0.92 (bimodal 부분 collapse).
+- **Verdict**: paper-defensible claim 강화. Full detail: §Acknowledged Loss-Design Constraints (3), line ~1839.
+
+#### U4. Δλ assumption uncertainty (2026-05-22)
+- **Catch**: S5'/S6 는 Δλ = DPS lit only (protan 10, deutan 6 nm) 고정 — g 분포에 Δλ uncertainty 미포함.
+- **Fix**: S6 convergence matrix sensitivity (3 Δλ sources: DPS lit, Boehm grid, JND-Lamb data-driven; framing 정정 "Δλ-prior robustness", not "convergence" — line 793).
+- **Impact**: Sub-09 protan small-Δλ (Boehm/Lamb) 에서 cortical g 최대 discriminator. Full detail: §Acknowledged Loss-Design Constraints (4), line ~1862.
+
+#### U5. HC pool g 의 procedural-bias caveat (2026-05-23)
+- **Catch**: S5' Form B 는 CVD-prior Δλ 를 HC 7 명에 강제 대입 → §2 A1/A6 위반 (HC true Δλ=0 이어야 함). HC g_hat 은 *misspecified fit*.
+- **Fix**: S6' (line 708) **HC subset resample design** 으로 대체 — HC reference dependence 측정. Old S5' Form B "z=+3.45" claim deprecated.
+- **Impact**: V4 protan small-Δλ L4 RDM 에서 *CVD vs HC 구별 불가능* (양쪽 boundary procedural artifact). Paper 정정: "HC pool g distribution" → "procedural g under CVD-model misspec". Full detail: §Acknowledged Loss-Design Constraints (5), line ~1872.
+
+#### U6. W asymmetry + L8 composite interpretation (2026-05-22)
+- **Catch**: L_LOCO 는 CVD-own W (V_s-matched within-subject ridge), L_RDM 은 HC pool W (cross-subject V_s-invariant 28-vec) → 두 loss 가 *다른 reference frame* 으로 같은 δθ 추정 안 함. L8 composite (0.5·L_γ + 0.25·L_LOCO + 0.25·L_RDM) 는 *modality-balanced compromise*, single "true δθ" 식별 아님.
+- **Status**: Acknowledged limitation; ideal shared encoder 는 small-n + Phase 1 SRM REJECTED 으로 impractical. L_LOCO ↔ L_RDM dissociation (sub-08 V1 p=0.047 vs p=0.179; sub-09 LOCO NS vs ΔRDM p=0.026) 은 *complementary information* 으로 해석.
+- **Full detail**: §Acknowledged Loss-Design Constraints (1)+(2), line ~1802.
+
+### S9.2 Thematic: Advisor catches (2026-05-21 evaluation of S9_old + later)
+
+#### A1. "FPR=0.000" misleading — point percentile, not true FPR
+- **Concern**: n=7 HC point fits 이므로 "0/7 exceed" 은 descriptive 일 뿐; bootstrap CI 비교 시 결과 다를 수 있음.
+- **Re-test**: CVD bootstrap CI vs HC pool bootstrap CI.
+  - sub-08: CVD [0.000, 3.000] ∩ HC [0.000, 3.000] = **complete overlap**.
+  - sub-09: CVD [1.300, 2.600] ∩ HC [1.000, 2.350] = overlap at margin [1.30, 2.35].
+- **Verdict**: "FPR=0.000" → "0/7 point fits exceed CVD (descriptive percentile), bootstrap CI overlap at margin". §0 policy ("specificity claim 금지, descriptive percentile OK") 적용 필수.
+- **Impact**: Paper claim 강등 — "group-level specificity recovered" 주장 제거.
+
+#### A2. (Y) JND transfer 4.59× 는 ‖δθ‖² magnitude artifact
+- **Concern**: Raw transfer ratio 가 δθ vector magnitude 에 의존. ‖δθ‖² 정규화 필요.
+- **Re-test** (V4 normalized = raw_ratio / ‖δθ‖²):
+  | Model | sub-08 raw | sub-08 ‖δθ‖² | sub-08 norm | sub-09 raw | sub-09 ‖δθ‖² | sub-09 norm |
+  |---|---|---|---|---|---|---|
+  | R+C | 0.96 | 516 | 0.00186 | 1.86 | 3583 | 0.00052 |
+  | 2-Comp | 4.59 | 7488 | **0.00061** | 1.82 | 3136 | **0.00058** |
+- **Verdict**: Sub-08 2-Comp normalized (0.00061) ≈ Sub-09 2-Comp normalized (0.00058). "Sub-08 4.59× subtype-specific transfer" 는 ‖δθ‖²=7488 magnitude artifact, NOT subtype-specific signal.
+- **Impact**: Paper claim COLLAPSES — "2-Comp subtype-specific transfer" 제거.
+
+#### A3. (X) LOCO ≈ 1.0 framing 정정
+- **Concern**: "노이즈" framing 부정확; 정확히는 "test uninformative".
+- **Verdict**: ratios ≈ 1.0 across all 7 HCs → LOCO transfer test discriminates 못함, 결과 자체 무의미. "(X) noise" 가 아니라 "(X) uninformative metric for this transfer design".
+
+#### A4. ΔAICc precision — 이전 "ΔAICc=−30" 자체 오류
+- **Concern**: 이전 보고 ΔAICc=−22 또는 −30 은 잘못 — 2-Comp AICc 의 absolute value 를 Δ 로 잘못 읽음.
+- **Re-compute**:
+  | Subject | R+C AICc | 2-Comp AICc | **ΔAICc** | Kass-Raftery |
+  |---|---|---|---|---|
+  | sub-08 | −22.40 | −22.81 | **+0.41** | <2: indistinguishable |
+  | sub-09 | −44.17 | −51.43 | **+7.27** | 6-10: strong |
+- **Verdict**: Sub-08 에서 R+C vs 2-Comp **모델 비교 indistinguishable** (이전 strong 주장 오류). Sub-09 만 strong evidence for 2-Comp.
+- **Impact**: Paper claim 정정 — sub-08 "ΔAICc=−30 very strong" 제거.
+
+#### A5. Cross-subtype Δ analysis 가 asymmetric claim INVERT
+- **Concern**: 이전 보고 ratio (sub-08→sub-09 vs sub-09→sub-08) 는 base loss magnitude artifact. **Δ (cross − within)** 가 올바른 metric.
+- **Re-compute**:
+  | Direction | L_within | L_cross | **Δ (cross−within)** | Ratio |
+  |---|---|---|---|---|
+  | sub-08 → sub-09 | 0.560 | 0.881 | +0.32 (smaller abs) | 1.57 |
+  | sub-09 → sub-08 | 5.151 | 5.672 | **+0.52 (larger abs)** | 1.10 |
+- **Verdict**: Δ analysis 하에서 sub-09→sub-08 transfer 가 *larger* absolute error → "Sub-08 subtype-specific, Sub-09 transferable" 주장 INVERT.
+- **Impact**: Paper claim 제거 — "asymmetric subtype-specificity (sub-08 specific, sub-09 generic)" 는 ratio artifact.
+
+#### A6. Permutation null 형식 — color-perm 과 loss-assign-perm 분리
+- **Concern**: S8 color-permutation null 은 과도하게 destructive; loss-assignment permutation 이 less destructive (model 구조 유지, fold-assignment 만 shuffle).
+- **Re-test**:
+  | Subject | S8 color-perm p | S10 loss-assign perm p | Verdict |
+  |---|---|---|---|
+  | sub-08 | 0.150 | 0.130 | NS in both — robust limitation |
+  | sub-09 | 0.000 | **0.000** | Significant in BOTH — robust evidence |
+- **Verdict**: Sub-09 permutation evidence survives **both** null forms — robust. Sub-08 fails both — paper limitation.
+
+#### A7. Pool-independence by construction (advisor catch 2026-05-23 in S11.5)
+- **Concern**: S11 HC LOO 의 `cvd_param_sd` 가 L_α / L_LOCO 에서 SD=0 — "stability" 가 아니라 *tautology* (closure 가 pool 인자 받지 않음).
+- **Fix**: Pool-dependent losses (L_γ, L_RDM) 만 의미; L_α / L_LOCO 는 trial-level CVD bootstrap 또는 cross-cell agreement 로 측정해야 함.
+- **Full detail**: §S11.5, line 1465.
+
+#### A8. Circularity block — filter fit ↔ behavioral validation (advisor catch 2026-05-23 in S11.6)
+- **Concern**: S11.6 의 single filter recommendation (sub-09 R+C L_γ V4, sub-08 2-Comp L_γ V1) 은 §0.1 P2a/P1 policy 와 동일한 circularity (behavioral data 로 fit → behavioral 로 validate).
+- **Resolution options**: (a) "interim, awaiting non-circular validation" qualifier, (b) L_RDM-only re-fit (단 U5 procedural bias 영향), (c) 별도 수집 behavioral test (filter 적용 자극 vs no-filter).
+- **Status**: BLOCK marker active in S11.6; Phase 3 trigger 전 resolution 필수.
+- **Full detail**: §S11.6, line 1517.
+
+### S9.3 Applied fixes — Paper-defensible claim revisions
+
+**SURVIVE** (after S9_old + S10_old + sub-sequent constraints):
+- ✓ Sub-09 individual-level g > 1 (trial-level bootstrap CI [2.35, 2.60] excludes 1.0; even with U3 fix, U4 sensitivity, U5 caveat)
+- ✓ Sub-09 permutation p=0.000 robust under **two** null forms (S8 color-perm + S10 loss-assign-perm, A6)
+- ✓ Sub-09 mild protan profile (JND-Lamb 1.5 nm + Ishihara 9/14 + V1 LOCO p=0.007 from project memory)
+- ✓ Sub-08 2-Comp captures structural distortion (β_s=48, β_c=−36) — K-robust per K-robustness Final Report (line 1330)
+- ✓ Sub-08 R+C 1-DOF misspecified (bimodal bootstrap, boundary mass) — shape diagnostic surviving
+- ✓ Subtype dichotomy β_c (sub-08 < 0 vs sub-09 > 0) — K-robust, U6 W-asymmetry-independent
+
+**COLLAPSE** (must remove from paper):
+- ✗ "Group-level CVD vs HC specificity recovered (FPR=0)" → only descriptive percentile + CI overlap (A1)
+- ✗ "2-Comp subtype-specific transfer (4.59× sub-08)" → ‖δθ‖² magnitude artifact (A2)
+- ✗ "Asymmetric subtype-specificity (sub-08 specific, sub-09 generic)" → INVERTS under Δ analysis (A5)
+- ✗ "ΔAICc=−30 very strong evidence" → actually +0.41 (sub-08 indistinguishable) and +7.27 (sub-09 strong) (A4)
+
+**QUALIFIED** (paper 보고 시 explicit caveat):
+- ⚠ V4 protan small-Δλ L4 RDM (sub-09 g=3 boundary): procedural-bias caveat (U5) 동반 보고 — "HC g distribution under CVD-model misspecification"
+- ⚠ Sub-08 permutation p=0.150 (S8) and p=0.130 (S10): paper limitation, robust NS — "R+C 1-DOF insufficient for sub-08, motivates 2-Comp for sub-08"
+- ⚠ S11.6 filter recommendations: BLOCKED for circularity (A8) — Phase 3 trigger 전 resolution 필요
+- ⚠ L8 composite-fit δθ: "weighted compromise across distinct measurement channels, not single true δθ" (U6 + §Loss-Design Constraints (1)+(2))
+
+### S9.4 Chronological audit log
+
+| Date | Source | Catch ID | Issue | Outcome |
+|---|---|---|---|---|
+| 2026-05-21 | User | **U1** | §6.3 transfer test 미실행, V_s mismatch 오해석 | `scripts/s9_retroactive_defenses.py` Part 1 실행 (V4 + V1, 28 transfer tests/ROI) |
+| 2026-05-21 | User | **U2** | Group-level FPR 새 framework 재검증 안 됨 | `scripts/s9_retroactive_defenses.py` Part 2 실행; raw FPR=0/7 보고 (later corrected by A1) |
+| 2026-05-21 | Advisor | **A1** | "FPR=0.000" misleading | CI overlap re-frame; "0/7 percentile" 으로 qualify |
+| 2026-05-21 | Advisor | **A2** | (Y) JND 4.59× 미정규화 | ‖δθ‖² normalize; subtype-specific claim COLLAPSE |
+| 2026-05-21 | Advisor | **A3** | (X) LOCO ≈ 1.0 framing 부정확 | "noise" → "test uninformative" |
+| 2026-05-21 | Advisor | **A4** | ΔAICc=−30 잘못 보고 | +0.41 / +7.27 로 재계산 |
+| 2026-05-21 | Advisor | **A5** | Cross-subtype ratio artifact | Δ-based re-analysis; asymmetric claim INVERT |
+| 2026-05-21 | Advisor | **A6** | color-perm too destructive | Loss-assign perm 추가; sub-09 robust, sub-08 NS in both |
+| 2026-05-22 | User | **U3** | Bootstrap sampling unit (color → trial) | `scripts/s6_bootstrap_g_ci_trial.py`; sub-09 CI 5× narrow |
+| 2026-05-22 | User | **U4** | Δλ assumption single point | S6 convergence matrix → "Δλ-prior robustness" (3 sources) |
+| 2026-05-22 | User | **U6** | W asymmetry + L8 composite interpretation | §Loss-Design Constraints (1)+(2) acknowledged limitation |
+| 2026-05-23 | User | **U5** | HC procedural bias (CVD-prior Δλ → HC) | S6' subset resample design (line 708); old S5' Form B deprecated |
+| 2026-05-23 | Advisor | **A7** | Pool-independence by construction | S11.5 re-framed; L_α/L_LOCO SD=0 tautology 보고 금지 |
+| 2026-05-23 | Advisor | **A8** | Circularity block (filter-behav) | S11.6 BLOCK marker; Phase 3 trigger 전 resolution 필요 |
+| 2026-05-24 | (Consolidation) | — | S9_old + S10_old → new S9 | 본 section; archive headers updated |
+
+### S9.5 Files
+
+- `scripts/s9_retroactive_defenses.py` — 7-fold HC transfer test + L_behav FPR test (U1, U2)
+- `scripts/s10_advisor_fixes.py` — ‖δθ‖² normalize, CI re-frame, ΔAICc, Δ cross-subtype, loss-assign perm (A1-A6)
+- `scripts/s6_bootstrap_g_ci_trial.py` — Trial-level bootstrap (U3)
+- `results/s9_retroactive/{transfer_test_V4.json, transfer_test_V1.json, fpr_test.json}`
+- `results/s10_advisor_fixes/` (logs)
+
+### S9.6 Status
+
+**Status**: Complete 2026-05-24. S9_old + S10_old content fully consolidated; archive headers updated (line 1145, 1224). Surviving paper claims locked in S9.3; collapsed claims explicitly listed for paper-revision QC. Cross-references to living detail (§Loss-Design Constraints, §S11.5, §S11.6) preserved.
+
+---
+
+## Acknowledged Loss-Design Constraints (Paper Limitations, 2026-05-22; **Moved to file bottom 2026-05-24**)
+
+사용자 catch (W asymmetry + L8 composite interpretation) + Option C framing 통합. Paper limitation section 후보.
+
+### (1) L_LOCO 와 L_RDM 의 encoder asymmetry — Option C framing
+
+**현 상태**:
+- L_LOCO: CVD 본인 W (within-subject ridge, V_s-matched)
+- L_RDM: HC pool W (cross-subject mean encoder, V_s-invariant 28-vec)
+
+**Ideal (impractical)**:
+이상적으로는 단일 W 정의 (예: HC + CVD 양 그룹의 voxel pattern 을 모두 fit 하는 shared encoder) 에서 두 loss 가 *동일 reference frame* 으로 계산되어야 함. 그래야 L_LOCO 와 L_RDM 이 같은 δθ 를 estimate.
+
+**Why impossible in current pipeline**:
+- V_s mismatch (subject 별 voxel 수 다름)
+- Phase 1 의 cross-subject alignment (Procrustes/SRM) 시도 REJECTED — SRM-based prior pipeline 이 within-subject ridge 보다 inferior (future_phase1_forward_model/README.md)
+- Small-n HC pool (n=7) → shared encoder fit 시 variance 너무 큼
+
+**Conceptual rationale (current asymmetry)**:
+- L_LOCO 의 native space = voxel → V_s match 필수 → within-subject W 가 *technical inevitability*
+- L_RDM 의 native space = 28-vec pairwise distance → V_s-invariant → HC W 사용 가능
+- 두 loss 의 W choice 비대칭은 *intentional inconsistency 아니라 each metric 의 native space 의 technical property*
+
+**Acknowledged implication**:
+- 두 loss 의 inferred *"best δθ"* 가 *loss-dependent*
+- 실측 dissociation: sub-08 V1 LOCO p=0.047 vs ΔRDM p=0.179 (NS); sub-09 LOCO NS vs ΔRDM p=0.026
+- → 단일 "true δθ" 가 정의되지 않음. 두 loss 가 *complementary information* 측정으로 해석.
+
+### (2) L8 (modality 5050) 의 의미 명시 — paper-level interpretation
+
+**Form**:
+```
+L8(δθ) = 0.5 · L_γ(δθ)                       ← behavioral (JND per-pair)
+       + 0.25 · L_LOCO(δθ; CVD own W)        ← neural functional (V_s-matched)
+       + 0.25 · L_RDM(δθ; HC pool W)         ← neural relational (V_s-invariant)
+```
+
+**Paper-defensible interpretation**:
+
+> "L8 represents a *modality-balanced composite* where behavioral JND constraints (0.5 weight) and neural constraints (0.5 total: 0.25 LOCO + 0.25 RDM) are weighted equally. The neural sub-weights split between functional voxel-level prediction (L_LOCO) and HC-referenced relational geometry (L_RDM) because these two channels capture complementary aspects of distortion: L_LOCO tests whether the model δθ improves *subject-own* pattern reconstruction (within-subject), while L_RDM tests whether δθ explains the *HC-referenced* pairwise distance distortion (cross-subject). The two neural channels use *different encoder references* (subject-own W for L_LOCO, HC-pool W for L_RDM) due to their distinct native spaces (voxel-level vs 28-vec representational), an asymmetry that reflects technical V_s constraints rather than a unified estimate of δθ. We therefore report L8-fitted parameters with the explicit understanding that they minimize a *weighted compromise* across these distinct measurement channels rather than identifying a single 'true δθ'."
+
+### (3) Bootstrap sampling unit — 사용자 catch 2026-05-22
+
+**Original S6 (s6_bootstrap_g_ci.py)**: sampling unit = **color/pair** (8 colors / 8 pairs with replacement). 사용자 catch: "8 개 중 일부 색만 여러번 sampled — 특정 색은 왜곡이 약할 수 있어 의미 없지 않나?"
+
+**문제 정확**:
+- Color-specific distortion (sub-08 yellow +30°, orange +43° 등) 의 sampling bias
+- Color set 은 실제 fixed design element → bootstrap 의 *true measurement uncertainty* 추정 아님
+- Sub-08 wide CI [0, 3] 의 origin = (1) R+C misspec + (2) color resample noise 의 *mix*
+
+**Trial-level bootstrap (S6 trial, `scripts/s6_bootstrap_g_ci_trial.py`)**:
+- Sampling unit = **individual trial** (JND staircase trial rows / 8AFC trial responses)
+- 8 colors / 8 pairs 항상 preserved (color set fixed)
+- True measurement-noise uncertainty estimate
+
+**Paper-level implication**: S6 의 CI 는 color-resample artifact 일부 포함. Trial-level bootstrap 이 *proper statistical bootstrap*. Sub-08 wide CI 의 *misspec vs noise* 분리 가능.
+
+**S6-trial result (2026-05-22 fix 후)**:
+- **Sub-09 DPS**: CI **5× narrow** (1.30-2.60 → 2.35-2.60), P(g>1)=1.00 robust → flagship claim **strengthened**
+- **Sub-08 DPS**: P(g>1) 0.66 → **0.92**, bimodal 부분 collapse → claim **strengthened** (단 부분 misspec 잔존)
+- **CVD vs HC CI separation**: sub-09 Boehm Δλ=3 에서 처음 separated (small Δλ 가설 하에서 cortical g 최대 discriminator)
+
+**Verdict**: Trial-level bootstrap 이 *모든 paper-defensible claims 를 강화*. 사용자 catch 가 paper evidence 를 더 robust 하게 만듦.
+
+### (4) Δλ assumption uncertainty — 사용자 catch 2026-05-22
+
+**Original S5'/S6**: Δλ = **DPS lit only** (protan 10 nm, deutan 6 nm) 고정 → g 분포에 Δλ uncertainty 미포함.
+
+**Δλ sensitivity check (S6 trial × 3 Δλ source × 2 family)**:
+- DPS lit (외부 상수), Boehm grid (외부 상수), JND-Lamb (data-driven fit)
+- Per Δλ source 의 g CI 비교 → "Δλ assumption 이 g 분포 얼마나 변화시키나" 평가
+
+**Paper-level**: S5'/S6 의 single Δλ=DPS 가정에 *추가 sensitivity layer* 제공. Sub-09 protan 의 JND-L Δλ=1.5 같은 small Δλ 가 g distribution 어떻게 변화시키는지 확인.
+
+### (5) HC pool g 의 procedural-bias caveat — 2026-05-23 사용자 catch
+
+**문제**: S5'/S5'-neural extension 에서 HC pool g 분포 산출 시 **CVD-prior Δλ** (DPS lit, Boehm grid, JND-Lamb inverse — 모두 CVD 데이터에서 도출) 를 7명 HC 에게 강제 대입.
+
+**모델 가정 위반 (§2 A1, A6)**:
+- A1: CVD 차이 = retinal cone shift → HC 의 "true Δλ" = 0
+- A6: HC pool descriptive only
+- CVD-Δλ 를 HC 에 적용 → **모델 misspecification 상태에서의 g_hat**
+
+**구체 사례**: V4 protan Boehm_low (Δλ=3) L4 RDM HC pool mean=2.61 (boundary high=3/6) 또는 JND_Lamb (Δλ=1.5) L4 RDM HC pool mean=2.43 (boundary high=2/6).
+- "HC 도 cortical compensation g≈3" 이 아니라 *잘못된 Δλ 가정 하에서 loss landscape 이 g→3 boundary 로 끌리는 procedural bias* 의 증거.
+- 같은 cell 의 CVD sub-09 g=3.00 → **CVD vs HC 구별 불가능** (둘 다 procedural artifact).
+
+**왜 Δλ=0 HC null 산출 불가**: Δλ=0 → Machado matrix = identity → δθ(c; 0, g) = 0 ∀g → g unidentifiable (loss landscape flat across g).
+
+**Paper 정정**:
+- "HC pool g distribution" framing → **"procedural g under CVD-model misspecification"** 로 변경.
+- V4 protan small-Δλ L4 RDM 의 CVD g=3 주장은 paper 에서 **procedural-bias caveat 동반** 또는 제외.
+- V1 L4 RDM, V4 deutan, V4 protan DPS 는 boundary high 발생률 낮음 (≤2/7) → 영향 작음.
+
+**더 honest null 대안** (S8_old sprint 에서 검토):
+- **Permutation null**: CVD/HC label shuffle, Δλ 는 CVD prior 고정 → CVD g 의 specificity 산출 (label permutation 만 변경, Δλ assumption 보존)
+- **HC-specific Δλ fit**: 보통 Δλ_HC ≈ 0–2 nm → R+C 로 식별 어려움 → 실용 가치 낮음
+- **2-comp 으로의 fallback**: 2-comp 은 Δλ 의존성 없음 (cortical only) → HC 적용 시 misspecification 약함
+
+### (6) Surviving paper-defensible claims under these constraints
+
+위 (1)-(5) limitation 하에서도 다음 주장은 robust:
+
+| Claim | (1) W asymmetry | (2) L8 multi-channel | (3) sampling unit | (4) Δλ assumption | (5) HC procedural bias |
+|---|---|---|---|---|---|
+| Sub-09 R+C g* = 2.60, Bootstrap CI [1.30, 2.60] | ✅ within-subject | ✅ behav-dominant L8 | ✅ trial-level confirm 예정 | ⚠ DPS Δλ only → sensitivity check 진행 중 | ⚠ V4 protan small-Δλ L4 RDM 만 영향, V1/V4-LOCO 무관 |
+| Sub-09 perm p=0.000 | ✅ within-subject | ✅ | ✅ color-label perm independent | ✅ Δλ-agnostic | ✅ label permutation 이 procedural bias 흡수 |
+| Subtype dichotomy β_c (sub-08 < 0 vs sub-09 > 0) | ✅ within-subject | ✅ K-robust | ✅ point estimate | ✅ | ✅ 2-comp 무관 |
+| Sub-09 V1 LOCO p=0.007 (separate, MEMORY) | ✅ pre-existing | ✅ not L8 | ✅ independent test | ✅ | ✅ L_LOCO 만 |
+| Sub-08 R+C 1-DOF misspecified (bimodal bootstrap) | ✅ shape diagnostic | ✅ | ⚠ trial-level 재검증 필요 | ✅ | ✅ |
+
+**즉 surviving claims 가 위 5가지 limitation 의 어느 *individual* 에도 의존하지 않음** — 단 V4 protan small-Δλ L4 RDM 결과는 procedural-bias caveat 동반 보고 필요.
+
+#### Paper limitation section 권장 문구 (draft, 5 constraints 통합)
+
+> "We acknowledge five measurement-design constraints affecting interpretation. **First**, the neural loss components L_LOCO and L_RDM employ different encoder references (subject-own ridge for L_LOCO, HC-pool ridge for L_RDM); this asymmetry follows from each metric's native space (voxel-bound vs V_s-invariant representational) rather than a deliberate design choice, and we observe that the two channels produce dissociated 'best δθ' estimates in some subject-ROI cells. **Second**, our composite L8 loss represents a weighted compromise across complementary measurement channels (behavioral JND, functional LOCO, relational RDM) rather than a unified estimate of a single underlying δθ. **Third**, our original bootstrap CI used color-set resampling, which conflates measurement noise with color-specific distortion-driver variance; we therefore report trial-level bootstrap (per-trial resampling with color set fixed) as the primary statistical uncertainty estimate. **Fourth**, the cone-shift Δλ is taken from external sources (DPS 1992 population mean, Boehm 2014 severity grid, or JND-Lamb inverse fit); g estimates are reported across these three Δλ priors as a sensitivity analysis. **Fifth**, HC pool g estimates use CVD-derived Δλ priors applied to HC subjects under the cone-shift model, which represents a procedural baseline under model misspecification (HC's true Δλ ≈ 0); this produces boundary g≈3 in V4 protan small-Δλ L4 RDM and necessitates explicit framing of HC pool g as 'procedural g under CVD-model assumption' rather than 'HC's true compensation'. The surviving paper-defensible claims (individual-level g > 1 in sub-09, subtype dichotomy in β_c sign, R+C misspecification in sub-08) do not depend on any individual measurement channel or modeling choice; each is supported by limitation-independent evidence. Group-level specificity claims are explicitly *not* asserted, in accordance with these constraints."

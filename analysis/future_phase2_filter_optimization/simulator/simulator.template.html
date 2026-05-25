@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>CVD Filter Simulator — 4-col</title>
+<style>
+  :root {
+    --bg: #fafafa;
+    --panel: #ffffff;
+    --border: #d9d9d9;
+    --text: #222;
+    --muted: #777;
+    --accent: #2563eb;
+    --ok: #1a9850;
+    --bad: #d73027;
+    --warn: #fdae61;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 18px 22px 40px; }
+  h1 { font-size: 18px; margin: 0 0 4px; }
+  .sub { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    padding: 14px 16px; margin-bottom: 14px; }
+  .row { display: flex; gap: 18px; flex-wrap: wrap; align-items: center; }
+  .row > .col { flex: 1 1 200px; min-width: 180px; }
+  label { font-size: 12px; color: var(--muted); display: block; margin-bottom: 4px; }
+  select, input[type=number] { font: inherit; padding: 4px 6px; border: 1px solid var(--border);
+    border-radius: 4px; width: 100%; }
+  input[type=range] { width: 100%; }
+  .pair { display: grid; grid-template-columns: 1fr 84px; gap: 8px; align-items: center; }
+  .preset-row button { font: inherit; padding: 4px 10px; border: 1px solid var(--border);
+    border-radius: 4px; background: #f5f5f7; cursor: pointer; margin-right: 6px; margin-bottom: 4px; }
+  .preset-row button:hover { background: #e8e8ec; }
+  .grid { display: grid; grid-template-columns: 60px repeat(4, 1fr) 80px; gap: 6px; align-items: center; }
+  .grid .head { font-size: 11px; color: var(--muted); text-align: center; font-weight: 600; }
+  .swatch { aspect-ratio: 5/2.2; border-radius: 4px; border: 1px solid #00000022; }
+  .rowlbl { font-size: 11px; color: var(--muted); line-height: 1.25; text-align: right; padding-right: 4px; }
+  .annot { font-size: 11px; color: #444; }
+  .annot.ok { color: var(--ok); }
+  .annot.bad { color: var(--bad); }
+  .annot.warn { color: var(--warn); }
+  .summary { font-size: 12px; color: #333; }
+  .summary span.k { color: var(--muted); margin-right: 4px; }
+  .summary span.v { font-variant-numeric: tabular-nums; font-weight: 600; margin-right: 14px; }
+  details { font-size: 12px; color: var(--muted); }
+  details code { background: #f1f1f3; padding: 1px 4px; border-radius: 3px; }
+  .hide { display: none !important; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 999px;
+    background: #eef; color: #336; font-size: 11px; margin-left: 6px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>CVD Filter Simulator <span class="pill">2-component / R+C · STIM_LAB</span></h1>
+  <div class="sub">8 canonical CIElab stimuli (L*=75, C=40, θ ∈ {0°, 45°, …, 315°}) · 4-col convention:
+    Original | CVD perceives | Filtered (pre-image) | CVD(Filtered)</div>
+
+  <div class="panel">
+    <div class="row">
+      <div class="col">
+        <label>Model</label>
+        <select id="model">
+          <option value="2comp">2-component (cortical opponent)</option>
+          <option value="rc">R+C (Δλ retinal + cortical g)</option>
+          <option value="identity">Identity (HC reference)</option>
+        </select>
+      </div>
+      <div class="col">
+        <label>CVD family</label>
+        <select id="family">
+          <option value="deutan">deutan (axis 150°)</option>
+          <option value="protan">protan (axis 16°)</option>
+        </select>
+      </div>
+      <div class="col">
+        <label>Subject preset</label>
+        <select id="preset">
+          <option value="">— custom —</option>
+          <option value="loco08">sub-08 LOCO-canonical 2-comp (β_s=38, β_c=−14)</option>
+          <option value="loco09">sub-09 LOCO-canonical 2-comp (β_s=6, β_c=−22)</option>
+          <option value="loco08v1">sub-08 V1 2-comp (β_s=50, β_c=−14)</option>
+          <option value="cycle14_08">sub-08 cycle14 V1-RDM (β_s=58, β_c=−36)</option>
+          <option value="cycle12_09">sub-09 cycle12 cross-ROI (β_s=30, β_c=+26)</option>
+          <option value="rc08">sub-08 R+C  Δλ=2.5,  g=3.25  (legacy g'=−2.25, 125% overshoot)</option>
+          <option value="rc09">sub-09 R+C  Δλ=19.5, g=2.10  (legacy g'=−1.10, 10%  overshoot)</option>
+          <option value="rc_hc">HC passthrough Δλ=0, g=1 (sanity)</option>
+          <option value="rc_full">Full compensation Δλ=10, g=2 (deutan)</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-2comp">
+    <div class="row">
+      <div class="col">
+        <label>β_s  (S-cone axis rotation, degrees)</label>
+        <div class="pair">
+          <input type="range" id="bs_range" min="-90" max="90" step="0.5" value="38">
+          <input type="number" id="bs" step="0.5" value="38">
+        </div>
+      </div>
+      <div class="col">
+        <label>β_c  (confusion axis rotation, degrees)</label>
+        <div class="pair">
+          <input type="range" id="bc_range" min="-90" max="90" step="0.5" value="-14">
+          <input type="number" id="bc" step="0.5" value="-14">
+        </div>
+      </div>
+      <div class="col">
+        <label>axis  (confusion-axis angle in CIElab, degrees)</label>
+        <div class="pair">
+          <input type="range" id="axis_range" min="0" max="359" step="1" value="150">
+          <input type="number" id="axis" step="1" value="150">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel hide" id="panel-rc">
+    <div class="row">
+      <div class="col">
+        <label>Δλ  (cone shift, nm)</label>
+        <div class="pair">
+          <input type="range" id="dl_range" min="0" max="30" step="0.5" value="10">
+          <input type="number" id="dl" step="0.5" value="10">
+        </div>
+      </div>
+      <div class="col">
+        <label>g  (cortical gain — 1: HC passthrough · 2: full compensation · >2: overshoot)</label>
+        <div class="pair">
+          <input type="range" id="g_range" min="-2" max="5" step="0.05" value="1">
+          <input type="number" id="g" step="0.05" value="1">
+        </div>
+      </div>
+    </div>
+    <details style="margin-top:8px">
+      <summary>R+C formula</summary>
+      δθ_RC(θ; Δλ, g, family) = (2 − g) · δθ_Machado(θ; Δλ, family).
+      Machado δθ is precomputed on a (hue × Δλ) grid and bilinearly interpolated.
+      (Legacy rc_1dof <code>rg' = rg_base + (1+g')·(rg_ret − rg_base)</code> convention has
+      g' = 1 − g for compensation magnitude — both forms are equivalent.)
+    </details>
+  </div>
+
+  <div class="panel">
+    <div class="summary" id="summary"></div>
+  </div>
+
+  <div class="panel">
+    <div class="grid" id="palette">
+      <!-- header -->
+      <div></div>
+      <div class="head">Original (θ)</div>
+      <div class="head">CVD perceives (θ + δθ)</div>
+      <div class="head">Filtered pre-image (θ_pre)</div>
+      <div class="head">CVD(Filtered) (target θ)</div>
+      <div class="head">δ (filter)</div>
+    </div>
+  </div>
+
+  <details class="panel">
+    <summary>Notes</summary>
+    <p style="margin:6px 0;">
+      <b>2-component model</b>: δθ(θ) = β_s · cos(θ − 90°) + β_c · cos(θ − axis).
+      Confusion axis for deutan ≈ 150°, protan ≈ 16° (CIElab a*–b* angle of Machado-derived
+      confusion line at the project's L*=75 / C=40 ring).
+    </p>
+    <p style="margin:6px 0;">
+      <b>Pre-image</b>: for each canonical target θ* ∈ {0°,45°,…,315°}, the simulator finds
+      θ_pre such that θ_pre + δθ(θ_pre) ≈ θ* (numerical 1° grid search over [0°,360°), refined to 0.05°).
+      An "exact" filter cell turns ✓ when |forward(θ_pre) − θ*| &lt; 0.1°.
+    </p>
+    <p style="margin:6px 0;">
+      Colors rendered via STIM_LAB interpolation (the experiment screenshot-derived CIElab values
+      from <code>utils_color_decoding.py</code>) → sRGB. δL* = 0 throughout.
+    </p>
+  </details>
+</div>
+
+<script>
+// === Embedded Machado lookup table (built by build_machado_table.py) =====
+const MACHADO_TABLE = __MACHADO_TABLE_JSON__;
+// ========================================================================
+
+const HUE_8 = [0, 45, 90, 135, 180, 225, 270, 315];
+const COLOR_NAMES = ['Red', 'Orange', 'Yellow', 'Green', 'Cyan', 'Blue', 'Purple', 'Magenta'];
+
+// --- STIM_LAB sample arrays ---------------------------------------------
+const STIM_LAB = MACHADO_TABLE.stim_lab;
+const STIM_L_ARR = [], STIM_C_ARR = [], STIM_H_ARR = [];
+(function () {
+  for (let i = 1; i <= 8; i++) {
+    const [L, a, b] = STIM_LAB['color_' + i];
+    STIM_L_ARR.push(L);
+    STIM_C_ARR.push(Math.hypot(a, b));
+    let h = Math.atan2(b, a) * 180 / Math.PI;
+    if (h < 0) h += 360;
+    STIM_H_ARR.push(h);
+  }
+})();
+const IDEAL_HUE_DEG = [0, 45, 90, 135, 180, 225, 270, 315];
+
+// --- circular interpolation ---------------------------------------------
+function wrap360(x) { return ((x % 360) + 360) % 360; }
+function interpCircular(target, hues, values) {
+  const tgt = wrap360(target);
+  // sort by hue
+  const idx = hues.map((_, i) => i).sort((a, b) => hues[a] - hues[b]);
+  const h = idx.map(i => wrap360(hues[i]));
+  const v = idx.map(i => values[i]);
+  // build extended arrays
+  const hExt = [], vExt = [];
+  for (let i = 0; i < h.length; i++) { hExt.push(h[i] - 360); vExt.push(v[i]); }
+  for (let i = 0; i < h.length; i++) { hExt.push(h[i]);       vExt.push(v[i]); }
+  for (let i = 0; i < h.length; i++) { hExt.push(h[i] + 360); vExt.push(v[i]); }
+  // linear search
+  let i = 0;
+  while (i < hExt.length - 1 && hExt[i + 1] < tgt) i++;
+  const x0 = hExt[i], x1 = hExt[i + 1], y0 = vExt[i], y1 = vExt[i + 1];
+  if (x1 === x0) return y0;
+  const t = (tgt - x0) / (x1 - x0);
+  return y0 + t * (y1 - y0);
+}
+function stimLabAtHue(theta) {
+  const L = interpCircular(theta, IDEAL_HUE_DEG, STIM_L_ARR);
+  const C = interpCircular(theta, IDEAL_HUE_DEG, STIM_C_ARR);
+  return [L, C];
+}
+
+// --- CIElab -> sRGB (D65) -----------------------------------------------
+const M_XYZ_TO_SRGB = [
+  [3.2406, -1.5372, -0.4986],
+  [-0.9689, 1.8758, 0.0415],
+  [0.0557, -0.2040, 1.0570],
+];
+function lab2rgb(L, a, b) {
+  let y = (L + 16) / 116;
+  let x = a / 500 + y;
+  let z = y - b / 200;
+  function f(t) { return t > 0.206893 ? t * t * t : (t - 16 / 116) / 7.787; }
+  x = f(x) * 0.95047; y = f(y) * 1.0; z = f(z) * 1.08883;
+  const r0 = M_XYZ_TO_SRGB[0][0] * x + M_XYZ_TO_SRGB[0][1] * y + M_XYZ_TO_SRGB[0][2] * z;
+  const r1 = M_XYZ_TO_SRGB[1][0] * x + M_XYZ_TO_SRGB[1][1] * y + M_XYZ_TO_SRGB[1][2] * z;
+  const r2 = M_XYZ_TO_SRGB[2][0] * x + M_XYZ_TO_SRGB[2][1] * y + M_XYZ_TO_SRGB[2][2] * z;
+  function compand(c) {
+    return c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(Math.max(c, 0), 1 / 2.4) - 0.055;
+  }
+  return [r0, r1, r2].map(compand).map(c => Math.max(0, Math.min(1, c)));
+}
+function rgbCss([r, g, b]) {
+  const f = c => Math.round(c * 255).toString(16).padStart(2, '0');
+  return '#' + f(r) + f(g) + f(b);
+}
+function renderHue(theta) {
+  const [L, C] = stimLabAtHue(theta);
+  const a = C * Math.cos(theta * Math.PI / 180);
+  const b = C * Math.sin(theta * Math.PI / 180);
+  return rgbCss(lab2rgb(L, a, b));
+}
+
+// --- forward models -----------------------------------------------------
+function fwd2comp(theta, bs, bc, axis) {
+  const th = theta * Math.PI / 180;
+  return bs * Math.cos(th - Math.PI / 2) + bc * Math.cos(th - axis * Math.PI / 180);
+}
+// Machado δθ bilinear lookup
+function dthetaMachado(theta, dl, family) {
+  if (dl <= 0) return 0;
+  const hues = MACHADO_TABLE.hue_grid_deg;
+  const dls = MACHADO_TABLE.delta_lambda_grid_nm;
+  const grid = MACHADO_TABLE[family];
+  if (!grid) return 0;
+  const dlMax = dls[dls.length - 1];
+  const dlClamped = Math.min(Math.max(dl, 0), dlMax);
+  const t = wrap360(theta);
+  // hue index (1-deg grid 0..359 → simple)
+  const hStep = hues[1] - hues[0];
+  const hi = Math.floor(t / hStep);
+  const hi1 = (hi + 1) % hues.length;
+  const ft = (t - hues[hi]) / hStep;
+  // Δλ index
+  const dlStep = dls[1] - dls[0];
+  let di = Math.floor((dlClamped - dls[0]) / dlStep);
+  if (di >= dls.length - 1) di = dls.length - 2;
+  const fd = (dlClamped - dls[di]) / dlStep;
+  // bilinear, but be careful: hue δθ has a discontinuity at the
+  // protan/deutan inversion line for very large Δλ. We resolve it by
+  // unwrapping the four corners to the corner with smallest |value|.
+  const corners = [grid[di][hi], grid[di][hi1], grid[di + 1][hi], grid[di + 1][hi1]];
+  const ref = corners[0];
+  const adj = corners.map(v => {
+    let dv = v - ref;
+    while (dv > 180) dv -= 360;
+    while (dv < -180) dv += 360;
+    return ref + dv;
+  });
+  const a0 = adj[0] * (1 - ft) + adj[1] * ft;
+  const a1 = adj[2] * (1 - ft) + adj[3] * ft;
+  let val = a0 * (1 - fd) + a1 * fd;
+  // wrap to (-180, 180]
+  while (val > 180) val -= 360;
+  while (val <= -180) val += 360;
+  return val;
+}
+function fwdRC(theta, dl, g, family) {
+  return (2 - g) * dthetaMachado(theta, dl, family);
+}
+function forward(theta, P) {
+  if (P.model === 'identity') return 0;
+  if (P.model === '2comp') return fwd2comp(theta, P.bs, P.bc, P.axis);
+  if (P.model === 'rc') return fwdRC(theta, P.dl, P.g, P.family);
+  return 0;
+}
+
+// --- pre-image ----------------------------------------------------------
+function preImage(target, P) {
+  // coarse 1° scan
+  let bestT = 0, bestErr = 1e9;
+  for (let i = 0; i < 360; i++) {
+    const f = (i + forward(i, P)) % 360;
+    let d = Math.abs(((f - target + 540) % 360) - 180);
+    if (d < bestErr) { bestErr = d; bestT = i; }
+  }
+  // refine in [bestT - 1°, bestT + 1°] at 0.05° step
+  let refT = bestT, refErr = bestErr;
+  for (let s = -1; s <= 1; s += 0.05) {
+    const t = wrap360(bestT + s);
+    const f = wrap360(t + forward(t, P));
+    let d = Math.abs(((f - target + 540) % 360) - 180);
+    if (d < refErr) { refErr = d; refT = t; }
+  }
+  return { theta: refT, err: refErr };
+}
+
+// --- UI plumbing --------------------------------------------------------
+const $ = id => document.getElementById(id);
+function syncPair(numId, rangeId) {
+  const a = $(numId), b = $(rangeId);
+  a.addEventListener('input', () => { b.value = a.value; render(); });
+  b.addEventListener('input', () => { a.value = b.value; render(); });
+}
+syncPair('bs', 'bs_range');
+syncPair('bc', 'bc_range');
+syncPair('axis', 'axis_range');
+syncPair('dl', 'dl_range');
+syncPair('g', 'g_range');
+$('model').addEventListener('change', () => {
+  const m = $('model').value;
+  $('panel-2comp').classList.toggle('hide', m !== '2comp');
+  $('panel-rc').classList.toggle('hide', m !== 'rc');
+  render();
+});
+$('family').addEventListener('change', () => {
+  // update default axis for 2-comp
+  if ($('model').value === '2comp') {
+    const fam = $('family').value;
+    const def = fam === 'protan' ? 16 : 150;
+    $('axis').value = def; $('axis_range').value = def;
+  }
+  render();
+});
+$('preset').addEventListener('change', () => {
+  const p = $('preset').value;
+  const presets = {
+    loco08:    { model: '2comp', family: 'deutan', bs: 38,  bc: -14, axis: 150 },
+    loco09:    { model: '2comp', family: 'protan', bs: 6,   bc: -22, axis: 16  },
+    loco08v1:  { model: '2comp', family: 'deutan', bs: 50,  bc: -14, axis: 150 },
+    cycle14_08:{ model: '2comp', family: 'deutan', bs: 58,  bc: -36, axis: 150 },
+    cycle12_09:{ model: '2comp', family: 'protan', bs: 30,  bc: 26,  axis: 16  },
+    rc08:      { model: 'rc',    family: 'deutan', dl: 2.5,  g: 3.25 },  // legacy g'=-2.25
+    rc09:      { model: 'rc',    family: 'protan', dl: 19.5, g: 2.10 },  // legacy g'=-1.10
+    rc_hc:     { model: 'rc',    family: 'deutan', dl: 0.0,  g: 1.00 },
+    rc_full:   { model: 'rc',    family: 'deutan', dl: 10.0, g: 2.00 },
+  };
+  if (!presets[p]) return;
+  const pr = presets[p];
+  $('model').value = pr.model;
+  $('panel-2comp').classList.toggle('hide', pr.model !== '2comp');
+  $('panel-rc').classList.toggle('hide', pr.model !== 'rc');
+  $('family').value = pr.family;
+  if (pr.model === '2comp') {
+    $('bs').value = pr.bs; $('bs_range').value = pr.bs;
+    $('bc').value = pr.bc; $('bc_range').value = pr.bc;
+    $('axis').value = pr.axis; $('axis_range').value = pr.axis;
+  } else if (pr.model === 'rc') {
+    $('dl').value = pr.dl; $('dl_range').value = pr.dl;
+    $('g').value = pr.g;   $('g_range').value = pr.g;
+  }
+  render();
+});
+
+function readParams() {
+  return {
+    model: $('model').value,
+    family: $('family').value,
+    bs: parseFloat($('bs').value),
+    bc: parseFloat($('bc').value),
+    axis: parseFloat($('axis').value),
+    dl: parseFloat($('dl').value),
+    g: parseFloat($('g').value),
+  };
+}
+
+function render() {
+  const P = readParams();
+  const palette = $('palette');
+  // wipe rows after header (header takes first 6 cells)
+  while (palette.children.length > 6) palette.removeChild(palette.lastChild);
+
+  const dtheta_obs = HUE_8.map(t => forward(t, P));
+  const preInfo = HUE_8.map(t => preImage(t, P));
+  const fwdPre = preInfo.map((pi, i) => wrap360(pi.theta + forward(pi.theta, P)));
+
+  HUE_8.forEach((theta, i) => {
+    const dt = dtheta_obs[i];
+    const cvdHue = wrap360(theta + dt);
+    const preT = preInfo[i].theta;
+    const finalHue = fwdPre[i];
+
+    // row label
+    const lbl = document.createElement('div');
+    lbl.className = 'rowlbl';
+    lbl.innerHTML = `c${i + 1}<br>${COLOR_NAMES[i]}<br>${theta}°`;
+    palette.appendChild(lbl);
+
+    // col 1: original
+    const s1 = document.createElement('div'); s1.className = 'swatch';
+    s1.style.background = renderHue(theta); palette.appendChild(s1);
+
+    // col 2: CVD perceives (annotation: δθ)
+    const s2wrap = document.createElement('div');
+    s2wrap.style.position = 'relative';
+    const s2 = document.createElement('div'); s2.className = 'swatch';
+    s2.style.background = renderHue(cvdHue); s2wrap.appendChild(s2);
+    const a2 = document.createElement('div'); a2.className = 'annot';
+    const cls = Math.abs(dt) < 5 ? 'ok' : (Math.abs(dt) < 25 ? 'warn' : 'bad');
+    a2.className = 'annot ' + cls;
+    a2.textContent = `δθ=${dt >= 0 ? '+' : ''}${dt.toFixed(1)}°`;
+    s2wrap.appendChild(a2);
+    palette.appendChild(s2wrap);
+
+    // col 3: filtered (pre-image)
+    const s3wrap = document.createElement('div');
+    s3wrap.style.position = 'relative';
+    const s3 = document.createElement('div'); s3.className = 'swatch';
+    s3.style.background = renderHue(preT); s3wrap.appendChild(s3);
+    const a3 = document.createElement('div'); a3.className = 'annot';
+    a3.textContent = `θ_pre=${preT.toFixed(1)}°`;
+    s3wrap.appendChild(a3);
+    palette.appendChild(s3wrap);
+
+    // col 4: CVD(filtered) → should hit canonical target
+    const errFinal = Math.abs(((finalHue - theta + 540) % 360) - 180);
+    const s4wrap = document.createElement('div');
+    s4wrap.style.position = 'relative';
+    const s4 = document.createElement('div'); s4.className = 'swatch';
+    s4.style.background = renderHue(finalHue); s4wrap.appendChild(s4);
+    const a4 = document.createElement('div');
+    const cls4 = errFinal < 0.5 ? 'ok' : (errFinal < 5 ? 'warn' : 'bad');
+    a4.className = 'annot ' + cls4;
+    a4.textContent = (errFinal < 0.5 ? '✓ ' : (errFinal < 5 ? '~ ' : '✗ ')) +
+      `err ${errFinal.toFixed(2)}°`;
+    s4wrap.appendChild(a4);
+    palette.appendChild(s4wrap);
+
+    // last col: δ filter (preT − theta wrapped to [-180,180])
+    const dFilter = ((preT - theta + 540) % 360) - 180;
+    const dCell = document.createElement('div');
+    dCell.className = 'annot';
+    dCell.style.textAlign = 'center';
+    dCell.style.fontVariantNumeric = 'tabular-nums';
+    dCell.textContent = (dFilter >= 0 ? '+' : '') + dFilter.toFixed(1) + '°';
+    palette.appendChild(dCell);
+  });
+
+  // summary
+  const maxAbs = Math.max(...dtheta_obs.map(Math.abs));
+  const meanAbs = dtheta_obs.map(Math.abs).reduce((a, b) => a + b, 0) / 8;
+  const errs = preInfo.map((pi, i) => {
+    const f = wrap360(pi.theta + forward(pi.theta, P));
+    return Math.abs(((f - HUE_8[i] + 540) % 360) - 180);
+  });
+  const nExact = errs.filter(e => e < 0.5).length;
+  const maxErr = Math.max(...errs);
+  let modelDescr = '';
+  if (P.model === '2comp') modelDescr =
+    `2-component · β_s=${P.bs.toFixed(1)}° · β_c=${P.bc.toFixed(1)}° · axis=${P.axis.toFixed(0)}° (${P.family})`;
+  else if (P.model === 'rc') modelDescr =
+    `R+C · Δλ=${P.dl.toFixed(1)} nm · g=${P.g.toFixed(2)} (factor 2−g = ${(2 - P.g).toFixed(2)}) · ${P.family}`;
+  else modelDescr = 'identity (HC reference)';
+  $('summary').innerHTML =
+    `<span class="k">model</span><span class="v">${modelDescr}</span>` +
+    `<span class="k">max|δθ|</span><span class="v">${maxAbs.toFixed(1)}°</span>` +
+    `<span class="k">mean|δθ|</span><span class="v">${meanAbs.toFixed(1)}°</span>` +
+    `<span class="k">pre-image exact (err&lt;0.5°)</span><span class="v">${nExact}/8</span>` +
+    `<span class="k">max pre-image err</span><span class="v">${maxErr.toFixed(2)}°</span>`;
+}
+
+render();
+</script>
+</body>
+</html>

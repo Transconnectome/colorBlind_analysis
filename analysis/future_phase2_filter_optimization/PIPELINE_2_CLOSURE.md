@@ -66,12 +66,12 @@
 
 | Candidate | test_loss median ± IQR | param IQR (β_s, β_c) | HC stability |
 |---|---|---|---|
-| **S09-primary (2, 24)** | −1.52 ± 1.41 | **(0, 0)** 완벽 deterministic | **★★★** (param 변동 0) |
-| S08-stable (38, −10) | −1.14 ± **0.86** | (24, 22) | ★★ (test_iqr 최저, param IQR 중간) |
-| S08-robust (6, −42) | −2.36 ± 2.15 | (8, 2) — β_c IQR 작음 | ★★ (param robust, test_iqr 중간) |
+| **S09-βc-rot (2, 24)** | −1.52 ± 1.41 | **(0, 0)** 완벽 deterministic | **★★★** (param 변동 0) |
+| S08-βs-dom (38, −10) | −1.14 ± **0.86** | (24, 22) | ★★ (test_iqr 최저, param IQR 중간) |
+| S08-βc-dom (6, −42) | −2.36 ± 2.15 | (8, 2) — β_c IQR 작음 | ★★ (param robust, test_iqr 중간) |
 
 **Verdict**: **Yes — 특정 model-loss pair 는 HC subset 에 robust 함**.
-- **S09-primary (β_s=2, β_c=24)**: γ_all + RDM_V1 fit loss + 2-Component 의 조합이 *2 fit combos 에서 동일 param 추출*, **param IQR=(0, 0)** 으로 *deterministic identification*
+- **S09-βc-rot (β_s=2, β_c=24)**: γ_all + RDM_V1 fit loss + 2-Component 의 조합이 *2 fit combos 에서 동일 param 추출*, **param IQR=(0, 0)** 으로 *deterministic identification*
 - S08 두 후보 도 param IQR 비교적 작음 (4-24)
 - R+C g=2.95 (sub-09) 도 g_iqr=0.10 으로 stable 하지만 *boundary saturation* 이므로 robust ≠ correct
 
@@ -342,21 +342,33 @@ fit_param = argmin(comp)                        # g 또는 (β_s, β_c)
 
 ### 3.5. 선정된 model·loss 후보 + fitting 결과 표
 
-선정 기준: Primary (test_loss_median) + Secondary (test_loss_iqr) + Supplementary (boundary, collapse) pass + Step 4 weight sweep robustness 확인 (아래 §4).
+선정 기준: Primary (test_loss_median) + Secondary (test_loss_iqr) + Supplementary (boundary, collapse) pass + Step 4 weight sweep robustness 확인 (아래 §4) + behavioral aggregate 임계 (`agg / 8 < 16 z²` ≈ 평균 4 SD/pair).
 
-| Subject | Model | Loss combo | Parameters (Phase B median ± IQR) | Phase B v6 IQR | Strict HC LOO range | AIC | BIC | bdy | test_med ± iqr | focal | agg | rdm |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| sub-08 | **2-Component** | γ_all + RDM_V1 | β_s=38±24, β_c=−10±22 | bs:24, bc:22 | bs[20, 46], bc[−32, 0] (sub-02 outlier) | 9.28 | 6.66 | **0%** | −1.14 ± **0.86** | 28.00 | 83.32 | 0.965 |
-| sub-08 | **2-Component** | γ_OY + RDM_V2 / V3 (2 combos) | β_s=6±8, β_c=−42±2 | bs:8, bc:2 | bs[2, 12], bc[−46, −38] | 10.88 | 8.27 | 9% | −2.36 ± 2.15 | 62.48 | **22.77** | 1.240 |
-| sub-08 | R+C (JND_Lamb) | RDM_V1 only | Δλ=6.5 nm, g=2.25±0.00 | 0.00 | g=2.25 deterministic | 9.01 | 7.70 | 0% | −0.88 ± 1.38 | 66.56 | 107.82 | 0.941 |
-| sub-09 | **2-Component** | γ_all + RDM_V1 / γ_GB + RDM_V1 (2 combos) | β_s=2±0, β_c=24±0 | bs:0, bc:0 | bs[2, 2], bc[24, 24] deterministic | 6.26 | 3.64 | **0%** | −1.52 ± 1.41 | 6.18 | 16.90 | **0.763** |
-| sub-09 | R+C (Boehm_low) | γ_all + RDM_V1 | Δλ=3.0 nm, g=2.95±0.10 | 0.10 | g[2.90, 3.00] (3/7 folds at boundary) | 4.20 | 2.89 | **41%** | −0.86 ± 0.57 | 6.00 | 6.41 | 0.921 |
+**명칭은 *mechanism descriptor* (β_s-dominant 등) 사용**. "stable" 같은 robust 주장 표현은 *5/2 sampling 의 좁은 IQR 만 반영*하며 §5.2 Round 3 identifiability FAIL 및 strict HC LOO spread 와 모순 가능 (advisor blocker 1).
+
+| Subject | Label | Model | Loss combo | Parameters (Phase B median ± IQR) | Strict HC LOO range | AIC | BIC | bdy | test_med ± iqr | focal | agg (per-pair) |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| sub-08 | **βs-dom** | 2-Component | γ_all + RDM_V1 | β_s=38±24, β_c=−10±22 | bs[20, 46], bc[−32, 0] (sub-02 outlier; 32° β_c span) | 9.28 | 6.66 | **0%** | −1.14 ± **0.86** | 28.00 | 83.32 (~10.4 z²/pair) |
+| sub-08 | **βc-dom** | 2-Component | γ_OY + RDM_V2 / V3 (2 combos) | β_s=6±8, β_c=−42±2 | bs[2, 12], bc[−46, −38] | 10.88 | 8.27 | 9% | −2.36 ± 2.15 | 62.48 | **22.77** (~2.85 z²/pair) |
+| sub-09 | **βc-rotation** | 2-Component | γ_all + RDM_V1 / γ_GB + RDM_V1 (2 combos) | β_s=2±0, β_c=24±0 | bs[2, 2], bc[24, 24] deterministic | 6.26 | 3.64 | **0%** | −1.52 ± 1.41 | 6.18 | 16.90 (~2.1 z²/pair) |
+| **R+C insufficiency references (not selected as filters)** | | | | | | | | | | | |
+| sub-08 | (R+C ref) | R+C (JND_Lamb) | RDM_V1 only | Δλ=6.5 nm, g=2.25±0.00 | g=2.25 deterministic | 9.01 | 7.70 | 0% | −0.88 ± 1.38 | 66.56 | 107.82 |
+| sub-09 | (R+C ref) | R+C (Boehm_low) | γ_all + RDM_V1 | Δλ=3.0 nm, g=2.95±0.10 | g[2.90, 3.00] (3/7 folds at boundary) | 4.20 | 2.89 | **41%** | −0.86 ± 0.57 | 6.00 | 6.41 |
+| **Excluded for transparency** | | | | | | | | | | | |
+| sub-08 | (excluded) | 2-Component | γ_YP + RDM_V4 + LOCO_V4 | β_s=44±4, β_c=36±4 | not tested | — | — | 7% | −2.20 ± 4.03 | **2.45** | **1386.54** (~173 z²/pair) |
+
+**Exclusion 기준 (advisor blocker 3)**: behavioral aggregate per-pair mean `agg/8 < 16 z²` (≈ 4 SD per non-focal pair).
+- (44, 36): per-pair ~173 z² ≈ 14 SD per pair → **excluded** (catastrophic non-YP fit)
+- (38, −10): per-pair ~10.4 z² ≈ 3.2 SD per pair → keep (within threshold)
+- (6, −42): per-pair ~2.85 z² ≈ 1.7 SD per pair → keep (best aggregate)
+
+**Behavioral fit warning (advisor blocker 1+2)**: §3.5 의 `test_focal`, `test_agg` column 은 Phase B 5/2 split (test=2 HC) 값. **Strict HC LOO 의 7-fold 에서는 test n=1 → γ baseline N/A → behavioral fit metric 재측정 불가**. LOO range column 은 *β/g param stability 만* 측정. *βs-dom 후보 (38, −10)* 는 §5.2 Round 3 에서 β_c sign-flip 으로 식별성 FAIL → "stable" 명칭 회피. 모든 candidate identifiability 결과는 §5.2 참조.
 
 **HC LOO 추가 finding** (`s17_hc_loo.py`):
-- Strict LOO median 이 *모든 5 후보에서 Phase B v6 5/2 random median 과 일치* → v6 median 이 sampling artifact 아님.
-- **S08-stable (38, −10)** 는 HC LOO 에서 bs[20, 46], bc[−32, 0] 가장 넓은 spread. **sub-02 exclusion 이 dominant outlier** (Δ=28.4) — CLAUDE §2.5 의 sub-04-driven instability 와 다른 pattern.
-- S08-robust, S09-stable, S08-rc-subprimary: LOO spread 작음 (zero 또는 ≤10° per axis).
-- S09-rc-subprimary: 3/7 folds 에서 g=3.0 boundary saturate — R+C insufficiency 의 fold-level 확인.
+- 모든 5 candidate 의 strict LOO median 이 Phase B v6 5/2 random median 과 일치 → v6 median sampling artifact 아님 (param 차원 only)
+- βs-dom (38, −10): bs[20, 46], bc[−32, 0]; **sub-02 dominant outlier** (Δ=28.4), CLAUDE §2.5 의 sub-04-driven instability 와 다른 pattern
+- βc-dom, βc-rotation, sub-08 R+C ref: LOO spread 작음 (≤10° per axis 또는 deterministic)
+- sub-09 R+C ref: 3/7 folds 에서 g=3.0 boundary — R+C structural insufficiency 의 fold-level 확인
 
 ---
 
@@ -393,11 +405,12 @@ score(r, w_f, w_a, w_R) = w_f · r['focal']  +  w_a · r['agg']  +  w_R · r['rd
 
 Sub-08 의 (β_s=38, β_c=−10) 는 Step 3 의 z-score composite ranking 단독으로는 top 에 오르지 않았으나 *focal+all joint scheme 에서 surface*. Step 3 의 raw cell-level metric (test_loss_median=−1.14, IQR=0.86, bdy=0%) 으로 이미 robust 후보였음 → **Step 4 가 *Step 3 후보의 명시화*** (selection rule 의 weight-emphasis 일관성 확인).
 
-### Step 4 의 결론
+### Step 4 의 결론 + 정직한 disclosure (advisor issue 4)
 
-- **Step 3 후보 5개 모두 Step 4 의 multiple scheme categories 에서 robust** (each ≥10/47 schemes, 또는 ≥2 categories)
-- 사용자 directive: "**새 optimal point 발견 아님**" — Step 4 의 alternative weight emphasis 가 *Step 3 후보를 다른 각도에서 확인* 하는 절차로 위치
-- (cycle 6b script 의 실제 이름은 §Files 참조)
+- Step 3 후보 5개 모두 Step 4 의 multiple scheme categories 에서 robust (each ≥10/47 schemes, 또는 ≥2 categories)
+- **βc-dom (6, −42), βc-rotation (2, 24), R+C reference 들은 Step 3 z-score composite 에서도 surface** — Step 4 는 robustness *확인* 역할
+- **βs-dom (38, −10) 은 Step 3 z-score composite ranking 단독으로는 top 에 오지 않았음** — *Step 4 의 joint γ_focal + γ_all weighting* 에서 처음 visible. 즉 Step 4 는 (a) 다른 후보들의 *sanity check* + (b) (38, −10) 처럼 *Step 3 z-score equalization 으로 invisible 했던 후보 노출* 두 역할 모두 수행
+- 사용자 directive "새 optimal point 발견 아님" 은 *Step 3 cell pool 내에서* 의 의미. (38, −10) 도 Step 3 의 71 cells × 4 models 안에 있음 — *새 cell* 추가가 아닌, *기존 cell 을 다른 weight 로 보면 surface*
 
 ---
 
@@ -411,12 +424,12 @@ Sub-08 의 (β_s=38, β_c=−10) 는 Step 3 의 z-score composite ranking 단독
 
 | 후보 | Phase B fit loss | β_s | β_c | test_med ± iqr | focal | agg | bdy | Phase B param_IQR | Strict HC LOO range |
 |---|---|---|---|---|---|---|---|---|---|
-| **S08-stable** | γ_all + RDM_V1 | 38 | −10 | −1.14 ± **0.86** | 28.00 (5.3 SD) | 83.32 | **0%** | (24, 22) | β_s[20, 46], β_c[−32, 0] (sub-02 outlier) |
-| **S08-robust** | γ_OY + RDM_V2 / V3 (**2 combos**) | 6 | −42 | −2.36 ± 2.15 | 62.48 (7.9 SD) | **22.77** | 9% | (8, 2) | β_s[2, 12], β_c[−46, −38] |
+| **S08-βs-dom** | γ_all + RDM_V1 | 38 | −10 | −1.14 ± **0.86** | 28.00 (5.3 SD) | 83.32 | **0%** | (24, 22) | β_s[20, 46], β_c[−32, 0] (sub-02 outlier) |
+| **S08-βc-dom** | γ_OY + RDM_V2 / V3 (**2 combos**) | 6 | −42 | −2.36 ± 2.15 | 62.48 (7.9 SD) | **22.77** | 9% | (8, 2) | β_s[2, 12], β_c[−46, −38] |
 
 **Mechanism interpretation**:
-- S08-stable (38, −10): primary S-cone shift, minimal cortical confusion-axis. β_s-dominant.
-- S08-robust (6, −42): primary cortical confusion-axis (large negative), minimal S-cone. β_c-dominant (opposite sign of stable).
+- S08-βs-dom (38, −10): primary S-cone shift, minimal cortical confusion-axis. β_s-dominant.
+- S08-βc-dom (6, −42): primary cortical confusion-axis (large negative), minimal S-cone. β_c-dominant (opposite sign of stable).
 - 두 후보는 **opposite mechanism hypotheses**. Phase 3 행동 실험이 tiebreaker.
 
 #### Sub-09 (protan) — (β_s=2, β_c=24) primary
@@ -432,16 +445,16 @@ Sub-08 의 (β_s=38, β_c=−10) 는 Step 3 의 z-score composite ranking 단독
 
 **Mechanism**: cortical confusion-axis primary (β_c=24), minimal S-cone (β_s=2). Atypical protan or cortical compensation dominant.
 
-**R+C 보조 보고 (NOT competing candidate)**: g=2.95 (rc_Boehm_low, Δλ=4.5nm), bdy=41% near-saturation → **R+C 1-DOF insufficient for sub-09**.
+**R+C 보조 보고 (NOT competing candidate)**: g=2.95 (rc_Boehm_low, **Δλ=3.0 nm**, protan), bdy=41% near-saturation → **R+C 1-DOF insufficient for sub-09**.
 
 ### 5.2. Phase D Round 3 — 식별성 검증 결과 (2026-05-26 완료)
 
 ```python
 # scripts/s13_round3.py
 CANDIDATES = [
-    {'id': 'S08-stable',  'subject': 'sub-08', 'beta_s_gt': 38.0,  'beta_c_gt': -10.0},
-    {'id': 'S08-robust',  'subject': 'sub-08', 'beta_s_gt': 6.0,   'beta_c_gt': -42.0},
-    {'id': 'S09-primary', 'subject': 'sub-09', 'beta_s_gt': 2.0,   'beta_c_gt': 24.0},
+    {'id': 'S08-βs-dom',  'subject': 'sub-08', 'beta_s_gt': 38.0,  'beta_c_gt': -10.0},
+    {'id': 'S08-βc-dom',  'subject': 'sub-08', 'beta_s_gt': 6.0,   'beta_c_gt': -42.0},
+    {'id': 'S09-βc-rot', 'subject': 'sub-09', 'beta_s_gt': 2.0,   'beta_c_gt': 24.0},
 ]
 # Per candidate × 2 GTs (null, fit) × N_OUTER=50 outer bootstrap (swap-HC)
 # Pass: β_s_iqr < 30, β_c_iqr < 30, recovery median within ±10° of GT
@@ -451,16 +464,16 @@ CANDIDATES = [
 
 | Candidate | GT type | β_s GT→median (offset) | β_c GT→median (offset) | β_c IQR | bdy | Verdict |
 |---|---|---|---|---|---|---|
-| **S08-stable** | fit (38, −10) | 38→32 (6) | −10→**+26** (**36**) | **44.0** | 26% | ✗ FAIL |
-| S08-stable | null (0, 0) | 0→+26 (26) | 0→−16 (16) | 36.0 | 20% | ✗ FAIL |
-| **S08-robust** | fit (6, −42) | 6→34 (28) | −42→−26 (16) | **68.5** | 26% | ✗ FAIL |
-| S08-robust | null (0, 0) | 0→+46 (46) | 0→−26 (26) | 18.0 | 50% | ✗ FAIL |
-| **S09-primary** | fit (2, 24) | 2→22 (20) | 24→**−10** (**34**) | **41.5** | 26% | ✗ FAIL |
-| S09-primary | null (0, 0) | 0→+26 (26) | 0→+10 (10) | 34.0 | 48% | ✗ FAIL |
+| **S08-βs-dom** | fit (38, −10) | 38→32 (6) | −10→**+26** (**36**) | **44.0** | 26% | ✗ FAIL |
+| S08-βs-dom | null (0, 0) | 0→+26 (26) | 0→−16 (16) | 36.0 | 20% | ✗ FAIL |
+| **S08-βc-dom** | fit (6, −42) | 6→34 (28) | −42→−26 (16) | **68.5** | 26% | ✗ FAIL |
+| S08-βc-dom | null (0, 0) | 0→+46 (46) | 0→−26 (26) | 18.0 | 50% | ✗ FAIL |
+| **S09-βc-rot** | fit (2, 24) | 2→22 (20) | 24→**−10** (**34**) | **41.5** | 26% | ✗ FAIL |
+| S09-βc-rot | null (0, 0) | 0→+26 (26) | 0→+10 (10) | 34.0 | 48% | ✗ FAIL |
 
 #### Critical findings
 
-1. **모든 fit GT recovery FAIL**: β_c IQR=41-68 (criterion <30), median offset 16-36°. 특히 **β_c sign-flip 등장** (S08-stable: GT−10 → recovered +26; S09-primary: GT+24 → recovered −10)
+1. **모든 fit GT recovery FAIL**: β_c IQR=41-68 (criterion <30), median offset 16-36°. 특히 **β_c sign-flip 등장** (S08-βs-dom: GT−10 → recovered +26; S09-βc-rot: GT+24 → recovered −10)
 2. **Null GT 도 FAIL**: 변형 없는 CVD voxel pattern 에서 (+26, −16) 등 spurious params 추정. *Fit procedure 가 systematic positive β_s bias 보유*
 3. **β_s positive bias**: null GT 에서도 +26~+46 으로 추정 — 0 grid edge 에서 vox covariance 가 +β_s 방향으로 fit 을 끌어당김
 
@@ -471,20 +484,30 @@ CANDIDATES = [
 - 후보들은 *fit-point optima* 이지만 *unique solutions* 아님 — 대체 (β_s, β_c) sets 가 유사 fit 산출 가능
 - **Behavioral validation (Phase 3) 가 sole verification path**
 
-#### Caveat — Bootstrap method 한계
+#### Caveat — Bootstrap method noise floor (advisor 권고로 reframing)
 
-Round 3 의 swap-HC bootstrap (HC voxel pattern 을 CVD 로 swap 후 GT perturbation 적용) 자체가 HC inter-subject variance 를 fit landscape 에 도입 → null GT 가 (0, 0) 으로 회복 안 되는 부분은 *partial method artifact* 가능. 단 **fit GT recovery FAIL 은 method 와 무관하게 해석 가능** (known signal 추가했음에도 fit 이 recovery 못 함 = procedure-level identifiability 한계).
+Round 3 의 swap-HC bootstrap (HC voxel pattern 을 CVD 로 swap 후 GT perturbation 적용) 은 *HC inter-subject variance 를 fit landscape 에 도입*. **Null GT 에서 (+26, −16) spurious 추정 = method noise floor ~26°/16° 수준**. Fit-point GT recovery offset (16-36°) 은 *null noise floor 와 같은 자릿수*.
+
+→ **정직한 해석**: Round 3 는 *procedure-level identifiability 한계를 확정* 하지 않음. 다음 둘 중 하나 (또는 둘 다):
+- (a) Procedure-level non-identifiability (parameter uniqueness 보장 없음)
+- (b) Swap-HC bootstrap method noise floor 가 fit GT 신호보다 큼
+
+**두 경우 모두 결론은 동일**: candidates 를 *unique parameter estimates* 로 claim 불가. *Descriptive fits at fit point only*.
 
 ### 5.3. Limitations (paper-level disclosure)
 
-- **L1. Identifiability FAIL (all candidates)** — Round 3 multi-point recovery: β_c IQR 41–68°, fit GT median offset 16–36°, β_c sign-flips (S08-stable, S09-primary), null GT spurious recovery. Forward model parameters are *not unique*. Candidates = *descriptive fits at fit point only*.
+- **L1. Identifiability cannot be established (all candidates)** — Round 3 multi-point recovery: β_c IQR 41–68°, fit GT median offset 16–36°, β_c sign-flips (S08-βs-dom, S09-βc-rot), null GT 에서 spurious (+26, −16) recovery. 이는 *procedure-level non-identifiability* 또는 *swap-HC bootstrap method noise floor* 둘 중 하나 (또는 둘 다)로 설명 가능. 두 경우 모두 candidates 를 *unique parameter estimates* 로 claim 할 수 없음. *Descriptive fits at fit point only*.
 - **L2. OOS axis is HC normalization only** — CVD JND is N=1 per pair; train/test split varies HC pool composition, not CVD samples. Behavioral generalization requires Phase 3 experiment.
 - **L3. Held-out focal pair CVD obs reuse** — focal pair excluded from fit objective; the same CVD measurement enters test eval under different HC normalization. Not data leakage under individualized-filter framing, but disclosure required.
-- **L4. CVD N=2, HC n=7, no strict CVD LOO possible** — CVD LOO impossible (N=2). Strict HC LOO (s17) confirms Phase B v6 medians but exposes per-fold spread (sub-02 drives S08-stable variance, not sub-04 as prior CLAUDE §2.5 expected).
+- **L4. CVD N=2, HC n=7, no strict CVD LOO possible** — CVD LOO impossible (N=2). Strict HC LOO (s17) confirms Phase B v6 medians but exposes per-fold spread (sub-02 drives S08-βs-dom variance, not sub-04 as prior CLAUDE §2.5 expected).
 - **L5. Z-score grid-relative composite equalizes atom info-density** — 1-pair γ_focal ↔ 8-pair γ_all contribute equally to composite. Step 4 raw-weight sweep used to verify Step 3 candidates are not artifact of this equalization.
 - **L6. R+C 1-DOF structurally insufficient** — sub-09 R+C saturates at g_max=3.0 (bdy=41%); R+C's forward expression `δθ=(2−g)·δθ_Machado` lacks DOF for cortical confusion-axis rotation that 2-Component captures via β_c. *Structural* limit (DOF count), not literature-g comparison.
 - **L7. Sub-08 mechanism non-unique** — (38, −10) β_s-dominant vs (6, −42) β_c-dominant with *opposite β_c sign*; both pass Step 3 selection. Two candidates reported in parallel; Phase 3 behavioral experiment is inter-candidate tiebreaker.
 - **L8. Phase B → Phase C seed sharing (historical)** — Phase C v2 (now deprecated, see §Files) used identical RNG seed; under independent seed sub-09 IQR inflated 80–300%. Does not affect final selection (Phase C did not contribute to final candidates).
+
+### Pipeline 3 status note
+
+본 closure 는 **Pipeline 2 only**. 이전 `PIPELINE_3_FRAMEWORK.md` 의 sub-09 (β_s=2, β_c=24) primary 결정은 Pipeline 2 의 Step 3 + Step 4 framework 안에서 *재도출* 됨 (위 §3.5 βc-rotation row). Pipeline 3 의 layer architecture (Layer A/B/C with E1/E2/E3) 는 *deprecated* — Phase B v6 + cycle6b 가 동일 역할 흡수 (자세한 이력은 `PIPELINE_3_FRAMEWORK.md` 참조). Pipeline 3 의 별도 후속 작업 없음.
 
 ---
 

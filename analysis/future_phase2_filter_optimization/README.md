@@ -1,346 +1,96 @@
-# Future Phase 2: CVD Cone-Shift Pipeline & Stimulus-Space Filter
+# future_phase2_filter_optimization
 
-**SRQ4**: Can we fit a physiologically grounded cone-shift model to CVD fMRI data and derive a stimulus-space color correction filter?
+**Status**: Pipeline 2 CLOSURE READY (2026-05-27) → Phase 3 행동 실험 진입 대기
 
-**Status**: Active (Gen-4, Machado-anchored, mw_jaccard cross-criterion winner identified 2026-05-03)
-**Subjects**: Sub-08 (deutan), Sub-09 (protan); Sub-10 excluded (CVD-HC indistinguishable)
-**Data**: C010 amplitudes (6 runs × 8 colors × n_voxels) from V1, V2, hV4
+**Project goal**: CVD subject (sub-08 deutan, sub-09 protan) 의 fMRI 기반 *individualized color filter* 추출.
 
 ---
 
-## ⭐ Current Filter Candidates (2026-05-03)
+## ⭐ 메인 entry point
 
-Per `results/inventory/loss_inventory.md` (15 loss variants × HC sanity check). HC sanity uses **bootstrap CI**: 10000 resamples of HC mean norm, then `boot_frac` = fraction of HC means below CVD norm. **✓✓ both sig** = both CVD `boot_frac` ≥ 0.975 (one-sided 95%). **~~ marginal** = 0.90 ≤ `boot_frac` < 0.975. CI-based replaces earlier rank emp_p (sensitive to single HC outliers like sub-04).
-
-### Sub-08 (deutan) candidates
-
-| 후보 | (β_s, β_c) | 출처 | HC sanity (CI-based) |
-|---|:---:|---|---|
-| **§3 canonical** | **(38°, −14°)** | Phase A LOCO ρ argmax | behav §3 PASS (YG-C 분리), HC fit pending server |
-| V4 cycle10d | (38°, +7°) | z_combined argmin (cycle10d Variant A) | (no inventory entry) |
-| V1+V4 avg | (19°, +3.5°) | per-ROI argmin 산술평균 | (no entry — V1 (0,0) drags) |
-| Cycle 12 cross-ROI | (68°, −38°) | α·l_topk(V4) + β·l_rank(V1) | ✓ sub-08 boot_frac=1.00, sub-09 inside CI |
-| **Cycle 15 opt2** | **(68°, −38°)** | 2·mw_jaccard(V4) + 1·l_rank(V1) | **✓✓ sub-08 boot_frac=1.00, sub-09 boot_frac=0.996** |
-| mw_jaccard alone | (58°, −36°) | mw_jaccard_loss @ V4 | ~~ both marginal (sub-08=0.94, sub-09=0.97) |
-
-→ **Sub-08 (68, −38) statistically robust** across 2 independent loss formulations (Cycle 12 + Cycle 15 opt2), boot_frac=1.000. **§3 canonical (38, −14) behaviorally validated** (PASS). Sub-08 has multiple convergent strong signals.
-
-### Sub-09 (protan) candidates
-
-| 후보 | (β_s, β_c) | 출처 | HC sanity (CI-based) |
-|---|:---:|---|---|
-| Phase A LOCO | (6°, −22°) | LOCO ρ argmax (canonical) | ~~ marginal (boot_frac near 0.5 for spearman) |
-| Cycle 12 cross-ROI | (30°, +26°) | α·l_topk(V4) + β·l_rank(V1) | one-CVD only (sub-09 inside HC CI) |
-| Cycle 14 cross-ROI RDM | (32°, +22°) | α·l_topk(V4) + β·(1-cos(ΔRDM_V1)) | ≈ Cycle 12 (V1 metric 무관) |
-| mw_jaccard alone | (44°, +54°) | mw_jaccard_loss @ V4 | ~~ marginal (boot_frac=0.97, just below 0.975) |
-| **Cycle 15 opt2** | **(44°, +54°)** | 2·mw_jaccard(V4) + 1·l_rank(V1) | **✓ sub-09 boot_frac=0.996, BUT sub-04 outlier 의존** |
-
-→ **Sub-09 (44, +54)** is the **only candidate passing CI-based ✓ sig**, but with caveat: HC distribution is bimodal (sub-04 outlier at norm=77.2 vs others). Sub-09 (norm=69.7) sits in the high zone next to sub-04. Sub-04 제외 시 sub-09 boot_frac=1.000 (5 HC만으로는 신뢰도 약함). **No loss gives sub-04-independent strong distinct for sub-09**.
-
-**Honest summary**: sub-08 multiple convergent loss → robust. sub-09 single (44, +54) candidate (cross-validated by mw_jaccard alone + opt2) but statistically borderline due to small HC pool + sub-04 outlier. **Behavioral validation is decisive for sub-09**.
-
-### Selection rule
-
-**Filter selection per CLAUDE.md §0**: LOCO-best descriptive fit + behavioral validation. Loss inventory (Cycle 15 mw_jaccard) provides **statistically robust candidates** (HC sanity ✓✓), but **behavioral PASS is final arbiter** (sub-08 §3 PASS for (38, −14) is the gold standard).
-
-**Visualization files for behavioral session**:
-- Sub-08: `results/visualizations/filter_visualization/filter_viz_sub-08_2comp.png` (canonical), `filter_visualization_phase3/phase3_sub-08_*.png` (3-way)
-- Sub-09: `filter_viz_sub-09_2comp.png` (Phase A), `filter_viz_sub-09_mwjaccard.png` (mw_jaccard winner), `filter_viz_sub-09_c8variants.png` (c8 magenta)
+| 문서 | 용도 |
+|---|---|
+| **`PIPELINE_2_CLOSURE.md`** | **single source of truth** — 5-step axis narrative, RQ + answers, final candidates, limitations |
+| `PIPELINE_2_AUDIT_2026-05-26.md` | Phase C seed audit + 상세 보조 분석 |
+| `CLAUDE.md` | 프로젝트 instructions (§0 framework decision, assumptions, status) |
+| `PAPER_OUTLINE_2026-05-26.md` | Paper outline (closure 결과 반영 wip) |
+| `prior-works.md` | Literature mapping (R+C, 2-Component grounding) |
+| `mathematical_basis.md` | Forward model 수학적 배경 |
+| `PI-feedback-priorwork.md` | PI feedback tracker |
+| `raw_behav.md` | Behavioral JND raw 데이터 노트 |
+| `index.md` | 폴더 navigation |
 
 ---
 
-## Current Active Configuration (2026-04-16, updated 2026-05-03)
+## ⭐ Pipeline 2 final candidates (2 CVD × 3 후보)
 
-**Three models retained. One loss active. Luminance fix is visualization-only.**
+| Subject | Label | Model | Loss combo | Parameters | Family | bdy | 식별성 (Round 3) |
+|---|---|---|---|---|---|---|---|
+| sub-08 deutan | **βs-dom** | 2-Component | γ_all + RDM_V1 | β_s=38, β_c=−10 | deutan | 0% | FAIL (β_c sign-flip) |
+| sub-08 deutan | **βc-dom** | 2-Component | γ_OY + RDM_V2/V3 | β_s=6, β_c=−42 | deutan | 9% | FAIL (β_c IQR=68) |
+| sub-09 protan | **βc-rot** | 2-Component | γ_all + RDM_V1 / γ_GB + RDM_V1 | β_s=2, β_c=24 | protan | **0%** | FAIL (β_c sign-flip) |
 
-### Models (all 3 live; all operate on CIELab L*=75, C*=40 ring)
+**R+C 1-DOF**: 두 subject 모두 *structural insufficient* (boundary saturation 또는 near-saturation) — `PIPELINE_2_CLOSURE.md` §RQ1 + L6 참조.
 
-| # | Name                | DOF | Level            | Forward map                                                                 |
-|---|---------------------|-----|------------------|------------------------------------------------------------------------------|
-| 1 | Machado 1-way       | 1   | Retinal (cone)   | `L_a(λ) = α·L(λ−Δλ) + (1−α)·k_L·M(λ)` (protan);  Δλ ∈ [0, 20 nm]             |
-| 2 | R+C Retinal+Cortical| 2   | Retinal+cortical | `rg' = rg_0 + (1+g)·(rg_ret − rg_0)`;  `g=0` ≡ Machado;  `g<−1` overcompensation |
-| 3 | 2-Component dilation | 2   | Stimulus-space    | `θ' = θ + β_s·cos(θ−90°) + β_c·cos(θ−θ_conf)`;  θ_conf = 16° protan, 150° deutan |
-
-No hybrid, no Fourier warp, no additional DOF. Machado is the physiological anchor; 2-Component is the best behavioral/LOCO-aligned fit for both CVD subjects.
-
-### Active Loss — `L_LOCO` (multi-objective, hV4, shift_at_both)
-
-```
-L_fit = α·L_vuln/4 + β·L_rank/2 + δ·L_rdm/2 + ε·L_smooth/32400
-      = 1.0·L_vuln/4 + 0.5·L_rank/2 + 0.2·L_rdm/2 + 0.1·L_smooth/32400
-```
-
-| Term     | Weight | Meaning                                                            |
-|----------|--------|---------------------------------------------------------------------|
-| L_vuln   | 1.0    | MSE between simulated and observed per-color LOCO vulnerability     |
-| L_rank   | 0.5    | 1 − Spearman ρ between simulated and observed vulnerability profiles|
-| L_rdm    | 0.2    | 1 − cosine(ΔRDM_sim, ΔRDM_obs)                                      |
-| L_smooth | 0.1    | Mean squared adjacent-difference of δθ (angular smoothness)        |
-
-**Script**: `scripts/loco_distortion_fit.py`. **Fit target**: hV4 LOCO vulnerability profile. **Null**: label permutation.
-
-### Filter pipeline (Phase B)
-
-```
-δ_fit(θ) from L_LOCO  →  pre-image search: θ_pre = argmin_θ' |forward(θ') − θ_target|
-```
-
-- 2-Component: exact pre-image (8/8) for both CVD subjects — **no arc compression**.
-- Machado: pre-image OK for sub-08 (Δλ=1.5 nm); 4/8 exact for sub-09 (Δλ=13.5 nm, arc compression).
-- R+C: pre-image 8/8 for sub-08 (Δλ=2.0, g=2.25).
-
-### Visualization luminance fix (data-collection control only)
-
-The `filter_visualization/` figures render the "CVD perceives" and "CVD(Filtered)" columns with a Machado-derived Δ L* (cone-response-equivalent Lab). This ensures the displayed swatch luminance reflects cone physics rather than a uniform CIELab ring.
-
-**This is a display/data-presentation control**, not a constraint on the filter.
-The filter itself operates in the 360° hue domain and does not need to match luminance — stimulus L* is clamped to 75 by the experimental protocol. The luminance-aware rendering exists only so that qualitative evaluators (e.g., sub-08's report) see the correct simulated percept.
-
-### Subjects, parameters, and best-per-subject model
-
-| Subject | CVD group  | Machado (Δλ nm) | R+C (Δλ, g)      | 2-Comp (β_s, β_c) | hV4 LOCO (best)          |
-|---------|------------|------------------|--------------------|--------------------|---------------------------|
-| sub-08  | deutan (mod) | 1.5             | (2.0, 2.25)        | (38°, −14°)        | **2-Comp, p=0.004**      |
-| sub-09  | protan (mod) | 13.5            | (13.5, 0) ≡ Mach   | (6°, −22°)         | **Machado, p=0.018**     |
-| sub-10  | normal       | ≈ 0             | —                  | —                   | NS (as expected)         |
-
-Machado → R+C → 2-Component is a nested hierarchy (R+C reduces to Machado at g=0; 2-Component is independent). **All three are retained** because they probe different mechanistic levels (retinal cone / cortical opponent gain / stimulus-space dilation). The current filter is derived from whichever model wins L_LOCO per subject.
+**식별성 verdict**: Round 3 multi-point recovery 가 모든 candidates 에 대해 FAIL → candidates 는 *descriptive fits at fit point only*, *unique parameter estimates* 가 아님. **Phase 3 행동 실험이 sole verification path** (`PIPELINE_2_CLOSURE.md` §5.2 + L1).
 
 ---
 
-## Workflow Overview
+## 폴더 구조
 
 ```
-Phase A: DISTORTION FITTING                Phase B: FILTER DERIVATION
-
-  C010 amps + Stockman fundamentals          Pre-image search
-          |                                  theta_in = argmin |D(theta) - theta_target|
-          v                                          |
-  Stage 0: Precompute                                v
-  HC W, ΔRDM_obs, Stockman cache             Exact pre-image (2-Comp: 8/8 both subjects)
-          |                                  or Separation optimization (Machado sub-09)
-          v                                          |
-  Stage 1: Model Fitting                             v
-  Compare 5 candidate models              Phase C: FILTER EVALUATION
-  (Machado / R+C / 2-Component /             Permutation tests
-   Fourier / Hybrid)                         L_improve sanity check
-          |                                  Specificity (sub-10 = identity)
-          v                                  Behavioral JND concordance
-  Stage 2: Dual-Criterion Validation
-  L_LOCO (hV4 per-color vulnerability)
-  L_ΔRDM (V1/V2 pairwise geometry)
-          |
-          v
-  Stage 3: Cross-Validation
-  LOHO, LORO, cross-ROI transfer
+future_phase2_filter_optimization/
+├── README.md                          ← (본 문서) navigation + final candidates
+├── PIPELINE_2_CLOSURE.md              ← MAIN: 5-step axis + RQ + limitations
+├── PIPELINE_2_AUDIT_2026-05-26.md     ← supplement: Phase C seed audit
+├── CLAUDE.md                          ← project instructions
+├── PAPER_OUTLINE_2026-05-26.md        ← paper draft outline
+├── prior-works.md, mathematical_basis.md, PI-feedback-priorwork.md, raw_behav.md, index.md
+├── scripts/                           ← Pipeline 2 code (scripts/README.md 참조)
+├── results/                           ← Pipeline 2 output (results/README.md 참조)
+├── sbatch/                            ← SLURM submission scripts
+├── simulator/                         ← interactive filter simulator (4-col HTML)
+├── presentation/                      ← figure/slide assets
+├── logs/                              ← run logs
+└── archive/                           ← deprecated docs + scripts (superseded_2026-05-27/)
 ```
-
-**Key design principle**: A distortion model that reproduces CVD vulnerability does NOT automatically yield a good corrective filter. The ΔRDM inverse failure (-37% to -153%) proved this. Therefore: fit distortion first, derive filter as pre-image, then independently verify improvement.
 
 ---
 
-## Models
+## 5-step pipeline (간략)
 
-### 1. Machado 1-Way Cone Shift (1 DOF)
+| Step | 역할 | 주 script |
+|---|---|---|
+| 1. 모델·로스 후보 선정 | precondition (HC LOO gate) | `scripts/s10a_precondition.py` |
+| 2. 손실항·조합 후보 소개 | atom 정의 + cell enumeration (no fitting) | `scripts/s10b_v6_pca_rdm.py` (atom factories + enum) |
+| 3. 조합 fit + 평가 | 5/2 HC split × 300 + strict HC LOO 7-fold | `scripts/s10b_v6_pca_rdm.py`, `scripts/s17_hc_loo.py` |
+| 4. 가중치 sweep sanity check | raw-weight robustness on Step 3 candidates | `scripts/cycle6b_extended_raw_weight.py` |
+| 5. 최종 결정 + 식별성 | closure + Phase D Round 3 multi-point sim | `scripts/s13_round3.py` |
 
-```
-Protanomaly:  L_a(lambda) = alpha * L(lambda - Delta_lambda) + (1-alpha) * k_L * M(lambda)
-Deuteranomaly: M_a(lambda) = alpha * M(lambda + Delta_lambda) + (1-alpha) * k_M * L(lambda)
-```
-
-Single spectral shift parameter Delta_lambda in [0, 20] nm. Based on Machado, Oliveira & Fernandes (2009) Eq 5/6.
-
-### 2. R+C Retinal + Cortical Gain (2-3 DOF)
-
-```
-rg_final = rg_baseline + (1 + g) * (rg_ret - rg_baseline)
-```
-
-- `g = 0`: pure retinal (= Machado)
-- `g = -1`: exact cortical compensation (dimensionless opponent gain)
-- `g < -1`: overcompensation
-- `g > 0`: amplification (novel for hV4)
-
-> Note: Tregillus 2021 의 cortical compensation 은 BOLD CRF 의 contrast scaling factor (sc, contrast multiplier 단위) — *얼개와 단위 모두 g 와 다름*. Tregillus 는 retinal shift 를 generative form 으로 두지 않고 행동 threshold ratio (t) 로 *고정 입력* 처리. 우리 R+C 의 (Δλ, g) cascade 는 Tregillus 에 직접 대응되지 않음. 자세한 매핑은 [`prior-works.md`](prior-works.md) §1, §3.
-
-### 3. 2-Component Angular Dilation (2 DOF)
-
-```
-theta'(c) = theta_baseline(c)
-           + beta_s * cos(theta_baseline(c) - 90)     [S-cone expansion]
-           + beta_c * cos(theta_baseline(c) - theta_conf)  [Confusion axis]
-```
-
-- `theta_conf = 16 deg (protan), 150 deg (deutan)`
-- Cortical-level model: bijective forward map (no arc compression)
-
-### 4. Fourier Warp (4 DOF) — ablation ceiling only
-
-```
-delta(theta) = a1*sin(theta) + b1*cos(theta) + a2*sin(2*theta) + b2*cos(2*theta)
-```
-
-### 5. Hybrid Cone + 2-Component (3 DOF) — REJECTED
-
-Components not additive. Cone shift becomes redundant or causes overfitting.
+각 step 의 자세한 내용은 `PIPELINE_2_CLOSURE.md` 참조.
 
 ---
 
-## Loss Functions
+## SRQ — Pipeline 2 답변
 
-### L_LOCO: Multi-Objective LOCO Loss
-
-**Script**: `scripts/loco_distortion_fit.py`
-**Applied to**: All models on hV4 (shift_at_both)
-
-```
-L_fit = alpha * L_vuln/4 + beta * L_rank/2 + delta * L_rdm/2 + epsilon * L_smooth/32400
-```
-
-| Term     | Weight | Measures                           |
-|----------|--------|------------------------------------|
-| L_vuln   | 1.0    | MSE(vuln_sim, vuln_cvd)            |
-| L_rank   | 0.5    | 1 - Spearman_rho (profile shape)   |
-| L_rdm    | 0.2    | 1 - cosine(ΔRDM_sim, ΔRDM_obs)    |
-| L_smooth | 0.1    | mean(adj_diff(delta_theta)^2)      |
-
-**Purpose**: Per-color interpolation accuracy -> filter design criterion.
-
-### L_ΔRDM: Cosine Similarity
-
-**Script**: `scripts/comprehensive_2component_analysis.py`
-**Applied to**: 2-Component on V1, V2 (separately and joint)
-
-```
-L = max cosine(ΔRDM_sim, ΔRDM_obs)
-```
-
-Permutation: 8! exact (40,320). Bootstrap CI: n=500.
-**Purpose**: Pairwise distance geometry -> mechanism characterization.
-
-### L3: Gen-4 Joint V1+V2 Loss
-
-**Script**: `scripts/l3_loss.py` (L3_MachadoV1V2)
-**Applied to**: Machado on joint V1+V2
-
-```
-L3 = L1 - lambda_scale * L_scale - lambda_ROI * L_ROI
-L1 = 0.5 * sim(ΔRDM_sim_V1, ΔRDM_obs_V1) + 0.5 * sim(ΔRDM_sim_V2, ΔRDM_obs_V2)
-```
-
-**Purpose**: Cross-ROI consistency validation.
-
-### L3v2: Gen-4.5 (with sign + family gates)
-
-Adds `L_sign` (sign agreement) and `L_fam` (family discrimination margin). All 3 CVD subjects FAILED the 4-gate criterion -> ΔRDM + Machado structurally incompatible.
-
-### L3rc: Retinal-Cortical Joint Loss
-
-Adds coupling penalty `g^2 / (|mean_Delta_lambda| + epsilon)` and dominance regularizer. LOCO evaluated inline as post-hoc validation only.
+| RQ | 결과 (요약) |
+|---|---|
+| RQ1. R+C vs 2-Component 어느 모델 better? | **2-Component** 양 subject 모두 better. R+C 1-DOF 는 structural insufficiency (cortical confusion-axis DOF 부재) |
+| RQ2. 특정 model-loss 가 HC subset 에 robust? | **Yes** — sub-09 (β_s=2, β_c=24) param IQR=(0, 0) deterministic, multiple loss combos 일치 |
+| RQ3. CVD/HC 간 일반화 가능? | **No** — CVD N=2, identifiability FAIL, individualized filter framing 만 가능 |
+| RQ4. R+C behav fit 이 기존 논문과 일치? Neural 추가 benefit? | R+C g 비교 invalid (방법론 mismatch); **Neural 추가 시 boundary 70% → 0%, β_c 추정 안정화** |
+| RQ5. Behav 와 Neural 같은 방향? | Sub-08: agreement; **Sub-09: disagreement** (behav β_c≈0, neural β_c=+24 — neural-only 가 cortical mechanism 노출) |
 
 ---
 
-## Results Summary
+## Closure 이후 next steps
 
-### Detection: All Models Converge
-
-| Subject  | Machado    | R+C        | 2-Component | Fourier     |
-|----------|------------|------------|-------------|-------------|
-| sub-08   | p=0.058 t  | p=0.005**  | **p=0.004** | p=0.0002 (overfit) |
-| sub-09   | **p=0.018** | = Machado | p=0.035*    | p=0.018*    |
-| sub-10   | p=0.559    | --         | p=0.058 m   | --          |
-
-All models detect distortion in sub-08/09 and null sub-10. **Detection is robust to model choice.**
-
-### Correction Direction: Models Diverge
-
-Machado/R+C vs 2-Component delta_theta: sign agreement 4/8, Spearman rho = -0.714.
-Different mechanistic lenses (L-M cone axis vs S-cone/confusion axis) produce different correction prescriptions.
-
-### Best Model by Subject
-
-| Subject  | Primary Model                      | hV4 LOCO    | V1 LOCO     | V1 ΔRDM       |
-|----------|-------------------------------------|-------------|-------------|----------------|
-| **sub-08** | **2-Component** (beta_s=38, beta_c=-14) | **p=0.004** | **p=0.001** | CI excl 0      |
-| sub-08   | R+C (Delta_lambda=2.0, g=2.25)     | p=0.005     | --          | p=0.179        |
-| **sub-09** | Machado (Delta_lambda=13.5)        | **p=0.018** | --          | --             |
-| sub-09   | 2-Component (beta_s=6, beta_c=-22) | p=0.035     | p=0.018     | **p=0.007***   |
-| sub-10   | None                                | All NS      | p=0.058     | --             |
-
-**2-Component is the ONLY model dual-validated (LOCO + ΔRDM) for both CVD subjects.**
-
-### ΔRDM <-> LOCO Dissociation
-
-```
-             ΔRDM perm_p    LOCO V1 label_p
-Sub-08:      0.179 (NS)     0.047* (SIG)    <- per-color accuracy > geometry
-Sub-09:      0.026* (SIG)   0.197 (NS)      <- geometry > per-color accuracy
-```
-
-The two criteria share RDM information (L_LOCO includes L_rdm at delta=0.2) but weight it differently. This is a **sensitivity difference**, not a true dissociation.
-
-### beta_s Cross-Subject Values (xnobis bootstrap — diagnostic only)
-
-```
-Sub-08 (deutan): beta_s = 20.0 +/- 8.0 deg  [from comprehensive_2component_analysis xnobis V1]
-Sub-09 (protan): beta_s = 23.0 +/- 10.2 deg [from comprehensive_2component_analysis xnobis V1]
-Cross-subject mean: ~21.5 deg
-```
-
-> ⚠️ **NOT a literature convergence claim** — see [`prior-works.md`](prior-works.md) §3 and project memory `feedback_convergence_claims.md` / `feedback_physiological_grounding.md`.
->
-> Emery 2021 의 21.4° 는 hue-scaling cosine fit 의 B-Y axis phase rotation (descriptive perceptual model, in MacLeod-Boynton color space). 우리 β_s 는 stimulus-space angular dilation 의 amplitude (CIELab opponent space, generative cortical hypothesis). **두 양은 색공간, layer, 측정 양식 (행동 vs xnobis bootstrap) 이 모두 다른 quantity**. 수치적 근접은 두 모델 모두 1st-harmonic descriptor 라는 *구조적 공통점* 의 결과지, parameter-level convergence 가 아님.
->
-> 또한 **shipped filter 의 (β_s, β_c)** (sub-08: 38°/−14°, sub-09: 6°/−22°; see `BEST_summary.json`) 는 xnobis 값 (20–23°) 와 다른 LOCO L_fit argmin 에서 옴 — 즉 이 절의 20–23° 값은 *시각 결과* 가 아닌 *diagnostic analysis*.
-
-### Pre-Image Filter Results
-
-| Model          | Sub-08 (deutan) | Sub-09 (protan)        |
-|----------------|-----------------|------------------------|
-| R+C            | 8/8 exact       | N/A (= Machado)        |
-| Machado        | not primary     | 4/8 exact (**FAIL**)   |
-| **2-Component** | **8/8 exact**  | **8/8 exact**          |
-
-2-Component is the only model with exact pre-image for BOTH subjects. Cortical-level angular dilation has no arc compression (unlike Machado's L-cone shift which compresses 360 deg -> ~96 deg for sub-09).
-
-**Under 2-Component, sub-09 is reclassified: "spectral filter required" -> "stimulus-space sufficient".**
-
-### Biological Plausibility
-
-| Parameter               | Our Value | Literature reference  | Status |
-|------------------------|-----------|-----------------------|---|
-| Sub-08 Delta_lambda    | 2.0 nm    | Machado 2009 mild range 1-4 nm | In Machado-physiological range (cone fundamental shift) |
-| Sub-09 Delta_lambda    | 13.5 nm   | Machado 2009 moderate range 9-14 nm | In Machado-physiological range |
-| beta_s (xnobis, diagnostic) | 20-23 deg | **Not directly comparable** to Emery 21.4° (different color space, layer, measurement modality — see [`prior-works.md`](prior-works.md) §3) | Structural-family co-occurrence (1st-harmonic descriptor), not parameter convergence |
-| Sub-09 g (V1)          | -1.10     | Tregillus 2021 reports cortical compensation sc=6.39 (V2v) / 7.82 (V3v) but units/layer differ — *not commensurate*. R+C g is dimensionless opponent gain, Tregillus sc is contrast multiplier. | Same direction (cortical compensation), incommensurable magnitude |
-| Sub-08 g (hV4)         | +2.25     | No precedent and out of Tregillus's range when made commensurable. Likely 2-DOF/8-data overfit. | Diagnostic flag — see project memory `R+C g=-2.25 non-physiological` |
-
-### Rejected Approaches
-
-| Approach                   | Failure Mode                                      |
-|---------------------------|---------------------------------------------------|
-| ΔRDM inverse -> filter     | -37% to -153% (WORSE). Pairwise != per-color.    |
-| Simple inverse (-delta)    | Assumes linearity. Nonlinear models need pre-image.|
-| Hybrid (Cone + 2-Comp)     | Components not additive. Cone shift redundant.     |
-| Gen-3 ΔRDM-only (Machado)  | 0/18 passed. ΔRDM_sim anti-correlates ΔRDM_obs.   |
-| Fourier as primary          | 4 DOF / 8 colors = overfitting ceiling only.      |
+1. **Phase 3 행동 실험 design** — 3 candidates ((38,−10), (6,−42), (2,24)) 적용 filter 의 색 perception/discrimination 검증
+2. **Paper draft** (`PAPER_OUTLINE_2026-05-26.md` 기반)
+3. **Filter visualization** — `simulator/` 의 4-col HTML 활용
 
 ---
 
-## Next Steps
+## Archived
 
-1. **Dual-filter behavioral comparison**: R+C vs 2-Component pre-image for sub-08
-2. **2-Component LOCO -> JND concordance**: Does the vulnerability profile predict behavioral JND?
-3. **LOHO robustness**: Sensitivity to individual HC in mean-HC
-
----
-
-## References
-
-1. Machado, Oliveira & Fernandes (2009). *IEEE TVCG*, 15(6), 1291-1298.
-2. Tregillus et al. (2021). *Current Biology*, 31(5), 936-942.
-3. Emery et al. (2021). *Vision Research*, 183, 1-12.
-4. Boehm et al. (2014). *J. Vision*, 14(13), 19.
-5. Somers et al. (2024). *Vision Research*. (EnChroma evaluation)
-6. Diedrichsen et al. (2020). *NeuroImage*. (WUC method)
-7. Walther et al. (2016). *NeuroImage*. (Crossnobis reliability)
+이전 Pipeline 1/3 framework docs 및 session-specific notes: `archive/superseded_2026-05-27/`

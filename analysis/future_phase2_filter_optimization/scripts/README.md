@@ -1,102 +1,71 @@
-# scripts/ — Phase 2 Filter Optimization
+# scripts/ — Pipeline 2 code index
 
-**Last updated**: 2026-05-19 (post-reorganization: 11 canonical at root + 6 subdirs)
+각 script 의 Pipeline 2 step 매핑. 자세한 narrative 는 `../PIPELINE_2_CLOSURE.md` 참조.
 
-## Canonical pipeline (scripts/ root, 11 files)
+## Pipeline 2 core (현재 active)
 
-These produce the Phase 2 BEST filter. To replicate, run `loco_distortion_fit.py`.
+| Script | Pipeline 2 Step | 역할 |
+|---|---|---|
+| `s10a_precondition.py` | Step 1 | HC LOO single-loss precondition gate |
+| `s10b_v6_pca_rdm.py` | Step 2 + 3 | atom factories + cell enumeration + 5/2 HC split × 300 main runner |
+| `s17_hc_loo.py` | Step 3 supplement | strict HC LOO 7-fold (deterministic) |
+| `cycle6b_extended_raw_weight.py` | Step 4 | raw-weight scheme sweep (γ_focal + γ_all + α·RDM, 47 schemes) — Step 3 후보 robustness sanity check |
+| `s13_round3.py` | Step 5 (Phase D) | multi-point recovery identifiability test on final candidates |
+| `s12b_phase_c_v2.py` | (deprecated) | simplex-constrained weight sweep — final selection 기여 없음, L8 limitation 보고용 |
 
-- `loco_distortion_fit.py` — main entry: `grid_search`, `FILTER_MODELS`, default L_fit
-- `machado_simulator.py` — Stockman cone fundamentals + `machado_shifted_hue` (computes h_base)
-- `utils_distortion_models.py` — model interface (`get_design_matrix`)
-- `step1_fit_loco_v2.py` — helpers (`precompute_hc_W`, `load_cvd_loco_target`)
-- `diagnostic_delta_rdm.py` — `compute_delta_rdm_obs/_sim` for L_rdm
-- `c3_relabel_p2a.py` — NEW 9-bin labels for canonical P2a
-- `c3_relabel_both_subjects.py` — per-subject NEW target maps
-- `render_loco_canonical_4col.py` — BEST 4-col viz generator
-- `stim_lab_render.py` — color rendering helper
-- `landscape_loader.py` — parquet-backed landscape access
-- `retinal_cortical.py` — R+C functions (paper Tier 2 diagnostic)
+## Helpers (forward models + atoms)
 
-**Subdirs**:
-- `forward_models/` — `two_component.py` (canonical), `three_component`, `opponent_gain`, `rc_2stage`
-- `filter_ops/` — alternative filter forms compared in paper (`voxel_level_fit.py`, `render_rc_2stage_4col.py`, `multi_roi_confusion_diagnostic.py`, etc.)
-- `diagnostics/` — descriptive diagnostics (HC LOO bootstrap, baseline_ρ, etc.)
-- `inventory/` — inventory builders
-- `visualization/` — figure generation
-- `slurm/` — SLURM submission scripts
-- `_archive/` — deprecated/exploratory scripts
+| Script | 역할 |
+|---|---|
+| `two_comp.py` | 2-Component forward model: `δθ(θ) = β_s·cos(θ−90°) + β_c·cos(θ−θ_conf)` |
+| `rc_1dof.py` | R+C forward model: `δθ_RC(c) = (2−g)·δθ_Machado(c; Δλ)` |
+| `machado_simulator.py` | Machado cone-shift 1-way base |
+| `behav_loss.py` | γ atom factories + JND baseline (HC pool) |
+| `neural_loss.py` | LOCO + RDM atoms |
+| `utils_forward_model.py` | FE-K basis (`create_basis_full`, `HUE_ANGLES`) |
+| `s8_loo_train_test.py` | `DELTA_LAMBDA_BY_FAMILY` dict + HC LOO baseline helper |
+| `diagnostic_delta_rdm.py` | `precompute_hc_W` for RDM atoms |
 
-## Canonical filter equation (single source of truth)
+## Legacy / superseded (참조용으로 보관)
 
-```
-Filter form (2-component cortical opponent rotation):
-    h(θ_CIELab)  = Stockman opponent hue projection (computed from CIE Stockman cone fundamentals)
-    δθ(θ)        = β_s · cos(h − 90°)  +  β_c · cos(h − θ_conf)
-    θ_corrected  = (θ_stimulus − δθ) mod 360°       # pre-image / corrective stimulus
+| Script | 대체 by |
+|---|---|
+| `cycle6_raw_weight.py` | `cycle6b_extended_raw_weight.py` (γ_focal 포함 + LOCO cells 포함) |
+| `s10b_v2_resample.py` / `_v3_extended.py` / `_v4_single_atom.py` / `_v5_gamma_all.py` | `s10b_v6_pca_rdm.py` (PCA-aligned RDM K=6) |
+| `s10b_v6_srm_rdm.py` | `s10b_v6_pca_rdm.py` (BrainIAK SRM 시도 → PCA 가 cleaner) |
+| `s10b_cross_roi.py`, `s10b_inclusion_ranking.py` | Phase B v6 통합 |
+| `s10_advisor_fixes.py` | Phase B v6 에 반영 |
+| `s10c_sub09_cosine.py`, `s10d_sub09_weight_sweep.py` | sub-09 exploratory, Phase B v6 흡수 |
+| `s11_*` (pre-Phase-C null sim variants) | Phase B v6 의 stability check 가 대체 |
+| `s12_phase_c_weight_sweep.py` (v1) | `s12b_phase_c_v2.py` (v2; v2 도 deprecated) |
+| `s13_multipoint_validation.py` (Round 1/2) | `s13_round3.py` (final candidates) |
+| `s14_atom_redesign.py` | Cycle 5 결과, PCA-RDM 으로 흡수 |
+| `s15_oos_reanalysis.py`, `s16_e2_srm_disparity.py` | Pipeline 3 deprecated |
+| `run_sub08_protan_audit.py`, `cycle7b_srm_diagnostic.py`, `cycle7c_pca_diagnostic.py`, `compare_pca_vs_srm_v6.py` | exploratory, closure 에 contribution 없음 |
+| `loco_distortion_fit.py`, `loco_filter*.py`, `step*.py`, older s1~s8 | pre-Pipeline 2 시도들 |
 
-Confusion axes (Stockman opponent space):
-    θ_conf = 150° (deutan), 16° (protan)
-```
+(legacy scripts 자체는 폴더에 남겨둠 — 재현성 + 이력 추적용.)
 
-The S-cone axis is at h=90° in Stockman opponent space (fixed). The L/M confusion axis varies per CVD family.
+## Run order (Pipeline 2 재현)
 
-## Canonical h_base reference (frozen 2026-05-19)
+```bash
+conda activate srm  # local environment
 
-The 8-anchor h_base vector produced by the canonical pipeline at fit time:
+# Step 1: precondition
+python scripts/s10a_precondition.py
 
-```python
-# Stockman opponent hue projections for the 8 DKL anchors
-# CIELab anchor θ° → h_base° (degrees in Stockman opponent space)
-# Env: conda srm; colour-science 0.4.4; numpy 1.26.4; scipy 1.13.1
-H_BASE_REFERENCE = {
-    # CIELab (DKL) hue → Stockman opponent h_base
-    'c1_red_0':     313.47,
-    'c2_orange_45': 299.86,
-    'c3_yellow_90': 288.33,
-    'c4_green_135': 278.15,
-    'c5_cyan_180':  267.62,
-    'c6_blue_225':  227.40,
-    'c7_purple_270':  86.66,
-    'c8_magenta_315': 348.48,
-}
-# Identical for deutan and protan (Δλ=0 baseline projection).
-# Family difference enters only through θ_conf (CONF_AXIS_STOCKMAN).
-```
+# Step 2/3: main Phase B v6 (5/2 HC split × 300)
+python scripts/s10b_v6_pca_rdm.py --subject sub-08
+python scripts/s10b_v6_pca_rdm.py --subject sub-09
 
-**Why a frozen reference**:
-- `machado_shifted_hue(0.0, family)` output depends on the installed `colour-science` version and Stockman fundamentals path. Different envs (e.g. with vs without `colour-science`) produce different h_base values.
-- The Phase 2 BEST coordinates (β_s, β_c) reported in `results/BEST_summary.json` are conditional on this exact h_base. To reproduce the canonical fit, this h_base must be reproduced.
-- Internal consistency between fit, viz, pre-image, and R+C diagnostic is preserved because all use the same `machado_shifted_hue` call in the same env.
-- For external reproducibility (paper Methods), use this lookup as ground truth.
+# Step 3 supplement: strict HC LOO 7-fold
+python scripts/s17_hc_loo.py
 
-## Canonical fitting method
+# Step 4: raw-weight sanity check
+python scripts/cycle6b_extended_raw_weight.py
 
-```
-Method: shift_at_both (canonical, post-2026-04-09)
-Grid: β_s ∈ [0, 50], β_c ∈ [-50, 50], step = 2° (1326 points)
-Encoder: ridge_gcv with GCV-selected α per HC subject
-HC pool: sub-01..07 (n=7); sub-07 V4 = 16 voxels (smaller than others ~67-70)
-ROI: V4 (hV4 on disk)
-Loss weights: (α, β, δ, ε) = (1.0, 0.5, 0.2, 0.1)
-Loss form: L_fit = α·L_vuln + β·L_rank + δ·L_rdm + ε·L_smooth
-Permutation test: 50000 random label shuffles per subject
+# Step 5: identifiability (Phase D Round 3)
+python scripts/s13_round3.py
 ```
 
-## Loss term definitions (all normalized to [0, 1])
-
-| Term | Raw | Normalizer |
-|---|---|---:|
-| L_vuln | `(1/8) · Σ (v_sim − v_cvd)²` | 4.0 |
-| L_rank | `1 − ρ_Spearman(v_sim, v_cvd)` | 2.0 |
-| L_rdm  | `1 − cos(Δrdm_sim, Δrdm_obs)` | 2.0 |
-| L_smooth | `(1/8) · Σ [(δθ[c+1] − δθ[c]) mod ±180]²` | 32400 |
-
-## Replication checklist
-
-1. `conda activate srm` (or any env with `colour-science 0.4.4`)
-2. Verify `machado_shifted_hue(0.0, 'deutan')` returns `H_BASE_REFERENCE` values within rounding tolerance
-3. Run `python scripts/loco_distortion_fit.py --subject 08 --roi V4 --method shift_at_both --models 2component`
-4. Compare to `results/BEST_summary.json` per-subject params
-
-If h_base values differ in your env, the resulting (β_s, β_c) will not match the paper's reported values. Pin h_base via the lookup above or install matching env.
+Outputs → `../results/` (results/README.md 참조).

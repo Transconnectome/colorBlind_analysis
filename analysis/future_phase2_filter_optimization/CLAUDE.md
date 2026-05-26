@@ -2,6 +2,8 @@
 
 **Stage B + C** · **Status**: ACTIVE.
 
+documentation should be updated rather than accumulating outdated results
+
 ## 0. Framework Decision (READ FIRST — 절대 재논의 금지)
 
 > **📎 prior-works mapping** — 모델 관련 작업 시작 전 `prior-works.md` 를 반드시 먼저 읽는다. paper draft / presentation / README 의 prior-art claim 은 본 문서와 일치해야 함.

@@ -42,6 +42,10 @@ Server: `haba6030@node3:/scratch/connectome/haba6030/colorBlind` (SSH/SCP = node
 - 서버에서 seaborn 사용 금지.
 - scp는 동일 목적지끼리 wildcard로 묶어 2–3개 명령으로.
 
+## NotebookLM (CRITICAL)
+
+이 프로젝트의 NotebookLM notebook 은 **단일**: `ColorBlind_comprehensive` (id `fa13d441-21f2-40a0-8170-8cc8eb49cc7b`, URL https://notebooklm.google.com/notebook/fa13d441-21f2-40a0-8170-8cc8eb49cc7b). 새 notebook 생성 금지. 모든 paper 추가는 이 notebook 에.
+
 ## 6. Data Paths & Subjects
 
 **Subjects**: HC sub-01~07 (N=7), CVD sub-08 deutan, sub-09 protan, sub-10 deutan.
@@ -86,7 +90,7 @@ BrainIAK은 mpi4py `MPI_Init_thread`를 호출. 인터랙티브/non-PMIx 환경�
 
 **PsychoPy experiment**: `/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind/colorBlind_test.py`
 
-- 8 equiluminant DKL hues (L*=75, equal chroma on a*-b* circle): color_1=Red(0°) → color_8=Magenta(315°), counterclockwise in 45° steps
+- 8 isoluminant CIE L*a*b* hues (L*=75, chroma r=40 on a*-b* circle): color_1=Red(0°) → color_8=Magenta(315°), counterclockwise in 45° steps. (Note: NOT DKL color space — earlier docs mislabeled this as DKL.)
 - Sinusoidal grating: 5 radial cycles, drifting at 0.3 cyc/s, duration 0.8s
 - RSVP oddball-K task: detect letter 'K' among distractor letters
 - Design: 6 runs × 8 colours/run

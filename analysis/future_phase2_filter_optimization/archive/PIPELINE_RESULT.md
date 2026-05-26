@@ -465,19 +465,19 @@ R+C / 2-Comp × 모든 loss × 양 피험자 × 양 family 전체 fit 반복
   ```
   # Observed ΔRDM (data side, V-free)
   For each HC s:
-    rdm_HC[s] = pdist(mean_runs(amp_HC[s]), metric=corr)        # in s's own V_s → 28-vec
+    rdm_HC[s] = pdist(mean_runs(amp_HC[s]), metric=corr) # in s's own V_s → 28-vec
   rdm_HC_mean = mean(rdm_HC[s] for s in HC)
-  rdm_CVD     = pdist(mean_runs(amp_CVD), metric=corr)          # in CVD's V_s → 28-vec
+  rdm_CVD     = pdist(mean_runs(amp_CVD), metric=corr) # in CVD's V_s → 28-vec
   ΔRDM_obs    = rdm_CVD − rdm_HC_mean
 
   # Simulated ΔRDM (model side, W-fixed per HC)
   For each HC s:
-    Y_shift = C(θ + δθ) @ W_HC[s]                               # W_HC[s] precomputed (HC ridge_gcv)
-    Y_base  = C(θ)       @ W_HC[s]                              # baseline = machado_shifted_hue(0.0)
+    Y_shift = C(θ + δθ) @ W_HC[s]           # W_HC[s] precomputed (HC ridge_gcv)
+    Y_base  = C(θ)       @ W_HC[s]          # baseline = machado_shifted_hue(0.0)
     ΔRDM_sim[s] = pdist(Y_shift, metric=corr) − pdist(Y_base, metric=corr)
-  ΔRDM_sim    = mean(ΔRDM_sim[s] for s in HC)                   # per-HC ΔRDM, THEN mean
+  ΔRDM_sim    = mean(ΔRDM_sim[s] for s in HC)        # per-HC ΔRDM, THEN mean
 
-  L_RDM = 1 − cos(ΔRDM_sim, ΔRDM_obs)                            # ∈ [0, 2]
+  L_RDM = 1 − cos(ΔRDM_sim, ΔRDM_obs)                # ∈ [0, 2]
   ```
   - V_s-invariant (RDM is 28-vec dissimilarity, voxel dimension absent)
   - Per-HC RDM in own V_s, then average ΔRDM across HCs
@@ -687,18 +687,45 @@ R+C / 2-Comp × 모든 loss × 양 피험자 × 양 family 전체 fit 반복
 
 → Sub-09 의 mild Δλ (1.5-3 nm) 에서 R+C 1-DOF 는 g=3 boundary 에 핀. *DPS Δλ=10 + g=2.60* 또는 *2-Comp* 만 sub-09 의 valid 설명.
 
-#### 4-cell L8 PRIMARY 요약 표 (K=6 corrected, 2026-05-22 정정)
+#### 4-cell L8 PRIMARY 요약 표 (K=6 corrected, 2026-05-22 정정; **Spearman ρ 보강 2026-05-24, Nili 2014 RSA 권장 metric**)
 
-| Subject | ROI | R+C DPS g* | 2-Comp (β_s, β_c) | L3 LOCO | L4 RDM | 2-Comp ROI 일치? |
-|---|---|---|---|---|---|---|
-| sub-08 | V1 | g=2.25 ✅ | (48, **−36**) | ⚠ g=0 boundary | **✅ clean (g=2.15)** | ✅ |
-| sub-08 | V4 | g=2.30 ✅ | (48, **−36**) | partial (DPS g=1.10) | partial (DPS g=1.25) | ✅ (β identical) |
-| sub-09 | V1 | g=2.60 ✅ | (26, **+6**) | ⚠ g=3 boundary (DPS) | **✅ clean (g=2.30)** | ✅ |
-| sub-09 | V4 | g=2.60 ✅ | (26, **+6**) | partial (DPS g=0.50) | partial (DPS g=1.05) | ✅ (β identical) |
+| Subject | ROI | R+C DPS g* | 2-Comp (β_s, β_c) | L3 LOCO | L4 RDM | 2-Comp ROI 일치? | L4 Spearman ρ — R+C / 2-Comp (median [95% CI], S6' bootstrap) |
+|---|---|---|---|---|---|---|---|
+| sub-08 | V1 | g=2.25 ✅ | (48, **−36**) | ⚠ g=0 boundary | **✅ clean (g=2.15)** | ✅ | 0.26 [0.14, 0.39] / **0.35 [0.22, 0.42]** |
+| sub-08 | V4 | g=2.30 ✅ | (48, **−36**) | partial (DPS g=1.10) | partial (DPS g=1.25) | ✅ (β identical) | 0.31 [0.20, 0.43] / **0.47 [0.35, 0.67]** |
+| sub-09 | V1 | g=2.60 ✅ | (26, **+6**) | ⚠ g=3 boundary (DPS) | **✅ clean (g=2.30)** | ✅ | 0.27 [0.15, 0.37] / **0.46 [0.32, 0.55]** |
+| sub-09 | V4 | g=2.60 ✅ | (26, **+6**) | partial (DPS g=0.50) | partial (DPS g=1.05) | ✅ (β identical) | 0.19 [0.15, 0.27] / **0.29 [0.19, 0.45]** |
 
 → L3 LOCO 가 일관되게 boundary, L4 RDM 은 sub-08/09 V1 에서 R+C cone-shift hypothesis 와 일치 (g≈2.15-2.30 clean).
 
 → **Behavioral path: 두 모델 모두 단일점 fit 안정 + ROI-invariant. Neural path: L4 RDM 은 R+C V1 에서만 clean, 그 외는 ROI-비안정 (R+C V4 weak, 2-Comp L4 단독 4 cells 모두 발산).** Paper-level claim "subtype-specific 2-Comp signature (sub-08 β_c=−36 vs sub-09 β_c≈0)" 는 *L8 점추정에 한해 4 cells robust*. (이전 서술 *"Neural path: R+C 가 모든 cells boundary, 2-Comp 가 안정"* 은 line 585/662 자기 모순 + JSON 불일치 — 사용자 catch 2026-05-24 정정.)
+
+##### Metric robustness 진단 (2026-05-24, Nili 2014 권장 metric 병행)
+
+위 표의 L4 RDM 값은 **cosine similarity** 기반. **Nili et al. 2014** (*PLOS Comp Biol*, RSA toolbox paper) 는 model RDM 과 brain RDM 비교에 **rank correlation (Spearman ρ 또는 Kendall τ_A)** 권장 — linear (Pearson/cosine) 가정이 brain RDM 에 questionable. S6' HC subset bootstrap (k∈{4,5,6}, 22-63 subsets per cell) 으로 Spearman ρ 병행 산출하여 metric robustness 평가:
+
+**(1) Rank-level (model ranking) — robust ✅**
+
+| Cell | Paired (2-Comp − R+C) win % | Wilcoxon p (one-sided) |
+|---|---|---|
+| sub-08 V1 | 54/63 = 86% | 3.1e-08 |
+| sub-08 V4 | 20/22 = 91% | 4.5e-06 |
+| sub-09 V1 | **63/63 = 100%** | **2.6e-12** |
+| sub-09 V4 | 21/22 = 95% | 7.2e-07 |
+
+→ 4 cells 모두에서 2-Comp > R+C 가 cosine / Spearman 양쪽 metric 에서 일관. 모든 4 cells × 2 models 의 Spearman ρ 95% CI 가 0 위 — 두 모델 다 chance 위 capture.
+
+**(2) Point estimate (개별 fit 값) — metric-dependent ⚠**
+
+- Subset-level r(ρ, cosine) = **0.11-0.85** (cell × model 별 변동). 가장 낮은 cell: sub-08 V1 2-Comp r=0.11 (두 metric 이 서로 다른 subset 을 best 로 평가).
+- L8 PRIMARY 재fit (`s5_spearman_refit`) 결과 **7/8 cells 의 (g, β_s, β_c) 가 ±2° 이내 동일**. 단 **1/8 cells 에서 paper-grade flip**: **sub-08 V4 R+C DPS** 가 cosine g=2.30 → Spearman g=0.00 (boundary).
+- Root cause: 해당 cell 의 L_γ landscape 가 g 에 거의 평탄 (loss 5.61-5.67 across full grid) → *"L_γ 가 L8 magnitude 의 88% 차지"* 가 *magnitude 지배* 일 뿐 *decision power* 아님. 작은 L_RDM 항 (9%) 이 metric 에 따라 argmin 결정.
+
+→ **paper claim 수준**:
+- ✅ Model ranking (2-Comp > R+C) — metric-robust
+- ✅ 2-Comp 의 (β_s, β_c) signature (sub-08 = (48,−36), sub-09 = (26,+6)) — metric-robust
+- ⚠ R+C individual g 값 — metric-dependent (특히 sub-08 V4 → paper footnote 권장)
+- ⚠ "L_γ dominance" 가설 — magnitude 차원만 성립, parameter-decision 차원 미성립
 
 #### CVD 단일점 fit 안정 매트릭스 (2×2, K=6 JSON 직접 확인, 2026-05-24 신설)
 
@@ -2063,3 +2090,363 @@ L8(δθ) = 0.5 · L_γ(δθ)                       ← behavioral (JND per-pair)
 #### Paper limitation section 권장 문구 (draft, 5 constraints 통합)
 
 > "We acknowledge five measurement-design constraints affecting interpretation. **First**, the neural loss components L_LOCO and L_RDM employ different encoder references (subject-own ridge for L_LOCO, HC-pool ridge for L_RDM); this asymmetry follows from each metric's native space (voxel-bound vs V_s-invariant representational) rather than a deliberate design choice, and we observe that the two channels produce dissociated 'best δθ' estimates in some subject-ROI cells. **Second**, our composite L8 loss represents a weighted compromise across complementary measurement channels (behavioral JND, functional LOCO, relational RDM) rather than a unified estimate of a single underlying δθ. **Third**, our original bootstrap CI used color-set resampling, which conflates measurement noise with color-specific distortion-driver variance; we therefore report trial-level bootstrap (per-trial resampling with color set fixed) as the primary statistical uncertainty estimate. **Fourth**, the cone-shift Δλ is taken from external sources (DPS 1992 population mean, Boehm 2014 severity grid, or JND-Lamb inverse fit); g estimates are reported across these three Δλ priors as a sensitivity analysis. **Fifth**, HC pool g estimates use CVD-derived Δλ priors applied to HC subjects under the cone-shift model, which represents a procedural baseline under model misspecification (HC's true Δλ ≈ 0); this produces boundary g≈3 in V4 protan small-Δλ L4 RDM and necessitates explicit framing of HC pool g as 'procedural g under CVD-model assumption' rather than 'HC's true compensation'. The surviving paper-defensible claims (individual-level g > 1 in sub-09, subtype dichotomy in β_c sign, R+C misspecification in sub-08) do not depend on any individual measurement channel or modeling choice; each is supported by limitation-independent evidence. Group-level specificity claims are explicitly *not* asserted, in accordance with these constraints."
+
+---
+
+# updated-pipeline — S10 Precondition + Cross-ROI Inclusion (2026-05-24)
+
+## A. Pass criterion (formalized)
+
+**Per (cell × loss) admission test**: compute Cohen's d_signed = (CVD_loss − HC_LOO_mean) / HC_LOO_SD at δθ=0, where HC_LOO 7 values are obtained by leave-one-HC-out (target = held-out HC, baseline = remaining 6 HC).
+
+| Criterion | Threshold | Rationale |
+|---|---|---|
+| **Direction** | d ≥ +0.5 (one-sided, CVD > HC) | Negative d means CVD is *closer to HC mean* than HC subjects themselves → no cone-shift signal. Two-sided abs(d) ≥ 0.5 would let negative d pass, incorrectly admitting null cells (e.g., sub-10 V3/V4 RDM d=−1.08/−1.91 represent regression-to-mean, not signal). |
+| **Effect size** | d ≥ +0.5 (medium) | Cohen 1988 convention. d ≥ +0.8 (strong) marked separately. |
+| **Per-ROI restriction (L_LOCO)** | V4 only | V1/V2/V3 L_LOCO fail permutation null (memory 2026-03-11: hV4 perm p=0.044 primary; V1/V2 null ~0.10–0.13 from voxel covariance, not color signal). Static effect size at V1/V2 can be high but is uninterpretable as cone-shift evidence. |
+| **L_RDM precondition metric** | ΔRDM_obs Euclidean norm | L_RDM cosine itself degenerate at δθ=0 (ΔRDM_sim ≈ 0 → cosine = NaN/0). Use raw ΔRDM_obs = (target_RDM − pool_mean_RDM) norm as static precondition. |
+
+## B. Precondition table (per CVD subject × ROI × loss, signed Cohen's d, δθ=0)
+
+L_γ has 3 aggregation variants: mean across 8 pairs, max, top-3 mean. L_RDM is per-ROI (4 cells per subject). L_LOCO is V4-only.
+
+| Cell | L_γ_mean | L_γ_max | L_γ_top3 | L_RDM | L_LOCO (V4) |
+|---|---|---|---|---|---|
+| sub-08 V1 | +5.21 ✓ | +7.29 ✓ | +8.69 ✓ | +2.31 ✓ | (V4 only) |
+| sub-08 V2 | +5.21 ✓ | +7.29 ✓ | +8.69 ✓ | +1.94 ✓ | (V4 only) |
+| sub-08 V3 | +5.21 ✓ | +7.29 ✓ | +8.69 ✓ | +0.86 ✓ | (V4 only) |
+| **sub-08 V4** | +5.21 ✓ | +7.29 ✓ | +8.69 ✓ | +2.19 ✓ | **+3.04 ✓** |
+| sub-09 V1 | −0.30 | −0.06 | −0.23 | **+0.81 ✓** | (V4 only) |
+| sub-09 V2 | −0.30 | −0.06 | −0.23 | −0.23 | (V4 only) |
+| sub-09 V3 | −0.30 | −0.06 | −0.23 | −0.48 | (V4 only) |
+| **sub-09 V4** | −0.30 | −0.06 | −0.23 | −0.24 | **+1.61 ✓** |
+| sub-10 V1 | NA (no JND) | NA | NA | −0.51 | (V4 only) |
+| sub-10 V2 | NA | NA | NA | +0.13 | (V4 only) |
+| sub-10 V3 | NA | NA | NA | −1.08 | (V4 only) |
+| **sub-10 V4** | NA | NA | NA | −1.91 | **+0.57 ✓ (FP)** |
+
+L_γ is ROI-agnostic so the same d repeats across V1–V4 — column structure preserved only to indicate which (loss, ROI) cell is admitted for fitting.
+
+**Pass counts (effective)**: L_γ_mean 4/12 (sub-08 only); L_γ_max 4/12; L_γ_top3 4/12; L_RDM 5/12 (sub-08 V1–V4 + sub-09 V1); L_LOCO V4 2/3 valid + sub-10 V4 marginal FP.
+
+sub-10 V4 L_LOCO +0.57 is a *known false positive* per memory `baseline_delta_rho/` (HC baseline_ρ confound −0.894 with Δρ, hV4 K=3 voxel-prediction artifact). Treated as null in downstream analysis.
+
+## C. L_γ pair-decomposition — per-pair Cohen's d (vs HC LOO at δθ=0)
+
+User insight (2026-05-24): aggregate L_γ_mean dilutes per-pair local distortion. Sub-09 L_γ_max (=−0.06) also fails. Direct per-pair test:
+
+| Pair | sub-08 z² | sub-08 d | sub-09 z² | sub-09 d |
+|---|---|---|---|---|
+| red-orange (0→45°) | 0.73 | −0.41 · | 0.46 | −0.53 ✗ |
+| **orange-yellow (45→90°)** | 17.25 | **+7.97 ✓** | 0.40 | −0.57 ✗ |
+| **yellow-green (90→135°)** | 18.68 | **+7.49 ✓** | 0.76 | −0.35 · |
+| green-blue (135→225°) | 0.004 | −0.50 ✗ | 5.55 | **+0.81 ✓** |
+| blue-purple (225→270°) | 0.23 | −0.44 · | 0.03 | −0.48 · |
+| **yellow-purple (90→270°)** | 44.92 | **+39.4 ✓** | 0.89 | −0.38 · |
+| cyan-magenta (180→315°) | 0.02 | −0.69 ✗ | 0.08 | −0.66 ✗ |
+| red-cyan (0→180°) | 1.51 | +0.25 · | 1.51 | +0.25 · |
+
+**Sub-08**: 3 pairs strong (yellow-purple d=+39.4, orange-yellow +7.97, yellow-green +7.49) — *yellow-axis HYPO* pattern (deutan red-green confusion compresses yellow distinguishability).
+
+**Sub-09**: 1 pair strong (**green-blue d=+0.81**) — *protan blue-end confusion axis*. Confirms user hypothesis: local distortion exists, but **only this single pair**. Aggregate L_γ_mean fails because the other 7 pairs dilute.
+
+**Per-pair L_γ atoms** (admissible if d ≥ +0.5):
+- **L_γ_OY** (orange-yellow): sub-08 only
+- **L_γ_YG** (yellow-green): sub-08 only
+- **L_γ_YP** (yellow-purple): sub-08 only
+- **L_γ_GB** (green-blue): sub-09 only
+
+These pair atoms replace aggregate L_γ in subject-specific fitting.
+
+## D. Cross-ROI inclusion — Per-subject atom set
+
+Phase A admits the following atoms (per subject):
+
+| Subject | Admissible atoms | # atoms |
+|---|---|---|
+| **sub-08 (deutan)** | L_γ_OY, L_γ_YG, L_γ_YP, L_RDM_V1, L_RDM_V2, L_RDM_V3, L_RDM_V4, L_LOCO_V4 | 8 |
+| **sub-09 (protan)** | L_γ_GB, L_RDM_V1, L_LOCO_V4 | 3 |
+| **sub-10 (near-normal)** | — (control, no valid cone-shift atoms) | 0 |
+
+**Sub-08 8 atoms → 2⁸=256 inclusion combos** is excessive. Pragmatic reduction:
+- Behavioral pool L_γ ∈ {single-pair (3 choices), mean of 3 pairs}: 4 choices
+- RDM ROI choice ∈ {V1, V2, V3, V4, V1+V4 cross-ROI}: 5 choices
+- LOCO V4 ∈ {in, out}: 2 choices
+- Total: 4 × 5 × 2 = **40 combos** for sub-08
+
+**Sub-09 3 atoms → 2³=8 inclusion combos** (cross-ROI L_γ_GB + L_RDM_V1 + L_LOCO_V4 is the key novel combo).
+
+**Phase B (S10b) execution scope**:
+- Sub-08: 40 cross-ROI combos
+- Sub-09: 8 cross-ROI combos
+- Sub-10: skipped (no atoms; descriptive control fit only at sub-08/09 selected combos)
+- × 2 models (R+C 3 Δλ sources + 2-comp) × 21 HC subsets ≈ 4000–5000 fits, server SLURM 2–3hr
+
+## E. Fitting metric for cross-ROI fits
+
+When loss combo spans multiple ROIs, fit is no longer per-ROI but **subject-level joint**. Composite loss:
+
+L_total(δθ; subject) = Σ_atom (1/√n_atoms) · z(L_atom)
+
+z-score normalization within each atom's HC LOO distribution. Coefficient 1/√n provides uniform-weight ensemble. Fitting parameter (g for R+C, β_s/β_c for 2-comp) yields single δθ(c) 8-vector per subject, evaluated on test L_γ (held-out HC complement) for cross-combo ranking.
+
+## F. Selection criterion (final)
+
+For each subject × model:
+1. For each inclusion combo: 21-subset train-test → median test L_γ (aggregate, 8-pair mean) on complement HC
+2. Rank combos by median test L_γ
+3. Combo of lowest median test L_γ + non-degenerate parameter (boundary < 50%) = selected
+4. 1000× HC subset bootstrap of test L_γ on top-1 combo → CI95
+
+**Sub-09 special case**: aggregate L_γ at test time may be insensitive (per Phase A finding). Alternative test metric for sub-09 = **L_γ_GB only** (green-blue pair test loss). Reported separately.
+
+## G. Sub-10 specificity check (descriptive only, §0 rule)
+
+For each (model, combo) selected from sub-08/09: also fit sub-10 → fit parameter g_sub10 or (β_s, β_c)_sub10. Report:
+- Distance from HC LOO fit distribution (descriptive percentile)
+- Pre-image magnitude on stimulus space
+- **NO p-value claim** (§0 framework decision: descriptive only, FPR ≥ 0.50 confirmed)
+
+## H. Implementation note
+
+Phase B execution (S10b) requires extending `s7_loss_combo_subset.py` to:
+1. Replace L_γ aggregate with per-pair L_γ_atom (4 pair atoms)
+2. Cross-ROI fitting: each fold loads all 4 ROI amps, fits single δθ minimizing cross-ROI joint composite
+3. Test metric = aggregate L_γ on complement (+ L_γ_GB only for sub-09)
+4. Sub-08: 40 combos, sub-09: 8 combos, sub-10: descriptive fit at sub-08/09's selected combo only
+
+Decision needed before Phase B sprint: **proceed with this cross-ROI reformulation** or **stay within-cell within-ROI** for tractability.
+
+## I. Phase B Results — sub-09 (2026-05-25)
+
+Phase B run: `scripts/s10b_v2_resample.py` (1000 size-5 HC resamples, RNG seed 43 for sub-09; 7 atom-inclusion combos × {3 R+C Δλ sources, 2-comp} = 28 (combo, model) cells). Source JSON: `results/s10_inclusion/s10b_v2_resample_results_sub-09.json`. **Replay validation (2026-05-25)**: re-running `s10c_sub09_cosine.py` (same RNG seed, same atoms, current code) reproduces the JSON's 2-comp params exactly (β_s=34, β_c=−8) and the focal_loss values within rounding (R+C focal_median 0.623 vs JSON 0.640; 2-comp focal_median 0.646 vs JSON 0.646), but the R+C g for the γ_GB-alone cell **does not** reproduce — re-fit g_median = **2.60** with 100% of 1000 draws falling in [2.50, 2.70], whereas JSON stored g_median = 1.30. Discriminating constraint: under current code, R+C focal at g=1.30 is 18.6 (for the same draw 0 train/test split) while focal at g=2.60 is 0.08, so the JSON's stored (focal=0.640, g=1.30) pair is internally inconsistent. The replay's (focal=0.62, g=2.60) is internally consistent. Hypothesis: JSON came from a stale `__pycache__` state of `rc_1dof.py` on the server pre-dating the 2026-05-21 advisor convention correction (memory note `rc_1dof.py`: "g interpretation (advisor corrected 2026-05-21)"). The reproducibility of 2-comp params and focal-loss values suggests the issue is isolated to the R+C g column for the γ_GB-alone cell. §I below uses the **replay-derived** R+C g (current-code authoritative).
+
+**Test metric**: median test L_γ on the **complement HC (focal pair = green-blue, the only admissible γ atom for sub-09)** across the 1000 resamples. Lower = better. IQR column below = *test-loss IQR* across draws (highly skewed — wide because n_test = 2 HC complement).
+
+### Top-5 candidates (sub-09, sorted by median test L_γ_focal)
+
+> **⚠ Ranking table superseded — see §I.3 for valid local v3 results** (server v2/v3 R+C invalid: Machado Gaussian fallback due to missing `colour-science` library on server. 2-comp values valid.) The table below is *preserved for audit* but its R+C g values are spurious.
+
+| Rank | Combo | Model | focal_med | focal_IQR | agg_med | bdy | param (median) | param_IQR | AIC | BIC | n |
+|---:|---|---|---:|---:|---:|---:|---|---|---:|---:|---:|
+| 1 (~~invalid~~) | γ_GB \| RDM_ \| noLOCO | rc_DPS_lit (Δλ=10) | 0.640 | 414.8 | 9.40 | 0.000 | ~~g = 1.30~~ → **2.60** (local) | 0.10 | −0.28 | −1.59 | 1000 |
+| 2 | γ_GB \| RDM_ \| noLOCO | 2comp | **0.646** | 408.1 | 35.48 | 0.000 | β_s=34, β_c=−8 (valid) | 18 / 42 | +1.74 | −0.88 | 1000 |
+| 3 | γ_ \| RDM_V1 \| LOCO | 2comp | 1.038 | 197.7 | 466.6 | 1.000 | β_s=18, β_c=+50 | 4 / 0 | +2.69 | +0.07 | 1000 |
+| 4 | γ_GB \| RDM_V1 \| LOCO | 2comp | 1.038 | 197.7 | 466.6 | 1.000 | β_s=18, β_c=+50 | 4 / 0 | +2.69 | +0.07 | 1000 |
+| 5 (~~invalid~~) | γ_GB \| RDM_ \| noLOCO | rc_Boehm_low (Δλ=3) | 2.327 | 18.1 | 8.30 | 1.000 | ~~g = 0.0~~ → 3.00 (local) | 0.0 | +2.30 | +1.00 | 1000 |
+
+Cross-ROI reference (γ_GB + RDM_V1 joint, RC variants): boundary-degenerate (bdy=0.40–0.87, g_iqr ≈ 0.20–1.10) across all three Δλ sources — see `s10b_v2_resample_results_sub-09.json` rank-11 through rank-20. **Note**: this server-stored bdy/iqr also reflects the wrong-Machado fit — local v3 reveals γ_GB+RDM_V1 rc_DPS_lit is *stable* (bdy=0.00, g=2.65±0.25, focal=2.69), see §I.3.
+
+### Key findings
+
+**(1) γ_GB-alone single-atom fits are the winners** (Rank 1 + Rank 2, identical combo, different mechanism). Both achieve focal ≈ 0.64 with stable parameters (bdy = 0.000) under 1000 HC resamples. Single 1-D behavioral constraint (green-blue JND) is sufficient to identify a 1-DOF cortical-gain parameter (R+C g) or a 2-DOF cortical rotation (2-comp β_s, β_c).
+
+**(2) Cross-ROI joint atoms degenerate** (Rank 3/4: γ_GB + RDM_V1 + LOCO_V4 2-comp; boundary rate 1.0, β_c pinned at the +50° grid edge). The cross-ROI joint cannot identify a non-degenerate filter for sub-09. Neural atoms pull the optimum *outside* the (β_s, β_c) box, evidence that γ_GB-derived δθ and RDM_V1-derived δθ disagree on the precise location in (β_s, β_c) plane.
+
+**(3) RDM_V1-alone (neural single, no γ) admissible but ~14× worse for behavior**: Rank 7/8 (γ_·|RDM_V1|noLOCO, 2-comp) yields β_s=2, β_c=+50 (boundary β_c=+50, bdy=0.796) — focal test 3.94 vs Rank 1/2's 0.64. Under R+C the same RDM_V1-alone yields **g ≈ 2.20** (rc_DPS_lit, replay-confirmed; JSON 2.10, re-fit 2.30, both within JSON IQR=1.10). 2-comp at (β_s=2, β_c=+50) sits at the boundary of the cortical rotation grid.
+
+**(4) Convergence (not dissociation) on cortical gain direction**: Both the behavioral channel (γ_GB alone → R+C **g ≈ 2.60**) and the neural channel (RDM_V1 alone → R+C **g ≈ 2.20**) prefer **over-compensation** (g > 2, sign-flip relative to forward Machado retinal δθ). The two channels *agree* on direction (both are above g=2 cancellation) but disagree on *magnitude* by ~0.4 g-units. Under the (2−g) convention this means: γ_GB asks the filter to apply −0.60 × Machado_protan(10nm), V1 RDM asks for −0.20 × Machado. Cross-ROI joint being boundary-degenerate stems from this magnitude disagreement plus the 2-comp Top-2 ridge (see (5) below). NB: this **revises the initial "dissociation" framing** that was based on the JSON's stored g=1.30.
+
+**(5) δθ direction divergence between R+C and 2-comp**: Despite both Rank 1 (R+C g=2.60) and Rank 2 (2-comp β_s=34, β_c=−8) reducing the *same* green-blue JND constraint to focal ≈ 0.64, their forward δθ(c) 8-vectors are **near-orthogonal in stimulus space**: cosine = **−0.087** at median parameters, with 100% of resamples giving cos < 0.5 (5–95 pct = [−0.33, +0.32], frac(cos > 0.8) = 0.0). The R+C δθ is dominated by hues 5–6 (blue / purple, |δθ| ≈ 53° / 43°), while the 2-comp δθ is a smooth sinusoidal pattern (|δθ| ≈ 32° at hues 2 and 6, ≈ 0 elsewhere). One scalar constraint cannot identify a *direction* in stimulus space — only a magnitude along the model class's parameterized axis. R+C and 2-comp axes don't coincide. Detailed analysis: §I.1 + `results/s10_inclusion/sub09_top12_cosine.json` + `sub09_top12_polar.png`.
+
+**(6) Paper-level message** (sub-09): **two-mechanism non-identifiability** of stimulus-space distortion given a single behavioral constraint. R+C and 2-comp both fit the green-blue JND to within Phase B's noise floor, but they prescribe near-orthogonal filter δθ(c). At least one of {behavioral protocol expansion, neural channel constraint} is required to discriminate them. Without that, the per-subject filter for sub-09 is **mechanism-underdetermined** even though parameter SD within each model class is small.
+
+### Caveat 1 (CRITICAL — baseline-swap, NOT generalization)
+
+The γ_GB-alone Top-1/Top-2 evaluation is **train-pool-vs-test-pool baseline swap on the same green-blue pair**, not held-out pair generalization. Phase A admitted only `L_γ_GB` for sub-09 (no other pair survived d ≥ +0.5); the focal-test pair is also green-blue. focal L_γ_focal = 0.64 measures "the fitted (Δλ, g) or (β_s, β_c) reproduces the green-blue JND ratio when the HC baseline pool is the complement of the training pool". It does **not** demonstrate the filter generalizes to the other 7 pairs — `test_agg_median` (8-pair mean) is 9.4 (R+C) or 35.5 (2-comp), an order of magnitude worse than focal. For sub-09 we cannot test pair-generalization within the current 1-pair-admitted regime.
+
+### Caveat 2 (Ridge — 2-comp Top-2)
+
+The 2-comp Top-2 (β_s=34, β_c=−8) sits on a γ_GB-constrained ridge: a single scalar constraint on a 26×51 (β_s, β_c) grid defines a 1-D manifold of near-equivalent minima. `bs_IQR=18, bc_IQR=42` across the 1000 resamples confirms the argmin walks along this ridge as the HC baseline pool changes. The median (34, −8) is the *median location on the ridge*, not a uniquely identified point. The cosine result in (5) is computed at the median location, and the cosine distribution across resamples (mean −0.065, SD 0.23) is the spread induced by this ridge walking — even averaging it out doesn't bring cos near R+C's δθ direction. R+C's 1-DOF parameterization on the same constraint is fully identified (g_IQR=0.10).
+
+### Caveat 3 (R+C g convention)
+
+Under `rc_1dof.py`'s `δθ = (2 − g) · δθ_Machado` convention (g ∈ [0, 3], g=2 = full retinal cancellation): g = 2.60 means **perceived shift is −0.60 × Machado retinal shift** (overcompensation by 60% of the predicted retinal magnitude, with sign flip). g = 2.20 (V1 RDM) is overcompensation by 20%. Neither parameter is "physiological" in the usual sense of g ∈ [1, 2] (no-compensation to full-compensation); both lie in the overcompensation half-plane.
+
+### Caveat 4 (CRITICAL — server `colour-science` missing → Machado Gaussian fallback)
+
+**Root cause of v2/v3 server R+C invalidity** (discovered 2026-05-25 during local sub-08 reproduction):
+
+- `scripts/machado_simulator.py:129` warns: `"colour-science D65 unavailable (No module named 'colour'); using Gaussian fallback — Machado calibration will drift."`
+- Server venv `/scratch/connectome/haba6030/colorBlind/.venv` lacked `colour-science` → Machado δθ computed via Gaussian approximation, *not* exact D65 cone fundamentals
+- Direct test: `forward_rc(10.0, 1.25, "protan")` returns **completely different δθ 8-vec** on server vs local:
+  - Local (D65): `[-6.69, -6.94, -2.99, +2.61, +11.67, +57.13, -45.67, +1.87]`
+  - Server (Gauss): `[-6.90, -7.78, -3.27, +2.97, +13.70, +103.38, -30.05, +5.11]`
+- Verification: server-side direct compute of `green-blue z²` at g=1.25, complement=[sub-04, sub-06] **reproduces JSON's stored focal=0.4924 exactly** — confirming the bug is in the server's Machado calculation, not in the storage code
+- Even after `pip install colour-science` on server, deltas still differ (possible package-internal D65 lookup difference) — server execution abandoned, all subsequent fits run locally
+- **All server SLURM jobs (105184, 105200, 105208) R+C results INVALID**. 2-comp (which doesn't use Machado) valid throughout
+- Local re-run (`bt5uv26vx`) confirms g_median = 2.60 (matches sub-agent replay 100%)
+
+## I.1 Top-1/Top-2 forward δθ cosine analysis (script `s10c_sub09_cosine.py`)
+
+Same γ_GB-only combo refit twice — once as R+C (1-DOF), once as 2-comp (2-DOF). 1000 size-5 HC resamples (RNG seed 43, same draws as s10b). Output: `results/s10_inclusion/sub09_top12_cosine.{json,_polar.png}`.
+
+| Quantity | Value |
+|---|---|
+| cos at median params | **−0.087** |
+| cos median across 1000 resamples | −0.087 |
+| cos IQR | 0.396 |
+| cos 5th–95th pct | [−0.334, +0.316] |
+| frac(cos > 0.80) | **0.000** |
+| frac(cos > 0.50) | 0.000 |
+| frac(cos < 0.50) | **1.000** |
+| frac(cos < 0.00) | 0.531 |
+
+**Verdict**: **NEAR-ORTHOGONAL**. The R+C δθ at median params is dominated by hues 5–6 (blue −45.7°, purple +36.5°) with small magnitude elsewhere — a "blue/purple chunk reversed" pattern coming from `(2 − 2.60) · Machado_protan(10nm)`. The 2-comp δθ at median params is the smooth sinusoidal pattern from `β_s·cos(θ−90°) + β_c·cos(θ−16°)` peaking at hues 2 (yellow +31.8°) and 6 (blue −31.8°). Both reduce the GB ratio constraint to focal ≈ 0.64, but they prescribe almost orthogonal stimulus-space distortions. **One scalar constraint = one model degree of freedom resolved**; orthogonality between mechanism classes is preserved.
+
+## I.2 Joint loss weight sweep — γ_GB + RDM_V1 (script `s10d_sub09_weight_sweep.py`)
+
+Composite loss `L_combo(δθ; w) = (1−w)·z(L_γ_GB) + w·z(L_RDM_V1)`, sweeping w from 0.0 to 1.0 in 0.1 steps over the same 1000 HC subset resamples (seed 43, V1 K=6, Δλ=10nm protan DPS_lit). Output: `results/s10_inclusion/sub09_weight_sweep.{json,.png}`.
+
+| w | R+C g (med, IQR) | R+C focal | bdy | 2-comp (β_s, β_c) | param IQR | 2-comp focal | bdy |
+|:---:|:---:|---:|---:|:---:|:---:|---:|---:|
+| 0.0 | 2.60 (0.10) | **0.62** | 0.000 | (34, −8) | 18 / 42 | **0.65** | 0.000 |
+| 0.1 | 2.65 (0.10) | 0.83 | 0.000 | **(2, +50)** | 2 / 4 | **3.94** | 0.743 |
+| 0.2 | 2.65 (0.10) | 0.83 | 0.000 | (2, +50) | 2 / 4 | 3.94 | 0.743 |
+| 0.3 | 2.65 (0.10) | 0.83 | 0.000 | (2, +50) | 2 / 4 | 3.94 | 0.796 |
+| 0.4 | 2.65 (0.10) | 1.27 | 0.000 | (2, +50) | 2 / 4 | 3.94 | 0.796 |
+| 0.5 | 2.65 (0.25) | 2.69 | 0.000 | (2, +50) | 2 / 4 | 3.94 | 0.796 |
+| 0.6 | 2.65 (0.35) | 7.61 | 0.000 | (2, +50) | 2 / 4 | 3.94 | 0.796 |
+| 0.7 | 2.40 (0.35) | 13.06 | 0.000 | (2, +50) | 2 / 4 | 3.94 | 0.796 |
+| 0.8 | 2.30 (1.80) | 17.02 | 0.000 | (2, +50) | 2 / 4 | 3.94 | 0.796 |
+| 0.9 | 2.30 (1.80) | 17.02 | 0.000 | (2, +50) | 2 / 4 | 3.94 | 0.796 |
+| 1.0 | 2.30 (2.25) | 19.70 | 0.323 | (2, +50) | 2 / 4 | 3.94 | 0.796 |
+
+### Sweep findings
+
+**(1) No intermediate w improves focal over w=0.** Both models monotonically (R+C) or instantly (2-comp) move *away* from the γ_GB best as soon as any RDM_V1 weight is added. R+C focal at w=0 is 0.62 and climbs to 19.7 at w=1. 2-comp focal at w=0 is 0.65 and snaps to 3.94 from w=0.1 onward. The behavioral cost of including neural information is monotonic non-positive across all 1000 HC resamples.
+
+**(2) R+C: smooth transition w∈[0.0, 0.6], degenerate w≥0.7.** g stays tightly clustered at 2.65 (IQR 0.10) up to w=0.6, then drops to 2.30–2.40 with IQR exploding to 1.8–2.25 by w=0.8. The cause: the RDM_V1 R+C grid has a wider preferred region around g≈2.0–2.5 (V1 has a relatively shallow loss landscape over g), so at high w the composite minimum bounces between resamples. **R+C g_RDM_V1 alone is not a sharp 2.20; the joint w=1.0 g_median=2.30 with IQR=2.25 confirms the V1 neural channel under-identifies g for sub-09 protan.**
+
+## I.3 Local v3 results — VALID sub-09 ranking (2026-05-25, correct Machado D65)
+
+Local re-run with `colour-science` properly invoked: `scripts/s10b_v3_extended.py --subject sub-09`, N=300 resamples (seed 43), output `results/s10_inclusion/s10b_v3_extended_results_sub-09.json` (2026-05-25 02:17 server-stamp overwritten by local run completion). Test metrics include focal (γ_GB), aggregate L_γ (8-pair mean), and V1-RDM cosine distance.
+
+### Top-10 ranking (sub-09 v3 local, focal-sorted)
+
+| # | Combo | Model | focal | agg | V1RDM | bdy | AIC | param |
+|---:|---|---|---:|---:|---:|---:|---:|---|
+| **1** | γ_GB \| RDM_ \| noLOCO | **rc_DPS_lit (Δλ=10)** | **0.623** | 8.19 | 0.884 | **0.00 ✓** | **−0.33** | **g=2.60 ± 0.10** ⭐ |
+| 2 | γ_GB \| RDM_ \| noLOCO | 2comp | 0.646 | 35.48 | 0.910 | 0.00 ✓ | +1.74 | β_s=34, β_c=−8 |
+| 3 | γ_GB \| RDM_ \| noLOCO | rc_Boehm_low (Δλ=3) | 0.655 | 8.32 | 0.905 | 0.90 ⚠ | −0.23 | g=3.00 (boundary) |
+| 4 | γ_GB \| RDM_ \| LOCO | rc_Boehm_low | 0.655 | 8.32 | 0.905 | 0.90 ⚠ | −0.23 | g=3.00 (boundary) |
+| 5 | γ_GB \| RDM_V1 \| noLOCO | rc_Boehm_low | 0.852 | 7.01 | 0.905 | 0.62 ⚠ | +0.29 | g=3.00 ± 0.10 |
+| 6 | γ_ \| RDM_V1 \| LOCO | 2comp | 1.038 | 234.39 | 0.736 | 1.00 ⚠ | +2.69 | β_s=18, β_c=+50 |
+| 7 | γ_GB \| RDM_V1 \| LOCO | 2comp | 1.038 | 234.39 | 0.736 | 1.00 ⚠ | +2.69 | β_s=18, β_c=+50 |
+| **8** | γ_GB \| RDM_V1 \| noLOCO | **rc_DPS_lit** | **2.693** | 8.65 | 0.895 | **0.00 ✓** | +2.59 | **g=2.65 ± 0.25** ⭐ |
+| 9 | γ_GB \| RDM_ \| noLOCO | rc_JND_Lamb (Δλ=1.5) | 3.810 | 8.17 | 0.919 | 1.00 ⚠ | +3.29 | g=3.00 |
+| 10 | γ_ \| RDM_ \| LOCO | 2comp | 3.998 | overflow | 0.760 | 1.00 ⚠ | +5.39 | β_s=24, β_c=+50 |
+
+### Validated findings
+
+**(1) Top-1 ranking unchanged** vs server v2/v3 (γ_GB alone, R+C DPS_lit), focal ≈ 0.62 stable. *Only the parameter interpretation changes*: g=2.60 (over-comp, valid) supersedes g=1.30 (under-comp, server-Machado artifact). Sub-agent replay (PIPELINE §I (4)) corroborated.
+
+**(2) NEW — cross-ROI joint stable at #8** (γ_GB + RDM_V1, R+C DPS_lit, g=2.65 ± 0.25, bdy=0.00, focal=2.69). Sub-agent's §I.2 weight sweep showed degeneracy *at high w*; local v3 reveals the **equal-weight (uniform composite, 1/√2 each)** point sits at a *non-boundary* g=2.65. The earlier framing "γ_GB + RDM_V1 joint is degenerate" needs qualification: *boundary-degenerate at RDM-dominant weights, stable at uniform weight*. This is paper-relevant for Phase C weight sweep design.
+
+**(3) R+C and 2-comp both converge on over-compensation** (g ≈ 2.60 vs β_c=−8 / 2-comp). δθ direction near-orthogonal (cos = −0.087, §I.1). Mechanism-underdetermined by single-pair behavioral constraint.
+
+**(4) AIC favors R+C over 2-comp** (−0.33 vs +1.74, ΔAIC = 2.07 in R+C's favor — interpretable as R+C's 1-DOF fit avoids the 2-DOF penalty while achieving equivalent focal).
+
+**Note**: §I (above) Top-5 table is preserved for audit but R+C g values therein are invalid. §I.3 is the **authoritative** sub-09 Phase B result.
+
+## J. Phase B Results — sub-08 (2026-05-25, local v3 valid Machado)
+
+Local run `scripts/s10b_v3_extended.py --subject sub-08`, N=300 size-5 resamples, seed 42. Output: `results/s10_inclusion/s10b_v3_extended_results_sub-08.json`. 40 combos × {3 R+C Δλ sources, 2-comp} = 160 (combo, model) cells.
+
+**Focal pair = yellow-purple** (sub-08's largest Phase A deviance, Cohen's d=+39.4).
+
+### Sub-08 ranking — top 15 unfiltered
+
+All Top 15 are **2-comp at parameter grid boundary** (bdy=1.0, β_s=50 or β_c=±50). R+C cells do not appear in top 15 because R+C focal floor (≈52) is higher than 2-comp boundary fits (≈1.6-22). 2-comp's expressiveness in 2-D allows lower focal but at the cost of *non-interpretable boundary fits*.
+
+### Sub-08 ranking — STABLE only (bdy<0.5)
+
+| # | Combo | Model | focal | agg | bdy | AIC | param |
+|---:|---|---|---:|---:|---:|---:|---|
+| 1 | γYG \| RDMV2 \| LOCO | 2comp | 47.49 | 97.3 | 0.45 | +10.33 | β_s=38, β_c=−40 |
+| 2 | γYP \| RDMV2 \| LOCO | **rc_Boehm_mid (Δλ=4.5)** | 52.19 | 144 | 0.34 | +8.52 | **g=0.05 ± 0.05** ⚠ |
+| 3 | γYP \| RDMV3 \| LOCO | rc_Boehm_mid | 52.66 | 140 | 0.27 | +8.54 | g=0.05 ± 0.05 |
+| 4 | γYP \| RDMV1+V4 \| noLOCO | rc_Boehm_mid | 53.60 | 140 | 0.44 | +8.58 | g=0.05 ± 0.15 |
+| 5 | γYP \| RDMV1+V4 \| LOCO | rc_Boehm_mid | 53.60 | 140 | 0.15 ✓ | +8.58 | g=0.05 ± 0.10 |
+| **6** | γYP \| RDMV4 \| LOCO | rc_Boehm_mid | 54.29 | 100 | **0.00 ✓** | +8.60 | **g=0.15 ± 0.00** |
+| **7** | γYP \| RDMV3 \| noLOCO | rc_JND_Lamb (Δλ=1.5) | 54.35 | 101 | 0.45 | +8.60 | g=0.05 ± 0.15 |
+| **8** | γYP \| RDMV4 \| noLOCO | rc_Boehm_mid | 54.97 | 100 | **0.00 ✓** | +8.63 | **g=0.30 ± 0.15** |
+| 9 | γYG \| RDMV2 \| noLOCO | 2comp | 59.80 | 75 | 0.46 | +10.80 | β_s=22, β_c=−46 |
+| 12 | γOY,YG,YP \| RDMV1 \| LOCO | **rc_DPS_lit (Δλ=6)** | 62.32 | 171 | 0.08 ✓ | +8.88 | **g=2.95 ± 0.00** ⚠ |
+
+### Key findings — sub-08
+
+**(1) R+C g exhibits *extreme bimodal* between Δλ sources** (the v3 result's bimodality is *across Δλ sources*, not within-source):
+- **Boehm_mid (Δλ=4.5)** fits → **g ≈ 0.05-0.30** (under-compensation, near g=0 boundary). Under (2−g) convention: δθ_RC ≈ +1.85 × Machado retinal, *amplifying* the cone shift rather than compensating
+- **DPS_lit (Δλ=6)** fits → **g ≈ 2.95** (over-compensation, near g=3 boundary). δθ_RC ≈ −0.95 × Machado retinal, *inverting* the cone shift
+
+Both extremes are biologically implausible. Confirms `[MEMORY: Sub-08 R+C 1-DOF misspecified (bimodal bootstrap)]`.
+
+**(2) 2-comp also boundary-degenerate** at top ranks (β_s=50 or β_c=±50 grid edges). Top stable 2-comp (rank 1) at (β_s=38, β_c=−40) has bdy=0.45 — *almost-degenerate*. Pure (β_s, β_c) interior solution does not exist for sub-08's yellow-purple HYPO magnitude under the current 26×51 grid.
+
+**(3) Focal floor is high — model class insufficient**: Best stable focal ≈ 47-55 (vs Phase A raw z²_YP=44.9). Best fit reduces *less than* the unfitted noise floor. **Sub-08's yellow-axis HYPO magnitude exceeds 1-DOF R+C and 2-DOF 2-comp expressive capacity**.
+
+**(4) Sub-09 vs sub-08 dichotomy** (paper-level message):
+- **Sub-09 protan**: 1-DOF cortical-gain model *sufficient*, well-fit (g=2.60, focal=0.62, bdy=0.00). Mechanism-underdetermined only between R+C/2-comp classes; *within each class*, parameters identified.
+- **Sub-08 deutan**: 1-DOF + 2-DOF *both insufficient* for yellow-axis HYPO. Parameters pinned at grid boundaries with either extreme g (Δλ-source-dependent bimodality) or β_c saturation. **Cortical compensation model not adequate** at sub-08 deutan severity.
+
+This dichotomy is consistent with sub-08's raw JND deviation Σz²=83 (Phase A) being **8.6× larger** than sub-09's Σz²=9.7 — sub-08 lies outside the comfortable identification range of single-stage cortical models.
+
+### Sub-08 Caveat — Δλ-source switching breaks "single g" interpretation
+
+Phase B optimizes g separately for each of the 3 Δλ priors. Result: best Boehm_mid g=0.05 ≠ best DPS_lit g=2.95. **The same R+C model under different Δλ priors selects opposite extremes**, indicating the *loss landscape* is essentially flat between these two minima — what the fit "sees" depends on which Δλ multiplier scales the Machado retinal δθ in the forward pass.
+
+**Implication for Phase C** (weight sweep, deferred): even with optimized atom weights, sub-08 R+C will remain boundary-degenerate. The natural Phase C question for sub-08 is *not* "which weight combination minimizes focal" but **"is the 1-DOF cortical-gain model class adequate for sub-08?"** — answer (based on §J): *no*. Sub-08 requires either a *higher-DOF model* (3-comp? non-linear?) or *reformulation* (treat sub-08 raw deviation as paper-level finding rather than fit, per memory).
+
+### Sub-08 Phase B verdict
+
+- **No paper-defensible sub-08 filter** from current Phase B (all candidates boundary-degenerate or focal-insufficient)
+- Best paper claim: **R+C/2-comp limitation as positive finding** for sub-08 — "deutan with raw Σz²=83 exceeds single-stage cortical model capacity"
+- Phase C weight sweep for sub-08 unlikely to recover paper-defensible filter without expanding model class
+- Phase 3 behavioral test priority shifts to **sub-09 only** for the active filter; sub-08 reserved for *baseline/control* or *model-class extension* publication
+
+### Sub-08 future-phase candidates — test_focal primary, interior-only stratification (2026-05-25 addendum)
+
+User directive (2026-05-25): primary criterion = **test-set loss fit (`test_focal`) value + distribution**, not AIC. Re-ranking the same 160 (combo × model) cells after stratifying by `boundary` flag at the per-fit level reveals candidates that the all-fit pool median masked.
+
+**Selection rule for this addendum**:
+1. Restrict to interior fits only (`boundary == False`) within each cell.
+2. Require n_interior ≥ 30 (statistical floor).
+3. Rank by `test_focal_median` (primary), then `test_focal_IQR` (distribution tightness).
+
+**Top-5 sub-08 candidates (interior-only, test_focal-ranked)**:
+
+| # | Combo | Model | n_int / n_bdy | focal_int_med ± IQR | agg_med | V1-RDM | Params (int, med ± IQR) |
+|---:|---|---|---:|---:|---:|---:|---|
+| **1** | γYG \| RDMV1+V4 \| noLOCO | 2-comp | 68 / 232 (23%) | **19.80 ± 11.38** | 11.1 | 1.028 | **β_s = 48 ± 0**, β_c = **−32 ± 0** |
+| 2 | γYG \| RDMV1 \| noLOCO | 2-comp | 101 / 199 (34%) | 19.80 ± 22.58 | 72.7 | 1.005 | β_s = 48 ± 0, β_c = −32 ± 2 |
+| 3 | γOY \| RDMV1 \| noLOCO | 2-comp | 43 / 257 (14%) | 25.36 ± 24.64 | 561.8 | 1.208 | β_s = 48 ± 0, β_c = **−48 ± 0** (near BC_min) |
+| **4** | γYG \| RDMV2 \| LOCO | 2-comp | **165 / 135 (55%)** | 39.68 ± 39.41 | 12.5 | 1.070 | β_s = 34 ± 4, β_c = −40 ± 4 |
+| 5 | γYP \| RDMV1+V4 \| noLOCO | R+C DPS_lit | 37 / 263 (12%) | 41.97 ± 21.94 | 27.1 | 0.938 | **g = 2.70 ± 0.00** |
+
+**Two notable cells**:
+- **Rank 1 (β_s=48, β_c=−32) — lowest focal**: every interior draw (68/300) yields the *exact* same point (param IQR = 0/0). agg = 11.1 (8-pair aggregate also low). Interior 23%.
+- **Rank 4 (β_s=34, β_c=−40) — majority interior**: 165/300 (55%) interior, the only sub-08 cell where interior is majority. Param cluster tight (IQR=4/4). agg = 12.5.
+
+**Acknowledged caveats** (user-confirmed):
+
+1. **Interior is minority** in 4 of top-5 (12–34%): the *majority* of HC subset resamples still push the 2-comp fit to a grid edge. "Interior-only" candidate is conditional on which 5 HCs are drawn.
+2. **R+C is Δλ-source sensitive**: always-interior R+C cells split bimodally between Boehm_mid (g ≈ 0.05) and DPS_lit / JND_Lamb (g ≈ 2.7–2.95). Rank 5's g=2.70 is the over-comp branch; choosing Boehm gives g≈0.05 (under-comp) for the same combo, *same focal landscape*. R+C single-g interpretation does not survive Δλ-source switching.
+3. **β_s = 48 is geometric boundary-adjacent**: BS_GRID max = 50, so β_s=48 occupies 96% of the grid range. Marked as `boundary == False` by the discrete check (strictly only ±50 counts), but the optimum sits at the grid edge in practice.
+4. **V1-RDM cosine ≈ 1.0 in all 5 candidates**: neural cross-validation via V1 RDM is not met — these candidates fit JND structure but show no V1 RDM signal beyond noise.
+5. **Always-interior + tight parameters**: 0 cells in 2-comp; 36 cells in R+C (all Δλ-bimodal). For 2-comp, no HC-subset-robust interior candidate exists; conditional candidates (Rank 1, Rank 4) are the best available.
+
+**For future phase use**:
+- The two 2-comp candidates **(β_s=48, β_c=−32)** [tightest interior cluster] and **(β_s=34, β_c=−40)** [largest interior majority] are the testable hypotheses for an extended sub-08 protocol (larger HC pool, 3-comp or non-linear model class, or behavioral validation that conditions on the 23%/55% subset regime).
+- The R+C g=2.70 candidate is recorded but *cannot be reported as a single-g result* without the Δλ-source caveat (paper would have to choose a Δλ prior and accept that the opposite Δλ prior gives g ≈ 0.05).
+- These candidates do **not** override the §J verdict above. The all-fit-pool conclusion ("no paper-defensible filter without model-class extension") is preserved. This addendum only documents *which (β_s, β_c) / g points emerge when the boundary mask is stripped*, for downstream protocol design.
+
+**(3) 2-comp: cliff at w=0.1, no intermediate region.** β_c jumps from −8 (γ_GB ridge median) to +50 (boundary corner) as soon as w=0.1, and stays at the boundary for all w ∈ [0.1, 1.0]. Once the RDM_V1 atom contributes at all, its preferred (β_s≈2, β_c≈+50) anchors the joint optimum at the corner. This is the same boundary degeneracy that drove the cross-ROI joint Rank-3/4 cells in Phase B (bdy=1.0, (β_s=18, β_c=+50)). 2-comp has no graceful joint regime — it's either γ_GB-pure or boundary-corner.
+
+**(4) Mechanism inference**: the two atoms point to *different* preferred regions in the (β_s, β_c) plane. γ_GB likes the ridge of (β_s, β_c) values that match the green-blue JND ratio; RDM_V1 likes (≈2, +50) which is high cortical S-axis (β_s≈0) plus large positive confusion-axis rotation. **They do not agree on direction.** Direct measurement: `cosine(forward_2comp(34,−8,'protan'), forward_2comp(2,+50,'protan')) = +0.080` — the within-2-comp δθ(c) vectors for the γ_GB optimum vs the RDM_V1 optimum are near-orthogonal in stimulus space (norms 65.4° and 101.2° respectively). The optima sit in disjoint corners of the (β_s, β_c) parameterization, hence the immediate snap to (2, +50) at w ≥ 0.1. (This within-model cross-atom result is distinct from §I.1's between-model cross-mechanism cos = −0.087; both directions independently confirm the multi-channel non-identifiability for sub-09.)
+
+**(5) Conclusion**: For sub-09 there is **no weight w that gives both atoms a "meeting point"**. The cross-ROI joint result reported in Phase B (Rank 3/4 degeneracy at β_c=+50) is the inevitable outcome at any w ≥ 0.1. **Recommendation**: report sub-09's two candidates (R+C g=2.60 and 2-comp (β_s=34, β_c=−8)) as **non-identifiable mechanism alternatives**, both fit to γ_GB alone, with documented baseline-swap-only validation (Caveat 1) and ridge-walk variability (Caveat 2). Behavioral filter generalization test is required to discriminate them; this is the sub-09 hold-out gap identified at the start of §I.
+
+Plots: `results/s10_inclusion/sub09_weight_sweep.png` (4-panel: focal-vs-w, boundary-vs-w, R+C g-vs-w, 2-comp params-vs-w).
+
+

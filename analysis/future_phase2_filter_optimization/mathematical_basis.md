@@ -263,9 +263,13 @@ R+C 와 병행 위치한 두 번째 forward map. R+C 가 LMS / opponent 좌표�
 
 ### 5'.1. 입력 정의
 
-$\theta_{\mathrm{base}}(c)$: family-conditioned baseline hue. 구현 상 $\theta_{\mathrm{base}} = $ `machado_shifted_hue(0, family)`. CIELab nominal 각도 (0°, 45°, ...) 가 아닌 family 별 reference (C_baseline 버그 방지, MEMORY 2026-04-07).
+**★ Closure (Phase B v6) 의 forward**: $\theta_{\mathrm{base}}(c) = \theta$ — **CIElab nominal hue 그대로** ($c_1 = 0°, c_2 = 45°, \dots, c_8 = 315°$). 변환 없이 trig 에 직접 대입. 구현: `scripts/two_comp.py:forward_2comp` (lines 21–29), `s10b_v6_pca_rdm.py:31,:231,:607` 가 import 하여 호출. 모든 closure step (Phase B v6, `s17_hc_loo`, `s13_round3`, `s12b_phase_c_v2`) + viz (`p2_primary_4col.py`) + Phase 3 자극 합성이 이 정의를 사용. 이력: deutan (38,−10) 의 8-vec δθ 가 [+8.66, +29.46, +33.0, +17.21, −8.66, −29.46, −33.0, −17.21] 로 산출되는 함수.
 
 $\theta_{\mathrm{conf}}$: a priori 고정된 confusion axis 각도 — Stockman cone fundamental 에서 derive.
+
+> **Alternative (NOT closure)** — `scripts/forward_models/two_component.py:dt_2comp` 는 $\theta_{\mathrm{base}}(c) =$ `machado_shifted_hue_at(0, family, θ)` (Stockman opponent space 로 변환된 h_base) 또는 frozen `H_BASE_CANONICAL_8` lookup 을 사용. `loco_distortion_fit.py` 전용 entry 이며 closure 가 호출하지 않음. 같은 (β_s, β_c) 라벨에서 closure forward 와 정반대 부호의 δθ 8-vec 을 산출 (deutan (38,−10) c1: closure +8.66° vs frozen −16.0°). 두 forward 혼용 금지 — see CLAUDE.md A13.
+>
+> R+C 모델의 *C_baseline* 결정 (MEMORY 2026-04-07: "machado_shifted_hue(0.0, family) for baseline, CIELab nominal angles caused +0.30 L1 artifact") 은 R+C 의 baseline state 를 정하는 별개 규약이며, 2-Component forward 의 입력 변환과 무관.
 
 | Family | $\theta_{\mathrm{conf}}$ |
 |---|---|

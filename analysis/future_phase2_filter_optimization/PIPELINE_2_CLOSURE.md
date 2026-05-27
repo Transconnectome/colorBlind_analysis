@@ -549,3 +549,79 @@ Round 3 의 swap-HC bootstrap (HC voxel pattern 을 CVD 로 swap 후 GT perturba
 | `results/s10_inclusion/s17_hc_loo_results.json` | Strict HC LOO output |
 | `results/s12b_phase_c_v2/sweep_*.json` | (deprecated) Phase C v2 output + seed audit |
 | `results/s13_multipoint_sim/s13_round3_recovery.json` | Phase D Round 3 |
+
+---
+
+## Appendix A — RDM Atom Robustness (PCA vs SRM-cosine vs SRM-disparity)
+
+Date: 2026-05-27. Motivation: Phase B v6 RDM atom 은 PCA-aligned 8×8 RDM cosine 차이 (Cycle 5 finding: 2× HC-CVD separation vs raw voxel-RDM). 본 부록은 RDM atom 정의를 두 가지 SRM family 로 swap 한 결과, §5.1 primary candidates 의 parameter 가 얼마나 robust 한지 측정.
+
+### A.1 Setup
+
+v6 fit pipeline 전체 (300 resample × 5/2 HC split × R+C + 2comp grid × γ atoms + LOCO V4) 그대로 유지. RDM atom 만 swap:
+
+| Variant | RDM atom 정의 | Script |
+|---|---|---|
+| **PCA-RDM** (v6 main) | 8 colors → voxel PCA top K_PCA=6 components → 8×K_PCA scores → 8×8 correlation-distance RDM → 28-d cosine vs HC mean RDM | `scripts/s10b_v6_pca_rdm.py` |
+| **SRM-cosine** | BrainIAK SRM(K=ROI_K, n_iter=20) on HC pool → CVD Procrustes against fixed S → 8×8 correlation-distance RDM in shared (K-d) space → 28-d cosine vs HC mean | `scripts/s10b_v6_srm_rdm.py` |
+| **SRM-disparity** | 동일 SRM training. RDM 대신 색-permutation 후 Procrustes Frobenius disparity (`phase2_SRM_across_between/rerun_loo_consistent.py` family). δθ=0 baseline = canonical disparity (sub-08 V2 p=0.040* 의 metric family). | `scripts/s10b_v6_srm_disparity.py` |
+
+Comparison runner: `scripts/compare_primary_candidates.py`.
+
+### A.2 Results — primary candidate cells
+
+§5.1 의 final candidates 와 §3.5 의 R+C reference 들에 대해, 동일 combo label 의 fit 결과 (median ± IQR over 300 resample):
+
+#### Sub-08
+
+| Candidate | combo | PCA (β_s, β_c) | SRM-cos (β_s, β_c) | SRM-dis (β_s, β_c) | PCA↔DIS 거리 | sign quadrant |
+|---|---|---|---|---|---|---|
+| **S08-βs-dom** | γ_all + RDM_V1 | (38, −10) | (22, −36) | **(24, −20)** | 17.2° | β_s>0, β_c<0 동일 ✓ |
+| **S08-βc-dom-V2** | γ_OY + RDM_V2 | (6, −42) | (8, −42) | **(2, −24)** | 18.4° | β_s>0, β_c<0 동일 ✓ |
+| **S08-βc-dom-V3** | γ_OY + RDM_V3 | (6, −42) | (8, −42) | **(2, −24)** | 18.4° | β_s>0, β_c<0 동일 ✓ |
+| **S08 R+C ref** | γ_blank + RDM_V1 | g=2.25 | g=2.70 | **g=1.80** | Δg=0.45 | Δλ_deutan large-shift 영역 동일 ✓ |
+
+#### Sub-09
+
+| Candidate | combo | PCA (β_s, β_c) | SRM-cos (β_s, β_c) | SRM-dis (β_s, β_c) | PCA↔DIS 거리 | sign quadrant |
+|---|---|---|---|---|---|---|
+| **S09-βc-rot-ALL** | γ_all + RDM_V1 | (2, +24) | (32, 0) | **(32, 0)** | 38.4° | β_c sign change (+24→0) ✗ |
+| **S09-βc-rot-GB** | γ_GB + RDM_V1 | (2, +24) | (32, 0) | **(32, 0)** | 38.4° | β_c sign change (+24→0) ✗ |
+| **S09 R+C ref** | γ_all + RDM_V1 | g=2.95 | g=1.10 | **g=2.50** | Δg=0.45 | Δλ_protan large-shift 영역 (PCA·DIS) ✓ |
+
+### A.3 Per-candidate verdict
+
+- **S08-βc-dom (6, −42)**: PCA·SRM-cos 거의 일치 (±2°), SRM-dis 는 β_c magnitude 절반 (−24) 으로 축소되나 **same quadrant** (β_s 작은 +, β_c 음). V2/V3 두 combo 모두 동일 SRM-dis 해 ((2, −24)) 로 수렴 — **RDM atom robust within mechanism class**.
+- **S08-βs-dom (38, −10)**: SRM-cos 는 (22, −36) 으로 β_c 강화, SRM-dis 는 (24, −20) 으로 PCA 와 SRM-cos 사이 중간. 세 방법 모두 **β_s>0, β_c<0 동일 quadrant**. Magnitude 변동 ~10–28°.
+- **S08 R+C g≈2.25**: PCA 2.25 · COS 2.70 · DIS 1.80. 모두 Δλ_deutan large-shift 영역 (Machado-saturated). Range ±0.9 → magnitude robust within R+C saturation envelope.
+- **S09-βc-rot (2, +24)**: SRM-cos·SRM-dis 모두 (32, 0) 으로 같은 cell 선택. **β_c sign +24 → 0** 으로 사라지고 β_s+30 으로 dominance shift → "cortical confusion-axis primary" 해석이 RDM atom 정의에 따라 **"S-cone shift primary"** 로 변함. 두 SRM 방법은 서로 일치하므로 SRM family-level robust, 단 **PCA-RDM 에 dependent**.
+- **S09 R+C g=2.95**: PCA 2.95 · DIS 2.50 (close), COS 1.10 (large drop). SRM-cos 만 dropout → SRM family 내부에서도 RDM-cosine vs disparity 분기.
+
+### A.4 Implication
+
+- **Sub-08 candidates (S08-βs-dom, S08-βc-dom-V2/V3)**: §5.1 final candidates 의 **sign-quadrant 와 mechanism class 는 PCA·SRM-cos·SRM-dis 세 방법 모두 동일**. Magnitude IQR (15–20°) 는 §5.2 Round 3 의 β_c IQR 41–68° 한계 안에 위치 → 본 robustness check 가 §5.2 identifiability 한계를 *완화하지 않음* 도 동시 확인.
+- **Sub-09 candidate (S09-βc-rot)**: PCA-RDM 에서 cortical-rotation primary 로 보이는 (2, +24) 가, SRM family (cosine·disparity 양쪽) 에서는 S-cone-shift primary (32, 0) 로 재해석됨. *Mechanism interpretation 은 RDM atom 정의에 sensitive* — paper 의 mechanism 서술 시 **이 ambiguity 를 explicit 하게 보고** 필요.
+- **R+C reference**: sub-08·sub-09 모두 magnitude robust within ±0.9 g unit (g_max=3 grid 의 ~30%). SRM-cos 만 sub-09 에서 g=1.10 으로 dropout — 이는 SRM-cosine 의 RDM-vector 가 saturation 영역에서 신호가 평탄해지기 때문 (DIS·PCA 는 g_max 근처 surface 유지).
+
+### A.5 Additional disclosure — canonical SRM (rerun_loo_consistent.py)
+
+§5.1 candidates 의 fit 은 모두 RDM-cosine atom 기반이지만, MEMORY 의 "sub-08 V2 p=0.040*" 는 `phase2_SRM_across_between/rerun_loo_consistent.py` 의 Procrustes-disparity LOO + Crawford & Howell t-test 결과로 **다른 metric family**. cycle7b SRM diagnostic 의 sub-08 V2 separation_z = +0.28 (weak) 는 RDM-cosine 으로 측정한 값이며 canonical p=0.040 결과를 부정하지 않음 — measurement family 차이.
+
+### A.6 Limitation 추가 권고
+
+§5.3 Limitations 에 다음을 권고:
+
+> **L9. RDM atom 정의 의존성 (sub-09 only)** — sub-09 βc-rot candidate (β_s=2, β_c=24) 의 mechanism interpretation (cortical confusion-axis primary) 은 PCA-aligned RDM atom 정의에 dependent. SRM-aligned RDM (cosine 또는 Procrustes-disparity) 으로 atom 을 swap 하면 같은 cell 이 (β_s=32, β_c=0) S-cone-shift primary 로 재해석됨. Sub-08 candidates 의 sign-quadrant 는 세 방법 모두 일관. Paper 의 sub-09 mechanism 서술 시 이 ambiguity 를 명시.
+
+### Files (Appendix A)
+
+| File | Role |
+|---|---|
+| `scripts/s10b_v6_srm_rdm.py` | v6 RDM-cosine in SRM shared space |
+| `scripts/s10b_v6_srm_disparity.py` | v6 Procrustes disparity (canonical SRM family) |
+| `scripts/cycle7b_srm_diagnostic.py` | δθ=0 baseline SRM atom (5-cell) |
+| `scripts/cycle7c_pca_diagnostic.py` | δθ=0 baseline PCA mirror of cycle7b |
+| `scripts/compare_primary_candidates.py` | 3-way comparison runner |
+| `results/s10_inclusion/s10b_v6_srm_rdm_results_{sub-08,sub-09}.json` | SRM-cosine v6 output |
+| `results/s10_inclusion/s10b_v6_srm_disparity_results_{sub-08,sub-09}.json` | SRM-disparity v6 output |
+| `results/s10_inclusion/cycle7{b,c}_*_diagnostic.json` | δθ=0 baseline diagnostic outputs |

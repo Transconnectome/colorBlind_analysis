@@ -1,13 +1,43 @@
-"""S5 helper: two_comp.py — 2-Component forward model (β_s, β_c).
+"""two_comp.py — ★ CLOSURE 2-Component forward (single source of truth).
 
-δθ(θ) = β_s · cos(θ − 90°) + β_c · cos(θ − θ_conf)
+This is the forward map used by PIPELINE_2_CLOSURE.md (2026-05-27) Phase B v6
+and every downstream closure step. All viz, post-hoc analysis, and Phase 3
+stimulus synthesis MUST use `forward_2comp` (or its identical inlined form).
+
+  δθ(θ) = β_s · cos(θ − 90°) + β_c · cos(θ − θ_conf)
+  θ_perceived = (θ + δθ) mod 360°
+
+Input convention: θ is CIElab nominal hue (0°, 45°, ..., 315° for c1..c8) —
+applied directly to the trig, with NO h_base / Stockman opponent conversion.
 
   θ_conf:
     protan: 16°
     deutan: 150°
 
-  β_s : S-cone cardinal amplitude (Krauskopf 1982)
+  β_s : S-(L+M) cardinal axis amplitude (Krauskopf 1982 convention)
   β_c : confusion-axis amplitude (Stockman cone fundamentals confusion line)
+
+Live callers (closure-active):
+  scripts/s10b_v6_pca_rdm.py:31, :231, :607  (Phase B v6 main runner)
+  scripts/s17_hc_loo.py                       (strict HC LOO 7-fold)
+  scripts/s13_round3.py                       (Phase D Round 3 multi-point sim)
+  scripts/s12b_phase_c_v2.py                  (deprecated, L8 audit only)
+  scripts/p2_primary_4col.py                  (closure-consistent 4-col viz)
+
+⚠ DO NOT replace with the h_base / frozen variant in
+  `scripts/forward_models/two_component.py` ⚠
+The two functions give DIFFERENT 8-vec δθ at the same (β_s, β_c). Example
+for deutan (38, −10):
+    closure (here):        [+8.66, +29.46, +33.0, +17.21,
+                            −8.66, −29.46, −33.0, −17.21]
+    forward_models/two_component (frozen):
+                           [−16.0, −23.7, −28.7, −31.8,
+                            −33.8, −6.7, +31.8, +15.6]
+See CLAUDE.md A13 for the project rule.
+
+Sanity check (deutan, β_s=38, β_c=−10):
+    forward_2comp(38, -10, 'deutan').round(2) ==
+        array([8.66, 29.46, 33., 17.21, -8.66, -29.46, -33., -17.21])
 """
 import numpy as np
 

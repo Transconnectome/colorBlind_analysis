@@ -1,24 +1,42 @@
-"""two_component.py — Canonical 2-component forward model (single source of truth).
+"""two_component.py — Alternative h_base / frozen 2-component forward.
 
-Mathematical definition (CIE 170-1:2006 Stockman opponent space):
-    h_base   = stockman_opponent_hue(θ_CIELab)            # CIELab → opponent hue
+⚠ NOT THE CLOSURE FORWARD. ⚠
+
+This module implements a Stockman opponent-space (h_base) variant of the
+2-component forward, with an optional `USE_FROZEN_H_BASE` lookup. It is
+**not** called by PIPELINE_2_CLOSURE.md's Phase B v6 main runner
+(`scripts/s10b_v6_pca_rdm.py`) or any other closure step. The closure
+forward lives in `scripts/two_comp.py:forward_2comp` and applies the trig
+directly to CIElab nominal θ (raw, no h_base transform).
+
+For the same nominal (β_s, β_c), the two forwards produce different δθ
+8-vectors. Example for deutan (38, −10):
+    closure (scripts/two_comp.py):       [+8.66, +29.46, +33.0, +17.21,
+                                          −8.66, −29.46, −33.0, −17.21]
+    frozen here (dt_2comp_8colors):      [−16.0, −23.7, −28.7, −31.8,
+                                          −33.8, −6.7, +31.8, +15.6]
+
+Mathematical definition (this module):
+    h_base   = stockman_opponent_hue(θ_CIELab)   # live OR frozen H_BASE_CANONICAL_8
     dt       = β_s · cos(h_base − 90°) + β_c · cos(h_base − θ_conf_stockman)
     θ_perceived_CIELab = (θ_CIELab + dt) mod 360°
 
+Sole live caller in the codebase: `scripts/loco_distortion_fit.py`
+(separate alternative entry; not part of Phase B v6 closure). Do not
+re-introduce this module into visualization or post-hoc analysis without
+the user's explicit override — see CLAUDE.md A13.
+
 Frame mixing caveat:
-    `dt` is computed in Stockman opponent space units but accumulated in CIELab.
-    This is a documented approximation (FORWARD_MODEL_AUDIT.md §3-3 #2).
-    Both fitting and visualization use the same approximation, so internal
-    self-consistency is preserved. P0 action item: implement Stockman→CIELab
-    inverse mapping for full frame consistency. Until P0 is resolved, this
-    formula is the single source of truth.
+    `dt` is computed in Stockman opponent space units but accumulated in
+    CIElab. This is a documented approximation (FORWARD_MODEL_AUDIT.md §3-3 #2).
 
 History:
-    Pre-2026-05-10: dt_2comp was duplicated in 3 files (visualize_filter_candidates.py,
-        loco_distortion_fit.py, comprehensive_2component_analysis.py) plus a
-        WRONG variant in visualize_phase3_preimage.py (CIELab-direct, no h_base).
-        Same nominal (β_s, β_c) produced different visualizations across files.
-    2026-05-10 (P1): consolidated here. Callers must `from forward_models import dt_2comp`.
+    Pre-2026-05-10: dt_2comp duplicated across 3+ viz/fit files; frame
+        mismatch between callers.
+    2026-05-10 (P1): consolidated here as canonical h_base formulation.
+    2026-05-27: re-audited — closure (Phase B v6) confirmed to use
+        `scripts/two_comp.py` (raw nominal-θ), NOT this module. This file
+        downgraded from "canonical" to "alternative h_base entry."
 """
 
 from __future__ import annotations

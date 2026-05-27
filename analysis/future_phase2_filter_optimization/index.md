@@ -1,8 +1,10 @@
 # Phase 2 — Literature Positioning & Paper Writing Reference
 
+> **Scope note (2026-05-28)**: 이 문서는 *literature positioning* (Emery / Tregillus 비교) 만 다루며, pipeline / final candidates / forward model 정의는 다루지 않는다. Closure 후 갱신 안 됨 (last update 2026-05-04, 이후 §3 Per-Subject Status 와 forward 정의가 두 차례 revision). Pipeline · candidate 정보는 [`PIPELINE_2_CLOSURE.md`](PIPELINE_2_CLOSURE.md), forward 정의는 [`CLAUDE.md`](CLAUDE.md) §2 A13 · [`mathematical_basis.md`](mathematical_basis.md) §5'.1 을 참조. Literature 표 (§1–§3) 의 사실관계는 아직 유효 — Emery 21.4° vs β_s 직접비교 금지 caveat 도 유지.
+
 **Purpose**: 논문 작성 시 우리 연구의 literature positioning을 빠르게 참조하기 위한 single source. 우리 결과의 novelty와 prior work 대비 ablation 차원을 정리.
 
-**Last updated**: 2026-05-04
+**Last updated**: 2026-05-04 (literature 표는 유효, pipeline 서술은 stale)
 
 ---
 

@@ -37,3 +37,13 @@
 후보의 raw-weight robustness (Step 4) 는 `cycle6b_extended_composite_{sid}.json` 의 `unique_candidates[].schemes_top` 에서 확인 가능.
 
 Identifiability (Step 5 Phase D) 는 `s13_multipoint_sim/s13_round3_recovery.json` 의 `loo_folds`(per-fold) + `summary` (aggregate) 에서 확인.
+
+## Visualization outputs (closure-consistent)
+
+| Directory | Generator | Forward |
+|---|---|---|
+| `visualizations/pipeline2_primary_4col/` (3 primary + 1 summary PNG) | `scripts/p2_primary_4col.py` | closure (`scripts/two_comp.py`) — raw nominal-θ, fit-code consistent |
+
+**Closure δθ sanity (deutan, β_s=38, β_c=−10)**: `[+8.66, +29.46, +33.0, +17.21, −8.66, −29.46, −33.0, −17.21]`. 어떤 viz 든 이 8-vec 과 다른 δθ 를 그린다면 frozen H_BASE 변형을 사용하고 있는 것이며 closure 와 부합하지 않음 — see `../CLAUDE.md` A13.
+
+Pre-2026-05-27 viz (`scripts/visualization/visualize_phase3_preimage.py`, `scripts/render_loco_canonical_4col.py`, `scripts/s5_*_viz_4col.py`, `scripts/s7_best_models_4col.py`) 는 frozen H_BASE 변형으로 그려진 이력이 있으므로 closure 보고용으로는 사용 금지.

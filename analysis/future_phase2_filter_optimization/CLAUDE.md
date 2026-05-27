@@ -52,7 +52,8 @@ documentation should be updated rather than accumulating outdated results
 | A9 | Behavioral validation은 model class 결정 권한 (단 P2a-restoration 기준 필요) | discriminability-PASS는 보류 (2026-05-13); P2a 기반 검증 프로토콜로 재설계 필요. |
 | A10 | Encoder = ridge_gcv (fixed) | smooth_tikh는 3회 rescue 시도 후 REJECTED (MEMORY 2026-03-11). 대안 encoder 제안 금지. |
 | A11 | Single mechanism per subject | Per-subject 1개 model class만 채택. 모델 class 간 ensemble averaging 금지. |
-| A12 | 2-component은 CIELab opponent space 작동 | RGB/cone space 아님. C_baseline은 `machado_shifted_hue(0.0, family)` (CIELab nominal 각도 금지). |
+| A12 | 2-component은 CIELab opponent space 작동 | RGB/cone space 아님. **R+C 의 C_baseline** 은 `machado_shifted_hue(0.0, family)` (CIELab nominal 각도 금지) — 이는 R+C baseline 규약이며, A13 의 2-Component forward 자체 (raw nominal-θ) 와는 다른 단계. |
+| **A13** | **Closure 2-Component forward** = `scripts/two_comp.py:forward_2comp` (★ raw CIElab nominal-θ): `δθ = β_s·cos(θ−90°) + β_c·cos(θ−θ_conf)`, θ_conf={protan:16°, deutan:150°}. Phase B v6 main runner (`scripts/s10b_v6_pca_rdm.py:31,:231,:607`), `s17_hc_loo.py`, `s13_round3.py`, `s12b_phase_c_v2.py` 가 모두 이 forward 만 호출. | **모든 viz / post-hoc / Phase 3 자극 합성도 이 forward 사용.** `scripts/forward_models/two_component.py` 의 frozen H_BASE 변형은 `loco_distortion_fit.py` 전용 alternative entry 이며 **closure 와 무관**. 같은 (β_s, β_c) 라벨에서도 두 함수는 정반대 δθ 8-vec 을 산출 (예: deutan (38,−10) c1 → raw +8.66° vs frozen −16.0°), 혼용 금지. 이력: 2026-05-27 viz 가 frozen 으로 잘못 그려졌다가 closure 와 부합하는 raw 로 정정. |
 
 ## 2.5. Loss Inventory + HC Sanity Check (NEW 2026-05-03, CI-revised 2026-05-04)
 

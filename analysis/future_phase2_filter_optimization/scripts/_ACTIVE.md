@@ -56,6 +56,17 @@ before the 2026-05-27 forward audit; many use the h_base / frozen variant
 and therefore display δθ inconsistent with the closure. They are **not**
 listed here; see [§Inactive](#inactive).
 
+**2026-05-28 (Phase B')**: `scripts/visualization/` now contains 7 paper-figure
+generators kept at root (cited by `mathematical_basis.md` / `presentation/`):
+`figs_2comp_anatomy`, `figs_2comp_stretch`, `figs_activation_overview`,
+`figs_loss_inventory`, `figs_model_vs_baseline`, `figs_rc_panels`,
+`figs_slide5_rc_panels`. The other 12 viz scripts moved to
+`visualization/_archive/` (broken deps or forward inconsistency).
+`scripts/diagnostics/` keeps only `cardinal_axis_amplitude.py` at root; the
+other 16 + all 5 in `inventory/` + all 7 in `filter_ops/` moved to their
+respective `_archive/`. `sbatch/_archive/` and `logs/_archive/` hold stale
+SLURM jobs and pre-v6 run logs.
+
 ## Deprecated but retained for L8 audit
 
 | Script | Reason kept |

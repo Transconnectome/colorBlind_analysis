@@ -14,15 +14,17 @@
 
 ## Deprecated outputs (참조용 보관)
 
-| Directory | 상태 |
-|---|---|
-| `s12b_phase_c_v2/sweep_*.json` | Phase C v2 — final selection 기여 없음, L8 seed audit 보고용 (sweep_*_seed142.json 포함) |
-| `s13_multipoint_sim/s13_multipoint_recovery_round1.json`, `_round2.json` | Phase D Round 1/2 — `s13_round3` 가 final candidates 적용으로 supersede |
-| `s11_pre_phase_c_null_sim/` | pre-Phase-C null simulation, Phase B v6 stability check 가 대체 |
-| `s14_atom_redesign/` | Cycle 5 atom redesign, PCA-RDM 으로 흡수 |
-| `oos_reanalysis_v1/` | Pipeline 3 (s15) output, deprecated |
-| `_superseded/` | 이전 pipeline-1 era outputs (loco_filter, candidates_p2 등) |
-| `_archive/` | older cleanup (post_consolidation_verify, validation_v2 등) |
+**2026-05-28 (Phase D)**: 다음 4 dir / 2 file 이 `_archive/` 로 이동되었음. 자세한 매핑은 [`_archive/README.md`](_archive/README.md) §Phase D 표 참조.
+
+| Directory | 상태 | 현재 위치 |
+|---|---|---|
+| `s12b_phase_c_v2/sweep_*.json` | Phase C v2 — final selection 기여 없음, L8 seed audit 보고용 (sweep_*_seed142.json 포함) | **여전히 `results/s12b_phase_c_v2/`** (L8 audit 한정 보존) |
+| `s13_multipoint_sim/s13_multipoint_recovery_round1.json`, `_round2.json` | Phase D Round 1/2 — `s13_round3` 가 final candidates 적용으로 supersede | → `_archive/s13_multipoint_sim_rounds_1_2/` |
+| `s11_pre_phase_c_null_sim/` | pre-Phase-C null simulation, Phase B v6 stability check 가 대체 | → `_archive/s11_pre_phase_c_null_sim/` |
+| `s14_atom_redesign/` | Cycle 5 atom redesign, PCA-RDM 으로 흡수 | → `_archive/s14_atom_redesign/` |
+| `oos_reanalysis_v1/` | Pipeline 3 (s15) output, deprecated | → `_archive/oos_reanalysis_v1/` |
+| `_superseded/` | 이전 pipeline-1 era outputs (loco_filter, candidates_p2 등) | (unchanged) |
+| `_archive/` | older cleanup (post_consolidation_verify, validation_v2 등) + 위 Phase D 항목 | (this directory) |
 
 ## Pipeline 2 final candidates 의 출처 위치
 

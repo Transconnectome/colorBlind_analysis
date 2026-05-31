@@ -78,8 +78,9 @@ def make_gamma_pair_atom(pair_key, cvd_jnd, pool_jnd_subjs):
         # Collect all valid pairs (cvd_jnd present + bl present)
         valid = []
         for pn, (ta, tb) in PAIR_HUES.items():
-            if pn in bl and cvd_jnd.get(pn) is not None and bl.get(pn) is not None:
-                p_sd = max(sd.get(pn, 1e-3), 1e-3)
+            if (pn in bl and cvd_jnd.get(pn) is not None
+                    and bl.get(pn) is not None and sd.get(pn) is not None):
+                p_sd = max(sd[pn], 1e-3)
                 i = int(round(ta/45.0)) % 8; j = int(round(tb/45.0)) % 8
                 d_phys = min(abs(ta-tb)%360, 360-abs(ta-tb)%360)
                 valid.append((i, j, d_phys, bl[pn], cvd_jnd[pn], p_sd))
@@ -98,7 +99,8 @@ def make_gamma_pair_atom(pair_key, cvd_jnd, pool_jnd_subjs):
     # Single-pair (original behavior)
     pair_name = PAIR_KEYS[pair_key]
     bl, sd = jnd_baseline_from_pool(pool_jnd_subjs)
-    if pair_name not in bl or cvd_jnd.get(pair_name) is None:
+    if (pair_name not in bl or cvd_jnd.get(pair_name) is None
+            or bl.get(pair_name) is None or sd.get(pair_name) is None):
         return None
     p_obs = cvd_jnd[pair_name]
     p_base = bl[pair_name]
@@ -394,7 +396,9 @@ def fit_subject(subject, combo_start=None, combo_end=None):
                 if cvd_jnd_local is None or cvd_jnd_local.get(p_name) is None:
                     out[p_name] = None
                     continue
-                if p_name not in test_bl:
+                if (p_name not in test_bl
+                        or test_bl.get(p_name) is None
+                        or test_sd.get(p_name) is None):
                     out[p_name] = None
                     continue
                 theta_a, theta_b = PAIR_HUES[p_name]
@@ -508,7 +512,9 @@ def fit_subject(subject, combo_start=None, combo_end=None):
             if cvd_jnd is None:
                 return None
             valid = {p: cvd_jnd[p] for p in test_bl.keys()
-                     if cvd_jnd.get(p) is not None and test_bl.get(p) is not None}
+                     if cvd_jnd.get(p) is not None
+                     and test_bl.get(p) is not None
+                     and test_sd.get(p) is not None}
             if not valid:
                 return None
             sd_d = {p: max(test_sd[p], 1e-3) for p in valid}
@@ -524,7 +530,9 @@ def fit_subject(subject, combo_start=None, combo_end=None):
                              360 - abs(focal_theta_a - focal_theta_b) % 360)
         focal_obs = cvd_jnd.get(focal_pair) if cvd_jnd else None
         focal_base = test_bl.get(focal_pair)
-        focal_sd_v = max(test_sd.get(focal_pair, 1.0), 1e-3) if focal_pair in test_sd else None
+        focal_sd_v = (max(test_sd[focal_pair], 1e-3)
+                      if focal_pair in test_sd and test_sd[focal_pair] is not None
+                      else None)
 
         def test_focal(delta):
             if focal_obs is None or focal_base is None or focal_sd_v is None:

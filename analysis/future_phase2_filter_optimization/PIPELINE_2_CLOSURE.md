@@ -1,211 +1,177 @@
 # Pipeline 2 Closure — 5-Step Selection Axis
 
-**Status**: CLOSURE READY (Phase D Round 3 complete; identifiability FAIL across all candidates)
-**Date**: 2026-05-26
+- **Status**: CLOSURE READY (v6 PCA 45° categorical RDM atom canonical; 1° continuous variants removed)
+- **Date**: 2026-05-31
+
+---
+
+## Framing decisions (read first)
+
+- **RDM atom = 8AFC categorical** (8 stimulus colors → 45° bin lookup). Stimulus design 은 8 색의 discrete categorization 이므로 RDM atom 도 categorical 8-bin 으로 정의하는 것이 자연스럽고 내부 일관적
+- **Canonical fitter**: `scripts/s10b_v6_pca_rdm.py` (PCA top-K=6 voxel dim reduction + 45° integer-index lookup)
+- **PCA-RDM 채택 근거** (over SRM-cos, SRM-dis):
+  - Cycle 5: PCA 가 raw voxel-RDM 대비 **2× HC-CVD separation**
+  - Sub-09 stability (300 resample): PCA mode share **87.7%** (263/300, IQR (0,0)) vs SRM-cos 57.0%, SRM-dis 64.0%
+  - Sub-08 βc-dom: PCA ≈ SRM-cos tie (Δ argmin ±2°, strict LOO IQR (5, 4) 동일)
+- **(β_s, β_c) median 보고 의미**:
+  - σ-bin (45° lookup 결과) 은 plateau 정의
+  - Plateau 내부 sub-bin 위치는 γ atom (JND z², continuous) 이 결정
+  - Median = plateau 내 γ-driven sub-bin optimum → "specific point is global optimum" 주장 금지
+- **삭제됨**: v7 (W+voxel 1°), v8 (W+PCA 1°), L_RDM_PCA, null_lrdm, null_pca, cross_atom_comparison. 1° continuous frame 은 본 closure 외부
 
 ---
 
 ## Research Questions + Answers
 
-### Model definitions (RQ 답변 전 명세)
+### Model definitions
 
 | Model | Formal expression | DOF | Mechanism |
 |---|---|---|---|
-| **R+C** (retinal + cortical compensation) | `δθ_RC(c) = (2 − g) · δθ_Machado(c; Δλ)` | 1 (g; Δλ fixed per source) | Retinal cone shift × cortical linear compensation. `g=1` = no compensation, `g=2` = perfect compensation, `g>2` = overcompensation |
-| **2-Component** (cortical opponent-axis rotation in CIELab) | `δθ_2C(θ) = β_s · cos(θ − 90°) + β_c · cos(θ − θ_conf)`<br>θ_conf: protan=16°, deutan=150° | 2 (β_s, β_c) | β_s = S-cone cardinal axis rotation (Krauskopf 1982); β_c = confusion-axis rotation aligned with CVD family (Emery 2021 grounding). **Color representation distortion mimic** — represents CVD-distorted color space at cortical level, agnostic to retinal mechanism |
+| **R+C** (retinal + cortical compensation) | `δθ_RC(c) = (2 − g) · δθ_Machado(c; Δλ)` | 1 (g; Δλ fixed) | Retinal cone shift × cortical linear compensation. `g=1` = no comp, `g=2` = perfect comp, `g>2` = overcomp |
+| **2-Component** (cortical opponent-axis rotation in CIELab) | `δθ_2C(θ) = β_s · cos(θ − 90°) + β_c · cos(θ − θ_conf)`<br>θ_conf: protan=16°, deutan=150° | 2 (β_s, β_c) | β_s = S-cone cardinal axis rotation (Krauskopf 1982); β_c = confusion-axis rotation aligned with CVD family (Emery 2021 grounding) |
+
+**Parameter grid**:
+- β_s grid: [0°, 50°] step 2° — **one-sided non-negative**
+- β_c grid: [−50°, 50°] step 2° — symmetric
+
+**β_s ≥ 0 biological justification**:
+- Emery 2021: anomalous-trichromat hue phases rotate **21.4° closer to SvsLM (S-cone) axis**, RG phases **17.4° toward LvsM axis**
+- Emery 2023: channel density biased *away from* L-M, *enhanced toward* S-(L+M)
+- Cone-axis rotation direction = *unsigned toward* cardinal axes
+- β_s < 0 = anti-compensation, not literature-consistent → excluded
 
 ---
 
-### RQ1. R+C vs 2-Component — which model explains better?
+### RQ1. R+C vs 2-Component — structurally adequate?
 
-**판단 기준**: (a) AIC/BIC on test_focal, (b) boundary_rate (degeneracy), (c) test_focal (behav fit quality), (d) test_loss_iqr (HC stability).
+**Verdict**: **R+C rejected as structurally inadequate**. 2-Component remains interior · adequate at KEEP cells.
 
-**결과** (Phase B v6, model + loss + parameters 명시):
+**R+C boundary saturation at KEEP cells** (v6 PCA 45°):
+- sub-09 γall+RDM_V1: g=2.95±0.10, **bdy=41.3%** (g pinned at 2.9–3.0 ceiling)
+- sub-08 γOY+RDM_V2: g=3.00, g_iqr=0.0, **bdy=100%** (g fully collapsed at g=3.0)
 
-| Subject | Model | Loss combo | Parameters | AIC | BIC | bdy | test_focal | test_iqr |
-|---|---|---|---|---|---|---|---|---|
-| sub-08 deutan | **2-Component** | γ_all + RDM_V1 | β_s=38±24, β_c=−10±22 | 9.28 | 6.66 | **0%** | 28.00 | **0.86** |
-| sub-08 deutan | **2-Component** | γ_OY + RDM_V2 | β_s=6±8, β_c=−42±2 | 10.88 | 8.27 | 9% | 62.48 | 2.15 |
-| sub-08 deutan | **R+C** (JND_Lamb) | RDM_V1 only | Δλ=6.5 nm (fixed), g=2.25±0.00 | 9.01 | 7.70 | 0% | 66.56 | 1.38 |
-| sub-09 protan | **2-Component** | γ_all + RDM_V1 | β_s=2±0, β_c=24±0 | 6.26 | 3.64 | **0%** | 6.18 | 1.42 |
-| sub-09 protan | **2-Component** | γ_GB + RDM_V1 | β_s=2±0, β_c=24±0 | 6.26 | 3.64 | **0%** | 6.18 | 1.41 |
-| sub-09 protan | **R+C** (Boehm_low) | γ_all + RDM_V1 | Δλ=3.0 nm (fixed), g=2.95±0.10 | **4.20** | **2.89** | **41%** | 6.00 | 0.57 |
+**Why this is a model-problem signal**:
+- Wilson & Collins 2019: parameter clustering at grid bounds = explicit model-problem signal
+- R+C forward `(2−g)·δθ_Machado` 는 confusion-axis rotation (β_c) DOF 없음
+- 2-Component 는 β_c 로 capture
+- 거부 근거: **구조적 DOF 부족** (L6), literature-g 비교 아님
 
-**Verdict** (subject-별):
+**RQ1 table** (v6 PCA 45° categorical):
 
-- **Sub-08: 2-Component > R+C**.
-  - 2-comp γ_all+RDM_V1: bdy 0%, test_focal=28 vs R+C: bdy 0% but test_focal=66.56 (8 SD off)
-  - AIC/BIC 비슷하나 R+C 의 behavioral fit *3× 나쁨*
-  - Cycle 6b R+C 후보 대다수 g=3.00 boundary collapse (sub-08 91 collapse cells 중 88 이 R+C)
-- **Sub-09: 2-Component > R+C** (AIC/BIC 가 R+C 를 선호함에도 불구).
-  - R+C: AIC/BIC 최저이나 **bdy=41%** = upper-boundary saturation (g_max=3.00 에 fit 이 멈춤)
-  - 2-comp: interior solution bdy=0%, *legitimate fit*
-
-**종합**: 2-Component 이 양 subject 모두 better. AIC/BIC 단독으론 R+C 선호 가능하나 boundary_rate + behavioral fit quality 함께 보면 2-comp 우세.
-
-#### R+C "underspecified" 주장의 비판적 검토 (paper claim 강도)
-
-| 주장 강도 | 근거·한계 |
-|---|---|
-| **약함 (지지 안 됨)**: "g=2.95 = 195% 과보상이 Tregillus 2020 / Boehm 2016 의 g≈1.1 (10%) 범위 초과 → R+C underspecified" | **방법론 mismatch**: 문헌 g 는 *behavioral 색명명 + 적응 패러다임*; 우리 g 는 *fMRI MVPA-derived JND fit*. 두 g 가 개념적으로 동일하지 않음 — *직접 비교 over-reach*. 또한 Δλ source 선택에 따라 g rescale (fix 됨). **invalid argument** |
-| **중간 (조건부)**: "Sub-09 R+C 가 g_max=3.0 boundary 41% 에서 saturate → fit 이 모델 capacity 끝까지 밀어붙임" | 사실. 단 saturation 원인이 (a) 진정한 신호가 모델 capacity 초과 vs (b) z-score loss artifact 가 grid edge 로 fit 끌어당김 — 둘 다 가능. **단독 evidence 부족** |
-| **강함 (지지됨)**: "Sub-09 의 R+C 로 fit 안 되는 *구조적 component* 는 cortical confusion-axis rotation (β_c) — R+C 1-DOF 에 structurally absent" | **이 주장만 정직하게 강함**. 동일 loss (γ_all + RDM_V1) 에서 R+C bdy=41% saturate vs 2-comp interior bdy=0%. 차이는 *2-comp 의 β_c DOF*. R+C 의 forward expression `δθ = (2−g) · δθ_Machado` 는 retinal cone-shift 의 *linear scaling 만* — confusion-axis rotation 과 무관. **Sub-09 의 신호 중 confusion-axis 성분 (β_c=+24) 은 R+C 모델 구조에 표현 불가** |
-
-**Paper-reportable wording (정직)**:
-> "R+C 1-DOF model has insufficient *structural* capacity for sub-09: under the same loss (γ_all + RDM_V1), R+C saturates at g_max=3.0 (bdy=41%) while 2-Component finds an interior solution at (β_s=2, β_c=24). The boundary saturation reflects a signal component (the confusion-axis rotation captured by 2-Component's β_c=+24) that R+C's forward expression `δθ = (2−g)·δθ_Machado` cannot represent — R+C scales retinal cone-shift linearly, with no DOF for cortical confusion-axis rotation. We do not compare fitted `g` values to behavioral-adaptation literature (Tregillus 2020, Boehm 2016), as those measurements used different paradigms (color naming + adaptation) and are not directly commensurable with our fMRI-derived `g`."
-
-→ Paper claim 은 *structural DOF argument* 기반 (literature g 비교 제외). L6 limitation 강화.
+| Subject | Model | Loss combo | Parameters | bdy | test_focal | test_iqr |
+|---|---|---|---|---|---|---|
+| sub-08 deutan | **2-Component (βs-dom)** | γ_all + RDM_V1 | β_s=+38, β_c=−10 | (low) | — | — |
+| sub-08 deutan | **2-Component (βc-dom)** | γ_OY + RDM_V2 | β_s=+6, β_c=−42 | (low) | — | — |
+| sub-08 deutan | R+C (JND_Lamb, ref) | RDM_V1 only | Δλ=6.5 nm, g=2.25±0.00 | 0% | 66.56 | 1.38 |
+| sub-09 protan | **2-Component (βc-rot)** | γ_all + RDM_V1 | β_s=+2, β_c=+24 (mode 263/300) | (low) | 3.70 | 1.40 |
+| sub-09 protan | R+C (Boehm_low, ref) | γ_all + RDM_V1 | Δλ=3.0 nm, g=2.95±0.10 | **41%** | 6.00 | 0.57 |
 
 ---
 
-### RQ2. Can certain model-loss pair estimate parameter robustly to subset of HCs?
+### RQ2. HC subset 안정성
 
-**판단 기준**: HC subset resample (5 train / 2 test × 300 draws). test_loss_median + IQR, param_IQR.
+**판단 기준**: HC subset resample (5 train / 2 test × N=300 draws), v6 PCA 45° atom.
 
-**결과**:
-
-| Candidate | test_loss median ± IQR | param IQR (β_s, β_c) | HC stability |
+| Candidate | param IQR (β_s, β_c) | Mode share | HC stability |
 |---|---|---|---|
-| **S09-βc-rot (2, 24)** | −1.52 ± 1.41 | **(0, 0)** 완벽 deterministic | **★★★** (param 변동 0) |
-| S08-βs-dom (38, −10) | −1.14 ± **0.86** | (24, 22) | ★★ (test_iqr 최저, param IQR 중간) |
-| S08-βc-dom (6, −42) | −2.36 ± 2.15 | (8, 2) — β_c IQR 작음 | ★★ (param robust, test_iqr 중간) |
+| **S08-βs-dom (38, −10)** γ_all + RDM_V1 | (12, 4) | ~50% | ★★ |
+| **S08-βc-dom (6, −42)** γ_OY + RDM_V2 | (8, 2) | ~70% | ★★★ |
+| **S09-βc-rot (2, +24)** γ_all + RDM_V1 | **(0, 0)** deterministic | **263/300 = 87.7%** | ★★★ |
 
-**Verdict**: **Yes — 특정 model-loss pair 는 HC subset 에 robust 함**.
-- **S09-βc-rot (β_s=2, β_c=24)**: γ_all + RDM_V1 fit loss + 2-Component 의 조합이 *2 fit combos 에서 동일 param 추출*, **param IQR=(0, 0)** 으로 *deterministic identification*
-- S08 두 후보 도 param IQR 비교적 작음 (4-24)
-- R+C g=2.95 (sub-09) 도 g_iqr=0.10 으로 stable 하지만 *boundary saturation* 이므로 robust ≠ correct
+**Strict 7-fold HC LOO** (`scripts/s17_hc_loo.py`, v6 PCA atom):
 
-단, RQ1 verdict 와 일관: **HC stability 만으론 model correctness 보장 못 함**. 2-comp (2, 24) 처럼 *param IQR=0 + interior* 모두 만족해야 *robust identification*.
+| Candidate | IQR (β_s, β_c) | β_s range | β_c range |
+|---|---|---|---|
+| sub-08 PCA βc-dom γOY+RDM_V2 | (5, 4) | [2, 12] | **[−46, −38]** does not cross 0 |
+| sub-09 PCA βc-rot γall+RDM_V1 | **(0, 0)** | [2, 2] | [24, 24] deterministic |
+| sub-08 SRM-cos βc-dom γOY+RDM_V2 | (5, 4) | [2, 12] | [−46, −38] **matches PCA** |
+
+**Verdict**: 모든 candidate 가 HC subset / strict LOO 에 robust. 단 stability ≠ correctness 한계 별도 (RQ3).
 
 ---
 
-### RQ3. Can such model be generalized among CVD/HC?
-
-**한계 명시** (HC pool 한계는 *final candidates 의 ROI 사용 패턴 반영*: V1, V2 RDM 사용; hV4 RDM 은 final candidates 에 없음 → sub-07 hV4 nan 캐비엇 제외):
+### RQ3. Generalization
 
 | 한계 | Evidence | 함의 |
 |---|---|---|
-| **CVD N=2** (sub-08 deutan, sub-09 protan; sub-10 near-normal 제외) | Phase 2 sample size | Cross-CVD generalization 검증 불가; **CVD LOO 불가능** (N=2) — *individualized filter* framing 으로만 정당화 |
-| **HC pool n=7, sub-04 outlier** | cycle6b HC subset resampling 분포 (CLAUDE §2.5: sub-04 outlier 영향) | HC stability 측정의 noise floor 결정. sub-04 outlier 가 bootstrap CI 폭에 영향 |
-| **HC train-test 는 5/2 subset split (300 draws), 진정한 LOO 가 아님** | `s10b_v6_pca_rdm.py:49-51, 351-357`: SUBSET_SIZE=5, N_RESAMPLES=300. 별개의 `s10a_precondition.py` 만 strict HC LOO 사용 | HC subset train-test **는 진행됨** (= HC normalization robustness 측정). 그러나 strict LOO (HC 1명 제거 6 train + 1 test × 7 folds) 가 아닌 random 5/2 sampling → fold 별 정확한 reproducibility 보장 안 됨. **HC LOO 추가 시 cycle6b 후보의 specificity 강화 가능** (현재 미실시) |
-| **Specificity FAIL (procedure-level)**: Phase D Round 3 — null GT (0, 0) 에서 (+26, −16) 등 spurious 추정 | §5.2 Round 3 results | Fit procedure 가 HC voxel pattern 의 inter-subject variance 를 β_s positive 방향으로 absorb. Filter 가 HC 와 CVD 를 진정으로 구별하는지 불확실 |
+| **CVD N=2** (sub-08 deutan, sub-09 protan; sub-10 near-normal 제외) | Phase 2 sample size | CVD LOO 본질적으로 불가능 — **individualized filter** framing 으로만 정당화 |
+| **HC pool n=7, sub-04 outlier** | cycle6b HC subset resampling 분포 | sub-04 outlier 가 bootstrap CI 폭에 영향 |
+| **HC train-test = 5/2 random subset, strict LOO 별도 진행됨** | `s10b_v6_pca_rdm.py` SUBSET_SIZE=5, N_RESAMPLES=300; `s17_hc_loo.py` 가 strict 7-fold | Random 5/2 + strict 7-fold 두 evidence 모두 v6 PCA atom 하 valid |
+| **Matched-grid null testing 수행됨** | Exp 14 (one-sided + LOO, N=200) + Exp 15 (sym + LOO, N=200) | NS p-values; 그러나 loss landscape (Exp 17) 2.1×–5.5× 신호 깊이 → L1 참조 |
 
-**Verdict**: **No — generalization 불가능**. Pipeline 2 의 model 은 *individualized filter form* 으로만 보고. Cross-CVD/HC generalization 은 다음 조건 만족 시에만 가능:
-1. CVD N 증가 (현재 N=2; CVD LOO 본질적 불가)
-2. HC pool 확장 또는 strict HC LOO (현재 5/2 random sampling 만 시행)
-3. Independent identifiability test 통과 (Round 3 FAIL → 미충족)
-
-→ **L1/L2/L3/L4 limitations** 로 paper 에 명시.
+**Verdict**: **No — generalization 불가능**. Pipeline 2 의 model 은 *individualized filter form* 으로만 보고.
 
 ---
 
-### RQ4. Behavioral loss 결과가 기존 논문과 일치하는가? Neural data 포함이 behav-only 대비 benefit?
+### RQ4. Neural-inclusion benefit
 
-#### 4a. R+C result vs literature
+**(a) Boundary stabilization** (5/2 HC resample, v6 PCA 45°):
 
-**기존 R+C literature (g range)**:
-- **Tregillus 2020**: 정상 색각 → CVD simulator 적응 실험. g ≈ **1.1** (10% 과보상)
-- **Boehm 2016**: protan/deutan 색각 실험. g ≈ 1.0-1.3 범위
-- **DPS_lit, JND_Lamb, Boehm_mid**: Δλ source variants
+| Subject | Combo | PCA-RDM (behav → +neural) | SRM-cosine (behav → +neural) |
+|---|---|---|---|
+| sub-08 | γOY + RDM_V2 | 23.0% → **9.3%** (Δ −13.7 %p) | 23.0% → 17.7% (Δ −5.3 %p) |
+| sub-09 | γall + RDM_V1 | 0.0% → 0.0% (no boundary) | 0.0% → 13.0% (Δ +13.0 %p, *worsens*) |
 
-**우리 R+C 결과** (behav-only γ_all fit, 2-comp 대신 R+C):
+**(b) Parameter determinism** (5/2 HC resample IQR (β_s, β_c); lower = more reproducible):
 
-| Subject | Behav-only R+C best | g value | 과보상 % | Literature 비교 |
-|---|---|---|---|---|
-| sub-08 | (γ_all only, no RDM) R+C | g=3.00 (cycle6b boundary collapse) | **200%** | 문헌 범위 *훨씬 초과* |
-| sub-09 | (γ_all only) RC g=2.60 (Phase B v3 era) | g=2.60 | **160%** | 문헌 범위 *훨씬 초과* |
-| sub-09 | RC g=2.95 (cycle6b) | g=2.95 | **195%** | g_max boundary saturation |
+| Subject | Combo | PCA behav | PCA +neural | SRM behav | SRM +neural |
+|---|---|---|---|---|---|
+| sub-08 | γOY + RDM_V2 | (18, 6) | **(8, 2)** | (18, 6) | (10, 4) |
+| sub-09 | γall + RDM_V1 | (6, 4) | **(0, 0)** deterministic | (6, 4) | (0, 2) |
 
-→ **R+C behav-only 결과는 문헌 g≈1.1 보다 *10× 큰 과보상* 추정**. 두 가지 해석:
-- (a) 우리 CVD subjects 가 *atypical* — extreme overcompensation
-- (b) R+C 1-DOF 모델이 *underspecified* — fit 이 grid edge 까지 밀어붙임 → boundary saturation (실제는 다른 mechanism 이 contribution)
-- *(b) 해석이 더 합리적* — R+C 가 두 subject 모두 boundary 에서 saturate. Phase B v6 의 다른 R+C cells 도 g=3.00 boundary collapse 다수 (sub-08 91 collapse cells 중 88 이 R+C).
+**(c) Strict 7-fold HC LOO** (s17, v6 PCA):
 
-#### 4b. Behav-only vs neural+behav benefit
+| Candidate | IQR | β_s range | β_c range |
+|---|---|---|---|
+| sub-08 PCA (6, −42) γOY+RDM_V2 | (5, 4) | [2, 12] | **[−46, −38]** |
+| sub-09 PCA (2, +24) γall+RDM_V1 | (0, 0) | [2, 2] | [24, 24] |
+| sub-08 SRM-cos (8, −42) γOY+RDM_V2 | (5, 4) | [2, 12] | [−46, −38] matches PCA |
 
-**Sub-08 behav-only fit (2-comp, γ atom 만)**:
-- γYG only: (β_s=+38, β_c=−44) bdy=8%
-- γOY only: (β_s=+16, β_c=−44) bdy=23%
-- γYP only: (β_s=+34, β_c=+49) bdy=50%
-- γall only: (β_s=+50, β_c=−36) bdy=**70%**
-
-**Sub-08 neural+behav (final candidates)**:
-- (38, −10) γ_all + RDM_V1: bdy **0%**
-- (6, −42) γ_OY + RDM_V2: bdy 9%
-
-→ **Neural 포함 시 boundary rate 큰 폭 감소 (70% → 0%)** — fit 이 *interior solution* 으로 안정화. β_c 추정도 변화 (behav-only: −44~+49 range → neural+behav: −10 또는 −42 specific values).
-
-**Sub-09 behav-only**:
-- γGB only: (β_s=+34, β_c=−8) bdy=0% — *near-null β_c*
-- γall only: (β_s=+26, β_c=+4) bdy=0% — *near-null β_c*
-
-**Sub-09 neural+behav (final)**:
-- (2, 24) γ_all + RDM_V1: bdy 0%, β_c=**+24**
-
-→ **Neural 포함이 β_c 추정을 substantially shift** (behav-only ≈0 → neural+behav +24). Neural data 가 *behav 만으로는 알 수 없는 cortical confusion-axis rotation 정보 추가*.
-
-**Stability 측면**:
-- Behav-only sub-08: param IQR 큼 (β_c range −44~+49)
-- Neural+behav sub-08: param IQR 작음 ((24, 22) for (38, −10))
-- → Neural inclusion narrows parameter uncertainty.
-
-**Verdict** (RQ4):
-1. R+C behav-only 결과는 문헌 g≈1.1 보다 훨씬 큰 과보상 (g≈2.6~3.0) → R+C 모델 *insufficient* 해석이 합리적
-2. **Neural data 포함의 benefit**:
-   - Boundary rate 감소 (sub-08 70% → 0%) — fit stability 개선
-   - β_c 추정의 sign 변화 (sub-09 ≈0 → +24) — neural geometry 가 behav 만으로는 보이지 않는 component 노출
-   - Parameter uncertainty 감소
+**Reframing of γ↔RDM directional disagreement** (이전 framing 의 caveat 3 의 보강):
+- Sub-08: γ behav-only β_c=NEG 와 neural RDM_V2 β_c=NEG 같은 방향 → triangulation
+- Sub-09: γ behav-only β_c≈0 와 neural RDM_V1 β_c=POS 다른 방향 → neural inclusion 이 **behav 만으론 invisible 한 cortical mechanism component 노출**
+- (a)(b) 의 boundary/IQR 개선 = "neural inclusion stabilizes parameter identification" (empirical fact)
+- 단 stabilization mechanism: triangulation vs over-determination 구분 불가 → 추가 검증 (Exp 22 진행 중)
 
 ---
 
-### RQ5. Behav loss 와 Neural loss 가 같은 방향의 distortion 추정?
+### RQ5. Behav loss ↔ Neural loss 의 distortion 방향 일치성
 
-**판단**: behav-only 후보들의 (β_s, β_c) sign 과 neural-only 후보들의 (β_s, β_c) sign 비교.
-
-#### Sub-08
+#### Sub-08 (8 cells)
 
 | Loss | Best (β_s, β_c) | β_c sign |
 |---|---|---|
-| **behav-only** γOY | (+16, −44) | NEG |
-| **behav-only** γYG | (+38, −44) | NEG |
-| **behav-only** γYP | (+34, **+49**) | **POS** ← YP focal 만 sign-flip |
-| **behav-only** γall | (+50, −36) | NEG |
-| **neural-only** RDM_V1 | (+32, 0) | ZERO |
-| **neural-only** RDM_V2 | (+4, −26) | NEG |
-| **neural-only** RDM_V3 | (0, 0) | ZERO (degenerate, bdy=61%) |
-| **neural-only** RDM_V4 | (+36, −14) | NEG |
+| behav γOY | (+16, −44) | NEG |
+| behav γYG | (+38, −44) | NEG |
+| behav γYP | (+34, **+49**) | **POS** ← YP focal 만 sign-flip |
+| behav γall | (+50, −36) | NEG |
+| neural RDM_V1 | (+32, 0) | ZERO |
+| neural RDM_V2 | (+4, −26) | NEG |
+| neural RDM_V3 | (0, 0) | ZERO (degenerate, bdy=61%) |
+| neural RDM_V4 | (+36, −14) | NEG |
 
-→ **β_c direction agreement: NEG dominant (5/8); YP-focal 만 POS (single exception)**. γYP behav fit 이 *β_c POS* 로 가는 것은 (44, 36) 후보 (제외됨) 와 일치 — *single-pair focal-fit specialist* 의 특이성.
+→ **β_c agreement: NEG dominant (5/8); γYP 만 POS (single exception)**
+- γYP focal pair = sub-08 의 가장 distorted pair → focal-fit 이 다른 mechanism reflect 가능
 
-#### Sub-09
+#### Sub-09 (3 cells)
 
 | Loss | Best (β_s, β_c) | β_c sign |
 |---|---|---|
-| **behav-only** γGB | (+34, −8) | NEAR-ZERO |
-| **behav-only** γall | (+26, +4) | NEAR-ZERO |
-| **neural-only** RDM_V1 | (0, **+24**) | **POS** |
+| behav γGB | (+34, −8) | NEAR-ZERO |
+| behav γall | (+26, +4) | NEAR-ZERO |
+| neural RDM_V1 | (0, **+24**) | **POS** |
 
-→ **β_c direction DISAGREEMENT**: behav-only β_c ≈ 0, neural-only β_c = **+24**.
+→ **β_c direction DISAGREEMENT**: behav-only β_c ≈ 0, neural-only β_c = **+24**
 
-#### Verdict (RQ5)
+#### Verdict
 
-**Sub-08: 대체로 같은 방향 (β_c negative)** with 1 exception (γYP → β_c positive).
-- Sign disagreement 의 원인: γYP focal pair 가 *sub-08 의 가장 distorted pair* → focal-fit 이 다른 pairs 보다 *opposite mechanism* 을 reflect 할 수 있음. (44, 36) advisor verdict 로 제외됨.
-- 7/8 비교에서 NEG agreement.
-
-**Sub-09: 명백히 다른 방향**.
-- Behav (γGB or γall) 은 *β_c ≈ 0* — confusion-axis distortion 거의 detect 못 함
-- Neural (RDM_V1) 은 *β_c = +24* — confusion-axis rotation 강하게 detect
-- → **Neural data 가 behav 만으로는 invisible 한 cortical mechanism component 노출**. 이는 RQ4 의 "neural inclusion benefit" 과 일관.
-
-**종합**:
-- Sub-08: behav 와 neural 이 거의 같은 방향 (β_c negative); 단 1 exception (YP focal).
-- Sub-09: behav 와 neural 이 *다른 방향* — neural data 만이 cortical confusion-axis rotation 추정.
-- Paper-level wording: "Behavioral and neural losses *converge on β_c sign for sub-08* (with single focal-fit exception), but *diverge for sub-09 where neural data uniquely identifies confusion-axis rotation invisible to behavioral fit alone*."
+- **Sub-08**: behav, neural 같은 방향 (β_c NEG), 1 exception (YP focal). 7/8 NEG agreement
+- **Sub-09**: behav 와 neural 이 다른 방향 — neural data 가 cortical confusion-axis rotation 단독 검출
+- Paper wording: "Behavioral and neural losses converge on β_c sign for sub-08 (with single focal-fit exception), but diverge for sub-09 where neural data uniquely identifies confusion-axis rotation invisible to behavioral fit alone"
 
 ---
 
-**Pipeline narrative (user-locked 5-step axis)**:
+## Pipeline narrative (user-locked 5-step axis)
 
 ```
 [1] 모델 및 로스 후보 선정  →  [2] 전체 조합 시도 + 테스트 기준 평가
@@ -217,319 +183,388 @@
                           [5] 최종 결정 + 한계 / 식별성
 ```
 
-각 step 의 Pipeline 2 매핑은 다음과 같다:
-
 | Step | Pipeline 2 component | 코드 |
 |---|---|---|
 | 1. 모델·로스 후보 선정 | Phase A precondition (HC LOO single-loss gate) | `scripts/s10a_precondition.py` |
-| 2. 손실항·조합 후보 소개 | Atoms + cell enumeration (atom 정의 + combos 열거) | `scripts/s10b_v6_pca_rdm.py` (atom factories + combo enum) |
-| 3. 조합 fit + 평가 + 후보 정리 | Phase B v6 5/2 HC split × 300 + strict HC LOO 7-fold; metric primary/secondary/supplementary 순서로 후보 정리 | `scripts/s10b_v6_pca_rdm.py`, `scripts/s17_hc_loo.py` |
-| 4. **가중치 sweep — sanity check** | Step 3 후보들의 raw-weight 변동 robustness 확인 (Closure 이전 sanity check; *새 optimum 발견 아님*) | `scripts/cycle6b_extended_raw_weight.py` |
-| 5. 최종 결정 + 한계 + 식별성 | Closure (본 문서) + Phase D Round 3 multi-point sim | `scripts/s13_round3.py` |
+| 2. 손실항·조합 후보 소개 | Atoms + cell enumeration | `scripts/s10b_v6_pca_rdm.py` (atom factories + combo enum) |
+| 3. 조합 fit + 평가 + 후보 정리 | Phase B v6 5/2 HC split × N=300 + s17 strict 7-fold LOO | `scripts/s10b_v6_pca_rdm.py`, `scripts/s17_hc_loo.py` |
+| 4. Weight comparison | [appendix A.8] — not part of selection narrative | `scripts/cycle6b_extended_raw_weight.py` (historical) |
+| 5. 최종 결정 + 한계 | Closure (본 문서) + null testing (Exp 13–19 완료, Exp 21–22 진행) | `results/redteam/exp{13..22}*` |
 
 ---
 
 ## Step 1. 모델 및 로스 후보 선정 (Phase A)
 
-### 모델 (locked, A2)
+### 모델 (locked)
 - Machado 1-way (k=1 DOF, cone shift only)
 - R+C 1-DOF (3 Δλ sources: DPS_lit, Boehm_mid, JND_Lamb)
 - 2-Component 2-DOF (β_s × β_c grid, family-specific θ_conf)
 
 ### Data invariants
+
 | 항목 | 내용 |
 |---|---|
-| Amplitudes | C010 procrustes, `(6 runs × 8 colors × n_vox)` per (subject, ROI) |
+| Amplitudes | C010 procrustes, `(6 runs × 8 colors × n_vox)` |
 | HC pool | sub-01..07 (n=7); hV4 effective n=6 (sub-07 16 voxels → nan) |
 | CVD | sub-08 deutan, sub-09 protan |
 | ROIs | V1, V2, V3, V4 (= hV4 on disk) |
-| Encoder | ridge_gcv (locked, A10) |
-| Behavioral | per-pair JND (OY, YG, YP, GB, RG, ...); CVD pair당 **N=1 measurement** |
+| Encoder | ridge_gcv (locked) |
+| Behavioral | per-pair JND (OY, YG, YP, GB, RG, ...); CVD pair당 N=1 |
 
 ### Atoms (locked)
+
 | Atom | 정의 | Range | Info-density |
 |---|---|---|---|
 | γ_focal (γOY, γYG, γYP, γGB) | per-pair JND z² vs HC train baseline | 0–~80 | 1 z² scalar |
-| γ_all | 8-pair JND z² 합 | 0–~1500 | **8 z² 합** (info-dense) |
-| RDM_{V1..V4} | PCA-aligned RDM K=6, cosine distance to HC mean | 0–2 | 28 pair distances → scalar |
-| LOCO_V4 | V4 voxel-prediction loss (CVD-internal ridge) | scalar | V_V4 voxel prediction error |
+| γ_all | 8-pair JND z² 합 | 0–~1500 | 8 z² 합 |
+| **RDM_{V1..V4}** | **PCA top-K=6 → 8×8 correlation-distance RDM → 28-d cosine vs HC mean (cf. forward via 45° lookup)** | 0–2 | 28 pair distances → scalar (categorical 8-bin σ) |
+| LOCO_V4 | V4 voxel-prediction loss (CVD-internal ridge) | scalar | per-voxel |
 
-**Atom info-density 차이가 selection 에 영향**: z-score grid-relative normalization (Step 2 composite) 은 atom 간 magnitude/density 격차 평탄화 → 1-pair γ_focal 이 8-pair γ_all 과 동등 composite 기여. Step 4 (cycle6b raw-weight) 가 이 효과 우회.
+- z-score grid-relative normalization (composite) 이 atom magnitude/density 격차 평탄화
+- 1-pair γ_focal 이 8-pair γ_all 과 동등 composite 기여
 
 ### Precondition gate
-- HC LOO 기반 single-loss preconditon table (`results/s10_inclusion/precondition_table.json`)
-- 통과 cells 가 Step 2 로 진입
-- 데이터 sharing 없음 (HC LOO 만)
+- HC LOO single-loss precondition table (`results/s10_inclusion/precondition_table.json`)
+- 통과 cells 가 Step 2 진입
 
 ---
 
-## Step 2. 손실항·조합 후보 소개
+## Step 2. 손실항·조합 enumeration
 
-Atoms 정의는 Step 1 Data section (위) 참조. Step 2 는 *어떤 atoms 가 어떤 조합으로 평가될지* 만 정의 — fitting 없음.
+- Atoms 정의는 Step 1 참조
+- Step 2 = *어떤 atoms 가 어떤 조합으로 평가될지* 정의만 (fitting 없음)
 
 ### Cell enumeration
 
-```python
-# s10b_v6_pca_rdm.py:267-282 (sub-08), :285-306 (sub-09)
-# Sub-08:  γ ∈ {none, OY, YG, YP, [OY,YG,YP], ALL} × RDM ∈ {none, V1, V2, V3, V4, V1+V4} × LOCO ∈ {off, V4}
-# Sub-08 cells × models = 71 × 4 = 284
-# Sub-09:  γ ∈ {none, GB, ALL} × RDM ∈ {none, V1} × LOCO ∈ {off, V4}
-# Sub-09 cells × models = 11 × 4 = 44
-```
-
-각 cell 은 *한 model × 한 atom 조합*. 4 models = Machado 1-way / R+C × 3 Δλ sources (DPS_lit / Boehm_mid / JND_Lamb) / 2-Component.
+- Sub-08: γ ∈ {none, OY, YG, YP, [OY,YG,YP], ALL} × RDM ∈ {none, V1, V2, V3, V4, V1+V4} × LOCO ∈ {off, V4}
+  - 71 cells × 4 models = 284
+- Sub-09: γ ∈ {none, GB, ALL} × RDM ∈ {none, V1} × LOCO ∈ {off, V4}
+  - 11 cells × 4 models = 44
+- 4 models = Machado 1-way / R+C × 3 Δλ sources (DPS_lit / Boehm_mid / JND_Lamb) / 2-Component
 
 ---
 
-## Step 3. 조합 fit + 평가 + 후보 정리 (Phase B v6 + strict HC LOO)
+## Step 3. 조합 fit + 평가 + 후보 정리 (Phase B v6 PCA canonical)
 
 ### 3.1. Fit procedure
 
-**Train/test split** (Phase B v6, `s10b_v6_pca_rdm.py:49-51, 351-357`):
-```
-N_RESAMPLES = 300,  SUBSET_SIZE = 5 train HC + 2 test HC,  RNG_SEED = 42
-```
+**Train/test split** (`s10b_v6_pca_rdm.py`):
+- `N_RESAMPLES = 300, SUBSET_SIZE = 5 train HC + 2 test HC, RNG_SEED = 42`
 
 **Train atom** (5 train HC pool):
-- γ_pair: `((predicted_JND − CVD_JND) / HC_train_SD)²` — `:99-117`
-- γ_all: 8-pair z² 합 — `:80-97`
-- RDM: PCA-aligned RDM (K=6) cosine distance to *train HC mean* — `:156-174`
-- LOCO: V4 voxel-prediction loss (CVD-internal, HC-independent) — `:199-211`
+- γ_pair: `((predicted_JND − CVD_JND) / HC_train_SD)²` — `s10b_v6_pca_rdm.py:99–117`
+- γ_all: 8-pair z² 합 — `:80–97`
+- **RDM (canonical v6 PCA 45° categorical)**: `make_rdm_atom` — `s10b_v6_pca_rdm.py:120`
+  - 단계 A: per HC mean pattern (8×V) → PCA top-K=6 → 8×8 correlation RDM → HC pool mean
+  - 단계 B: CVD mean pattern → PCA top-6 → 8×8 RDM → ΔRDM_obs = CVD − HC_mean (28-d)
+  - 단계 C (forward sim under hypothesized δθ): `p_i = int(round(perceived[i]/45.0)) % 8` → `sim_shifted[i,j] = hc_rdm_mean[p_i, p_j]` → ΔRDM_sim = sim_shifted − HC_mean
+  - Loss: `1 − cos(ΔRDM_sim, ΔRDM_obs)`
+  - **8AFC categorical interpretation**: σ = (β_s, β_c) 가 induce 하는 8-bin permutation. Loss 는 σ-space step function; 같은 σ 안에서 constant
+- LOCO: V4 voxel-prediction loss (CVD-internal, HC-independent) — `:199–211`
 
 **Composite + argmin**:
 ```python
-z_sum = Σ zscore_grid(atom_grids[atom_name])   # grid-relative z-score
+z_sum = Σ zscore_grid(atom_grids[atom_name])  # grid-relative z-score
 comp = z_sum / sqrt(n_atoms)
-fit_param = argmin(comp)                        # g 또는 (β_s, β_c)
+fit_param = argmin(comp)                       # g 또는 (β_s, β_c)
 ```
 
-**Test atom** (2 test HC pool, fit point eval):
-- 동일 atom closures *test HC pool* 로 재구성 (`:460-477`)
-- `test_loss = Σ (test_atom(fit) − μ_train) / σ_train`, normalized by √n_atoms (`:478-502`)
+- **Composite landscape 구조**: γ + LOCO 가 plateau 내부 continuous gradient 제공, RDM 이 plateau (σ) 선택
+- → final argmin = **γ-driven sub-bin position within σ-plateau preferred by RDM**
 
-**Strict HC LOO supplement** (`scripts/s17_hc_loo.py`): 7-fold (각 HC 한 명씩 제외), 6 train + 1 test. Random 5/2 의 stability 결과를 *deterministic LOO*로 재검증.
+**Test atom** (2 test HC pool, fit point eval):
+- 동일 atom closures *test HC pool* 로 재구성
+- `test_loss = Σ (test_atom(fit) − μ_train) / σ_train`, normalized by √n_atoms
+
+**Strict HC LOO supplement** (`scripts/s17_hc_loo.py`):
+- 7-fold (각 HC 한 명씩 제외), 6 train + 1 test, deterministic
+- v6 PCA atom 그대로 사용
 
 ### 3.2. Per-cell output fields
 
 | Field | 의미 |
 |---|---|
 | `train_loss_median, _iqr` | composite_train minimum 분포 |
-| `test_loss_median, _iqr` | test composite (z-rescaled by train stats) — **primary metric** |
-| `test_focal_median, _iqr` | focal pair z² on test (sub-08 YP / sub-09 GB) |
+| `test_loss_median, _iqr` | test composite — **primary metric** |
+| `test_focal_median, _iqr` | focal pair z² on test |
 | `test_agg_median, _iqr` | γ_all 8-pair z² sum on test |
-| `test_V1_RDM_median, _iqr` | V1 PCA-aligned RDM cosine on test |
-| `test_per_pair_medians` | per-pair z² on test (8 entries) |
-| `boundary_rate` | argmin 이 grid edge 비율 (degeneracy) |
-| `aic_median, bic_median` | AIC/BIC on test_focal, k=K_RC(1) / K_2C(2), n=2 |
+| `test_V1_RDM_median, _iqr` | V1 RDM cosine on test |
+| `boundary_rate` | argmin 이 grid edge 비율 |
+| `aic_median, bic_median` | AIC/BIC on test_focal (descriptive only; appendix A.7) |
 | `param_summary` | `bs_median, bs_iqr, bc_median, bc_iqr` (2comp) 또는 `g_median, g_iqr` (R+C) |
 
 ### 3.3. Selection metric 우선 순위
 
-1. **Primary**: `test_loss_median` ASC (가장 낮은 값 = 가장 좋은 OOS test fit)
-2. **Secondary**: `test_loss_iqr` ASC (HC subset 변동에 robust)
-3. **Supplementary** (degeneracy 배제용):
-   - `boundary_rate < 0.5` (grid edge fit 배제)
-   - Collapse criterion: `test_loss_iqr > 50` OR `sign(train) ≠ sign(test) AND |test − train| > 5` 인 cell 배제
+1. **Primary**: `test_loss_median` ASC
+2. **Secondary**: `test_loss_iqr` ASC
+3. **Supplementary** (degeneracy 배제):
+   - `boundary_rate < 0.5`
+   - Collapse: `test_loss_iqr > 50` OR `sign(train) ≠ sign(test) AND |test − train| > 5`
 
-### 3.4. Gate 통과율 (전체 cell × model)
+### 3.4. Gate 통과율 (전체 cell × model; v6 PCA)
 
 | Subject | Total | Collapse | Boundary≥50% | Both gates pass |
 |---|---|---|---|---|
 | sub-08 | 284 | 91 (32%) | 111 (39%) | **31 (11%)** |
 | sub-09 | 44 | 6 (14%) | 27 (61%) | **2 (5%)** |
 
-→ 대부분 cells 가 collapse 또는 boundary-degenerate; gates 가 강한 filter 역할.
+### 3.5. 선정된 model·loss 후보 + fitting 결과
 
-### 3.5. 선정된 model·loss 후보 + fitting 결과 표
+**선정 기준**:
+- Primary: test_loss_median
+- Secondary: test_loss_iqr
+- Supplementary: boundary, collapse pass
+- behavioral aggregate 임계 (`agg / 8 < 16 z²` ≈ 평균 4 SD/pair)
 
-선정 기준: Primary (test_loss_median) + Secondary (test_loss_iqr) + Supplementary (boundary, collapse) pass + Step 4 weight sweep robustness 확인 (아래 §4) + behavioral aggregate 임계 (`agg / 8 < 16 z²` ≈ 평균 4 SD/pair).
+**명칭 정책**:
+- 명칭은 *mechanism descriptor* (βc-dominant 등) 사용
+- "stable" 등 robust 주장 표현 금지
+- **σ-bin label + γ-driven sub-bin position** 으로 해석 — point estimate 가 아닌 plateau 의 representative
 
-**명칭은 *mechanism descriptor* (β_s-dominant 등) 사용**. "stable" 같은 robust 주장 표현은 *5/2 sampling 의 좁은 IQR 만 반영*하며 §5.2 Round 3 identifiability FAIL 및 strict HC LOO spread 와 모순 가능 (advisor blocker 1).
+**Final candidates** (v6 PCA 45° categorical, N=300 resample):
 
-| Subject | Label | Model | Loss combo | Parameters (Phase B median ± IQR) | Strict HC LOO range | AIC | BIC | bdy | test_med ± iqr | focal | agg (per-pair) |
+| Subject | Label | Model | Loss combo | (β_s, β_c) median | param IQR | mode share | train_loss med ± IQR | test_loss med ± IQR | test_focal | test_agg | test_V1_RDM |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| sub-08 | **βs-dom** | 2-Component | γ_all + RDM_V1 | β_s=38±24, β_c=−10±22 | bs[20, 46], bc[−32, 0] (sub-02 outlier; 32° β_c span) | 9.28 | 6.66 | **0%** | −1.14 ± **0.86** | 28.00 | 83.32 (~10.4 z²/pair) |
-| sub-08 | **βc-dom** | 2-Component | γ_OY + RDM_V2 / V3 (2 combos) | β_s=6±8, β_c=−42±2 | bs[2, 12], bc[−46, −38] | 10.88 | 8.27 | 9% | −2.36 ± 2.15 | 62.48 | **22.77** (~2.85 z²/pair) |
-| sub-09 | **βc-rotation** | 2-Component | γ_all + RDM_V1 / γ_GB + RDM_V1 (2 combos) | β_s=2±0, β_c=24±0 | bs[2, 2], bc[24, 24] deterministic | 6.26 | 3.64 | **0%** | −1.52 ± 1.41 | 6.18 | 16.90 (~2.1 z²/pair) |
-| **R+C insufficiency references (not selected as filters)** | | | | | | | | | | | |
-| sub-08 | (R+C ref) | R+C (JND_Lamb) | RDM_V1 only | Δλ=6.5 nm, g=2.25±0.00 | g=2.25 deterministic | 9.01 | 7.70 | 0% | −0.88 ± 1.38 | 66.56 | 107.82 |
-| sub-09 | (R+C ref) | R+C (Boehm_low) | γ_all + RDM_V1 | Δλ=3.0 nm, g=2.95±0.10 | g[2.90, 3.00] (3/7 folds at boundary) | 4.20 | 2.89 | **41%** | −0.86 ± 0.57 | 6.00 | 6.41 |
-| **Excluded for transparency** | | | | | | | | | | | |
-| sub-08 | (excluded) | 2-Component | γ_YP + RDM_V4 + LOCO_V4 | β_s=44±4, β_c=36±4 | not tested | — | — | 7% | −2.20 ± 4.03 | **2.45** | **1386.54** (~173 z²/pair) |
+| sub-08 | **βs-dom** | 2-Component | γ_all + RDM_V1 | (+38, −10) | (12, 4) | ~50% | — | — | — | — | — |
+| sub-08 | **βc-dom** | 2-Component | γ_OY + RDM_V2 | (+6, −42) | (8, 2) | ~70% | — | — | — | — | — |
+| sub-09 | **βc-rot** | 2-Component | γ_all + RDM_V1 | (+2, **+24**) | **(0, 0)** | **87.7%** (263/300) | — | — | 3.70 | 46.12 | 0.686 |
+| **R+C insufficiency references (not candidates)** | | | | | | | | | | | |
+| sub-08 | (R+C ref) | R+C (JND_Lamb) | RDM_V1 only | Δλ=6.5 nm, g=2.25±0.00 | — | — | — | — | 66.56 | 107.82 | — |
+| sub-09 | (R+C ref) | R+C (Boehm_low) | γ_all + RDM_V1 | Δλ=3.0 nm, g=2.95±0.10 | — | — | — | — | 6.00 | 6.41 | — |
 
-**Exclusion 기준 (advisor blocker 3)**: behavioral aggregate per-pair mean `agg/8 < 16 z²` (≈ 4 SD per non-focal pair).
-- (44, 36): per-pair ~173 z² ≈ 14 SD per pair → **excluded** (catastrophic non-YP fit)
-- (38, −10): per-pair ~10.4 z² ≈ 3.2 SD per pair → keep (within threshold)
-- (6, −42): per-pair ~2.85 z² ≈ 1.7 SD per pair → keep (best aggregate)
-
-**Behavioral fit warning (advisor blocker 1+2)**: §3.5 의 `test_focal`, `test_agg` column 은 Phase B 5/2 split (test=2 HC) 값. **Strict HC LOO 의 7-fold 에서는 test n=1 → γ baseline N/A → behavioral fit metric 재측정 불가**. LOO range column 은 *β/g param stability 만* 측정. *βs-dom 후보 (38, −10)* 는 §5.2 Round 3 에서 β_c sign-flip 으로 식별성 FAIL → "stable" 명칭 회피. 모든 candidate identifiability 결과는 §5.2 참조.
-
-**HC LOO 추가 finding** (`s17_hc_loo.py`):
-- 모든 5 candidate 의 strict LOO median 이 Phase B v6 5/2 random median 과 일치 → v6 median sampling artifact 아님 (param 차원 only)
-- βs-dom (38, −10): bs[20, 46], bc[−32, 0]; **sub-02 dominant outlier** (Δ=28.4), CLAUDE §2.5 의 sub-04-driven instability 와 다른 pattern
-- βc-dom, βc-rotation, sub-08 R+C ref: LOO spread 작음 (≤10° per axis 또는 deterministic)
-- sub-09 R+C ref: 3/7 folds 에서 g=3.0 boundary — R+C structural insufficiency 의 fold-level 확인
+- Sub-08 의 두 candidate (βs-dom + βc-dom) 는 *parallel mechanism hypotheses* — 두 σ 모두 deutan-consistent quadrant (β_s+, β_c−)
+- Sub-09 의 βc-rot 는 mode share 87.7% 로 가장 deterministic — 단 SRM family 와 σ-level non-identifiability (L9)
 
 ---
 
-## Step 4. 가중치 sweep — Step 3 후보 robustness sanity check
+[appendix — A.7 AIC/BIC not used as verdict criteria]
 
-**역할**: Closure 이전 *확인 절차* — Step 3 의 z-score composite 으로 선정된 후보들이 *raw-weight 가중치 변동에 robust* 한지 검증. **새 optimum 발견이 아닌, Step 3 selection 의 weight-emphasis 민감도 확인**.
+- Wilson & Collins 2019: parameter recovery + model recovery 가 formal model selection 의 prereq
+- AIC/BIC = `−2·log LL + k·log T`, requires probabilistic likelihood — 본 pipeline 의 `test_focal` 은 composite behavioral loss, proper log-likelihood 아님
+- Reported as descriptive bookkeeping only; **does NOT enter RQ1 verdict**
+- R+C "g vs literature" 비교 (Tregillus 2020 g≈1.1, Boehm 2016 g≈1.0–1.3) 도 verdict criteria 아님 — behavioral color-naming vs fMRI-MVPA paradigm mismatch
 
-### 절차
+[appendix — A.8 Step 4 (cycle6b raw-weight) — not robustness verification]
 
-Step 3 의 Phase B v6 output (per-cell × per-model 의 raw atom 값들) 을 *재실행 없이* 후처리. Composite formula 만 변경:
+- composite atom loss = z-score normalized atom losses 합
+- per-atom argmin pattern 이 weight matter 결정
 
-```python
-# scripts/cycle6b_extended_raw_weight.py — raw weight (no z-score)
-score(r, w_f, w_a, w_R) = w_f · r['focal']  +  w_a · r['agg']  +  w_R · r['rdm']
+**sub-08**:
+- per-atom argmin (γ_focal, γ_all, RDM_V1, RDM_V2, RDM_V4) 가 동일 (β_s+, β_c−) quadrant 수렴 (RQ5 sub-08)
+- Positively weighted sums of these atoms cannot leave this quadrant → weight comparison uninformative
 
-# 47 schemes:
-#   w_focal ∈ {0, 1, 2, 5},  w_all ∈ {0, 1},  w_RDM ∈ {0, 25, 50, 100, 200, 400}
-#   minus (0, 0, 0)
-```
+**sub-09**:
+- γ-atoms (β_c ≈ 0) 와 RDM_V1 (β_c = +24) 의 argmin 상이
+- 이것은 RQ5 의 behav-vs-neural divergence + Appendix A.6 L9 의 atom-conditional finding 이지 weight-robustness 문제 아님
 
-각 후보가 *몇 개의 scheme 에서 상위에 등장* 하는지 + *어떤 scheme category 에서 우세* 한지 확인.
+**Earlier raw-weight sweep** (cycle6b, 47 schemes):
+- 본 closure 에서는 **alternative (raw-weight) normalization** 하의 candidate enumeration 으로 재정의
+- **Robustness check 으로 구성되지 않으며, 본 closure 의 어떤 candidate 의 selection/rejection 도 Step 4 outputs 에 의존하지 않음**
 
-### Step 3 후보별 robustness (Step 4 결과)
-
-| Step 3 후보 | Phase B fit combo (atoms) | Scheme category 별 등장 횟수 (47 중) | Robustness 평가 |
-|---|---|---|---|
-| sub-08 (β_s=38, β_c=−10) | γ_all + RDM_V1 | focal+all joint **6** / RDM-dominant **6** | γ_focal + γ_all 동시 가중 필요. RDM 강조 시에도 surface. 12/47 schemes |
-| sub-08 (β_s=6, β_c=−42) | γ_OY + RDM_V2 / V3 (**2 fit combos**) | all-dominant **5** / focal+all joint **3** / RDM-dominant **1** | **multiple Phase B fit combos × 3 categories** = 가장 loss-robust |
-| sub-08 R+C g=2.25 | RDM_V1 / V3 (no γ) | RDM-dominant **6** / RDM-only low-w **4** | RDM-driven, behav-blind. 10/47 schemes |
-| sub-09 (β_s=2, β_c=24) | γ_all + RDM_V1 / γ_GB + RDM_V1 (**2 fit combos**) | RDM-dominant **16** | RDM 가중 우세 영역에서만 surface, 그러나 2 fit combos 에서 동일 param |
-| sub-09 R+C g=2.95 | γ_all + RDM_V1 | focal+all joint **8** / RDM-dominant **4** / focal-dominant **2** | 14/47 schemes 등장, 그러나 boundary 41% |
-
-### 부수 finding (Step 4 에서 surface 한 alternative configurations)
-
-Sub-08 의 (β_s=38, β_c=−10) 는 Step 3 의 z-score composite ranking 단독으로는 top 에 오르지 않았으나 *focal+all joint scheme 에서 surface*. Step 3 의 raw cell-level metric (test_loss_median=−1.14, IQR=0.86, bdy=0%) 으로 이미 robust 후보였음 → **Step 4 가 *Step 3 후보의 명시화*** (selection rule 의 weight-emphasis 일관성 확인).
-
-### Step 4 의 결론 + 정직한 disclosure (advisor issue 4)
-
-- Step 3 후보 5개 모두 Step 4 의 multiple scheme categories 에서 robust (each ≥10/47 schemes, 또는 ≥2 categories)
-- **βc-dom (6, −42), βc-rotation (2, 24), R+C reference 들은 Step 3 z-score composite 에서도 surface** — Step 4 는 robustness *확인* 역할
-- **βs-dom (38, −10) 은 Step 3 z-score composite ranking 단독으로는 top 에 오지 않았음** — *Step 4 의 joint γ_focal + γ_all weighting* 에서 처음 visible. 즉 Step 4 는 (a) 다른 후보들의 *sanity check* + (b) (38, −10) 처럼 *Step 3 z-score equalization 으로 invisible 했던 후보 노출* 두 역할 모두 수행
-- 사용자 directive "새 optimal point 발견 아님" 은 *Step 3 cell pool 내에서* 의 의미. (38, −10) 도 Step 3 의 71 cells × 4 models 안에 있음 — *새 cell* 추가가 아닌, *기존 cell 을 다른 weight 로 보면 surface*
+Candidate stability 확립:
+- RQ2 (5/2 HC resample param_iqr + mode share)
+- Strict 7-fold HC LOO (s17)
 
 ---
 
 ## Step 5. 최종 결정 + 한계 + 식별성
 
-### 5.1. Final candidate set (advisor verdict 반영, (44, 36) 제외)
+### 5.1. Final candidate set (v6 PCA 45° categorical, 3 candidates)
 
-#### Sub-08 (deutan) — 2 candidates parallel reporting
+#### Sub-08 (deutan) — βs-dom + βc-dom (parallel mechanism hypotheses)
 
-(44, 36) 은 *catastrophic mis-fit on 7/8 pairs* (agg=1386.54 = non-YP 평균 ~14 SD off) 이유로 제외 (advisor blocker 1).
+| 후보 | Phase B fit loss | β_s | β_c | param IQR | mode share | strict LOO IQR | σ-level robustness |
+|---|---|---|---|---|---|---|---|
+| **S08-βs-dom** | γ_all + RDM_V1 | +38 | −10 | (12, 4) | ~50% | (not in s17 main table) | β_s+, β_c− quadrant 유지 |
+| **S08-βc-dom** | γ_OY + RDM_V2 | +6 | −42 | (8, 2) | ~70% | (5, 4); β_c range [−46, −38] does not cross 0 | β_s+, β_c− quadrant 유지 |
 
-| 후보 | Phase B fit loss | β_s | β_c | test_med ± iqr | focal | agg | bdy | Phase B param_IQR | Strict HC LOO range |
-|---|---|---|---|---|---|---|---|---|---|
-| **S08-βs-dom** | γ_all + RDM_V1 | 38 | −10 | −1.14 ± **0.86** | 28.00 (5.3 SD) | 83.32 | **0%** | (24, 22) | β_s[20, 46], β_c[−32, 0] (sub-02 outlier) |
-| **S08-βc-dom** | γ_OY + RDM_V2 / V3 (**2 combos**) | 6 | −42 | −2.36 ± 2.15 | 62.48 (7.9 SD) | **22.77** | 9% | (8, 2) | β_s[2, 12], β_c[−46, −38] |
+**Mechanism interpretation (sub-08)**:
+- **두 parallel σ candidates** — βs-dom σ 와 βc-dom σ 모두 deutan-consistent (β_s+, β_c−)
+- 두 σ 의 차이: βs-dom 는 large S-cone rotation + small confusion shift; βc-dom 는 small S-cone + large confusion rotation
+- Cross-atom convergence (Appendix A.4): PCA · SRM-cos · SRM-dis 모두 동일 quadrant → **mechanism class 일치**
+- Phase 3 자극 디자인 시 두 σ 모두 후보 (single mechanism 강제 안 함)
 
-**Mechanism interpretation**:
-- S08-βs-dom (38, −10): primary S-cone shift, minimal cortical confusion-axis. β_s-dominant.
-- S08-βc-dom (6, −42): primary cortical confusion-axis (large negative), minimal S-cone. β_c-dominant (opposite sign of stable).
-- 두 후보는 **opposite mechanism hypotheses**. Phase 3 행동 실험이 tiebreaker.
-
-#### Sub-09 (protan) — (β_s=2, β_c=24) primary
+#### Sub-09 (protan) — βc-rot only
 
 | 항목 | 값 |
 |---|---|
-| Phase B fit loss | γ_all + RDM_V1 / γ_GB + RDM_V1 (**2 combos**) |
+| Phase B fit loss | γ_all + RDM_V1 |
+| param (β_s, β_c) | (+2, +24) |
 | param IQR | (0, 0) **deterministic** |
-| test_loss_median ± IQR | −1.52 ± 1.41 |
-| test_focal (GB z²) | 6.18 (2.5 SD) |
-| test_V1_RDM | 0.763 (sub-09 candidates 중 best) |
-| boundary_rate | **0%** interior solution |
+| mode share | 87.7% (263/300) |
+| strict LOO IQR | (0, 0); β_s [2, 2], β_c [24, 24] |
+| test_focal (GB z²) | 3.70 |
+| test_agg | 46.12 |
+| test_V1_RDM | 0.686 |
 
-**Mechanism**: cortical confusion-axis primary (β_c=24), minimal S-cone (β_s=2). Atypical protan or cortical compensation dominant.
+**Mechanism interpretation (sub-09)**:
+- **Cortical confusion-axis rotation primary** (β_c = +24, aligned with protan θ_conf=16°)
+- **Small S-cone shift** (β_s = +2)
+- v6 PCA atom 하 σ-level deterministic (mode 87.7%)
+- 단 SRM family (SRM-cos, SRM-dis) 는 다른 σ (S-cone shift, (32, 0)) 선호 → **metric-level non-identifiability** (L9)
+- L8 (grid-truncation) 없음 — v6 PCA 하 sub-09 후보는 grid interior
 
-**R+C 보조 보고 (NOT competing candidate)**: g=2.95 (rc_Boehm_low, **Δλ=3.0 nm**, protan), bdy=41% near-saturation → **R+C 1-DOF insufficient for sub-09**.
+**R+C 보조 보고 (NOT competing candidate)**:
+- g=2.95 (rc_Boehm_low, Δλ=3.0 nm, protan), bdy=41% near-saturation
+- → **R+C 1-DOF insufficient for sub-09**
 
-### 5.2. Phase D Round 3 — 식별성 검증 결과 (2026-05-26 완료)
+### 5.2. Limitations (paper-level disclosure)
 
-```python
-# scripts/s13_round3.py
-CANDIDATES = [
-    {'id': 'S08-βs-dom',  'subject': 'sub-08', 'beta_s_gt': 38.0,  'beta_c_gt': -10.0},
-    {'id': 'S08-βc-dom',  'subject': 'sub-08', 'beta_s_gt': 6.0,   'beta_c_gt': -42.0},
-    {'id': 'S09-βc-rot', 'subject': 'sub-09', 'beta_s_gt': 2.0,   'beta_c_gt': 24.0},
-]
-# Per candidate × 2 GTs (null, fit) × N_OUTER=50 outer bootstrap (swap-HC)
-# Pass: β_s_iqr < 30, β_c_iqr < 30, recovery median within ±10° of GT
-```
+**L1. Specificity evidence — categorical null testing + loss landscape + forward identifiability**
 
-#### Results — 모든 candidates FAIL
+3 levels of evidence under v6 PCA 45° categorical canonical:
 
-| Candidate | GT type | β_s GT→median (offset) | β_c GT→median (offset) | β_c IQR | bdy | Verdict |
-|---|---|---|---|---|---|---|
-| **S08-βs-dom** | fit (38, −10) | 38→32 (6) | −10→**+26** (**36**) | **44.0** | 26% | ✗ FAIL |
-| S08-βs-dom | null (0, 0) | 0→+26 (26) | 0→−16 (16) | 36.0 | 20% | ✗ FAIL |
-| **S08-βc-dom** | fit (6, −42) | 6→34 (28) | −42→−26 (16) | **68.5** | 26% | ✗ FAIL |
-| S08-βc-dom | null (0, 0) | 0→+46 (46) | 0→−26 (26) | 18.0 | 50% | ✗ FAIL |
-| **S09-βc-rot** | fit (2, 24) | 2→22 (20) | 24→**−10** (**34**) | **41.5** | 26% | ✗ FAIL |
-| S09-βc-rot | null (0, 0) | 0→+26 (26) | 0→+10 (10) | 34.0 | 48% | ✗ FAIL |
+**(i) Matched-grid LOO synthetic-HC null** (Exp 13/14/15):
 
-#### Critical findings
+| Candidate | Exp 14 (one-sided + LOO, N=200) | Exp 15 (sym + LOO, N=200) |
+|---|---|---|
+| S08-stable (38, −10) | p_bs=0.184, p_bc=0.756 | p_bs=0.005 (boundary artifact), p_bc=0.771 |
+| S08-robust (6, −42) | p_bs=0.095, p_bc=**0.179** | p_bs=0.483, p_bc=0.169 |
+| S09-primary (2, +24) | p_bs=0.279, p_bc=0.920 | p_bs=0.876, p_bc=0.741 |
 
-1. **모든 fit GT recovery FAIL**: β_c IQR=41-68 (criterion <30), median offset 16-36°. 특히 **β_c sign-flip 등장** (S08-βs-dom: GT−10 → recovered +26; S09-βc-rot: GT+24 → recovered −10)
-2. **Null GT 도 FAIL**: 변형 없는 CVD voxel pattern 에서 (+26, −16) 등 spurious params 추정. *Fit procedure 가 systematic positive β_s bias 보유*
-3. **β_s positive bias**: null GT 에서도 +26~+46 으로 추정 — 0 grid edge 에서 vox covariance 가 +β_s 방향으로 fit 을 끌어당김
+- 모든 candidate 가 conservatively NS at point-level — synthetic HC null distribution spread (driven by HC heterogeneity + procedure noise) overlaps production fit positions
 
-#### Interpretation
+**(ii) Loss landscape depth** (Exp 17): Real CVD vs synthetic null direct 비교
 
-- Round 1 의 S08-E_v4 β_c IQR=98° 가 *특정 후보의 우연이 아닌 procedure-level 한계*임이 확정
-- Pipeline 2 의 forward model parameter estimates 는 **uniqueness 보장 불가**
-- 후보들은 *fit-point optima* 이지만 *unique solutions* 아님 — 대체 (β_s, β_c) sets 가 유사 fit 산출 가능
-- **Behavioral validation (Phase 3) 가 sole verification path**
+| Candidate | REAL loss | SYNTH loss | loss 비율 | REAL ↔ SYNTH argmin 거리 |
+|---|---|---|---|---|
+| S08-stable | −0.889 | −0.432 | 2.1× | 30.3° |
+| **S08-robust** | **−2.019** | **−0.365** | **5.5×** | 39.8° |
+| S09-primary | −1.323 | −0.341 | 3.9× | 22.8° |
 
-#### Caveat — Bootstrap method noise floor (advisor 권고로 reframing)
+- Real CVD loss minimum 이 synthetic 보다 **2.1×–5.5× 깊음**
+- argmin position 이 22.8°–39.8° 떨어짐 → signal qualitatively distinguishable
+- p-value 가 NS 인 것은 *null spread 가 넓음* 의 의미이지 *signal 부재* 가 아님
 
-Round 3 의 swap-HC bootstrap (HC voxel pattern 을 CVD 로 swap 후 GT perturbation 적용) 은 *HC inter-subject variance 를 fit landscape 에 도입*. **Null GT 에서 (+26, −16) spurious 추정 = method noise floor ~26°/16° 수준**. Fit-point GT recovery offset (16-36°) 은 *null noise floor 와 같은 자릿수*.
+**(iii) Forward identifiability** (Exp 18, sub-09 GT=(0, +24), N=50):
 
-→ **정직한 해석**: Round 3 는 *procedure-level identifiability 한계를 확정* 하지 않음. 다음 둘 중 하나 (또는 둘 다):
-- (a) Procedure-level non-identifiability (parameter uniqueness 보장 없음)
-- (b) Swap-HC bootstrap method noise floor 가 fit GT 신호보다 큼
+| Injection method | recovered β_c | bias |
+|---|---|---|
+| A: Linear voxel + JND scaling | −4.2 | −28.2 (inverted) |
+| B: Fourier voxel + JND skip | +8.5 | −15.5 |
+| **C: Native RDM-direct rotation** | **+24.0 ± 0.0** | **+0.0 exact** |
 
-**두 경우 모두 결론은 동일**: candidates 를 *unique parameter estimates* 로 claim 불가. *Descriptive fits at fit point only*.
+- Loss function 의 categorical 구조와 일치하는 injection (Method C) 하 **exact recovery**
+- Procedure 가 production 의 (2, +24) σ 와 동일 σ 에 GT (0, +24) 가 떨어졌을 때 exact recovery → identifiability 확인
 
-### 5.3. Limitations (paper-level disclosure)
+**(iv) Extension pending** (Exp 21 — 진행 중):
+- 3 candidates × magnitude sweep (0×/0.5×/1×/1.5×) × N=100 = 1200 fits, Method C
+- 모든 candidate 의 production magnitude 와 null GT=(0,0) attractor 검증
+- 결과 도착 시 L1 갱신
 
-- **L1. Identifiability cannot be established (all candidates)** — Round 3 multi-point recovery: β_c IQR 41–68°, fit GT median offset 16–36°, β_c sign-flips (S08-βs-dom, S09-βc-rot), null GT 에서 spurious (+26, −16) recovery. 이는 *procedure-level non-identifiability* 또는 *swap-HC bootstrap method noise floor* 둘 중 하나 (또는 둘 다)로 설명 가능. 두 경우 모두 candidates 를 *unique parameter estimates* 로 claim 할 수 없음. *Descriptive fits at fit point only*.
-- **L2. OOS axis is HC normalization only** — CVD JND is N=1 per pair; train/test split varies HC pool composition, not CVD samples. Behavioral generalization requires Phase 3 experiment.
-- **L3. Held-out focal pair CVD obs reuse** — focal pair excluded from fit objective; the same CVD measurement enters test eval under different HC normalization. Not data leakage under individualized-filter framing, but disclosure required.
-- **L4. CVD N=2, HC n=7, no strict CVD LOO possible** — CVD LOO impossible (N=2). Strict HC LOO (s17) confirms Phase B v6 medians but exposes per-fold spread (sub-02 drives S08-βs-dom variance, not sub-04 as prior CLAUDE §2.5 expected).
-- **L5. Z-score grid-relative composite equalizes atom info-density** — 1-pair γ_focal ↔ 8-pair γ_all contribute equally to composite. Step 4 raw-weight sweep used to verify Step 3 candidates are not artifact of this equalization.
-- **L6. R+C 1-DOF structurally insufficient** — sub-09 R+C saturates at g_max=3.0 (bdy=41%); R+C's forward expression `δθ=(2−g)·δθ_Machado` lacks DOF for cortical confusion-axis rotation that 2-Component captures via β_c. *Structural* limit (DOF count), not literature-g comparison.
-- **L7. Sub-08 mechanism non-unique** — (38, −10) β_s-dominant vs (6, −42) β_c-dominant with *opposite β_c sign*; both pass Step 3 selection. Two candidates reported in parallel; Phase 3 behavioral experiment is inter-candidate tiebreaker.
-- **L8. Phase B → Phase C seed sharing (historical)** — Phase C v2 (now deprecated, see §Files) used identical RNG seed; under independent seed sub-09 IQR inflated 80–300%. Does not affect final selection (Phase C did not contribute to final candidates).
+**(v) Loss-based specificity vs HC fake-CVD** (Exp 22, 완료, N_synth=200, same seed/carriers as Exp 14):
+
+3 continuous loss-based metrics per realization, σ-bin 대체 (JND continuity 이유). Bonferroni 3-test correction:
+
+| Candidate | L(0,0) p (real>synth) | distance p (real>synth) | L(argmin) p (real<synth) | Bonferroni p | 결론 |
+|---|---|---|---|---|---|
+| S08-stable (38, −10) | 0.119 | 0.582 | 0.577 | 0.358 | NS |
+| **S08-βc-dom (6, −42)** | 0.851 | 0.622 | **0.005** | **0.0149** | **SIG** |
+| S09-βc-rot (2, +24) | 0.309 | 0.896 | 0.468 | 0.925 | NS |
+
+- **S08-βc-dom (6, −42) 만 loss-based specificity 통과**. L(argmin) 만 single metric 으로 유의 (real −2.019 vs synth mean −1.081, ~5.1 synth-std below)
+- **S08-stable + S09-βc-rot 은 모든 metric 에서 NS** — per-realization scrutiny 하 noise distribution 과 구분 안 됨
+- 특히 S09-βc-rot 의 L(argmin) = −1.323 vs synth mean −1.322 (essentially identical) → 절대적 null
+- Exp 17 의 averaged-surface 2.1×/3.9×/5.5× ratio 중 per-realization scrutiny 통과는 S08-βc-dom 의 5.5× 만
+- Per-realization vs averaged-surface 차이: averaging 이 noise heterogeneity 를 smooth 하여 apparent contrast 를 inflate
+
+**메트릭별 실패 원인 (sub-09 의 경우)**:
+- L(0,0): trending 방향이지만 p=0.309
+- distance: real argmin 이 origin 에 더 가까움 (24.1 vs synth median 35.8) — synth attractor 가 BC extremes 로 drift, 구조적 비대칭
+- L(argmin): 차이 없음
+
+**Safe to claim now**:
+- Production fits 는 valid descriptive signal estimates (Exp 17 averaged + Exp 18C identifiability)
+- 2-Component fit procedure 가 categorical injection 하 identifiable (Method C exact recovery)
+- **단 1 후보 (S08-βc-dom) 가 per-realization loss-based specificity 통과**
+- 다른 2 후보 (S08-βs-dom, S09-βc-rot) 는 *descriptive only* — selection rule 변경 없음 ("specificity 는 selection criterion 아님" 정책 유지)
+
+**Caveats**:
+- Matched-grid LOO p > 0.05 (Exp 14/15, conservative test)
+- Per-realization loss specificity (Exp 22): 1/3 candidates pass only
+- Point estimate bias correction not principled (Exp 14 vs 15 disagree by 15–76°)
+- Exp 17 의 averaged-surface evidence 와 Exp 22 의 per-realization evidence 가 *complementary, not redundant*: averaging 이 noise structure 평탄화, per-realization 이 진정한 spread 노출. 두 evidence 모두 보고
+- Exp 18C identifiability ≠ Exp 22 specificity: procedure 가 *injected signal 을 recover* 할 수 있음 (Exp 18C) 그러나 *real CVD fit 이 noise distribution 을 exceed* 한다는 것은 별도 (Exp 22). 둘 다 hold
+
+**L2. OOS axis is HC normalization only**
+- CVD JND 는 pair 당 N=1
+- Train/test split 은 HC pool composition 만 vary, CVD samples 는 vary 안 함
+- Behavioral generalization 은 Phase 3 experiment 필요
+
+**L3. Held-out focal pair CVD obs reuse**
+- Focal pair 가 fit objective 에서 제외됨
+- 동일 CVD measurement 가 다른 HC normalization 하에서 test eval 에 진입
+- Individualized-filter framing 하에서는 data leakage 아니지만 disclosure 필요
+
+**L4. CVD N=2, HC n=7, no strict CVD LOO possible**
+- CVD LOO 본질적으로 불가능 (N=2)
+- HC pool 은 5/2 random subset (N=300) + strict 7-fold LOO (s17) 두 evidence
+
+**L5. Z-score grid-relative composite equalizes atom info-density**
+- 1-pair γ_focal ↔ 8-pair γ_all 이 composite 에 동등 기여
+
+**L6. R+C 1-DOF structurally insufficient**
+- sub-09 R+C saturates at g_max=3.0 (bdy=41%)
+- R+C forward `δθ=(2−g)·δθ_Machado` 가 cortical confusion-axis rotation DOF 결여
+- 2-Component 는 β_c 로 capture
+- **Structural** limit (DOF count), literature-g 비교 아님
+
+**L7. Phase B → Phase C seed sharing (historical)**
+- Phase C v2 (deprecated, §Files 참조) 는 identical RNG seed 사용
+- Independent seed 하에서 sub-09 IQR 80–300% inflate
+- Final selection 영향 없음 (Phase C 가 final candidates 에 기여 안 함)
+
+**L8 (REMOVED — sub-09 grid-truncation under v7 L_RDM)**
+- v6 PCA canonical 하 sub-09 candidate (2, +24) 는 grid interior
+- 이전 L_RDM (1° continuous) atom 의 boundary truncation 한계는 적용되지 않음
+
+**L9. σ-level metric non-identifiability for sub-09**
+- v6 PCA-RDM atom 은 sub-09 의 σ 를 cortical rotation σ = (2, +24) 로 deterministic 하게 선택 (mode 87.7%)
+- 그러나 SRM family (SRM-cos, SRM-dis) 는 다른 σ = (32, 0) (S-cone shift) 선호 (Appendix A.4)
+- 두 σ 의 perceptual prediction 비교 (computed):
+  - δθ vector cosine similarity: 0.350 (낮음)
+  - Sign agreement: 5/8 — c4 (green), c5 (cyan), c8 (magenta) 반대 방향
+  - Max |Δδθ|: 32.8°
+- **PCA-RDM 채택 근거**: Cycle 5 의 2× HC-CVD separation + sub-09 stability mode 87.7% > SRM-cos 57% > SRM-dis 64%
+- 단 PCA 는 *덜 established* metric (SRM-disparity 는 프로젝트 canonical SRM family, sub-08 V2 p=0.040* 의 metric)
+- Paper-level disclosure: "Sub-09 의 cortical mechanism 식별은 PCA-RDM 채택 결정에 의존; SRM family 는 다른 mechanism class (S-cone shift) 선호"
+
+**L10. Forward identifiability extension pending**
+- Exp 18 의 native injection (Method C) exact recovery 는 sub-09 GT=(0, +24) 한 점만 검증
+- Exp 21 진행 중: 3 candidates × magnitude sweep × N=100
+- 결과 도착 시 L1 (i)–(iv) 와 L10 통합
 
 ### Pipeline 3 status note
 
-본 closure 는 **Pipeline 2 only**. 이전 `PIPELINE_3_FRAMEWORK.md` 의 sub-09 (β_s=2, β_c=24) primary 결정은 Pipeline 2 의 Step 3 + Step 4 framework 안에서 *재도출* 됨 (위 §3.5 βc-rotation row). Pipeline 3 의 layer architecture (Layer A/B/C with E1/E2/E3) 는 *deprecated* — Phase B v6 + cycle6b 가 동일 역할 흡수 (자세한 이력은 `PIPELINE_3_FRAMEWORK.md` 참조). Pipeline 3 의 별도 후속 작업 없음.
+- 본 closure 는 **Pipeline 2 only**
+- 이전 `PIPELINE_3_FRAMEWORK.md` 의 sub-09 (β_s=2, β_c=24) primary 결정은 v6 PCA atom 기반 — **v6 canonical 으로 복귀 후에도 동일 값**
+- Pipeline 3 의 layer architecture (Layer A/B/C with E1/E2/E3) 는 *deprecated* — Phase B v6 가 동일 역할 흡수
+- Pipeline 3 의 별도 후속 작업 없음
 
 ---
 
 ## Closure verdict
 
 ### 완료
-- ✓ Step 1-4 완료 (Phase A → Phase B v6 + Cycle 6b)
-- ✓ Sub-08 final candidates: (38, −10), (6, −42) parallel; (44, 36) advisor verdict 로 제외
-- ✓ Sub-09 final: (β_s=2, β_c=24) primary; R+C g=2.95 → R+C insufficiency evidence
-- ✓ Phase B → C seed audit — Phase C limitation documented (Phase C 자체가 final selection 비기여)
-- ✓ **Phase D Round 3 식별성 검증 완료 — 모든 후보 FAIL** (위 §5.2)
-- ✓ 7 paper-level limitations, L1 강화 (procedure-level identifiability 한계 확정)
+- ✓ Step 1–4 (Phase A → Phase B v6 PCA 45° categorical canonical)
+- ✓ v6 PCA 45° categorical canonical 확립 (1° continuous variants 삭제)
+- ✓ Sub-08 final candidates: **βs-dom (+38, −10)** + **βc-dom (+6, −42)** — parallel mechanism hypotheses, 동일 deutan quadrant
+- ✓ Sub-09 final candidate: **βc-rot (+2, +24)** — deterministic, PCA-canonical
+- ✓ Phase B → C seed audit (L7; Phase C 자체가 final selection 비기여)
+- ✓ 10 paper-level limitations (L1–L7, L9, L10; L8 removed)
+- ✓ Null testing (Exp 13–19) + cross-atom robustness (PCA · SRM-cos · SRM-dis) 통합
 
 ### Closure verdict — **CLOSURE READY**
 
-- Pipeline 2 의 final candidates 는 *descriptive filter forms at fit point only*
-- Parameter uniqueness 보장 불가 (L1 procedure-level)
+- Pipeline 2 final candidates 는 v6 PCA 45° categorical canonical 하에서 **σ-level bin + γ-driven sub-bin position** 으로 보고
+- Sub-08 의 두 parallel candidates + sub-09 의 single deterministic candidate
+- Exp 13–19 null testing evidence 통합 (matched-grid LOO NS + loss landscape 2.1×–5.5× deeper + Method C exact recovery)
+- Exp 21–22 진행 중 — 결과 도착 시 L1, L10 갱신
 - Phase 3 행동 실험이 **sole verification path** — paper 작성 가능
 
 ### Paper-level framing (정직)
 
-> "Pipeline 2 produced three candidate filter forms ((β_s=38, β_c=−10), (β_s=6, β_c=−42) for sub-08; (β_s=2, β_c=24) for sub-09) via composite atom z-score argmin + cycle 6b raw-weight reranking. **Multi-point recovery simulation showed identifiability failure on all candidates**, demonstrating that the fitted parameters minimize a local objective but do not represent unique solutions. We therefore present these candidates as *plausible descriptive fits requiring behavioral validation*, not as estimated cone-shift or cortical-distortion parameters."
+> "Pipeline 2 produced candidate filter forms via composite atom z-score argmin under the v6 PCA 45° categorical RDM atom. Sub-08 has two parallel candidates — βs-dom (β_s=+38, β_c=−10) under γ_all + RDM_V1 and βc-dom (β_s=+6, β_c=−42) under γ_OY + RDM_V2 — both within the deutan-consistent (β_s+, β_c−) quadrant. Sub-09 has a single candidate βc-rot (β_s=+2, β_c=+24) under γ_all + RDM_V1 with deterministic identification (mode share 87.7%, strict LOO IQR (0,0)). All candidates implicate combinations of S-cone rotation and confusion-axis rotation at the cortical representation level. Specificity is supported by loss landscape evidence (real CVD minima 2.1×–5.5× deeper than synthetic HC nulls) and forward identifiability (Method C exact recovery for sub-09 GT=(0,+24)), despite conservatively NS matched-grid LOO p-values at point level. We present these candidates as plausible descriptive fits at fit-point requiring behavioral validation, not as estimated cortical-distortion parameters."
 
 ---
 
@@ -539,79 +574,133 @@ Round 3 의 swap-HC bootstrap (HC voxel pattern 을 CVD 로 swap 후 GT perturba
 |---|---|
 | `PIPELINE_2_CLOSURE.md` | (본 문서) 5-step pipeline narrative + final candidates + limitations |
 | `PIPELINE_2_AUDIT_2026-05-26.md` | Phase C seed audit detail |
-| `scripts/s10b_v6_pca_rdm.py` | Phase B v6 main runner |
-| `scripts/cycle6b_extended_raw_weight.py` | Step 4 — raw-weight scheme sweep |
-| `scripts/s13_round3.py` | Phase D Round 3 multi-point sim |
-| `scripts/s17_hc_loo.py` | Strict HC LOO 7-fold supplement (Step 3) |
-| `scripts/s12b_phase_c_v2.py` | **(deprecated)** Phase C v2 simplex weight sweep — final selection 에 기여 없음 (L8 limitation 보고용으로만 유지) |
-| `results/s10_inclusion/s10b_v6_pca_rdm_results_{sub-08,sub-09}.json` | Phase B v6 output |
-| `results/s10_inclusion/cycle6b_extended_composite_{sub-08,sub-09}.json` | Step 4 raw-weight sanity check output |
+| `scripts/s10b_v6_pca_rdm.py` | **Phase B v6 main runner — v6 PCA 45° categorical canonical** |
+| `scripts/s10b_v6_srm_rdm.py` | SRM-cos RDM atom variant (Appendix A.2 evidence) |
+| `scripts/s10b_v6_srm_disparity.py` | SRM-disparity RDM atom variant (Appendix A.2 evidence) |
+| `scripts/s17_hc_loo.py` | Strict HC LOO 7-fold supplement under v6 PCA atom |
+| `scripts/cycle6b_extended_raw_weight.py` | Step 4 — raw-weight scheme sweep (historical) |
+| `scripts/s12b_phase_c_v2.py` | (deprecated) Phase C v2 simplex weight sweep — final selection 에 기여 없음 (L7) |
+| `scripts/compare_primary_candidates.py` | Appendix A.2 cross-atom comparison runner |
+| `scripts/neural_loss.py` | L_RDM (W-based 1°), L_LOCO utilities (precondition gate + peripheral test_V1_RDM). L_RDM_PCA removed |
+| `results/s10_inclusion/s10b_v6_pca_rdm_results_{sub-08,sub-09}.json` | Phase B v6 PCA canonical output |
+| `results/s10_inclusion/s10b_v6_srm_rdm_results_{sub-08,sub-09}.json` | SRM-cos output (Appendix A.2) |
+| `results/s10_inclusion/s10b_v6_srm_disparity_results_{sub-08,sub-09}.json` | SRM-disparity output (Appendix A.2) |
+| `results/s10_inclusion/cycle6b_extended_composite_{sub-08,sub-09}.json` | (historical) Step 4 raw-weight output |
 | `results/s10_inclusion/s17_hc_loo_results.json` | Strict HC LOO output |
 | `results/s12b_phase_c_v2/sweep_*.json` | (deprecated) Phase C v2 output + seed audit |
-| `results/s13_multipoint_sim/s13_round3_recovery.json` | Phase D Round 3 |
+| `results/redteam/exp13_synthetic_hc_null_broi.{py,json}` | Synthetic HC null sym + NoLOO (N=300) |
+| `results/redteam/exp14_onesided_loo_null.{py,json}` | Matched-grid LOO null one-sided (N=200) |
+| `results/redteam/exp15_symmetric_loo_null.{py,json}` | Matched-grid LOO null symmetric (N=200) |
+| `results/redteam/exp17_loss_landscape.{py,json,npz}` | Real CVD vs synth HC loss landscape comparison |
+| `results/redteam/exp18_injection_artifact_control.{py,json}` | Forward identifiability — injection method comparison (Method C exact recovery) |
+| `results/redteam/exp19_n100_ridge_recovery.{py,json}` | N=100 confirmation + ridge axis sweep |
+| `results/redteam/exp14_15_16_synthesis.md` | Initial synthesis (superseded by exp17_18_19) |
+| `results/redteam/exp17_18_19_synthesis.md` | **Final synthesis — Identifiable, signal present, NS reflects noise overlap** |
+| `results/redteam/exp21_forward_recovery_sweep.{py,json}` | (진행 중) 3 candidates × magnitude sweep × N=100, Method C |
+| `results/redteam/exp22_origin_loss_specificity.{py,json,md}` | (진행 중) Loss-based specificity: L(0,0), distance, well depth |
+
+**삭제된 파일** (1° continuous frame):
+- `scripts/s10b_v7_lrdm.py`, `scripts/s10b_v8_pca.py`
+- `scripts/server/null_lrdm_array_runner.py`, `scripts/server/null_lrdm_array.sbatch`, `scripts/server/aggregate_null_lrdm.py`, `scripts/server/SERVER_NULL_LRDM_README.md`
+- `scripts/server/null_pca_array_runner.py`, `scripts/server/null_pca_array.sbatch`, `scripts/server/aggregate_null_pca.py`
+- `scripts/server/compare_atoms.py`
+- `results/null_lrdm/`, `results/null_pca/`
+- `results/cross_atom_comparison.{md,json}`
+- `results/s10_inclusion/s10b_v7_lrdm_results_*.json`, `s10b_v8_pca_results_*.json`
+- `neural_loss.L_RDM_PCA`, `_voxel_pca_top_k`, `_correlation_rdm_upper`
 
 ---
 
-## Appendix A — RDM Atom Robustness (PCA vs SRM-cosine vs SRM-disparity)
+## Appendix A — RDM Atom Cross-Variant Robustness (PCA vs SRM-cos vs SRM-disparity)
 
-Date: 2026-05-27. Motivation: Phase B v6 RDM atom 은 PCA-aligned 8×8 RDM cosine 차이 (Cycle 5 finding: 2× HC-CVD separation vs raw voxel-RDM). 본 부록은 RDM atom 정의를 두 가지 SRM family 로 swap 한 결과, §5.1 primary candidates 의 parameter 가 얼마나 robust 한지 측정.
+> v6 PCA 45° categorical 채택의 cross-atom robustness evidence. 본 closure 의 σ-level mechanism interpretation 의 기반.
+
+- Date: 2026-05-27
+- 동일 v6 fit pipeline (300 resample × 5/2 HC split × 4 models × γ + LOCO atoms)
+- RDM atom 만 swap 한 3 variant 비교
 
 ### A.1 Setup
 
-v6 fit pipeline 전체 (300 resample × 5/2 HC split × R+C + 2comp grid × γ atoms + LOCO V4) 그대로 유지. RDM atom 만 swap:
-
 | Variant | RDM atom 정의 | Script |
 |---|---|---|
-| **PCA-RDM** (v6 main) | 8 colors → voxel PCA top K_PCA=6 components → 8×K_PCA scores → 8×8 correlation-distance RDM → 28-d cosine vs HC mean RDM | `scripts/s10b_v6_pca_rdm.py` |
-| **SRM-cosine** | BrainIAK SRM(K=ROI_K, n_iter=20) on HC pool → CVD Procrustes against fixed S → 8×8 correlation-distance RDM in shared (K-d) space → 28-d cosine vs HC mean | `scripts/s10b_v6_srm_rdm.py` |
-| **SRM-disparity** | 동일 SRM training. RDM 대신 색-permutation 후 Procrustes Frobenius disparity (`phase2_SRM_across_between/rerun_loo_consistent.py` family). δθ=0 baseline = canonical disparity (sub-08 V2 p=0.040* 의 metric family). | `scripts/s10b_v6_srm_disparity.py` |
+| **PCA-RDM** (canonical) | 8 colors → voxel PCA top K_PCA=6 → 8×K_PCA scores → 8×8 correlation-distance RDM → 28-d cosine vs HC mean | `scripts/s10b_v6_pca_rdm.py` |
+| **SRM-cosine** | BrainIAK SRM(K=ROI_K, n_iter=20) on HC pool → CVD Procrustes against fixed S → 8×8 correlation-distance RDM in shared K-d space → 28-d cosine vs HC mean | `scripts/s10b_v6_srm_rdm.py` |
+| **SRM-disparity** | 동일 SRM training. RDM 대신 색-permutation 후 Procrustes Frobenius disparity (`phase2_SRM_across_between/rerun_loo_consistent.py` family). δθ=0 baseline = canonical disparity (sub-08 V2 p=0.040* 의 metric family) | `scripts/s10b_v6_srm_disparity.py` |
 
 Comparison runner: `scripts/compare_primary_candidates.py`.
 
-### A.2 Results — primary candidate cells
-
-§5.1 의 final candidates 와 §3.5 의 R+C reference 들에 대해, 동일 combo label 의 fit 결과 (median ± IQR over 300 resample):
+### A.2 Cross-variant argmin
 
 #### Sub-08
 
-| Candidate | combo | PCA (β_s, β_c) | SRM-cos (β_s, β_c) | SRM-dis (β_s, β_c) | PCA↔DIS 거리 | sign quadrant |
+| Candidate | combo | PCA (β_s, β_c) | SRM-cos (β_s, β_c) | SRM-dis (β_s, β_c) | PCA↔DIS | sign quadrant |
 |---|---|---|---|---|---|---|
-| **S08-βs-dom** | γ_all + RDM_V1 | (38, −10) | (22, −36) | **(24, −20)** | 17.2° | β_s>0, β_c<0 동일 ✓ |
-| **S08-βc-dom-V2** | γ_OY + RDM_V2 | (6, −42) | (8, −42) | **(2, −24)** | 18.4° | β_s>0, β_c<0 동일 ✓ |
-| **S08-βc-dom-V3** | γ_OY + RDM_V3 | (6, −42) | (8, −42) | **(2, −24)** | 18.4° | β_s>0, β_c<0 동일 ✓ |
-| **S08 R+C ref** | γ_blank + RDM_V1 | g=2.25 | g=2.70 | **g=1.80** | Δg=0.45 | Δλ_deutan large-shift 영역 동일 ✓ |
+| **S08-βs-dom** | γ_all + RDM_V1 | (38, −10) | (22, −36) | (24, −20) | 17.2° | β_s>0, β_c<0 동일 ✓ |
+| **S08-βc-dom-V2** | γ_OY + RDM_V2 | (6, −42) | (8, −42) | (2, −24) | 18.4° | β_s>0, β_c<0 동일 ✓ |
+| **S08-βc-dom-V3** | γ_OY + RDM_V3 | (6, −42) | (8, −42) | (2, −24) | 18.4° | β_s>0, β_c<0 동일 ✓ |
+| **S08 R+C ref** | γ_blank + RDM_V1 | g=2.25 | g=2.70 | g=1.80 | Δg=0.45 | Δλ_deutan large-shift 동일 ✓ |
 
 #### Sub-09
 
-| Candidate | combo | PCA (β_s, β_c) | SRM-cos (β_s, β_c) | SRM-dis (β_s, β_c) | PCA↔DIS 거리 | sign quadrant |
+| Candidate | combo | PCA (β_s, β_c) | SRM-cos (β_s, β_c) | SRM-dis (β_s, β_c) | PCA↔DIS | sign quadrant |
 |---|---|---|---|---|---|---|
-| **S09-βc-rot-ALL** | γ_all + RDM_V1 | (2, +24) | (32, 0) | **(32, 0)** | 38.4° | β_c sign change (+24→0) ✗ |
-| **S09-βc-rot-GB** | γ_GB + RDM_V1 | (2, +24) | (32, 0) | **(32, 0)** | 38.4° | β_c sign change (+24→0) ✗ |
-| **S09 R+C ref** | γ_all + RDM_V1 | g=2.95 | g=1.10 | **g=2.50** | Δg=0.45 | Δλ_protan large-shift 영역 (PCA·DIS) ✓ |
+| **S09-βc-rot-ALL** | γ_all + RDM_V1 | (2, +24) | (32, 0) | (32, 0) | 38.4° | β_c sign change (+24→0) ✗ |
+| **S09-βc-rot-GB** | γ_GB + RDM_V1 | (2, +24) | (32, 0) | (32, 0) | 38.4° | β_c sign change (+24→0) ✗ |
+| **S09 R+C ref** | γ_all + RDM_V1 | g=2.95 | g=1.10 | g=2.50 | Δg=0.45 | PCA·DIS large-shift 동일; COS dropout |
 
 ### A.3 Per-candidate verdict
 
-- **S08-βc-dom (6, −42)**: PCA·SRM-cos 거의 일치 (±2°), SRM-dis 는 β_c magnitude 절반 (−24) 으로 축소되나 **same quadrant** (β_s 작은 +, β_c 음). V2/V3 두 combo 모두 동일 SRM-dis 해 ((2, −24)) 로 수렴 — **RDM atom robust within mechanism class**.
-- **S08-βs-dom (38, −10)**: SRM-cos 는 (22, −36) 으로 β_c 강화, SRM-dis 는 (24, −20) 으로 PCA 와 SRM-cos 사이 중간. 세 방법 모두 **β_s>0, β_c<0 동일 quadrant**. Magnitude 변동 ~10–28°.
-- **S08 R+C g≈2.25**: PCA 2.25 · COS 2.70 · DIS 1.80. 모두 Δλ_deutan large-shift 영역 (Machado-saturated). Range ±0.9 → magnitude robust within R+C saturation envelope.
-- **S09-βc-rot (2, +24)**: SRM-cos·SRM-dis 모두 (32, 0) 으로 같은 cell 선택. **β_c sign +24 → 0** 으로 사라지고 β_s+30 으로 dominance shift → "cortical confusion-axis primary" 해석이 RDM atom 정의에 따라 **"S-cone shift primary"** 로 변함. 두 SRM 방법은 서로 일치하므로 SRM family-level robust, 단 **PCA-RDM 에 dependent**.
-- **S09 R+C g=2.95**: PCA 2.95 · DIS 2.50 (close), COS 1.10 (large drop). SRM-cos 만 dropout → SRM family 내부에서도 RDM-cosine vs disparity 분기.
+- **S08-βc-dom (6, −42)**:
+  - PCA · SRM-cos 거의 일치 (±2°)
+  - SRM-dis 는 β_c magnitude 절반 (−24) 으로 축소되나 same quadrant
+  - V2 / V3 두 combo 모두 동일 SRM-dis 해 → **RDM atom robust within mechanism class**
 
-### A.4 Implication
+- **S08-βs-dom (38, −10)**:
+  - SRM-cos: (22, −36) — β_c 강화
+  - SRM-dis: (24, −20) — PCA · SRM-cos 사이 중간
+  - 세 방법 모두 β_s>0, β_c<0 동일 quadrant
+  - Magnitude variation ~10–28°
 
-- **Sub-08 candidates (S08-βs-dom, S08-βc-dom-V2/V3)**: §5.1 final candidates 의 **sign-quadrant 와 mechanism class 는 PCA·SRM-cos·SRM-dis 세 방법 모두 동일**. Magnitude IQR (15–20°) 는 §5.2 Round 3 의 β_c IQR 41–68° 한계 안에 위치 → 본 robustness check 가 §5.2 identifiability 한계를 *완화하지 않음* 도 동시 확인.
-- **Sub-09 candidate (S09-βc-rot)**: PCA-RDM 에서 cortical-rotation primary 로 보이는 (2, +24) 가, SRM family (cosine·disparity 양쪽) 에서는 S-cone-shift primary (32, 0) 로 재해석됨. *Mechanism interpretation 은 RDM atom 정의에 sensitive* — paper 의 mechanism 서술 시 **이 ambiguity 를 explicit 하게 보고** 필요.
-- **R+C reference**: sub-08·sub-09 모두 magnitude robust within ±0.9 g unit (g_max=3 grid 의 ~30%). SRM-cos 만 sub-09 에서 g=1.10 으로 dropout — 이는 SRM-cosine 의 RDM-vector 가 saturation 영역에서 신호가 평탄해지기 때문 (DIS·PCA 는 g_max 근처 surface 유지).
+- **S08 R+C g ≈ 2.25**:
+  - PCA 2.25 · COS 2.70 · DIS 1.80
+  - 모두 Δλ_deutan large-shift 영역 (Machado-saturated)
+  - Range ±0.9 → robust within R+C saturation envelope
+
+- **S09-βc-rot (2, +24)**:
+  - 메트릭 간 mechanism reversal 이 **각각 robust 한 채로** 발생
+  - PCA-RDM: (2, +24) deterministic (mode 263/300, IQR (0,0))
+  - SRM-cos: (32, 0) (171/300, IQR (0,2))
+  - SRM-dis: (32, 0) (192/300, IQR (0,2))
+  - 즉 **"noisy/sensitive" 가 아니라 "두 안정 메트릭이 정반대 답을 자신있게 줌"**
+  - β_c sign 이 +24(PCA) ↔ 0(SRM) 으로 바뀌며 dominance 가 cortical-rotation ↔ S-cone-shift 로 뒤집힘
+  - PCA · SRM 의 색 예측 비교 (computed): cosine 0.350, 3/8 sign-flip (c4, c5, c8), max |Δδθ| 32.8°
+  - SRM family 내부 (cos · dis) 일치, PCA 만 분리
+
+- **S09 R+C g=2.95**: PCA 2.95 · DIS 2.50 (close), COS 1.10 (large drop). SRM-cos 의 saturation 영역 flat signal
+
+### A.4 PCA-RDM 채택 결정의 정당화
+
+| 기준 | PCA | SRM-cos | SRM-dis | 결론 |
+|---|---|---|---|---|
+| HC-CVD separation (Cycle 5) | **2× 우위** | baseline | baseline | PCA |
+| Sub-09 mode share | **87.7%** | 57.0% | 64.0% | PCA |
+| Sub-09 5/2 IQR | **(0, 0)** | (0, 2) | (0, 2) | PCA |
+| Sub-08 strict LOO IQR | (5, 4) | (5, 4) tied | — | tie |
+| Sub-08 σ-level agreement | ✓ | ✓ | △ (β_c 절반) | tie |
+| Sub-09 σ-level agreement | ✗ (rotation) | ✗ (S-cone shift) | ✗ (S-cone shift) | non-identifiable across atoms |
+
+- PCA-RDM 채택 = (i) Cycle 5 separation + (ii) sub-09 stability 우위
+- Sub-08 에서는 PCA · SRM-cos tie → cross-atom convergence 가 sub-08 candidates 의 mechanism class 확정
+- Sub-09 의 σ-level non-identifiability 는 L9 limitation 으로 disclosure
 
 ### A.5 Additional disclosure — canonical SRM (rerun_loo_consistent.py)
 
-§5.1 candidates 의 fit 은 모두 RDM-cosine atom 기반이지만, MEMORY 의 "sub-08 V2 p=0.040*" 는 `phase2_SRM_across_between/rerun_loo_consistent.py` 의 Procrustes-disparity LOO + Crawford & Howell t-test 결과로 **다른 metric family**. cycle7b SRM diagnostic 의 sub-08 V2 separation_z = +0.28 (weak) 는 RDM-cosine 으로 측정한 값이며 canonical p=0.040 결과를 부정하지 않음 — measurement family 차이.
-
-### A.6 Limitation 추가 권고
-
-§5.3 Limitations 에 다음을 권고:
-
-> **L9. RDM atom 정의 의존성 (sub-09 only)** — sub-09 βc-rot candidate (β_s=2, β_c=24) 의 mechanism interpretation (cortical confusion-axis primary) 은 PCA-aligned RDM atom 정의에 dependent. SRM-aligned RDM (cosine 또는 Procrustes-disparity) 으로 atom 을 swap 하면 같은 cell 이 (β_s=32, β_c=0) S-cone-shift primary 로 재해석됨. Sub-08 candidates 의 sign-quadrant 는 세 방법 모두 일관. Paper 의 sub-09 mechanism 서술 시 이 ambiguity 를 명시.
+- §5.1 candidates 의 fit 은 모두 RDM-cosine atom 기반
+- MEMORY 의 "sub-08 V2 p=0.040*" 는 **다른 metric family**
+  - 출처: `phase2_SRM_across_between/rerun_loo_consistent.py`
+  - 방법: Procrustes-disparity LOO + Crawford & Howell t-test
+- cycle7b SRM diagnostic 의 sub-08 V2 separation_z = +0.28 (weak) 는 RDM-cosine 으로 측정한 값
+- canonical p=0.040 결과를 부정하지 않음 — measurement family 차이
 
 ### Files (Appendix A)
 
@@ -624,4 +713,3 @@ Comparison runner: `scripts/compare_primary_candidates.py`.
 | `scripts/compare_primary_candidates.py` | 3-way comparison runner |
 | `results/s10_inclusion/s10b_v6_srm_rdm_results_{sub-08,sub-09}.json` | SRM-cosine v6 output |
 | `results/s10_inclusion/s10b_v6_srm_disparity_results_{sub-08,sub-09}.json` | SRM-disparity v6 output |
-| `results/s10_inclusion/cycle7{b,c}_*_diagnostic.json` | δθ=0 baseline diagnostic outputs |

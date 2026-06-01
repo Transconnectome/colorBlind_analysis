@@ -1,7 +1,8 @@
 # Pipeline 2 Closure — 5-Step Selection Axis
 
-- **Status**: CLOSURE READY (v6 PCA 45° categorical RDM atom canonical; 1° continuous variants removed)
-- **Date**: 2026-05-31
+- **Status**: CLOSURE READY (v6 PCA 45° categorical RDM atom canonical; 1° continuous variants removed) — verification complete; 4-test verdict 12/12 FAIL recorded as descriptive limitation
+- **Date**: 2026-06-01
+- **Verification**: see `closure.md` for 4-test summary (param recovery / (0,0) algorithm validation / HC pseudo-CVD / label permutation)
 
 ---
 
@@ -56,7 +57,7 @@
 - 2-Component 는 β_c 로 capture
 - 거부 근거: **구조적 DOF 부족** (L6), literature-g 비교 아님
 
-**RQ1 table** (v6 PCA 45° categorical):
+**RQ1 table** (v6 PCA 45° categorical) — 후보 (β_s, β_c) 의 평면 시각화는 §5.1 figure (`fig_candidates_param_space.png`) 참조:
 
 | Subject | Model | Loss combo | Parameters | bdy | test_focal | test_iqr |
 |---|---|---|---|---|---|---|
@@ -371,6 +372,15 @@ Candidate stability 확립:
 
 ### 5.1. Final candidate set (v6 PCA 45° categorical, 3 candidates)
 
+**Figure (앞부분 통계 결과)** — `results/figures/fig_candidates_param_space.png` (재현 `scripts/fig_candidates_param_space.py`; (β_s, β_c) 는 v6 fit 결과 JSON 의 per-subset median 직접 read → Appendix A.2 표 재현):
+
+![Candidate filters in (β_s, β_c) space](results/figures/fig_candidates_param_space.png)
+
+- 세 후보를 (β_s, β_c) 평면에 표시. 각 후보당 PCA(production, ★) · SRM-cos(●) · SRM-dis(▲) 세 metric argmin 을 얇은 선으로 연결 → cross-metric spread
+- **Sub-08 (βs-dom, βc-dom)**: 세 metric 모두 deutan-consistent 하단 (β_s>0, β_c<0) 에 수렴 → mechanism class 일치 (RQ1·App. A.3)
+- **Sub-09 (βc-rot)**: PCA (+2, +24) 와 SRM (32, 0) 가 β_c=0 선을 가로질러 크게 벌어짐 → **σ-level metric non-identifiability** (Theme A.2 / 구 L9)
+- R+C 후보(1-DOF g)는 (β_s, β_c) 좌표가 아니므로 본 평면에서 제외 (RQ1 saturation 은 본문 표 참조)
+
 #### Sub-08 (deutan) — βs-dom + βc-dom (parallel mechanism hypotheses)
 
 | 후보 | Phase B fit loss | β_s | β_c | param IQR | mode share | strict LOO IQR | σ-level robustness |
@@ -410,7 +420,64 @@ Candidate stability 확립:
 
 ### 5.2. Limitations (paper-level disclosure)
 
-**L1. Specificity evidence — categorical null testing + loss landscape + forward identifiability**
+한계는 **3개 큰 주제**로 묶어 보고한다 — **A: parameter 식별성·specificity**, **B: 표본·out-of-sample 구조**, **C: 모델링 프레임 선택**. 개별 라벨(구 L1–L9)은 주제 하위에 재배치하고 traceability 를 위해 괄호로 병기한다. (해소·비적용된 구 L7 seed-공유, 구 L8 grid-truncation, 구 L10 pending-experiment 은 삭제 — 구 L10 의 완료된 결과는 Theme A.1 (iv)–(v) 에 통합됨.)
+
+```
+§5.2 Limitations 분류도
+│
+│  [삭제]  구 L7 seed-공유 · 구 L8 grid-truncation · 구 L10 pending-exp
+│          └─ 해소/비적용 (구 L10 의 완료 결과만 A.1 (iv)–(v) 로 흡수)
+│
+├─ Theme A · 식별성 / specificity ........... 구 L1 + 구 L9
+│     └▶ "mechanism class (부호 quadrant) 는 robust, 절대 magnitude 는 아니다"
+│
+├─ Theme B · 표본 / out-of-sample 구조 ...... 구 L4 + 구 L2 + 구 L3
+│     └▶ "CVD N=2 → 모든 OOS 축이 HC pool 위에서만 정의됨"
+│
+└─ Theme C · 모델링 프레임 선택 ............. 구 L5 + 구 L6
+      └▶ "composite normalization + model DOF = 의도된 설계 trade-off"
+```
+
+---
+
+#### Theme A — Parameter identifiability & specificity (구 L1 + L9)
+
+> 핵심 메시지: **mechanism class (sign quadrant) 는 robust, 절대 magnitude 는 아니다.** 모든 candidate 는 descriptive only.
+
+**Figure (통계 결과)** — `results/figures/fig_specificity_summary.png` (재현 스크립트 `scripts/fig_specificity_summary.py`, 원자료 redteam JSON 직접 read):
+
+![Theme A specificity summary](results/figures/fig_specificity_summary.png)
+
+- **(A)** Averaged-surface loss depth (Exp 17): REAL CVD 최소값이 synthetic HC null 보다 2.1×/5.5×/3.9× 깊음 → signal 존재 (= 증거 (ii))
+- **(B)** Per-realization specificity p-value heatmap: Exp22 Bonferroni · Exp22 L(argmin) · Test2c label-perm. **S08-βc-dom 의 Exp22 만 p<0.05 (single null source); 나머지 8/9 cell NS** (= 증거 (i)(v)(vi))
+- **(C)** Production-GT parameter recovery bias 벡터 (Test 1): 세 후보 모두 10° tol 밖 → f₁₀° < 0.30 FAIL (= 증거 (iv))
+- **(D)** GT=(0,0) algorithm validation (Test 2a/B2): f₁₀°(origin)=0/140, |β_s|·|β_c| median 이 ~20°/25° → pipeline noise floor (= 증거 (iv) 보강)
+
+```
+Theme A 증거 구조 — 두 축이 complementary (모순 아님)
+
+  averaged-surface 증거                       per-realization 증거
+  (surface 가 noise 평탄화)                    (진짜 spread 노출)
+  ───────────────────────                     ──────────────────────────
+  (ii) loss depth   Exp17  REAL 2.1–5.5× 깊음   (i)  matched-grid LOO   Exp14/15  NS
+  (iii) forward id  Exp18C Method C exact        (iv) param recovery    Test1     f10°<0.30  FAIL
+                                                 (v)  loss specificity  Exp22     1/3 single-source
+                                                 (vi) label-perm null   Test2c    0/3        FAIL
+        │                                                │
+        ▼                                                ▼
+  "signal 존재 + categorical 식별 가능"          "절대값 식별 불가 · noise floor ~20°/25°"
+        │                                                │
+        └───────────────────────┬────────────────────────┘
+                                 ▼
+   A.2 (구 L9): sub-09 는 metric 선택(PCA vs SRM) 자체가 mechanism class 를 가름
+                                 ▼
+        ┌──────────────────────────────────────────────────────────┐
+        │ 결론: descriptive only — mechanism class(부호 quadrant)만 보고 │
+        │       (β_s, β_c) 값 자체는 low-dim embedding 으로만 해석        │
+        └──────────────────────────────────────────────────────────┘
+```
+
+**A.1 Specificity evidence — categorical null testing + loss landscape + forward identifiability** (구 L1)
 
 3 levels of evidence under v6 PCA 45° categorical canonical:
 
@@ -447,10 +514,31 @@ Candidate stability 확립:
 - Loss function 의 categorical 구조와 일치하는 injection (Method C) 하 **exact recovery**
 - Procedure 가 production 의 (2, +24) σ 와 동일 σ 에 GT (0, +24) 가 떨어졌을 때 exact recovery → identifiability 확인
 
-**(iv) Extension pending** (Exp 21 — 진행 중):
-- 3 candidates × magnitude sweep (0×/0.5×/1×/1.5×) × N=100 = 1200 fits, Method C
-- 모든 candidate 의 production magnitude 와 null GT=(0,0) attractor 검증
-- 결과 도착 시 L1 갱신
+**(iv) Parameter recovery + (0,0) algorithm validation** (Exp 21 완료, 2026-05-31, v2 GT-consistent fake JND, n=140 per candidate):
+
+Production GT recovery (Test 1, mag=1.0):
+| Candidate | bias (β_s, β_c) | f10° | Verdict |
+|---|---|---|---|
+| S08-stable  (+38, −10) | (−6, +19)  | 0.10 | FAIL |
+| S08-robust  (+6,  −42) | (+16, −4)  | 0.26 | FAIL |
+| S09-primary (+2,  +24) | (+11, −27) | 0.14 | FAIL |
+
+- 축-비대칭 식별가능성: v1→v2 합성-JND 일관성 수정 후 큰 |GT| 축 회수 개선 — S08-robust β_c bias 30.9°→4.7°; S08-stable β_s bias 17.0°→7.6°
+- 작은 |GT| 축은 noise floor 아래 — S09-primary GT=(2, 24) 의 작은 β_s 축에서 v2 가 v1 대비 marginal 악화 (β_s noise 가 신호보다 큼)
+- 이는 production argmin 의 절대 위치를 ±10° 이내로 보고 불가능을 의미; **mechanism class (β_s sign × β_c sign quadrant)** 만 보고 가능
+
+(0,0) algorithm validation (Test 2a, B2 Source A) — **load-bearing**:
+| Candidate | β_s_med (IQR) | β_c_med (IQR) | β_s p95 | β_c p95 | f10°_origin |
+|---|---|---|---|---|---|
+| S08-stable  | 20° (22)   | 26° (16)   | 42° | 46° | 0.00 |
+| S08-robust  | 22° (40)   | 26° (10.5) | 50° | 44° | 0.00 |
+| S09-primary | 16° (17.5) | 24° (9)    | 30° | 48° | 0.00 |
+
+- Synth design contamination 으로부터 자유로운 영점 합성 (donor real JND + GT=(0,0) synth voxels, both at zero-signature)
+- 모든 후보 f10°_origin = 0/140 — argmin 이 단 한 번도 origin 10° 이내 안착 못함
+- Pipeline 의 **effective noise floor / built-in bias** = ~20° (β_s axis) / ~25° (β_c axis)
+- Production argmin 의 effective uncertainty 하한 = 이 noise floor 수준
+- → 절대값 physiological 해석 (cone shift 정도, cortical rotation 각도) 불가; 저차원 descriptive embedding 으로만 사용
 
 **(v) Loss-based specificity vs HC fake-CVD** (Exp 22, 완료, N_synth=200, same seed/carriers as Exp 14):
 
@@ -468,78 +556,139 @@ Candidate stability 확립:
 - Exp 17 의 averaged-surface 2.1×/3.9×/5.5× ratio 중 per-realization scrutiny 통과는 S08-βc-dom 의 5.5× 만
 - Per-realization vs averaged-surface 차이: averaging 이 noise heterogeneity 를 smooth 하여 apparent contrast 를 inflate
 
+**(vi) Label permutation specificity** (Test 2c / Source C, 2026-05-31, N=1000 within-subject trial-label shuffle, HC pool unchanged):
+
+| Candidate | real_loss | perm 5% cut | p_perm | Verdict |
+|---|---|---|---|---|
+| S08-stable  | −1.236 | −2.613 | 0.866 | FAIL |
+| S08-robust  | −2.892 | −3.136 | 0.167 | FAIL |
+| S09-primary | −1.681 | −3.053 | 0.471 | FAIL |
+
+- Within-subject 색-라벨 signal magnitude 가 random shuffle 분포 대비 lower-tail (p<0.05) 진입 못함
+- 어느 후보도 trial-shuffled null 의 5% 컷보다 깊지 않음
+
+**(v)–(vi) reconcile — Exp 22 vs Test 2c**:
+- Exp 22 (synthetic HC fake-CVD): S08-βc-dom Bonferroni p=0.0149 SIG (L(argmin)=−2.019 vs synth mean=−1.081, single metric)
+- Test 2c (real CVD label permutation): S08-βc-dom p_perm=0.167 FAIL
+- 두 test 의 null source 다름: Exp 22 = HC heterogeneity 기반 noise distribution; Test 2c = within-subject label entropy 기반 noise distribution
+- Conservative reading: per-realization scrutiny across both null sources → **0/3 candidates dual-pass**
+- S08-βc-dom 의 Exp 22 Bonferroni-SIG 는 **single null-source marginal evidence** 로 강등; Test 2c 와 합치면 descriptive only
+
 **메트릭별 실패 원인 (sub-09 의 경우)**:
 - L(0,0): trending 방향이지만 p=0.309
 - distance: real argmin 이 origin 에 더 가까움 (24.1 vs synth median 35.8) — synth attractor 가 BC extremes 로 drift, 구조적 비대칭
 - L(argmin): 차이 없음
 
-**Safe to claim now**:
-- Production fits 는 valid descriptive signal estimates (Exp 17 averaged + Exp 18C identifiability)
-- 2-Component fit procedure 가 categorical injection 하 identifiable (Method C exact recovery)
-- **단 1 후보 (S08-βc-dom) 가 per-realization loss-based specificity 통과**
-- 다른 2 후보 (S08-βs-dom, S09-βc-rot) 는 *descriptive only* — selection rule 변경 없음 ("specificity 는 selection criterion 아님" 정책 유지)
+**Safe to claim (긍정 — 보고 가능)**:
 
-**Caveats**:
-- Matched-grid LOO p > 0.05 (Exp 14/15, conservative test)
-- Per-realization loss specificity (Exp 22): 1/3 candidates pass only
-- Point estimate bias correction not principled (Exp 14 vs 15 disagree by 15–76°)
-- Exp 17 의 averaged-surface evidence 와 Exp 22 의 per-realization evidence 가 *complementary, not redundant*: averaging 이 noise structure 평탄화, per-realization 이 진정한 spread 노출. 두 evidence 모두 보고
-- Exp 18C identifiability ≠ Exp 22 specificity: procedure 가 *injected signal 을 recover* 할 수 있음 (Exp 18C) 그러나 *real CVD fit 이 noise distribution 을 exceed* 한다는 것은 별도 (Exp 22). 둘 다 hold
+- **Averaged-surface 수준에서 CVD별 distortion 방향성을 descriptive 하게 포착.** — group-averaged loss surface 에서 real CVD 신호가 null 보다 뚜렷이 깊음 → *신호 존재 자체*는 확립.
+  - Production fits = valid descriptive signal estimates at averaged-surface level (Exp 17: real minima 2.1–5.5× deeper than synthetic HC null)
+  - Categorical injection 하 fit procedure identifiable (Exp 18C Method C exact recovery)
+- **Mechanism class (sign quadrant) 는 보고 가능.** — "어느 *방향*으로 distortion 이 일어나는가"(deutan β_s+/β_c−, protan β_c+)는 robust.
+  - 모든 후보가 family-consistent quadrant 유지 (RQ1 · App. A.3 cross-metric)
+  - selection rule 변경 없음 ("specificity 는 selection criterion 아님" 정책 유지)
 
-**L2. OOS axis is HC normalization only**
+**Cannot claim (한계 — 주장 불가)**:
+
+- **Per-realization specificity — 사분면(quadrant)까지만 제한적으로 확정되고, 그 안의 구체적 값은 재현·구분 불가.** 의미: realization 단위로 보면 real CVD 가 null 과 구분되지 않고(CVD-specificity fail) 알려진 GT 도 회수되지 않음(simulation fail) → 신뢰 가능한 해상도가 *방향(quadrant)* 에서 멈춤.
+  - Simulation (Test 1 parameter recovery): production GT 에서 f10° < 0.30, 3/3 FAIL
+  - CVD-specificity test: Test 2c label-perm 0/3, Test 2b HC pseudo-CVD, Exp 22 loss-specificity 1/3 (single null-source, S08-βc-dom only), Exp 14/15 matched-grid LOO p>0.05
+  - 종합: **0/3 candidates dual-pass** across null sources
+- **현재 지표의 값 자체를 보고하기 어려움 — 절대 (β_s, β_c) 의 robustness · 생리 해석 불가.** 의미: pipeline 내재 noise floor 가 신호 위치 해상도보다 커서, 절대 각도를 cone-shift / cortical-rotation 물리량으로 읽을 수 없음.
+  - Test 2a (0,0) algorithm validation: f10°_origin = 0/140, noise floor ~20°(β_s)/25°(β_c) — 모델 내재 bias
+  - Point-estimate bias 보정 unprincipled (Exp 14 vs 15 가 15–76° 불일치)
+  - → 절대값은 low-dim descriptive embedding 으로만; physiological cortical-distortion parameter 로 해석 금지
+
+**Interpretation notes (reconcile)**:
+
+- Averaged-surface (Exp 17) ↔ per-realization (Exp 22, Test 1/2a/2c) 는 *complementary, not redundant* — averaging 이 noise structure 평탄화, per-realization 이 진짜 spread 노출. 두 evidence 모두 보고.
+- Exp 18C identifiability ≠ Test 1 production GT recovery — categorical-injected single-σ 는 recover 가능(Exp 18C exact), voxel-level full-pipeline recovery 는 noise floor 위에서만(Test 1 axis-asymmetric).
+
+**A.2 σ-level metric non-identifiability for sub-09** (구 L9)
+
+- PCA - SRM 간 차이 및 PCA 선택
+  - v6 PCA-RDM atom 은 sub-09 의 σ 를 cortical rotation σ = (2, +24) 로 deterministic 하게 선택 (mode 87.7%)
+  - 그러나 SRM family (SRM-cos, SRM-dis) 는 다른 σ = (32, 0) (S-cone shift) 선호 (Appendix A.4)
+  - 두 σ 의 perceptual prediction 비교 (computed): δθ vector cosine 0.350 (낮음); sign agreement 5/8 — c4 (green), c5 (cyan), c8 (magenta) 반대 방향; max |Δδθ| 32.8°
+- **PCA-RDM 채택 근거**: Cycle 5 의 2× HC-CVD separation + sub-09 stability mode 87.7% > SRM-cos 57% > SRM-dis 64%
+  - 단 PCA 는 *덜 established* metric (SRM-disparity 는 프로젝트 canonical SRM family, sub-08 V2 p=0.040* 의 metric)
+- Paper-level disclosure: "Sub-09 의 cortical mechanism 식별은 PCA-RDM 채택 결정에 의존; SRM family 는 다른 mechanism class (S-cone shift) 선호"
+- **Theme A 와의 관계**: A.1 이 *절대 magnitude* 의 식별 불가(noise floor·null overlap)를 보였다면, A.2 는 *metric 선택* 자체가 sub-09 의 mechanism class 를 가른다는 더 깊은 식별성 한계 — 둘 다 "absolute parameter 해석 금지, mechanism class 만 보고" 결론으로 수렴.
+
+---
+
+#### Theme B — Sample size & out-of-sample structure (구 L4 + L2 + L3)
+
+> 핵심 메시지: CVD 표본이 N=2 이고 CVD 측정이 pair 당 N=1 이므로, **모든 out-of-sample 축은 HC pool 위에서만 정의**된다. CVD generalization 은 Phase 3 행동 실험만이 제공할 수 있다.
+
+```
+Theme B — fit/test 에서 무엇이 vary 하는가
+
+        CVD 쪽 (N=2, pair당 N=1)          HC pool 쪽 (n=7)
+        ─────────────────────            ──────────────────────────
+  fit:   ▣ 고정 (vary 불가)       ×       ◇ vary: 5/2 resample (N=300)
+  test:  ▣ 동일 obs 재사용 (B.3)          ◇ vary: strict 7-fold LOO (s17)
+            │                                    │
+        B.1 CVD LOO 불가능                   유일하게 움직이는 축
+            └───────────────┬────────────────────┘
+                            ▼
+              B.2 모든 out-of-sample 축 = HC normalization 만
+                            ▼
+              B.3 held-out focal pair 도 CVD obs 는 그대로,
+                  HC norm 만 바뀌어 test 재진입
+                            ▼
+            ┌──────────────────────────────────────────┐
+            │ CVD generalization → Phase 3 행동실험만 가능 │
+            └──────────────────────────────────────────┘
+```
+
+**B.1 CVD N=2, HC n=7 — strict CVD LOO 불가능** (구 L4)
+- CVD LOO 본질적으로 불가능 (N=2: sub-08 deutan, sub-09 protan)
+- HC pool 은 5/2 random subset (N=300) + strict 7-fold LOO (s17) 두 evidence 로 평가
+
+**B.2 Out-of-sample 축 = HC normalization 만** (구 L2)
 - CVD JND 는 pair 당 N=1
 - Train/test split 은 HC pool composition 만 vary, CVD samples 는 vary 안 함
 - Behavioral generalization 은 Phase 3 experiment 필요
 
-**L3. Held-out focal pair CVD obs reuse**
-- Focal pair 가 fit objective 에서 제외됨
-- 동일 CVD measurement 가 다른 HC normalization 하에서 test eval 에 진입
+**B.3 Held-out focal pair 의 CVD obs 재사용** (구 L3)
+- Focal pair 가 fit objective 에서 제외되나, 동일 CVD measurement 가 다른 HC normalization 하에서 test eval 에 재진입
 - Individualized-filter framing 하에서는 data leakage 아니지만 disclosure 필요
+- B.1–B.2 의 직접 귀결: CVD 축이 vary 하지 않으므로 test 가 HC-축으로만 구성됨
 
-**L4. CVD N=2, HC n=7, no strict CVD LOO possible**
-- CVD LOO 본질적으로 불가능 (N=2)
-- HC pool 은 5/2 random subset (N=300) + strict 7-fold LOO (s17) 두 evidence
+---
 
-**L5. Z-score grid-relative composite equalizes atom info-density**
-- 1-pair γ_focal ↔ 8-pair γ_all 이 composite 에 동등 기여
+#### Theme C — Modeling-framework choices (구 L5 + L6)
 
-**L6. R+C 1-DOF structurally insufficient**
+> 핵심 메시지: composite 구성과 model DOF 선택은 의도된 설계 결정이며, 각각 명시적 trade-off 를 동반한다.
+
+```
+Theme C — 두 의도된 설계 선택과 trade-off
+
+  C.1 z-score grid-relative composite
+       1-pair γ_focal  ─┐
+                        ├─(z-score)─▶  동등 기여   ◀── trade-off: info-density 차이 평탄화
+       8-pair γ_all   ─┘                              (소수 pair 가 8-pair 와 같은 무게)
+
+  C.2 R+C = 1 DOF (g)
+       δθ = (2−g)·δθ_Machado   ──▶  confusion-axis(β_c) DOF 없음  ──▶ g 가 경계 saturate
+                                                                       (sub-09 bdy=41%)
+                                          │
+                                          └──▶ 2-Component (β_s, β_c) 가 β_c 로 capture
+                                               (RQ1: R+C 구조적 기각 근거)
+```
+
+**C.1 Z-score grid-relative composite 가 atom info-density 평탄화** (구 L5)
+- 1-pair γ_focal ↔ 8-pair γ_all 이 composite 에 동등 기여 (의도된 normalization, §L5 원문 §2.5 일관)
+
+**C.2 R+C 1-DOF 구조적 부족** (구 L6)
 - sub-09 R+C saturates at g_max=3.0 (bdy=41%)
-- R+C forward `δθ=(2−g)·δθ_Machado` 가 cortical confusion-axis rotation DOF 결여
-- 2-Component 는 β_c 로 capture
-- **Structural** limit (DOF count), literature-g 비교 아님
-
-**L7. Phase B → Phase C seed sharing (historical)**
-- Phase C v2 (deprecated, §Files 참조) 는 identical RNG seed 사용
-- Independent seed 하에서 sub-09 IQR 80–300% inflate
-- Final selection 영향 없음 (Phase C 가 final candidates 에 기여 안 함)
-
-**L8 (REMOVED — sub-09 grid-truncation under v7 L_RDM)**
-- v6 PCA canonical 하 sub-09 candidate (2, +24) 는 grid interior
-- 이전 L_RDM (1° continuous) atom 의 boundary truncation 한계는 적용되지 않음
-
-**L9. σ-level metric non-identifiability for sub-09**
-- v6 PCA-RDM atom 은 sub-09 의 σ 를 cortical rotation σ = (2, +24) 로 deterministic 하게 선택 (mode 87.7%)
-- 그러나 SRM family (SRM-cos, SRM-dis) 는 다른 σ = (32, 0) (S-cone shift) 선호 (Appendix A.4)
-- 두 σ 의 perceptual prediction 비교 (computed):
-  - δθ vector cosine similarity: 0.350 (낮음)
-  - Sign agreement: 5/8 — c4 (green), c5 (cyan), c8 (magenta) 반대 방향
-  - Max |Δδθ|: 32.8°
-- **PCA-RDM 채택 근거**: Cycle 5 의 2× HC-CVD separation + sub-09 stability mode 87.7% > SRM-cos 57% > SRM-dis 64%
-- 단 PCA 는 *덜 established* metric (SRM-disparity 는 프로젝트 canonical SRM family, sub-08 V2 p=0.040* 의 metric)
-- Paper-level disclosure: "Sub-09 의 cortical mechanism 식별은 PCA-RDM 채택 결정에 의존; SRM family 는 다른 mechanism class (S-cone shift) 선호"
-
-**L10. Forward identifiability extension pending**
-- Exp 18 의 native injection (Method C) exact recovery 는 sub-09 GT=(0, +24) 한 점만 검증
-- Exp 21 진행 중: 3 candidates × magnitude sweep × N=100
-- 결과 도착 시 L1 (i)–(iv) 와 L10 통합
+- R+C forward `δθ=(2−g)·δθ_Machado` 가 cortical confusion-axis rotation DOF 결여 → 2-Component 가 β_c 로 capture
+- **Structural** limit (DOF count) 이며 literature-g 비교 아님 (RQ1 verdict 근거)
 
 ### Pipeline 3 status note
 
 - 본 closure 는 **Pipeline 2 only**
-- 이전 `PIPELINE_3_FRAMEWORK.md` 의 sub-09 (β_s=2, β_c=24) primary 결정은 v6 PCA atom 기반 — **v6 canonical 으로 복귀 후에도 동일 값**
-- Pipeline 3 의 layer architecture (Layer A/B/C with E1/E2/E3) 는 *deprecated* — Phase B v6 가 동일 역할 흡수
-- Pipeline 3 의 별도 후속 작업 없음
 
 ---
 
@@ -551,7 +700,7 @@ Candidate stability 확립:
 - ✓ Sub-08 final candidates: **βs-dom (+38, −10)** + **βc-dom (+6, −42)** — parallel mechanism hypotheses, 동일 deutan quadrant
 - ✓ Sub-09 final candidate: **βc-rot (+2, +24)** — deterministic, PCA-canonical
 - ✓ Phase B → C seed audit (L7; Phase C 자체가 final selection 비기여)
-- ✓ 10 paper-level limitations (L1–L7, L9, L10; L8 removed)
+- ✓ Limitations 를 3개 주제로 계층화: **A 식별성·specificity** (구 L1+L9), **B 표본·OOS 구조** (구 L4+L2+L3), **C 모델링 프레임** (구 L5+L6). 해소·비적용된 구 L7/L8/L10 은 삭제 (구 L10 의 완료 결과는 A.1 에 통합)
 - ✓ Null testing (Exp 13–19) + cross-atom robustness (PCA · SRM-cos · SRM-dis) 통합
 
 ### Closure verdict — **CLOSURE READY**
@@ -564,7 +713,7 @@ Candidate stability 확립:
 
 ### Paper-level framing (정직)
 
-> "Pipeline 2 produced candidate filter forms via composite atom z-score argmin under the v6 PCA 45° categorical RDM atom. Sub-08 has two parallel candidates — βs-dom (β_s=+38, β_c=−10) under γ_all + RDM_V1 and βc-dom (β_s=+6, β_c=−42) under γ_OY + RDM_V2 — both within the deutan-consistent (β_s+, β_c−) quadrant. Sub-09 has a single candidate βc-rot (β_s=+2, β_c=+24) under γ_all + RDM_V1 with deterministic identification (mode share 87.7%, strict LOO IQR (0,0)). All candidates implicate combinations of S-cone rotation and confusion-axis rotation at the cortical representation level. Specificity is supported by loss landscape evidence (real CVD minima 2.1×–5.5× deeper than synthetic HC nulls) and forward identifiability (Method C exact recovery for sub-09 GT=(0,+24)), despite conservatively NS matched-grid LOO p-values at point level. We present these candidates as plausible descriptive fits at fit-point requiring behavioral validation, not as estimated cortical-distortion parameters."
+> "Pipeline 2 produced candidate filter forms via composite atom z-score argmin under the v6 PCA 45° categorical RDM atom. Sub-08 has βc-dom (β_s=+6, β_c=−42) under γ_OY + RDM_V2 as a final candidate within the deutan-consistent (β_s+, β_c−) quadrant. Sub-09 has a single candidate βc-rot (β_s=+2, β_c=+24) under γ_all + RDM_V1 with deterministic identification at the σ-bin level (mode share 87.7%, strict LOO IQR (0,0)). All candidates implicate combinations of S-cone rotation and confusion-axis rotation at the cortical representation level. Averaged-surface evidence supports signal presence (Exp 17 real CVD minima 2.1×–5.5× deeper than synthetic HC nulls) and categorical identifiability holds (Exp 18C Method C exact recovery for sub-09 GT=(0,+24)); however per-realization parameter recovery FAIL across all three candidates (f10° < 0.30 at production GT, f10°_origin = 0 at GT=(0,0) confirming a ~20°/25° per-axis noise floor on β_s/β_c), and Source C label-permutation null is NS for all three (p_perm = 0.17–0.87). We therefore present these candidates as plausible descriptive fits at fit-point requiring behavioral validation, with absolute (β_s, β_c) values interpretable only as low-dimensional embedding rather than physiological cortical-distortion parameters. Mechanism class (sign quadrant) is robust; magnitudes are not."
 
 ---
 
@@ -573,6 +722,7 @@ Candidate stability 확립:
 | File | Role |
 |---|---|
 | `PIPELINE_2_CLOSURE.md` | (본 문서) 5-step pipeline narrative + final candidates + limitations |
+| `closure.md` | **4-test verification summary (canonical user-facing)** — content/purpose/metric/result per test |
 | `PIPELINE_2_AUDIT_2026-05-26.md` | Phase C seed audit detail |
 | `scripts/s10b_v6_pca_rdm.py` | **Phase B v6 main runner — v6 PCA 45° categorical canonical** |
 | `scripts/s10b_v6_srm_rdm.py` | SRM-cos RDM atom variant (Appendix A.2 evidence) |
@@ -596,8 +746,17 @@ Candidate stability 확립:
 | `results/redteam/exp19_n100_ridge_recovery.{py,json}` | N=100 confirmation + ridge axis sweep |
 | `results/redteam/exp14_15_16_synthesis.md` | Initial synthesis (superseded by exp17_18_19) |
 | `results/redteam/exp17_18_19_synthesis.md` | **Final synthesis — Identifiable, signal present, NS reflects noise overlap** |
-| `results/redteam/exp21_forward_recovery_sweep.{py,json}` | (진행 중) 3 candidates × magnitude sweep × N=100, Method C |
-| `results/redteam/exp22_origin_loss_specificity.{py,json,md}` | (진행 중) Loss-based specificity: L(0,0), distance, well depth |
+| `results/redteam/exp21_forward_recovery_sweep.{py,json}` | (deprecated by Test 1/2a) 3 candidates × magnitude sweep × N=100, Method C |
+| `results/redteam/exp22_origin_loss_specificity.{py,json,md}` | Loss-based specificity (synthetic HC null): L(0,0), distance, well depth — single null-source marginal evidence only (S08-βc-dom Bonferroni p=0.0149) |
+| `results/redteam/param_recovery_voxel_v6_pca_v2.json` | Test 1 — Production GT parameter recovery (v2 GT-consistent fake JND) |
+| `results/redteam/null_within_hc_loo_v6_pca.json` | Test 2a (B2 / Source A) + Test 2b (B1 / Source B) — algorithm validation at (0,0) + HC pseudo-CVD specificity |
+| `results/redteam/null_label_permutation_v6_pca.json` | Test 2c (Source C, N=1000) — within-subject color-label permutation |
+| `results/redteam/verdict_matrix_v6_pca_v2.json` / `verdict_matrix_v2.md` | 4-test verdict matrix (FDR-corrected) |
+| `results/redteam/uncertainty_summary.json` / `uncertainty_summary.md` | Per-candidate effective uncertainty (B2 σ) + v1/v2 comparison + Source C + B1 ranks |
+| `scripts/fig_specificity_summary.py` | **§5.2 Theme A figure 재현 스크립트** — exp17/exp22/verdict_matrix_v2/uncertainty_summary JSON 직접 read |
+| `results/figures/fig_specificity_summary.{png,pdf}` | **§5.2 Theme A 통계 figure** (4-panel: loss depth / specificity p-heatmap / recovery bias / (0,0) noise floor) |
+| `scripts/fig_candidates_param_space.py` | **§5.1 / RQ1 candidate (β_s,β_c) figure 재현 스크립트** — v6 fit 결과 JSON 의 per-subset median (App. A.2 재현) |
+| `results/figures/fig_candidates_param_space.{png,pdf}` | **§5.1 앞부분 figure** — 3 candidate (β_s,β_c) + cross-metric (PCA/SRM-cos/SRM-dis) spread |
 
 **삭제된 파일** (1° continuous frame):
 - `scripts/s10b_v7_lrdm.py`, `scripts/s10b_v8_pca.py`

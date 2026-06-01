@@ -379,9 +379,21 @@ def render_markdown(verdicts: dict) -> str:
 def main(argv: Optional[list] = None) -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--fdr-alpha", type=float, default=0.05)
+    parser.add_argument("--recovery-json", type=str, default=None,
+                        help="Override recovery JSON path (e.g. v2 file).")
+    parser.add_argument("--out-suffix", type=str, default="",
+                        help="Suffix for output JSON/MD (e.g. _v2).")
     args = parser.parse_args(argv)
 
+    global RECOVERY_JSON, OUT_JSON, OUT_MD  # noqa: PLW0603
+    if args.recovery_json:
+        RECOVERY_JSON = Path(args.recovery_json)
+    if args.out_suffix:
+        OUT_JSON = OUT_JSON.with_name(OUT_JSON.stem + args.out_suffix + OUT_JSON.suffix)
+        OUT_MD = OUT_MD.with_name(OUT_MD.stem + args.out_suffix + OUT_MD.suffix)
+
     print("[analyze_verification] loading...", flush=True)
+    print(f"  recovery: {RECOVERY_JSON}", flush=True)
     recovery = _load_json(RECOVERY_JSON) if RECOVERY_JSON.exists() else {"cells": {}}
     try:
         perm = _load_perm_json_with_slices()

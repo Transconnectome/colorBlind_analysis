@@ -290,11 +290,71 @@ def synth_provenance() -> dict:
     }
 
 
+def synthesize_fake_jnd(beta_s: float, beta_c: float, family: str,
+                        pool_jnd_baseline: dict, pool_jnd_sd: dict,
+                        rng: np.random.Generator,
+                        theta_canonical: Optional[np.ndarray] = None) -> dict:
+    """Behaviorally-consistent fake CVD JND at GT (β_s, β_c).
+
+    Mirrors the v6 γ-atom forward model:
+        d_perceived(i,j) at GT = perceived hue distance under δθ_2comp(GT)
+        pred_jnd          = pool_baseline * (d_phys / d_perceived)
+        fake_jnd          = pred_jnd + N(0, pool_sd)
+
+    The pool baseline/SD must come from the same pool that v6 will use
+    internally (HC \\ {donor} under the LOO patch). Pairs whose pool baseline
+    or SD is None are returned as None (caller forwards as missing).
+
+    Args:
+        beta_s, beta_c:     GT 2-component parameters in degrees.
+        family:             'protan' | 'deutan'.
+        pool_jnd_baseline:  dict {pair_name: float|None}.
+        pool_jnd_sd:        dict {pair_name: float|None}.
+        rng:                numpy Generator (caller controls determinism).
+        theta_canonical:    (8,) hue angles for c1..c8; defaults to HUE_ANGLES.
+
+    Returns:
+        dict {pair_name: float|None} matching `load_jnd_per_pair` format.
+
+    Notes:
+        This function fixes the γ-atom inconsistency in the prior recovery
+        design where fake_jnd was donor's REAL JND (effectively GT=0 for
+        behaviour), creating γ-pull to δ=0 while voxel signal was at δ≠0.
+    """
+    # Late import to avoid circulars at module load.
+    from behav_loss import PAIR_HUES  # noqa: WPS433
+
+    if theta_canonical is None:
+        theta_canonical = HUE_ANGLES.astype(float)
+
+    delta = delta_theta_2comp(theta_canonical, beta_s, beta_c, family)
+    perceived = (theta_canonical + delta) % 360.0
+
+    fake: dict = {}
+    for p_name, (theta_a, theta_b) in PAIR_HUES.items():
+        bl = pool_jnd_baseline.get(p_name)
+        sd = pool_jnd_sd.get(p_name)
+        if bl is None or sd is None:
+            fake[p_name] = None
+            continue
+        i = int(round(theta_a / 45.0)) % 8
+        j = int(round(theta_b / 45.0)) % 8
+        d_phys = min(abs(theta_a - theta_b) % 360,
+                      360 - abs(theta_a - theta_b) % 360)
+        d_perc_raw = abs(perceived[i] - perceived[j]) % 360
+        d_perc = max(min(d_perc_raw, 360 - d_perc_raw), 1e-3)
+        pred = float(bl) * (d_phys / d_perc)
+        noise = float(rng.normal(0, max(float(sd), 1e-3)))
+        fake[p_name] = float(pred + noise)
+    return fake
+
+
 __all__ = [
     "delta_theta_2comp",
     "precompute_per_hc_W",
     "estimate_noise_per_hc",
     "synthesize_voxel_response",
+    "synthesize_fake_jnd",
     "synth_provenance",
     "SPATIAL_COV_RANK",
     "AR1_RHO",

@@ -51,17 +51,19 @@ from forward_voxel_synth import (                                # noqa: E402
     precompute_per_hc_W,
     estimate_noise_per_hc,
     synthesize_voxel_response,
+    synthesize_fake_jnd,
     synth_provenance,
     SPATIAL_COV_RANK,
     AR1_RHO,
 )
+from s8_loo_train_test import jnd_baseline_from_pool             # noqa: E402
 
 _PHASE1_FWD = SCRIPT_DIR.parents[1] / "future_phase1_forward_model" / "scripts"
 sys.path.insert(0, str(_PHASE1_FWD))
 from utils_forward_model import create_basis_full, HUE_ANGLES   # noqa: E402
 
 OUT = (SCRIPT_DIR.parent / "results" / "redteam"
-       / "param_recovery_voxel_v6_pca.json")
+       / "param_recovery_voxel_v6_pca_v2.json")
 
 # ---------------------------------------------------------------------------
 HC_ALL = ["sub-01", "sub-02", "sub-03", "sub-04", "sub-05", "sub-06", "sub-07"]
@@ -133,16 +135,40 @@ def _build_synth_fake_amps(hc_k: str, family: str,
     return fake_amps
 
 
+def _build_synth_fake_jnd(family: str, gt_bs: float, gt_bc: float,
+                          pool_jnd_subjs: list,
+                          rng: np.random.Generator) -> dict:
+    """Behaviorally-consistent fake CVD JND at GT, using v6's eventual pool.
+
+    Computes (baseline, sd) per pair across HC \\ {donor} (which is
+    pool_jnd_subjs as set by the alpha LOO patch), then draws
+    pred_jnd + N(0, sd_pair) per pair.
+
+    Returns dict {pair_name: float|None}.
+    """
+    bl, sd = jnd_baseline_from_pool(pool_jnd_subjs)
+    return synthesize_fake_jnd(
+        beta_s=gt_bs, beta_c=gt_bc, family=family,
+        pool_jnd_baseline=bl, pool_jnd_sd=sd, rng=rng,
+        theta_canonical=HUE_ANGLES.astype(float),
+    )
+
+
 def _run_v6_synth(subject_label: str, fake_amps_by_roi: dict,
+                  fake_jnd: dict,
                   pool_amps_by_roi_excl_donor: dict,
                   all_hc_jnd: dict, h_jnd_carrier: str,
                   original_hc_jnd_subjs: list) -> dict:
-    """Mirror of null_within_hc_loo's monkeypatch helper. Inlined for clarity."""
+    """Mirror of null_within_hc_loo's monkeypatch helper. Inlined for clarity.
+
+    fake_jnd is passed in (built once per cell at GT) — this fixes the prior
+    inconsistency where fake_jnd was donor's REAL JND while voxels were
+    synth at GT≠0, biasing γ-atom toward δ=0.
+    """
     o_amps, o_hc, o_jnd = (v6.load_amplitudes, v6.load_hc_pool,
                            v6.load_jnd_per_pair)
     o_jnd_subjs = list(v6.HC_JND_SUBJS)
     o_hc_subjs = list(v6.HC_SUBJS)
-    fake_jnd = dict(all_hc_jnd[h_jnd_carrier])
 
     def p_amps(sid, roi):
         if sid == subject_label:
@@ -219,9 +245,14 @@ def run_cell(candidate: dict, magnitude: float, hc_k: str,
         if not fake_amps:
             records.append({"realization": m, "error": "no fake amps"})
             continue
+        # GT-consistent fake JND from pool = HC \ {donor} (v6's effective pool)
+        pool_jnd_subjs = [h for h in original_hc_jnd_subjs if h != hc_k]
+        fake_jnd = _build_synth_fake_jnd(
+            family, gt_bs, gt_bc, pool_jnd_subjs, rng,
+        )
         try:
             storage = _run_v6_synth(
-                subject_label, fake_amps, pool,
+                subject_label, fake_amps, fake_jnd, pool,
                 all_hc_jnd, hc_k, original_hc_jnd_subjs,
             )
         except Exception as e:
@@ -316,6 +347,12 @@ def main(argv: Optional[list] = None) -> None:
             "note": (
                 "Voxel-level synthesis through HC_k's W with HC_k residual "
                 "covariance + AR(1) — replaces Method C (loss-level injection)."
+            ),
+            "synth_jnd_consistent": True,
+            "synth_jnd_method": (
+                "fake_jnd = (HC \\ donor pool baseline) * d_phys/d_perc(GT) + "
+                "N(0, pool_sd_per_pair). Replaces v1 behaviour of using donor's "
+                "REAL JND (which biases γ-atom toward δ=0 when GT≠0)."
             ),
         },
         "cells": {},

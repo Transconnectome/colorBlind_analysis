@@ -3,6 +3,7 @@
 - **Status**: CLOSURE READY (v6 PCA 45° categorical RDM atom canonical; 1° continuous variants removed) — verification complete; 4-test verdict 12/12 FAIL recorded as descriptive limitation
 - **Date**: 2026-06-01
 - **Verification**: see `closure.md` for 4-test summary (param recovery / (0,0) algorithm validation / HC pseudo-CVD / label permutation)
+- **현행 main candidate = 2개** (2026-06): **S08-robust (+6, −42) deutan** · **S09-primary (+2, +24) protan**. **βs-dom / S08-stable (+38, −10)은 dropped** — 본 문서의 βs-dom 행(RQ2·RQ4·App.A 등)은 verification 스냅샷으로 보존된 이력이며 *현행 후보 아님*.
 
 ---
 
@@ -100,7 +101,16 @@
 | **HC train-test = 5/2 random subset, strict LOO 별도 진행됨** | `s10b_v6_pca_rdm.py` SUBSET_SIZE=5, N_RESAMPLES=300; `s17_hc_loo.py` 가 strict 7-fold | Random 5/2 + strict 7-fold 두 evidence 모두 v6 PCA atom 하 valid |
 | **Matched-grid null testing 수행됨** | Exp 14 (one-sided + LOO, N=200) + Exp 15 (sym + LOO, N=200) | NS p-values; 그러나 loss landscape (Exp 17) 2.1×–5.5× 신호 깊이 → L1 참조 |
 
-**Verdict**: **No — generalization 불가능**. Pipeline 2 의 model 은 *individualized filter form* 으로만 보고.
+**두 generalization 축 구분 (중요)**:
+- **(i) CVD-level generalization** = "다른 CVD 피험자로 전이되는가". CVD N=2 → **불가능**.
+  Pipeline 2 model 은 *individualized filter form* 으로만 보고. (위 verdict)
+- **(ii) HC-reference-pool generalization** = "필터가 anchor 된 HC reference pool 안에서,
+  본 적 없는 HC 로 전이되는가". 7-fold HC-LOO 로 **검증 가능하며 positive** —
+  RQ4(e) 의 held-out test-loss 참조 (s18: 안정적 fit 이 held-out HC 를 no-correction 보다
+  잘 예측, 7/7 fold). 이는 (i) 과 별개의 축이며, overfitting 배제 증거.
+
+**Verdict**: CVD-level = **No (N=2)**; HC-reference-pool = **Yes (s18 test-loss positive)**.
+필터는 individualized form 으로 보고하되, HC-LOO 일반성은 별도 근거로 보강.
 
 ---
 
@@ -128,11 +138,83 @@
 | sub-09 PCA (2, +24) γall+RDM_V1 | (0, 0) | [2, 2] | [24, 24] |
 | sub-08 SRM-cos (8, −42) γOY+RDM_V2 | (5, 4) | [2, 12] | [−46, −38] matches PCA |
 
-**Reframing of γ↔RDM directional disagreement** (이전 framing 의 caveat 3 의 보강):
-- Sub-08: γ behav-only β_c=NEG 와 neural RDM_V2 β_c=NEG 같은 방향 → triangulation
-- Sub-09: γ behav-only β_c≈0 와 neural RDM_V1 β_c=POS 다른 방향 → neural inclusion 이 **behav 만으론 invisible 한 cortical mechanism component 노출**
-- (a)(b) 의 boundary/IQR 개선 = "neural inclusion stabilizes parameter identification" (empirical fact)
-- 단 stabilization mechanism: triangulation vs over-determination 구분 불가 → 추가 검증 (Exp 22 진행 중)
+**(d) Standalone term fits — neural-only as its own signal, + behavioral-benefit asymmetry**
+(`scripts/s18_heldout_predictive.py`, full 7-HC pool; reports each term standalone, not just the increment):
+
+| Subject | combined (prod) | γ-only (behav) | RDM-only (neural) |
+|---|---|---|---|
+| sub-08 (S08-robust) | (6, −42) | (6, −42) | **(4, −26)** non-degenerate |
+| sub-09 (S09-primary) | (2, +24) | (26, +4) | **(0, +24)** non-degenerate |
+
+- **Neural-only signal exists for BOTH subjects** — RDM-only fits are non-trivial /
+  non-degenerate for each (S08 β_c=−26, S09 β_c=+24). So "neural carries its own signal"
+  is symmetric across subjects.
+- **Behavioral benefit is asymmetric:**
+  - **sub-08 = YES (triangulation).** γ-only beats no-shift strongly (held-out ΔL=−13.8,
+    neg_frac 0.71) and lands β_c<0, the *same* direction as neural RDM-only (−26). Both
+    terms independently support the deutan cortical direction; the combined fit is not
+    driven by one term.
+  - **sub-09 = NO / weak.** γ-only gives β_c≈+4 (≈0) and does **not** beat no-shift
+    (held-out ΔL=+0.01, neg_frac 0.43). The production (2,+24) is essentially the
+    **neural(RDM)-only fit**; behavior does not support it.
+- Consistent with (a): neural inclusion stabilizes/sharpens for sub-08 (boundary 23→9%),
+  while for sub-09 the filter rests on the neural term alone (behav-only is silent).
+- Stabilization mechanism for sub-08: triangulation vs over-determination not separable
+  → further check (Exp 22 in progress).
+
+**(e) Held-out test-loss in LOO — does the stable value beat no-correction?** (`s18`;
+the train fit's predictive loss on the held-out HC vs the (0,0) no-correction baseline,
+NOT argmin stability, NOT closeness-to-oracle):
+
+| Candidate (combined=prod fit) | RDM L_test med | RDM ΔL vs (0,0) med | folds beating (0,0) | grid pct med | γ ΔL vs (0,0) |
+|---|---|---|---|---|---|
+| sub-08 (6,−42) | 0.594 | **−0.406** | **7/7** | 0.05 (beats 95%) | −13.8 (5/7) ✓ |
+| sub-09 (2,+24) | 0.528 | **−0.472** | **7/7** | 0.08 (beats 92%) | −0.55 (4/7) ≈null |
+
+- **Neural (RDM) stable value is GOOD for BOTH subjects**: ΔL vs (0,0) < 0 on every
+  held-out HC → predicts held-out geometry better than no-correction. (0,0)=1.0 is the
+  no-structure floor; the grid percentile (production fit ≈92–95%) confirms the win is
+  non-trivial (an arbitrary shift centers near 1.0), not just beating the degenerate floor.
+- **Behavioral (γ)**: good for sub-08 (ΔL=−13.8), ≈null for sub-09 (ΔL=−0.55, 4/7) —
+  reinforces (d)'s asymmetry.
+- **Stable + good, but not value-crowning.** Stable train fit (s17: S08 β_c[−46,−38];
+  S09 (2,24) deterministic) + beats-no-correction are *both* positive, and *both* coexist
+  with the closure's ~20° non-identifiability (Test 2a): one **broad, shallow low-loss
+  basin** — consistently centered (stable), shared + beats (0,0) (good), ~20° wide
+  (absolute value unresolved). The value is **in the good region**, not point-resolved.
+  Detail + retraction of an earlier over-claim (gen_gap/oracle was the wrong reference;
+  per-fold oracle β_c flips = single-HC noise, NOT the test-loss):
+  `results/s10_inclusion/s18_INTERPRETATION.md`.
+
+**(f) Methods note — stability vs overfitting/generalization, and how each term is scored**
+(`s18`; supports RQ2 stability ↔ RQ3(ii) generalization).
+
+*Two questions, two estimators (the chain):*
+- **Stability (RQ2/c, s17)** = "HC 부분집합을 바꿔 refit 하면 같은 (β_s,β_c)?" → **estimator
+  분산(재현성)**. 한계: 모델이 misspecified 여도 모든 부분집합이 같은 *틀린* 값으로 수렴 가능 →
+  재현성은 정확성·과적합을 검출 못 함.
+- **Held-out test-loss (RQ4/e, s18)** = "6 HC 로 fit 한 값이 *본 적 없는* 7번째 HC 도 설명?"
+  → **held-out 예측**. (a) overfitting 과 (b) 값의 임의성을 배제. stability 를 *넘어서는*
+  정보. 단 ~20° basin 폭(Test 2a) 안의 절대값은 고정 못 함 → "good region", not point.
+- 종합: **재현 가능(stable) + 무보정보다 예측 우수(generalizes) + 값은 ±~20° 불확실** —
+  하나의 broad shallow basin 기하로 모두 설명. specificity claim 아님(§0).
+
+*과적합 방지 설계 (s18 가 plug-in 이 아닌 이유):*
+- fold 마다 (β_s,β_c) 를 **6 train HC 로 재추정** (`composite_argmin`); production (6,−42)/(2,24)
+  를 대입하지 않음. 고정된 것은 *모델 구조*(combo·family·θ_conf) 와 CVD target 데이터뿐.
+  HC 만 train(6)/test(1) 분할, CVD 는 항상 target.
+- 두 term 모두 **무보정 baseline (δθ=0) 대비 개선 ΔL** 로 채점 (uniform).
+
+*γ vs RDM — held-out HC 의 역할이 다름 (user-agreed 비대칭):*
+- **RDM = 진짜 held-out 예측**: held-out HC 의 *기하구조(ΔRDM_obs)* 가 target. L_RDM =
+  1−cos(ΔRDM_sim(δθ), ΔRDM_obs). (0,0) → ΔRDM_sim=0 → loss≡1.0 = no-structure floor;
+  ΔL=L(fit)−1.0, percentile 이 floor-trivial 여부를 de-confound.
+- **γ = reference-robustness**: held-out HC 의 JND 는 *baseline 입력*, target 은 *고정 CVD JND*.
+  `pred = HC_baseline_JND × (d_phys / d_perceived(δθ))`, L_γ = mean((pred−CVD_JND)/train_SD)².
+  δθ=0 → pred=HC baseline (무보정); ΔL<0 = fit 왜곡이 HC baseline 에서 출발해도 CVD JND
+  anomaly 를 무보정보다 잘 재현. HC 가 target 이 아니므로 엄밀한 held-out 예측은 아님 → 라벨 분리.
+- 코드: `scripts/s18_heldout_predictive.py` `rdm_heldout_eval`(L173), `gamma_heldout_loss`(L140),
+  fold 루프(L223–262).
 
 ---
 
@@ -723,7 +805,6 @@ Theme C — 두 의도된 설계 선택과 trade-off
 |---|---|
 | `PIPELINE_2_CLOSURE.md` | (본 문서) 5-step pipeline narrative + final candidates + limitations |
 | `closure.md` | **4-test verification summary (canonical user-facing)** — content/purpose/metric/result per test |
-| `PIPELINE_2_AUDIT_2026-05-26.md` | Phase C seed audit detail |
 | `scripts/s10b_v6_pca_rdm.py` | **Phase B v6 main runner — v6 PCA 45° categorical canonical** |
 | `scripts/s10b_v6_srm_rdm.py` | SRM-cos RDM atom variant (Appendix A.2 evidence) |
 | `scripts/s10b_v6_srm_disparity.py` | SRM-disparity RDM atom variant (Appendix A.2 evidence) |

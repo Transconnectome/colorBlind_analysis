@@ -131,6 +131,9 @@ grep -E "from two_comp import|from forward_models.two_component import" \
 Sanity assertion (paste into REPL or test):
 ```python
 from two_comp import forward_2comp
-assert tuple(forward_2comp(38, -10, 'deutan').round(2)) == \
-    (8.66, 29.46, 33.0, 17.21, -8.66, -29.46, -33.0, -17.21)
+# current main candidates (S08-robust, S09-primary):
+assert tuple(forward_2comp(6, -42, 'deutan').round(2)) == \
+    (36.37, 15.11, -15.0, -36.33, -36.37, -15.11, 15.0, 36.33)   # S08-robust
+assert tuple(forward_2comp(2, 24, 'protan').round(2)) == \
+    (23.07, 22.41, 8.62, -10.22, -23.07, -22.41, -8.62, 10.22)   # S09-primary
 ```

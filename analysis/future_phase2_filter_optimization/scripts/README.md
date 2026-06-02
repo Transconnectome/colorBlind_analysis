@@ -1,71 +1,173 @@
-# scripts/ — Pipeline 2 code index
+# `scripts/` — Phase 2 code structure & execution guide
 
-각 script 의 Pipeline 2 step 매핑. 자세한 narrative 는 `../PIPELINE_2_CLOSURE.md` 참조.
+Phase B (simulator fit) + Phase C (pre-image filter) code for the CVD
+individualized-filter pipeline. Narrative source of truth:
+[`../PIPELINE_2_CLOSURE.md`](../PIPELINE_2_CLOSURE.md). Closure-citation index:
+[`_ACTIVE.md`](_ACTIVE.md). Framework / forward rules: [`../CLAUDE.md`](../CLAUDE.md) §A13.
 
-## Pipeline 2 core (현재 active)
+> ⚠️ **Flat imports — do NOT move core files into subfolders.** Every script
+> imports siblings flat (`from behav_loss import …`, `from two_comp import …`).
+> Python puts the run script's own directory on `sys.path[0]`, so
+> `python scripts/X.py` resolves these. Relocating a core module into a
+> subdirectory breaks the whole pipeline. Organize *logically* (this README),
+> not physically.
+>
+> External dep: `../future_phase1_forward_model/scripts/utils_forward_model.py`
+> (`create_basis_full`, `HUE_ANGLES`) — Phase 1 module, added to path by the scripts.
 
-| Script | Pipeline 2 Step | 역할 |
+**Environment**: `conda activate srm` (local). All inputs are local (no server).
+
+**2026-06-02 cleanup**: deleted superseded figure iterations
+`make_loss_pipeline_{fig,v2..v8}.py` (kept `make_loss_pipeline_v9.py`, repo root);
+`git rm` exploratory orphans `exp_atom_decomp_at_zero.py`, `exp_gt_grid_sweep.py`
+(recoverable from git history). No core/pipeline files moved (flat-import constraint).
+
+---
+
+## §1 Core library — imported by the pipeline (never delete/move)
+
+| Module | Provides |
+|---|---|
+| `two_comp.py` ★ | Closure 2-Component forward `forward_2comp` (raw CIElab nominal-θ, A13). |
+| `rc_1dof.py` | R+C forward `δθ=(2−g)·δθ_Machado(c;Δλ)`. |
+| `machado_simulator.py` | Machado–Smith cone-shift fundamentals. |
+| `utils_distortion_models.py` | distortion-model utils (wraps `machado_simulator`). |
+| `behav_loss.py` | γ (JND z²) atom factories + HC-pool JND baseline. |
+| `neural_loss.py` | `L_LOCO`, `L_RDM` atoms + `precompute_loco_W_within`. |
+| `diagnostic_delta_rdm.py` | `precompute_hc_W` for RDM atoms (library, despite name). |
+| `s8_loo_train_test.py` | `jnd_baseline_from_pool`, `DELTA_LAMBDA_BY_FAMILY`. |
+| `s10b_v6_pca_rdm.py` | v6 PCA-45° atom factories, grid/argmin helpers (also a Step-2/3 entry). |
+| `forward_voxel_synth.py` | voxel-level synthesis for verification (used by Tests 1/2a). |
+
+## §2 Pipeline entry points — 5-step closure (per PIPELINE_2_CLOSURE.md)
+
+| Step | Script | Output (`results/…`) |
 |---|---|---|
-| `s10a_precondition.py` | Step 1 | HC LOO single-loss precondition gate |
-| `s10b_v6_pca_rdm.py` | Step 2 + 3 | atom factories + cell enumeration + 5/2 HC split × 300 main runner |
-| `s17_hc_loo.py` | Step 3 supplement | strict HC LOO 7-fold (deterministic) |
-| `cycle6b_extended_raw_weight.py` | Step 4 | raw-weight scheme sweep (γ_focal + γ_all + α·RDM, 47 schemes) — Step 3 후보 robustness sanity check |
-| `s13_round3.py` | Step 5 (Phase D) | multi-point recovery identifiability test on final candidates |
-| `s12b_phase_c_v2.py` | (deprecated) | simplex-constrained weight sweep — final selection 기여 없음, L8 limitation 보고용 |
+| 1 precondition | `s10a_precondition.py` | `s10_inclusion/precondition_table.json` |
+| 2 atoms + cells | `s10b_v6_pca_rdm.py` (`build_cells`) | (in v6 JSON) |
+| 3 fit + HC 5/2×300 (main) | `s10b_v6_pca_rdm.py --subject sub-08\|sub-09` ★ | `s10_inclusion/s10b_v6_pca_rdm_results_{sub}.json` |
+| 3 strict HC LOO 7-fold | `s17_hc_loo.py` | `s10_inclusion/s17_hc_loo_results.json` |
+| 4 raw-weight robustness | `cycle6b_extended_raw_weight.py` | `s10_inclusion/cycle6b_extended_composite_{sub}.json` |
+| 5 identifiability (Phase D R3) | `s13_round3.py` | `s13_multipoint_sim/s13_round3_recovery.json` |
 
-## Helpers (forward models + atoms)
+## §3 Closure verification — "redteam" 4-test battery (closure.md Tests 1/2)
 
-| Script | 역할 |
+Generates `results/redteam/*.json` that back `closure.md`. Run after §2.
+
+| Script | closure.md test | Output |
+|---|---|---|
+| `param_recovery_voxel.py` | Test 1 (recovery at argmin) | `redteam/param_recovery_voxel_v6_pca_v2.json` |
+| `null_within_hc_loo.py` | Test 2a (origin) + 2b (HC pseudo-CVD) | `redteam/null_within_hc_loo_v6_pca.json` |
+| `null_label_permutation.py` | Test 2c (label perm) | `redteam/null_label_permutation_v6_pca.json` |
+| `null_label_permutation_block.py` | Test 2c block variant | `redteam/null_label_permutation_block_v6_pca.json` |
+| `analyze_verification.py` | aggregate → FDR verdict matrix | `redteam/verdict_matrix_v6_pca_v2.{json,md}` |
+| `build_uncertainty_summary.py` | effective-uncertainty summary | `redteam/uncertainty_summary.{json,md}` |
+
+## §4 Held-out predictive test-loss (s18) — NEW 2026-06-02
+
+| Script | Role | Output |
+|---|---|---|
+| `s18_heldout_predictive.py` | leave-one-HC-out 7-fold **test-loss** (ΔL vs no-correction (0,0)) + neural/behav standalone fits. Answers "stable value도 *좋은* 값인가". Imports `s17_hc_loo`. | `s10_inclusion/s18_heldout_predictive.{json,md}` |
+
+Interpretation: [`../results/s10_inclusion/s18_INTERPRETATION.md`](../results/s10_inclusion/s18_INTERPRETATION.md);
+narrative in PIPELINE_2_CLOSURE.md RQ3(ii)/RQ4(e,f).
+
+## §5 RDM-atom appendix — SRM variants (convergence check, not fitting primary)
+
+| Script | Role |
 |---|---|
-| `two_comp.py` | 2-Component forward model: `δθ(θ) = β_s·cos(θ−90°) + β_c·cos(θ−θ_conf)` |
-| `rc_1dof.py` | R+C forward model: `δθ_RC(c) = (2−g)·δθ_Machado(c; Δλ)` |
-| `machado_simulator.py` | Machado cone-shift 1-way base |
-| `behav_loss.py` | γ atom factories + JND baseline (HC pool) |
-| `neural_loss.py` | LOCO + RDM atoms |
-| `utils_forward_model.py` | FE-K basis (`create_basis_full`, `HUE_ANGLES`) |
-| `s8_loo_train_test.py` | `DELTA_LAMBDA_BY_FAMILY` dict + HC LOO baseline helper |
-| `diagnostic_delta_rdm.py` | `precompute_hc_W` for RDM atoms |
+| `s10b_v6_srm_rdm.py` | SRM-cosine RDM atom variant. |
+| `s10b_v6_srm_disparity.py` | SRM Procrustes disparity atom variant. |
+| `s17_srm_hc_loo.py` | strict HC LOO, SRM-RDM variant (mirrors `s17_hc_loo`). |
+| `compare_primary_candidates.py` | PCA-RDM vs SRM-cos vs SRM-disparity at the 3 primary cells. |
 
-## Legacy / superseded (참조용으로 보관)
+## §6 Figures & visualization (closure-consistent forward only)
 
-| Script | 대체 by |
+| Script | Output |
 |---|---|
-| `cycle6_raw_weight.py` | `cycle6b_extended_raw_weight.py` (γ_focal 포함 + LOCO cells 포함) |
-| `s10b_v2_resample.py` / `_v3_extended.py` / `_v4_single_atom.py` / `_v5_gamma_all.py` | `s10b_v6_pca_rdm.py` (PCA-aligned RDM K=6) |
-| `s10b_v6_srm_rdm.py` | `s10b_v6_pca_rdm.py` (BrainIAK SRM 시도 → PCA 가 cleaner) |
-| `s10b_cross_roi.py`, `s10b_inclusion_ranking.py` | Phase B v6 통합 |
-| `s10_advisor_fixes.py` | Phase B v6 에 반영 |
-| `s10c_sub09_cosine.py`, `s10d_sub09_weight_sweep.py` | sub-09 exploratory, Phase B v6 흡수 |
-| `s11_*` (pre-Phase-C null sim variants) | Phase B v6 의 stability check 가 대체 |
-| `s12_phase_c_weight_sweep.py` (v1) | `s12b_phase_c_v2.py` (v2; v2 도 deprecated) |
-| `s13_multipoint_validation.py` (Round 1/2) | `s13_round3.py` (final candidates) |
-| `s14_atom_redesign.py` | Cycle 5 결과, PCA-RDM 으로 흡수 |
-| `s15_oos_reanalysis.py`, `s16_e2_srm_disparity.py` | Pipeline 3 deprecated |
-| `run_sub08_protan_audit.py`, `cycle7b_srm_diagnostic.py`, `cycle7c_pca_diagnostic.py`, `compare_pca_vs_srm_v6.py` | exploratory, closure 에 contribution 없음 |
-| `loco_distortion_fit.py`, `loco_filter*.py`, `step*.py`, older s1~s8 | pre-Pipeline 2 시도들 |
+| `fig_candidates_param_space.py` | `results/figures/fig_candidates_param_space.png` (RQ1/§5.1) |
+| `fig_specificity_summary.py` | `results/figures/fig_specificity_summary.png` (§5.2 Theme A) |
+| `p2_primary_4col.py` | `results/visualizations/pipeline2_primary_4col/` (3 primary + summary) |
+| `p2_alternative_rdm_4col.py` | `results/visualizations/pipeline2_alternative_rdm/` |
+| `viz_closure_ground_plot.py` | z-score composite loss landscape PNGs |
+| `viz_closure_rdm_compare.py` | PCA vs SRM-cos vs SRM-disparity comparison PNGs |
+| `stim_lab_render.py` | STIM_LAB rendering helper (lib for p2_*). |
+| `../make_loss_pipeline_v9.py` | loss-pipeline schematic figure (repo root). |
+| `../make_meeting_pptx.py`, `revise_ppt_s18.py` | meeting deck generator / s18 patch (repo root + scripts). |
 
-(legacy scripts 자체는 폴더에 남겨둠 — 재현성 + 이력 추적용.)
+## §7 Phase 3 prep (forward-looking, not closure)
 
-## Run order (Pipeline 2 재현)
+| Script | Role |
+|---|---|
+| `exp2_compute_preimage.py` | A13 pre-image for exp2 deployment → `results/exp2_preimage/sub-{ID}_2component_preimage.json`. |
+
+## §8 Active diagnostics (cited in `_ACTIVE.md`)
+
+| Script | Role |
+|---|---|
+| `cycle7b_srm_diagnostic.py` | δθ=0 baseline SRM 5-cell diagnostic. |
+| `cycle7c_pca_diagnostic.py` | δθ=0 baseline PCA mirror of cycle7b. |
+| `diagnostics/cardinal_axis_amplitude.py` | cardinal-axis amplitude check. |
+
+## §9 Deprecated / superseded — retained for git history & audit
+
+Already archived under `scripts/_archive_pre_closure/<category>/` (s5–s9 sprints,
+pre-v6 Phase B, older forwards, phase_c/d predecessors, pipeline3) and
+`scripts/_archive/` (cleanup_2026-05-18, cleanup_2026-05-19, zombie_cycle12).
+Subpackage dead code under `diagnostics/_archive/`, `filter_ops/_archive/`,
+`inventory/_archive/`. `s12b_phase_c_v2.py` kept at root for the §5.3 L8 audit only.
+Full disposition table: [`_ACTIVE.md`](_ACTIVE.md) §Inactive.
+
+---
+
+## Execution guide
 
 ```bash
-conda activate srm  # local environment
+conda activate srm        # local; all inputs local
 
-# Step 1: precondition
+# ── A. Main 5-step pipeline (reproduce candidates) ────────────────
 python scripts/s10a_precondition.py
-
-# Step 2/3: main Phase B v6 (5/2 HC split × 300)
 python scripts/s10b_v6_pca_rdm.py --subject sub-08
 python scripts/s10b_v6_pca_rdm.py --subject sub-09
-
-# Step 3 supplement: strict HC LOO 7-fold
 python scripts/s17_hc_loo.py
-
-# Step 4: raw-weight sanity check
 python scripts/cycle6b_extended_raw_weight.py
-
-# Step 5: identifiability (Phase D Round 3)
 python scripts/s13_round3.py
+
+# ── B. Held-out predictive test-loss (after s17) ──────────────────
+python scripts/s18_heldout_predictive.py        # ~12s, → s10_inclusion/s18_*
+
+# ── C. Closure verification (redteam → closure.md) ────────────────
+python scripts/param_recovery_voxel.py
+python scripts/null_within_hc_loo.py
+python scripts/null_label_permutation.py
+python scripts/null_label_permutation_block.py
+python scripts/analyze_verification.py          # verdict matrix
+python scripts/build_uncertainty_summary.py     # uncertainty summary
+
+# ── D. Figures ────────────────────────────────────────────────────
+python scripts/fig_candidates_param_space.py
+python scripts/fig_specificity_summary.py
+python scripts/p2_primary_4col.py
+python scripts/p2_alternative_rdm_4col.py
 ```
 
-Outputs → `../results/` (results/README.md 참조).
+Outputs are flat under `../results/<analysis_name>/` (no timestamp subdirs;
+per-subject `sub-{ID}_*.json`; one `config.json` per output dir — see
+[`../CLAUDE.md`](../CLAUDE.md) §7).
+
+## Closure-consistency self-check
+
+A script is closure-consistent iff it uses the `two_comp` forward, **not** the
+`forward_models/two_component.py` frozen H_BASE variant (A13):
+
+```bash
+grep -E "from two_comp import|from forward_models.two_component import" scripts/<X>.py
+```
+```python
+from two_comp import forward_2comp
+# current main candidates (S08-robust, S09-primary):
+assert tuple(forward_2comp(6, -42, 'deutan').round(2)) == \
+    (36.37, 15.11, -15.0, -36.33, -36.37, -15.11, 15.0, 36.33)   # S08-robust
+assert tuple(forward_2comp(2, 24, 'protan').round(2)) == \
+    (23.07, 22.41, 8.62, -10.22, -23.07, -22.41, -8.62, 10.22)   # S09-primary
+```

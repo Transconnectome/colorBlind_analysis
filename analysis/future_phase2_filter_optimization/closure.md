@@ -15,6 +15,10 @@ deutan:150°}) production fits per CVD subject:
 | **S08-robust**  | (+6,  −42) | γOY\|RDMV2\|noLOCO  | sub-08 deutan |
 | **S09-primary** | (+2,  +24) | γALL\|RDMV1\|noLOCO | sub-09 protan |
 
+> **현행 main candidate = 2개** (2026-06): **S08-robust (+6, −42) deutan** · **S09-primary (+2, +24) protan**.
+> **S08-stable (+38, −10)은 dropped** (s18 held-out 분석에서 제외). 위 3-candidate 표는 verification 당시
+> 스냅샷(셋 다 FAIL)으로 보존된 이력이며, S08-stable 행은 *현행 후보가 아님*.
+
 Verification spans **4 tests**: (1) parameter identifiability at production
 argmin + (2) three null/specificity tests.
 

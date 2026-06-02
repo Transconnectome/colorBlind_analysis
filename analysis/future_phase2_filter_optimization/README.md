@@ -10,10 +10,8 @@
 
 | 문서 | 용도 |
 |---|---|
-| **`PIPELINE_2_CLOSURE.md`** | **single source of truth** — 5-step axis narrative, RQ + answers, final candidates, limitations |
-| `PIPELINE_2_AUDIT_2026-05-26.md` | Phase C seed audit + 상세 보조 분석 |
+| **`PIPELINE_2_CLOSURE.md`** | **single source of truth** — 5-step axis narrative, RQ + answers, final candidates, limitations (Phase C seed audit 포함; 옛 PIPELINE_2_AUDIT supersede) |
 | `CLAUDE.md` | 프로젝트 instructions (§0 framework decision, assumptions, status) |
-| `PAPER_OUTLINE_2026-05-26.md` | Paper outline (closure 결과 반영 wip) |
 | `prior-works.md` | Literature mapping (R+C, 2-Component grounding) |
 | `mathematical_basis.md` | Forward model 수학적 배경 |
 | `PI-feedback-priorwork.md` | PI feedback tracker |
@@ -22,7 +20,10 @@
 
 ---
 
-## ⭐ Pipeline 2 final candidates (2 CVD × 3 후보)
+## ⭐ Pipeline 2 final candidates
+
+> **현행 main candidate = 2개** (2026-06): **S08-robust (β_s=6, β_c=−42) deutan** · **S09-primary (β_s=2, β_c=+24) protan**.
+> **βs-dom (38, −10)은 dropped** — 아래 표의 βs-dom 행은 closure verification 스냅샷으로만 보존된 이력이며 현행 후보 아님.
 
 | Subject | Label | Model | Loss combo | Parameters | Family | bdy | 식별성 (Round 3) |
 |---|---|---|---|---|---|---|---|
@@ -41,10 +42,8 @@
 ```
 future_phase2_filter_optimization/
 ├── README.md                          ← (본 문서) navigation + final candidates
-├── PIPELINE_2_CLOSURE.md              ← MAIN: 5-step axis + RQ + limitations
-├── PIPELINE_2_AUDIT_2026-05-26.md     ← supplement: Phase C seed audit
+├── PIPELINE_2_CLOSURE.md              ← MAIN: 5-step axis + RQ + limitations + Phase C seed audit
 ├── CLAUDE.md                          ← project instructions
-├── PAPER_OUTLINE_2026-05-26.md        ← paper draft outline
 ├── prior-works.md, mathematical_basis.md, PI-feedback-priorwork.md, raw_behav.md, index.md
 ├── scripts/                           ← Pipeline 2 code (scripts/README.md 참조)
 ├── results/                           ← Pipeline 2 output (results/README.md 참조)
@@ -85,8 +84,8 @@ future_phase2_filter_optimization/
 
 ## Closure 이후 next steps
 
-1. **Phase 3 행동 실험 design** — 3 candidates ((38,−10), (6,−42), (2,24)) 적용 filter 의 색 perception/discrimination 검증
-2. **Paper draft** (`PAPER_OUTLINE_2026-05-26.md` 기반)
+1. **Phase 3 행동 실험 design** — 현행 2 main candidates ((6,−42) S08-robust, (2,+24) S09-primary) 적용 filter 의 색 perception/discrimination 검증
+2. **Paper draft** (`PIPELINE_2_CLOSURE.md` §Paper 기반)
 3. **Filter visualization** — `simulator/` 의 4-col HTML 활용
 
 ---

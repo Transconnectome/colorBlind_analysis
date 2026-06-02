@@ -1,6 +1,6 @@
 # Phase 2 Filter Optimization — Verification Closure
 
-_Last updated: 2026-06-01_
+_Last updated: 2026-06-02_
 
 ## Context
 
@@ -104,12 +104,43 @@ S08-stable β_s=+38) 은 일관된 합성 JND 에서 회수도 개선
 
 ---
 
+## Test 3 — Held-out predictive test-loss + candidate-landscape characterization (s18/s19)
+
+| 항목 | 내용 |
+|---|---|
+| **내용** | leave-one-HC-out 7-fold. 6 HC 로 (β_s, β_c) refit → **held-out HC** 에서 평가. `s18` = 선정된 후보, `s19` = **gate-pass 전체 후보**(noLOCO+RDM; S08 30, S09 3). |
+| **측정값** | held-out RDM loss = `1 − cos(ΔRDM_sim(δθ), ΔRDM_obs)`. ΔRDM_obs = CVD−(held-out HC) RDM (28-vec). ΔRDM_sim = δθ 가 각 색을 45° bin 으로 재매핑해 만든 HC RDM 변화. 즉 **"필터가 예측한 표상왜곡이 실제 CVD−HC 왜곡 *방향* 을 맞추는가" (cosine)**. **percentile** = grid 내 순위(ROI 내, cross-ROI 비교가능). **ΔL vs (0,0)** = L−1.0 = −cos (단 ROI 난이도 confound 로 cross-ROI 비교 불가 → 순위는 percentile 사용). |
+| **목적** | 선정된 값이 *재현성(stability)* 을 넘어 *held-out 예측적으로도 좋은가*, 그리고 전체 후보 중 어디에 위치하는가 — selection corroboration (NOT re-selection, §0). |
+| **결과** | 아래. |
+
+| Subject | held-out 결과 (선정 후보) | 전체 후보 중 위치 |
+|---|---|---|
+| S08-robust (6,−42, V2) | RDM ΔL vs(0,0) med −0.406 (cos≈+0.41), **7/7 fold (0,0) 우위**, pct 0.046; γ ΔL −13.8 | **rank 1 (0.046, 3-way 동률)** / 30 |
+| S09-primary (2,+24, V1) | RDM ΔL vs(0,0) med −0.472 (cos≈+0.47), **7/7**, pct 0.081; γ ΔL ≈ 0 | **최상위 동률 (0.081)** / 3 |
+| (참고) S08-stable (38,−10, V1) — dropped | — | rank 7 (0.085) — goodness 도 강함 (dropped 이유는 안정성/기타, goodness 아님) |
+
+**핵심 해석 (정직)**:
+1. **선정 값은 held-out goodness 최상위권** — 어떤 gate-pass 후보보다 열위 아님. 동시에
+2. **goodness 는 후보 간 *비변별적* (clustering)** — 거의 모든 후보가 7/7 fold (0,0) 우위, percentile 0.046–0.38 에 bunched, sharp winner 없음.
+3. **원인 = RDM loss 의 45° categorical 양자화**: δθ 는 "각 색이 어느 45° bin 으로 가나" 를 통해서만 손실에 진입 → 손실은 계단함수, **±~22.5° 이동해도 bin 배열 불변 → 손실 불변** (flat plateau). 이 plateau 반폭 ≈ **Test 2a 의 ~20–25° 식별 하한과 동일 원인**. 즉 non-identifiability 와 non-discrimination 은 한 현상.
+4. **함의**: held-out test-loss 는 선정 값이 *good region* 에 있음을 **확인**하나, 설계상 ±~22° 미만을 변별 못 하므로 **값을 고정(pin)하지 못함**. 따라서 goodness 가 결정 기준이 될 수 없었고 — **안정성은 goodness-동등 후보들 사이의 정당한 tiebreak**.
+
+**Caveats**: (a) ΔL 은 ROI 난이도 confound 로 cross-ROI 비교 불가 → 순위는 percentile. top cluster 가 V2(=선정 ROI)라 V2 우위는 일부 ROI 난이도 가능성. (b) γYP combo 는 β_c **양수**(deutan 방향 반대)인데도 pct 양호 → goodness 가 quadrant 를 강제 안 함 → quadrant 일관성·안정성이 별도로 필요. (c) γ(JND)는 연속이라 더 변별적이나 sub-08 만 유효. (d) LOCO combo 제외(held-out degenerate).
+
+> **선정 사슬 (≠ "안정성만")**: ① 모델 = 구조적 적합성(R+C 기각) → ② gate = CVD−HC 방향 분리(Cohen's d ≥ +0.5) → ③ 값 = 데이터기반 loss argmin(in-sample 적합) → ④ goodness-동등 후보 간 **안정성 tiebreak** → ⑤ s19 가 그 tiebreak 승자도 held-out goodness 최상위권임을 사후 확인. **선정 값의 행동/신경 *효능* 검증(점-정밀 추정 아님)은 Phase 3** (제시한 (6,−42)/(2,+24) 필터를 실제 적용해 색 인지/구별이 HC 쪽으로 개선되는지).
+
+데이터: `results/s10_inclusion/s18_heldout_predictive.{json,md}`, `s19_allcandidate_heldout.{json,md}`, `s18_INTERPRETATION.md`.
+
+---
+
 ## 종합 verdict
 
-FDR-corrected (BH α=0.05), 3 candidates × 3 main tests = 9 tests:
+FDR-corrected (BH α=0.05), 3 candidates × 3 main tests (Test 1/2a/2b/2c) = 9 tests:
 **유의한 것 없음.** 가장 무거운 증거는 **Test 2a (영점 회수 실패)** —
 synth design contamination 으로부터 자유로운 깨끗한 noise floor 측정에서
 ~20°/25° bias.
+
+**Test 3 는 이 FDR 9-test 에 포함되지 않음** — null/specificity 검정이 아니라 *generalization characterization* 이다. 결과는 positive (선정 값이 held-out 에서 무보정 대비 우위, goodness 최상위권) 이나, 45° 양자화로 값을 *고정* 하진 못해 Test 2a non-identifiability 와 일관. FAIL verdict 를 바꾸지 않으며 별개 축이다.
 
 (β_s, β_c) production argmin 의 허용 해석:
 - **금지**: 절대값 physiological 해석 (cone-shift 정도, cortical rotation 각도)
@@ -123,3 +154,5 @@ synth design contamination 으로부터 자유로운 깨끗한 noise floor 측�
 - Source C (Test 2c): `results/redteam/null_label_permutation_v6_pca.json`
 - Verdict matrix: `results/redteam/verdict_matrix_v6_pca_v2.json` / `verdict_matrix_v2.md`
 - Uncertainty summary: `results/redteam/uncertainty_summary.json` / `uncertainty_summary.md`
+- Test 3 held-out (선정 후보): `results/s10_inclusion/s18_heldout_predictive.{json,md}` + `s18_INTERPRETATION.md` (`scripts/s18_heldout_predictive.py`)
+- Test 3 held-out (전체 후보): `results/s10_inclusion/s19_allcandidate_heldout.{json,md}` (`scripts/s19_allcandidate_heldout.py`)

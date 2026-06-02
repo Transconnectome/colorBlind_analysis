@@ -44,6 +44,17 @@ the two forwards give different δθ 8-vec. See CLAUDE.md A13.
 | [`cycle7c_pca_diagnostic.py`](cycle7c_pca_diagnostic.py) | δθ=0 baseline PCA mirror of cycle7b |
 | [`compare_primary_candidates.py`](compare_primary_candidates.py) | 3-way comparison runner |
 
+## Test 3 — Held-out predictive test-loss (closure.md §Test 3, 2026-06-02)
+
+| Script | Role | Output |
+|---|---|---|
+| [`s18_heldout_predictive.py`](s18_heldout_predictive.py) | leave-one-HC-out 7-fold test-loss (ΔL vs no-correction) + standalone fits — **selected** candidates | `results/s10_inclusion/s18_heldout_predictive.{json,md}` (+ `s18_INTERPRETATION.md`) |
+| [`s19_allcandidate_heldout.py`](s19_allcandidate_heldout.py) | same metric across **all gate-passing** candidates; cross-candidate rank by grid-null percentile (corroboration, NOT re-selection §0) | `results/s10_inclusion/s19_allcandidate_heldout.{json,md}` |
+
+Finding: held-out goodness non-discriminative (45° categorical quantization → ±~22.5°
+plateau ≈ Test 2a floor); selected values top-tier but value not pinned. Phase 3 =
+behavioral/neural efficacy of the specific selected value (not point-precision).
+
 ## Visualization (closure-consistent)
 
 | Script | Output | Forward used |

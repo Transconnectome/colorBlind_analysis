@@ -63,14 +63,19 @@ Generates `results/redteam/*.json` that back `closure.md`. Run after §2.
 | `analyze_verification.py` | aggregate → FDR verdict matrix | `redteam/verdict_matrix_v6_pca_v2.{json,md}` |
 | `build_uncertainty_summary.py` | effective-uncertainty summary | `redteam/uncertainty_summary.{json,md}` |
 
-## §4 Held-out predictive test-loss (s18) — NEW 2026-06-02
+## §4 Held-out predictive test-loss (s18/s19) — closure Test 3, NEW 2026-06-02
 
 | Script | Role | Output |
 |---|---|---|
-| `s18_heldout_predictive.py` | leave-one-HC-out 7-fold **test-loss** (ΔL vs no-correction (0,0)) + neural/behav standalone fits. Answers "stable value도 *좋은* 값인가". Imports `s17_hc_loo`. | `s10_inclusion/s18_heldout_predictive.{json,md}` |
+| `s18_heldout_predictive.py` | leave-one-HC-out 7-fold **test-loss** (ΔL vs no-correction (0,0)) + neural/behav standalone fits, for the **selected** candidates. Answers "stable value도 *좋은* 값인가". Imports `s17_hc_loo`. | `s10_inclusion/s18_heldout_predictive.{json,md}` |
+| `s19_allcandidate_heldout.py` | same held-out metric across **ALL gate-passing candidates** (noLOCO+RDM; S08 30, S09 3). Cross-candidate rank by grid-null **percentile** (ROI-comparable). Corroborates that the stability-pick is goodness top-tier; characterizes the landscape (NOT re-selection, §0). Imports `s18`+`s17`. | `s10_inclusion/s19_allcandidate_heldout.{json,md}` |
 
+Key facts (closure `Test 3`): held-out RDM goodness is **non-discriminative** (45° categorical
+quantization → ±~22.5° plateau ≈ Test 2a ~20° floor); selected values are top-tier but the
+metric cannot *pin* the value. Phase 3 validates the **behavioral/neural efficacy of the
+specific selected value** (not point-precision).
 Interpretation: [`../results/s10_inclusion/s18_INTERPRETATION.md`](../results/s10_inclusion/s18_INTERPRETATION.md);
-narrative in PIPELINE_2_CLOSURE.md RQ3(ii)/RQ4(e,f).
+narrative in `closure.md` §Test 3 + PIPELINE_2_CLOSURE.md RQ3(ii)/RQ4(e,f).
 
 ## §5 RDM-atom appendix — SRM variants (convergence check, not fitting primary)
 
@@ -133,8 +138,9 @@ python scripts/s17_hc_loo.py
 python scripts/cycle6b_extended_raw_weight.py
 python scripts/s13_round3.py
 
-# ── B. Held-out predictive test-loss (after s17) ──────────────────
-python scripts/s18_heldout_predictive.py        # ~12s, → s10_inclusion/s18_*
+# ── B. Held-out predictive test-loss (after s17) — closure Test 3 ─
+python scripts/s18_heldout_predictive.py        # ~12s, selected candidates → s10_inclusion/s18_*
+python scripts/s19_allcandidate_heldout.py      # ~3min, ALL gate-passing candidates → s19_*
 
 # ── C. Closure verification (redteam → closure.md) ────────────────
 python scripts/param_recovery_voxel.py

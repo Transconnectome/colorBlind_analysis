@@ -406,11 +406,11 @@ fit_param = argmin(comp)                       # g 또는 (β_s, β_c)
 
 ### 3.5. 선정된 model·loss 후보 + fitting 결과
 
-**선정 기준**:
-- Primary: test_loss_median
+**선정 기준** (→ §3.3 상세):
+- Gate: boundary_rate < 0.5 + collapse 배제
+- Primary: test_loss_median (composite z-score)
 - Secondary: test_loss_iqr
-- Supplementary: boundary, collapse pass
-- behavioral aggregate 임계 (`agg / 8 < 16 z²` ≈ 평균 4 SD/pair)
+- Supplementary: rdm L_test med (s18 7-fold LOO, neural fixed criterion) + behavioral aggregate 임계 (`agg / 8 < 16 z²` ≈ 평균 4 SD/pair)
 
 **명칭 정책**:
 - 명칭은 *mechanism descriptor* (βc-dominant 등) 사용

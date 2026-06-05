@@ -166,10 +166,10 @@
 the train fit's predictive loss on the held-out HC vs the (0,0) no-correction baseline,
 NOT argmin stability, NOT closeness-to-oracle):
 
-| Candidate (combined=prod fit) | RDM L_test med | RDM ΔL vs (0,0) med | folds beating (0,0) | grid pct med | γ ΔL vs (0,0) |
-|---|---|---|---|---|---|
-| sub-08 (6,−42) | 0.594 | **−0.406** | **7/7** | 0.05 (beats 95%) | −13.8 (5/7) ✓ |
-| sub-09 (2,+24) | 0.528 | **−0.472** | **7/7** | 0.08 (beats 92%) | −0.55 (4/7) ≈null |
+| Candidate (combined=prod fit) | RDM L_test med | RDM ΔL vs (0,0) med | folds beating (0,0) | grid pct med | NC_rdm med | frac_above_nc med | γ ΔL vs (0,0) |
+|---|---|---|---|---|---|---|---|
+| sub-08 (6,−42) | 0.594 | **−0.406** | **7/7** | 0.05 (beats 95%) | 0.240 | 0.484 | −13.8 (5/7) ✓ |
+| sub-09 (2,+24) | 0.528 | **−0.472** | **7/7** | 0.08 (beats 92%) | 0.274 | 0.325 | −0.55 (4/7) ≈null |
 
 - **Neural (RDM) stable value is GOOD for BOTH subjects**: ΔL vs (0,0) < 0 on every
   held-out HC → predicts held-out geometry better than no-correction. (0,0)=1.0 is the
@@ -185,6 +185,12 @@ NOT argmin stability, NOT closeness-to-oracle):
   Detail + retraction of an earlier over-claim (gen_gap/oracle was the wrong reference;
   per-fold oracle β_c flips = single-HC noise, NOT the test-loss):
   `results/s10_inclusion/s18_INTERPRETATION.md`.
+- **Noise ceiling (Lage-Castellanos et al. 2018)**: split-half NC from held-out HC amplitude
+  reliability = 0.240 (S08) / 0.274 (S09). frac_above_nc = 0.484 / 0.325 — production fit은
+  "noise ceiling → no-correction floor" 가용 범위의 33–48% 위치. 이는 broad shallow basin
+  해석(§Theme A)과 일관. **Caveat**: NC는 HC-side split-half만 추정; CVD amplitude 노이즈
+  (ΔRDM_obs의 CVD 항)는 미포함 → 실제 NC ≥ 보고값. 코드: `s18_heldout_predictive.py`
+  `compute_rdm_nc_splithalf()` (10 balanced 3-3 splits of held-out HC's 6 runs).
 
 **(f) Methods note — stability vs overfitting/generalization, and how each term is scored**
 (`s18`; supports RQ2 stability ↔ RQ3(ii) generalization).
@@ -213,6 +219,9 @@ NOT argmin stability, NOT closeness-to-oracle):
   `pred = HC_baseline_JND × (d_phys / d_perceived(δθ))`, L_γ = mean((pred−CVD_JND)/train_SD)².
   δθ=0 → pred=HC baseline (무보정); ΔL<0 = fit 왜곡이 HC baseline 에서 출발해도 CVD JND
   anomaly 를 무보정보다 잘 재현. HC 가 target 이 아니므로 엄밀한 held-out 예측은 아님 → 라벨 분리.
+  NC 미적용: CVD JND 는 단일 측정값(N=1 per pair), split-half 추정 불가.
+- **RDM NC 비대칭**: NC (0.240/0.274) 는 HC-side amplitude noise만 반영; CVD amplitude noise는
+  별도. γ 에는 NC 가 없으므로 γ ΔL 과 rdm frac_above_nc 는 직접 비교 불가.
 - 코드: `scripts/s18_heldout_predictive.py` `rdm_heldout_eval`(L173), `gamma_heldout_loss`(L140),
   fold 루프(L223–262).
 
@@ -378,11 +387,15 @@ fit_param = argmin(comp)                       # g 또는 (β_s, β_c)
 
 ### 3.3. Selection metric 우선 순위
 
-1. **Primary**: `test_loss_median` ASC
-2. **Secondary**: `test_loss_iqr` ASC
-3. **Supplementary** (degeneracy 배제):
-   - `boundary_rate < 0.5`
-   - Collapse: `test_loss_iqr > 50` OR `sign(train) ≠ sign(test) AND |test − train| > 5`
+1. **Gate**: `boundary_rate < 0.5` + collapse 배제
+   (`test_loss_iqr > 50` OR `sign(train) ≠ sign(test) AND |test − train| > 5`)
+2. **Primary**: `test_loss_median` ASC — composite z-score (`Σ zscore_grid(atom) / √n_atoms`).
+   각 atom을 자신의 grid 분포 대비 표준화하므로 combo 간 scope 차이(focal vs all-pair)는
+   z-score reference 에 흡수됨 → 값 비교 유효. 단 selection은 subject 내부에서만.
+3. **Secondary**: `test_loss_iqr` ASC — parameter stability
+4. **Supplementary**: `rdm L_test med` ASC (s18 7-fold strict LOO) — neural component
+   고정 criterion (L_RDM = 1−cosine, 모든 combo 동일 공식). behavioral equivalent 없으므로
+   primary 진입 불가; composite selection 이후 neural validation 역할.
 
 ### 3.4. Gate 통과율 (전체 cell × model; v6 PCA)
 
@@ -406,17 +419,31 @@ fit_param = argmin(comp)                       # g 또는 (β_s, β_c)
 
 **Final candidates** (v6 PCA 45° categorical, N=300 resample):
 
-| Subject | Label | Model | Loss combo | (β_s, β_c) median | param IQR | mode share | train_loss med ± IQR | test_loss med ± IQR | test_focal | test_agg | test_V1_RDM |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| sub-08 | **βs-dom** | 2-Component | γ_all + RDM_V1 | (+38, −10) | (12, 4) | ~50% | — | — | — | — | — |
-| sub-08 | **βc-dom** | 2-Component | γ_OY + RDM_V2 | (+6, −42) | (8, 2) | ~70% | — | — | — | — | — |
-| sub-09 | **βc-rot** | 2-Component | γ_all + RDM_V1 | (+2, **+24**) | **(0, 0)** | **87.7%** (263/300) | — | — | 3.70 | 46.12 | 0.686 |
-| **R+C insufficiency references (not candidates)** | | | | | | | | | | | |
-| sub-08 | (R+C ref) | R+C (JND_Lamb) | RDM_V1 only | Δλ=6.5 nm, g=2.25±0.00 | — | — | — | — | 66.56 | 107.82 | — |
-| sub-09 | (R+C ref) | R+C (Boehm_low) | γ_all + RDM_V1 | Δλ=3.0 nm, g=2.95±0.10 | — | — | — | — | 6.00 | 6.41 | — |
+| Subject | Label | Model | Loss combo | (β_s, β_c) median | param IQR | mode share | train_loss med ± IQR | test_loss med ± IQR | bdy | test_focal | test_agg | test_V1_RDM |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| sub-08 | ~~βs-dom~~ (**DROPPED** 2026-06-01) | 2-Component | γ_all + RDM_V1 | (+38, −10) | (24, 22) | ~50% | −1.24 ± 0.86 | −1.14 ± 0.86 | 0.000 | — | — | — |
+| sub-08 | **βc-dom** ✓ | 2-Component | γ_OY + RDM_V2 | (+6, −42) | (8, 2) | ~70% | **−2.89 ± 0.27** | **−2.36 ± 2.15** | 0.093 | — | — | — |
+| sub-09 | **βc-rot** ✓ | 2-Component | γ_all + RDM_V1 | (+2, **+24**) | **(0, 0)** | **87.7%** (263/300) | **−1.68 ± 0.46** | **−1.54 ± 1.42** | 0.000 | 3.70 | 46.12 | 0.686 |
+| **R+C insufficiency references (not candidates)** | | | | | | | | | | | | |
+| sub-08 | (R+C ref) | R+C (JND_Lamb) | RDM_V1 only | Δλ=6.5 nm, g=2.25±0.00 | — | — | −1.30 ± 0.23 | −0.88 ± 1.38 | 0.000 | 66.56 | 107.82 | — |
+| sub-09 | (R+C ref) | R+C (Boehm_low) | γ_all + RDM_V1 | Δλ=3.0 nm, g=2.95±0.10 | — | — | −1.10 ± 0.11 | −0.86 ± 0.57 | 0.413 | 6.00 | 6.41 | — |
 
-- Sub-08 의 두 candidate (βs-dom + βc-dom) 는 *parallel mechanism hypotheses* — 두 σ 모두 deutan-consistent quadrant (β_s+, β_c−)
+- Sub-08 βs-dom 은 2026-06-01 closure 에서 **DROPPED** (test_loss 및 param IQR 열등; IQR=(24,22) vs βc-dom (8,2))
 - Sub-09 의 βc-rot 는 mode share 87.7% 로 가장 deterministic — 단 SRM family 와 σ-level non-identifiability (L9)
+
+**Gate-2-passed 비교 (bdy < 0.5, test_loss_median 기준, 2comp only)**:
+
+| Subject | N cells | 선정 rank | 선정값 | 2위 | 최하위 |
+|---|---|---|---|---|---|
+| sub-08 | 25 | **#1** | −2.36 (iqr=2.15, bdy=0.093) | −2.20 (iqr=4.03, bdy=0.067) | +0.78 |
+| sub-09 | 4 | **#1** | −1.54 (iqr=1.42, bdy=0.000) | −1.52 (iqr=1.41, bdy=0.000) | −0.03 |
+
+**R+C Gate-2-passed 최우수값 (참고용 — model rejection 이전)**:
+
+| Subject | Best R+C test_loss | combo | 비고 |
+|---|---|---|---|
+| sub-08 | −2.39 (iqr=1.24, bdy=0.000) | γ_\|RDMV2\|LOCO\|rc_Boehm_mid | LOCO 포함 combo; primary R+C (bdy=100%) rejected |
+| sub-09 | −2.38 (iqr=1.36, bdy=0.000) | γ_\|RDMV1\|LOCO\|rc_DPS_lit | LOCO 포함 combo; primary R+C (bdy=41%) rejected |
 
 ---
 

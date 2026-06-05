@@ -1,6 +1,6 @@
 # S18 — Held-out-HC predictive eval + standalone fits
 
-_generated: 11.3s, 2 candidates_
+_generated: 11.7s, 2 candidates_
 
 ## Q2 — Standalone full-pool (7 HC) fits  (beta_s, beta_c)
 
@@ -13,14 +13,16 @@ _generated: 11.3s, 2 candidates_
 
 Primary metric = **ΔL vs (0,0)** (test-loss improvement over no-correction), applied uniformly to gamma and rdm. For rdm, (0,0) = no-structure floor (loss≡1.0); the grid percentile de-confounds the (0,0) win (LOW pct = beats arbitrary shift, not just the floor). gen_gap (vs held-out oracle) demoted to footnote — answers 'close to best', not 'good'.
 
-| Candidate | variant | gamma ΔL med (neg_frac) | rdm L_test med | rdm ΔL vs(0,0) med (folds<00) | rdm grid pct med |
-|---|---|---|---|---|---|
-| S08-robust | combined | -13.85 (0.71) | 0.594 | -0.406 (1.00) | 0.05 |
-| S08-robust | gamma | -13.81 (0.71) | — | — | — |
-| S08-robust | rdm | — | 0.640 | -0.360 (1.00) | 0.13 |
-| S09-primary | combined | +0.01 (0.43) | 0.528 | -0.472 (1.00) | 0.08 |
-| S09-primary | gamma | -0.55 (0.57) | — | — | — |
-| S09-primary | rdm | — | 0.528 | -0.472 (1.00) | 0.08 |
+NC=split-half noise ceiling (Lage-Castellanos et al. 2018); report BOTH raw L_test and NC. frac_above_nc=(L_test-NC)/(1-NC): 0=at ceiling, 1=at floor, <0=beats NC.
+
+| Candidate | variant | gamma dL med (neg_frac) | rdm L_test med | rdm dL vs(0,0) med (folds<00) | rdm grid pct med | NC med | frac_above_nc med |
+|---|---|---|---|---|---|---|---|
+| S08-robust | combined | -13.85 (0.71) | 0.594 | -0.406 (1.00) | 0.05 | 0.240 | 0.484 |
+| S08-robust | gamma | -13.81 (0.71) | — | — | — | — | — |
+| S08-robust | rdm | — | 0.640 | -0.360 (1.00) | 0.13 | 0.240 | 0.539 |
+| S09-primary | combined | +0.01 (0.43) | 0.528 | -0.472 (1.00) | 0.08 | 0.274 | 0.325 |
+| S09-primary | gamma | -0.55 (0.57) | — | — | — | — | — |
+| S09-primary | rdm | — | 0.528 | -0.472 (1.00) | 0.08 | 0.274 | 0.325 |
 
 ## Q1 (caveat, NOT the headline) — per-fold oracle β_c spread
 

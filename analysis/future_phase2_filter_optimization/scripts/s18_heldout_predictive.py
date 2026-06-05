@@ -36,6 +36,7 @@ Output:
   results/s10_inclusion/s18_heldout_predictive.md
 """
 import importlib.util
+import itertools
 import json
 import sys
 import time
@@ -170,11 +171,118 @@ def gamma_heldout_loss(delta_8vec, gamma_pairs, cvd_jnd, heldout_jnd, train_sd):
     return (total / n) if n > 0 else None
 
 
+def compute_rdm_nc_splithalf(cvd_amp, hc_amp_6runs):
+    """Split-half noise ceiling for RDM cosine loss on a single held-out HC.
+
+    Estimates the minimum achievable L_RDM given measurement noise in the
+    held-out HC's amplitude data (Lage-Castellanos et al. 2018 PLOS CB).
+
+    Each half estimates ΔRDM = cvd_rdm - hc_rdm(half), matching the vector
+    that make_rdm_atom_n1ok uses as the target. NC = 1 - cos(ΔRDM_A, ΔRDM_B).
+
+    6 runs have C(6,3)/2 = 10 unique balanced 3-3 partitions (each unique,
+    symmetric duplicates removed). NC = mean over all 10 splits.
+
+    Parameters
+    ----------
+    cvd_amp : ndarray, shape (6, 8, n_vox)
+        CVD subject's per-run amplitudes (kept at full 6 runs, not split).
+    hc_amp_6runs : ndarray, shape (6, 8, n_vox)
+        Held-out HC's per-run amplitudes.
+
+    Returns
+    -------
+    dict with 'NC_rdm' (mean), 'NC_rdm_std' (std), 'n_splits_valid' (int).
+    Returns None if computation fails.
+    """
+    K_PCA = 6
+
+    def voxel_pca_components(pattern_8xV):
+        mp = pattern_8xV - pattern_8xV.mean(axis=0, keepdims=True)
+        try:
+            U, S, Vt = np.linalg.svd(mp, full_matrices=False)
+            k_eff = min(K_PCA, U.shape[1])
+            return U[:, :k_eff] * S[:k_eff]
+        except Exception:
+            return mp[:, :K_PCA]
+
+    def compute_rdm_correlation(scores_8xk):
+        n = scores_8xk.shape[0]
+        out = np.zeros((n * (n - 1)) // 2)
+        idx = 0
+        for i in range(n):
+            for j in range(i + 1, n):
+                a, b = scores_8xk[i], scores_8xk[j]
+                am = a - a.mean(); bm = b - b.mean()
+                denom = np.linalg.norm(am) * np.linalg.norm(bm)
+                out[idx] = 1.0 - (am @ bm / denom if denom > 1e-9 else 0.0)
+                idx += 1
+        return out
+
+    try:
+        from scipy.spatial.distance import squareform
+        triu = np.triu_indices(8, k=1)
+
+        # CVD RDM from all 6 runs (fixed, not split)
+        cvd_mean = cvd_amp.mean(axis=0)  # (8, n_vox)
+        cvd_scores = voxel_pca_components(cvd_mean)
+        cvd_rdm = squareform(compute_rdm_correlation(cvd_scores))  # (8,8)
+
+        # Enumerate all 10 balanced 3-3 partitions of 6 runs
+        all_splits = []
+        for combo in itertools.combinations(range(6), 3):
+            half1 = list(combo)
+            half2 = [r for r in range(6) if r not in half1]
+            # Canonical form: first element of half1 < first element of half2
+            if half1[0] < half2[0]:
+                all_splits.append((half1, half2))
+        # Should give exactly 10 unique balanced splits
+
+        nc_vals = []
+        for half1, half2 in all_splits:
+            try:
+                hc_mean1 = hc_amp_6runs[half1, :, :].mean(axis=0)  # (8, n_vox)
+                hc_mean2 = hc_amp_6runs[half2, :, :].mean(axis=0)
+                hc_scores1 = voxel_pca_components(hc_mean1)
+                hc_scores2 = voxel_pca_components(hc_mean2)
+                hc_rdm1 = squareform(compute_rdm_correlation(hc_scores1))
+                hc_rdm2 = squareform(compute_rdm_correlation(hc_scores2))
+                # ΔRDM vectors: cvd - hc_half (matching make_rdm_atom_n1ok target)
+                delta1 = (cvd_rdm - hc_rdm1)[triu]
+                delta2 = (cvd_rdm - hc_rdm2)[triu]
+                n1 = np.linalg.norm(delta1)
+                n2 = np.linalg.norm(delta2)
+                if n1 < 1e-9 or n2 < 1e-9:
+                    continue
+                cos_val = float(np.dot(delta1, delta2) / (n1 * n2))
+                nc_vals.append(1.0 - cos_val)
+            except Exception:
+                continue
+
+        if not nc_vals:
+            return None
+        nc_arr = np.array(nc_vals)
+        return {
+            'NC_rdm': float(np.mean(nc_arr)),
+            'NC_rdm_std': float(np.std(nc_arr)),
+            'n_splits_valid': int(len(nc_arr)),
+        }
+    except Exception:
+        return None
+
+
 def rdm_heldout_eval(fit, roi, cvd_amp, heldout_hc, hc_amps_by_roi, C, K, family):
-    """L_RDM on held-out single HC + random-delta grid-null percentile."""
+    """L_RDM on held-out single HC + random-delta grid-null percentile + NC.
+
+    Also computes split-half noise ceiling (Lage-Castellanos et al. 2018):
+      NC_rdm = expected min L_RDM given HC measurement noise (10-split mean).
+      frac_above_nc = (L_test - NC) / (1 - NC): 0=at ceiling, 1=at no-correction floor.
+    Per Lage-Castellanos caveat: both raw L_rdm_test and NC_rdm are reported.
+    """
     if heldout_hc not in hc_amps_by_roi[roi]:
         return None
-    test_pool = {heldout_hc: hc_amps_by_roi[roi][heldout_hc]}
+    hc_amp = hc_amps_by_roi[roi][heldout_hc]  # shape (6, 8, n_vox)
+    test_pool = {heldout_hc: hc_amp}
     atom = make_rdm_atom_n1ok(roi, cvd_amp, test_pool, C, K)
     if atom is None:
         return None
@@ -187,6 +295,23 @@ def rdm_heldout_eval(fit, roi, cvd_amp, heldout_hc, hc_amps_by_roi, C, K, family
         return None
     pct = float(np.mean(flat < val))  # fraction of grid BETTER than fitted; low = good
     test_argmin = argmin_2comp(grid)
+
+    # Split-half noise ceiling (Lage-Castellanos et al. 2018)
+    nc_result = compute_rdm_nc_splithalf(cvd_amp, hc_amp)
+    if nc_result is not None:
+        nc_rdm = nc_result['NC_rdm']
+        nc_rdm_std = nc_result['NC_rdm_std']
+        n_splits_valid = nc_result['n_splits_valid']
+        # frac_above_nc: 0 = at ceiling (L_test = NC), 1 = at no-correction floor (L_test = 1)
+        # <0 = beats ceiling (noisy NC estimate)
+        denom = 1.0 - nc_rdm
+        frac_above_nc = float((val - nc_rdm) / denom) if abs(denom) > 1e-9 else None
+    else:
+        nc_rdm = None
+        nc_rdm_std = None
+        n_splits_valid = 0
+        frac_above_nc = None
+
     return {
         'L_rdm_test': val,
         'grid_null_percentile': pct,       # low = fitted generalizes / specific
@@ -194,6 +319,11 @@ def rdm_heldout_eval(fit, roi, cvd_amp, heldout_hc, hc_amps_by_roi, C, K, family
         'gen_gap': float(val - np.nanmin(grid)),   # val - oracle; 0 = perfect transfer
         'L_rdm_test_at_00': float(atom(np.zeros(8))),  # ~1.0 degenerate (documented)
         'test_argmin': test_argmin,
+        # Noise ceiling (Lage-Castellanos et al. 2018): report BOTH raw and NC
+        'NC_rdm': nc_rdm,
+        'NC_rdm_std': nc_rdm_std,
+        'NC_n_splits_valid': n_splits_valid,
+        'frac_above_nc': frac_above_nc,    # 0=at ceiling, 1=at floor, <0=beats NC
     }
 
 
@@ -352,6 +482,19 @@ def summarize_loo(folds):
         s['n_rdm_folds'] = int(pcts.size)
     if gaps:
         s['rdm_gen_gap_median'] = float(np.median(gaps))  # footnote only (closeness-to-oracle)
+    # Noise ceiling (Lage-Castellanos et al. 2018): split-half NC per fold
+    ncs = [f['rdm']['NC_rdm'] for f in folds
+           if f.get('rdm') and f['rdm'].get('NC_rdm') is not None]
+    fracs = [f['rdm']['frac_above_nc'] for f in folds
+             if f.get('rdm') and f['rdm'].get('frac_above_nc') is not None]
+    if ncs:
+        ncs = np.array(ncs)
+        s['rdm_NC_median'] = float(np.median(ncs))
+        s['rdm_NC_iqr'] = float(np.percentile(ncs, 75) - np.percentile(ncs, 25))
+    if fracs:
+        fracs = np.array(fracs)
+        s['rdm_frac_above_nc_median'] = float(np.median(fracs))
+        s['rdm_frac_above_nc_iqr'] = float(np.percentile(fracs, 75) - np.percentile(fracs, 25))
     # ESTIMATOR-CLEAN held-out identifiability: per-fold oracle argmin (each fold
     # = argmin of a genuinely held-out single-HC RDM surface). Wandering / sign-
     # flipping oracle beta_c => value not identified by held-out prediction.
@@ -391,8 +534,11 @@ def make_md(results):
           "(loss≡1.0); the grid percentile de-confounds the (0,0) win (LOW pct = beats "
           "arbitrary shift, not just the floor). gen_gap (vs held-out oracle) demoted to "
           "footnote — answers 'close to best', not 'good'.", "",
-          "| Candidate | variant | gamma ΔL med (neg_frac) | rdm L_test med | rdm ΔL vs(0,0) med (folds<00) | rdm grid pct med |",
-          "|---|---|---|---|---|---|"]
+          "NC=split-half noise ceiling (Lage-Castellanos et al. 2018); "
+          "report BOTH raw L_test and NC. "
+          "frac_above_nc=(L_test-NC)/(1-NC): 0=at ceiling, 1=at floor, <0=beats NC.", "",
+          "| Candidate | variant | gamma dL med (neg_frac) | rdm L_test med | rdm dL vs(0,0) med (folds<00) | rdm grid pct med | NC med | frac_above_nc med |",
+          "|---|---|---|---|---|---|---|---|"]
     for c in results['candidates']:
         for v in VARIANTS:
             s = c['heldout_loo'][v]['summary']
@@ -404,7 +550,11 @@ def make_md(results):
                   else f"{s['rdm_dL_vs00_median']:+.3f} ({s['rdm_dL_vs00_neg_frac']:.2f})")
             r = ("—" if 'rdm_percentile_median' not in s
                  else f"{s['rdm_percentile_median']:.2f}")
-            L.append(f"| {c['id']} | {v} | {g} | {lt} | {dl} | {r} |")
+            nc = ("—" if 'rdm_NC_median' not in s
+                  else f"{s['rdm_NC_median']:.3f}")
+            frac = ("—" if 'rdm_frac_above_nc_median' not in s
+                    else f"{s['rdm_frac_above_nc_median']:.3f}")
+            L.append(f"| {c['id']} | {v} | {g} | {lt} | {dl} | {r} | {nc} | {frac} |")
     L += ["", "## Q1 (caveat, NOT the headline) — per-fold oracle β_c spread", "",
           "The headline is the ΔL-vs-(0,0) table above (stable value beats no-correction). "
           "The quantity below is the per-fold ORACLE β_c (each held-out *single*-HC's own "
@@ -467,7 +617,7 @@ def main():
         'design': 'leave-one-HC-out (7-fold) held-out predictive + 7-HC standalone',
         'variants': VARIANTS,
         'gamma_handling': 'baseline=held-out HC JND, SD=train 6-HC SD; dL vs (0,0) meaningful',
-        'rdm_handling': 'held-out single-HC target; (0,0) DEGENERATE -> grid-null percentile',
+        'rdm_handling': 'held-out single-HC target; (0,0) DEGENERATE -> grid-null percentile; NC=split-half noise ceiling (Lage-Castellanos 2018)',
         'asymmetry': 'gamma=reference-robustness, rdm=held-out prediction (user-agreed 2026-06-02)',
     }}
 

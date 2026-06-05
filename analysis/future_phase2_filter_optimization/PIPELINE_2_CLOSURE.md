@@ -419,22 +419,59 @@ fit_param = argmin(comp)                       # g 또는 (β_s, β_c)
 - "stable" 등 robust 주장 표현 금지
 - **σ-bin label + γ-driven sub-bin position** 으로 해석 — point estimate 가 아닌 plateau 의 representative
 
-**Final candidates** (v6 PCA 45° categorical):
-- `param IQR`, `mode share`, `train/test_loss med ± IQR`, `bdy`, `test_focal/agg` → **s10b (5/2 HC resample, N=300)**
-- `rdm L_test med` → **s18 (7-fold strict LOO)**, selected candidates only; supplementary criterion (§3.3)
-- `test_ROI_RDM` → s10b resample 내 해당 ROI RDM atom test 값 (composite의 일부; S08은 V2, S09는 V1)
+---
 
-| Subject | Label | Model | Loss combo | (β_s, β_c) median | param IQR | mode share | train_loss med ± IQR | test_loss med ± IQR | bdy | test_focal | test_agg | test_ROI_RDM | rdm L_test med (s18) |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| sub-08 | ~~βs-dom~~ (**DROPPED** 2026-06-01) | 2-Component | γ_all + RDM_V1 | (+38, −10) | (24, 22) | ~50% | −1.24 ± 0.86 | −1.14 ± 0.86 | 0.000 | — | — | — | — |
-| sub-08 | **βc-dom** ✓ | 2-Component | γ_OY + RDM_V2 | (+6, −42) | (8, 2) | ~70% | **−2.89 ± 0.27** | **−2.36 ± 2.15** | 0.093 | — | — | — | **0.594** (V2) |
-| sub-09 | **βc-rot** ✓ | 2-Component | γ_all + RDM_V1 | (+2, **+24**) | **(0, 0)** | **87.7%** (263/300) | **−1.68 ± 0.46** | **−1.54 ± 1.42** | 0.000 | 3.70 | 46.12 | 0.686 (V1) | **0.528** (V1) |
-| **R+C insufficiency references (not candidates)** | | | | | | | | | | | | | |
-| sub-08 | (R+C ref) | R+C (JND_Lamb) | RDM_V1 only | Δλ=6.5 nm, g=2.25±0.00 | — | — | −1.30 ± 0.23 | −0.88 ± 1.38 | 0.000 | 66.56 | 107.82 | — | — |
-| sub-09 | (R+C ref) | R+C (Boehm_low) | γ_all + RDM_V1 | Δλ=3.0 nm, g=2.95±0.10 | — | — | −1.10 ± 0.11 | −0.86 ± 0.57 | 0.413 | 6.00 | 6.41 | — | — |
+#### Table A — Selection (source: `closure/selection/`, s10b PCA, N=300 resample)
 
-- Sub-08 βs-dom 은 2026-06-01 closure 에서 **DROPPED** (test_loss 및 param IQR 열등; IQR=(24,22) vs βc-dom (8,2))
-- Sub-09 의 βc-rot 는 mode share 87.7% 로 가장 deterministic — 단 SRM family 와 σ-level non-identifiability (L9)
+컬럼 출처: `param IQR`, `mode share`, `train/test_loss`, `bdy`, `test_focal`, `test_agg`, `test_V1_RDM` 모두 **s10b N300**.
+`test_V1_RDM` = V1 RDM diagnostic (s10b 고정 컬럼); S08 combo의 실제 RDM atom은 V2.
+S09 `test_focal`/`test_agg`/`test_V1_RDM` 은 현재 s10b v6 JSON 기준 (구 문서값 3.70/46.12/0.686 는 이전 run 스냅샷 — primary criterion test_loss_median 에 영향 없음).
+
+| Subj | Label | Loss combo | (β_s, β_c) | param IQR | mode share | train_loss med±IQR | test_loss med±IQR | bdy | test_focal | test_agg | test_V1_RDM |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| s08 | ~~βs-dom~~ (DROPPED) | γ_all + RDM_V1 | (+38, −10) | (24, 22) | ~50% | −1.24 ± 0.86 | −1.14 ± 0.86 | 0.000 | 28.0 | 83.3 | 0.965 |
+| s08 | **βc-dom** ✓ | γ_OY + RDM_V2 | (+6, −42) | (8, 2) | ~70% | **−2.89 ± 0.27** | **−2.36 ± 2.15** | 0.093 | 62.5 | 22.8 | 1.240 |
+| s09 | **βc-rot** ✓ | γ_all + RDM_V1 | (+2, **+24**) | **(0, 0)** | **87.7%** | **−1.68 ± 0.46** | **−1.54 ± 1.42** | 0.000 | 6.18 | 16.9 | 0.763 |
+| s08 | (R+C ref) | RDM_V1 only | Δλ=6.5 nm, g=2.25 | — | — | −1.30 ± 0.23 | −0.88 ± 1.38 | 0.000 | 66.56 | 107.82 | — |
+| s09 | (R+C ref) | γ_all + RDM_V1 | Δλ=3.0 nm, g=2.95 | — | — | −1.10 ± 0.11 | −0.86 ± 0.57 | 0.413 | 6.00 | 6.41 | — |
+
+- Sub-08 βs-dom **DROPPED** 2026-06-01: test_loss −1.14 < βc-dom −2.36, param IQR (24,22) >> (8,2)
+- Sub-09 βc-rot: mode share 87.7% deterministic — SRM family σ-level non-identifiability 별도 (§A.2)
+
+**Gate-2-passed ranking (bdy < 0.5, test_loss_median, 2comp only)**:
+
+| Subj | N cells | #1 (선정) | #2 | 최하위 |
+|---|---|---|---|---|
+| s08 | 25 | **−2.36** (iqr=2.15, bdy=0.093) | −2.20 (iqr=4.03) | +0.78 |
+| s09 | 4 | **−1.54** (iqr=1.42, bdy=0.000) | −1.52 (iqr=1.41) | −0.03 |
+
+---
+
+#### Table B — LOO Validation (source: `closure/validation/`)
+
+**B1. 선정후보 상세 (s18 loo7-refit, NC 포함)**
+
+| Subj | Label | rdm L_test | rdm ΔL vs(0,0) | folds | NC_rdm | frac_above_nc | γ ΔL | γ neg_frac |
+|---|---|---|---|---|---|---|---|---|
+| s08 | **βc-dom** ✓ | 0.594 | −0.406 | 7/7 | 0.240 | 0.484 | −13.85 | 0.71 |
+| s09 | **βc-rot** ✓ | 0.528 | −0.472 | 7/7 | 0.274 | 0.325 | +0.01 | 0.43 |
+
+NC = held-out HC split-half (Lage-Castellanos 2018); CVD amplitude noise 미포함 → 실제 NC ≥ 보고값.
+frac_above_nc: 0 = NC 도달, 1 = no-correction 수준. s08: 0.484, s09: 0.325 — broad shallow basin(§Theme A)과 일관.
+
+**B2. 전체 후보 rdm ΔL 분포 (s19 loo7-fixedparam, N=82, NC 없음)**
+
+| Subj | ROI | n combos | rdm L_test range | 비고 |
+|---|---|---|---|---|
+| s08 | V1 | 24 | [0.459, 0.550] | βs-dom (dropped): 0.459 |
+| s08 | V2 | 12 | [0.594, 0.640] | **βc-dom (selected): 0.594** |
+| s08 | V3 | 12 | [0.507, 0.645] | — |
+| s08 | V4 | 12 | [0.656, 0.720] | — |
+| s08 | γ-only | 11 | rdm 없음 | — |
+| s09 | V1 | 6 | [0.528, 0.528] | **βc-rot (selected): 0.528** |
+| s09 | γ-only | 5 | rdm 없음 | — |
+
+전체 82개 후보 상세: `closure/validation/s0809_pca_allcombos_rdm-gamma_loo7-fixedparam.json`
 
 **Gate-2-passed 비교 (bdy < 0.5, test_loss_median 기준, 2comp only)**:
 

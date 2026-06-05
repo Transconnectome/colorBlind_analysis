@@ -1,0 +1,149 @@
+% Supplementary S3 — Identifiability checks
+% 2026-06-05
+% Candidates reported: S08-robust (6,−42), S09-primary (2,+24).
+% S08-stable excluded (dropped at selection stage).
+% All tests use PCA-basis voxel synthesis (spatial PCA(20) on SRM-projected amplitudes).
+
+\section*{Supplementary S3: Identifiability checks}
+\label{app:identifiability}
+
+Four pre-specified checks assessed whether the production argmin
+is identifiable (Test~1), what the algorithm's noise floor is
+(Test~2a), and whether the fit is specific to CVD data
+(Tests~2b--2c).
+Each test was run on the two production candidates (S08-robust,
+S09-primary).
+All tests use PCA-basis voxel synthesis (spatial PCA(20) on
+SRM-projected amplitudes) as the feature space.
+FDR correction (Benjamini--Hochberg, $\alpha = 0.05$) was applied
+across 6 tests (2 candidates $\times$ 3 main tests); 0/6 reached
+significance.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\paragraph{Test 1 — Voxel-level parameter recovery.}
+% ─────────────────────────────────────────────────────────────────────────────
+
+Synthetic fMRI data were generated at the production argmin
+(PCA-basis; 7~HC donors $\times$ 20 noise draws $= 140$ samples
+per candidate) with GT-consistent JND: behavioral thresholds were
+scaled to match the distortion magnitude at the ground-truth
+$(\beta_s, \beta_c)$.
+The same fitting pipeline was re-run on each synthetic sample.
+Pass criterion: fraction within $10^\circ$ on both axes
+($f_{10^\circ}$) $\geq 0.5$ and $|$bias$| < 10^\circ$ on both axes.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lccc}
+\hline
+Candidate & bias $(\beta_s,\; \beta_c)$ & $f_{10^\circ}$ & Verdict \\
+\hline
+S08-robust  $(6^\circ, -42^\circ)$  & $(+16^\circ,\; -4.7^\circ)$  & 0.26 & FAIL \\
+S09-primary $(2^\circ, +24^\circ)$  & $(+11^\circ,\; -27^\circ)$  & 0.14 & FAIL \\
+\hline
+\end{tabular}
+\caption{Test~1 results. Both production candidates fail the recovery
+criterion ($f_{10^\circ} < 0.5$).
+The non-dominant axes ($|\hat\beta_s| \leq 6^\circ$ for both
+participants) fall below the effective parameter uncertainty
+established by Test~2a and are not recoverable.
+For S08-robust, the dominant axis ($|\hat\beta_c| = 42^\circ$, bias
+$= 4.7^\circ$) shows lower bias than the non-dominant axis
+($16^\circ$), consistent with partial magnitude recoverability
+where the axis magnitude exceeds the noise floor.}
+\end{table}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\paragraph{Test 2a — Origin-recovery null.}
+% ─────────────────────────────────────────────────────────────────────────────
+
+Synthetic fMRI data were generated at GT $= (0, 0)$ using real HC
+JND (no synthetic behavioral signal; PCA-basis).
+At the null, real HC JND carries no CVD-consistent signal, making
+this a noise floor measurement free of synthesis design
+contamination.
+Pass criterion: $|$bias$| < 5^\circ$ on both axes.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lcccc}
+\hline
+Candidate
+  & $|\hat\beta_s|_{\rm med}$ (IQR)
+  & $|\hat\beta_c|_{\rm med}$ (IQR)
+  & $\beta_c$ p95
+  & $f_{10^\circ}^{\rm origin}$ \\
+\hline
+S08-robust  & $22^\circ\;(40)$ & $26^\circ\;(10.5)$ & $44^\circ$ & 0.00 \\
+S09-primary & $16^\circ\;(17.5)$ & $24^\circ\;(9)$  & $48^\circ$ & 0.00 \\
+\hline
+\end{tabular}
+\caption{Test~2a results. $f_{10^\circ}^{\rm origin} = 0/140$ for
+both candidates: no sample was recovered within $10^\circ$ of the
+origin under a null ground truth.
+Effective parameter uncertainty (PCA-basis): $\sim\!20^\circ$ ($\beta_s$)
+and $\sim\!25^\circ$ ($\beta_c$).}
+\end{table}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\paragraph{Test 2b — HC pseudo-CVD specificity.}
+% ─────────────────────────────────────────────────────────────────────────────
+
+Each HC participant's real amplitude data were substituted as a
+fake CVD participant (7 carriers per candidate, deterministic).
+The production CVD fit distance from the origin was ranked among
+the 7 HC pseudo-CVD distances (rank$_{\rm dist}$, one-sided high).
+Pass criterion: rank $= 1.0$ (CVD fit exceeds all HC distances).
+This test is descriptive only and was not used as a selection
+criterion.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lcc}
+\hline
+Candidate & rank$_{\rm dist}$ & Verdict \\
+\hline
+S08-robust  & 0.875 & FAIL \\
+S09-primary & 0.875 & FAIL \\
+\hline
+\end{tabular}
+\caption{Test~2b results. Neither candidate exceeds all HC
+pseudo-CVD distances.}
+\end{table}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\paragraph{Test 2c — Color-label permutation.}
+% ─────────────────────────────────────────────────────────────────────────────
+
+CVD trial labels were randomly shuffled ($N = 1000$ permutations);
+HC data were held fixed.
+Pass criterion: $p_{\rm perm} < 0.05$ (one-sided, lower = better).
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lccc}
+\hline
+Candidate & Real loss & Perm 5\% cut & $p_{\rm perm}$ \\
+\hline
+S08-robust  & $-2.892$ & $-3.136$ & 0.167 \\
+S09-primary & $-1.681$ & $-3.053$ & 0.471 \\
+\hline
+\end{tabular}
+\caption{Test~2c results. Neither candidate reaches significance
+against the label-permutation null.}
+\end{table}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\paragraph{FDR summary and basis caveat.}
+% ─────────────────────────────────────────────────────────────────────────────
+
+After FDR correction across 6 tests (2 candidates $\times$ 3 main
+tests; BH $\alpha = 0.05$), no test reaches significance.
+The production argmin is treated as a descriptive embedding of the
+CVD-specific distortion direction throughout.
+
+All results above use the PCA-basis loss.
+For sub-09, the sign of $\hat\beta_c$ (mechanism class) was confirmed
+under the PCA-basis loss only.
+The SRM-basis loss may yield a different mechanism class for this
+participant; sign stability under the SRM basis was not verified.

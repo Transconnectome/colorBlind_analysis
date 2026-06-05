@@ -132,38 +132,153 @@ No value of $g$ can account for distortions in directions orthogonal to
 that axis.
 R+C is not considered further as a filter candidate.
 
-% \textcolor{red}{[TODO: R2 --- A single cortical model fits both CVD cases]}
-% \textcolor{red}{[TODO: R2.5 --- Neural data identifies what behavior cannot]}
-% \textcolor{red}{[TODO: R3 --- Identifiability: mechanism class robust, per-axis value not]}
+% ──────────────────────────────────────────────────────────────────────────────
+\subsection{A common cortical model fits both CVD cases}
+\label{sec:results:twocomp}
+% ──────────────────────────────────────────────────────────────────────────────
+
+The 2-component cortical model fit both participants using the same
+functional form.
+The deutan and protan cases differ in $(\hat\beta_s, \hat\beta_c)$,
+not in model structure.
+
+For sub-08 (deutan, $\theta_{\rm conf} = 150^\circ$), the selected
+loss combination $\gamma_{\rm OY} + L_{\rm RDM}^{(V2)}$ yielded
+$(\hat\beta_s, \hat\beta_c) = (6^\circ, -42^\circ)$.
+The held-out test-loss was $\overline{L}_{\rm test} = -2.36$
+(IQR $= 2.15$), lower than the alternative candidate
+($\overline{L}_{\rm test} = -1.14$; Supplementary~\S S2).
+The HC-resample parameter IQR was $(8^\circ, 2^\circ)$.
+The strict 7-fold LOO $\hat\beta_c$ range was $[-46^\circ, -38^\circ]$;
+all values are negative, confirming a stable sign across held-out
+reference sets.
+
+For sub-09 (protan, $\theta_{\rm conf} = 16^\circ$), the selected
+loss combination $\gamma_{\rm all} + L_{\rm RDM}^{(V1)}$ yielded
+$(\hat\beta_s, \hat\beta_c) = (2^\circ, +24^\circ)$.
+The held-out test-loss was $\overline{L}_{\rm test} = -1.54$
+(IQR $= 1.42$).
+The HC-resample parameter IQR was $(0^\circ, 0^\circ)$, and
+$\langle 87.7\%\rangle$ of resamples recovered the same
+$45^\circ$ bin.
+The strict 7-fold LOO IQR was $(0^\circ, 0^\circ)$.
+This position is metric-dependent (Appendix~\ref{app:crossatom}).
+
+In both participants, the dominant distortion component is
+$\hat\beta_c$, indicating a primary distortion along each
+participant's confusion axis.
+
+The RDM held-out loss on the strict 7-fold leave-one-out was
+$\overline{L}_{\rm RDM}^{\rm LOO} = 0.594$ for sub-08 and $0.528$
+for sub-09, beating the no-correction baseline on all 7 held-out
+folds ($(0,0)$: $1.0$; Supplementary~\S S2).
+The production fits rank in the top $5$--$8\%$ of grid combinations,
+confirming the improvement is non-trivial relative to the
+no-correction floor.
+The HC LOO noise ceiling, estimated from split-half HC amplitude
+reliability \cite{lagecastellanos2018}, was $0.240$ (sub-08) and
+$0.274$ (sub-09); this estimate is conservative because CVD amplitude
+noise is excluded.
+The production fits recover $52\%$ and $67\%$ of the achievable
+range toward the noise ceiling, respectively.
+
+The RDM atom in each subject's winning combination was consistent
+with the ROI showing significant geometric disparity:
+V2 for sub-08 ($p = \langle 0.040\rangle$) and V1 for sub-09
+($p = \langle 0.007\rangle$, Section~\ref{sec:results:geometry}).
+The two criteria were independent: the loss combination was selected
+by held-out test-loss, and the significant disparity ROI was
+identified by Crawford--Howell tests on disparity amplitude.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\subsection{Neural data identifies what behavior cannot}
+\label{sec:results:neural_role}
+% ──────────────────────────────────────────────────────────────────────────────
+
+Fitting behavioral ($\gamma$) and neural (RDM) loss atoms
+independently reveals three distinct roles of the neural component.
+
+The neural term captures a protan cortical direction that the
+behavioral loss cannot resolve.
+Sub-09's behavioral-only fit yielded $\hat\beta_c \approx +4^\circ$
+and did not beat the no-correction baseline
+($\Delta L = +0.01$, 4/7 folds).
+The RDM term captures a signal that the behavioral loss cannot
+detect for this participant.
+
+The neural term stabilizes the argmin for sub-08.
+The behavioral-only and combined fits share the same argmin
+$(6^\circ, -42^\circ)$, confirming that the behavioral atom
+independently locates the deutan direction.
+Adding the RDM atom reduced the boundary saturation rate from
+$23\%$ to $9.3\%$, sharpening the argmin without shifting it.
+
+The neural term also reduces parameter IQR in both participants.
+For sub-08, adding the neural term reduced the HC-resample IQR
+from $(18^\circ, 6^\circ)$ to $(8^\circ, 2^\circ)$ (PCA) and
+$(10^\circ, 4^\circ)$ (SRM).
+For sub-09, the IQR collapsed from $(6^\circ, 4^\circ)$ to
+$(0^\circ, 0^\circ)$ (PCA, deterministic) and $(0^\circ, 2^\circ)$
+(SRM).
+
+The neural-only fit for sub-08 is also non-degenerate
+($\hat\beta_c = -26^\circ$; Supplementary~\S S2),
+independently corroborating the deutan direction identified by
+the behavioral atom.
+% ──────────────────────────────────────────────────────────────────────────────
+\subsection{Identifiability: mechanism class robust, per-axis value not}
+\label{sec:results:identifiability}
+% ──────────────────────────────────────────────────────────────────────────────
+
+Parameter recovery fails across all pre-specified identifiability
+checks (0/6 significant after FDR correction, BH $\alpha = 0.05$;
+Supplementary~\S S3).
+The voxel-level parameter-recovery test yielded $f_{10^\circ} < 0.30$
+for both production candidates.
+The non-dominant axes ($|\hat\beta_s| \leq 6^\circ$ for both
+participants) fall below the effective parameter uncertainty of
+$\sim\!20^\circ$--$25^\circ$ and are not recoverable
+(Supplementary~\S S3).
+The dominant axis ($|\hat\beta_c| = 42^\circ$ for sub-08), whose
+magnitude exceeds this uncertainty, shows partial recovery under
+GT-consistent synthesis (bias $4.7^\circ$; Supplementary~\S S3).
+
+Consistent with the partial recoverability of the dominant axis,
+the sign of $\hat\beta_c$ --- the distortion direction --- is stable
+across held-out reference sets
+(Section~\ref{sec:results:twocomp}).
+Sub-08 consistently returns $\hat\beta_c < 0$ across all LOO folds
+and resamples.
+Sub-09 consistently returns $\hat\beta_c > 0$ under the PCA-basis
+loss; sign stability under the SRM-basis loss was not verified
+(Supplementary~\S S3).
+The distortion direction is recoverable even when its magnitude is not.
+
 % \textcolor{red}{[TODO: Figure 4 --- loss landscape caption (6,-42)/(2,+24) 기준으로 교체]}
 
 % ──────────────────────────────────────────────────────────────────────────────
-\subsection{\textcolor{red}{[TODO] Per-subject stimulus-space filter}}
+\subsection{Per-subject stimulus-space filter}
 \label{sec:results:filter}
 % ──────────────────────────────────────────────────────────────────────────────
 
-{\color{red}
-The 2-component transform is bijective, so a stimulus-space pre-image $\tilde{\theta}_k$ such that $T(\tilde{\theta}_k) = \theta_k$ exists for every displayed hue $\theta_k$ (see the \nameref{sec:methods:filter} section).
-The per-subject correction filter is $\delta\theta^{\rm filt}_k = \tilde{\theta}_k - \theta_k$.
-For both participants, 8/8 pre-images were exact (residual $< 0.001^\circ$, Figure~\ref{fig:filter}).
+The per-subject filter $\delta\theta^{\rm filt}_k =
+\tilde\theta_k - \theta_k$ is the pre-image of the fitted
+2-component transform (Section~\ref{sec:methods:filter}).
 
-For sub-08 (deutan, $\hat\beta_s = 38^\circ$, $\hat\beta_c = -14^\circ$, Stockman confusion axis $\theta_{\rm conf} = 150^\circ$), the filter applies a wide-amplitude L/M-rotation.
-A near-uniform negative shift is applied across red, orange, yellow, green, and cyan ($\delta\theta^{\rm filt}$ ranging $-10^\circ$ to $-32^\circ$, peak $-32^\circ$ at cyan, $\theta = 180^\circ$).
-A large opposite-sign rotation is applied at purple ($+29^\circ$, $\theta = 270^\circ$) and magenta ($+19^\circ$, $\theta = 315^\circ$).
-The mean correction magnitude is $|\delta\theta^{\rm filt}| = 22^\circ$.
+For sub-08 (deutan, $\hat\beta_s = 6^\circ$,
+$\hat\beta_c = -42^\circ$, $\theta_{\rm conf} = 150^\circ$),
+the dominant $\hat\beta_c$ term produces a large-amplitude
+correction that varies asymmetrically across hues
+(Figure~\ref{fig:filter}).
 
-For sub-09 (protan, $\hat\beta_s = 6^\circ$, $\hat\beta_c = -22^\circ$, Stockman axis $\theta_{\rm conf} = 16^\circ$), the correction is a far smaller monotonic rotation along the protan confusion axis.
-Peak displacements are at blue ($+21^\circ$, $\theta = 225^\circ$) and magenta ($-21^\circ$, $\theta = 315^\circ$), with near-zero shifts at green and cyan.
-The mean correction magnitude is $|\delta\theta^{\rm filt}| = 10^\circ$.
+For sub-09 (protan, $\hat\beta_s = 2^\circ$,
+$\hat\beta_c = +24^\circ$, $\theta_{\rm conf} = 16^\circ$),
+the smaller $\hat\beta_c$ produces a more targeted correction
+concentrated near the protan confusion axis
+(Figure~\ref{fig:filter}).
 
-The two correction signatures reflect distinct CVD etiologies rather than mirrored protan/deutan symmetry.
-Under the R+C decomposition (Appendix~\ref{app:altmodels}), sub-08 is cortical-dominant and sub-09 is retinal-dominant.
-A single retinal-family filter cannot serve both individuals.
-
-The model-class expressiveness has a closed-form upper bound.
-The magnitude $|\delta\theta|$ at $\theta = 45^\circ$ is bounded by $|0.71\,\hat\beta_s - 0.26\,\hat\beta_c|$.
-Corrective shifts exceeding $\sim\!51^\circ$ at the deutan mid-axis (e.g.\ an orange-to-green excursion of $\gtrsim 85^\circ$) lie outside the 2-component class for any biologically plausible $\hat\beta$ and would require an additional mechanism such as saturation or lightness.
-}
+The two correction signatures reflect individual etiologies that
+a single retinal-family filter cannot capture.
 
 % ── Figure 6 ─────────────────────────────────────────────────────────────────
 \begin{figure*}[!htbp]

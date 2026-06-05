@@ -3,7 +3,9 @@
 - **Status**: CLOSURE READY (v6 PCA 45° categorical RDM atom canonical; 1° continuous variants removed) — verification complete; 4-test verdict 12/12 FAIL recorded as descriptive limitation
 - **Date**: 2026-06-01
 - **Verification**: see `closure.md` for 4-test summary (param recovery / (0,0) algorithm validation / HC pseudo-CVD / label permutation)
-- **현행 main candidate = 2개** (2026-06): **S08-robust (+6, −42) deutan** · **S09-primary (+2, +24) protan**. **βs-dom / S08-stable (+38, −10)은 dropped** — 본 문서의 βs-dom 행(RQ2·RQ4·App.A 등)은 verification 스냅샷으로 보존된 이력이며 *현행 후보 아님*.
+- **현행 main candidate = 2개** (2026-06): 
+  - **S08-robust (+6, −42) deutan** 
+  - **S09-primary (+2, +24) protan**
 
 ---
 
@@ -65,7 +67,7 @@
 | sub-08 deutan | **2-Component (βs-dom)** | γ_all + RDM_V1 | β_s=+38, β_c=−10 | (low) | — | — |
 | sub-08 deutan | **2-Component (βc-dom)** | γ_OY + RDM_V2 | β_s=+6, β_c=−42 | (low) | — | — |
 | sub-08 deutan | R+C (JND_Lamb, ref) | RDM_V1 only | Δλ=6.5 nm, g=2.25±0.00 | 0% | 66.56 | 1.38 |
-| sub-09 protan | **2-Component (βc-rot)** | γ_all + RDM_V1 | β_s=+2, β_c=+24 (mode 263/300) | (low) | 3.70 | 1.40 |
+| sub-09 protan | **2-Component (βc-rot)** | γ_all + RDM_V1 | β_s=+2, β_c=+24 (mode 263/300) | (low) | 3.70 | 1.42 |
 | sub-09 protan | R+C (Boehm_low, ref) | γ_all + RDM_V1 | Δλ=3.0 nm, g=2.95±0.10 | **41%** | 6.00 | 0.57 |
 
 ---
@@ -417,16 +419,19 @@ fit_param = argmin(comp)                       # g 또는 (β_s, β_c)
 - "stable" 등 robust 주장 표현 금지
 - **σ-bin label + γ-driven sub-bin position** 으로 해석 — point estimate 가 아닌 plateau 의 representative
 
-**Final candidates** (v6 PCA 45° categorical, N=300 resample):
+**Final candidates** (v6 PCA 45° categorical):
+- `param IQR`, `mode share`, `train/test_loss med ± IQR`, `bdy`, `test_focal/agg` → **s10b (5/2 HC resample, N=300)**
+- `rdm L_test med` → **s18 (7-fold strict LOO)**, selected candidates only; supplementary criterion (§3.3)
+- `test_ROI_RDM` → s10b resample 내 해당 ROI RDM atom test 값 (composite의 일부; S08은 V2, S09는 V1)
 
-| Subject | Label | Model | Loss combo | (β_s, β_c) median | param IQR | mode share | train_loss med ± IQR | test_loss med ± IQR | bdy | test_focal | test_agg | test_V1_RDM |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| sub-08 | ~~βs-dom~~ (**DROPPED** 2026-06-01) | 2-Component | γ_all + RDM_V1 | (+38, −10) | (24, 22) | ~50% | −1.24 ± 0.86 | −1.14 ± 0.86 | 0.000 | — | — | — |
-| sub-08 | **βc-dom** ✓ | 2-Component | γ_OY + RDM_V2 | (+6, −42) | (8, 2) | ~70% | **−2.89 ± 0.27** | **−2.36 ± 2.15** | 0.093 | — | — | — |
-| sub-09 | **βc-rot** ✓ | 2-Component | γ_all + RDM_V1 | (+2, **+24**) | **(0, 0)** | **87.7%** (263/300) | **−1.68 ± 0.46** | **−1.54 ± 1.42** | 0.000 | 3.70 | 46.12 | 0.686 |
-| **R+C insufficiency references (not candidates)** | | | | | | | | | | | | |
-| sub-08 | (R+C ref) | R+C (JND_Lamb) | RDM_V1 only | Δλ=6.5 nm, g=2.25±0.00 | — | — | −1.30 ± 0.23 | −0.88 ± 1.38 | 0.000 | 66.56 | 107.82 | — |
-| sub-09 | (R+C ref) | R+C (Boehm_low) | γ_all + RDM_V1 | Δλ=3.0 nm, g=2.95±0.10 | — | — | −1.10 ± 0.11 | −0.86 ± 0.57 | 0.413 | 6.00 | 6.41 | — |
+| Subject | Label | Model | Loss combo | (β_s, β_c) median | param IQR | mode share | train_loss med ± IQR | test_loss med ± IQR | bdy | test_focal | test_agg | test_ROI_RDM | rdm L_test med (s18) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| sub-08 | ~~βs-dom~~ (**DROPPED** 2026-06-01) | 2-Component | γ_all + RDM_V1 | (+38, −10) | (24, 22) | ~50% | −1.24 ± 0.86 | −1.14 ± 0.86 | 0.000 | — | — | — | — |
+| sub-08 | **βc-dom** ✓ | 2-Component | γ_OY + RDM_V2 | (+6, −42) | (8, 2) | ~70% | **−2.89 ± 0.27** | **−2.36 ± 2.15** | 0.093 | — | — | — | **0.594** (V2) |
+| sub-09 | **βc-rot** ✓ | 2-Component | γ_all + RDM_V1 | (+2, **+24**) | **(0, 0)** | **87.7%** (263/300) | **−1.68 ± 0.46** | **−1.54 ± 1.42** | 0.000 | 3.70 | 46.12 | 0.686 (V1) | **0.528** (V1) |
+| **R+C insufficiency references (not candidates)** | | | | | | | | | | | | | |
+| sub-08 | (R+C ref) | R+C (JND_Lamb) | RDM_V1 only | Δλ=6.5 nm, g=2.25±0.00 | — | — | −1.30 ± 0.23 | −0.88 ± 1.38 | 0.000 | 66.56 | 107.82 | — | — |
+| sub-09 | (R+C ref) | R+C (Boehm_low) | γ_all + RDM_V1 | Δλ=3.0 nm, g=2.95±0.10 | — | — | −1.10 ± 0.11 | −0.86 ± 0.57 | 0.413 | 6.00 | 6.41 | — | — |
 
 - Sub-08 βs-dom 은 2026-06-01 closure 에서 **DROPPED** (test_loss 및 param IQR 열등; IQR=(24,22) vs βc-dom (8,2))
 - Sub-09 의 βc-rot 는 mode share 87.7% 로 가장 deterministic — 단 SRM family 와 σ-level non-identifiability (L9)

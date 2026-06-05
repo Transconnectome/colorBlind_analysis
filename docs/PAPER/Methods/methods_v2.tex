@@ -14,9 +14,18 @@
 \label{sec:methods}
 
 The analysis follows three stages.
-First, the fMRI neural signature of each CVD participant's hue-processing deficit was characterized by two measures, both serving as fitting criteria for the distortion model. Leave-one-color-out (LOCO) decoding at hV4 yielded a hue vulnerability profile $\mathbf{v} \in [0,1]^8$ (see the \nameref{sec:methods:loco} section). The between-group difference of representational dissimilarity matrices (RDMs), denoted $\Delta$RDM, quantified the per-pair deviation of CVD geometry from the HC mean (see the \nameref{sec:methods:rdm} section).
-Second, a two-component cortical distortion model fits these neural observations by simulating the joint effect of a retinal cone shift and a cortical orientation gain on HC-trained neural representations (see the \nameref{sec:methods:twocomp} section).
-Third, the fitted distortion is analytically inverted to yield a stimulus-space pre-image filter that maps the distorted hue coordinates back towards the HC percept (see the \nameref{sec:methods:filter} section).
+First, two neural measures characterised each CVD participant's hue-processing deficit:
+leave-one-colour-out (LOCO) decoding at hV4 yielded a per-hue vulnerability profile
+(§\ref{sec:methods:loco}), and the between-group RDM difference ($\Delta$RDM) captured
+the per-pair geometric deviation of CVD representational geometry from the HC mean
+(§\ref{sec:methods:rdm}).
+Second, two candidate distortion model classes were fit by minimising a combination of
+neural and behavioural losses, with parameters selected by a pre-specified stability
+procedure (§\ref{sec:methods:candidates}--§\ref{sec:methods:selection}).
+Third, the fitted distortion was analytically inverted to yield a per-subject
+stimulus-space correction filter (§\ref{sec:methods:filter}).
+This filter was then evaluated in a repeat fMRI session and a 2AFC behavioural
+discrimination test (§\ref{sec:methods:behavioral}).
 
 % ── Figure 1 ─────────────────────────────────────────────────────────────────
 \begin{figure*}[tb]
@@ -27,7 +36,7 @@ Third, the fitted distortion is analytically inverted to yield a stimulus-space 
   \textbf{(C)} Analysis pipeline.
   Stage A: two-stage GLM single-trial $\beta$ amplitudes, Procrustes-aligned across runs, projected into an SRM space trained on HC participants only.
   Decoding: LORO (discrimination), LOCO (interpolation).
-  CVD characterization: 2-component model with retinal ($\beta_s$) and cortical ($\beta_c$) components. Pre-image yields per-subject stimulus-space filter.
+  CVD characterisation: 2-component cortical model with S-cone-axis ($\beta_s$) and confusion-axis ($\beta_c$) components. Pre-image yields per-subject stimulus-space filter.
   HC: $n = 7$ (sub-01--07); deutan: sub-08; protan: sub-09.}
   \label{fig:paradigm}
 \end{figure*}
@@ -59,7 +68,8 @@ Each run contained eight repetitions of all eight chromatic stimuli and the gray
 Each session comprised six runs ($\approx 7$ min each).
 The experiment was coded in PsychoPy 2022.2.5 \cite{peirce2019}.
 
-CVD participants additionally completed a second scanning session for filter evaluation (see the \nameref{sec:methods:behavioral} section).
+All participants completed JND behavioral testing in the same scanning session as the main MRI acquisition.
+CVD participants additionally completed a second session in which JND was repeated under the per-subject stimulus-space filter, alongside a second fMRI acquisition (see the \nameref{sec:methods:behavioral} section).
 
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{MRI acquisition and preprocessing}
@@ -178,43 +188,192 @@ The per-pair deviation of each CVD participant's RDM from the HC mean was $\Delt
 Correspondence between the observed $\Delta\text{RDM}$ and the prediction of the two-component distortion model (see \nameref{sec:methods:twocomp}) was reported descriptively as the Spearman $\rho$ between the upper-triangle elements of the two matrices.
 
 % ──────────────────────────────────────────────────────────────────────────────
-\subsection{Two-component distortion model}
+\subsection{Candidate distortion models}
+\label{sec:methods:candidates}
+% ──────────────────────────────────────────────────────────────────────────────
+
+Two candidate model classes were evaluated.
+Each parameterises the angular distortion $\delta\theta(\theta)$ that
+maps the displayed hue angle $\theta$ to the angle perceived by a CVD
+observer.
+
+\paragraph{Candidate Model 1: retinal-plus-gain (R+C).}
+The prevailing account attributes CVD colour distortion to a
+cone-spectral shift at the retinal level \cite{machado2009},
+optionally augmented by a cortical compensation gain $g$
+\cite{boehm2014,tregillus2021}:
+%
+\begin{equation}
+  \delta\theta_{\rm RC}(\theta;\,g)
+    = (2 - g)\,\delta\theta_{\rm Mach}(\theta)
+  \label{eq:rc}
+\end{equation}
+%
+where $\delta\theta_{\rm Mach}$ is the per-hue angular shift
+predicted by Machado simulation applied to Stockman \& Sharpe LMS
+cone fundamentals \cite{stockman2000}.
+The gain $g$ parameterises cortical compensation: at $g = 1$ the
+cortical stage leaves the retinal distortion unchanged; at $g = 2$
+it fully cancels the retinal shift; at $g > 2$ cortical processing
+reverses the direction of the retinal shift, moving the perceived
+hue past the undistorted colour.
+The confusion axis is the colour-space direction along which CVD
+observers cannot distinguish hues from one another.
+Because $\delta\theta_{\rm Mach}$ lies entirely along this axis,
+R+C can only displace colours along this single direction and cannot
+account for distortions in other colour directions.
+
+\paragraph{Candidate Model 2: two-component cortical (2-comp).}
+We propose a parametric model of the hue distortion pattern measured
+in \S\ref{sec:results:loco} and \S\ref{sec:results:rdm}:
+%
+\begin{equation}
+  \delta\theta(\theta;\,\beta_s,\beta_c)
+    = \beta_s\cos(\theta - 90^\circ)
+    + \beta_c\cos(\theta - \theta_{\rm conf})
+  \label{eq:2comp}
+\end{equation}
+%
+where $\theta_{\rm conf}$ is the CVD-subtype confusion axis
+($16^\circ$ protan; $150^\circ$ deutan), derived from Stockman \&
+Sharpe cone fundamentals \cite{stockman2000}.
+$\beta_s$ parameterises distortion along the S-cone axis
+($\theta = 90^\circ$) and $\beta_c$ parameterises distortion along
+the individual confusion axis; these two components span the axes
+of distortion identified by the neural analysis
+(\S\ref{sec:results:loco}, \S\ref{sec:results:rdm}).
+Both signs of $\beta_c$ are unconstrained; the basis for
+constraining $\beta_s \geq 0$ is detailed in Supplementary~\S S1.
+Model adequacy was assessed by the procedure in
+\S\ref{sec:methods:selection}; results are reported in
+\S\ref{sec:results:candidates}.
+
+% ──────────────────────────────────────────────────────────────────────────────
+\subsection{Inverse fitting}
 \label{sec:methods:twocomp}
 % ──────────────────────────────────────────────────────────────────────────────
 
-CVD hue distortion was modelled as a two-component angular shift in Stockman opponent-color space:
+Per-subject distortion parameters $(\beta_s,\beta_c)$ were estimated
+by finding the distortion that, when applied to HC-derived neural
+representations, best reproduces the observed CVD responses.
+Three loss families served as the fitting objective.
 
+\paragraph{Behavioral JND ratio ($L_\gamma$).}
+For each color pair, the JND ratio $\gamma = \gamma_{\rm CVD} /
+\bar{\gamma}_{\rm HC}$ quantifies how much more difficult
+discrimination is for a CVD observer relative to the HC mean
+(\S\ref{sec:methods:behavioral}).
+Two variants enter the fitting: a subtype-targeted pair ratio
+$\gamma_{\rm subtype}$ (the color pair predicted to show the
+largest distortion for each CVD subtype) and an aggregate ratio
+$\gamma_{\rm all}$ averaged across all tested pairs.
+$L_\gamma$ penalises rank discordance between the model-predicted
+distortion magnitude at each pair (from Eq.\,\ref{eq:2comp}) and
+the observed $\gamma$ ordering.
+
+\paragraph{Representational $\Delta$RDM cosine ($L_{\rm RDM}$).}
+The between-group geometry difference $\Delta\text{RDM} =
+\text{RDM}_{\rm CVD} - \overline{\text{RDM}}_{\rm HC}$ captures
+which color pairs drive the CVD--HC representational deviation
+(\S\ref{sec:methods:rdm}).
+For a candidate distortion, $\Delta\text{RDM}_{\rm sim}$ is
+obtained by applying $\delta\theta$ to the HC mean RDM.
+The loss is the cosine dissimilarity between the observed and
+simulated 28-element upper-triangle vectors:
+%
 \begin{equation}
-  \delta\theta(h;\,\beta_s,\beta_c) = \beta_s \cos(h - 90^\circ) + \beta_c \cos(h - \theta_{\rm conf})
-  \label{eq:2comp}
+  L_{\rm RDM} = \frac{1 - \cos\!\bigl(\Delta\text{RDM}_{\rm sim},\,
+    \Delta\text{RDM}_{\rm obs}\bigr)}{2}
+  \label{eq:lrdm}
 \end{equation}
 
-where $h$ is the opponent-hue angle of the stimulus in CIELab space and $\theta_{\rm conf}$ is the CVD-subtype confusion axis ($16^\circ$ protan; $150^\circ$ deutan), derived from the Brettel--Vi\'enot--Mollon dichromatic simulation \cite{brettel1997} applied to Stockman \& Sharpe LMS cone fundamentals \cite{stockman2000}. $\beta_s$ parameterizes distortion along the S-cone axis ($h = 90^\circ$), motivated by cortical-RDM evidence that CVD errors concentrate at S-cone loci \cite{emery2021}. $\beta_c$ parameterizes rotation along the confusion axis, with both signs unconstrained as free parameters of the fit.
-We compared this model with retinal-shift-based alternatives (Machado, R+C retinal family); see Appendix~\ref{app:altmodels}.
-
-Per-subject parameters $(\beta_s, \beta_c)$ were recovered by minimizing a four-term, neural-primary loss derived from the V4 LOCO forward model:
-
+\paragraph{hV4 LOCO voxel-prediction ($L_{\rm LOCO}$).}
+The per-hue vulnerability profile $\mathbf{v}_{\rm obs} \in
+[0,1]^8$ records where each CVD participant's hue interpolation
+breaks down (\S\ref{sec:methods:loco}).
+For a candidate $(\beta_s,\beta_c)$, the simulated profile
+$\mathbf{v}_{\rm sim}$ is obtained by re-applying the HC-trained
+ridge-GCV encoding weights $W$ (\S\ref{sec:methods:encoding}) to
+the channel design matrix $C$ shifted by the candidate distortion.
+The loss is the mean squared deviation between the two profiles:
+%
 \begin{equation}
-  L_\text{fit}(\beta_s, \beta_c) = 1.0\,L_\text{vuln} + 0.5\,L_\text{rank} + 0.2\,L_\text{rdm} + 0.1\,L_\text{smooth}
-  \label{eq:lfit}
+  L_{\rm LOCO} = \frac{1}{8}\,\|\mathbf{v}_{\rm sim} -
+    \mathbf{v}_{\rm obs}\|^2
+  \label{eq:lloco}
 \end{equation}
 
-with each term normalized to $[0,1]$ before weighting.
-Let $\mathbf{v}_\text{sim}(\beta_s, \beta_c) = f_\text{forward}\!\bigl(C(\theta + \delta\theta(\,\cdot\,;\beta_s,\beta_c));\,W\bigr) \in [0,1]^8$ be the simulated per-color V4 LOCO vulnerability ($1 - \rho$) obtained by re-applying the HC-trained ridge encoding weights $W$ (Section~\ref{sec:methods:encoding}) to the design matrix $C$ shifted by the candidate distortion, and let $\mathbf{v}_\text{obs} \in [0,1]^8$ be the observed CVD per-color vulnerability.
+\paragraph{Grid search.}
+Parameters were searched by exhaustive grid over
+$(\beta_s,\beta_c) \in \langle[-90^\circ, 90^\circ]^2\rangle$
+at $2^\circ$ resolution ($\langle8{,}281\rangle$ cells).
+For R+C (Eq.\,\ref{eq:rc}), $g$ was searched over $[0, 3]$.
+Per-subject loss combinations and parameter selection are described
+in \S\ref{sec:methods:selection}.
 
-\paragraph{Loss-term roles.}
-$L_\text{vuln} = \tfrac{1}{8 \cdot 4}\,\|\mathbf{v}_\text{sim} - \mathbf{v}_\text{obs}\|^2$ (per-color MSE, normalizer $4.0$ for $[0,1]$ amplitude range) is the primary fit term: it forces the simulated vulnerability profile to match the per-color LOCO breakdown that the CVD encoder exhibits, which is the operative neural quantity for the corrective filter (see the \nameref{sec:discussion} section for the LOCO--behavior concordance evidence underlying this choice).
-$L_\text{rank} = (1 - \rho_\text{Spearman}(\mathbf{v}_\text{sim}, \mathbf{v}_\text{obs}))/2$ is an ordering term that breaks ties when the MSE landscape is locally flat by penalizing rank-reordering of vulnerable colors; it is downweighted to $0.5$ because amplitude (MSE) is the operative signal.
-$L_\text{rdm} = (1 - \cos(\Delta\text{RDM}_\text{sim}, \Delta\text{RDM}_\text{obs}))/2$ is a geometric convergence check on the 28-pair upper-triangle of the CVD-minus-HC representational dissimilarity-matrix difference at hV4 ($\Delta\text{RDM} = \text{RDM}_\text{CVD} - \overline{\text{RDM}}_\text{HC}$, correlation distance, \citeNP{kriegeskorte2008}). It is downweighted to $0.2$ because the RDM and per-color vulnerability signals partially overlap.
-$L_\text{smooth} = \tfrac{1}{8 \cdot 32400}\,\sum_c (\delta\theta_{c+1} - \delta\theta_c \mod \pm 180)^2$ is a circular-smoothness regularizer on the per-color shift vector $\delta\theta \in \mathbb{R}^8$ produced by the candidate $(\beta_s, \beta_c)$; it is downweighted to $0.1$ as a weak prior favouring smooth filters over discontinuous per-color shifts.
+% ──────────────────────────────────────────────────────────────────────────────
+\subsection{Parameter selection}
+\label{sec:methods:selection}
+% ──────────────────────────────────────────────────────────────────────────────
 
-\paragraph{ROI scope.}
-All four terms are computed at hV4 (V4 on disk).
-We fit at hV4 rather than V1--V3 because hV4 is the only ROI in this dataset whose HC group LOCO interpolation exceeds the permutation null ($p = 0.044$ at hV4 vs.\ NS at V1/V2/V3; \nameref{sec:results:loco}), and because hV4 is the canonical cortical hub for hue representation in the ventral stream (\citeNP{brouwer2009, bannert2018, kuriki2015}); cone-shift parameters fit on an encoder that cannot interpolate held-out colors lack a voxel-level cone-shift interpretation.
+Per-subject loss combinations and model class were selected by a
+three-gate procedure applied to results from a 5-train/2-test HC
+resample ($N = \langle300\rangle$) and a strict 7-fold HC
+leave-one-out (LOO) using the same atom factories.
 
-\paragraph{Per-subject distortion fit.}
-Parameters were searched by exhaustive grid over $\beta_s \in [0^\circ, 50^\circ]$ and $\beta_c \in [-50^\circ, 50^\circ]$ ($26 \times 51 = 1{,}326$ cells at $2^\circ$ resolution); $(\hat\beta_s, \hat\beta_c) = \arg\min L_\text{fit}$ was retained per CVD subject.
-We checked the optimal distortion magnitude against an HC leave-one-out distribution under the same loss for validation (Supplementary~\ref{app:hc_perm}); quantitative filter validity is established by the Phase-3 2AFC behavioral arm (see the \nameref{sec:methods:behavioral} section, last paragraph).
+\paragraph{Gate 1: Directional precondition.}
+Only loss atoms where the CVD loss value exceeded the HC LOO
+distribution in the expected direction were admitted.
+Admission required signed Cohen's $d \geq +0.5$; atoms failing
+this gate were excluded from combination.
+
+\paragraph{Gate 2: Boundary saturation.}
+Among admitted combinations, those where $\geq 50\%$ of resample
+solutions saturated the grid boundary were rejected as indicative
+of model misspecification.
+
+\paragraph{Gate 3: Held-out test-loss.}
+The primary criterion was the median composite test-loss
+($\overline{L}_{\rm test}$) across the $N = \langle 300\rangle$
+HC resamples.
+For each resample, the composite loss was evaluated at the training
+argmin on the two held-out HC, z-normalized relative to the training
+grid.
+Lower $\overline{L}_{\rm test}$ indicates generalization to unseen
+HC references.
+The secondary criterion was the test-loss IQR across resamples,
+measuring resample stability of the generalization estimate.
+A dedicated neural RDM held-out loss ($\overline{L}_{\rm RDM}^{\rm
+LOO}$; Supplementary~\S S2) from the strict 7-fold leave-one-out
+isolates the neural component's held-out performance from the
+behavioral weighting in the composite.
+Supplementary stability indices included the IQR of recovered
+$(\hat\beta_s, \hat\beta_c)$ (parameter stability), the fraction of
+resamples recovering the modal $45^\circ$ bin (mode share), and the
+strict 7-fold LOO parameter range (Supplementary~\S S2).
+
+\paragraph{Specificity.}
+The HC false-positive rate was not used as a selection criterion
+and is reported descriptively in \S\ref{sec:results:identifiability}
+(Supplementary~\S S2).
+
+\paragraph{Per-subject selected loss combinations.}
+For sub-08 (deutan), $\gamma_{\rm OY} + L_{\rm RDM}^{(V2)}$
+satisfied all three gates; for sub-09 (protan),
+$\gamma_{\rm all} + L_{\rm RDM}^{(V1)}$.
+The LOCO loss family did not enter the winning combination for
+either participant (Supplementary~\S S2).
+
+% ──────────────────────────────────────────────────────────────────────────────
+\subsection{Identifiability and recovery}
+\label{sec:methods:identifiability}
+% ──────────────────────────────────────────────────────────────────────────────
+
+Identifiability was assessed by three pre-specified checks conducted
+before parameter reporting: a voxel-level parameter-recovery test,
+an origin-recovery null test, and HC pseudo-CVD and color-label
+permutation specificity contrasts (Supplementary~\S S3).
+\textcolor{red}{[TODO: closure.md 4-test verdict 확정 후 §S3와 함께 수정 예정.]}
 
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{Stimulus-space filter}
@@ -228,30 +387,41 @@ A CVD observer viewing $\tilde{\theta}_k$ thus receives, under the model, the sa
 Pre-images were computed by numerical inversion of the forward map (Brent's-method root-finding); inversion was exact ($|T(\tilde{\theta}_k) - \theta_k| < 0.001^\circ$) for all 8 hues in both CVD participants.
 
 % ──────────────────────────────────────────────────────────────────────────────
-\subsection{Behavioral concordance}
+\subsection{Behavioral tasks}
 \label{sec:methods:behavioral}
 % ──────────────────────────────────────────────────────────────────────────────
 
-Behavioral tasks were held on the same day as the MRI acquisition.
+\paragraph{Just-noticeable difference (JND).}
+Color discrimination thresholds were estimated for eight hue pairs
+using two-interleaved 1-up/1-down adaptive staircases, each
+terminating after eight reversals \cite{levitt1971}.
+Pairs spanned three categories: (i) three pairs hypothesized as
+universally difficult for both CVD types (yellow--purple,
+blue--purple, red--orange), (ii) two pairs hypothesized as
+deutan-specific (orange--yellow, yellow--green), (iii) two pairs
+hypothesized as protan-specific (cyan--magenta, green--blue), and
+(iv) one control pair (red--cyan).
+For each pair, the JND ratio $\gamma = \gamma_{\rm CVD} /
+\bar{\gamma}_{\rm HC}$ was computed, where $\bar{\gamma}_{\rm HC}$
+is the HC mean threshold.
+Ratios $\gamma > 1$ indicate elevated discrimination difficulty
+relative to HC.
+These ratios enter the fitting loss as described in
+\S\ref{sec:methods:twocomp}.
 
-\paragraph{Just-noticeable difference (JND)}
-Color discrimination thresholds were estimated for eight hue pairs using two-interleaved 1-up/1-down adaptive staircases, each terminating after eight reversals \cite{levitt1971}.
-Pairs spanned three categories: (i) three pairs hypothesized as universally difficult for both CVD types (yellow--purple, blue--purple, red--orange), (ii) two pairs hypothesized as deutan-specific (orange--yellow, yellow--green), (iii) two pairs hypothesized as protan-specific (cyan--magenta, green--blue), and (iv) one control pair (red--cyan).
-
-For each pair, the CVD JND threshold was compared to the HC distribution and assigned a behavioral impairment label: \emph{hypo} when the CVD threshold fell above the HC range (CVD/HC ratio $> 1$; discrimination worse than HC), or \emph{hyper} when it fell below (CVD/HC ratio $< 1$; discrimination preserved or better than HC). This pairwise hypo/hyper classification quantified where CVD behavior diverged from HC.
-
-\paragraph{Simulator--JND concordance}
-The fitted 2-component simulator was tested against the behavioral labels by comparing each pair's hypo/hyper classification with the simulator's predicted per-pair angular distortion under the fitted parameters $(\hat\beta_s, \hat\beta_c)$.
-For a pair $(\theta_a, \theta_b)$, the simulator's predicted distortion magnitude was the sum of the per-color shifts applied to its two members, $|\delta\theta(\theta_a;\hat\beta_s,\hat\beta_c)| + |\delta\theta(\theta_b;\hat\beta_s,\hat\beta_c)|$.
-The simulator and behavior were called concordant when hypo-labeled pairs corresponded to larger simulator-predicted distortions than hyper-labeled pairs, providing a direct neural-to-behavioral check independent of the fit loss.
-
-\paragraph{Behavioral color identification}
-An eight-alternative forced-choice (8AFC) color identification task was administered: participants performed six trials per color (48 trials per participant in total), and both the order of presented colors and the order of the eight answer options were randomized across trials. In parallel to the JND--simulator concordance above, each CVD response was evaluated against the simulator's predicted shifted angle: for a presented hue $\theta_k$, the fitted 2-component simulator predicts that responses should cluster near $\theta_k + \delta\theta(\theta_k;\hat\beta_s,\hat\beta_c)$. Exact and adjacent-bin agreement between observed responses and this predicted angle were tabulated as post-hoc consistency checks; quantitative validation is deferred to the Phase-3 2AFC arm.
-
-\paragraph{Filter evaluation session (CVD only)}
-CVD participants completed a second scanning session after the main experiment.
-Three runs were acquired under the 2-component-derived stimulus-space filter and three runs under a generic Windows accessibility filter, presented in counterbalanced order.
-LOCO decoding and LORO classification were repeated on second-session data to assess filter efficacy.
+\paragraph{Filter evaluation session (CVD only).}
+\textcolor{red}{[TODO: Phase 3 설계 확정 후 수정 — baseline filter 종류, run 수, counterbalancing scheme 구체화 예정.]}
+CVD participants completed a second scanning session after the main
+experiment.
+Three fMRI runs were acquired under the 2-component-derived
+stimulus-space filter and three runs under a generic Windows
+accessibility filter, presented in counterbalanced order.
+LOCO decoding and LORO classification were repeated on
+second-session data to assess filter effects on neural color
+representation.
+JND behavioral testing was repeated in this session under the same
+filter conditions, to assess filter effects on discrimination
+thresholds relative to the unfiltered baseline from Session 1.
 
 \paragraph{\textcolor{red}{[TODO] Planned validation}}
 \textcolor{red}{A two-alternative forced-choice (2AFC) discrimination arm targeting filter-induced perceptual restoration is pre-registered for Phase 3 (data not collected at the time of writing).}

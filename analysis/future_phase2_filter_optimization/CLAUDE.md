@@ -55,115 +55,90 @@ documentation should be updated rather than accumulating outdated results
 | A12 | 2-component은 CIELab opponent space 작동 | RGB/cone space 아님. **R+C 의 C_baseline** 은 `machado_shifted_hue(0.0, family)` (CIELab nominal 각도 금지) — 이는 R+C baseline 규약이며, A13 의 2-Component forward 자체 (raw nominal-θ) 와는 다른 단계. |
 | **A13** | **Closure 2-Component forward** = `scripts/two_comp.py:forward_2comp` (★ raw CIElab nominal-θ): `δθ = β_s·cos(θ−90°) + β_c·cos(θ−θ_conf)`, θ_conf={protan:16°, deutan:150°}. Phase B v6 main runner (`scripts/s10b_v6_pca_rdm.py:31,:231,:607`), `s17_hc_loo.py`, `s13_round3.py`, `s12b_phase_c_v2.py` 가 모두 이 forward 만 호출. | **모든 viz / post-hoc / Phase 3 자극 합성도 이 forward 사용.** `scripts/forward_models/two_component.py` 의 frozen H_BASE 변형은 `loco_distortion_fit.py` 전용 alternative entry 이며 **closure 와 무관**. 같은 (β_s, β_c) 라벨에서도 두 함수는 정반대 δθ 8-vec 을 산출 (예: 현행 S08-robust deutan (6,−42) c4 → raw −36.33° vs frozen +19.18°, 부호 반대), 혼용 금지. 이력: 2026-05-27 viz 가 frozen 으로 잘못 그려졌다가 closure 와 부합하는 raw 로 정정. |
 
-## 2.5. Loss Inventory + HC Sanity Check (NEW 2026-05-03, CI-revised 2026-05-04)
+## 2.5. Loss Atoms + Selection Framework (v6 PCA canonical, SUPERSEDED 2026-06-01)
 
-**Document**: `results/inventory/loss_inventory.{md,csv}` (15 loss variants × 8 subjects)
+> **⚠️ 구 §2.5 (cycle15 / mw_jaccard / l_rank / boot_frac ≥ 0.975) 는 S7 sprint 이전 단계이며 v6 PCA canonical 이 이를 전면 supersede.** cycle15_opt2, mw_jaccard 등 구 loss variant 를 selection criterion 으로 쓰지 않는다. 아래가 현행 기준.
 
-**Verdict 기준 (CI-based, robust to single HC outliers)**:
-- For each (loss × subject): bootstrap HC mean (10000 resamples) → `boot_frac` = fraction of HC means below CVD norm.
-- **✓✓ both sig** = both CVD `boot_frac` ≥ 0.975 (one-sided 95% CI)
-- **~~ marginal** = both CVD 0.90 ≤ `boot_frac` < 0.975
-- **✗ inside HC CI** = `boot_frac` < 0.90
+**Canonical fitter**: `scripts/s10b_v6_pca_rdm.py` (v6 PCA 45° categorical RDM atom)
+**Source of truth**: `PIPELINE_2_CLOSURE.md` (2026-06-01, CLOSURE READY)
 
-이전 rank-based emp_p (1/6, 2/6 등 discrete)는 sub-04 같은 outlier 1개에 sensitive — CI 기반으로 변경.
+### Loss atoms (locked)
 
-**Top results**:
+| Atom | 정의 | 역할 |
+|---|---|---|
+| **γ_focal** (γOY, γYG, γYP, γGB) | per-pair JND z² vs HC train baseline | 행동 focal pair |
+| **γ_all** | 8-pair JND z² 합 | 행동 전체 |
+| **RDM_{V1..V4}** (canonical) | PCA top-K=6 → 8×8 correlation-RDM → 28-d cosine vs HC mean (categorical 45° σ-bin) | 신경 구조 |
+| LOCO_V4 | V4 voxel-prediction loss | precondition gate 전용 |
 
-1. **`cycle15_opt2_v4mwj_v1lrank`** = `2·mw_jaccard(V4) + 1·l_rank(V1) + 0.2·Tikh`
-   - sub-08 boot_frac=**1.000** (HC 누구도 sub-08보다 위 아님)
-   - sub-09 boot_frac=**0.996** (CVD가 boot mean 분포의 99.6% 위)
-   - **caveat**: sub-09는 HC가 양극화 분포 (4 HC very low + sub-04/05 high) 덕분에 wide CI, sub-09 (norm 69.7)는 sub-04 (77.2) 옆 zone에 위치. sub-04 outlier 의존 (제외 시 boot_frac 1.000으로 더 강해짐).
-   - sub-08 (β_s=68, β_c=−38) — same as Cycle 12; sub-09 (β_s=44, β_c=+54) — same as mw_jaccard alone
+**Composite**: `z_sum = Σ zscore_grid(atom)` → `comp / sqrt(n_atoms)` → `argmin`
 
-2. **`mw_jaccard_loss`** @ V4 (alone) — **~~ marginal** (CI-based 강등)
-   - sub-08 boot_frac=0.94, sub-09 boot_frac=0.97 (둘 다 0.975 미달)
-   - HC 분포가 좁음 (34-78) → CVD가 같은 zone, distinct 약함
-   - 이전 ✓✓ 평가는 rank-based의 outlier-단감도 한계
+### Selection metric hierarchy (`PIPELINE_2_CLOSURE.md §3.3`)
 
-✓ one sig: `cycle12_cross_roi`, `l_dir`, `pearson_r`, `spearman_r`, `l_rank`, `l_mag`, `cycle15_opt3`, `cycle15_opt4`
-~~ marginal: `mw_jaccard_loss` (alone), `norm_resid`, `l_rank_V1`
-✗ inside CI: `l_topk_V1`, `sign_agree`, `l_topk_jaccard`
+1. **Primary**: `test_loss_median` ASC (5/2 HC split × N=300 resample 의 test composite)
+2. **Secondary**: `test_loss_iqr` ASC
+3. **Supplementary**: `boundary_rate < 0.5`; collapse: `iqr > 50` OR `sign(train) ≠ sign(test) AND |Δ| > 5`
 
-**정직한 결론**:
-- **Sub-08**: 여러 loss가 strong distinct — robust signal across formulations
-- **Sub-09**: cycle15_opt2만 ✓ sig, 그러나 sub-04 HC outlier 위치에 의존. **어떤 loss도 sub-04 outlier-independent 한 strong distinct 만들지 못함**. 행동 검증 결정적.
+## 2.6. HC Specificity (DESCRIPTIVE ONLY — 2026-06-01 confirmation)
 
-**중요한 함의**:
-1. 사용자 (Q3, 2026-05-03) 통찰 evidence-confirmed: **현재 모든 loss는 HC vs CVD 통계적 구별 weak** (단 mw_jaccard_loss 예외)
-2. Sub-09는 어떤 single-ROI loss로도 unambiguously distinct 안 됨 — cross-ROI 또는 mw_jaccard만이 가능성
-3. **Phase A canonical L_LOCO HC fit 빠짐** — re-run 필요 (sub-01~07 V1, V4 2-component fit)
-4. HC pool sub-04 outlier가 most loss에서 mean 왜곡 — bootstrap이 이를 robust하게 평가
+**§0 rule 불변**: specificity = descriptive only, selection criterion 아님.
 
-## 2.6. HC Specificity Check Mandate (2026-05-10)
+v6 PCA canonical null testing (`PIPELINE_2_CLOSURE.md §5.2 Theme A`) 결과:
+- Exp 22 loss-based specificity: **0/3 candidates dual-pass** (S08-βc-dom Bonferroni p=0.0149 = single-null-source marginal, Test 2c label-perm 0/3 FAIL)
+- Exp 14/15 matched-grid LOO: 모든 candidate 보수적 NS
+- **Safe to claim**: mechanism class (sign quadrant) descriptive, averaged-surface signal presence (2.1×–5.5× deeper than null)
+- **Cannot claim**: per-realization specificity, absolute (β_s, β_c) physiological interpretation
 
-Any new filter (β_s, β_c) MUST be checked before behavioral testing.
+→ `hc_specificity_check.py` (boot_frac) 는 보조 descriptive 도구. v6 PCA test_loss_median 이 primary.
 
-```bash
-python scripts/hc_specificity_check.py --beta_s <val> --beta_c <val> --cvd_type deutan --roi V4
-```
+## 3. Per-Subject Status (CLOSURE READY 2026-06-01 — v6 PCA 45° categorical)
 
-Verdicts: ✓✓ boot_frac≥0.975 | ~~ 0.90–0.975 | ✗ <0.90
+**Source of truth**: `PIPELINE_2_CLOSURE.md` (2026-06-01). **S7 sprint = COMPLETED. v6 PCA 45° categorical canonical 채택.**
 
-**§0 rule: DESCRIPTIVE ONLY — cannot override behavioral validation.**
+**S7 이전 sprint (S5', S6, S11_legacy) + 구 closure (2026-05-17) 은 역사적 기록. 재활성화 금지.**
 
-Known results (V4, deutan, boot 10000):
-| Filter | norm | boot_frac | Verdict |
-|---|---|---|---|
-| Canonical (38,−14) | 40.5° | 0.517 | ✗ |
-| V4-only (38,+7) | 38.6° | 0.299 | ✗ |
-| Cycle14 (58,−36) | 68.3° | 1.000 | ✓✓ |
+### Model class verdict (RQ1 — FINAL)
 
-## 3. Per-Subject Status (RE-OPENED 2026-05-23 — model-loss selection sprint active)
+- **R+C: REJECTED** — boundary saturation (sub-08 bdy=100%, sub-09 bdy=41%); DOF 부족 (confusion-axis β_c 없음, `δθ=(2−g)·δθ_Machado` 형태)
+- **2-Component: ACTIVE** — β_s (S-cone cardinal axis) + β_c (confusion-axis rotation) covers both axes
 
-**Source of truth (machine-readable)**: `results/BEST_summary.json` (previous closure, candidate state)
-**Narrative**: `results/SUMMARY.md`
-**Forward pipeline writeup**: `results/c3_relabel/SCIENTIFIC_NARRATIVE_2026-05-16.md`
-**Rejected candidates (records only)**: `results/c3_relabel/NEAR_CONTROLS.md`
+### Final candidates (v6 PCA 45°, 2026-06)
 
-### Status (2026-05-24, USER DIRECTIVE — sprint 번호 재정렬)
-**적합 모델·loss 미확정.** 2026-05-17 Phase 2 closure (2-component standalone @ V4)는 **단일 후보로 강등** — Loss combination + HC subset resample sprint (S7) 진행 중. R+C (Δλ, g)와 2-component (β_s, β_c) 모두 후보.
+| Subject | Label | Model | Loss combo | (β_s, β_c) | param IQR | Stability |
+|---|---|---|---|---|---|---|
+| sub-08 deutan | **S08-robust (βc-dom)** | 2-Component | γ_OY + RDM_V2 | (+6, −42) | (8, 2) | 7-fold LOO β_c [−46, −38], cross-0 없음 |
+| sub-09 protan | **S09-primary (βc-rot)** | 2-Component | γ_all + RDM_V1 | (+2, +24) | **(0, 0)** | mode share 87.7% (263/300) |
 
-**Sprint label mapping (PIPELINE_RESULT.md)**:
-- **S6** (was S7, line 793): Convergence matrix (complete)
-- **S7** (NEW, line 1564): Loss combination + HC subset resample sprint, Stage A-E + 5 research questions
-- **S8** (placeholder, line 1757): Filter candidates per model — trigger when S7 RQ1-RQ4 pass
-- **S9** (placeholder, line 1776): Integrated defenses (S9_old + S10_old 통합, subagent task)
-- **S11_legacy** (line 1386): LOO+train-test (S7 의 직전 단계, 결과는 prior 로 활용, S7 가 supersede)
+**S08-βs-dom (+38, −10) = DROPPED** (2026-06-01 closure 결정).
 
-**Active sprint = S7**: 2 models × 11 loss configs (4 single + 6 pair + 1 triple) × 4 ROIs × 3 subjects × HC subset resample k∈{4,5,6} all C(7,k) subsets
-- Stage A: single-loss subset stability (RQ1)
-- Stage B: loss combination value (RQ2)
-- Stage C: neural unique contribution λ sweep (RQ3) — 3 probes: L_γ+λ·L_LOCO, L_γ+λ·L_RDM, L_γ+λ·(L_LOCO+L_RDM)/2
-- Stage D: train-test MSE (RQ4)
-- Stage E: post-selection color-perm (RQ5, final 1 cell only)
-- Selection criteria: (a) parameter SD, (b) CVD-HC separation rate, (d) inter-loss Pearson r, (e) train-test MSE. **(c) P1/P2a guardrail = descriptive only, criterion 아님 (사용자 결정 2026-05-23).**
-- L_α 수식 포함 (Stage A/B), Stage C λ sweep probe 에서는 제외 (8AFC degenerate)
-- §0 framework 은 유지 (specificity claim 금지, descriptive only). 본 sprint는 specificity reformulation 이 아니라 loss-component 평가.
+### 식별성 한계 (Theme A, `PIPELINE_2_CLOSURE.md §5.2`)
 
-### Previous closure (2026-05-17, NOW SUPERSEDED PENDING S7)
-- Filter form: 2-component standalone (cortical opponent rotation in CIELab)
-- Loss: `L_fit = α·L_vuln + β·L_rank + δ·L_rdm + ε·L_smooth` @ V4 hV4 LOCO (`loco_distortion_fit.py:200`)
-- Per-subject (β_s, β_c): see `BEST_summary.json`
-- Pre-image: 8/8 exact for both subjects
-- **이 결정은 LOO 검증 없이 single-fit point estimate 기반.** S7 결과 도착 시 re-validation.
+- **보고 가능**: mechanism class (sign quadrant) — sub-08 β_s+/β_c−, sub-09 β_c+; averaged-surface signal (2.1×–5.5× deeper than HC null)
+- **보고 불가**: 절대 (β_s, β_c) 값 physiological 해석 — noise floor ~20°(β_s)/25°(β_c), f10° < 0.30 FAIL for all 3 candidates, 0/3 dual-pass null tests
+- **Sub-09 추가 한계**: PCA (2,+24) vs SRM (32,0) — σ-level metric non-identifiability (mechanism class itself is metric-dependent)
 
-### Deprecated (DO NOT REVERT)
-- **Option C** (40,+26)/(12,−28) adopted 2026-05-13 — corrected-label P2a is 0.500/0.887; **deprecated 2026-05-17**.
-- **R+C 2-stage as filter form** (advisor 2026-05-16 1st call) — empirically falsified by Check 4 (P2a 0.588/0.787 < LOCO-canonical 0.750/0.975); **advisor reversal 2026-05-16 2nd call**.
-- R+C decomposition (Δλ, g) is **active candidate again** in S8 — not as filter form by default, but LOO+train-test 결과에 따라 선정 가능.
+### Held-out test evidence (`s18`, RQ4e)
 
-### S5' procedural-bias caveat (2026-05-23)
-HC pool g 산출 시 CVD-prior Δλ를 HC에 강제 대입 → 모델 misspecification. V4 protan small-Δλ L4 RDM에서 HC mean=2.43-2.61 boundary high는 procedural artifact. CVD g≈3 주장은 paper에서 **procedural bias caveat 동반** 또는 제외.
+- sub-08 (6,−42): RDM ΔL=−0.406, **7/7 folds beat (0,0)**, γ ΔL=−13.8 (5/7) ✓
+- sub-09 (2,+24): RDM ΔL=−0.472, **7/7 folds beat (0,0)**, γ ΔL=−0.55 (4/7) ≈null
+- Neural (RDM) stable value = good for both; behavioral (γ) benefit asymmetric (sub-08 YES, sub-09 NO/weak)
+
+### Behavioral validation status
+- **Phase 3 = sole CVD-generalization verification path**
+- sub-09 의 sub-08-equivalent behavioral session 1회 acquisition = Phase 3 first priority
+- P2a/P1 = descriptive guardrail only (§0.1, circular on existing data)
+
+### S5' procedural-bias caveat (2026-05-23, unchanged)
+HC pool g 산출 시 CVD-prior Δλ를 HC에 강제 대입 → procedural artifact. CVD g≈3 claim은 paper에서 **caveat 동반** 또는 제외.
 
 ### sub-10 (제외, §A7 unchanged)
-- 분석 대상 아님.
+분석 대상 아님.
 
-## 4. Active Deliverables (Phase 2 종결 전)
+## 4. Active Deliverables (Phase 2 CLOSURE READY — Phase 3 준비 단계)
 
-1. **Sub-09 behavioral protocol** + 시각화 자료 (Track A, Plan agent 진행 중)
-2. **Sub-08 fine grid** (Track B1) — c2 orange 정밀화
-3. **Sub-08 c8 variant** (Track B2) — magenta 정밀화
-4. **Phase 2 closure document**: 두 피험자 최종 필터 + behavioral evidence 요약
+1. **Sub-09 behavioral session acquisition** (Phase 3 first priority) — JND 8 pair + 8AFC 64 trial, sub-08-equivalent protocol
+2. **Paper write-up**: `PIPELINE_2_CLOSURE.md §Paper-level framing` 기준 — candidates as descriptive fits + Theme A/B/C limitations
+3. **Phase 3 stimulus synthesis**: pre-image 적용 자극 생성 (`scripts/s12b_phase_c_v2.py`, closure forward 사용)
 
 ## 5. Closed (재논의 금지)
 
@@ -181,15 +156,22 @@ HC pool g 산출 시 CVD-prior Δλ를 HC에 강제 대입 → 모델 misspecifi
 
 ## 6. Results & Documentation Map
 
-- `behav_validation.md` — 참고만 (discriminability 기준 PASS이며 P2a-restoration 기준은 아님, 2026-05-13 보류)
-- `notion.md` — 모델·피팅·pre-image 전체 서술
-- `LOCO_FILTER_PLAN.md`, `LOCO_FILTER_RESULTS.md` — 필터 디자인 결정
-- `COMPREHENSIVE_MODEL_RESULTS.md` — 3 모델 비교
-- `PIPELINE_WFIXED.md` — W-fixed 파이프라인
-- `action_plans/PLAN04_EXECUTIVE_SUMMARY.md` — Cycle 1~13 통합 서술
-- `results/loco_filter/preimage_2component/` — sub-08/09 V4 pre-image JSON
-- `results/loco_filter/phase_a_2component/` — 2-component fit 결과
+**PRIMARY (v6 canonical)**:
+- `PIPELINE_2_CLOSURE.md` — **5-step pipeline + final candidates + RQ1-RQ5 + §5.2 Limitations** (source of truth)
+- `closure.md` — 4-test verification summary (canonical user-facing)
+- `results/s10_inclusion/s10b_v6_pca_rdm_results_{sub-08,sub-09}.json` — Phase B v6 PCA output
+- `results/s10_inclusion/s17_hc_loo_results.json` — Strict 7-fold HC LOO
+- `results/redteam/` — Exp13-22 null testing evidence
+
+**REFERENCE (prior work)**:
+- `action_plans/PLAN04_EXECUTIVE_SUMMARY.md` — Cycle 1~13 이력 (구 cycle15 포함)
+- `notion.md` — 전체 서술 (일부 구형 terminology 포함 가능)
+- `COMPREHENSIVE_MODEL_RESULTS.md` — 3 모델 비교 (구형)
 - `simulation_recoverability_behavior.md` — recoverability 분석
+
+**DEPRECATED**:
+- `LOCO_FILTER_PLAN.md`, `LOCO_FILTER_RESULTS.md` — 구 single-loss LOCO 기반 설계 (v6 이전)
+- `results/loco_filter/` — 구 LOCO filter output
 
 ## 7. Rule of Action
 
@@ -201,7 +183,7 @@ HC pool g 산출 시 CVD-prior Δλ를 HC에 강제 대입 → 모델 misspecifi
 6. **Specificity claim 금지** — descriptive ("HC distribution의 X percentile")만 허용.
 7. **Sub-10 분석 시도 금지** — CVD-HC 차이 미포착, downstream 제외.
 8. **Selection rule reformulation 금지** — Cycle 9~13에서 13회 시도, 동일 한계 확인.
-9. **Behavioral validation 보류** (2026-05-13). discriminability-PASS는 P2a-restoration 검증을 의미하지 않음. P2a 기반 protocol 재설계 전까지 model class 결정은 LOCO ρ만 사용.
+9. **Model class 결정 = v6 PCA canonical (PIPELINE_2_CLOSURE.md RQ1 FINAL)**. R+C = REJECTED (boundary saturation). LOCO_V4 는 precondition gate 전용; primary metric 아님. behavioral validation (Phase 3 acquisition) = sole CVD-generalization path.
 10. SLURM: hV4 전체 fit은 CPU-heavy → node2 `%5~10`, `--mem=16G`.
 11. 결과 저장: flat `results/<analysis_name>/` (timestamp 서브디렉토리 금지), per-subject json, batch당 `config.json` 1개.
 

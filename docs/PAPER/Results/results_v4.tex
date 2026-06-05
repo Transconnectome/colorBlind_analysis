@@ -100,36 +100,42 @@ The ROIs of strongest disparity elevation (V1 for sub-09, V2 for sub-08) differ 
 \end{figure*}
 
 % ──────────────────────────────────────────────────────────────────────────────
-\subsection{A 2-component cortical distortion fits both CVD cases at hV4}
-\label{sec:results:twocomp}
+\subsection{The retinal-plus-gain model is structurally insufficient}
+\label{sec:results:rc_insufficient}
 % ──────────────────────────────────────────────────────────────────────────────
 
-To identify the distortion parameters needed for the corrective filter, we fit the 2-component cortical model (Equation~\ref{eq:2comp}) to each CVD participant's hV4 representation under the four-term neural-primary loss (Equation~\ref{eq:lfit}, see the \nameref{sec:methods:twocomp} section).
+The R+C model is structurally insufficient for both CVD participants.
+Fitting this model to each CVD participant yielded ceiling saturation in
+both cases.
+For sub-08, $\langle 100\%\rangle$ of resample solutions saturated the
+grid boundary ($g = \langle 3.0\rangle$).
+For sub-09, saturation remained high ($\langle 41\%\rangle$,
+$g = \langle 2.95\rangle$).
+Boundary saturation at these rates indicates model misspecification,
+not a well-constrained optimum \cite{wilson2019}.
 
-The fit returned $(\hat{\beta}_s, \hat{\beta}_c) = (38^\circ, -14^\circ)$ for sub-08 (deutan, $\|\hat{\beta}\| = 40.5^\circ$) and $(6^\circ, -22^\circ)$ for sub-09 (protan, $\|\hat{\beta}\| = 22.8^\circ$, Figure~\ref{fig:twocomp}).
-The etiological asymmetry resides in the S-cone-axis magnitude ($\hat\beta_s = 38^\circ$ vs.\ $6^\circ$).
-The confusion-axis rotation $\hat\beta_c$ operates along subtype-specific axes ($\theta_{\rm conf} = 150^\circ$ deutan, $16^\circ$ protan) and is not directly comparable in sign across subjects.
-Both subjects show non-zero $\hat\beta_s$ along the S-cone axis on the same angular scale as the $21.4^\circ$ behavioral blue-yellow rotation reported in anomalous trichromacy by \citeA{emery2021}, confirming at the neural level the literature grounding adopted in Methods.
+A gain $g > 2$ implies that cortical processing reverses the direction of
+the retinal shift past the undistorted hue
+(Section~\ref{sec:methods:candidates}).
+Both participants scored below the Ishihara criterion (sub-08: 5/14 plates
+correct; sub-09: 7/14), confirming residual CVD under standard viewing
+conditions.
+A fitted $g > 2$ is therefore internally inconsistent with confirmed CVD
+status: the model claims overcompensation where the participants
+demonstrably show impairment.
+The saturated boundary is a model failure, not a valid parameter estimate.
 
-The fitted distortion is consistent with each subject's independent behavioral phenotype.
-8AFC color identification placed both CVD subjects well below HC (HC $0.94 \pm 0.04$, sub-08 $0.71$, sub-09 $0.62$, chance $= 0.125$), with sub-08's errors clustering on the red--green axis (c2/c3 confused with c7, mean confusion $28\%$) and sub-09's errors extending across the L--M opponent range with additional magenta (c8) misidentification.
+The structural cause is a degree-of-freedom deficit.
+The function $\delta\theta = (2 - g)\cdot\delta\theta_{\rm Mach}$
+displaces hues only along the fixed confusion axis.
+No value of $g$ can account for distortions in directions orthogonal to
+that axis.
+R+C is not considered further as a filter candidate.
 
-HC leave-one-out validation under the same loss is reported in Supplementary~\ref{app:hc_perm}, and the R+C cone-shift decomposition is reported in Appendix~\ref{app:altmodels}.
-The HC label-permutation null is non-null for the 2-component class, so case-level distinctness rests on the joint pattern of vulnerability profile, R+C decomposition, and per-color filter direction rather than on $\|\hat\beta\|$ alone.
-
-% ── Figure 5 ─────────────────────────────────────────────────────────────────
-\begin{figure*}[tb]
-  \centering
-  \includegraphics[width=\textwidth,height=0.55\textheight,keepaspectratio]{fig4_twocomp}
-  \caption{\textbf{Per-subject 2-component loss landscape at hV4.}
-  Canonical V4 LOCO loss
-  $L_\text{fit}(\beta_s, \beta_c) = 1.0\,L_\text{vuln} + 0.5\,L_\text{rank} + 0.2\,L_\text{rdm} + 0.1\,L_\text{smooth}$ (Equation~\ref{eq:lfit}; Methods) evaluated on the $26 \times 51 = 1{,}326$-cell grid ($\beta_s \in [0^\circ, 50^\circ]$, $\beta_c \in [-50^\circ, +50^\circ]$, step $2^\circ$).
-  Left: sub-08 (deutan, Stockman S-cone confusion axis $150^\circ$). Right: sub-09 (protan, Stockman axis $16^\circ$).
-  White star: per-subject argmin --- sub-08 $(\hat\beta_s, \hat\beta_c) = (38^\circ, -14^\circ)$, $\|\hat\beta\| = 40.5^\circ$; sub-09 $(6^\circ, -22^\circ)$, $\|\hat\beta\| = 22.8^\circ$.
-  Both $\hat\beta_c$ values are negative. The inter-subject asymmetry resides in the S-cone-axis magnitude ($\hat\beta_s = 38^\circ$ vs.\ $6^\circ$).
-  See Appendix~\ref{app:altmodels} for the historical LOCO-$\rho$ comparison and Machado/R+C cone-shift baselines.}
-  \label{fig:twocomp}
-\end{figure*}
+% \textcolor{red}{[TODO: R2 --- A single cortical model fits both CVD cases]}
+% \textcolor{red}{[TODO: R2.5 --- Neural data identifies what behavior cannot]}
+% \textcolor{red}{[TODO: R3 --- Identifiability: mechanism class robust, per-axis value not]}
+% \textcolor{red}{[TODO: Figure 4 --- loss landscape caption (6,-42)/(2,+24) 기준으로 교체]}
 
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{\textcolor{red}{[TODO] Per-subject stimulus-space filter}}

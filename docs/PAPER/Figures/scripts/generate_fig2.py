@@ -33,7 +33,7 @@ ROI_LABELS  = ["V1", "V2", "V3", "hV4"]
 HUE_NAMES   = ["Red", "Org", "Yel", "Grn", "Cyn", "Blu", "Pur", "Mag"]
 
 CHANCE_EXACT = 0.125
-CHANCE_MAE   = 90.0   # uniform-random predictor mean abs error over 8-hue circle
+CHANCE_ADJ   = 3/8    # adjacent-accuracy chance (within +/-1 of 8 hues = 3/8)
 
 HC_COLOR  = "#AAAAAA"
 HC_DOT    = "#555555"
@@ -75,28 +75,28 @@ loco_acc = {}
 for sub in SUBS_CVD + ["10"]:
     loco_acc[sub] = {}
     for roi in ROIS:
-        loco_acc[sub][roi] = loco_cvd_raw[sub][roi]["ForwardEncoding"]["mae"]
+        loco_acc[sub][roi] = loco_cvd_raw[sub][roi]["ForwardEncoding"]["adjacent_acc"]
 
 for sub in SUBS_HC:
     with open(f"{LOCO_HC_DIR}/sub-{sub}_loco.json") as f:
         d = json.load(f)
     loco_acc[sub] = {}
     for roi in ROIS:
-        loco_acc[sub][roi] = d["results"][roi]["ForwardEncoding"]["overall_mae"]
+        loco_acc[sub][roi] = d["results"][roi]["ForwardEncoding"]["overall_adjacent_acc"]
 
 hue_acc_08 = {}
 hue_acc_09 = {}
 for fold in loco_cvd_raw["08"]["V4"]["ForwardEncoding"]["fold_results"]:
-    hue_acc_08[fold["test_color"]] = fold["mae"]
+    hue_acc_08[fold["test_color"]] = fold["adjacent_acc"]
 for fold in loco_cvd_raw["09"]["V4"]["ForwardEncoding"]["fold_results"]:
-    hue_acc_09[fold["test_color"]] = fold["mae"]
+    hue_acc_09[fold["test_color"]] = fold["adjacent_acc"]
 
 hue_acc_hc = {i: [] for i in range(8)}
 for sub in SUBS_HC:
     with open(f"{LOCO_HC_DIR}/sub-{sub}_loco.json") as f:
         d = json.load(f)
     for fold in d["results"]["V4"]["ForwardEncoding"]["fold_results"]:
-        hue_acc_hc[fold["test_color"]].append(fold["mae"])
+        hue_acc_hc[fold["test_color"]].append(fold["adjacent_acc"])
 
 hue_acc_hc_mean = np.array([np.mean(hue_acc_hc[i]) for i in range(8)])
 hue_acc_hc_sem  = np.array([np.std(hue_acc_hc[i], ddof=1) / np.sqrt(7) for i in range(8)])
@@ -148,20 +148,20 @@ for r in ROIS:
 ch_loro_08 = ch_loro_per_roi["V4"]["08"]
 ch_loro_09 = ch_loro_per_roi["V4"]["09"]
 
-# Panel B (LOCO MAE) — one-sided upper per ROI (deficit = higher MAE)
+# Panel B (LOCO adjacent acc) — one-sided lower per ROI (deficit = lower acc)
 ch_loco_per_roi = {}
 for r in ROIS:
     ch_loco_per_roi[r] = {
-        "08": crawford_howell(loco_acc["08"][r], loco_hc_ind[r], tail="upper"),
-        "09": crawford_howell(loco_acc["09"][r], loco_hc_ind[r], tail="upper"),
+        "08": crawford_howell(loco_acc["08"][r], loco_hc_ind[r], tail="lower"),
+        "09": crawford_howell(loco_acc["09"][r], loco_hc_ind[r], tail="lower"),
     }
 ch_08 = ch_loco_per_roi["V4"]["08"]
 ch_09 = ch_loco_per_roi["V4"]["09"]
 
 # Panel C — per-hue Crawford & Howell at hV4 (each hue tested independently)
-ch_per_hue_08 = {i: crawford_howell(hue_acc_08[i], hue_acc_hc[i], tail="upper")
+ch_per_hue_08 = {i: crawford_howell(hue_acc_08[i], hue_acc_hc[i], tail="lower")
                  for i in range(8)}
-ch_per_hue_09 = {i: crawford_howell(hue_acc_09[i], hue_acc_hc[i], tail="upper")
+ch_per_hue_09 = {i: crawford_howell(hue_acc_09[i], hue_acc_hc[i], tail="lower")
                  for i in range(8)}
 
 # ── Figure layout ─────────────────────────────────────────────────────────────
@@ -262,9 +262,9 @@ loco_09 = np.array([loco_acc["09"][r] for r in ROIS])
 plot_bars(ax_b,
           hc_mean=loco_hc_mean, hc_sem=loco_hc_sem, hc_ind=loco_hc_ind,
           v08=loco_08, v09=loco_09,
-          ylabel="MAE (°)",
-          chance=CHANCE_MAE,
-          y_lo=0.0, y_hi=125.0,
+          ylabel="Adjacent accuracy",
+          chance=CHANCE_ADJ,
+          y_lo=0.0, y_hi=0.85,
           per_roi_p08={r: ch_loco_per_roi[r]["08"][1] for r in ROIS},
           per_roi_p09={r: ch_loco_per_roi[r]["09"][1] for r in ROIS})
 
@@ -292,11 +292,11 @@ ax_c.plot(hue_x, hue_acc_09_arr,
           linestyle="-", linewidth=0.7,
           markeredgecolor="white", markeredgewidth=0.4, zorder=5)
 
-ax_c.axhline(CHANCE_MAE, color=CHANCE_COL, linestyle="--",
+ax_c.axhline(CHANCE_ADJ, color=CHANCE_COL, linestyle="--",
              linewidth=0.8, zorder=1, alpha=0.75)
 
 # Per-hue per-subject sig labels attached directly above each CVD marker
-y_pad_c = 7
+y_pad_c = 0.04
 for i in range(8):
     lbl08, fs08, fw08 = _sig_label(ch_per_hue_08[i][1])
     lbl09, fs09, fw09 = _sig_label(ch_per_hue_09[i][1])
@@ -311,8 +311,8 @@ for i in range(8):
 
 ax_c.set_xticks(hue_x)
 ax_c.set_xticklabels(HUE_NAMES, rotation=35, ha="right", fontsize=6.5)
-ax_c.set_ylabel("MAE (°)", fontsize=7, labelpad=3)
-ax_c.set_ylim(0, 175)
+ax_c.set_ylabel("Adjacent accuracy", fontsize=7, labelpad=3)
+ax_c.set_ylim(0, 1.0)
 ax_c.set_xlim(-0.6, 7.6)
 ax_c.tick_params(axis="both", labelsize=6.5, length=3)
 strip_spines(ax_c)
@@ -350,11 +350,11 @@ print("\nCrawford & Howell — hV4 (parametric t, df=6); test: CVD performance <
 print("  LORO accuracy (one-sided lower, deficit = lower accuracy):")
 print(f"    sub-08: t={ch_loro_08[0]:.3f}, p={ch_loro_08[1]:.4f}")
 print(f"    sub-09: t={ch_loro_09[0]:.3f}, p={ch_loro_09[1]:.4f}")
-print("  LOCO MAE (one-sided upper, deficit = higher MAE):")
+print("  LOCO adjacent acc (one-sided lower, deficit = lower acc):")
 print(f"    sub-08: t={ch_08[0]:.3f}, p={ch_08[1]:.4f}")
 print(f"    sub-09: t={ch_09[0]:.3f}, p={ch_09[1]:.4f}")
 
-print("\nPer-hue C&H at hV4 (LOCO, one-sided upper):")
+print("\nPer-hue C&H at hV4 (LOCO, one-sided lower):")
 print(f"  {'Hue':<7} {'sub-08 t':<10} {'p':<8} {'sub-09 t':<10} {'p':<8}")
 for i, name in enumerate(HUE_NAMES):
     t08, p08 = ch_per_hue_08[i]

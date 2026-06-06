@@ -49,8 +49,8 @@ Both CVD participants fell at or below the adjacent-accuracy chance level at hV4
 Sub-08 reached adjacent accuracy $0.25$ (Crawford \& Howell $t = -1.58$, $p = 0.082$, n.s., $d_{cc} = -1.71$).
 Sub-09 reached $0.13$ ($t = -2.48$, $p = 0.024$, $d_{cc} = -2.68$).
 The impairment was not uniform across hues.
-Both participants showed near-zero adjacent accuracy specifically for S-cone intermediate colors at hV4, namely blue, purple, and magenta (Figure~\ref{fig:loco}C).
-Per-hue Crawford \& Howell tests reached significance for blue (sub-08 $d = 2.13$, $p = 0.047$; sub-09 $d = 2.15$, $p = 0.046$) and for purple (sub-08 $d = 2.40$, $p = 0.033$).
+Both participants showed near-zero adjacent accuracy at hV4 for the S-cone intermediate colors blue, purple, and magenta (adjacent accuracy $= 0$ for both participants at all three hues; Figure~\ref{fig:loco}C).
+Per-hue Crawford \& Howell tests (one-tailed) reached significance only for blue (both participants $d = 2.20$, $p = 0.042$); purple ($d = 1.02$, $p = 0.19$) and magenta ($d = 1.89$, $p = 0.064$) did not survive the single-case test against the $n = 7$ HC distribution.
 These per-hue accuracies form each participant's hue vulnerability profile $\mathbf{v} \in [0,1]^8$.
 
 % ── Figure 3 ─────────────────────────────────────────────────────────────────
@@ -63,7 +63,7 @@ These per-hue accuracies form each participant's hue vulnerability profile $\mat
   \textbf{(B)} LOCO adjacent accuracy ($\pm 1$ hue step; chance $= 3/8$).
   \emph{$*$}: sub-09 below HC at hV4 (Crawford \& Howell $t = -2.48$, $p = 0.024$; exploratory single-case finding); sub-08 $t = -1.58$, $p = 0.082$, n.s.
   \textbf{(C)} Per-hue adjacent accuracy at hV4, HC bars $\pm$ SEM.
-  Per-hue Crawford \& Howell tests (one-tailed): blue --- sub-08 $d = 2.13$, $p = 0.047$; sub-09 $d = 2.15$, $p = 0.046$; purple --- sub-08 $d = 2.40$, $p = 0.033$.
+  Per-hue Crawford \& Howell tests (one-tailed) were significant only for blue (both participants $d = 2.20$, $p = 0.042$); purple ($d = 1.02$, $p = 0.19$) and magenta ($d = 1.89$, $p = 0.064$) were n.s.
   Joint pattern in (A) and (B--C) defines the filter precondition and target, respectively.}
   \label{fig:loco}
 \end{figure*}
@@ -141,6 +141,24 @@ The 2-component cortical model fit both participants using the same
 functional form.
 The deutan and protan cases differ in $(\hat\beta_s, \hat\beta_c)$,
 not in model structure.
+We estimated $(\beta_s, \beta_c)$ by casting distortion estimation as an
+inverse problem (Figure~\ref{fig:pipeline}): a two-parameter forward model is
+fit to CVD--HC differences under three loss families, and the fitted transform
+is analytically inverted to a stimulus-space correction filter.
+
+% ── Figure 5 — inverse-problem workflow schematic ────────────────────────────
+\begin{figure*}[tb]
+  \centering
+  \includegraphics[width=\textwidth]{fig5_generated_v}
+  \caption{\textbf{Inverse-problem workflow for personalised stimulus-space filter design.}
+  \textbf{(1)} A two-parameter forward model expresses the per-hue distortion as $\delta\theta(\theta) = \beta_s\cos(\theta - 90^\circ) + \beta_c\cos(\theta - \theta_{\rm conf})$: an S-cone-axis component ($\beta_s$) plus a family-specific confusion-axis rotation ($\beta_c$; $\theta_{\rm conf} = 16^\circ$ protan, $150^\circ$ deutan).
+  \textbf{(2)} Three loss families quantify CVD--HC differences --- behavioural JND ratios ($\gamma$), neural representational $\Delta$RDM cosine, and hV4 forward-encoding LOCO; only the LOCO loss couples to the forward encoder.
+  \textbf{(3)} A grid search over $(\beta_s, \beta_c)$ minimises the $z$-scored composite to the selected fit $\hat\beta$.
+  \textbf{(4)} The fitted forward map is analytically inverted: for each displayed hue $\theta$, the corrected stimulus $\theta_{\rm pre}$ solves $\theta_{\rm pre} + \delta\theta(\theta_{\rm pre}) = \theta$.
+  \textbf{(5)} The per-subject filter is $\delta\theta_{\rm filter}(\theta) = \theta_{\rm pre} - \theta$.
+  Glyphs are illustrative; the fitted loss landscape is shown in Figure~\ref{fig:landscape}.}
+  \label{fig:pipeline}
+\end{figure*}
 
 For sub-08 (deutan, $\theta_{\rm conf} = 150^\circ$), the selected
 loss combination $\gamma_{\rm OY} + L_{\rm RDM}^{(V2)}$ yielded
@@ -254,7 +272,24 @@ loss; sign stability under the SRM-basis loss was not verified
 (Supplementary~\S S3).
 The distortion direction is recoverable even when its magnitude is not.
 
-% \textcolor{red}{[TODO: Figure 4 --- loss landscape caption (6,-42)/(2,+24) 기준으로 교체]}
+The selected fit lies at the global minimum of each participant's composite
+loss surface (Figure~\ref{fig:landscape}), but the per-resample argmin
+distribution makes the identifiability limit explicit: sub-09's argmin recurs
+in $87.7\%$ of resamples yet a secondary basin near $(32^\circ, 0^\circ)$
+reflects metric-dependent non-identifiability, and sub-08's argmin disperses
+along the $\beta_c$ axis.
+
+% ── Figure 6 — per-subject loss landscape ────────────────────────────────────
+\begin{figure*}[tb]
+  \centering
+  \includegraphics[width=\textwidth]{fig6_landscape}
+  \caption{\textbf{Per-subject loss landscape and parameter uncertainty.}
+  $z$-scored composite loss over the $(\beta_s, \beta_c)$ grid for each CVD participant's selected loss combination (sub-08: $\gamma_{\rm OY} + L_{\rm RDM}^{(V2)}$; sub-09: $\gamma_{\rm all} + L_{\rm RDM}^{(V1)}$), reconstructed on the full 7-HC pool. Lower (yellow) indicates better fit.
+  Red star: selected fit (argmin) --- sub-08 $(\hat\beta_s, \hat\beta_c) = (6^\circ, -42^\circ)$; sub-09 $(2^\circ, +24^\circ)$.
+  White points: per-resample argmins over $N = 300$ HC 5-train/2-test resamples, showing parameter uncertainty.
+  The selected fits are descriptive low-dimensional embeddings of each participant's distortion, not physiological point estimates (this section).}
+  \label{fig:landscape}
+\end{figure*}
 
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{Per-subject stimulus-space filter}
@@ -280,21 +315,17 @@ concentrated near the protan confusion axis
 The two correction signatures reflect individual etiologies that
 a single retinal-family filter cannot capture.
 
-% ── Figure 6 ─────────────────────────────────────────────────────────────────
+% ── Figure 7 — per-subject stimulus-space filter (Original | Filtered) ───────
 \begin{figure*}[!htbp]
   \centering
-  \includegraphics[width=\textwidth,height=0.85\textheight,keepaspectratio]{fig5_preimage}
-  \caption[Per-subject 4-column filter rendering]{\textbf{Per-subject stimulus-space filter: 4-column rendering, side-by-side.}
-  Left block: sub-08 (deutan), filter at $(\hat\beta_s, \hat\beta_c) = (38^\circ, -14^\circ)$, $\|\hat\beta\| = 40.5^\circ$.
-  Right block: sub-09 (protan), filter at $(\hat\beta_s, \hat\beta_c) = (6^\circ, -22^\circ)$, $\|\hat\beta\| = 22.8^\circ$.
-  Eight rows correspond to the eight displayed DKL hues.
-  Columns (left to right) within each block:
-  \emph{Original} (HC percept of the displayed stimulus);
-  \emph{CVD percept} (simulated CVD percept of the original under the per-subject 2-component model);
-  \emph{Filtered} (stimulus after applying $\delta\theta^{\rm filt}$, the exact pre-image of $-\delta\theta(\hat\beta_s, \hat\beta_c)$ computed by Brent's-method refinement of the forward map; 8/8 exact, residual $< 0.001^\circ$ for both subjects);
-  \emph{CVD(Filt.)} (simulated CVD percept of the filtered stimulus).
+  \includegraphics[width=\textwidth]{fig7_filter}
+  \caption[Per-subject stimulus-space correction filter]{\textbf{Per-subject stimulus-space correction filter.}
+  For each CVD participant, the displayed stimulus (\emph{Original}) and the corrected stimulus (\emph{Filtered}) are shown for the eight scanner hues.
+  Left block: sub-08 (deutan), $(\hat\beta_s, \hat\beta_c) = (6^\circ, -42^\circ)$.
+  Right block: sub-09 (protan), $(\hat\beta_s, \hat\beta_c) = (2^\circ, +24^\circ)$.
+  The filtered stimulus is the exact numerical pre-image of the fitted 2-component transform; the per-hue correction $\delta\theta_{\rm filter} = \theta_{\rm pre} - \theta$ is annotated beneath each \emph{Filtered} swatch (8/8 pre-images exact, residual $< 0.01^\circ$ for both subjects).
   Rendering coordinate space: STIM\_LAB CIELab (project convention).
-  Quantitative behavioral validation of filter efficacy is deferred to the Phase-3 2AFC arm and will be added once data are collected.}
+  Quantitative behavioural validation of filter efficacy is deferred to the Phase-3 2AFC arm and will be added once data are collected.}
   \label{fig:filter}
 \end{figure*}
 

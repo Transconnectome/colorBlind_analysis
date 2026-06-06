@@ -91,6 +91,6 @@ BrainIAK은 mpi4py `MPI_Init_thread`를 호출. 인터랙티브/non-PMIx 환경�
 **PsychoPy experiment**: `/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind/colorBlind_test.py`
 
 - 8 isoluminant CIE L*a*b* hues (L*=75, chroma r=40 on a*-b* circle): color_1=Red(0°) → color_8=Magenta(315°), counterclockwise in 45° steps. (Note: NOT DKL color space — earlier docs mislabeled this as DKL.)
-- Sinusoidal grating: 5 radial cycles, drifting at 0.3 cyc/s, duration 0.8s
+- **실제 자극 = 균일 단색 원반 (a uniform coloured disc) + 중앙 RSVP 글자.** 스크립트는 `RadialStim(tex='sin', radialCycles=5)` 정현파 grating(5 radial cycles, drift 0.3 cyc/s)을 코딩하지만 **런타임 렌더링 실패로 grating은 표시되지 않음** → 참가자는 평평한 색 원반만 봄. **논문·그림은 "grating" 아닌 "균일 색 원반"으로 기술할 것** (methods_v2.tex L65-66, Fig 1 panel A 반영 완료, 2026-06-05 user-confirmed).
 - RSVP oddball-K task: detect letter 'K' among distractor letters
 - Design: 6 runs × 8 colours/run

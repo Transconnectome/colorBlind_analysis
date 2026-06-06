@@ -30,7 +30,7 @@ discrimination test (§\ref{sec:methods:behavioral}).
 % ── Figure 1 ─────────────────────────────────────────────────────────────────
 \begin{figure*}[tb]
   \centering
-  \includegraphics[width=\textwidth]{fig1_paradigm}
+  \includegraphics[width=\textwidth]{fig1_generated_v2}
   \caption{\textbf{Experimental paradigm and analysis pipeline.} \textbf{(A)} Stimulus set: 8 isoluminant CIE $L^{*}a^{*}b^{*}$ hues at 45\degree\ angular spacing ($L^{*} = 75$, chroma $= 40$; red--magenta).
   \textbf{(B)} Retinotopic ROIs: V1, V2, V3, hV4 (standard retinotopic mapping).
   \textbf{(C)} Analysis pipeline.
@@ -62,8 +62,8 @@ Eight isoluminant chromatic stimuli were drawn from CIE $L^{*}a^{*}b^{*}$ space 
 A gray filler ($a^{*} = b^{*} = 0$) served as a null condition.
 
 Stimuli were presented in a Rapid Serial Visual Presentation (RSVP) design to sustain attention and fixation.
-A circular patch (1.5 s per stimulus) was shown in pseudo-random order optimized with Neurodesign \cite{durnez2018}.
-Participants pressed a button upon detecting two consecutive 'K's within a rapid serial letter stream presented above the grating patch.
+Each stimulus was a uniform circular chromatic patch (a coloured disc, 1.5 s per stimulus) shown in pseudo-random order optimized with Neurodesign \cite{durnez2018}.
+Participants pressed a button upon detecting two consecutive 'K's within a rapid serial letter stream presented at the centre of the chromatic disc.
 Each run contained eight repetitions of all eight chromatic stimuli and the gray filler; inter-stimulus intervals were drawn from $\{3, 4.5, 6\}$ s.
 Each session comprised six runs ($\approx 7$ min each).
 The experiment was coded in PsychoPy 2022.2.5 \cite{peirce2019}.
@@ -373,7 +373,7 @@ Identifiability was assessed by three pre-specified checks conducted
 before parameter reporting: a voxel-level parameter-recovery test,
 an origin-recovery null test, and HC pseudo-CVD and color-label
 permutation specificity contrasts (Supplementary~\S S3).
-\textcolor{red}{[TODO: closure.md 4-test verdict 확정 후 §S3와 함께 수정 예정.]}
+\textcolor{red}{[TODO: revise together with Supplementary S3 once the closure 4-test verdict is finalised.]}
 
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{Stimulus-space filter}
@@ -410,7 +410,7 @@ These ratios enter the fitting loss as described in
 \S\ref{sec:methods:twocomp}.
 
 \paragraph{Filter evaluation session (CVD only).}
-\textcolor{red}{[TODO: Phase 3 설계 확정 후 수정 — baseline filter 종류, run 수, counterbalancing scheme 구체화 예정.]}
+\textcolor{red}{[TODO: finalise once the Phase 3 design is fixed --- specify baseline filter type, run count, and counterbalancing scheme.]}
 CVD participants completed a second scanning session after the main
 experiment.
 Three fMRI runs were acquired under the 2-component-derived

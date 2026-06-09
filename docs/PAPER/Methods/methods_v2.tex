@@ -23,7 +23,7 @@ Second, two candidate distortion model classes were fit by minimising a combinat
 neural and behavioural losses, with parameters selected by a pre-specified stability
 procedure (§\ref{sec:methods:candidates}--§\ref{sec:methods:selection}).
 Third, the fitted distortion was analytically inverted to yield a per-subject
-stimulus-space correction filter (§\ref{sec:methods:filter}).
+stimulus-space correction filter (§\ref{sec:methods:filter}); Figure~\ref{fig:pipeline} summarises this fit-and-invert workflow.
 This filter was then evaluated in a repeat fMRI session and a 2AFC behavioural
 discrimination test (§\ref{sec:methods:behavioral}).
 
@@ -80,7 +80,7 @@ Data were acquired on a Siemens 3T MAGNETOM Cima.X scanner with BioMatrix 3T coi
 To constrain coverage to posterior occipital cortex we used 24 oblique slices perpendicular to the calcarine sulcus \cite{brouwer2009} (TR 1.5 s, TE 30 ms, FA $75^\circ$, $2 \times 2 \times 2$ mm, $96 \times 80$ matrix).
 
 Data were converted to BIDS format and defaced with ezBIDS \cite{levitas2024}.
-Functional images were registered to the T1w image via mutual-information coregistration (FreeSurfer \texttt{mri\_coreg}; \citeNP{maes1997, wells1996}).
+Functional images were registered to the T1w image via mutual-information coregistration (FreeSurfer \texttt{mri\_coreg}; \citeNP{wells1996, maes1997}).
 T1w-to-MNI normalization used 12-DOF affine (FSL FLIRT; \citeNP{jenkinson2002}) followed by nonlinear warping (FNIRT; \citeNP{andersson2007}), yielding 2 mm isotropic MNI-space BOLD data.
 
 % ──────────────────────────────────────────────────────────────────────────────
@@ -196,6 +196,20 @@ Two candidate model classes were evaluated.
 Each parameterises the angular distortion $\delta\theta(\theta)$ that
 maps the displayed hue angle $\theta$ to the angle perceived by a CVD
 observer.
+
+% ── Pipeline schematic — inverse-problem workflow ────────────────────────────
+\begin{figure*}[tb]
+  \centering
+  \includegraphics[width=\textwidth]{fig5_generated_v}
+  \caption{\textbf{Inverse-problem workflow for personalised stimulus-space filter design.}
+  \textbf{(1)} A two-parameter forward model expresses the per-hue distortion as $\delta\theta(\theta) = \beta_s\cos(\theta - 90^\circ) + \beta_c\cos(\theta - \theta_{\rm conf})$: an S-cone-axis component ($\beta_s$) plus a family-specific confusion-axis rotation ($\beta_c$; $\theta_{\rm conf} = 16^\circ$ protan, $150^\circ$ deutan).
+  \textbf{(2)} Three loss families quantify CVD--HC differences --- behavioural JND ratios ($\gamma$), neural representational $\Delta$RDM cosine, and hV4 forward-encoding LOCO; only the LOCO loss couples to the forward encoder.
+  \textbf{(3)} A grid search over $(\beta_s, \beta_c)$ minimises the $z$-scored composite to the selected fit $\hat\beta$.
+  \textbf{(4)} The fitted forward map is analytically inverted: for each displayed hue $\theta$, the corrected stimulus $\theta_{\rm pre}$ solves $\theta_{\rm pre} + \delta\theta(\theta_{\rm pre}) = \theta$.
+  \textbf{(5)} The per-subject filter is $\delta\theta_{\rm filter}(\theta) = \theta_{\rm pre} - \theta$.
+  Glyphs are illustrative; the fitted loss landscape is shown in Figure~\ref{fig:landscape}.}
+  \label{fig:pipeline}
+\end{figure*}
 
 \paragraph{Candidate Model 1: retinal-plus-gain (R+C).}
 The prevailing account attributes CVD colour distortion to a
@@ -410,12 +424,15 @@ These ratios enter the fitting loss as described in
 \S\ref{sec:methods:twocomp}.
 
 \paragraph{Filter evaluation session (CVD only).}
-\textcolor{red}{[TODO: finalise once the Phase 3 design is fixed --- specify baseline filter type, run count, and counterbalancing scheme.]}
+\textcolor{red}{[TODO: finalise once the Phase 3 design is fixed --- specify the comparison-filter instance, run count, and counterbalancing scheme.]}
+We use \emph{non-personalized filter} to denote the family of established CVD corrections that apply a fixed, population- or subtype-level transform (retinal-simulation Daltonization filters, hardware notch lenses, and display- or operating-system-level accessibility filters), as distinct from the per-subject, neurally-derived filter introduced here.
 CVD participants completed a second scanning session after the main
 experiment.
-Three fMRI runs were acquired under the 2-component-derived
-stimulus-space filter and three runs under a generic Windows
-accessibility filter, presented in counterbalanced order.
+fMRI runs were acquired under the 2-component-derived
+stimulus-space filter and under an established non-personalized
+comparison filter, with a retinal-simulation filter the theory-critical
+instance because it isolates a cortical versus retinal corrective target,
+presented in counterbalanced order.
 LOCO decoding and LORO classification were repeated on
 second-session data to assess filter effects on neural color
 representation.

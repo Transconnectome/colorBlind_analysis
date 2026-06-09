@@ -180,8 +180,6 @@ The 2-DOF retinal$+$cortical R$+$C model~\citeNP{tregillus2021} augments Machado
 The large positive cortical gain for Sub-08 ($g = +2.25$, indicating $>$100\% overshoot beyond the exact Tregillus compensation level of $g = -1$;~\citeNP{tregillus2021}) is not physiologically interpretable as a gain parameter and is treated as an empirical characterization of residual hV4 structure.
 The cross-subject model-class divergence (R+C for Sub-08; 1-DOF Machado for Sub-09) prevents a common-axis comparison of the two cases' distortion mechanisms.
 
-\textbf{Correction-vector divergence.} Despite comparable LOCO fit quality ($\rho = 0.857$ for R+C vs.\ $0.881$ for 2-component), the R+C and 2-component correction vectors for Sub-08 have cosine similarity $-0.18$ and sign agreement only $3/8$, confirming that detection converges while correction directions diverge at the cortical level.
-
 \textbf{$\Delta$RDM cross-model convergence.} Using R+C parameters for Sub-09 ($\Delta\lambda = 19.5$~nm, $g = -1.10$), an independent $\Delta$RDM test reaches $p = 0.026$ (40{,}320 cosine-similarity permutations on crossnobis distances), providing cross-model corroboration for the Sub-09 distortion signal.
 Retinal-family optimization directly against $\Delta$RDM fails for both CVD subjects; LOCO is the more discriminating phenotype and $\Delta$RDM serves as a convergence cross-check only.
 
@@ -189,14 +187,16 @@ Retinal-family optimization directly against $\Delta$RDM fails for both CVD subj
 These three collapsed hues fall within Sub-09's LOCO vulnerability cluster (c5/c6 cyan/blue), confirming that arc-compression eliminates correction capacity precisely where Sub-09 requires it most.
 
 \begin{table}[ht]
-  \caption{All distortion model fits at hV4 LOCO for both CVD participants.
-  Retinal-family fits are reported under the historical LOCO-$\rho$ argmax criterion (Section~A.1 of Appendix A); $\rho$ is Spearman correlation between simulated and observed per-color vulnerability.}
+  \caption{Distortion-model fits at hV4 for both CVD participants.
+  The 2-component model is listed at its adopted fit, selected by held-out composite test-loss ($\overline{L}_{\rm test}$, lower is better) under the $L_\text{fit}$ criterion (main text, Section~\ref{sec:results:twocomp}).
+  The retinal-family baselines were fit only under the historical LOCO-$\rho$ argmax criterion (Section~A.1 of Appendix~A; $\rho$ is Spearman correlation between simulated and observed per-color vulnerability), reported for reference only.}
   \label{tab:S1}
   \centering
   \small
-  \begin{tabular}{llccccc}
-    \toprule Subject & Model & DOF & Param.\ 1 & Param.\ 2 & $\rho$ \\ \midrule Sub-08 (deutan) & 2-component & 2 & $\beta_s = 38^\circ$ & $\beta_c = -14^\circ$ & 0.881 \\ Sub-09 (protan) & 2-component & 2 & $\beta_s = 6^\circ$ & $\beta_c = -22^\circ$ & 0.690 \\ \midrule Sub-08 (deutan) & R+C & 2 & $\Delta\lambda = 2.0$~nm & $g = +2.25$ & 0.857 \\ Sub-09 (protan) & Machado & 1 & $\Delta\lambda = 13.5$~nm & --- & 0.762 \\ \bottomrule
+  \begin{tabular}{llcccc}
+    \toprule Subject & Model & DOF & Param.\ 1 & Param.\ 2 & Fit \\ \midrule Sub-08 (deutan) & 2-component & 2 & $\beta_s = 6^\circ$ & $\beta_c = -42^\circ$ & $\overline{L}_{\rm test} = -2.36$ \\ Sub-09 (protan) & 2-component & 2 & $\beta_s = 2^\circ$ & $\beta_c = +24^\circ$ & $\overline{L}_{\rm test} = -1.54$ \\ \midrule Sub-08 (deutan) & R+C\textsuperscript{a} & 2 & $\Delta\lambda = 2.0$~nm & $g = +2.25$ & $\rho = 0.857$ \\ Sub-09 (protan) & Machado\textsuperscript{a} & 1 & $\Delta\lambda = 13.5$~nm & --- & $\rho = 0.762$ \\ \bottomrule
   \end{tabular}
+  \\[2pt]{\footnotesize \textsuperscript{a}Historical LOCO-$\rho$ argmax criterion (reference only); not the adopted filter fit.}
 \end{table}
 
 % ========== Section 17: HC magnitude-anchor distribution ==========

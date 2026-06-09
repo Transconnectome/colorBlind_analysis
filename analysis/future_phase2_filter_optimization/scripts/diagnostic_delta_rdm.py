@@ -579,7 +579,7 @@ def main():
               + ', '.join(f'{a:.1f}' for a in hc_alphas.values()) + ')')
 
         for cvd_subj in args.cvd_subjects:
-            cvd_type = CVD_TYPE[cvd_subj]
+            cvd_type = CVD_TYPE[cvd_subj.split('-')[-1]]  # accept 'sub-08' or '08'
             print(f'\n  --- sub-{cvd_subj} ({cvd_type}) ---')
 
             # Load CVD amplitudes

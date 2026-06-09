@@ -2,7 +2,8 @@
 % Updated 2026-05-19: main text adopts the V4 LOCO neural-primary
 % loss L_fit (Eq. eq:lfit). Retains LOCO-rho-argmax fits and the
 % Machado/R+C cone-shift baselines as historical reference; R+C
-% decomposition is retained as a diagnostic of per-subject etiology.
+% decomposition retained only as an exploratory descriptive companion
+% (near-degenerate loss; no etiological claim).
 
 \section*{Appendix A: Alternative Model Comparison}
 \label{app:altmodels}
@@ -21,10 +22,11 @@ Under the LOCO-$\rho$ argmax criterion used in earlier drafts, the Machado model
 These fits are reported as historical reference for the main-text 2-component fit (Section~\ref{sec:results:twocomp}); the present $L_\text{fit}$ loss (Equation~\ref{eq:lfit}) and LOCO-$\rho$ argmax need not agree, since $L_\text{fit}$ optimizes a combination of per-color V4 vulnerability MSE, Spearman rank ordering, $\Delta$RDM cosine, and a smoothness regularizer rather than the rank-order monotonicity of $\rho$ at hV4 alone.
 
 \paragraph{R+C decomposition as a diagnostic.}
-Although the R+C 2-stage model is not adopted as the filter form (see \nameref{sec:results:filter}), the R+C parameter fit at hV4 under $L_\text{fit}$ is retained as a per-subject etiological diagnostic.
-For sub-08, the R+C decomposition recovers $\Delta\lambda = 2.5$~nm (near-zero retinal shift) with $g = -2.25$ (large cortical overshoot), consistent with a cortical-dominant CVD.
-For sub-09, the R+C decomposition recovers $\Delta\lambda = 19.5$~nm (within the published protan cone-shift range) with $g = -1.10$ (near-physiological cortical compensation, no overshoot), consistent with a retinal-dominant CVD.
-This per-subject cortical-vs-retinal asymmetry is reported as a mechanistic interpretation of the 2-component fit, not as an independent test.
+Although the R+C 2-stage model is not adopted as the filter form (see \nameref{sec:results:filter}), the R+C parameter fit at hV4 under $L_\text{fit}$ is reported here as an exploratory per-subject diagnostic.
+For sub-08, the R+C decomposition returns $\Delta\lambda = 2.5$~nm with $g = -2.25$; for sub-09 it returns $\Delta\lambda = 19.5$~nm with $g = -1.10$.
+These values are reported for completeness only and carry no etiological interpretation.
+The R+C neural loss is weakly identified (near-degenerate) along the $\Delta\lambda$--$g$ trade-off, and the $g$ estimate in particular is unstable across fitting variants, reversing sign under alternative criteria (the historical LOCO-$\rho$ argmax fit returns $g = +2.25$ for sub-08, versus $g = -2.25$ here; Supplementary Table~\ref{tab:S1}); the $(\Delta\lambda, g)$ pair therefore does not constitute a reliable point estimate and supports no retinal-versus-cortical attribution.
+We retain it only as a descriptive companion to the 2-component fit, not as an independent test.
 
 \subsection*{A.2 Inverse-mapping (pre-image) behavior}
 

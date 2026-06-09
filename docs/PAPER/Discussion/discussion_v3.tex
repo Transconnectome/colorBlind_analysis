@@ -1,0 +1,93 @@
+% Discussion Section v3 — 2026-06-08 (Round 1 revised after adversarial + writing review)
+% Reframe: CVD color deficit = individual-specific GEOMETRIC DISTORTION of
+%   cortical color representation. RDM = structure, LOCO = functional consequence.
+%   Neural + behavioral measurements JOINTLY ground a personalized correction.
+% Spine: 3 contributions — C1 structural/geometric distortion (RQ1, ¶2);
+%   C2 personalized filter from cortical structural info (¶3-5);
+%   C3 performance superiority (Phase 3 forward-looking, ¶6).
+% Removed from v2: upstream-input-rejection paragraph; detection-correction
+%   "divergence" falsifier + §S16 cosine statistic.
+% Brief / evidence pack / constraints: discussion_structure_v3.md
+
+\section{Discussion}
+\label{sec:discussion}
+
+We asked whether the cortical color representation of a color-vision-deficient (CVD) individual is structured enough to ground a personalized corrective filter.
+Two CVD participants, one deutan and one protan, retained categorical discrimination of all eight color hues at every retinotopic ROI.
+Yet both selectively lost continuous-hue interpolation, falling at or below the adjacent-accuracy chance level.
+This deficit was not diffuse signal loss but a structured geometric distortion.
+We modelled it with two cortical components: a rotation along the subtype confusion axis --- the classical direction of CVD color confusion --- and a distortion along the S-cone axis, where the interpolation deficit was concentrated.
+Fit independently per participant from behavioral discrimination thresholds and cortical representational geometry, this model recovered an exact stimulus-space pre-image for all eight hues in both cases.
+That pre-image is the per-person correction filter, built from that individual's own cortical color geometry.
+We propose that such a filter pulls the distorted representation back toward the healthy-control geometry, improving both behavioral hue discrimination and the cortical color response.
+% TODO(Phase 3 — 본 논문 포함 예정): replace this forward-looking "we propose" with the demonstrated outcome once Phase-3 data are collected. This validation is an analysis OF THIS paper, not a separate study, so the final text should state the actual result (behavioral JND reduction + fMRI geometry shift toward HC), or revise the distortion account per the observed outcome. Same flip needed for the prospective framing of paragraph 6 below.
+
+\subsection{A geometric distortion of cortical color representation}
+We identify that CVD is a structured distortion of cortical color geometry rather than a uniform attenuation of the chromatic signal.
+Representational geometry treats the pairwise distance structure among stimuli as an encoded relationship in each cortical region \cite{kriegeskorte2008, kriegeskorte2019}.
+Two complementary measurements expose a structural distortion, each at the stage where its signal exists.
+The representational dissimilarity matrix (RDM) shows \emph{which} pairwise distances deviate from the healthy-control (HC) geometry: disparity was significantly elevated at V2 in the deutan participant (Crawford \& Howell $p = 0.040$) and at V1 in the protan participant ($p = 0.007$).
+This subject-specific ROI pattern is inconsistent with a shared group-level gain.
+Leave-one-color-out decoding shows \emph{where} the continuous-hue manifold breaks down.
+Only hV4 supported above-chance interpolation in HC ($0.47 \pm 0.05$, $p = 0.044$), replicating \citeA{brouwer2009}.
+There, the protan participant fell significantly below HC ($0.13$, $p = 0.024$; exploratory single-case), and the deutan participant showed a marginal reduction in the same direction ($0.25$, $p = 0.082$).
+Both sat at zero adjacent accuracy, with a significant deficit at the S-cone intermediate blue ($d = 2.20$, $p = 0.042$).
+This account aligns with prior characterizations of CVD as a multidimensional deformation of color space rather than a uniform attenuation \cite{boehm2014, emery2021}.
+
+\subsection{A neurally grounded, individualizable correction filter}
+We built each correction filter by inverting that participant's fitted two-component model to its stimulus-space pre-image (Methods~\S\ref{sec:methods:filter}) --- the displayed hue that, after the cortex distorts it, is perceived as the intended color.
+Across the eight hues this filter applied a mean rotation of $|\delta\theta| = 26.3^\circ$ for the deutan participant and $16.2^\circ$ for the protan participant.
+
+Fitting the behavioral and neural loss atoms independently revealed three benefits of grounding the correction in cortical geometry.
+First, the neural term recovered a confusion-axis direction the behavioral loss could not resolve: the protan behavioral-only fit did not beat the no-correction baseline ($\Delta L = +0.01$, 4 of 7 folds), whereas the RDM term resolved a clear rotation.
+Second, it stabilized an already-informative solution: for the deutan participant the behavioral-only and combined fits shared the same argmin $(6^\circ, -42^\circ)$, and adding the neural term sharpened it without shifting it, lowering the boundary-saturation rate from $23\%$ to $9.3\%$.
+Third, it tightened parameter stability in both participants, narrowing the resample interquartile range of the recovered parameters.
+The neural-only fit for the deutan participant independently returned the same direction ($\hat\beta_c = -26^\circ$), corroborating the behavioral estimate.
+A correction grounded in individual cortical geometry therefore differs in substance from a purely behavioral one.
+
+The resulting filter is per-person and neurally grounded --- the architectural advance over a population-average correction.
+The two fitted filters differ by subtype in the \emph{direction} of the dominant confusion-axis term ($\hat\beta_c = -42^\circ$ for the deutan participant versus $+24^\circ$ for the protan participant).
+Per-axis magnitude is not identifiable (below) and is not the basis of the contrast.
+The architecture is individualizable by construction: each filter is built from one participant's measured cortical color geometry rather than from a fixed subtype-average spectral shift.
+Because $\theta_{\rm conf}$ is subtype-defined and the sample holds one deutan and one protan, this contrast is between-subtype.
+What makes each correction individual is that its distortion is read from that participant's own cortical color geometry, not assigned from their diagnostic subtype.
+This neural grounding is robust at the level the filter relies on: the two-component mechanism class and the direction (sign) of the dominant confusion-axis term are stable across held-out reference sets.
+Their per-axis magnitudes are not separately identifiable (0 of 6 recovery checks survive FDR correction), so the between-subtype contrast rests on these robust directions rather than on absolute parameter values.
+
+A population-average transform cannot substitute for this per-person inverse, for a reason that holds independent of any fit.
+The Machado class --- a fixed spectral shift along the single confusion axis, even when scaled by a cortical gain \cite{machado2009} --- stays confined to that one axis and cannot represent distortion in orthogonal directions.
+For the protan participant it even collapses three distinct displayed hues onto a single pre-image near $127^\circ$, leaving no exact pre-image where that participant is most vulnerable (Appendix~\ref{app:altmodels}).
+Fitting the class confirmed the mismatch empirically --- its gain saturated near $g \approx 3$, implausibly implying overcompensation in observers who remain measurably impaired --- but the structural limit alone rules it out as an exact correction (Section~\ref{sec:methods:candidates}).
+
+\subsection{Testing whether the filter improves perception}
+Closing the loop from neural model to perceptual benefit, this study tests whether the personalized filter improves perception in a preregistered two-alternative forced-choice experiment.
+% TODO(Phase 3 — 본 논문 포함, 데이터 미수집): 결과 삽입 예정. 현재는 design+양방향 예측만. 데이터 수집 후 (1) 이 topic sentence를 실제 결과로, (2) 행동 JND 감소 + fMRI 기하 이동 결과를 Results로, (3) design 상세를 Methods로 이동. 데이터 전까지 C3은 "delivered contribution"으로 주장 불가 — 현 draft은 design+pending 상태.
+The design compares three conditions at each participant's most LOCO-vulnerable hue pairs: the personalized neural-grounded filter, a population-average retinal-simulation filter (the deployable instance --- for example an operating-system accessibility filter --- to be fixed in the Phase-3 protocol), and a no-filter baseline.
+% TODO (¶1 정합): add neural-validation arm. ¶1 promises improvement in "the cortical color response"; this paragraph currently describes only the behavioral 2AFC/JND test. Stage D plan = JND + fMRI (SRM/LOCO). Add one sentence: a parallel fMRI test of whether the filter moves the CVD representational geometry (SRM alignment / LOCO interpolation) back toward HC. Until added, ¶1 over-promises a neural endpoint not stated here.
+We state the prediction in both directions.
+If the personalized filter lowers the just-noticeable difference at these hue pairs where the population-average filter does not, individualized cortical-geometry correction is a deployable alternative to population-average approaches.
+If the population-average filter instead matches or exceeds it, the cortical-distortion account that motivates the personalized design requires revision.
+Either outcome is informative, and the contrast makes the account falsifiable rather than merely illustrative.
+
+\subsection{Limitations}
+Four considerations bound the proof-of-concept scope of these findings.
+First, the CVD sample is $N = 2$.
+Single-case statistics \cite{crawford1998} permit individual-level inference, but population-level claims about deutan or protan subtypes require replication with more participants.
+As established above, the sign of $\hat\beta_c$ is the recoverable quantity.
+Whether the between-subtype $\hat\beta_c$ difference ($-42^\circ$ vs.\ $+24^\circ$) is subtype-level or idiosyncratic awaits power-adequate replication.
+Establishing per-person rather than subtype-average correction specifically requires testing several individuals \emph{within} a single subtype --- the decisive follow-up experiment.
+Second, the stimulus set was confined to a single isoluminant, iso-chroma locus ($L^{*} = 75$, chroma $= 40$).
+The filter is therefore derived and, in Phase~3, validated only along the hue circle at fixed lightness and saturation.
+It does not constrain how the correction generalises to luminance- or saturation-varying stimuli or to naturalistic viewing --- gaps that denser stimulus sampling across these axes would close.
+Third, the effective HC pool at hV4 ($n = 6$, after excluding sub-07 for low voxel count) is small enough that the HC $\|\hat\beta\|$ leave-one-out distribution we report is a magnitude anchor for the CVD estimates, not a hypothesis test.
+A larger HC reference cohort would be required to arbitrate population-level distortion patterns.
+Fourth, we did not compute parameter-level bootstrap confidence intervals on $\hat\beta_s$ and $\hat\beta_c$, so the per-axis estimates are point values whose interval precision awaits the additional runs per participant that bootstrap resampling would require.
+
+\subsection{Conclusion}
+This work is a proof-of-concept that each individual's cortical color geometry, measured with fMRI, can ground a stimulus-space correction obtained by inverting a fitted model of that individual's representational distortion.
+It recasts what a color-vision deficiency is: not a uniform retinal loss to be undone by a fixed subtype-average spectral shift, but an individually patterned, multidimensional distortion of the cortical color representation --- one structured enough to invert.
+The architecture that follows --- measure an individual's cortical geometry, fit its distortion, and invert it to a per-person correction --- is distinct by construction from population-average retinal approaches.
+A fixed subtype-average spectral shift cannot represent a per-person distortion, whereas a per-person inverse can, exactly for the mechanism class and up to the per-axis magnitude uncertainty quantified above.
+\textcolor{red}{[TODO Phase~3: replace with the measured outcome once data are collected.] Phase~3 will test whether this cortical-level correction reduces discrimination thresholds where population-average correction does not.}
+A correction spanning hue, lightness, and chroma jointly --- fitted from denser stimulus sampling, more runs per participant, and a larger HC reference pool --- is the path toward a deployable personalized filter.
+More broadly, treating a sensory deficit as an invertible distortion of its own cortical representation --- characterized and corrected one individual at a time --- offers a template for personalized, brain-based perceptual correction beyond color vision.

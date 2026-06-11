@@ -1,0 +1,381 @@
+{
+  "V1": {
+    "roi": "V1",
+    "K": 6,
+    "hc_n": 7,
+    "hc_loco_rho_n4_mean": 0.12859393179004194,
+    "hc_loco_rho_n4_sd": 0.08619850326585314,
+    "hc_loco_rho_n4_values": [
+      0.0757,
+      0.0679,
+      0.1807,
+      0.1416,
+      0.2173,
+      -0.0067,
+      0.2236
+    ],
+    "hc_loco_rho_n6_mean": 0.12997847771311385,
+    "hc_loco_rho_n6_sd": 0.09702162176892799,
+    "hc_loro_acc_mean": 0.7142857142857144,
+    "hc_loro_acc_sd": 0.09294740220533106,
+    "conditions": {
+      "window": {
+        "n_voxels": 560,
+        "n_runs": 4,
+        "loco_rho_mean": -0.31025794799532125,
+        "loco_rho_per_color": [
+          -0.7361,
+          -0.5073,
+          0.1515,
+          0.2869,
+          0.2387,
+          -0.523,
+          -0.7061,
+          -0.6868
+        ],
+        "loco_d_vs_hc_n4matched": -5.091177493324422,
+        "loco_rho_loo_runs": [
+          -0.3482,
+          -0.3245,
+          -0.1709,
+          -0.2307
+        ],
+        "loco_rho_loo_min": -0.3481625906953915,
+        "loco_rho_loo_max": -0.17093797408137912,
+        "loro_acc": 0.84375,
+        "rdm_cosine_to_hc": 0.9128257657544226
+      },
+      "optimal": {
+        "n_voxels": 560,
+        "n_runs": 4,
+        "loco_rho_mean": 0.05798051437320484,
+        "loco_rho_per_color": [
+          0.2536,
+          -0.3736,
+          -0.2051,
+          0.6311,
+          0.4583,
+          -0.3503,
+          -0.0625,
+          0.1124
+        ],
+        "loco_d_vs_hc_n4matched": -0.8191954006330183,
+        "loco_rho_loo_runs": [
+          0.0109,
+          0.1723,
+          0.1927,
+          0.1292
+        ],
+        "loco_rho_loo_min": 0.01087590773509675,
+        "loco_rho_loo_max": 0.1926745762684809,
+        "loro_acc": 0.71875,
+        "rdm_cosine_to_hc": 0.9060214779890253
+      }
+    },
+    "nofilter_baseline_exp1": {
+      "n_voxels": 560,
+      "loco_rho_n6_full": -0.061553156564936456,
+      "loco_rho_n4_matched": 0.005112162154517438,
+      "loco_d_vs_hc_n4": -1.4325280017297102,
+      "loro_acc": 0.7916666666666666,
+      "note": "sub-08 exp1; maskfunc recipe (recipe-matched to HC; voxel set 560 differs from exp2 858)"
+    },
+    "contrast_optimal_minus_window": {
+      "delta_loco_rho": 0.3682384623685261,
+      "delta_in_hc_n4_sd_units": 4.271982092691403,
+      "optimal_closer_to_hc": true,
+      "loo_run_separated": true,
+      "vs_nofilter": {
+        "nofilter_rho_n4": 0.005112162154517438,
+        "optimal_more_hc_like_than_nofilter": true,
+        "window_more_hc_like_than_nofilter": false,
+        "optimal_minus_nofilter": 0.0528683522186874,
+        "window_minus_nofilter": -0.3153701101498387
+      }
+    }
+  },
+  "V2": {
+    "roi": "V2",
+    "K": 6,
+    "hc_n": 7,
+    "hc_loco_rho_n4_mean": 0.16165882707011606,
+    "hc_loco_rho_n4_sd": 0.13496314767902878,
+    "hc_loco_rho_n4_values": [
+      0.0965,
+      0.2391,
+      0.2136,
+      0.2114,
+      0.2767,
+      -0.1178,
+      0.2122
+    ],
+    "hc_loco_rho_n6_mean": 0.14962293819685374,
+    "hc_loco_rho_n6_sd": 0.18769423328355958,
+    "hc_loro_acc_mean": 0.7053571428571429,
+    "hc_loro_acc_sd": 0.08195789504890032,
+    "conditions": {
+      "window": {
+        "n_voxels": 400,
+        "n_runs": 4,
+        "loco_rho_mean": -0.2297323618521937,
+        "loco_rho_per_color": [
+          -0.8477,
+          -0.5242,
+          0.671,
+          -0.0132,
+          0.5458,
+          -0.0877,
+          -0.7776,
+          -0.8043
+        ],
+        "loco_d_vs_hc_n4matched": -2.899985630545026,
+        "loco_rho_loo_runs": [
+          -0.2242,
+          -0.1206,
+          -0.1001,
+          -0.1255
+        ],
+        "loco_rho_loo_min": -0.2241967467047607,
+        "loco_rho_loo_max": -0.10008731484758981,
+        "loro_acc": 0.6875,
+        "rdm_cosine_to_hc": 0.8520836180980177
+      },
+      "optimal": {
+        "n_voxels": 400,
+        "n_runs": 4,
+        "loco_rho_mean": 0.1674076446658314,
+        "loco_rho_per_color": [
+          0.2479,
+          -0.4633,
+          -0.051,
+          0.7891,
+          0.78,
+          -0.1339,
+          -0.131,
+          0.3013
+        ],
+        "loco_d_vs_hc_n4matched": 0.042595461758103574,
+        "loco_rho_loo_runs": [
+          0.1528,
+          0.1988,
+          0.2506,
+          0.1501
+        ],
+        "loco_rho_loo_min": 0.1501122239352442,
+        "loco_rho_loo_max": 0.25064450388155807,
+        "loro_acc": 0.625,
+        "rdm_cosine_to_hc": 0.8248770249411631
+      }
+    },
+    "nofilter_baseline_exp1": {
+      "n_voxels": 400,
+      "loco_rho_n6_full": -0.24116422029697987,
+      "loco_rho_n4_matched": -0.21075823213937914,
+      "loco_d_vs_hc_n4": -2.759398143967289,
+      "loro_acc": 0.7916666666666666,
+      "note": "sub-08 exp1; maskfunc recipe (recipe-matched to HC; voxel set 560 differs from exp2 858)"
+    },
+    "contrast_optimal_minus_window": {
+      "delta_loco_rho": 0.3971400065180251,
+      "delta_in_hc_n4_sd_units": 2.9425810923031297,
+      "optimal_closer_to_hc": true,
+      "loo_run_separated": true,
+      "vs_nofilter": {
+        "nofilter_rho_n4": -0.21075823213937914,
+        "optimal_more_hc_like_than_nofilter": true,
+        "window_more_hc_like_than_nofilter": false,
+        "optimal_minus_nofilter": 0.3781658768052105,
+        "window_minus_nofilter": -0.018974129712814564
+      }
+    }
+  },
+  "V3": {
+    "roi": "V3",
+    "K": 6,
+    "hc_n": 7,
+    "hc_loco_rho_n4_mean": 0.053052193637943036,
+    "hc_loco_rho_n4_sd": 0.20017605993691998,
+    "hc_loco_rho_n4_values": [
+      0.1802,
+      0.1299,
+      -0.0141,
+      0.0567,
+      0.354,
+      -0.2812,
+      -0.0542
+    ],
+    "hc_loco_rho_n6_mean": 0.02307324093686703,
+    "hc_loco_rho_n6_sd": 0.24031593474261087,
+    "hc_loro_acc_mean": 0.7678571428571429,
+    "hc_loro_acc_sd": 0.1235029400074192,
+    "conditions": {
+      "window": {
+        "n_voxels": 114,
+        "n_runs": 4,
+        "loco_rho_mean": -0.3197899638267484,
+        "loco_rho_per_color": [
+          -0.8891,
+          -0.8459,
+          0.475,
+          -0.6748,
+          0.8649,
+          -0.0374,
+          -0.6481,
+          -0.8029
+        ],
+        "loco_d_vs_hc_n4matched": -1.8625711665130311,
+        "loco_rho_loo_runs": [
+          -0.3269,
+          -0.3375,
+          -0.288,
+          -0.2814
+        ],
+        "loco_rho_loo_min": -0.33754326747640195,
+        "loco_rho_loo_max": -0.28141205677671305,
+        "loro_acc": 0.78125,
+        "rdm_cosine_to_hc": 0.8347459789687884
+      },
+      "optimal": {
+        "n_voxels": 114,
+        "n_runs": 4,
+        "loco_rho_mean": 0.0454160133879076,
+        "loco_rho_per_color": [
+          -0.3362,
+          -0.6915,
+          -0.7176,
+          0.7901,
+          0.8141,
+          -0.0381,
+          0.0928,
+          0.4496
+        ],
+        "loco_d_vs_hc_n4matched": -0.03814732017625769,
+        "loco_rho_loo_runs": [
+          0.0525,
+          0.0447,
+          0.1356,
+          0.0747
+        ],
+        "loco_rho_loo_min": 0.04473829811189975,
+        "loco_rho_loo_max": 0.13564178098337853,
+        "loro_acc": 0.6875,
+        "rdm_cosine_to_hc": 0.7798685232096908
+      }
+    },
+    "nofilter_baseline_exp1": {
+      "n_voxels": 114,
+      "loco_rho_n6_full": 0.049361596683290834,
+      "loco_rho_n4_matched": 0.06623785261373578,
+      "loco_d_vs_hc_n4": 0.06587030926649196,
+      "loro_acc": 0.6666666666666666,
+      "note": "sub-08 exp1; maskfunc recipe (recipe-matched to HC; voxel set 560 differs from exp2 858)"
+    },
+    "contrast_optimal_minus_window": {
+      "delta_loco_rho": 0.365205977214656,
+      "delta_in_hc_n4_sd_units": 1.824423846336773,
+      "optimal_closer_to_hc": true,
+      "loo_run_separated": true,
+      "vs_nofilter": {
+        "nofilter_rho_n4": 0.06623785261373578,
+        "optimal_more_hc_like_than_nofilter": true,
+        "window_more_hc_like_than_nofilter": false,
+        "optimal_minus_nofilter": -0.020821839225828184,
+        "window_minus_nofilter": -0.3860278164404842
+      }
+    }
+  },
+  "V4": {
+    "roi": "V4",
+    "K": 6,
+    "hc_n": 6,
+    "hc_loco_rho_n4_mean": 0.20789970301206742,
+    "hc_loco_rho_n4_sd": 0.17869406589391207,
+    "hc_loco_rho_n4_values": [
+      0.0046,
+      0.4036,
+      0.403,
+      0.151,
+      0.0198,
+      0.2654
+    ],
+    "hc_loco_rho_n6_mean": 0.23164515891993595,
+    "hc_loco_rho_n6_sd": 0.16632022820907563,
+    "hc_loro_acc_mean": 0.7534722222222222,
+    "hc_loro_acc_sd": 0.0971974174706456,
+    "conditions": {
+      "window": {
+        "n_voxels": 70,
+        "n_runs": 4,
+        "loco_rho_mean": -0.38821069100812833,
+        "loco_rho_per_color": [
+          -0.94,
+          -0.6842,
+          0.6567,
+          -0.4782,
+          0.8003,
+          -0.769,
+          -0.8827,
+          -0.8087
+        ],
+        "loco_d_vs_hc_n4matched": -3.3359271951095306,
+        "loco_rho_loo_runs": [
+          -0.3798,
+          -0.3948,
+          -0.3866,
+          -0.391
+        ],
+        "loco_rho_loo_min": -0.3948205251101071,
+        "loco_rho_loo_max": -0.3797885495078328,
+        "loro_acc": 0.875,
+        "rdm_cosine_to_hc": 0.8127867131106469
+      },
+      "optimal": {
+        "n_voxels": 70,
+        "n_runs": 4,
+        "loco_rho_mean": 0.17886295791630277,
+        "loco_rho_per_color": [
+          0.4991,
+          0.0878,
+          -0.4213,
+          0.8575,
+          0.3841,
+          -0.3708,
+          0.1502,
+          0.2443
+        ],
+        "loco_d_vs_hc_n4matched": -0.1624941765721718,
+        "loco_rho_loo_runs": [
+          0.1931,
+          0.1335,
+          0.3367,
+          -0.0138
+        ],
+        "loco_rho_loo_min": -0.013829237174844328,
+        "loco_rho_loo_max": 0.33666883411622783,
+        "loro_acc": 0.5,
+        "rdm_cosine_to_hc": 0.812850402753122
+      }
+    },
+    "nofilter_baseline_exp1": {
+      "n_voxels": 70,
+      "loco_rho_n6_full": -0.27454897653735955,
+      "loco_rho_n4_matched": -0.27232845389474786,
+      "loco_d_vs_hc_n4": -2.6874320336519704,
+      "loro_acc": 0.7291666666666666,
+      "note": "sub-08 exp1; maskfunc recipe (recipe-matched to HC; voxel set 560 differs from exp2 858)"
+    },
+    "contrast_optimal_minus_window": {
+      "delta_loco_rho": 0.5670736489244311,
+      "delta_in_hc_n4_sd_units": 3.173433018537359,
+      "optimal_closer_to_hc": true,
+      "loo_run_separated": true,
+      "vs_nofilter": {
+        "nofilter_rho_n4": -0.27232845389474786,
+        "optimal_more_hc_like_than_nofilter": true,
+        "window_more_hc_like_than_nofilter": false,
+        "optimal_minus_nofilter": 0.4511914118110506,
+        "window_minus_nofilter": -0.11588223711338047
+      }
+    }
+  }
+}

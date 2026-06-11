@@ -5,7 +5,7 @@ Generated: 2026-05-11. All captions target eLife style.
 
 ## Figure 1 | Experimental paradigm and analysis pipeline
 
-**(A)** Stimulus set. Isoluminant chromatic stimuli were drawn from a DKL (Derrington–Krauskopf–Lennie) hue wheel at 8 equally-spaced angles (45° apart), spanning red, orange, yellow, green, cyan, blue, purple, and magenta. **(B)** Retinotopic regions of interest (ROIs). Four areas (V1, V2, V3, hV4) were delineated on each participant's cortical surface using standard retinotopic mapping procedures. **(C)** Analysis pipeline. Stage A (navy): raw fMRI responses were modeled with GLMsingle to obtain single-trial β amplitudes, aligned across sessions with Procrustes rotation, and projected into a group-shared color representation space using Shared Response Modeling (SRM; trained on healthy control participants only). Decoding stages (green): LORO and LOCO assessed discrimination and interpolation capacity, respectively. CVD characterization (coral): a 2-component model decomposed individual CVD distortions into a retinal component (β_s) and a cortical component (β_c), and the pre-image of the estimated distortion yielded a stimulus-space filter specific to each CVD subject. HC: healthy controls, n=7 (sub-01–07); deutan CVD: sub-08; protan CVD: sub-09.
+**(A)** Stimulus set. Isoluminant chromatic stimuli were drawn from a CIE L\*a\*b\* hue circle (L\* = 75, chroma 40 on the a\*–b\* plane) at 8 equally-spaced angles (45° apart), spanning red, orange, yellow, green, cyan, blue, purple, and magenta. **(B)** Retinotopic regions of interest (ROIs). Four areas (V1, V2, V3, hV4) were delineated on each participant's cortical surface using standard retinotopic mapping procedures. **(C)** Analysis pipeline. Stage A (navy): raw fMRI responses were modeled with GLMsingle to obtain single-trial β amplitudes, aligned across sessions with Procrustes rotation, and projected into a group-shared color representation space using Shared Response Modeling (SRM; trained on healthy control participants only). Decoding stages (green): LORO and LOCO assessed discrimination and interpolation capacity, respectively. CVD characterization (coral): a 2-component model decomposed individual CVD distortions into a retinal component (β_s) and a cortical component (β_c), and the pre-image of the estimated distortion yielded a stimulus-space filter specific to each CVD subject. HC: healthy controls, n=7 (sub-01–07); deutan CVD: sub-08; protan CVD: sub-09.
 
 ---
 
@@ -31,27 +31,27 @@ Generated: 2026-05-11. All captions target eLife style.
 
 ---
 
-## Figure 4 | Per-subject 2-component loss landscape at hV4
+## Figure 4 | Per-subject 2-component loss landscape
 
-Canonical V4 LOCO loss `L_fit(β_s, β_c) = 1.0·L_vuln + 0.5·L_rank + 0.2·L_rdm + 0.1·L_smooth` (Methods, Eq. eq:lfit) evaluated on the 26 × 51 = 1,326-cell grid (β_s ∈ [0°, 50°], β_c ∈ [−50°, +50°], step 2°). All four terms are computed at hV4 (V4 on disk); each term is normalised to [0, 1] before weighting.
+Per-participant production loss (a behavioral discrimination term γ plus a ΔRDM cortical-geometry term) evaluated on the (β_s, β_c) grid (β_s ∈ [0°, 50°], β_c ∈ [−50°, +50°], step 2°). The loss is selected per participant — sub-08: γ_OY + L_RDM at V2; sub-09: γ_all + L_RDM at V1 — and the leave-one-color-out (LOCO) decoding term is not part of the selected loss. Each term is normalised before combination.
 
-**Left.** Sub-08 (deutan, Stockman S-cone confusion axis 150°). White star: argmin (β̂_s, β̂_c) = (38°, −14°), ‖β̂‖ = 40.5°.
+**Left.** Sub-08 (deutan, Stockman confusion axis 150°). White star: argmin (β̂_s, β̂_c) = (6°, −42°), ‖β̂‖ = 42.4°.
 
-**Right.** Sub-09 (protan, Stockman axis 16°). White star: argmin (β̂_s, β̂_c) = (6°, −22°), ‖β̂‖ = 22.8°.
+**Right.** Sub-09 (protan, Stockman axis 16°). White star: argmin (β̂_s, β̂_c) = (2°, +24°), ‖β̂‖ = 24.1°.
 
-Colormap (`viridis_r`): low L_fit in yellow (good fit), high L_fit in dark purple (poor fit). Loss-term roles: L_vuln = per-colour MSE of simulated vs observed V4 LOCO vulnerability (primary fit); L_rank = Spearman rank-ordering tiebreaker; L_rdm = ΔRDM cosine geometric convergence at hV4; L_smooth = circular smoothness regulariser on the per-colour shift vector (Methods).
+Colormap (`viridis_r`): low loss in yellow (good fit), high loss in dark purple (poor fit). Loss-term roles: γ = behavioral discrimination-threshold term that drives the fit; L_RDM = ΔRDM cortical-geometry term at the participant's selected ROI (V2 for sub-08, V1 for sub-09; Methods).
 
-**Caveats and consistency anchors.** HC leave-one-out range under canonical L_fit (n=6, sub-01–06; sub-07 excluded for 16-voxel hV4): ‖β̂‖ ∈ [26.3°, 49.2°], mean 40.1°. Sub-09 (‖β̂‖ = 22.8°) falls below the HC minimum; sub-08 (‖β̂‖ = 40.5°) falls near the HC mean, so ‖β̂‖ alone does not separate sub-08 from the HC distribution — descriptive comparison, not a hypothesis test. Within-cohort label-permutation p-values for the per-subject argmin are not reported: they assess whether the loss landscape has a non-trivial minimum on a participant's vulnerability profile, not whether the inverted filter restores HC-equivalent perception. Quantitative filter validity is deferred to the Phase-3 2AFC behavioural arm. Sub-09 (single protan participant) results are exploratory single-case observations requiring independent replication. Both β̂_c values are negative; the inter-subject asymmetry resides in the S-cone-axis magnitude (β̂_s = 38° vs 6°). The per-subject R+C diagnostic decomposition (Appendix A) recovers cortical-dominant etiology for sub-08 (Δλ ≈ 2.5 nm, g = −2.25) and retinal-dominant etiology for sub-09 (Δλ ≈ 19.5 nm, g = −1.10).
+**Caveats and consistency anchors.** The HC leave-one-out ‖β̂‖ anchor is computed per participant under that participant's production loss (each of the n=7 HC participants refit as a pseudo-CVD case): ‖β̂‖ ∈ [30.5°, 58.1°], mean 49.1° under the sub-08 loss, and ‖β̂‖ ∈ [23.4°, 55.5°], mean 35.7° under the sub-09 loss. Both CVD estimates fall within their respective HC ranges (sub-08 ‖β̂‖ = 42.4°; sub-09 ‖β̂‖ = 24.1°), so ‖β̂‖ magnitude alone does not separate the CVD cases from the HC distribution — a descriptive anchor, not a hypothesis test. Within-cohort label-permutation p-values for the per-subject argmin are not reported: they assess whether the loss landscape has a non-trivial minimum on a participant's profile, not whether the inverted filter restores HC-equivalent perception. Quantitative filter validity is deferred to the Phase-3 behavioural arm. Sub-09 (single protan participant) results are exploratory single-case observations requiring independent replication. The between-subtype contrast rests on the sign of the dominant confusion-axis term (β̂_c = −42° for sub-08 versus +24° for sub-09); per-axis magnitudes are not separately identifiable and carry no retinal-versus-cortical etiological attribution.
 
 ---
 
 ## Figure 5 | Per-subject stimulus-space filter: 4-column rendering, side-by-side
 
-**Left block.** Sub-08 (deutan) at (β̂_s, β̂_c) = (38°, −14°), ‖β̂‖ = 40.5°. Per-hue filter shift (δθ°): red −12, orange −20, yellow −26, green −29, cyan −32, blue −10, purple +29, magenta +19; mean |δθ| = 22°.
+**Left block.** Sub-08 (deutan) at (β̂_s, β̂_c) = (6°, −42°), ‖β̂‖ = 42.4°. Per-hue filter shift (δθ°): red −38, orange −32, yellow +32, green +38, cyan +26, blue +9, purple −9, magenta −26; mean |δθ| = 26.3°.
 
-**Right block.** Sub-09 (protan) at (β̂_s, β̂_c) = (6°, −22°), ‖β̂‖ = 22.8°. Per-hue filter shift (δθ°): red −16, orange −11, yellow −7, green −2, cyan +2, blue +21, purple +2, magenta −21; mean |δθ| = 10°.
+**Right block.** Sub-09 (protan) at (β̂_s, β̂_c) = (2°, +24°), ‖β̂‖ = 24.1°. Per-hue filter shift (δθ°): red −19, orange −25, yellow −14, green +16, cyan +25, blue +18, purple +6, magenta −7; mean |δθ| = 16.2°.
 
-Within each block, eight rows correspond to the eight displayed DKL hues (c1 red 0° → c8 magenta 315°, 45° spacing). Columns (left → right):
+Within each block, eight rows correspond to the eight displayed CIE L\*a\*b\* hues (c1 red 0° → c8 magenta 315°, 45° spacing). Columns (left → right):
 
 1. **Original** — HC percept of the displayed stimulus.
 2. **CVD percept** — simulated CVD percept of the *original* stimulus under the per-subject 2-component model.
@@ -65,6 +65,22 @@ Rendering coordinate space: STIM_LAB CIELab (project convention, `scripts/stim_l
 ---
 
 # Revision log
+
+## 2026-06-11 — synced to v6 PCA closure (canonical argmins)
+
+| Item | Status |
+|---|---|
+| F4/F5 argmins: sub-08 (38°,−14°)→(6°,−42°), ‖β̂‖ 40.5°→42.4°; sub-09 (6°,−22°)→(2°,+24°), ‖β̂‖ 22.8°→24.1° | ✓ Fixed |
+| F4 loss: deprecated `L_fit`/`eq:lfit` (V4 LOCO 4-term weighted) → per-subject production loss (γ + L_RDM at V2/V1; LOCO not in selected loss) | ✓ Fixed |
+| F4 HC LOO anchor: single-loss [26.3°,49.2°] mean 40.1° (n=6) → per-subject sub-08 [30.5°,58.1°] mean 49.1°, sub-09 [23.4°,55.5°] mean 35.7° (n=7) | ✓ Fixed |
+| F4 "sub-09 below HC minimum" claim removed — 24.1° now within HC range [23.4°,55.5°] | ✓ Fixed |
+| F4 "both β̂_c negative" corrected → β̂_c = −42° (sub-08) vs +24° (sub-09); contrast is sign, not S-cone magnitude | ✓ Fixed |
+| F4 R+C etiology claim (cortical-/retinal-dominant; Δλ/g values) removed — appendix disclaims attribution; g sign reverses across criteria | ✓ Fixed (#2) |
+| F5 per-hue δθ vectors regenerated from exp2_preimage canonical pre-image (sub-08 \|δθ\|=26.3°, sub-09 \|δθ\|=16.2°) | ✓ Fixed |
+
+| F1/F5 stimulus space "DKL (Derrington–Krauskopf–Lennie)" → CIE L\*a\*b\* (L\*=75, chroma 40 on a\*–b\* plane) per CLAUDE.md | ✓ Fixed |
+
+Note: this doc's "Figure 4" loss landscape = compiled `fig6_landscape` (renumbered); compiled captions in `results_v4.tex` already current.
 
 ## 2026-05-11 — issues fixed
 

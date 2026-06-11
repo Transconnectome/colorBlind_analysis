@@ -20,25 +20,13 @@ We evaluated all subjects' data suitable for downstream analysis, though sub-07 
 
 % ========== Section 3: Voxel Counts ==========
 
-\subsection*{\textbf{S3. Voxel Counts Range}}
-
-Voxel counts after ROI definition and quality filtering are reported in the main Methods section.
-Detailed per-subject counts are available in the online repository.
-
-
-% ========== Section 4: Consistency Tests ==========
-
-\subsection*{\textbf{S4. Consistency Test: PCA and Procrustes \todo{(TBA)}}}
-
-Additional validation analyzes comparing SRM with PCA-based dimensionality reduction and norm-constrained Procrustes alignment will be reported following completion of the full dataset.
 
 
 % ========== Section 5: Mean Activation ==========
 
 \subsection*{\textbf{S5. Mean Activation Analysis}}
 
-We conducted mean voxel response amplitudes analysis to identify whether SRM-based differences rely on the activation.
-We checked mean amplitudes across all colors and for each color.
+To verify that the shared-space geometric differences are not a signal-quality confound, we compared activation-level metrics between groups before SRM alignment. Mean activation magnitude (mean $|\beta|$), signal-to-noise ratio, color modulation depth, run-to-run reliability, and spatial variance did not differ between HC and CVD across V1, V2, V3, and hV4 (Welch's $t$-tests, all $p > 0.09$), and the two CVD cases fell within the HC range on every metric (Crawford--Howell, all $p > 0.09$). Voxel-level color selectivity was strong in both groups (one-way ANOVA across voxels, $F > 4$, $p < 0.001$ in V1--V3). Critically, none of the activation metrics correlated with SRM disparity across participants (Pearson $r$, 20 tests, all $p > 0.13$). The HC--CVD difference is therefore one of representational pattern, not signal amplitude: the cortical color response is equally strong in CVD but geometrically reorganized.
 
 
 % ========== Section 6: Statistical Analysis ==========
@@ -188,7 +176,7 @@ These three collapsed hues fall within Sub-09's LOCO vulnerability cluster (c5/c
 
 \begin{table}[ht]
   \caption{Distortion-model fits at hV4 for both CVD participants.
-  The 2-component model is listed at its adopted fit, selected by held-out composite test-loss ($\overline{L}_{\rm test}$, lower is better) under the $L_\text{fit}$ criterion (main text, Section~\ref{sec:results:twocomp}).
+  The 2-component model is listed at its adopted fit, selected by held-out composite test-loss ($\overline{L}_{\rm test}$, lower is better; main text, Section~\ref{sec:results:twocomp}).
   The retinal-family baselines were fit only under the historical LOCO-$\rho$ argmax criterion (Section~A.1 of Appendix~A; $\rho$ is Spearman correlation between simulated and observed per-color vulnerability), reported for reference only.}
   \label{tab:S1}
   \centering
@@ -204,9 +192,8 @@ These three collapsed hues fall within Sub-09's LOCO vulnerability cluster (c5/c
 \subsection*{\textbf{S17. HC leave-one-out magnitude-anchor distribution}}
 \label{app:hc_perm}
 
-Each of $n = 6$ effective HC participants was refit under the canonical V4 LOCO loss $L_\text{fit}$ (Equation~\ref{eq:lfit}) with the remaining HC pool as reference, yielding an HC leave-one-out distribution of fitted-parameter magnitudes $\|\hat\beta\|$ ranging $26.3^\circ$ to $49.2^\circ$ (mean $40.1^\circ$).
-Sub-07 was excluded because its hV4 ROI contained only 16 voxels (versus 67--70 for the remaining HC), which precluded a stable forward-encoder LOCO target vector at this ROI; the exclusion arises in filter-fit space and is unrelated to the SRM dimensionality choice.
-This range is reported as a magnitude anchor for the CVD estimates (sub-08 $\|\hat\beta\| = 40.5^\circ$, falling near the HC mean; sub-09 $\|\hat\beta\| = 22.8^\circ$, below the HC minimum), not as a hypothesis test of CVD-versus-HC specificity.
+Because the production loss differs between participants (sub-08: $\gamma_{\rm OY} + L_{\rm RDM}^{(V2)}$; sub-09: $\gamma_{\rm all} + L_{\rm RDM}^{(V1)}$), the HC leave-one-out anchor was computed per participant under that participant's loss. Each of the $n = 7$ HC participants was refit as a pseudo-CVD case with the remaining HC pool as reference, yielding a distribution of fitted-parameter magnitudes $\|\hat\beta\|$: $30.5^\circ$ to $58.1^\circ$ (mean $49.1^\circ$) under the sub-08 loss, and $23.4^\circ$ to $55.5^\circ$ (mean $35.7^\circ$) under the sub-09 loss.
+Both CVD estimates fall within their respective HC ranges (sub-08 $\|\hat\beta\| = 42.4^\circ$; sub-09 $\|\hat\beta\| = 24.1^\circ$), so parameter magnitude alone does not separate the CVD cases from HC; the distribution is reported as a descriptive magnitude anchor, not as a hypothesis test of CVD-versus-HC specificity.
 
 % ========== Section 18: Effect Sizes ==========
 

@@ -8,6 +8,11 @@ distribution, no inferential p — permutation null deprecated for grand-mean bi
 4 runs/condition (Window = runs 1,4,5,8; Optimal = runs 2,3,6,7; ABBA WOOWWOOW).
 V1 primary, V2/V3 supporting, V4(hV4) descriptive-only.
 
+## Figure
+`figures/exp2_neural_hc_likeness_{native,matched}.png/.pdf` (`scripts/generate_exp2_fig.py`, cloned from
+paper `generate_fig2.py` style). 2×2: A=LOCO ρ, B=FE-6 LORO (functional, ↑HC-like); C=SRM disparity
+(↓HC-like), D=SRM-space RDM-ρ (geometry, ↑HC-like). HC reference bar + No-filter/Window/Optimal markers.
+
 ## Pipeline (scripts/)
 1. `exp2_C010_conditions.py` — canonical C010 recipe (FIR→HRF GLM, per-run amplitudes),
    8 runs → condition split → **per-condition Procrustes** (each condition aligned to

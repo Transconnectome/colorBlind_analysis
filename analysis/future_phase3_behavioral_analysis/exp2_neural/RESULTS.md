@@ -1,5 +1,15 @@
 # exp2 neural HC-likeness — sub-08 (descriptive)
 
+> **Decoder rule (READ FIRST)**: see [`analysis/decoder-comparison.md`](../../decoder-comparison.md).
+> Color/hue **decoding accuracy** (LOCO/LORO adjacent/exact acc) uses the **B&H α=0
+> pseudoinverse**; **voxel-pattern prediction ρ** (forward-tuning) uses **ridge-GCV**.
+> ✅ FIXED (2026-06-13, verified): `loco_accuracy_within` now uses α=0 via the shared
+> `loco_canonical.py`; `loco_rho_within` keeps ridge-GCV (numerically unchanged, diff=0).
+> HC hV4 adjacent restored to **0.465 (n6)** above chance (was ~0.378 under the ridge-GCV bug).
+> ⚠ Numbers below that pre-date 2026-06-13 are the **old ridge-GCV** accuracy — superseded by
+> the α=0 re-run (`exp2_hc_likeness_sub-08_{native,matched}.json`); see decoder-comparison.md
+> for the corrected filter readout (Optimal≥Window 4/4 on decode-acc; Optimal>no-filter only 2/4).
+
 **Question**: does the personalized **Optimal** filter make CVD voxel response more
 HC-like than (a) the macOS **Window** filter and (b) **no filter**?
 

@@ -37,6 +37,7 @@ Both CVD participants exceeded the 0.125 exact-accuracy chance level at every RO
 
 We next tested whether continuous hue interpolation fails, which indicated structural impairment in cortical representation, using leave-one-color-out (LOCO) decoding of the forward encoding model. Among the four retinotopic ROIs, only hV4 supported above-chance hue interpolation in HC (adjacent accuracy $0.47 \pm 0.05$, mean $\pm$ SEM over $n = 6$ HC, sub-07 excluded at hV4 for insufficient voxels; $p = 0.044$ under $8! = 40{,}320$ exact label permutations). V1--V3 did not exceed chance despite preserving cross-run discrimination. This is consistent with hV4 as the primary interpolation gate, replicating \citeA{brouwer2009}.
 
+% [TODO: revise based on feedback] — mark the blue per-hue result (p=0.042) as one-tailed, uncorrected and exploratory (per-hue Crawford-Howell, not FDR-corrected). See PSYCH_THESIS/Results/results_v4.tex.
 Both CVD participants fell at or below the adjacent-accuracy chance level at hV4 (Figure~\ref{fig:loco}B). Sub-08 reached adjacent accuracy $0.25$ (Crawford \& Howell $t = -1.58$, $p = 0.082$, n.s., $d_{cc} = -1.71$). Sub-09 reached $0.13$ ($t = -2.48$, $p = 0.024$, $d_{cc} = -2.68$). The impairment was not uniform across hues. Both participants showed near-zero adjacent accuracy at hV4 for the S-cone intermediate colors blue, purple, and magenta (adjacent accuracy $= 0$ for both participants at all three hues; Figure~\ref{fig:loco}C). Per-hue Crawford \& Howell tests (one-tailed) reached significance only for blue (both participants $d = 2.20$, $p = 0.042$); purple ($d = 1.02$, $p = 0.19$) and magenta ($d = 1.89$, $p = 0.064$) did not survive the single-case test against the $n = 6$ HC distribution. These per-hue accuracies form each participant's hue vulnerability profile $\mathbf{v} \in [0,1]^8$.
 
 % ── Figure 3 ─────────────────────────────────────────────────────────────────
@@ -173,6 +174,7 @@ The two fits differ in the magnitude and direction of the dominant confusion-axi
   Right block: sub-09 (protan), $(\hat\beta_s, \hat\beta_c) = (2^\circ, +24^\circ)$.
   The filtered stimulus is the exact numerical pre-image of the fitted 2-component transform; the per-hue correction $\delta\theta_{\rm filter} = \theta_{\rm pre} - \theta$ is annotated beneath each \emph{Filtered} swatch (8/8 pre-images exact, residual $< 0.01^\circ$ for both subjects).
   Rendering coordinate space: STIM\_LAB CIELab (project convention).
+  % [TODO: revise based on feedback] — (1) stale: neural + JND + 8AFC RSVP validation IS done (2nd deutan session, see fig:filter_eval); only separate 2AFC fine-discrimination remains. (2) "Phase-3" is internal jargon → reword to "future work". See PSYCH_THESIS/Results/results_v4.tex.
   Quantitative behavioural validation of filter efficacy is deferred to the Phase-3 2AFC arm and will be added once data are collected.}
   \label{fig:filter}
 \end{figure*}

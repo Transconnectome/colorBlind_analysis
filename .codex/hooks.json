@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "BashTool",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo PreToolUse BashTool"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "BashTool",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo Done"
+          }
+        ]
+      }
+    ]
+  }
+}

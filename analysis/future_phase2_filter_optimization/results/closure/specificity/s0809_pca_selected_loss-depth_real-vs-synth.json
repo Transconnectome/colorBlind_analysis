@@ -1,0 +1,100 @@
+{
+  "meta": {
+    "bs_grid_one_sided": [
+      0.0,
+      50.0,
+      26
+    ],
+    "n_synth_avg": 20,
+    "forward_basis_corr": {
+      "deutan": 0.5,
+      "protan": 0.276
+    }
+  },
+  "candidates": {
+    "S08-stable": {
+      "production": [
+        38.0,
+        -10.0
+      ],
+      "real_analysis": {
+        "argmin_bs": 38.0,
+        "argmin_bc": -4.0,
+        "loss_at_argmin": -0.8887203928431806,
+        "loss_at_zero": 0.536085203510497,
+        "bs_curvature_at_argmin": 0.21976566871818232,
+        "bc_curvature_at_argmin": 0.2197656663561721,
+        "aniso_curvature": 0.9999999892521418,
+        "boundary": false
+      },
+      "synth_analysis": {
+        "argmin_bs": 42.0,
+        "argmin_bc": 26.0,
+        "loss_at_argmin": -0.43212093920625605,
+        "loss_at_zero": 0.19014742538614354,
+        "bs_curvature_at_argmin": 0.0456864344510627,
+        "bc_curvature_at_argmin": 0.10116660949909911,
+        "aniso_curvature": 2.21436867890105,
+        "boundary": false
+      },
+      "d_argmin_real_vs_synth": 30.265491900843113,
+      "surface_cosine_similarity": 0.6818178100947591
+    },
+    "S08-robust": {
+      "production": [
+        6.0,
+        -42.0
+      ],
+      "real_analysis": {
+        "argmin_bs": 6.0,
+        "argmin_bc": -42.0,
+        "loss_at_argmin": -2.018982884242111,
+        "loss_at_zero": -0.46247567441393855,
+        "bs_curvature_at_argmin": 0.0018718840531631864,
+        "bc_curvature_at_argmin": 0.012902449170949293,
+        "aniso_curvature": 6.892760878616496,
+        "boundary": false
+      },
+      "synth_analysis": {
+        "argmin_bs": 44.0,
+        "argmin_bc": -30.0,
+        "loss_at_argmin": -0.3653227094068359,
+        "loss_at_zero": 0.2268826341759981,
+        "bs_curvature_at_argmin": 6.703947239693198e-05,
+        "bc_curvature_at_argmin": 0.000452125457627392,
+        "aniso_curvature": 6.744167897838099,
+        "boundary": false
+      },
+      "d_argmin_real_vs_synth": 39.84971769034255,
+      "surface_cosine_similarity": -0.2787873139789749
+    },
+    "S09-primary": {
+      "production": [
+        2.0,
+        24.0
+      ],
+      "real_analysis": {
+        "argmin_bs": 2.0,
+        "argmin_bc": 24.0,
+        "loss_at_argmin": -1.3226609764179553,
+        "loss_at_zero": 0.4813513228628354,
+        "bs_curvature_at_argmin": 0.23554270580432712,
+        "bc_curvature_at_argmin": 0.6865477177766011,
+        "aniso_curvature": 2.914748369864352,
+        "boundary": false
+      },
+      "synth_analysis": {
+        "argmin_bs": 20.0,
+        "argmin_bc": 10.0,
+        "loss_at_argmin": -0.34096910682931925,
+        "loss_at_zero": 0.32335279176703613,
+        "bs_curvature_at_argmin": 0.16608707085498273,
+        "bc_curvature_at_argmin": 0.16608694622684236,
+        "aniso_curvature": 0.999999249621661,
+        "boundary": false
+      },
+      "d_argmin_real_vs_synth": 22.80350850198276,
+      "surface_cosine_similarity": 0.7680361971992206
+    }
+  }
+}

@@ -159,9 +159,9 @@ jupyter nbconvert --to notebook --execute 01_distortion_quantification.ipynb 02_
 ```
 
 **Data availability.** The analysis code and the per-number *Source & code map* in each notebook are in
-this repository, as are the Phase-1 and SRM result JSONs that Notebook 01 reads. The Phase-2 fit outputs
-the notebooks consume — both the large per-resample dumps
-(`results/s10_inclusion/s10b_v6_*_results_sub-0X.json`, ≈125 MB) behind the modal-parameter and
-2-Component cells and the smaller LOO, held-out-loss, pre-image, and null-model JSONs — are kept out of
-version control and are available from the authors on request; every value they produce is also listed,
-already regenerated, in the tables above.
+this repository, as are the Phase-1/SRM result JSONs that Notebook 01 reads and the smaller Phase-2
+outputs that Notebook 02 reads (the LOO, held-out-loss, pre-image, loss-depth, origin-recovery, and
+null-model-verdict JSONs). The only inputs kept out of version control are the large per-resample fit
+dumps (`results/s10_inclusion/s10b_v6_*_results_sub-0X.json`, ≈125 MB) behind the modal-parameter and
+2-Component cells; these are available from the authors on request, and every value they produce is also
+listed, already regenerated, in the tables above.

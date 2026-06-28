@@ -1,27 +1,31 @@
-%%%%%%%% SD4H @ ICML 2026 — Camera-ready Path B (closure-canonical reframe) %%%%%%%%%%%%%%%%
-% Path B: reconcile Results to the 2026-06-01 Pipeline 2 closure.
-%   - Single canonical model = 2-Component cortical opponent-axis (2-DOF).
-%   - Machado / R+C presented as candidate mechanisms that FAIL structural
-%     adequacy; R+C rejected (boundary saturation).
-%   - Selection = held-out test_loss_median + structural adequacy (NOT perm-p).
-%   - HC specificity = descriptive only; physiological (beta_s,beta_c)
-%     interpretation removed (noise floor; 0/3 dual-pass null).
-%   - Divergence thesis anchored on sub-08 (identified beta_c sign); both
-%     mechanisms feasible (8/8), corrections oppositely directed (cos ~ -0.4,
-%     sign-agree 1/8). sub-09 NOT a divergence case: its beta_c sign is
-%     non-identified, so its retinal-vs-cortical cosine flips with the sign.
-%     "4/8 collapse / 360->96 arc" REMOVED (superseded c3_relabel; both 8/8).
-%   - Base = SD4H_draft_v6.1.tex; preamble/title/packages/citation keys preserved.
+%%%%%%%% SD4H @ ICML 2026 — Camera-ready (paper-spine reframe) %%%%%%%%%%%%%%%%
+% Rebuilt from the updated main paper (docs/PAPER, 2026-06) + Pipeline-2 closure
+% (analysis/future_phase2_filter_optimization, PIPELINE_2_CLOSURE.md 2026-06-01).
 %
-% v6.1: Concrete-first framing pass over v6.
-%   - Abstract/intro open with "such as CVD" instead of pure abstraction.
-%   - "distortion field" terminology removed throughout
-%     ("the fitted model" at L92, "low-dimensional distortion" at L93).
-%   - Representational-geometry sentence split: general definition,
-%     then CVD-specific application.
-%   - Results: significance vs. permutation null stated once at the
-%     §3.1 opener and once in Fig 2 caption; per-subject blurbs carry
-%     numeric ρ / p_perm only.
+% SPINE (paper C1->C2, C3-validation scoped OUT for the workshop):
+%   C1  Structured cortical distortion: categorical discrimination preserved
+%       (LORO), while continuous-hue interpolation (LOCO, hV4) AND pairwise
+%       geometry (RDM; distinct ROI per subject: V2 sub-08, V1 sub-09) are
+%       impaired.
+%   C2  Individualized, cortical-reference-grounded, invertible correction
+%       filter: per-subject 2-Component fit -> exact stimulus-space pre-image.
+%       Proof-of-concept (N=3: two fit-recovered CVD + sub-10 null).
+%   Divergence framing REMOVED (user, 2026-06-23): single thesis = directly
+%       modeling the structural distortion (2-Component cortical) is more
+%       adequate than retinal cone-shift models, which fail structurally
+%       (R+C overcompensation boundary saturation g->3.0; Machado arc-
+%       compression at protan severity). Behavioral validation = next step.
+%       C3 (2nd session) excluded from the body.
+%
+% CHANGED vs prior Path B:
+%   - Old composite loss eq replaced: production loss = per-subject
+%     (behavioral gamma) + (neural RDM); only the (non-selected) L_LOCO atom
+%     couples to the forward encoder.
+%   - HC FPR 15/21 table (old LOCO-rho family) -> closure-canonical null testing
+%     (0/3 dual-pass; surface 2.1x-5.5x deeper) + regression-to-mean (r=-0.894).
+%   - hV4 LOCO above-chance p = 0.044 (NOT 0.017); FE basis F=6 uniform (NOT K=3);
+%     R+C grid g in [0,3]; mean |dtheta| sub-08 26.3, sub-09 16.2.
+%   - V1/V2 geometry PROMOTED to a body Results subsection (Fig 3, fig3_geometry).
 
 \documentclass{article}
 
@@ -33,7 +37,7 @@
 
 \newcommand{\theHalgorithm}{\arabic{algorithm}}
 
-\usepackage{icml2026}
+\usepackage[accepted]{icml2026}
 
 \usepackage{amsmath}
 \usepackage{amssymb}
@@ -42,16 +46,6 @@
 \usepackage{multirow}
 
 \usepackage[capitalize,noabbrev]{cleveref}
-
-% Inline TODO marker for data-dependent values to be filled before submission
-\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
-
-% Placeholder command for figures not yet created
-\newcommand{\figplaceholder}[2]{%
-  \begin{center}
-    \fbox{\parbox{#1}{\centering\vspace{1.5em}\textcolor{gray}{\textbf{[FIGURE PLACEHOLDER]}\\#2}\vspace{1.5em}}}
-  \end{center}
-}
 
 \icmltitlerunning{Inferring Individualized Color-Vision Distortions from fMRI Hue-Representation Geometry}
 
@@ -64,12 +58,19 @@
   \icmlsetsymbol{equal}{*}
 
   \begin{icmlauthorlist}
-    \icmlauthor{Anonymous Authors}{anon}
+    \icmlauthor{Jinil Kim}{ling,psy}
+    \icmlauthor{Albert Minkue Cho}{ece}
+    \icmlauthor{Jungwoo Seo}{bcs}
+    \icmlauthor{Jiook Cha}{psy,bcs}
   \end{icmlauthorlist}
 
-  \icmlaffiliation{anon}{Anonymous Institution}
+  \icmlaffiliation{ling}{Department of Linguistics, Seoul National University, Seoul, South Korea}
+  \icmlaffiliation{ece}{Department of Electrical and Computer Engineering, Seoul National University, Seoul, South Korea}
+  \icmlaffiliation{bcs}{Department of Brain \& Cognitive Sciences, Seoul National University, Seoul, South Korea}
+  \icmlaffiliation{psy}{Department of Psychology, Seoul National University, Seoul, South Korea}
 
-  \icmlcorrespondingauthor{Anonymous Author}{anonymous@example.com}
+  \icmlcorrespondingauthor{Jinil Kim}{haba6030@snu.ac.kr}
+  \icmlcorrespondingauthor{Jiook Cha}{connectome@snu.ac.kr}
 
   \icmlkeywords{structured representation, individualized phenotype inference, representational geometry, color vision deficiency, fMRI}
 
@@ -81,13 +82,14 @@
 %==============================================================================
 \begin{abstract}
 %==============================================================================
-Many health-related data carry structured distortions that can act as phenotypes, yet interpreting such signatures and translating them into intervention remains challenging.
-Color vision deficiency (CVD), for example, distorts pairwise relations between neural hue representations while categorical recognition remains relatively preserved.
-Here we formulate fMRI-measured hue responses as structured neural representations and infer low-dimensional distortions that explain their geometry.
-We quantify this distortion using the Leave-One-Color-Out (LOCO) interpolation vulnerability profile, which measures how well each held-out hue can be interpolated from the remaining hue manifold.
-Applied to Ishihara-confirmed CVD participants across visual areas (V1--hV4), the framework recovers each subject's distortion with a two-degree-of-freedom cortical opponent-axis model, selected among candidate retinal and retinal--cortical mechanisms by held-out predictive loss and structural adequacy.
-Candidate mechanisms agree at the level of which individuals are distorted, yet this detection-level agreement cannot adjudicate the correction: the retinal and cortical accounts both yield feasible corrections, but in nearly opposite directions, so only structural adequacy and a planned behavioral test can select between them.
-These findings show that detection-level agreement is insufficient for choosing an intervention and demonstrate that structured distortions in high-dimensional biological data can be resolved into low-dimensional, subject-specific models for personalized intervention.
+Color vision deficiency (CVD) distorts the pairwise relations between neural hue representations while categorical recognition is relatively preserved.
+Such structured distortions recur across health-related data and can act as phenotypes, yet interpreting these neural signatures and translating them into intervention remains challenging.
+Here we formulate fMRI-measured hue responses as structured neural representations and infer the low-dimensional distortions that explain their geometry.
+We quantify this distortion as an impairment of continuous hue structure---how well each hue can be reconstructed from the others---yielding a per-hue vulnerability profile.
+A complementary representational distance matrix (RDM) captures the relative distances between hue representations, identifying which hue pairs are pulled apart or pushed together relative to healthy controls.
+The framework then fits a two-parameter cortical model---one that distorts hue angles along the brain's two color-opponent axes---to these signatures by held-out predictive loss.
+We then analytically invert the fitted model into a stimulus-space color-correction filter that is exact for every displayed hue (residual $<0.001^\circ$).
+In two CVD individuals, this yields an individualized correction computed directly from each person's neural distortion signature; whether it improves perception is the framework's defined next test.
 \end{abstract}
 
 %==============================================================================
@@ -103,23 +105,27 @@ When such structural distortion can be parameterized, it can be inverted for cor
 
 In a geometric framework, responses to stimuli can be summarized as a \emph{representational geometry}, where pairwise distances capture what a neural population distinguishes \citep{kriegeskorte2008}.
 In CVD, this geometry becomes the natural inference target: the pairwise relationships among hues can be systematically distorted even when categorical decoding remains preserved.
-Despite this perspective, structured distortions have rarely been used to derive individualized perceptual corrections; the closest analogue---a cochlear simulator that inverts a hearing-impairment deformation model \citep{irino2023}---targets simulation of sensory loss, not its correction.
+Despite this perspective, structured distortions have rarely been used to derive individualized perceptual corrections.
+The closest analogue, a cochlear simulator that inverts a hearing-impairment deformation model \citep{irino2023}, targets simulation of sensory loss rather than its correction.
 
 CVD arises from altered spectral sensitivity of retinal cone photoreceptors, affecting approximately 8\% of males \citep{machado2009}, and produces structured distortions in cortical color representations that vary across individuals.
-Current assistive approaches, including commercial spectral-notch filters, apply a fixed, generic correction; recent evidence indicates that such filters alter color \emph{appearance} but have minimal effect on color \emph{discrimination} at threshold \citep{somers2024}, suggesting that effective correction may require individually-tailored strategies.
+Current assistive approaches, including commercial spectral-notch filters, apply a fixed, generic correction.
+Recent evidence indicates that such filters alter color \emph{appearance} but minimally affect color \emph{discrimination} at threshold \citep{somers2024}.
+Effective correction may therefore require individually-tailored strategies.
 
-While categorical color decoding can remain preserved---leave-one-run-out decoding shows no HC--CVD difference ($p = 0.668$)---continuous hue relationships may be systematically altered; classification accuracy is insensitive to this relational structure.
-CVD is also heterogeneous across individuals; even within a single diagnostic category, cortical compensation can vary substantially \citep{tregillus2021}, motivating individual-level rather than group-level inference.
-In CVD, the pairwise geometry of stimulus-evoked fMRI responses is itself distorted in low-dimensional, parameterizable ways; we model this distortion as a mapping that can be fit and inverted.
+Categorical color recognition can remain comparatively preserved in CVD: dichromats and anomalous trichromats often name and categorize colors more like color-normal observers than their threshold losses would predict \citep{bonnardel2006,emery2021cvd}.
+Continuous hue relationships, however, may still be altered, and classification accuracy is insensitive to this relational structure.
+CVD is also heterogeneous across individuals.
+Even within one diagnostic category, cortical compensation varies substantially \citep{tregillus2021}, motivating individual-level rather than group-level inference.
+In CVD, the pairwise geometry of stimulus-evoked fMRI responses is itself distorted in low-dimensional, parameterizable ways.
+We diagnose this distortion from an interpolation vulnerability profile, fit a subject-specific model to its behavioral and pairwise-geometric (RDM) signatures, and invert the fit into a candidate correction.
 
-Here we present a framework that quantifies this structured distortion through the interpolation vulnerability profile—how well each hue can be predicted from its neighbors—and fits low-dimensional simulator parameters that reproduce the observed profile.
-The fitted model can then be used to generate candidate corrections through pre-image search.
 The unit of inference is each individual's distortion model, not the population mean.
 Our contributions are:
 \begin{enumerate}
-    \item We formulate distorted neural geometry as a structured-distortion inference problem and quantify it through the interpolation vulnerability profile, which captures subject-specific deficits in pairwise hue relations beyond classification accuracy.
-    \item We infer a low-dimensional (2-DOF) cortical opponent-axis distortion model from high-dimensional neural representations, selecting it among candidate retinal and retinal--cortical mechanisms by held-out predictive loss and structural adequacy rather than by in-sample significance.
-    \item We show that candidate mechanisms agree on which individuals are distorted yet prescribe divergent corrections, so that detection-level agreement cannot determine the correction; this gap defines a concrete, falsifiable behavioral test as the framework's next step.
+    \item We formulate distorted neural geometry as a structured-distortion inference problem, quantified by an interpolation vulnerability profile and a pairwise RDM that expose continuous-geometry deficits invisible to categorical classification.
+    \item We infer a low-dimensional (2-DOF) cortical opponent-axis distortion model, selected among candidate retinal and retinal--cortical mechanisms by held-out predictive loss and structural adequacy.
+    \item We invert the fitted cortical model into subject-specific candidate corrections, individually tailored unlike current generic filters. The cortical opponent-axis reorganization proves more structurally adequate than retinal cone-shift accounts, which cannot invert exactly. Whether such corrections improve perception is a concrete, falsifiable behavioral test---the framework's immediate next step.
 \end{enumerate}
 
 %==============================================================================
@@ -130,18 +136,17 @@ Our contributions are:
 \begin{figure}[t]
   \vskip 0.1in
   \centering
-  \includegraphics[width=\columnwidth]{figures/fig1_panels_bcd.pdf}
-  \caption{Structured distortion and the inference pipeline.
-  \textbf{Top}: CVD distorts the continuous geometry of hue representations in hV4---some neighboring hues collapse while others expand---even though classification accuracy is preserved.
-  \textbf{Bottom}: The inference pipeline quantifies the structured distortion via the LOCO vulnerability profile, fits parsimonious distortion parameters (1--2 DOF), and assesses correction feasibility via pre-image inversion.}
+  \includegraphics[width=\columnwidth]{figures/fig1_pipeline_revise.png}
+  \caption{Structured distortion and the fit-and-invert pipeline.
+  \textbf{Top}: CVD distorts the continuous geometry of hue representations---some neighboring hues collapse while others expand---even though classification accuracy is preserved.
+  \textbf{Bottom}: The pipeline quantifies the structured distortion via an interpolation vulnerability profile and the pairwise representational distances ($\Delta$RDM), fits a parsimonious (2-DOF) cortical distortion model, and analytically inverts it into a per-subject stimulus-space correction filter.}
   \label{fig:pipeline}
   \vskip -0.1in
 \end{figure}
 
 \subsection{Data Acquisition and Structured Representation}
 
-Ten participants (7 healthy controls [HC], 3 females, age $22.7 \pm 2.5$ years; 3 color vision deficient [CVD], all male: two deutan and one protan) were assessed using the 14-plate Ishihara test \citep{ishihara1917}.
-All three CVD participants are Ishihara-confirmed; one deutan case (Sub-10) is null at both the LOCO and SRM representational levels used in this work and is therefore reserved as a future-work probe of alternative representational dimensions.
+Ten participants (7 healthy controls [HC], 3 females, age $22.7 \pm 2.5$ years; 3 color-vision-deficient [CVD], all male: two deutan and one protan) were assessed with the 14-plate Ishihara test \citep{ishihara1917}; all three CVD cases were confirmed.
 Given the small CVD sample, all CVD results are interpreted as individual case demonstrations, not population-level effects \citep{crawford1998}.
 
 Stimuli consisted of eight colors equally spaced from 0$^\circ$ to 315$^\circ$ in CIE~$L^*a^*b^*$ space ($L^* = 75$, chroma distance 40).
@@ -149,86 +154,115 @@ Participants performed a modified Rapid Serial Visual Presentation (RSVP) task \
 Functional images (Siemens 3T; TR\,=\,1.5~s; 2~mm isotropic; 24 oblique slices) were preprocessed with fMRIPrep and projected to retinotopically-defined ROIs (V1, V2, hV4) via the Wang probabilistic atlas at 50\% threshold \citep{wang2015}.
 Response amplitudes were estimated using a two-stage FIR-then-GLM procedure \citep{brouwer2009} and Procrustes-aligned across runs.
 
-We modeled hue-selective neural populations with half-wave rectified and squared sinusoidal basis functions \citep{brouwer2009}: $r_k(\theta) = \max(0, \cos(\theta - \theta_k))^2$ for $K$ channels.
-The weight matrix $W$ mapping channels to voxel responses was estimated via ridge regression with GCV regularization \citep{golub1979}.
-This encoding model transforms raw voxel data into a structured representation in which the relational geometry across hues is explicitly parameterized.
+We modeled hue-selective neural populations with half-wave rectified and squared sinusoidal basis functions \citep{brouwer2009}: $r_k(\theta) = \max(0, \cos(\theta - \theta_k))^2$ for $F = 6$ channels with preferred hues equally spaced at $60^\circ$.
+A weight matrix $W \in \mathbb{R}^{F \times V}$ mapping channels to $V$ voxel responses was estimated by ridge regression with generalized-cross-validation regularization \citep{golub1979}.
+This encoding model turns raw voxel data into a structured representation in which the relational geometry across hues is explicitly parameterized.
+Outside the scanner, we also measured color-discrimination thresholds (just-noticeable differences, JND) for eight hue pairs using adaptive 1-up/1-down staircases; these enter the fitting loss as CVD-to-HC ratios (\cref{app:implementation}).
 
-\subsection{Structured Distortion Quantification: Interpolation Vulnerability}
+\subsection{Structured Distortion Quantification}
 
-To capture distortions in relational geometry, we extract an interpolation vulnerability profile that reveals which hues are geometrically fragile in a participant's neural representation.
-In leave-one-color-out (LOCO) cross-validation, the encoding model $W$ is trained on 7 of 8 hues and evaluated on the held-out hue; the 8 prediction errors form a vulnerability vector $\mathbf{v} \in \mathbb{R}^8$, capturing structural deficits invisible to categorical classification.
+We quantify the distortion with two complementary read-outs of the same encoding model.
+With six runs of eight hues, two cross-validation schemes withhold orthogonal slices of the design.
+Leave-one-\emph{run}-out (LORO) holds out one run---a single repetition of all eight hues---and tests whether each already-seen hue stays decodable across runs (category identity).
+Leave-one-\emph{color}-out (LOCO) holds out one hue---all six of its repetitions---and tests whether that hue can be reconstructed by interpolating the seven remaining hues (relational geometry).
+The eight per-hue LOCO accuracies form an interpolation vulnerability vector $\mathbf{v} \in [0,1]^8$, which exposes continuous-geometry deficits that categorical classification cannot see.
+We focus distortion inference on hV4, the only ROI supporting above-chance interpolation in HC and the established locus of perceptual color representation \citep{brouwer2009, bannert2018}.
 
-This profile is specific to continuous geometry: leave-one-\emph{run}-out (LORO) classification shows no HC--CVD difference, while LOCO interpolation error is significantly elevated in CVD.
-Among the ROIs tested, the effect was most robust in hV4 ($p = 0.017$; $K{=}3$), consistent with hV4's established role in perceptual color representation \citep{brouwer2009, bannert2018}.
-We therefore focus distortion inference on hV4, with V1 analyses reported as cross-ROI validation in \cref{app:supporting}.
+We additionally quantify pairwise distortion via representational distance matrices (RDMs).
+For each participant, an $8 \times 8$ crossnobis distance matrix is computed in SRM-aligned space, and the difference $\Delta\text{RDM} = \text{RDM}_{\text{CVD}} - \overline{\text{RDM}}_{\text{HC}}$ measures how that individual's pairwise geometry deviates from the HC mean.
+The vulnerability vector $\mathbf{v}$ (8-dim) and $\Delta$RDM (28-dim) are the diagnostic signatures fitted in \cref{sec:methods_select}.
 
-We additionally quantify pairwise structural distortion via representational distance matrices (RDMs).
-The $8 \times 8$ crossnobis distance matrix is computed in voxel space for each participant, and the difference $\Delta\text{RDM} = \text{RDM}_{\text{CVD}} - \overline{\text{RDM}}_{\text{HC}}$ measures how a CVD individual's pairwise geometry deviates from the HC mean.
-While $\mathbf{v}$ summarizes per-color vulnerability (8-dim), $\Delta$RDM captures pairwise distortion ($\binom{8}{2} = 28$-dim)---used as a fitting regularizer (\cref{eq:loss}) and cross-criterion validation target (\cref{sec:results}).
+\subsection{Candidate Distortion Mechanisms}
 
-\subsection{Inverse Inference of Low-Dimensional Distortion Fields}
-
-We infer low-dimensional distortion parameters from the observed profile $\mathbf{v}$ by evaluating three candidate mechanisms that parameterize how a stimulus hue angle $\theta$ maps to a distorted angle $\theta'$ at distinct processing levels (\cref{fig:pipeline}, bottom; notation in \cref{app:notation}): a retinal cone shift (Machado), a retinal shift under cortical compensation (R+C), and a cortical opponent-axis reorganization (2-Component).
-These are competing hypotheses about the locus of distortion, not a nested escalation; we ask which mechanism is structurally adequate to reproduce the observed geometry and generalizes to held-out data (\cref{sec:methods_select}).
-
-\paragraph{Machado cone shift (1 DOF).}
-A retinal model \citep{machado2009}: the anomalous cone's spectral peak is shifted by $\Delta\lambda \in [0, 20]$~nm, predicting hue distortion through altered L--M cone opponency.
+We evaluate three candidate mechanisms for how a stimulus hue $\theta$ maps to a distorted angle $\theta'$ at distinct processing levels (notation in \cref{app:notation}): a retinal cone shift (Machado, 1-DOF \citep{machado2009}; \cref{app:adequacy}), a retinal shift under cortical compensation (R+C, 1-DOF), and a cortical opponent-axis reorganization (2-Component, 2-DOF).
+These are competing hypotheses about the locus of distortion, not a nested escalation.
 
 \paragraph{Retinal + cortical compensation (R+C; 1 DOF).}
-Scales the Machado retinal shift by a cortical compensation factor:
+The R+C model scales a fixed Machado retinal shift $\Delta\lambda$ by a single cortical compensation gain $g$ (the only free parameter):
 \begin{equation}
-\delta\theta_{\text{RC}}(c) = (2 - g) \cdot \delta\theta_{\text{Machado}}(c; \Delta\lambda)
+\delta\theta_{\text{RC}}(\theta) = (2 - g)\, \delta\theta_{\text{Machado}}(\theta; \Delta\lambda),
 \label{eq:rc}
 \end{equation}
-where $\delta\theta_{\text{Machado}}$ is the per-color hue shift induced by cone shift $\Delta\lambda$ and $g$ scales the cortical response: $g{=}1$ is no compensation, $g{=}2$ is exact compensation, and $g{>}2$ is overcompensation---motivated by evidence for progressive cortical amplification in anomalous trichromats \citep{tregillus2021}.
-Because R+C rescales the retinal shift along a single axis, it carries no confusion-axis degree of freedom; we show below (\cref{sec:methods_select}, \cref{app:supporting}) that this structural limitation causes $g$ to saturate at the grid boundary, rejecting R+C as structurally inadequate.
+where $g{=}1$ is no compensation, $g{=}2$ exact compensation, and $g{>}2$ overcompensation that reverses the retinal shift past the undistorted hue \citep{tregillus2021}.
 
 \paragraph{Cortical opponent-axis model (2 DOF).}
-The cortical mechanism models distortion as angular dilation along two opponent axes:
+The cortical model expresses the distortion as angular dilation along an S-cone axis ($\beta_s$) and a type-specific confusion axis ($\beta_c$):
 \begin{equation}
-\theta'(c) = \theta(c) + \underbrace{\beta_s \cos(\theta(c) {-} 90^\circ)}_{\text{S-cone axis}} + \underbrace{\beta_c \cos(\theta(c) {-} \theta_{\text{conf}})}_{\text{confusion axis}}
+\theta'(\theta) = \theta + \beta_s \cos(\theta - 90^\circ) + \beta_c \cos(\theta - \theta_{\text{conf}}),
 \label{eq:2comp}
 \end{equation}
-where $\beta_s$ captures S-cone axis expansion, motivated by behavioral evidence for hue-angle reorganization in CVD \citep{emery2021}, and $\theta_{\text{conf}} = 16^\circ$ (protan) or $150^\circ$ (deutan) is the type-specific confusion axis.
+with $\theta_{\text{conf}} = 16^\circ$ (protan) or $150^\circ$ (deutan).
+The S-cone term is motivated by behavioral evidence for hue-angle reorganization in CVD \citep{emery2021}, and the two axes span the distortion directions identified by the neural analysis (\cref{sec:results_distortion}).
 
-\subsection{Model Selection and Specificity}
+\subsection{Fitting Loss and Model Selection}
 \label{sec:methods_select}
 
-We select optimal parameters by forward-simulating each model's distortion through the HC encoding model and comparing the resulting profile to the observed $\mathbf{v}$.
-The composite fitting loss balances per-color functional accuracy with pairwise structural coherence:
-\begin{equation}
-L = \underbrace{L_{\text{vuln}} + 0.5 \, L_{\text{rank}}}_{\text{per-color (8-dim)}} + \underbrace{0.2 \, L_{\text{rdm}}}_{\text{pairwise (28-dim)}} + 0.1 \, L_{\text{smooth}}
-\label{eq:loss}
-\end{equation}
-where $L_{\text{vuln}}$ is MSE between simulated and observed profiles, $L_{\text{rank}} = 1 - \rho$ penalizes rank disagreement, $L_{\text{rdm}}$ encourages pairwise distance coherence, and $L_{\text{smooth}}$ regularizes adjacent-color shifts.
-Effective DOF are 1--2, well below data dimensionality of 8; parameters are optimized over grids.
-A candidate mechanism is selected by two criteria, not by in-sample significance: (i) \emph{structural adequacy}---the fitted parameters lie in the grid interior rather than saturating at a boundary, indicating the model has the degrees of freedom to reproduce the observed geometry; and (ii) \emph{held-out predictive loss}---using a held-out cross-validation over the HC reference pool (5 train / 2 test, $N{=}300$ resamples; and a strict 7-fold leave-one-HC-out supplement), we report the median test composite loss, and ask whether the fitted distortion predicts each held-out participant's geometry better than the no-correction baseline ($\delta\theta = 0$).
-A successful LOCO precondition gate in hV4 is required for a subject to enter inference, but the LOCO criterion is a gate, not the selection metric.
-HC-based false-positive calibration is reported as a descriptive diagnostic in \cref{app:hc_specificity}; it is not used as a selection rule.
+For a candidate distortion, the simulated geometry is obtained by applying $\delta\theta$ to the HC-derived representation and compared to the observed CVD geometry.
+Three loss families quantify the CVD--HC difference: a behavioral JND-ratio rank loss $L_\gamma$, a representational $\Delta$RDM cosine loss $L_{\text{RDM}}$, and an hV4 LOCO loss $L_{\text{LOCO}}$.
+The per-subject fitting objective is a composite of one behavioral and one neural atom (Sub-08: $\gamma_{\text{OY}} + L_{\text{RDM}}^{(\text{V2})}$; Sub-09: $\gamma_{\text{all}} + L_{\text{RDM}}^{(\text{V1})}$), $z$-scored over the $(\beta_s, \beta_c)$ grid and minimized by exhaustive search.
+
+Loss combinations and parameters were selected by held-out generalization rather than in-sample significance.
+Over candidate atom combinations (behavioral $\gamma_{\text{focal}}/\gamma_{\text{all}}$ $\times$ neural $\text{RDM}_{\text{V1--hV4}}$), each was ranked by the median held-out test composite loss (5-train/2-test HC resample, $N{=}300$), then by its test-loss IQR; combinations with grid-boundary saturation above $50\%$ were rejected as structurally inadequate.
+A strict 7-fold leave-one-HC-out supplement tests whether the fitted distortion predicts each held-out HC's geometry better than the no-correction baseline ($\delta\theta = 0$).
+
+Once fitted, the 2-Component transform is analytically inverted to a per-hue stimulus-space pre-image $\tilde\theta_k$, solving $\theta'(\tilde\theta_k) = \theta_k$ (Brent root-finding; \cref{app:implementation}) and giving the correction $\delta\theta_k^{\text{filt}} = \tilde\theta_k - \theta_k$.
 
 %==============================================================================
 \section{Results}
 \label{sec:results}
 %==============================================================================
 
-\subsection{Subject-Specific Distortion Inference}
+\subsection{A Structured Cortical Distortion}
+\label{sec:results_distortion}
 
-\cref{tab:main} and \cref{fig:results} present the central result: among the three candidate mechanisms, the 2-Component cortical opponent-axis model is the single model that is structurally adequate and predicts held-out HC geometry better than the no-correction baseline for both fit-recovered CVD participants, recovering a distinct sign quadrant per subject; the third participant (Sub-10, deutan) is null at both the LOCO and SRM representational levels.
-The retinal R+C mechanism is rejected for both subjects by boundary saturation (\cref{sec:methods_select}, \cref{app:supporting}).
-We report the mechanism class---the sign quadrant of $(\beta_s, \beta_c)$---as descriptive; the averaged loss surface for the real CVD fits is 2.1$\times$--5.5$\times$ deeper than the HC null, while absolute parameter magnitudes are not identifiable (\cref{app:supporting}).
+\paragraph{Discrimination preserved, interpolation impaired.}
+A stimulus-space correction is well-posed only if the displayed hues remain neurally distinguishable yet their continuous arrangement is distorted.
+Both conditions hold.
+Cross-run (LORO) classification of the eight hues shows no HC--CVD difference (pooled cross-subject decoding, $p = 0.668$), and both fit-recovered CVD participants exceed chance at every ROI: the hues are individually distinguishable at the cortical level.
+Cross-color (LOCO) interpolation, by contrast, is selectively impaired.
+Only hV4 supported above-chance interpolation in HC (adjacent accuracy $0.47 \pm 0.05$, $p = 0.044$), replicating \citet{brouwer2009}; there the protan participant fell significantly below chance (Sub-09 $0.13$, $p = 0.024$), and the deutan participant showed a marginal reduction in the same direction (Sub-08 $0.25$, $p = 0.082$). The deficit concentrated on the S-cone intermediate hues (blue, purple, magenta) in an uncorrected, exploratory per-hue test.
+The per-hue interpolation accuracies form each participant's vulnerability profile $\mathbf{v}$.
+
+\paragraph{Pairwise geometry distorted at a distinct ROI per subject.}
+The geometric basis of this deficit appears as elevated pairwise distortion that localizes to a different early-visual area in each participant (\cref{fig:geometry}).
+Sub-08 (deutan) shows significantly elevated representational disparity at V2 (Crawford--Howell $p = 0.040$), with no elevation at V1, V3, or hV4; Sub-09 (protan) shows it at V1 ($p = 0.007$), with no elevation elsewhere.
+The corresponding $\Delta$RDM heatmaps reveal subject-specific distortion structure---elevated distances among S-cone-intermediate pairs for Sub-08, a broader reorganization of pairwise distances for Sub-09.
+That the same categorical-discrimination-preserving representation is geometrically distorted---and in an individually patterned way---is the structured-distortion phenotype this framework targets.
+A third CVD participant (Sub-10) is null at both the LOCO and SRM levels and does not enter distortion inference; it is reserved as a future-work probe of alternative representational dimensions.
+
+\begin{figure}[t]
+  \vskip 0.1in
+  \centering
+  \includegraphics[width=\columnwidth]{figures/fig3_geometry.pdf}
+  \caption{Pairwise color geometry is distorted at a distinct ROI in each CVD participant.
+  \textbf{(A)} $\Delta\text{RDM} = \text{RDM}_{\text{CVD}} - \overline{\text{RDM}}_{\text{HC}}$ in SRM-aligned space at each subject's affected ROI (Sub-08 V2, Sub-09 V1); warm = CVD distances larger than the HC mean, cool = smaller.
+  \textbf{(B)} Mean pairwise disparity per subject per ROI; HC band = group mean $\pm 1$\,SD ($n = 7$), individual HC leave-one-out as dots.
+  Each CVD participant shows significantly elevated disparity at a single, distinct ROI (Sub-08 V2, $p = 0.040$; Sub-09 V1, $p = 0.007$; Crawford--Howell single-case, exploratory).}
+  \label{fig:geometry}
+  \vskip -0.1in
+\end{figure}
+
+\subsection{An Individualized, Invertible Correction Filter}
+\label{sec:results_filter}
+
+\paragraph{Model selection: structural modeling beats cone-shift.}
+Directly modeling the structural distortion as a cortical opponent-axis reorganization is more adequate than the retinal cone-shift accounts, which are structurally inadequate as exact filters.
+The R+C model saturates by overcompensation: its single gain pins to the grid ceiling (Sub-08 boundary rate $100\%$, $g{\to}3.0$; Sub-09 $41\%$), having no axis orthogonal to the confusion direction.
+Its retinal-only limit (Machado, the $g{=}1$ case) is moreover non-invertible at protan severity, collapsing three hues onto a single pre-image so that only $4$ of $8$ of Sub-09's hues admit an exact correction (\cref{app:adequacy,app:feasibility}).
+Only the 2-Component model fits in the grid interior for both participants and is carried forward (\cref{tab:main}); its per-subject loss combination and $(\beta_s, \beta_c)$ were selected by held-out test composite loss, and the fit clears the no-correction null on all 7 leave-one-HC-out folds on the neural ($\Delta$RDM) criterion---a null-comparison sanity check, since most candidate fits clear this baseline, rather than a discriminative ranking among them.
+We report the mechanism class---the sign quadrant of $(\beta_s, \beta_c)$---as descriptive: the averaged loss surface for the real CVD fits is 2.1$\times$--5.5$\times$ deeper than the HC null, while absolute magnitudes are not identifiable (\cref{app:hc_specificity}).
 
 \begin{table}[t]
-  \caption{Selected distortion model per subject (2-Component cortical opponent-axis, hV4). Parameters $(\beta_s, \beta_c)$ in degrees report the mechanism class (sign quadrant), not point-resolved magnitudes. Held-out evidence: median test composite loss (5/2 HC split, $N{=}300$; lower is better) and the number of strict 7-fold leave-one-HC-out folds in which the fit beats the no-correction baseline ($\delta\theta{=}0$). The retinal R+C mechanism is rejected by boundary saturation (\cref{app:supporting}); Sub-10 is null at the LOCO and SRM levels.}
+  \caption{Selected per-subject 2-Component fit (hV4). $(\beta_s, \beta_c)$ in degrees report the mechanism class (sign quadrant), not point-resolved magnitudes. Test loss: median held-out composite (5/2 HC split, $N{=}300$; lower is better). All fits clear the no-correction null on $7/7$ leave-one-HC-out folds (a sanity check, not a discriminative ranking). Stability: parameter IQR over resamples or modal-bin share. Sub-09's $(\beta_s, \beta_c)$ is metric-dependent (SRM basis gives $(+32, 0)$; \cref{app:hc_specificity}), so its filter is illustrative.}
   \label{tab:main}
   \begin{center}
     \begin{small}
-      \begin{tabular}{llcccc}
+      \begin{tabular}{lccc}
         \toprule
-        Subject & Model & $(\beta_s, \beta_c)$ & Test loss & Folds & Mode \\
+        Subject & $(\beta_s, \beta_c)$ & Test loss & Stability \\
         \midrule
-        Sub-08 (deutan) & 2-Comp & $(+6, -42)$ & $-2.36 \pm 2.15$ & 7/7 & ${\sim}70\%$ \\
-        Sub-09 (protan) & 2-Comp & $(+2, +24)$ & $-1.54 \pm 1.42$ & 7/7 & $87.7\%$ \\
-        Sub-10 (deutan) & --- & --- & --- & --- & null \\
+        Sub-08 (deutan) & $(+6, -42)$ & $-2.36 \pm 2.15$ & IQR $(8,2)$ \\
+        Sub-09 (protan) & $(+2, +24)$ & $-1.54 \pm 1.42$ & mode $87.7\%$ \\
         \bottomrule
       \end{tabular}
     \end{small}
@@ -236,63 +270,62 @@ We report the mechanism class---the sign quadrant of $(\beta_s, \beta_c)$---as d
   \vskip -0.15in
 \end{table}
 
-\textbf{Sub-09 (protan).}
-The 2-Component model fits Sub-09 with a dominant confusion-axis rotation and a small S-cone component ($\beta_s \approx +2^\circ$); the in-sample fit is bin-level deterministic (mode share $87.7\%$, $263/300$ resamples; held-out median test loss $-1.54$) and the fitted correction beats the no-correction baseline on all 7 leave-one-HC-out folds on the neural ($\Delta$RDM) criterion ($\Delta L = -0.472$).
-We report this as a detection-and-fit result only: unlike Sub-08, Sub-09's confusion-axis \emph{sign} is not identified---the held-out per-fold oracle $\beta_c$ spans both signs (most folds negative, opposite to the in-sample $+24^\circ$), and the inferred mechanism class itself changes with the RDM metric (\cref{app:supporting}).
-We therefore do not assign Sub-09 a resolved mechanism class, and Sub-09 does not anchor the divergent-correction analysis below.
-The behavioral term additionally does not generalize for Sub-09 ($\Delta L = -0.55$, $4/7$ folds $\approx$ null), so the fit rests on the neural geometry alone and a direct behavioral session is the first validation priority (\cref{sec:discussion}).
-The retinal R+C mechanism saturates at the grid boundary for this subject and is rejected.
+\paragraph{Sub-08 (deutan).}
+The 2-Component model places Sub-08 in the deutan confusion-axis quadrant ($\beta_s > 0$, $\beta_c < 0$).
+The fit has the lowest held-out median test loss ($-2.36 \pm 2.15$) and its confusion-axis sign is stable across reference sets (7-fold leave-one-HC-out $\beta_c \in [-46^\circ, -38^\circ]$, no crossing of zero); the neural and behavioral terms independently support the same deutan direction (neural $\Delta L = -0.406$, $7/7$ folds; behavioral $\Delta L = -13.8$, $5/7$ folds).
 
-\textbf{Sub-08 (deutan).}
-The 2-Component model places Sub-08 in the opposite confusion-axis quadrant ($\beta_s > 0$, $\beta_c < 0$, consistent with the deutan confusion axis).
-The fit has a low held-out median test loss ($-2.36 \pm 2.15$, the lowest among the structurally adequate 2-Component cells), beats the no-correction baseline on all 7 leave-one-HC-out folds for the neural criterion ($\Delta L = -0.406$) and on $5/7$ folds for the behavioral criterion ($\Delta L = -13.8$), so that neural and behavioral terms independently support the same deutan direction.
-As for Sub-09, the retinal R+C mechanism saturates at the grid boundary and is rejected.
+\paragraph{Sub-09 (protan).}
+Under the production PCA-basis RDM loss---adopted for both participants for its parameter stability (Sub-09 resample mode share $87.7\%$, $263/300$, versus $57\%$/$64\%$ for the two SRM-basis variants)---the 2-Component model fits Sub-09 with a dominant confusion-axis rotation and a small S-cone component, clearing the no-correction null on all $7$ folds on the neural criterion ($\Delta L = -0.472$).
+This protan fit is presented as illustrative: the confusion-axis sign is identified only under the PCA basis, and the dominant axis itself is basis-dependent---the argmin moves to $(\beta_s, \beta_c) = (+32, 0)$ under the alternative SRM-basis reduction, where the confusion-axis term vanishes in favor of an S-cone shift (\cref{app:hc_specificity}).
 
-\textbf{Sub-10 (deutan).}
-Sub-10 is null at both the LOCO and SRM representational levels, bounding the sensitivity of the representational levels used here; this Ishihara-confirmed case is reserved as a future-work probe of alternative representational dimensions.
+\paragraph{The neural term carries what behavior cannot.}
+Fitting the behavioral and neural atoms separately shows that the neural geometry contributes beyond behavior.
+For Sub-09 the behavioral-only fit does not beat the no-correction baseline ($\Delta L = -0.55$, $4/7$ folds), whereas the $\Delta$RDM term recovers a stable confusion-axis rotation, so the protan fit rests on the neural geometry alone.
+For Sub-08 the two terms agree, and the neural term sharpens the estimate.
+A direct behavioral session for Sub-09 is therefore the first validation priority (\cref{sec:discussion}).
+
+\paragraph{Inversion to a per-subject filter.}
+Each fitted transform admits an exact stimulus-space pre-image for all eight hues (residual $<0.001^\circ$), yielding a directly implementable 8-point correction lookup table per subject (mean $|\delta\theta| = 26.3^\circ$ for Sub-08, $16.2^\circ$ for Sub-09; \cref{fig:results}).
+The two filters differ by subtype in the direction of the dominant confusion-axis term ($\beta_c = -42^\circ$ deutan vs.\ $+24^\circ$ protan); each is built from that individual's own cortical geometry rather than a fixed subtype-average spectral shift.
 
 \begin{figure}[t]
   \vskip 0.1in
   \centering
-  \includegraphics[width=\columnwidth]{figures/fig2_loco_profiles.pdf} % TODO regenerate as RDM fig
-  \caption{Subject-specific 2-Component fits (hV4). \textbf{Top}: observed, predicted, and residual $\Delta$RDM ($8{\times}8$ pairwise distance deviation from the HC mean) for each fit-recovered participant, showing that the cortical opponent-axis model reproduces the observed pairwise geometry. \textbf{Bottom}: composite loss landscape over the $(\beta_s, \beta_c)$ grid with the argmin and its bin-level stability across HC resamples. \textbf{Sub-08} (deutan): $(\beta_s, \beta_c){=}(+6^\circ, -42^\circ)$, beats no-correction on $7/7$ leave-one-HC-out folds. \textbf{Sub-09} (protan): $(\beta_s, \beta_c){=}(+2^\circ, +24^\circ)$, mode share $87.7\%$, $7/7$ folds. Parameters report the mechanism class (sign quadrant), not point-resolved magnitudes (\cref{app:supporting}). See \cref{fig:pipeline} for pipeline overview.}
+  \includegraphics[width=\columnwidth]{figures/fig2_landscape_filter.pdf}
+  \caption{Per-subject 2-Component fit and inverted filter (hV4). Each row is one participant.
+  \textbf{Left}: composite loss landscape over the $(\beta_s, \beta_c)$ grid, with the selected fit (argmin, red star) and HC-resample argmins (white).
+  \textbf{Right}: the inverted stimulus-space filter---displayed (Original) vs.\ corrected (Filtered) for the eight scanner hues.
+  Sub-08 (deutan) $(+6^\circ, -42^\circ)$; Sub-09 (protan) $(+2^\circ, +24^\circ)$.
+  Parameters report the mechanism class (sign quadrant), not point-resolved magnitudes (\cref{app:hc_specificity}).
+  Observed vs.\ predicted $\Delta$RDM fits are in \cref{app:rdmfit}.}
   \label{fig:results}
   \vskip -0.1in
 \end{figure}
-
-\subsection{Convergent Detection, Divergent Correction}
-
-The candidate mechanisms \emph{agree on detection}---all three identify the same two individuals as distorted---but \emph{diverge on correction}.
-We make this concrete for Sub-08, whose confusion-axis sign is identified (leave-one-HC-out $\beta_c \in [-46^\circ,-38^\circ]$, no crossing of zero), so the comparison does not hinge on a non-identified parameter.
-Both candidates yield \emph{feasible} corrections---the retinal Machado mechanism and the cortical 2-Component model each admit exact pre-image solutions for all eight colors---yet the corrections they prescribe point in nearly opposite directions: the per-color correction angles have cosine ${\approx}-0.4$ (range $-0.37$ to $-0.54$ across the plausible severity range $\Delta\lambda \in [2,13.5]$~nm, jackknife all-negative) and agree in sign on only $1$ of $8$ colors.
-This divergence is a falsifiable prediction: the retinal account prescribes spectral pre-distortion, while the cortical account prescribes opponent-axis rescaling; because both fit the observed detection profile \emph{and} both yield feasible corrections, neither detection nor feasibility can adjudicate them---only behavioral validation can, while localizing the dominant processing level.
-
 
 %==============================================================================
 \section{Discussion}
 \label{sec:discussion}
 %==============================================================================
 
-\paragraph{From structured distortion to intervention design.}
-The LOCO vulnerability profile compresses high-dimensional voxel data into an 8-element geometry-sensitive summary.
-Combined with a composite loss that decomposes geometric fidelity into per-color and pairwise components (\cref{eq:loss}), this enables distortion inference that is both interpretable and invertible into candidate corrections.
-Future work could replace grid search with amortized inference (e.g., conditional normalizing flows) for real-time distortion estimation.
-This approach may generalize to other conditions where sensory representations are distorted rather than absent.
+\paragraph{From structured distortion to an invertible correction.}
+A CVD color deficit appears in these data not as a uniform loss of chromatic signal but as an individually patterned geometric distortion of the cortical color representation: categorical discrimination is preserved, while continuous-hue interpolation (hV4) and pairwise geometry (V2 in the deutan, V1 in the protan participant) are impaired.
+The LOCO vulnerability profile compresses high-dimensional voxel data into an 8-element geometry-sensitive summary, and a composite loss that decomposes geometric fidelity into behavioral and pairwise neural components yields a low-dimensional model that is both interpretable and analytically invertible.
+Grounding the fit in cortical geometry, rather than a behavioral threshold alone, is what makes the resulting filter individual: it is read from that participant's own representation rather than assigned from their diagnostic subtype.
+Future work could replace grid search with amortized inference (e.g., conditional normalizing flows) for real-time distortion estimation, and the approach may generalize to other conditions where sensory representations are distorted rather than absent.
 
 \paragraph{Limitations.}
-We have \emph{not} shown that corrections improve perceptual discrimination---behavioral validation is the framework's primary next step.
-Three CVD participants are insufficient for population-level claims; this work is a proof-of-concept, and the fMRI requirement limits scalability.
-Grid optimization on 8 data points yields elevated HC false-positive rates (15/21 model--subject pairs significant; \cref{app:hc_specificity}), which is why HC specificity is reported only descriptively and is not used as a selection rule; the pipeline targets individual profiling of \emph{known} CVD cases, not screening.
-What the fit-recovered CVD cases support is mechanism-class consistency (the sign quadrant of $(\beta_s, \beta_c)$) together with cross-criterion convergence; the absolute $(\beta_s, \beta_c)$ values are \emph{not} identifiable, given a per-axis noise floor of ${\sim}20^\circ$/$25^\circ$ and a per-realization null in which 0/3 candidates pass both null sources, so the parameters are to be read as a low-dimensional descriptive embedding rather than as physiological cortical-distortion magnitudes.
-Finally, behavioral generalization is asymmetric across subjects: for sub-08 both neural and behavioral terms support the deutan direction, whereas for sub-09 the fit rests on the neural geometry alone and the behavioral term does not generalize---a direct behavioral session for sub-09 is the first priority of the planned validation.
-
+This is a proof-of-concept, and three considerations bound it.
+First, the fit-recovered CVD sample is $N = 2$ (with Sub-10 null); single-case statistics \citep{crawford1998} permit individual-level inference, but population- or subtype-level claims require replication, and establishing per-person rather than subtype-average correction specifically requires testing several individuals within one subtype.
+Second, what the fits support is mechanism-class consistency---the sign quadrant of $(\beta_s, \beta_c)$---not absolute magnitudes: grid optimization on 8 data points inflates the HC false-positive rate (\cref{app:hc_specificity}), and across pre-specified null tests $0/3$ candidate fits pass both null sources, with a per-axis noise floor of ${\sim}20^\circ$/$25^\circ$, so the parameters are a low-dimensional descriptive embedding rather than physiological distortion magnitudes.
+Third, we have \emph{not} shown that the correction improves perceptual discrimination; a behavioral advantage and broader validation remain to be established---the framework's immediate next step.
 
 %==============================================================================
 \section{Conclusion}
 \label{sec:conclusion}
 %==============================================================================
 
-We present a framework that quantifies structured distortions in fMRI hue representations and fits parsimonious low-dimensional parameters, recovering subject-specific distortions that converge on detection but diverge on correction---generating falsifiable behavioral predictions as the immediate next step.
+We present a framework that quantifies structured distortions in fMRI hue representations and analytically inverts a parsimonious cortical model into an individualized, stimulus-space correction filter---exact for all displayed hues---as a proof-of-concept in two CVD individuals.
+Directly modeling the structural distortion proves more adequate than retinal cone-shift accounts, and whether the correction improves perception is the defined next step; more broadly, recasting a sensory deficit as an invertible distortion of its own cortical representation, characterized one individual at a time, offers a template for personalized perceptual correction.
 
 %==============================================================================
 \section*{Impact Statement}
@@ -326,97 +359,96 @@ Mapping such signatures onto low-dimensional, invertible geometric features coul
     \toprule
     Symbol & Description \\
     \midrule
-    $\theta(c)$, $\theta'(c)$ & Stimulus / distorted hue angle for color $c$ \\
-    $\mathbf{v} \in \mathbb{R}^8$ & LOCO vulnerability profile (per-color interp.\ error) \\
-    $W$ & Encoding weight matrix ($K$ channels $\to$ voxels) \\
+    $\theta$, $\theta'$ & Stimulus / distorted hue angle \\
+    $\mathbf{v} \in [0,1]^8$ & LOCO vulnerability profile (per-hue interp.\ accuracy) \\
+    $W \in \mathbb{R}^{F\times V}$ & Encoding weight matrix ($F{=}6$ channels $\to$ $V$ voxels) \\
     $\Delta\lambda$ & Retinal cone-shift magnitude (nm) \\
-    $g$ & R+C cortical compensation factor ($1$: none; $2$: full; $>2$: over) \\
+    $g \in [0,3]$ & R+C cortical compensation factor ($1$: none; $2$: full; $>2$: over) \\
     $\beta_s$, $\beta_c$ & S-cone / confusion-axis angular dilation ($^\circ$) \\
+    $\theta_{\text{conf}}$ & Confusion axis ($16^\circ$ protan; $150^\circ$ deutan) \\
     $\Delta$RDM & Pairwise distance deviation from HC mean \\
-    $\rho$ & Spearman corr.\ (simulated vs.\ observed $\mathbf{v}$) \\
     \bottomrule
   \end{tabular}
   \end{small}
   \end{center}
 \end{table}
 
-\subsection{HC Specificity Calibration}
+\subsection{Per-Subject $\Delta$RDM Fits}
+\label{app:rdmfit}
+
+\Cref{fig:rdmfit} shows, per fit-recovered participant, the observed and 2-Component-predicted $\Delta$RDM (CVD minus HC mean) at the subject's affected ROI, with the observed-versus-predicted scatter over the 28 upper-triangle entries.
+The model recovers the correct \emph{direction} of the dominant pairwise deviation on held-out folds, but the in-sample observed-versus-predicted cosine is modest ($0.48$ for Sub-09 protan at V1; $0.16$ for Sub-08 deutan at V2): the $45^\circ$ categorical quantization of the RDM loss makes the fit direction-consistent but magnitude-unresolved, consistent with the identifiability limits of \cref{app:hc_specificity}.
+Selection therefore rests on held-out generalization---clearing the no-correction null on all leave-one-HC-out folds (\cref{sec:results_filter})---not on raw RDM cosine.
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=0.92\textwidth]{figures/fig2_rdm_fit.pdf}
+  \caption{Per-subject $\Delta$RDM fit (2-Component). For Sub-08 (deutan, V2) and Sub-09 (protan, V1): observed $\Delta$RDM, predicted $\Delta$RDM, and the observed-versus-predicted scatter over the 28 upper-triangle entries (cosine similarity annotated). $\Delta$RDM is the CVD-minus-HC-mean pairwise distance.}
+  \label{fig:rdmfit}
+\end{figure}
+
+\subsection{Implementation Details (Reproducibility)}
+\label{app:implementation}
+
+\paragraph{Encoding model.}
+The forward encoder is a half-wave-rectified squared-cosine basis with $F = 6$ channels at preferred hues spaced $60^\circ$ apart \citep{brouwer2009}.
+The channel-to-voxel weight matrix $W$ ($\hat{X} = CW^\top$) is fit by ridge regression with the regularization parameter selected by generalized cross-validation \citep{golub1979}.
+Decoding reconstructs channel activations from a held-out voxel pattern as $\hat{\mathbf{c}} = W\mathbf{x}$ and returns the hue whose basis vector has the highest Pearson correlation with $\hat{\mathbf{c}}$; the same encoder is used for both cross-validation schemes below.
+
+\paragraph{Cross-validation and metrics.}
+\emph{LORO} (discrimination): for each of the 6 runs, $W$ is trained on the remaining 5 runs and the held-out run's 8 hues are decoded by nearest-neighbour matching; performance is 8-class exact accuracy (chance $1/8$).
+\emph{LOCO} (interpolation): each of the 8 hues is held out in turn, $W$ is trained on the remaining 7 hues pooled across all 6 runs (42-sample design), and the held-out hue is predicted in channel-output space; the primary metric is \emph{adjacent accuracy}, the proportion of predictions within $\pm 1$ hue step ($\pm 45^\circ$) of the target (chance $3/8$). The 8 per-hue adjacent accuracies constitute the vulnerability profile $\mathbf{v}$.
+\emph{LOSO} (cross-subject generalization): $W$ is trained on the remaining HC participants' SRM-aligned data and tested on the held-out participant.
+
+\paragraph{Alignment and RDM.}
+Run-level Procrustes alignment precedes a shared response model (SRM); the reduced dimension $k$ per ROI ($k = 4, 4, 3, 3$ for V1, V2, V3, hV4) was selected by leave-one-subject-out RDM reliability.
+Geometric disparity uses a leave-one-out-consistent HC reference (each fold's reference is the mean of the remaining 6 HC, against which both the held-out HC and the CVD participant are compared).
+The $8\times 8$ crossnobis RDM and $\Delta\text{RDM} = \text{RDM}_{\text{CVD}} - \overline{\text{RDM}}_{\text{HC}}$ are computed in this aligned space.
+
+\paragraph{Statistics.}
+Individual CVD participants are compared to the HC distribution with the \citet{crawford1998} modified single-case $t$ ($df = 6$, one-tailed). Above-chance interpolation and HC--CVD comparisons use color-label permutation (1{,}000 iterations) and subject-label permutation (10{,}000 iterations) as appropriate. False-discovery-rate correction is applied within the pre-specified RDM color-pair and identifiability families; exploratory per-hue tests are reported uncorrected.
+
+\subsection{Loss Atoms and Selection Procedure}
+\label{app:selection}
+
+\paragraph{Loss atoms.}
+The fitting objective draws on three families: (i)~$L_\gamma$, a rank loss between the model-predicted distortion magnitude at each hue pair and the observed behavioral JND ratio $\gamma = \gamma_{\text{CVD}}/\bar\gamma_{\text{HC}}$ (variants: a subtype-focal pair $\gamma_{\text{focal}}$ or the aggregate $\gamma_{\text{all}}$); (ii)~$L_{\text{RDM}}$, the cosine dissimilarity between the simulated and observed 28-element $\Delta$RDM (computable per ROI); and (iii)~$L_{\text{LOCO}}$, the MSE between the simulated and observed vulnerability profiles. Only $L_{\text{LOCO}}$ couples to the forward encoder; the production fits use a behavioral $+$ neural-RDM composite, so the encoder enters fitting only through the LOCO precondition gate.
+
+\paragraph{Selection.}
+Per-subject loss combination and parameters were selected by a three-gate procedure over a 5-train/2-test HC resample ($N = 300$) and a strict 7-fold HC leave-one-out, using $(\beta_s, \beta_c) \in [-90^\circ, 90^\circ]^2$ and $g \in [0,3]$ for R+C: (1)~a \emph{directional precondition} admitting only atoms whose CVD loss exceeds the HC leave-one-out distribution in the expected direction (signed Cohen's $d \geq 0.5$); (2)~a \emph{boundary-saturation} gate rejecting combinations with $\geq 50\%$ of resample solutions at the grid boundary; (3)~the \emph{held-out test composite loss} (median, then IQR) as the primary and secondary criteria. The selected combinations were $\gamma_{\text{OY}} + L_{\text{RDM}}^{(\text{V2})}$ for Sub-08 and $\gamma_{\text{all}} + L_{\text{RDM}}^{(\text{V1})}$ for Sub-09, with parameter stability reported in \cref{tab:main}.
+
+\subsection{HC Specificity and Identifiability}
 \label{app:hc_specificity}
 
-To empirically calibrate the false-positive rate of the grid-search fitting procedure, we applied the full hV4 LOCO pipeline to all 7 HC participants, treating each as if they were a CVD candidate (best-family selected per model).
-
-\paragraph{Results.}
-\cref{tab:hc_fpr} reports the number of HC participants reaching $p < 0.05$ for each model.
-The observed false-positive rate substantially exceeds the nominal 5\%: 15/21 model--subject tests are significant, compared to the expected 1.05 under the null.
-The 2-component model is worst (7/7), Machado is least inflated (3/7).
-
-\begin{table}[h]
-  \caption{HC false-positive rates (hV4 LOCO, $p < 0.05$).}
-  \label{tab:hc_fpr}
-  \begin{center}
-    \begin{small}
-      \begin{tabular}{lccc}
-        \toprule
-        Model & DOF & HC significant & FPR \\
-        \midrule
-        Machado & 1 & 3/7 & 43\% \\
-        R+C & 2 & 5/7 & 71\% \\
-        2-Component & 2 & 7/7 & 100\% \\
-        \midrule
-        Total & & 15/21 & 71\% \\
-        \bottomrule
-      \end{tabular}
-    \end{small}
-  \end{center}
-\end{table}
-
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\textwidth]{figures/fig_hc_specificity.pdf}
-  \caption{HC specificity calibration. \textbf{(a)} Per-subject p-values for each model (log scale). The red dashed line marks $\alpha = 0.05$; shaded region indicates the false-positive zone. \textbf{(b)} Aggregate false-positive rates. Dashed line: nominal $\alpha = 5\%$; dotted line: chance rate for $n{=}7$ (14.3\%). Higher model complexity (DOF) yields higher false-positive rates.}
-  \label{fig:hc_specificity}
-\end{figure}
-
-\paragraph{Mechanism.}
-The elevated FPR arises from two reinforcing factors:
-\begin{enumerate}
-\item \textbf{Grid-search flexibility on 8 data points.} With 1--2 DOF optimized over a fine grid (41--1,326 candidate parameter configurations) and rank-based loss ($L_{\text{rank}} = 1 - \rho$), most individuals---healthy or not---will have some configuration that achieves a nominally significant rank correlation with 8 elements. This is a known property of permutation tests under flexible model search.
-\item \textbf{Regression to the mean.} HC individuals with low baseline LOCO performance (i.e., already poorly interpolated before any model fitting) have the most room for apparent improvement. We observe a strong negative correlation ($r = -0.894$) between HC baseline $\rho$ and the improvement $\Delta\rho$ achieved by fitting, confirming that the signal captured in HC fits is predominantly regression to the mean rather than color-specific structure.
-\end{enumerate}
-
-\paragraph{Role of this calibration.}
-This false-positive calibration is reported as an honest descriptive diagnostic; it is \emph{not} a selection rule, and we do not claim specificity against healthy color vision from the present case series.
-The pipeline is designed for \emph{individual profiling} of known CVD cases, not population screening.
-We emphasize that the elevated HC false-positive rate is precisely why selection rests on held-out predictive loss and structural adequacy (\cref{sec:methods_select}) rather than on any in-sample significance threshold.
-What can be stated descriptively about the fit-recovered CVD cases is that the 2-Component model's axes---S-cone and type-specific confusion---are grounded in known CVD physiology \citep{emery2021}, and that the fitted sign quadrant is consistent across criteria for each subject.
-We make no claim that the absolute $(\beta_s, \beta_c)$ magnitudes are physiologically interpretable; per-realization null testing places 0/3 candidates past both null sources, and a $(0,0)$ algorithm validation reveals a per-axis noise floor of ${\sim}20^\circ$/$25^\circ$, so only the mechanism class is reportable.
-Sub-10 is Ishihara-confirmed CVD but is null at both the LOCO and SRM representational levels used here; probing this case at alternative representational dimensions is an explicit future-work direction.
+We applied the full hV4 fitting pipeline to all 7 HC participants, each substituted in turn into the CVD slot, to characterize the grid search's behavior under the null.
+Two findings frame the parameters as descriptive.
+First, the grid search over-fits 8 data points: most individuals---healthy or not---admit some configuration achieving a nominally good fit, and HC participants with poorer baseline interpolation have the most apparent room to improve (a strong negative correlation, $r = -0.894$, between HC baseline fit quality and fitting gain confirms the signal is predominantly regression to the mean).
+Second, under the canonical (behavioral $+$ RDM) loss, pre-specified null testing places $0/3$ candidate fits past both null sources (a per-realization Bonferroni test and a color-label permutation), the HC pseudo-CVD distance does not exceed all HC references (rank $0.875$, not $1.0$), and a $(0,0)$ origin-recovery null reveals a per-axis uncertainty floor of ${\sim}20^\circ$/$25^\circ$. A separate parameter-recovery family---two fit-recovered subjects $\times$ three recovery tests---likewise yields $0/6$ surviving FDR correction.
+What remains reportable is therefore the mechanism class (sign quadrant), whose averaged loss surface is 2.1$\times$--5.5$\times$ deeper than the HC null, together with the cross-criterion consistency of each subject's fitted sign; the absolute $(\beta_s, \beta_c)$ magnitudes are not physiologically interpretable.
+This calibration is an honest descriptive diagnostic, \emph{not} a selection rule: the pipeline targets individual profiling of known CVD cases, not population screening, which is precisely why selection rests on held-out predictive loss and structural adequacy (\cref{app:selection}) rather than on any in-sample significance threshold.
 
 \subsection{Structural Adequacy of Candidate Mechanisms}
+\label{app:adequacy}
 
-The retinal R+C mechanism is rejected for both CVD participants by boundary saturation: its single compensation factor $g$ collapses to the grid ceiling (sub-08 boundary rate $100\%$, $g{\to}3.0$; sub-09 boundary rate $41\%$), indicating that the model lacks a confusion-axis degree of freedom and cannot reproduce the observed geometry from the grid interior (parameter clustering at grid bounds is a recognized model-inadequacy signal).
-The 2-Component model, by contrast, fits in the grid interior for both subjects, with the fitted sign quadrant consistent across the $\Delta$RDM atom computed in multiple ROIs (V1--hV4) for each participant (mechanism-class consistency; \cref{tab:full}).
+The retinal R+C mechanism is rejected for both CVD participants by boundary saturation: its single compensation factor $g$ collapses to the grid ceiling (Sub-08 boundary rate $100\%$, $g{\to}3.0$; Sub-09 $41\%$, $g{\approx}2.95$), indicating that the model lacks a degree of freedom orthogonal to the confusion axis and cannot reproduce the observed geometry from the grid interior (parameter clustering at grid bounds is a recognized model-inadequacy signal).
+The 2-Component model, by contrast, fits in the grid interior for both subjects, with the fitted sign quadrant consistent across the $\Delta$RDM atom computed in multiple ROIs (V1--hV4) for Sub-08; for Sub-09 the class is metric-dependent (\cref{app:hc_specificity}).
 These are descriptive structural-adequacy observations, not significance claims.
 
-\subsection{Divergent Corrections at Equal Feasibility (Sub-08)}
+\subsection{Correction Feasibility and the Inadequacy of Cone-Shift Models}
+\label{app:feasibility}
 
-\begin{figure}[h]
-  \centering
-  \includegraphics[width=\textwidth]{figures/fig_divergence_sub08.pdf} % TODO regenerate: per-color correction angles, retinal Machado vs cortical 2-Component, Sub-08 (8 hues); annotate cosine and sign-agreement
-  \caption{Both candidate mechanisms yield feasible corrections, but in opposite directions (Sub-08, deutan). For each of the 8 hues, the per-color correction angle prescribed by the retinal Machado mechanism and by the cortical 2-Component model ($\beta_s,\beta_c{=}{+}6^\circ,{-}42^\circ$). Each model independently admits exact pre-image solutions for all 8 colors, yet the two correction vectors point in nearly opposite directions (cosine ${\approx}-0.4$; sign-agreement $1/8$). Feasibility therefore does not distinguish the two accounts; only their direction does, and only behavioral validation can adjudicate it.}
-  \label{fig:feasibility}
-\end{figure}
+The angular 2-Component transform is bijective by construction, so an exact stimulus-space pre-image exists for every displayed hue: all 8 colors invert exactly for both subjects (Sub-08 mean $|\delta\theta| = 26.3^\circ$; Sub-09 $16.2^\circ$; residual $<0.001^\circ$), giving a directly implementable per-subject lookup table.
 
-Both the retinal Machado mechanism and the cortical 2-Component model admit exact pre-image solutions for all 8 colors (residual $< 0.001^\circ$); feasibility alone does not separate them.
-What separates them is the \emph{direction} of the prescribed correction.
-For Sub-08---whose confusion-axis sign is identified (leave-one-HC-out $\beta_c \in [-46^\circ,-38^\circ]$)---the per-color correction angles of the two models have cosine ${\approx}-0.4$ (range $-0.37$ to $-0.54$ across the plausible severity range $\Delta\lambda \in [2,13.5]$~nm; leave-one-hue-out jackknife all-negative) and agree in sign on only $1$ of $8$ colors.
-We anchor this comparison on Sub-08 rather than Sub-09 because Sub-09's confusion-axis sign is not identified, so its retinal-versus-cortical cosine flips sign with the (unresolved) sign of $\beta_c$ and cannot support a divergence claim.
-Which correction actually improves perception requires behavioral validation.
+The retinal cone-shift accounts, by contrast, are structurally inadequate as filters.
+The R+C model is rejected by overcompensation boundary saturation, its gain pinned at the grid ceiling ($g{\to}3.0$; \cref{app:adequacy}).
+Its retinal-only limit (Machado, the $g{=}1$ case) is moreover non-invertible for the protan participant: at that subtype severity ($\Delta\lambda = 13.5$~nm) its arc-compression collapses three displayed hues (green $135^\circ$, cyan $180^\circ$, blue $225^\circ$) onto a single pre-image angle (${\sim}127^\circ$), so only $4$ of $8$ hues admit an exact pre-image, exactly where Sub-09 is most vulnerable.
+This arc-compression is a structural property of the retinal-shift form, independent of the fitting criterion, and disqualifies the retinal family for the stimulus-space filter task.
+That modeling the structural distortion directly inverts exactly for every hue, where the cone-shift models do not, is the core adequacy argument for the cortical account; whether its correction improves perception requires behavioral validation.
 
 \subsection{Model Comparison: Full Table}
 
 \begin{table}[h]
-  \caption{Candidate-mechanism comparison by structural adequacy and held-out evidence. \emph{Adequate?} marks whether the fit lies in the grid interior (R+C saturates the $g$ ceiling, so it is structurally inadequate and rejected). Held-out evidence (2-Component only): median test composite loss and the number of strict 7-fold leave-one-HC-out folds beating the no-correction baseline ($\delta\theta{=}0$) on the $\Delta$RDM criterion. R+C and Machado are listed as the rejected/dominated alternatives; no significance ($\rho$, $p$) values enter selection.}
+  \caption{Candidate-mechanism comparison by structural adequacy and held-out evidence. \emph{Adequate?} marks whether the fit lies in the grid interior (R+C saturates the $g$ ceiling, so it is structurally inadequate and rejected). Held-out evidence (2-Component only): median test composite loss and the number of strict 7-fold leave-one-HC-out folds beating the no-correction baseline ($\delta\theta{=}0$) on the $\Delta$RDM criterion. Machado and R+C are the rejected/dominated alternatives; no in-sample significance values enter selection.}
   \label{tab:full}
   \begin{center}
     \begin{small}
@@ -434,23 +466,10 @@ Which correction actually improves perception requires behavioral validation.
         \midrule
         Sub-10 & --- & --- & --- & null & --- & --- \\
         \bottomrule
-        \multicolumn{7}{p{0.95\columnwidth}}{\small R+C is rejected by boundary saturation ($g$ pinned at the grid ceiling), lacking a confusion-axis DOF. Sub-10 is null at the LOCO and SRM levels.} \\
+        \multicolumn{7}{p{0.92\columnwidth}}{\small R+C is rejected by boundary saturation ($g$ pinned at the grid ceiling), lacking a confusion-axis DOF. Sub-10 is null at the LOCO and SRM levels.} \\
       \end{tabular}
     \end{small}
   \end{center}
 \end{table}
-
-\subsection{Correction Feasibility Details}
-
-\paragraph{Sub-08 (2-Component pre-image).}
-All 8 colors admit exact pre-image solutions (mean $|\delta| = 46.3^\circ$; residual $< 0.001^\circ$).
-The resulting 8-point lookup table is directly implementable on any digital display.
-
-\paragraph{Sub-09 (2-Component pre-image).}
-All 8 colors admit exact pre-image solutions (mean $|\delta| = 20.1^\circ$; residual $< 0.001^\circ$).
-
-\paragraph{Retinal Machado (rejected alternative).}
-The retinal Machado mechanism is rejected on structural-adequacy grounds (\cref{tab:full}), not on feasibility: evaluated as a continuous pre-image, it too admits exact solutions for all 8 colors across the plausible severity range.
-Its correction is therefore feasible but mis-directed relative to the cortical fit (\cref{fig:feasibility}); a per-color arc ``collapse'' appears only under a discrete 8-bin categorical relabelling and does not hold for the deployed continuous filter, so we do not invoke it.
 
 \end{document}

@@ -15,6 +15,17 @@
 \usepackage{apacite}  % REQUIRED for BibTeX APA citations
 \usepackage[nameinlink]{cleveref}  % \cref{} — load after hyperref and apacite
 \usepackage{gensymb}  % \degree symbol
+% =====================================================================
+% Number the section headings (matches PSYCH_THESIS fix). apa6 'man' mode
+% leaves \section/\subsection unnumbered, so every \ref{sec:...} stored an
+% empty number field ({}) in the .aux and rendered as a blank "(§)" /
+% "Section )" — 34 such labels / 41 cross-references across the body.
+% Numbering them (depth 2 = \section + \subsection; \paragraph stays
+% unnumbered) gives \ref/\cref a value to print and resolves all of them.
+% Note: APA's "no heading numbers" is a manuscript-submission convention;
+% switch to \nameref-based refs instead if strict APA numbering-free
+% headings are required for the target venue.
+\setcounter{secnumdepth}{2}
 \usepackage{booktabs} % \toprule, \midrule, \bottomrule in tables
 \usepackage{xcolor}   % \textcolor — load after hyperref is not needed; xcolor is safe here
 \newcommand{\todo}[1]{\textcolor{red}{#1}}
@@ -56,9 +67,8 @@
 
 \keywords{color vision deficiency, anomalous trichromacy, fMRI, hV4, representational similarity analysis, forward encoding model, personalized color correction}
 
-% [TODO: revise based on feedback] — abstract tone/term: (1) soften "Continuous interpolation between hues failed in area hV4" to protan-significant / deutan same-direction trend (p=0.082); (2) "forward-tuning" → "hue interpolation" (forward-tuning is the analysis method, not the substantive restored quantity). See PSYCH_THESIS/main.tex for the revised wording.
 \abstract{
-Color vision deficiency (CVD) is typically corrected with filters that target a population-average retina and treat every user alike. Yet the cortical color representation that perception reads out is reshaped individually, and whether it could guide a personalized correction is unknown. Here we show, using fMRI in two adults with CVD studied as single cases alongside healthy controls, that the cortical representation of color is not reduced in overall signal but distorted in its response structure. Both CVD participants discriminated all displayed hues across the visual hierarchy, yet the structure of their color representation was distorted in two complementary ways. Continuous interpolation between hues failed in area hV4, and the geometry of color representations itself was altered in early visual cortex (V1 and V2), differing between the two individuals. We then summarized each person's distortion with a compact two-component cortical model and analytically inverted it into a per-individual stimulus-space filter, designed to move the CVD color perception and cortical representation structure toward that of a healthy observer. In a second session in the deutan participant, the personalized filter moved the impaired cortical hue geometry back toward the healthy-control reference, where a deployed accessibility filter did not; both filters restored behavioral discrimination comparably, and validation in further individuals remains open. These findings recast CVD as an individually patterned distortion of cortical color structure rather than a loss of chromatic signal, one that can be inverted into a personalized correction.
+Color vision deficiency (CVD) is typically corrected with filters that target a population-average retina and treat every user alike. Yet the cortical color representation that perception reads out is reshaped individually, and whether it could guide a personalized correction is unknown. Here we show, using fMRI in two adults with CVD studied as single cases alongside healthy controls, that the cortical representation of color is not reduced in overall signal but distorted in its response structure. Both CVD participants discriminated all displayed hues across the visual hierarchy, yet the structure of their color representation was distorted in two complementary ways. Continuous interpolation between hues was reduced at area hV4, significantly in the protan participant and as a same-direction trend in the deutan participant. Separately, the geometry of color representations was altered in early visual cortex (V1 and V2), differing between the two individuals. We then summarized each person's distortion with a compact two-component cortical model and analytically inverted it into a per-individual stimulus-space filter, designed to move the CVD color perception and cortical representation structure toward that of a healthy observer. In a second session in the deutan participant, the personalized filter moved the impaired cortical hue interpolation partway toward the healthy-control reference --- without reaching the control level --- whereas a deployed accessibility filter did not improve it. This partial advantage was confined to the interpolation index: both filters restored behavioral discrimination comparably, and neither yielded an HC-like representational geometry. Quantitative fine-discrimination (2AFC) testing and replication in further individuals remain open. These findings recast CVD as an individually patterned distortion of cortical color structure rather than a loss of chromatic signal, one that can in principle be inverted into a personalized correction.
 }
 
 \begin{document}
@@ -100,5 +110,15 @@ Color vision deficiency (CVD) is typically corrected with filters that target a 
 \clearpage
 \section{Supplementary Methods}
 \input{Methods/supplementary_content}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% Supplementary S3 — Identifiability checks (backs the 0/6 claim cited in Results §S3)
+%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\clearpage
+\input{Supplementary/S3_identifiability}
+
+\clearpage
+\input{Supplementary/S16_filter_eval_design}
 
 \end{document}

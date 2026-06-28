@@ -1,0 +1,19 @@
+% Supplementary S16 — Filter-evaluation session: design and comparator
+% Holds the over-specific 2nd-MRI design details moved out of Methods §Filter evaluation:
+% macOS comparator specifics, run-count rationale (four per condition), single-case
+% inference detail, and the behavioral battery.
+
+\section*{Supplementary S16: Filter-evaluation session --- design and comparator}
+\label{app:filter_eval}
+
+\paragraph{Comparator.}
+The deployed comparator was the macOS accessibility Color Filter (System Settings $>$ Accessibility $>$ Display, build 26.5.1), set at an intensity the participant self-tuned before scanning. It is the unmodified shipping product --- an operating-system-level post-display transform. We compared against this deployed filter rather than a re-implemented retinal-simulation transform so that the comparator is the correction an end user actually encounters. The personalized filter, by contrast, was rendered directly in PsychoPy from the frozen per-subject pre-image.
+
+\paragraph{Acquisition and run count.}
+Eight fMRI runs were acquired in ABBA-counterbalanced order, split evenly into four runs per filter. Two constraints set this count. First, scanner time: a within-session two-condition design at six runs per condition would require roughly 90 minutes, beyond the 60--75-minute window over which participant attention and head motion stay acceptable, whereas four runs per condition ($\sim$60 minutes) sits at the recommended boundary. Second, a run-count subsampling analysis on the existing six-run data --- evaluating signal-quality, geometric-stability, and outcome-detection metrics across all $\binom{6}{n}$ run subsets for $n = 2$--$6$ --- indicated that four runs retains the single-subject landmark findings, with five runs preferred and four the acceptable fallback. We note that four runs is below the count that simulations recommend for fine-grained RDM-based model discrimination; the second session is therefore powered to detect movement toward or away from the HC reference, not to adjudicate model classes. The subsampling analysis tracked the encoding-direction LOCO correlation, LORO classification accuracy, and split-half geometric-stability measures; it did not separately certify the adjacent-accuracy metric used as the primary readout in the main text, so the hV4 adjacent-accuracy result of the second session is reported descriptively as a single case rather than as a powered test. For every neural index, the Session-1 HC reference runs were subsampled to four to match this per-condition run count, so that the condition and HC estimates rest on equal amounts of data.
+
+\paragraph{Single-case inference.}
+Each condition's neural index was compared to the HC distribution as a standardized single-case effect size (Cohen's $d$ against the HC mean and SD), reported in place of an inferential $p$ because the grand-mean permutation null is biased for this design. Robustness was assessed in two ways: by leave-one-run separation (the contrast holding after any single run is dropped) and by re-extracting both conditions on the no-filter baseline voxel set.
+
+\paragraph{Behavioral battery.}
+JND staircases were run for eight hue pairs, and the eight-alternative forced-choice (8AFC) color-identification task comprised 64 trials. Both were compared to the unfiltered Session-1 baseline and to the HC distribution.

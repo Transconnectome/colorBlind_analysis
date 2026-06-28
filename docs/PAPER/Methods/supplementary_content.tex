@@ -1,3 +1,4 @@
+\renewcommand{\thetable}{S\arabic{table}}\setcounter{table}{0}
 % Supplementary Methods - Content Only
 % To be included via \input{Methods/supplementary_content}
 
@@ -24,17 +25,16 @@ We evaluated all subjects' data suitable for downstream analysis, though sub-07 
 
 % ========== Section 5: Mean Activation ==========
 
-\subsection*{\textbf{S5. Mean Activation Analysis}}
+\subsection*{\textbf{S3. Mean Activation Analysis}}
 
 To verify that the shared-space geometric differences are not a signal-quality confound, we compared activation-level metrics between groups before SRM alignment. Mean activation magnitude (mean $|\beta|$), signal-to-noise ratio, color modulation depth, run-to-run reliability, and spatial variance did not differ between HC and CVD across V1, V2, V3, and hV4 (Welch's $t$-tests, all $p > 0.09$), and the two CVD cases fell within the HC range on every metric (Crawford--Howell, all $p > 0.09$). Voxel-level color selectivity was strong in both groups (one-way ANOVA across voxels, $F > 4$, $p < 0.001$ in V1--V3). Critically, none of the activation metrics correlated with SRM disparity across participants (Pearson $r$, 20 tests, all $p > 0.13$). The HC--CVD difference is therefore one of representational pattern, not signal amplitude: the cortical color response is equally strong in CVD but geometrically reorganized.
 
 
 % ========== Section 6: Statistical Analysis ==========
 
-\subsection*{\textbf{S6. Statistical Analysis}}
+\subsection*{\textbf{S4. Statistical Analysis}}
 
-% [TODO: revise based on feedback] — FDR scope conflict: "All tests … FDR" overstates. FDR actually applies only to RDM color-pair comparisons (28 pairs) + the 6 identifiability checks; per-hue vulnerability and per-pair identification tests are uncorrected/exploratory. See PSYCH_THESIS/Methods/supplementary_content.tex for the revised wording.
-All tests used a significance threshold of $\alpha = 0.05$ with False Discovery Rate correction \cite{benjamini1995}; $q = 0.05$ applied to RDM color-pair comparisons (28 pairs per participant).
+Unless noted otherwise, the significance threshold was $\alpha = 0.05$. False Discovery Rate correction \cite{benjamini1995} was applied within two pre-specified families only: the RDM color-pair comparisons ($q = 0.05$; 28 pairs per participant) and the six parameter-identifiability checks (\cref{sec:methods:identifiability}). The exploratory per-hue vulnerability comparisons and the per-pair identification tests (including the blue-hue deficit) are reported one-tailed and uncorrected.
 Individual CVD participants were compared to the HC distribution using \citeA{crawford1998} modified t-tests:
 
 \begin{equation}
@@ -49,7 +49,7 @@ Group-level permutation tests (10,000 iterations) were used for HC-CVD compariso
 
 % ========== Section 7: K-Selection ==========
 
-\subsection*{\textbf{S7. Dimensionality Selection (K-Selection)}}
+\subsection*{\textbf{S5. Dimensionality Selection (K-Selection)}}
 
 The reduced dimension $k$ for SRM was determined via leave-one-subject-out (LOSO) cross-validation based on within-subject representational dissimilarity matrix (RDM) reliability \cite{cunningham2014}.
 For each candidate $k$ (range: 1--8) and fold, reliability was quantified as the Spearman correlation between RDMs computed from even runs (2,4,6) versus odd runs (1,3,5) of the held-out participant in SRM space.
@@ -66,7 +66,7 @@ The selected values and their associated cross-subject RDM Spearman correlations
 
 % ========== Section 8: GCV Details ==========
 
-\subsection*{\textbf{S8. Generalized Cross-Validation for Ridge Regression}}
+\subsection*{\textbf{S6. Generalized Cross-Validation for Ridge Regression}}
 \label{app:gcv}
 
 The regularization parameter $\alpha$ for ridge regression was selected via Generalized Cross-Validation (GCV; \citeNP{golub1979}), implemented as \texttt{sklearn.linear\_model.RidgeCV} with \texttt{gcv\_mode='auto'} (\citeNP{pedregosa2011}).
@@ -82,28 +82,58 @@ where $X$ denotes the design matrix, $y$ is the observed response vector, $\hat{
 
 % ========== Section 9: LOO-Consistent Disparity ==========
 
-\subsection*{\textbf{S9. Leave-One-Out Consistent Disparity Estimation}}
+\subsection*{\textbf{S7. Leave-One-Out Consistent Disparity Estimation}}
 
 To quantify HC-CVD disparity with unbiased references, we used a leave-one-out (LOO) consistent procedure: for each fold $i$ (leaving out HC participant $i$), a reference pattern $R_{-i}$ was computed as the mean of the remaining six HC participants' aligned data.
 Both the held-out $\text{HC}_i$ and both CVD participants were compared against this same reference $R_{-i}$, yielding disparity scores $d(\text{HC}_i, R_{-i})$ and $d(\text{CVD}_j, R_{-i})$.
 This ensures HC and CVD disparities are measured against identical references within each fold.
 Individual CVD disparity significance was assessed via \citeA{crawford1998} modified t-tests comparing each CVD participant's mean disparity (averaged across 7 folds) to the HC distribution ($n=7$, $df=6$).
 
+\paragraph{Common-space vs.\ symmetric-LOSO estimates.}
+The geometric-disparity tests (\S\ref{sec:results:geometry}) are reported primarily in the common HC-trained SRM space, in which the seven HC train the shared space and each subject of interest is projected in; because the held-out HC reference is in-sample whereas the projected CVD participant is out-of-sample, we additionally computed a symmetric leave-one-subject-out (LOSO) estimate in which every HC and CVD subject alike is projected by SVD into a space trained on the remaining six HC (Methods, \S\ref{sec:methods:rdm}). Both use the \citeNP{crawford1998} one-tailed single-case $t$ ($df = 6$). Table~\ref{tab:disparity_loso} reports both estimates for all ROIs. The protan participant's V1 elevation is significant under both estimators; the deutan participant's V2 elevation is significant in the common space and attenuates to a non-significant trend under LOSO.
+
+\begin{table}[h]
+\centering
+\caption{Mean pairwise disparity, Crawford--Howell one-tailed single-case $t$ ($df = 6$) against the HC reference, in the primary common HC-trained SRM space and under the symmetric LOSO control, with the common-space case-control effect size $d_{cc} = t\sqrt{8/7}$ ($n = 7$). Bold: $p < 0.05$.}
+\label{tab:disparity_loso}
+\begin{tabular}{llcccccc}
+\toprule
+ & & \multicolumn{3}{c}{Common space} & \multicolumn{2}{c}{Symmetric LOSO} \\
+\cmidrule(lr){3-5}\cmidrule(lr){6-7}
+Subject & ROI & $t$ & $p$ & $d_{cc}$ & $t$ & $p$ \\
+\midrule
+Deutan & V1 & $1.10$ & $0.157$ & $1.18$ & $0.48$ & $0.323$ \\
+ & \textbf{V2} & $\mathbf{2.11}$ & $\mathbf{0.040}$ & $2.26$ & $1.33$ & $0.116$ \\
+ & V3 & $1.92$ & $0.052$ & $2.05$ & $1.17$ & $0.143$ \\
+ & hV4 & $0.23$ & $0.411$ & $0.25$ & $0.07$ & $0.474$ \\
+\midrule
+Protan & \textbf{V1} & $\mathbf{3.48}$ & $\mathbf{0.007}$ & $3.72$ & $\mathbf{2.02}$ & $\mathbf{0.045}$ \\
+ & V2 & $0.99$ & $0.181$ & $1.06$ & $0.77$ & $0.234$ \\
+ & V3 & $0.09$ & $0.466$ & $0.10$ & $0.06$ & $0.479$ \\
+ & hV4 & $1.13$ & $0.150$ & $1.21$ & $0.80$ & $0.228$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 
 % ========== Section 10: Cross-Validation Details ==========
 
-\subsection*{\textbf{S10. Cross-Validation Procedures}}
+\subsection*{\textbf{S8. Cross-Validation Procedures}}
 
 \subsection*{\textbf{Leave-One-Run-Out (LORO)}}
 
 LORO evaluated whether individual colors could be distinguished from voxel response amplitudes, testing the consistency of neural color encoding across runs.
 For each of six runs, the corresponding response matrices ($B$, $C$) were held out as the test set, $W$ was trained on the remaining five runs.
-Both color decoding and voxel response prediction were evaluated on the held-out run.
+The held-out run's color patterns were then decoded by nearest-neighbour matching in channel-output space using the OLS pseudoinverse weights (Methods \S\ref{sec:methods:encoding}).
 
 \subsection*{\textbf{Leave-One-Color-Out (LOCO)}}
 
 LOCO tested whether geometric relationships of circular hue space were preserved in neural representation by evaluating interpolation to held-out colors.
-For each color, all six run response matrices of the target color were held out. $W$ was trained on the remaining seven colors, and the model predicted either the held-out color from voxel responses or voxel responses from the held-out color's channel outputs.
+For each color, all six run response matrices of the target color were held out. $W$ was trained on the remaining seven colors. The held-out color was then decoded from voxel responses using the OLS pseudoinverse weights, yielding the adjacent-accuracy vulnerability profile. The complementary voxel-response prediction (ridge-GCV encoding) enters only the fitting loss $L_{\rm LOCO}$, not the decoding metric (Methods \S\ref{sec:methods:encoding}).
+
+\subsection*{\textbf{Cross-run alignment and leakage control}}
+
+The run-level Procrustes alignment (Methods, ROI definition and response estimation) maps runs 2--6 onto a fixed run-1 reference by an orthogonal rotation that uses no stimulus labels. Because the alignment target is a single fixed run rather than a jointly fitted shared space, the held-out run or color does not define the alignment frame. We further confirmed that re-estimating the Procrustes rotation within each cross-validation fold (nested alignment) leaves LORO classification accuracy essentially unchanged, ruling out test-set leakage from the alignment step.
 
 \subsection*{\textbf{Leave-One-Subject-Out (LOSO)}}
 
@@ -115,7 +145,7 @@ This assessed whether the HC group-derived common space supported generalization
 
 % ========== Section 11: Evaluation Metrics ==========
 
-\subsection*{\textbf{S11. Evaluation Metrics}}
+\subsection*{\textbf{S9. Evaluation Metrics}}
 
 \subsection*{\textbf{Color Decoding Metrics}}
 
@@ -127,12 +157,12 @@ Voxel response prediction was evaluated using Pearson correlation between predic
 
 \subsection*{\textbf{Statistical Significance}}
 
-Statistical significance of group comparisons (HC vs CVD) and individual CVD analyzes was assessed using nonparametric permutation tests (10,000 iterations; \citeNP{nichols2002}).
+Statistical significance of group comparisons (HC vs CVD) and individual CVD analyses was assessed using nonparametric permutation tests (10,000 iterations; \citeNP{nichols2002}).
 
 
 % ========== Section 12: SRM Residuals ==========
 
-\subsection*{\textbf{S12. Shared Response Model Residuals}}
+\subsection*{\textbf{S10. Shared Response Model Residuals}}
 
 Each participant's residuals in the SRM model reflect the extent to which their data are not captured by the common structure, including inherent geometric differences.
 The orthogonal constraint ($W_i^T W_i = I_k$) helps preserve geometric relationships between colors---distances and angles---in the common space.
@@ -142,68 +172,74 @@ Additionally, global between-subject RDM similarity was quantified using Spearma
 
 % ========== Section 13: Image Orientation ==========
 
-\subsection*{\textbf{S13. Image Orientation Initialization}}
+\subsection*{\textbf{S11. Image Orientation Initialization}}
 
 Image orientation was first initialized according to the scanner-defined obliquity information in the NIfTI header.
 The mutual-information cost function was then optimized to maximize the statistical dependence between T1w and BOLD intensity distribution within the overlapping region.
 
 
-% ========== Section 14: Procrustes Benefits ==========
-
-\subsection*{\textbf{S14. Procrustes Alignment Benefits}}
-
-This preprocessing reduces measurement noise across runs while preserving color representational geometry, thereby improving the quality of subsequent SRM fitting.
-
-
 % ========== Section 16: Retinal-Family Model Comparison ==========
 
-\subsection*{\textbf{S16. Comparison with Retinal-Family Distortion Models}}
+\subsection*{\textbf{S12. Comparison with Retinal-Family Distortion Models}}
 \label{app:retinal_family}
 
-Two retinal-family models were evaluated alongside the 2-component model by the same grid-search and permutation procedure (see Section~\ref{sec:methods:filter}).
+The retinal-family (R+C) model was evaluated alongside the 2-component model under the same grid-search and held-out composite criterion (\S\ref{sec:methods:selection}).
 
-\textbf{Models.} The 1-DOF Machado model~\citeNP{machado2009} shifts the L/M cone spectral sensitivity by $\Delta\lambda$~nm, yielding a hue-confusion pattern characteristic of the CVD subtype.
-The 2-DOF retinal$+$cortical R$+$C model~\citeNP{tregillus2021} augments Machado with a cortical gain $g$: $r_{g}' = r_{g,\text{base}} + (1+g)(r_{g,\text{ret}} - r_{g,\text{base}})$, where $g = 0$ recovers the retinal-only model and $g = -1$ is exact cortical compensation.
+\textbf{Model.} The retinal-plus-cortical (R+C) model is defined in \S\ref{sec:methods:candidates}: the subtype Machado cone-shift $\delta\theta_{\rm Mach}$~\citeNP{machado2009}, fixed by the confusion axis, scaled by a single cortical-gain parameter $g$ ($\delta\theta_{\rm RC} = (2-g)\,\delta\theta_{\rm Mach}$; $g = 1$ is retinal-only, $g = 2$ exact cortical cancellation;~\citeNP{tregillus2021}). It was fit by the same grid-search and held-out composite criterion as the 2-component model (\S\ref{sec:methods:selection}), so the two model classes are directly comparable on $\overline{L}_{\rm test}$.
 
-\textbf{Fits (Table~\ref{tab:S1}).} Under the historical LOCO-$\rho$ argmax criterion (40{,}320 label permutations), reported here for reference only, retinal-family fits at hV4 yield Sub-08 R+C $(\Delta\lambda = 2.0$~nm, $g = +2.25$, $\rho = 0.857)$ and Sub-09 1-DOF Machado $(\Delta\lambda = 13.5$~nm, $\rho = 0.762)$; the latter shift magnitude falls within the established range for moderate--severe protanomaly~\cite{neitz2011}.
-The large positive cortical gain for Sub-08 ($g = +2.25$, indicating $>$100\% overshoot beyond the exact Tregillus compensation level of $g = -1$;~\citeNP{tregillus2021}) is not physiologically interpretable as a gain parameter and is treated as an empirical characterization of residual hV4 structure.
-The cross-subject model-class divergence (R+C for Sub-08; 1-DOF Machado for Sub-09) prevents a common-axis comparison of the two cases' distortion mechanisms.
+\textbf{Fits (Table~\ref{tab:modelfits}).} On the held-out composite, R+C failed for both participants. For the deutan participant, $\langle 100\%\rangle$ of resample solutions saturated the gain boundary ($g \to 3.0$), so the fit was rejected at the boundary-saturation gate as model misspecification (\S\ref{sec:results:rc_insufficient}). For the protan participant, R+C passed that gate ($\langle 41\%\rangle$ saturation, $g = 2.95$) but generalized worse than the adopted 2-component fit ($\overline{L}_{\rm test} = -0.86$ vs.\ $-1.54$). A gain $g > 2$ implies cortical overshoot past the undistorted hue, inconsistent with the participants' confirmed residual CVD; the structural cause is the single-axis degree-of-freedom deficit detailed in \S\ref{sec:results:rc_insufficient}.
 
-\textbf{$\Delta$RDM cross-model convergence.} Using R+C parameters for Sub-09 ($\Delta\lambda = 19.5$~nm, $g = -1.10$), an independent $\Delta$RDM test reaches $p = 0.026$ (40{,}320 cosine-similarity permutations on crossnobis distances), providing cross-model corroboration for the Sub-09 distortion signal.
-Retinal-family optimization directly against $\Delta$RDM fails for both CVD subjects; LOCO is the more discriminating phenotype and $\Delta$RDM serves as a convergence cross-check only.
-
-\textbf{Arc-compression and LOCO vulnerability.} At Sub-09's severity, Machado arc-compression ($\Delta\lambda = 13.5$~nm) collapses three hues (c4 green, c5 cyan, c6 blue) to a single perceived angle in opponent hue space.
-These three collapsed hues fall within Sub-09's LOCO vulnerability cluster (c5/c6 cyan/blue), confirming that arc-compression eliminates correction capacity precisely where Sub-09 requires it most.
+\textbf{Relation to $\Delta$RDM and LOCO.} Optimizing a retinal-family model directly against $\Delta$RDM also fails for both CVD participants. For the adopted 2-component model, the $\Delta$RDM cosine ($L_{\rm RDM}$) is itself a component of the selected composite loss (\S\ref{sec:methods:selection}); the forward-encoding LOCO family did not enter either adopted combination and is used only for diagnostic decoding.
 
 \begin{table}[ht]
-  \caption{Distortion-model fits at hV4 for both CVD participants.
-  The 2-component model is listed at its adopted fit, selected by held-out composite test-loss ($\overline{L}_{\rm test}$, lower is better; main text, Section~\ref{sec:results:twocomp}).
-  The retinal-family baselines were fit only under the historical LOCO-$\rho$ argmax criterion (Section~A.1 of Appendix~A; $\rho$ is Spearman correlation between simulated and observed per-color vulnerability), reported for reference only.}
-  \label{tab:S1}
+  \caption{Distortion-model fits for both CVD participants, all scored on the same held-out composite test-loss ($\overline{L}_{\rm test}$, lower is better; \S\ref{sec:methods:selection}; the neural RDM atom in each adopted fit is V2 for the deutan and V1 for the protan participant). The 2-component model is shown at its adopted fit. The retinal-plus-cortical (R+C) fits are reported for comparison: the deutan R+C was rejected at the boundary-saturation gate (\S\ref{sec:results:rc_insufficient}), and the protan R+C generalized worse than the 2-component fit.}
+  \label{tab:modelfits}
   \centering
   \small
-  \begin{tabular}{llcccc}
-    \toprule Subject & Model & DOF & Param.\ 1 & Param.\ 2 & Fit \\ \midrule Sub-08 (deutan) & 2-component & 2 & $\beta_s = 6^\circ$ & $\beta_c = -42^\circ$ & $\overline{L}_{\rm test} = -2.36$ \\ Sub-09 (protan) & 2-component & 2 & $\beta_s = 2^\circ$ & $\beta_c = +24^\circ$ & $\overline{L}_{\rm test} = -1.54$ \\ \midrule Sub-08 (deutan) & R+C\textsuperscript{a} & 2 & $\Delta\lambda = 2.0$~nm & $g = +2.25$ & $\rho = 0.857$ \\ Sub-09 (protan) & Machado\textsuperscript{a} & 1 & $\Delta\lambda = 13.5$~nm & --- & $\rho = 0.762$ \\ \bottomrule
+  \begin{tabular}{llcc}
+    \toprule Participant & Model & Fitted parameters & Held-out fit \\ \midrule
+    Deutan & 2-component & $\beta_s = 6^\circ,\ \beta_c = -42^\circ$ & $\overline{L}_{\rm test} = -2.36$ \\
+    Protan & 2-component & $\beta_s = 2^\circ,\ \beta_c = +24^\circ$ & $\overline{L}_{\rm test} = -1.54$ \\ \midrule
+    Deutan & R+C & $g \to 3.0$ ($\langle 100\%\rangle$ saturated) & rejected (Gate 2) \\
+    Protan & R+C & $g = 2.95$ ($\langle 41\%\rangle$ saturated) & $\overline{L}_{\rm test} = -0.86$ \\ \bottomrule
   \end{tabular}
-  \\[2pt]{\footnotesize \textsuperscript{a}Historical LOCO-$\rho$ argmax criterion (reference only); not the adopted filter fit.}
 \end{table}
 
 % ========== Section 17: HC magnitude-anchor distribution ==========
 
-\subsection*{\textbf{S17. HC leave-one-out magnitude-anchor distribution}}
+\subsection*{\textbf{S13. HC leave-one-out magnitude-anchor distribution}}
 \label{app:hc_perm}
 
-Because the production loss differs between participants (sub-08: $\gamma_{\rm OY} + L_{\rm RDM}^{(V2)}$; sub-09: $\gamma_{\rm all} + L_{\rm RDM}^{(V1)}$), the HC leave-one-out anchor was computed per participant under that participant's loss. Each of the $n = 7$ HC participants was refit as a pseudo-CVD case with the remaining HC pool as reference, yielding a distribution of fitted-parameter magnitudes $\|\hat\beta\|$: $30.5^\circ$ to $58.1^\circ$ (mean $49.1^\circ$) under the sub-08 loss, and $23.4^\circ$ to $55.5^\circ$ (mean $35.7^\circ$) under the sub-09 loss.
-Both CVD estimates fall within their respective HC ranges (sub-08 $\|\hat\beta\| = 42.4^\circ$; sub-09 $\|\hat\beta\| = 24.1^\circ$), so parameter magnitude alone does not separate the CVD cases from HC; the distribution is reported as a descriptive magnitude anchor, not as a hypothesis test of CVD-versus-HC specificity.
+Because the production loss differs between participants (the deutan participant: $\gamma_{\rm OY} + L_{\rm RDM}^{(V2)}$; the protan participant: $\gamma_{\rm all} + L_{\rm RDM}^{(V1)}$), the HC leave-one-out anchor was computed per participant under that participant's loss. Each of the $n = 7$ HC participants was refit as a pseudo-CVD case with the remaining HC pool as reference, yielding a distribution of fitted-parameter magnitudes $\|\hat\beta\|$: $30.5^\circ$ to $58.1^\circ$ (mean $49.1^\circ$) under the deutan participant's loss, and $23.4^\circ$ to $55.5^\circ$ (mean $35.7^\circ$) under the protan participant's loss.
+Both CVD estimates fall within their respective HC ranges (the deutan participant $\|\hat\beta\| = 42.4^\circ$; the protan participant $\|\hat\beta\| = 24.1^\circ$), so parameter magnitude alone does not separate the CVD cases from HC; the distribution is reported as a descriptive magnitude anchor, not as a hypothesis test of CVD-versus-HC specificity.
 
 % ========== Section 18: Effect Sizes ==========
 
-\subsection*{\textbf{S18. Effect Sizes for Single-Case Comparisons}}
+\subsection*{\textbf{S14. Effect Sizes for Single-Case Comparisons}}
 \label{app:effect_sizes}
 
 Crawford--Howell single-case comparisons used the modified $t$ \citeNP{crawford1998}; the corresponding case-control effect size is $d_{cc} = (x_{\rm case} - \bar{x}_{\rm HC}) / s_{\rm HC} = t \cdot \sqrt{(n+1)/n}$ where $n$ is the HC sample size used in the test.
 Mann--Whitney $U$ tests are reported with rank-biserial correlation $r_{\rm rb}$ as effect size.
-Full per-test statistics ($t$, $U$, $p$, $d_{cc}$, $r_{\rm rb}$) for every Crawford--Howell and Mann--Whitney comparison reported in the main text are tabulated in the online repository (\texttt{statistics/effect\_sizes.csv}).
+Effect sizes for the single-case interpolation comparisons are collected in \cref{tab:effect_sizes}; the geometric-disparity effect sizes are listed alongside their $t$ statistics in \cref{tab:disparity_loso} (case-control $d_{cc} = t\sqrt{8/7}$, $n = 7$). Two pooled cross-decoding comparisons were null and are reported by their $p$-values only: the HC-to-HC versus HC-to-CVD generalization test (Mann--Whitney $U$, 21 vs.\ 14 pairs, $p = 0.668$) and the within-ROI hV4 single-case test ($p = 0.142$).
+
+\begin{table}[h]
+\centering
+\caption{Effect sizes for the single-case hue-interpolation comparisons at hV4 (main text, \S\ref{sec:results:loco}). Crawford--Howell case-control effect size $d_{cc} = t\sqrt{(n+1)/n}$ against the $n = 6$ HC distribution. Per-hue tests are one-tailed, uncorrected, and exploratory; both CVD participants share identical per-hue statistics where adjacent accuracy is zero. No individual hue reaches significance.}
+\label{tab:effect_sizes}
+\begin{tabular}{lccc}
+\toprule
+Comparison (hV4) & $t$ & $p$ & $d_{cc}$ \\
+\midrule
+LOCO adjacent accuracy, deutan & $-1.84$ & $0.063$ & $-1.99$ \\
+LOCO adjacent accuracy, protan & $-2.91$ & $0.017$ & $-3.14$ \\
+\midrule
+\multicolumn{4}{l}{\emph{Per-hue adjacent accuracy (one-tailed, exploratory; both participants)}} \\
+Blue & $-1.73$ & $0.072$ & $-1.87$ \\
+Purple & $-0.90$ & $0.205$ & $-0.97$ \\
+Magenta & $-1.32$ & $0.122$ & $-1.43$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 % NOTE: Bibliography는 main.tex에서 처리됨
 

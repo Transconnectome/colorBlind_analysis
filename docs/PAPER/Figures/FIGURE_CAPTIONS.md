@@ -11,11 +11,11 @@ Generated: 2026-05-11. All captions target eLife style.
 
 ## Figure 2 | Color discrimination is preserved but interpolation is selectively impaired at hV4 in CVD
 
-**(A)** Leave-one-run-out (LORO) discrimination accuracy (LDA, 8-class, SRM-aligned) across visual areas V1–hV4 (defined in Figure 1). Gray bars: healthy control (HC) group mean ± SEM (n=7); individual HC values shown as dots. Orange square: sub-08 (deutan CVD); teal triangle: sub-09 (protan CVD). Dashed line: exact-accuracy chance (1/8 = 0.125). n.s.: HC-to-HC vs HC-to-CVD cross-subject LDA generalization, all ROIs pooled (28 HC-to-HC pairs vs 12 HC-to-CVD pairs, Mann-Whitney U, p = 0.668).
+**(A)** Leave-one-run-out (LORO) discrimination accuracy (LDA, 8-class, SRM-aligned) across visual areas V1–hV4 (defined in Figure 1). Gray bars: healthy control (HC) group mean ± SEM (n=7); individual HC values shown as dots. Orange square: sub-08 (deutan CVD); teal triangle: sub-09 (protan CVD). Dashed line: exact-accuracy chance (1/8 = 0.125). n.s.: HC-to-HC vs HC-to-CVD cross-subject LDA generalization, all ROIs pooled (21 HC-to-HC pairs vs 14 HC-to-CVD pairs, Mann-Whitney U, p = 0.668).
 
-**(B)** Leave-one-color-out (LOCO) adjacent accuracy (ForwardEncoding, Procrustes-aligned). Adjacent accuracy: proportion of predictions within ±1 hue step of the target color (0–1; higher = better). Dashed line: adjacent-accuracy chance level (3/8 = 0.375). \*: sub-09 falls significantly below the HC distribution at hV4 (Crawford & Howell, 1998, modified t-test, t = −2.48, p = 0.024); sub-08: t = −1.58, p = 0.082, n.s. Asterisk refers to sub-09 only. Sub-09 (single protan participant) results are reported throughout as exploratory single-case observations requiring independent replication.
+**(B)** Leave-one-color-out (LOCO) adjacent accuracy (ForwardEncoding, Procrustes-aligned). Adjacent accuracy: proportion of predictions within ±1 hue step of the target color (0–1; higher = better). Dashed line: adjacent-accuracy chance level (3/8 = 0.375). \*: sub-09 falls significantly below the HC distribution at hV4 (Crawford & Howell, 1998, modified t-test, t = −2.91, p = 0.017); sub-08: t = −1.84, p = 0.063, n.s. Asterisk refers to sub-09 only. Sub-09 (single protan participant) results are reported throughout as exploratory single-case observations requiring independent replication.
 
-**(C)** Per-hue adjacent accuracy at hV4. HC bars: group mean ± SEM. Hue abbreviations: Org=orange, Yel=yellow, Grn=green, Cyn=cyan, Blu=blue, Pur=purple, Mag=magenta. Dashed line: 3/8 chance. Per-hue Crawford & Howell tests (one-tailed, uncorrected): blue — sub-08 d=2.13, p=0.047; sub-09 d=2.15, p=0.046; purple — sub-08 d=2.40, p=0.033.
+**(C)** Per-hue adjacent accuracy at hV4. HC bars: group mean ± SEM (n=6; sub-07 excluded for insufficient hV4 voxels). Hue abbreviations: Org=orange, Yel=yellow, Grn=green, Cyn=cyan, Blu=blue, Pur=purple, Mag=magenta. Dashed line: 3/8 chance. Both CVD participants showed zero adjacent accuracy at the S-cone intermediate hues blue, purple, and magenta. Per-hue single-case tests (Crawford & Howell, one-tailed, uncorrected and exploratory) reached significance at no individual hue.
 
 *Takeaway.* hV4 supports above-chance 8-class discrimination in both CVD participants while selectively losing continuous-hue interpolation along S-cone-intermediate hues — the joint pattern that simultaneously warrants and constrains a stimulus-space correction filter (panel A: filter precondition; panels B–C: filter target).
 
@@ -87,7 +87,7 @@ Note: this doc's "Figure 4" loss landscape = compiled `fig6_landscape` (renumber
 | Item | Status |
 |---|---|
 | F2 Panel B: `*` = sub-09 only, added "Asterisk refers to sub-09 only" | ✓ Fixed |
-| F2 Panel A: p=0.668 scope — added "(28 HC-to-HC pairs vs 12 HC-to-CVD pairs, all ROIs pooled)" | ✓ Fixed |
+| F2 Panel A: p=0.668 scope — added "(21 HC-to-HC pairs vs 14 HC-to-CVD pairs, all ROIs pooled)" | ✓ Fixed |
 | F2 Panel C: "no within-hue tests" removed; per-hue C&H stats added from per_color_breakdown.json | ✓ Fixed |
 | F2: HC defined "(healthy control, HC; n=7)" at first use | ✓ Fixed |
 | F3 Panel A: ROI selection explained "(V2 for sub-08, V1 for sub-09)" | ✓ Fixed |

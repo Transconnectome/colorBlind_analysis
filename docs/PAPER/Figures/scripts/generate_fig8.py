@@ -74,14 +74,20 @@ def main():
     hl = json.load(open(RESDIR / f"exp2_hc_likeness_sub-08_{args.variant}.json"))
     cv = json.load(open(RESDIR / f"exp2_convergent_sub-08_{args.variant}.json"))
 
-    metric_tail = {"loco": "lower", "loro": "lower", "srm": "upper", "rdm": "lower"}
+    metric_tail = {"adjacc": "lower", "loco": "lower", "loro": "lower", "srm": "upper", "rdm": "lower"}
 
     def panel_data(metric):
         d = {"hc_mean": [], "hc_sd": [], "hc_dots": [], "n": [],
              "nofilter": [], "window": [], "optimal": [], "tail": metric_tail[metric]}
         for roi in ROIS:
             h = hl[roi]; c = cv[roi]
-            if metric == "loco":
+            if metric == "adjacc":
+                d["hc_mean"].append(h["hc_loco_adjacc_n4_mean"]); d["hc_sd"].append(h["hc_loco_adjacc_n4_sd"])
+                d["hc_dots"].append(h["hc_loco_adjacc_n4_values"]); d["n"].append(h["hc_n"])
+                d["nofilter"].append(h["nofilter_baseline_exp1"]["loco_adjacc_n4_matched"])
+                d["window"].append(h["conditions"]["window"]["loco_adjacc_mean"])
+                d["optimal"].append(h["conditions"]["optimal"]["loco_adjacc_mean"])
+            elif metric == "loco":
                 d["hc_mean"].append(h["hc_loco_rho_n4_mean"]); d["hc_sd"].append(h["hc_loco_rho_n4_sd"])
                 d["hc_dots"].append(h["hc_loco_rho_n4_values"]); d["n"].append(h["hc_n"])
                 d["nofilter"].append(h["nofilter_baseline_exp1"]["loco_rho_n4_matched"])
@@ -109,10 +115,10 @@ def main():
         return d
 
     panels = [
-        ("loco", "A", "LOCO ρ (voxel prediction)", "Functional — forward encoding", "Decoding ρ", True),
-        ("loro", "B", "LORO accuracy (discrimination)", "Functional — forward encoding", "Proportion correct", True),
-        ("srm",  "C", "SRM disparity", "Geometry — shared-space alignment", "SRM disparity", False),
-        ("rdm",  "D", "RDM similarity to HC", "Geometry — representational RDM", "Spearman ρ to HC", True),
+        ("adjacc", "A", "LOCO adjacent accuracy (±1 step)", "Functional — interpolation (primary)", "Adjacent accuracy", True),
+        ("loco",   "B", "LOCO forward-tuning ρ", "Functional — encoding (secondary)", "Decoding ρ", True),
+        ("srm",    "C", "SRM disparity", "Geometry — shared-space alignment", "SRM disparity", False),
+        ("rdm",    "D", "RDM similarity to HC", "Geometry — representational RDM", "Spearman ρ to HC", True),
     ]
 
     mm = 1 / 25.4
@@ -156,6 +162,10 @@ def main():
         ax.set_ylabel(ylabel, fontsize=7, labelpad=3)
         ax.tick_params(axis="both", labelsize=6.5, length=3)
         ax.axhline(0, color="#bbb", linewidth=0.6, zorder=0)
+        if metric == "adjacc":
+            ax.axhline(0.375, color="#999", linestyle="--", linewidth=0.7, zorder=1)
+            ax.text(len(ROIS) - 0.55, 0.375, "chance", fontsize=5.5, color="#999",
+                    va="bottom", ha="right")
         strip(ax)
         ax.text(-0.02, 1.18, letter, transform=ax.transAxes, fontsize=11, fontweight="bold",
                 va="bottom", ha="left")

@@ -1,40 +1,24 @@
 % Appendix A — Alternative model comparison
-% Updated 2026-05-19: main text adopts the per-subject selected loss
-% (gamma + L_RDM; Methods, parameter selection). Retains LOCO-rho-argmax fits and the
-% Machado/R+C cone-shift baselines as historical reference; R+C
-% decomposition retained only as an exploratory descriptive companion
-% (near-degenerate loss; no etiological claim).
+% Reconciled 2026-06-23 with the main-text composite criterion: the retinal-family
+% (R+C) model is the 1-DOF g-only form (delta_theta = (2-g) delta_theta_Mach;
+% Methods sec:methods:candidates), scored on the same held-out composite as the
+% 2-component model. Historical LOCO-rho-argmax fits and the 2-DOF (Delta-lambda, g)
+% decomposition have been removed; only the criterion-independent structural
+% arguments are retained.
 
 \section*{Appendix A: Alternative Model Comparison}
 \label{app:altmodels}
 
-The main text adopts a 2-component cortical model (Section~\ref{sec:results:twocomp}).
-Here we report two cone-shift baselines as reference comparisons:
+The main text adopts a 2-component cortical model (Section~\ref{sec:results:twocomp}). Here we compare it against the retinal-family alternative on the same held-out composite criterion (\S\ref{sec:methods:selection}), and give the structural reasons the retinal-family class is inadequate for the stimulus-space filter task.
 
-\begin{itemize}
-  \item \textbf{Machado (1-DOF)} --- a single retinal cone-spectral shift $\Delta\lambda$ \citeNP{machado2009}.
-  \item \textbf{Retinal + Cortical (R+C, 2-DOF)} --- retinal shift $\Delta\lambda$ plus a cortical compensation gain $g$ \citeNP{tregillus2021}.
-\end{itemize}
+\subsection*{A.1 Retinal-plus-cortical (R+C) fit on the composite criterion}
 
-\subsection*{A.1 Fit results (LOCO Spearman $\rho$ argmax, historical reference)}
-
-Under the LOCO-$\rho$ argmax criterion used in earlier drafts, the Machado model fit Sub-09 at $\Delta\lambda = 13.5$~nm with $\rho_\text{V4} = 0.76$ and Sub-08 at $\rho_\text{V4} = 0.62$ (lower fit quality); the R+C model did not improve on either single-component model in either subject.
-These fits are reported as historical reference for the main-text 2-component fit (Section~\ref{sec:results:twocomp}); the LOCO-$\rho$ argmax criterion used here need not agree with the per-subject loss selected in the main text (\S\ref{sec:methods:selection}).
-
-\paragraph{R+C decomposition as a diagnostic.}
-Although the R+C 2-stage model is not adopted as the filter form (see \nameref{sec:results:filter}), the R+C parameter fit at hV4 is reported here as an exploratory per-subject diagnostic.
-For sub-08, the R+C decomposition returns $\Delta\lambda = 2.5$~nm with $g = -2.25$; for sub-09 it returns $\Delta\lambda = 19.5$~nm with $g = -1.10$.
-These values are reported for completeness only and carry no etiological interpretation.
-The R+C neural loss is weakly identified (near-degenerate) along the $\Delta\lambda$--$g$ trade-off, and the $g$ estimate in particular is unstable across fitting variants, reversing sign under alternative criteria (the historical LOCO-$\rho$ argmax fit returns $g = +2.25$ for sub-08, versus $g = -2.25$ here; Supplementary Table~\ref{tab:S1}); the $(\Delta\lambda, g)$ pair therefore does not constitute a reliable point estimate and supports no retinal-versus-cortical attribution.
-We retain it only as a descriptive companion to the 2-component fit, not as an independent test.
+The retinal-plus-cortical model applies the subtype Machado cone-shift $\delta\theta_{\rm Mach}$ \citeNP{machado2009} scaled by a single cortical-gain parameter $g$ ($\delta\theta_{\rm RC} = (2 - g)\,\delta\theta_{\rm Mach}$; $g = 1$ retinal-only, $g = 2$ exact cortical cancellation; \citeNP{tregillus2021}). Scored on the same held-out composite as the 2-component model, R+C failed for both participants: for the deutan participant every resample saturated the gain boundary ($g \to 3.0$, $\langle 100\%\rangle$), so the fit was rejected as misspecified; for the protan participant the best fit ($g = 2.95$) generalized worse than the adopted 2-component model ($\overline{L}_{\rm test} = -0.86$ vs.\ $-1.54$). Full fits are in Supplementary Table~\ref{tab:modelfits} and Section~\ref{sec:results:rc_insufficient}. A gain $g > 2$ implies cortical overshoot past the undistorted hue, inconsistent with the participants' confirmed residual CVD, so the saturated estimate is a model failure rather than a parameter value.
 
 \subsection*{A.2 Inverse-mapping (pre-image) behavior}
 
-The angular form of the 2-component model is bijective by construction: a stimulus-space pre-image $\theta + \delta\theta$ exists for any target hue.
-The 1-DOF Machado fit for sub-09, by contrast, collapses three hues (green $135^\circ$, cyan $180^\circ$, blue $225^\circ$) onto a single pre-image angle ($\sim 127^\circ$), which mathematically prevents exact inversion at those positions.
-This arc-compression failure is a structural property of the 1-DOF retinal-shift model and is independent of the fitting criterion; it disqualifies the Machado baseline for the stimulus-space filter task of Section~\ref{sec:results:filter}.
+The angular form of the 2-component model is bijective by construction: a stimulus-space pre-image $\theta + \delta\theta$ exists for any target hue. The retinal-shift component $\delta\theta_{\rm Mach}$ (the $g = 1$ retinal-only case), by contrast, compresses three hues (green $135^\circ$, cyan $180^\circ$, blue $225^\circ$) into a narrow ${\sim}26^\circ$ band (the eight shifted hues span only ${\sim}96^\circ$) at the protan participant's subtype severity, so they lose a unique pre-image and exact inversion fails at those positions. This arc-compression is a structural property of the retinal-shift form, independent of the fitting criterion, and disqualifies the retinal-family baseline for the stimulus-space filter task of Section~\ref{sec:results:filter}.
 
-\subsection*{A.3 R+C model}
+\subsection*{A.3 Why the cortical gain cannot recover the distortion}
 
-The R+C model is retained here as a 2-DOF baseline.
-Because the cortical gain term $g$ acts as a uniform amplitude scaling without generating the angular distortion captured by the 2-component model's $\beta_c \cos(h - \theta_{\rm conf})$ term, R+C does not match the observed hV4 LOCO vulnerability pattern beyond what the retinal $\Delta\lambda$ term alone provides; this conclusion is consistent across loss criteria.
+Because the cortical gain $g$ rescales the retinal shift uniformly without generating the angular distortion captured by the 2-component model's $\beta_c \cos(\theta - \theta_{\rm conf})$ term, no value of $g$ matches the observed hV4 LOCO vulnerability pattern beyond what the retinal $\delta\theta_{\rm Mach}$ term alone provides. This single-axis degree-of-freedom deficit is the structural cause of the failure in A.1, and it holds across fitting criteria.

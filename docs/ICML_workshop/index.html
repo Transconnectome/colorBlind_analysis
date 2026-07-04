@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>ICML 2026 · SD4H — Personalized Inverse Filters for Color Vision Deficiency</title>
+<meta name="description" content="ICML 2026 SD4H workshop — landing page: poster, code, homepage, LinkedIn." />
+
+<!-- ============================================================= -->
+<!--  EDIT LINKS HERE — change the 4 href values below only.       -->
+<!-- ============================================================= -->
+<style>
+  :root {
+    /* 4 button destinations. Replace "#" placeholders when ready. */
+    /* poster  : ./poster_ICML_SD4H_preview.pdf  (repo PDF)          */
+    /* code    : https://github.com/Transconnectome/colorBlind_analysis */
+    /* homepage: https://haba6030.github.io                           */
+    /* linkedin: https://www.linkedin.com/in/jinilkimpotato/          */
+  }
+</style>
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg1: #ffffff;
+    --bg2: #f4f6fb;
+    --card: #ffffff;
+    --card-border: rgba(15, 23, 42, 0.12);
+    --text: #12151b;
+    --muted: #5a6472;
+    --accent: #3b6fe0;
+    /* isoluminant hue ring — nods to the 8-hue stimulus set */
+    --h1: #ff5a5f; --h2: #ff9f43; --h3: #ffd23f;
+    --h4: #4cd97b; --h5: #22d3ee; --h6: #5b8cff;
+    --h7: #a678ff; --h8: #ff6ad5;
+  }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    min-height: 100dvh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text);
+    background:
+      radial-gradient(1000px 520px at 50% -12%, #eef2fb 0%, transparent 60%),
+      linear-gradient(180deg, var(--bg1), var(--bg2));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+    gap: 28px;
+  }
+
+  .wrap {
+    width: 100%;
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    gap: 26px;
+  }
+
+  /* ---- Hero figure ---- */
+  .hero-fig {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    border-radius: 16px;
+    border: 1px solid var(--card-border);
+    box-shadow: 0 6px 22px rgba(15,23,42,.10);
+    background: #fff;
+  }
+
+  /* ---- Header ---- */
+  header { text-align: center; }
+
+  .badge {
+    display: inline-block;
+    font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted);
+    border: 1px solid var(--card-border);
+    border-radius: 999px;
+    padding: 5px 12px;
+    margin-bottom: 14px;
+  }
+
+  h1 {
+    font-size: clamp(20px, 5.2vw, 28px);
+    line-height: 1.28;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  .subtitle {
+    margin-top: 10px;
+    color: var(--muted);
+    font-size: clamp(13px, 3.4vw, 15px);
+    line-height: 1.5;
+  }
+  .author { margin-top: 6px; color: var(--text); font-weight: 600; font-size: 15px; }
+
+  /* ---- Buttons ---- */
+  nav {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  .btn {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+    color: var(--text);
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    padding: 20px 18px;
+    min-height: 108px;
+    box-shadow: 0 1px 2px rgba(15,23,42,.05), 0 6px 18px rgba(15,23,42,.06);
+    transition: transform .15s ease, border-color .15s ease, box-shadow .15s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:hover, .btn:focus-visible {
+    transform: translateY(-3px);
+    border-color: rgba(59,111,224,.45);
+    box-shadow: 0 4px 10px rgba(15,23,42,.08), 0 14px 30px rgba(15,23,42,.10);
+    outline: none;
+  }
+  .btn:active { transform: translateY(-1px) scale(.99); }
+
+  .btn .ico {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: grid; place-items: center;
+    color: #fff;
+  }
+  .btn .ico svg { width: 22px; height: 22px; display: block; }
+  .btn .label { font-size: 16px; font-weight: 650; }
+  .btn .hint { font-size: 12px; color: var(--muted); }
+
+  .ico-poster   { background: linear-gradient(135deg, var(--h1), var(--h2)); }
+  .ico-code     { background: linear-gradient(135deg, var(--h4), var(--h5)); }
+  .ico-homepage { background: linear-gradient(135deg, var(--h6), var(--h7)); }
+  .ico-linkedin { background: linear-gradient(135deg, #0a66c2, #378fe9); }
+
+  /* disabled placeholder link */
+  .btn[href="#"] { opacity: .55; cursor: not-allowed; }
+  .btn[href="#"] .hint::after { content: " (link pending)"; }
+
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  @media (max-width: 380px) {
+    nav { grid-template-columns: 1fr; }
+    .btn { min-height: 84px; flex-direction: row; align-items: center; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <img class="hero-fig" src="./icml2026/figures/fig1_pipeline_revise.png"
+         alt="Pipeline overview: fMRI hue geometry to personalized inverse filter for color vision deficiency." />
+    <header>
+      <div class="badge">ICML 2026 · SD4H Workshop</div>
+      <h1>Personalized Inverse Filters for Color&nbsp;Vision Deficiency</h1>
+      <p class="subtitle">Structured-distortion inference &amp; analytic inversion of an interpretable individual model from fMRI hue geometry.</p>
+      <p class="author">Jinil Kim · Connectome Lab, SNU</p>
+    </header>
+
+    <nav aria-label="Project links">
+      <!-- 1. POSTER -->
+      <a class="btn" href="./poster_ICML_SD4H_preview.pdf" target="_blank" rel="noopener">
+        <span class="ico ico-poster" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>
+        </span>
+        <span class="label">Poster</span>
+        <span class="hint">PDF</span>
+      </a>
+
+      <!-- 2. CODES -->
+      <a class="btn" href="https://github.com/Transconnectome/colorBlind_analysis" target="_blank" rel="noopener">
+        <span class="ico ico-code" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+        </span>
+        <span class="label">Codes</span>
+        <span class="hint">GitHub repo</span>
+      </a>
+
+      <!-- 3. HOMEPAGE -->
+      <a class="btn" href="https://haba6030.github.io" target="_blank" rel="noopener">
+        <span class="ico ico-homepage" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/><rect x="9.5" y="13" width="5" height="7"/></svg>
+        </span>
+        <span class="label">Homepage</span>
+        <span class="hint">Personal site</span>
+      </a>
+
+      <!-- 4. LINKEDIN -->
+      <a class="btn" href="https://www.linkedin.com/in/jinilkimpotato/" target="_blank" rel="noopener">
+        <span class="ico ico-linkedin" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9h4v12H3zM9 9h3.8v1.7h.05c.53-.95 1.83-1.95 3.77-1.95 4.03 0 4.78 2.5 4.78 5.75V21h-4v-4.9c0-1.17-.02-2.68-1.9-2.68-1.9 0-2.2 1.28-2.2 2.6V21H9z"/></svg>
+        </span>
+        <span class="label">LinkedIn</span>
+        <span class="hint">Profile</span>
+      </a>
+    </nav>
+
+    <footer>
+      Scan-to-explore · ICML 2026 SD4H Workshop<br/>
+      <a href="https://github.com/Transconnectome/colorBlind_analysis" target="_blank" rel="noopener">Transconnectome / colorBlind_analysis</a>
+    </footer>
+  </div>
+</body>
+</html>

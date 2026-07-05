@@ -12,8 +12,8 @@
 <style>
   :root {
     /* 4 button destinations. Replace "#" placeholders when ready. */
-    /* poster  : ./poster_ICML_SD4H_preview.pdf  (repo PDF)          */
-    /* code    : https://github.com/Transconnectome/colorBlind_analysis */
+    /* poster  : ./poster_ICML_0704.pdf  (A1 repo PDF)                */
+    /* paper   : https://openreview.net/forum?id=YSptfeekLI (OpenReview) */
     /* homepage: https://haba6030.github.io                           */
     /* linkedin: https://www.linkedin.com/in/jinilkimpotato/          */
   }
@@ -100,6 +100,16 @@
     line-height: 1.5;
   }
   .author { margin-top: 6px; color: var(--text); font-weight: 600; font-size: 15px; }
+  .venue {
+    margin-top: 8px;
+    display: inline-block;
+    color: var(--muted);
+    font-size: 12.5px;
+    line-height: 1.45;
+    border: 1px solid var(--card-border);
+    border-radius: 999px;
+    padding: 5px 12px;
+  }
 
   /* ---- Buttons ---- */
   nav {
@@ -175,11 +185,12 @@
       <h1>Personalized Inverse Filters for Color&nbsp;Vision Deficiency</h1>
       <p class="subtitle">Structured-distortion inference &amp; analytic inversion of an interpretable individual model from fMRI hue geometry.</p>
       <p class="author">Jinil Kim · Connectome Lab, SNU</p>
+      <p class="venue">Poster · Session 1, Hall D2, Coex · Fri Jul 11, 2026 · 9:50–10:50&nbsp;AM</p>
     </header>
 
     <nav aria-label="Project links">
       <!-- 1. POSTER -->
-      <a class="btn" href="./poster_ICML_SD4H_preview.pdf" target="_blank" rel="noopener">
+      <a class="btn" href="./poster_ICML_0704.pdf" target="_blank" rel="noopener">
         <span class="ico ico-poster" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>
         </span>
@@ -187,13 +198,13 @@
         <span class="hint">PDF</span>
       </a>
 
-      <!-- 2. CODES -->
-      <a class="btn" href="https://github.com/Transconnectome/colorBlind_analysis" target="_blank" rel="noopener">
+      <!-- 2. PAPER (OpenReview) -->
+      <a class="btn" href="https://openreview.net/forum?id=YSptfeekLI" target="_blank" rel="noopener">
         <span class="ico ico-code" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M14 2v6h6"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
         </span>
-        <span class="label">Codes</span>
-        <span class="hint">GitHub repo</span>
+        <span class="label">Paper</span>
+        <span class="hint">OpenReview</span>
       </a>
 
       <!-- 3. HOMEPAGE -->
@@ -216,8 +227,8 @@
     </nav>
 
     <footer>
-      Scan-to-explore · ICML 2026 SD4H Workshop<br/>
-      <a href="https://github.com/Transconnectome/colorBlind_analysis" target="_blank" rel="noopener">Transconnectome / colorBlind_analysis</a>
+      Scan-to-explore · ICML 2026 · Structured Data for Health (SD4H)<br/>
+      <a href="https://openreview.net/forum?id=YSptfeekLI" target="_blank" rel="noopener">Read the paper on OpenReview</a>
     </footer>
   </div>
 </body>

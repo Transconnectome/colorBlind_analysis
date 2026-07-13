@@ -296,7 +296,7 @@ where ψ(θ) = Σ_k [a_k sin(kθ) + b_k cos(kθ)]   (Fourier parameterization)
 - sub-09 (protan): 7 FDR pairs (V1 magenta axis), dual dissociation with sub-08
 - sub-10 (deutan, compensated): 0 FDR pairs, HC-like — cortical compensation case study
 
-**Documents**: `analysis/future_phase2_filter_optimization/pre_validation/notion_prevalidation.md`
+**Documents**: `analysis/phase2_procrustes_cvd_hc/README.md` (CVD–HC SRM pair-level distortion; 구 `future_phase2_filter_optimization/pre_validation/notion_prevalidation.md`은 commit 58bce39에서 삭제)
 
 ---
 

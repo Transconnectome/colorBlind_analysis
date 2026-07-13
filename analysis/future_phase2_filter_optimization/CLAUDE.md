@@ -166,12 +166,10 @@ HC pool g 산출 시 CVD-prior Δλ를 HC에 강제 대입 → procedural artifa
 **REFERENCE (prior work)**:
 - `action_plans/PLAN04_EXECUTIVE_SUMMARY.md` — Cycle 1~13 이력 (구 cycle15 포함)
 - `notion.md` — 전체 서술 (일부 구형 terminology 포함 가능)
-- `COMPREHENSIVE_MODEL_RESULTS.md` — 3 모델 비교 (구형)
-- `simulation_recoverability_behavior.md` — recoverability 분석
 
-**DEPRECATED**:
-- `LOCO_FILTER_PLAN.md`, `LOCO_FILTER_RESULTS.md` — 구 single-loss LOCO 기반 설계 (v6 이전)
-- `results/loco_filter/` — 구 LOCO filter output
+**REMOVED (git history only, commit 91796b6 정리에서 삭제 — 필요 시 `git show 91796b6~1:<path>`)**:
+- `COMPREHENSIVE_MODEL_RESULTS.md`, `simulation_recoverability_behavior.md` (구 3-모델 비교 / recoverability)
+- `LOCO_FILTER_PLAN.md`, `LOCO_FILTER_RESULTS.md`, `results/loco_filter/` (구 single-loss LOCO 설계, v6 이전)
 
 ## 7. Rule of Action
 

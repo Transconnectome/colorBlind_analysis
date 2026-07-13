@@ -109,7 +109,7 @@ PCA:                30 components
 **1B. QC Visualization** (`visualize_roi_overlay.py`)
 - ROI alignment check on functional data
 
-**1C. Baseline Analysis** (`fir_reconstruction_BH2009_system_clean.py`)
+**1C. Baseline Analysis** (`phase1_procrustes_decoding/run_full_dataset_C010.py`; 구 FIR 시제품은 `backup/fir_trials/fir_reconstruction_BH2009_*.py`)
 - **1st-level GLM**: FIR-based HRF estimation (8 delays, 12s window, NO drift)
 - Voxel selection: Top 50% by FIR R-squared
 - **2nd-level GLM**: HRF + derivative + **2nd-level drift** (12 regressors: 6x linear + 6x constant)

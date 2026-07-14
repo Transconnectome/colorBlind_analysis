@@ -30,14 +30,14 @@ This phase uses Procrustes analysis to quantify CVD-HC differences in neural col
 | Subject | CVD Type | Magnitude (L2 ratio) | Sign/Baseline | Structure (RDM diff) | Total T |
 |---------|----------|---------------------|---------------|---------------------|---------|
 | **Sub-08** | Deut | 0.66 (-34%) | -0.41 | 0.505 | 0.178 (V2) |
-| **Sub-09** | Deut | 1.21 (+21%) | +0.32 | 0.118 | 0.115 (V1) |
-| **Sub-10** | Prot | 0.89 (-11%) | -0.05 | 0.310 | 0.117 (V2) |
+| **Sub-09** | Prot | 1.21 (+21%) | +0.32 | 0.118 | 0.115 (V1) |
+| **Sub-10** | Deut | 0.89 (-11%) | -0.05 | 0.310 | 0.117 (V2) |
 
-**Key Insight**: **Sub-08 vs Sub-09** have **identical genotype** (deuteranopia) but **opposite neural phenotypes**:
-- Sub-08: Low magnitude, negative baseline, high structural distortion
-- Sub-09: High magnitude, positive baseline, low structural distortion
+**Key Insight**: **CVD is heterogeneous** — the three CVD participants show distinct three-dimensional distortion profiles (magnitude, sign, structure), not a single shared pattern. For example, sub-08 and sub-09 differ on every axis:
+- Sub-08 (deutan): Low magnitude, negative baseline, high structural distortion
+- Sub-09 (protan): High magnitude, positive baseline, low structural distortion
 
-**Conclusion**: Personalized interventions are **necessary**; generic CVD filter would fail due to opposing distortion profiles.
+**Conclusion**: Personalized interventions are **necessary**; a generic CVD filter would fail because the per-subject distortion profiles diverge.
 
 ---
 

@@ -190,11 +190,13 @@ def srm_disparities(hc_means, cond_means, k, nofilter_raw=None):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--variant', default='native', choices=['native', 'matched'])
+    ap.add_argument('--subject', default='08', help='CVD subject id, e.g. 08 / 09')
     args = ap.parse_args()
+    subj = f"sub-{args.subject}"
     exp2_dir = ROOT / "derivatives" / (
         "full_dataset_C010_exp2" if args.variant == 'native'
         else "full_dataset_C010_exp2_matched")
-    print(f"VARIANT={args.variant} exp2_dir={exp2_dir}")
+    print(f"SUBJECT={subj} VARIANT={args.variant} exp2_dir={exp2_dir}")
 
     results = {}
     for roi in ROIS:
@@ -208,13 +210,13 @@ def main():
             if roi == 'V4' and amp.shape[2] < 20:
                 continue
             hc_raws.append(amp); hc_means.append(amp.mean(0))
-        # condition raw + means: nofilter = sub-08 exp1; window/optimal = exp2 variant
+        # condition raw + means: nofilter = this subject's exp1; window/optimal = exp2 variant
         cond_means, cond_raws = {}, {}
-        nf_raw = load_npy(HC_C010 / "sub-08" / roi / "amplitudes_procrustes.npy")  # (6,8,V)
+        nf_raw = load_npy(HC_C010 / subj / roi / "amplitudes_procrustes.npy")  # (6,8,V)
         if nf_raw is not None:
             cond_means['nofilter'] = nf_raw.mean(0); cond_raws['nofilter'] = nf_raw
         for c in ['window', 'optimal']:
-            a = load_npy(exp2_dir / "sub-08" / c / roi / "amplitudes_procrustes.npy")
+            a = load_npy(exp2_dir / subj / c / roi / "amplitudes_procrustes.npy")
             if a is not None:
                 cond_means[c] = a.mean(0); cond_raws[c] = a
 
@@ -298,7 +300,7 @@ def main():
         results[roi] = roi_res
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    out = OUT_DIR / f"exp2_convergent_sub-08_{args.variant}.json"
+    out = OUT_DIR / f"exp2_convergent_{subj}_{args.variant}.json"
     with open(out, 'w') as f:
         json.dump(results, f, indent=2)
     print(f"\nSaved: {out}")

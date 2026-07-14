@@ -72,9 +72,11 @@ def strip(ax):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--variant", default="native", choices=["native", "matched"])
+    ap.add_argument("--subject", default="08", help="CVD subject id, e.g. 08 / 09")
     args = ap.parse_args()
-    hl = json.load(open(RESDIR / f"exp2_hc_likeness_sub-08_{args.variant}.json"))
-    cv = json.load(open(RESDIR / f"exp2_convergent_sub-08_{args.variant}.json"))
+    subj = f"sub-{args.subject}"
+    hl = json.load(open(RESDIR / f"exp2_hc_likeness_{subj}_{args.variant}.json"))
+    cv = json.load(open(RESDIR / f"exp2_convergent_{subj}_{args.variant}.json"))
 
     # ---- assemble per-panel data: hc(mean,sd,n,dots) + cond values + CH tail ----
     def panel_data(metric):
@@ -179,12 +181,12 @@ def main():
                 markersize=6, label=COND_STYLE[c][2], linewidth=0) for c in ["nofilter", "window", "optimal"]]
     fig.legend(handles=handles, loc="lower center", ncol=5, fontsize=6.5, frameon=False,
                bbox_to_anchor=(0.5, 0.055))
-    fig.suptitle(f"exp2 neural HC-likeness — sub-08 ({args.variant} voxels, descriptive)",
+    fig.suptitle(f"exp2 neural HC-likeness — {subj} ({args.variant} voxels, descriptive)",
                  y=0.965, fontsize=9, fontweight="bold")
 
     OUTDIR.mkdir(parents=True, exist_ok=True)
-    png = OUTDIR / f"exp2_neural_hc_likeness_{args.variant}.png"
-    pdf = OUTDIR / f"exp2_neural_hc_likeness_{args.variant}.pdf"
+    png = OUTDIR / f"exp2_neural_hc_likeness_{subj}_{args.variant}.png"
+    pdf = OUTDIR / f"exp2_neural_hc_likeness_{subj}_{args.variant}.pdf"
     fig.savefig(png, dpi=300, bbox_inches="tight")
     fig.savefig(pdf, bbox_inches="tight")
     print(f"Saved: {png}")

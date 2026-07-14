@@ -46,12 +46,14 @@ def load(path):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--variant", default="native", choices=["native", "matched"])
+    ap.add_argument("--subject", default="08", help="CVD subject id, e.g. 08 / 09")
     args = ap.parse_args()
+    subj = f"sub-{args.subject}"
     EXP2 = ROOT / "derivatives" / ("full_dataset_C010_exp2" if args.variant == "native"
                                    else "full_dataset_C010_exp2_matched")
     HC_C010 = ROOT / "derivatives" / "full_dataset_C010"
     OUT = ROOT / "analysis" / "future_phase3_behavioral_analysis" / "exp2_neural" / "results"
-    print(f"VARIANT={args.variant}  EXP2={EXP2.name}")
+    print(f"SUBJECT={subj}  VARIANT={args.variant}  EXP2={EXP2.name}")
 
     results = {}
     for roi in ROIS:
@@ -65,9 +67,9 @@ def main():
             if roi == "V4" and a.shape[2] < 20:    # sub-07 hV4 sparse
                 continue
             hc_amps.append(a)
-        conds["nofilter"] = load(HC_C010 / "sub-08" / roi / "amplitudes_procrustes.npy")
-        conds["window"]   = load(EXP2 / "sub-08" / "window"  / roi / "amplitudes_procrustes.npy")
-        conds["optimal"]  = load(EXP2 / "sub-08" / "optimal" / roi / "amplitudes_procrustes.npy")
+        conds["nofilter"] = load(HC_C010 / subj / roi / "amplitudes_procrustes.npy")
+        conds["window"]   = load(EXP2 / subj / "window"  / roi / "amplitudes_procrustes.npy")
+        conds["optimal"]  = load(EXP2 / subj / "optimal" / roi / "amplitudes_procrustes.npy")
 
         roi_res = {"roi": roi, "hc_n": len(hc_amps), "conditions": {}}
 
@@ -91,12 +93,12 @@ def main():
         results[roi] = roi_res
 
     OUT.mkdir(parents=True, exist_ok=True)
-    out_f = OUT / f"exp2_decoder_2x2_sub-08_{args.variant}.json"
+    out_f = OUT / f"exp2_decoder_2x2_{subj}_{args.variant}.json"
     with open(out_f, "w") as f:
         json.dump(results, f, indent=2)
 
     # ---- print: per ROI, conditions as rows, decoder as columns ----
-    print(f"\n{'='*92}\nsub-08 exp2 — 2x2 decoder(ols/gcv) x task(ENCODING rho / DECODING adj,exact)\n"
+    print(f"\n{'='*92}\n{subj} exp2 — 2x2 decoder(ols/gcv) x task(ENCODING rho / DECODING adj,exact)\n"
           f"chance: adj=0.375  exact=0.125   (ENCODING wants gcv high; DECODING wants ols high)\n{'='*92}")
     for roi, r in results.items():
         print(f"\n[{roi}]  (HC n={r['hc_n']})")

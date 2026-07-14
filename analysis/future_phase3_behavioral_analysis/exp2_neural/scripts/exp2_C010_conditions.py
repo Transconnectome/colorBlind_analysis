@@ -60,10 +60,13 @@ N_RUNS = 8
 N_COLORS = 8
 FIR_DELAYS = np.arange(8) * TR
 
-# Condition map (1-indexed run numbers), ABBA WOOWWOOW
-CONDITION_RUNS = {
-    "window":  [1, 4, 5, 8],
-    "optimal": [2, 3, 6, 7],
+# Condition map (1-indexed run numbers), ABBA counterbalancing — MIRRORED across subjects.
+#   sub-08 (deutan): W O O W W O O W  -> window  {1,4,5,8}, optimal {2,3,6,7}
+#   sub-09 (protan): O W W O O W W O  -> optimal {1,4,5,8}, window  {2,3,6,7}  (mirror)
+# sub-09 map verified per-run from ses-1_colorDetect_run-N_info.json "Filter condition".
+CONDITION_RUNS_BY_SUBJECT = {
+    "08": {"window": [1, 4, 5, 8], "optimal": [2, 3, 6, 7]},
+    "09": {"window": [2, 3, 6, 7], "optimal": [1, 4, 5, 8]},
 }
 
 # C010: drift only, NO confounds (identical to exp1)
@@ -278,7 +281,8 @@ def run_subject_roi(subject_id, roi_name):
     np.save(allraw_dir / "amplitudes_raw_8run.npy", amps8)
 
     print("Step 3: condition split + per-condition Procrustes...")
-    for cond, runs1 in CONDITION_RUNS.items():
+    cond_runs = CONDITION_RUNS_BY_SUBJECT[subject_id]
+    for cond, runs1 in cond_runs.items():
         idx = [r - 1 for r in runs1]  # 0-indexed
         block_raw = amps8[idx]        # (4, 8, V)
         block_proc, disp = apply_procrustes_alignment(block_raw)

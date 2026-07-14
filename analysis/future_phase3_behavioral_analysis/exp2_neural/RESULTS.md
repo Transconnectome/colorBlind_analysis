@@ -1,5 +1,15 @@
 # exp2 neural HC-likeness — sub-08 (descriptive)
 
+> 🛑 **ENDPOINT CORRECTION (2026-06-28, supersedes the "V1 primary" framing below).**
+> The PRIMARY endpoint for exp2 neural HC-likeness is **hV4 LOCO adjacent accuracy**
+> (the only ROI where Session-1 HC interpolation exceeded chance), per the current
+> manuscript (`docs/PAPER/Results/results_v4.tex:189`, `methods_v2.tex:265`). The
+> **forward-tuning LOCO ρ is SECONDARY / corroboration only** — V1 within-condition
+> LOCO ρ failed the permutation null and is no longer a primary readout. Wherever this
+> file says "V1 primary … hV4 descriptive-only" (e.g. line ~19, the "Result (LOCO ρ,
+> primary)" table), read it as the historical/secondary framing. Report hV4 LOCO
+> adjacent accuracy as the headline. This applies to sub-09 too.
+
 > **Decoder rule (READ FIRST)**: see [`analysis/decoder-comparison.md`](../../decoder-comparison.md).
 > Color/hue **decoding accuracy** (LOCO/LORO adjacent/exact acc) uses the **B&H α=0
 > pseudoinverse**; **voxel-pattern prediction ρ** (forward-tuning) uses **ridge-GCV**.

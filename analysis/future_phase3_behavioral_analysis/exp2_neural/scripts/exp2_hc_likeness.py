@@ -210,12 +210,14 @@ def load_npy(path):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--variant', default='native', choices=['native', 'matched'])
+    ap.add_argument('--subject', default='08', help='CVD subject id, e.g. 08 / 09')
     args = ap.parse_args()
+    subj = f"sub-{args.subject}"
     global EXP2_C010
     EXP2_C010 = ROOT / "derivatives" / (
         "full_dataset_C010_exp2" if args.variant == 'native'
         else "full_dataset_C010_exp2_matched")
-    out_name = f"exp2_hc_likeness_sub-08_{args.variant}.json"
+    out_name = f"exp2_hc_likeness_{subj}_{args.variant}.json"
     print(f"VARIANT={args.variant}  EXP2_C010={EXP2_C010}")
 
     results = {}
@@ -279,9 +281,9 @@ def main():
             'conditions': {},
         }
 
-        # ---- no-filter baseline = sub-08 exp1 (canonical maskfunc recipe) ----
+        # ---- no-filter baseline = this subject's exp1 (canonical maskfunc recipe) ----
         # Answers "more HC-like THAN WHAT" + sanity-checks loco code on known data.
-        nf_amp = load_npy(HC_C010 / "sub-08" / roi / "amplitudes_procrustes.npy")
+        nf_amp = load_npy(HC_C010 / subj / roi / "amplitudes_procrustes.npy")
         nf_rho4 = np.nan
         nf_adj4 = np.nan
         if nf_amp is not None:
@@ -302,7 +304,7 @@ def main():
                 'loco_adjacc_per_color': [round(x, 4) for x in nf_adj_vec.tolist()],
                 'loro_acc': float(loro_accuracy(nf_amp)),
                 'loro_fe6_acc': float(loro_accuracy_fe6(nf_amp, C_baseline)),
-                'note': 'sub-08 exp1; maskfunc recipe (recipe-matched to HC; voxel set 560 differs from exp2 858)',
+                'note': f'{subj} exp1; maskfunc recipe (recipe-matched to HC; voxel set differs from exp2 native)',
             }
             print(f"  [nofilter-exp1] LOCO rho n4={nf_rho4:.4f} n6={nf_rho6:.4f} "
                   f"(d_vs_HCn4={nf_d:+.2f}) | adj_acc n4={nf_adj4:.4f} n6={nf_adj6:.4f} "
@@ -312,7 +314,7 @@ def main():
         cond_rho = {}
         cond_adj = {}
         for cond in CONDITIONS:
-            amp = load_npy(EXP2_C010 / "sub-08" / cond / roi / "amplitudes_procrustes.npy")
+            amp = load_npy(EXP2_C010 / subj / cond / roi / "amplitudes_procrustes.npy")
             if amp is None:
                 print(f"  [exp2] {cond} {roi} MISSING")
                 continue
@@ -417,7 +419,11 @@ def main():
     print(f"\nSaved: {OUT_DIR / out_name}")
 
     # ---- compact summary ----
-    print(f"\n{'='*72}\nSUMMARY (sub-08, descriptive)  PRIMARY=V1\n{'='*72}")
+    # NOTE (paper alignment): forward-tuning LOCO rho is the SECONDARY/corroboration
+    # index (methods_v2 L265, results_v4 L191). The PRIMARY endpoint is hV4 LOCO
+    # adjacent accuracy (printed in the next table). Read that table as the headline.
+    print(f"\n{'='*72}\nSUMMARY ({subj}, descriptive) — forward-tuning LOCO rho (CORROBORATION)\n"
+          f"  [PRIMARY endpoint = hV4 LOCO adjacent accuracy, see next table]\n{'='*72}")
     print(f"{'ROI':<5}{'HCn4':>7}{'NoFilt':>8}{'Win':>8}{'Opt':>8}"
           f"{'NF_d':>7}{'Win_d':>7}{'Opt_d':>7}{'Opt>NF':>8}{'LOOsep':>7}")
     for roi, r in results.items():
@@ -435,11 +441,12 @@ def main():
               f"{o.get('loco_d_vs_hc_n4matched', float('nan')):>7.2f}"
               f"{str(vnf.get('optimal_more_hc_like_than_nofilter', '')):>8}"
               f"{str(ct.get('loo_run_separated', '')):>7}")
-    print("\nNoFilt = sub-08 exp1 no-filter baseline (maskfunc, 560 vox); "
-          "Win/Opt exp2 (masknone n coverage, 858 vox @V1). 'Opt>NF' = Optimal closer to HC than no-filter.")
+    print(f"\nNoFilt = {subj} exp1 no-filter baseline (maskfunc); "
+          "Win/Opt exp2 (masknone n coverage). 'Opt>NF' = Optimal closer to HC than no-filter.")
 
     # ---- LOCO adjacent accuracy (interpolation; Phase-1 readout) ----
-    print(f"\n{'='*72}\nLOCO adjacent accuracy (interpolation; chance 3/8)\n{'='*72}")
+    # *** PRIMARY ENDPOINT *** (paper: hV4 is the validated ROI; chance = 3/8). ***
+    print(f"\n{'='*72}\nLOCO adjacent accuracy (interpolation; chance 3/8) — *** PRIMARY ENDPOINT (hV4) ***\n{'='*72}")
     print(f"{'ROI':<5}{'HCn4':>7}{'NoFilt':>8}{'Win':>8}{'Opt':>8}"
           f"{'Opt_d':>7}{'Win_d':>7}{'Opt>NF':>8}{'LOOsep':>7}")
     for roi, r in results.items():

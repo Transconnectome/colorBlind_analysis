@@ -47,6 +47,10 @@
 - Encoder: ridge-GCV + FE-6 basis (smooth_tikh rejected)
 - HC LOCO > 0: V1 p=0.012; HC > CVD gap V1 d=1.61 (p=0.021), V2 d=1.85 (p=0.022)
 - 3/4 ROIs pass GO/NO-GO (V1, V2, hV4 GO; V3 NO-GO)
+- **Robustness (3 axes, PV-2 ✅ 2026-07-13)** — hV4 GO는 세 축 모두 통과, 임의선택 민감성 아님:
+  - *Per-color dominance* (Friedman across 8 colors, HC): hV4 χ²=6.48 **p=0.485** (색간 균일 → GO가 특정 색에 안 끌림); V1 p=0.011 / V2 p=0.047 (discrim-only ROI만 색별 이질). `results/loco_reinforcement/per_color_breakdown.json`
+  - *Residual structure* (r between encoding residual RDM & color RDM, HC mean): hV4 **r=0.053** (잔차 무구조 = well-specified); V1/V2 r≈0.45 (잔차에 색구조 잔존 = under-fit). resid/signal ratio hV4 0.454 < V1/V2 0.658. `residual_structure.json`
+  - *GCV λ stability* (`lambda_stability_loco.py` → `lambda_stability.json`): hV4 GCV α가 73% fold에서 α=1로 수렴(log₁₀α SD=0.46); encoding ρ은 α 전구간(0.001–1000)에서 peak의 ≥90% 유지 = **λ-무관 plateau (7/7 grid pts)**, GCV ρ 0.205 ≈ peak fixed ρ 0.208 → p~0.044가 λ 우연 아님. (V1/V2 modal α=10, plateau 2–3/7로 더 민감하나 GO 근거는 hV4.)
 
 ### PAPER — interpolation (adjacent accuracy @hV4, FE-6 OLS)  → `../docs/PAPER/repro/PERMUTATIONS.md`
 - HC 0.465 ± 0.044 (n=6, sub-07 excluded); above-chance permutation **p=0.008** (N=1000 per-subject)
@@ -77,12 +81,12 @@
 
 ## Pending Validations
 
-검증 대기 항목 (우선순위 + blocker). daily-checkin `tasks_from` 소스. 총 5 (High 3 / Med 1 / Low 1).
+검증 대기 항목 (우선순위 + blocker). daily-checkin `tasks_from` 소스. 총 4 (High 2 / Med 1 / Low 1). [PV-2 완료 2026-07-13]
 
 | # | Pending validation | Domain | Priority | Blocker / next action |
 |---|---|---|---|---|
 | PV-1 | sub-09 behavioral session (sub-08-equivalent JND 8-pair + 8AFC 64-trial) | Phase 3 | **High** | 데이터 미수집 — Phase 3 first priority |
-| PV-2 | Forward-model robustness (per-color LOCO, residual structure, GCV λ stability) | Stage A | **High** | Active — 분석 실행 (TODO Active #1) |
+| ~~PV-2~~ | ~~Forward-model robustness (per-color LOCO, residual structure, GCV λ stability)~~ | Stage A | ✅ Done | **완료 2026-07-13** — hV4 3축 통과 (per-color p=0.485, residual r=0.053, λ plateau 7/7). 결과: Forward model 섹션 |
 | PV-3 | exp2 filter validation at adequate power | Phase 3 | **High** | N=2 underpowered (no domain sig Opt>Win) → effect-size + per-subject 재프레이밍, 추가 피험자/촬영 필요 |
 | PV-4 | V1 disparity ↔ color-specificity gap | Stage A | Med | disparity sig (p=0.024)이나 RDM color-specificity n.s. (p=0.192/0.599) — 해석 미해결 |
 | PV-5 | Phase 2 SRM RDM metric test (correlation vs Euclidean, z-score vs min-max) | Stage A | Low | Deferred (TODO Deferred #4) |
@@ -95,9 +99,10 @@
 - [x] **Future Phase 1: Forward Model Validation** — Ridge-GCV + FE-6 validated. 3/4 ROIs pass gate (V1, V2, hV4). Basis ablation confirms FE-6 > Fourier.
 - [x] **Future Phase 2: Filter Optimization** — 2-component fit + analytic inverse filter; per-subject argmin and |δθ| frozen (see future_phase2 closure docs).
 - [x] **PAPER adjacent-accuracy permutations** — per ROI complete: hV4 p=0.008 (above chance); V1 p=0.164 (n.s.); V2/V3 below chance. Only hV4 supports above-chance interpolation. See `../docs/PAPER/repro/PERMUTATIONS.md`.
+- [x] **Forward model robustness (PV-2, 2026-07-13)** — 3축 완료: per-color dominance (hV4 Friedman p=0.485), residual structure (hV4 r=0.053), GCV λ stability (hV4 ρ plateau 7/7, GCV 0.205≈peak 0.208). hV4 GO는 색/잔차/λ 임의선택에 무관. `results/loco_reinforcement/{per_color_breakdown,residual_structure,lambda_stability}.json`.
 
 ### Active
-1. **Forward model additional analyses** (metric robustness): per-color LOCO, residual structure, GCV lambda stability.
+_(none — PV-2 완료 후 Stage A robustness 스레드 종결. 다음: PV-1/PV-3 Phase 3 데이터 대기)_
 
 ### Deferred
 3. **Publication figure** — comprehensive decoder-comparison summary.

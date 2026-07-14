@@ -34,9 +34,10 @@
 - **sub-10**을 *null control*로 분리 (gating 대상 아님)
 
 ### 1.5 결정
-- **V1**을 primary endpoint로 (이전 hV4 가정 부정)
+- **V1**을 primary endpoint로 (이전 hV4 가정 부정) — 단, 이는 **ρ 기반 outcome-detection** 기준. 논문 primary가 된 **adjacent accuracy**는 hV4에서 별개로 robust함 (v3 addendum).
 - **n = 5 baseline + n = 4 fallback** (안전 margin 포함)
 - Permutation null은 deprecated (grand-mean bias로 invalid)
+- **v3 addendum (2026-06-29)**: adjacent accuracy(논문 primary metric)도 C(6,n) subsampling으로 검증 → hV4 landmark가 n=4에서 완전 보존 (HC 0.45 > chance, deutan 0.23 / protan 0.14, |d_cc|>2). 상세: `REPORT.md` v3 Addendum, script `scripts/run_count_adjacc.py`.
 
 ---
 

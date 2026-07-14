@@ -341,3 +341,30 @@ Stockman baseline 사용 확인 — `get_design_matrix("machado_1way", [0.0], cv
 | sub-10 처리 | gating 포함 | null control로 분리 | hV4 noise ceiling 분석에서 발견된 fundamental 차이 |
 
 v1 파일들 (`v1_allroi_n4_vs_n6.json`, `v1_hV4_n4_vs_n6.json`, `v1_permutation_n4_vs_n6.json`)은 superseded로 표시; 향후 분석은 본 REPORT의 saturation/tier 파일을 사용.
+
+---
+
+## v3 Addendum (2026-06-29) — Adjacent-accuracy retention (paper primary metric)
+
+**Trigger**: The paper's filter-evaluation primary readout was reframed to **LOCO adjacent accuracy** (decoding, ±1 hue step), but Tiers 1–3 above certified n=4 only on encoding-direction LOCO ρ, LORO, and geometric stability — *not* on adjacent accuracy. This addendum closes that gap.
+
+**Script**: `scripts/run_count_adjacc.py` (canonical FE-6 uniform basis + OLS pseudoinverse decoder via `loco_canonical.loco_forward_readouts`; same C010 amplitudes_procrustes input).
+**Outputs**: `adjacc_saturation.json` (per-cell, all C(6,n) subsets), `adjacc_retention_summary.json` (per-ROI per-n HC mean + CVD single-case d_cc).
+**Scope**: 4 ROIs × 10 subjects × 57 subsets. HC hV4 excludes sub-07 (low voxels). Chance = 3/8 = 0.375.
+
+### hV4 retention (landmark ROI)
+
+| n | HC mean ± SEM | HC > chance | deutan (s08) | protan (s09) |
+|---|---|:---:|---|---|
+| 2 | 0.448 ± 0.032 | ✓ | 0.233 (d=−2.50) | 0.171 (d=−3.22) |
+| 3 | 0.445 ± 0.034 | ✓ | 0.229 (d=−2.42) | 0.148 (d=−3.33) |
+| **4** | **0.449 ± 0.037** | **✓** | **0.231 (d=−2.21)** | **0.138 (d=−3.17)** |
+| 5 | 0.452 ± 0.037 | ✓ | 0.229 (d=−2.26) | 0.133 (d=−3.24) |
+| 6 | 0.456 ± 0.039 | ✓ | 0.250 (d=−2.02) | 0.125 (d=−3.25) |
+
+(d = Crawford–Howell d_cc against the per-subject HC mean distribution at that n. sub-10 deutan control: 0.15–0.17 below chance at all n.)
+
+### Conclusion
+The hV4 adjacent-accuracy landmark — **HC above the 3/8 chance level, both CVD participants well below** — is fully retained at n=4. The HC mean is flat across run counts (0.448–0.456), and the CVD single-case effect sizes are large at every n (|d_cc| > 2 deutan, > 3 protan); they are if anything marginally *larger* at n<6 because the HC subset-mean SD tightens. **The paper's primary interpolation metric is therefore certified at the deployed four-run count**, on top of the ρ/LORO/geometry metrics validated in v2. This supersedes the v2-era scope note that adjacent accuracy was untested at reduced run counts.
+
+n=6 anchor reproduces the paper exactly (deutan 0.250, protan 0.125; HC 0.456 ≈ reported 0.47).

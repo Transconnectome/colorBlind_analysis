@@ -8,6 +8,11 @@
 > Red Team Analysis (RT-1 through RT-6 + Neutralizations N1–N3): **DONE**
 > LOSO Zero-Shot Transfer (leakage-free SRM refit): **DONE**
 
+> **PAPER adjacent-accuracy above-chance permutations (per ROI)** — canonical record at
+> `docs/PAPER/repro/PERMUTATIONS.md`. FE-6 OLS, per-subject perm, N=1000, seed=42.
+> hV4 **p=0.008** (obs 0.4653); V1 running; V2/V3 observed < chance. Supersedes any
+> "p=0.044 / 8! exact" figure (that was the voxel_corr metric, not adjacent accuracy).
+
 ---
 
 ## Table of Contents
@@ -280,6 +285,19 @@ V1/V2 observed CI falls entirely within null CI → FAIL. **Only hV4 observed me
 
 hV4 residuals near-random → model captures most available structure. V1/V2 residuals systematic → model misses significant color geometry.
 
+#### GCV λ Stability (HC, `lambda_stability_loco.py`)
+
+Is the hV4 encoding GO (perm p=0.044) a coincidence of the GCV-selected ridge λ? Two checks: (1) does the per-fold GCV α concentrate on the grid, and (2) is the encoding ρ a knife-edge on the chosen α or a plateau across the whole α grid `[1e-3 … 1e3]`?
+
+| ROI | modal α (of 56 folds) | log₁₀α SD | GCV ρ | peak fixed ρ | ρ plateau (grid pts ≥90% peak) |
+|-----|:---:|:---:|:---:|:---:|:---:|
+| V1 | 10 (89%) | 0.31 | 0.109 | 0.136 | 2/7 |
+| V2 | 10 (86%) | 0.35 | 0.165 | 0.185 | 3/7 |
+| V3 | 1 (50%) | 0.57 | 0.097 | 0.100 | 7/7 (low ρ) |
+| hV4 | **1 (73%)** | 0.46 | **0.205** | 0.208 | **7/7 (full grid)** |
+
+hV4 encoding ρ stays within 90% of its peak across the **entire** α grid (7/7) and GCV ρ (0.205) ≈ peak fixed ρ (0.208) → the GO is **λ-independent**, not an α fluke. GCV converges to α=1 in 73% of folds (log₁₀α SD=0.46 ≈ one grid step). V1/V2 are more α-sensitive (plateau 2–3/7), consistent with their discrimination-only status. `results/loco_reinforcement/lambda_stability.json`.
+
 #### Intercept Model Test (10K perm, HC)
 
 **Question**: Does a shared spatial mean (intercept) inflate LOCO performance?
@@ -300,6 +318,7 @@ hV4 residuals near-random → model captures most available structure. V1/V2 res
 | **Permutation (H₀: shuffled)** | p=0.274 | p=0.311 | **p=0.044*** |
 | Friedman per-color | non-uniform* | non-uniform* | **uniform** |
 | Residuals | systematic | systematic | **near-random** |
+| GCV λ stability (ρ plateau) | 2/7 α-sensitive | 3/7 α-sensitive | **7/7 λ-independent** |
 
 #### Eigenspectrum Decay (Pospisil & Pillow 2024)
 

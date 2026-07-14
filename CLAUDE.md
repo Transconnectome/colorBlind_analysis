@@ -60,6 +60,7 @@ descriptive fit + behavioral validation. Specificity는 descriptive-only이지 s
 **허용 패턴 (스테이징 대상):**
 - `*.py` (분석 스크립트), `*.sbatch` (SLURM), `*.sh` (셸)
 - `*.md` (문서), `utils/` (유틸 모듈)
+- `*.tex` (논문 소스, 특히 `docs/PAPER/`)
 - `*.json` (10MB 미만), `.claude/skills/`
 
 **커밋 prefix 표:**
@@ -70,6 +71,7 @@ descriptive fit + behavioral validation. Specificity는 descriptive-only이지 s
 | `validation/` | `validation:` | `validation: add split-half ICC analysis` |
 | `utils/` | `utils:` | `utils: update output_paths for phase3` |
 | `*.md` 문서 | `docs:` | `docs: update METHODS_RESULTS_SUMMARY` |
+| `docs/PAPER/**/*.tex` | `docs:` | `docs: fix encoding equation transpose in Methods` |
 | `.claude/skills/` | `skills:` | `skills: add server-sync and slurm-monitor` |
 
 ---

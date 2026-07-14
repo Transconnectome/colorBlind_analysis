@@ -21,8 +21,11 @@
 %     (axis 2). Compensation is motivation (§Intro-3), not a gap.
 %   - RQ as four plain-language questions (no internal terms/results, per
 %     "this is the Introduction" directive 2026-06-11): Q1 Describe, Q2
-%     Summarize, Q3 Correct, Q4 Validate-later (efficacy reserved for Phase-3,
-%     not reported here). Three hypotheses for Q1-3.
+%     Summarize, Q3 Correct, Q4 Validate. Q4 IS reported in Results (exp2,
+%     second-session deployed-vs-individualized comparison across behavior,
+%     LORO, LOCO, RDM) but is underpowered (N=1/subtype) and inconclusive:
+%     "superior to the deployed filter remains to be established with more
+%     participants" -- NOT deferred to a future phase. Three hypotheses for Q1-3.
 %   - De-jargon pass: removed subject IDs, Crawford-Howell, v-vector notation,
 %     S-cone/confusion-axis terms, per-hue p-values, SRM/RDM mechanics from the
 %     body (all belong to Methods/Results). "hV4 geometry" generalized to
@@ -45,7 +48,7 @@
 % Intro-1: What CVD is
 %==============================================================================
 Color vision deficiency (CVD) affects approximately 8\% of men and 0.4\% of women of European ancestry~\citep{birch2012}.
-It arises from altered spectral sensitivity of the L- or M-cone photopigment. This altered sensitivity is driven by X-linked polymorphisms in the cone opsin genes~\citep{deeb2005, neitz2011}. In anomalous trichromats, the deviant cone peak is displaced by roughly 2--12~nm from its normal position~\citep{stockman2000}. This small displacement reduces the L--M cone-opponent signal rather than abolishing it.
+It arises from altered spectral sensitivity of the L- or M-cone photopigment. This altered sensitivity is driven by X-linked polymorphisms in the cone opsin genes~\citep{deeb2005, neitz2011}. In anomalous trichromats, the L- and M-cone spectral peaks are separated by only about 2--12~nm, versus roughly 25~nm in normal trichromacy~\citep{neitz2011}. This reduced separation weakens the L--M cone-opponent signal rather than abolishing it.
 
 A weakened L--M signal yields a characteristic peripheral phenotype. Affected observers show reduced red--green discrimination, frequent category confusions, and elevated just-noticeable differences along the L--M chromatic axis. The Ishihara test screens for the resulting red--green confusions~\citep{ishihara1917}. The elevated discrimination thresholds are quantified instead by threshold psychophysics~\citep{boehm2014, bosten2019}.
 
@@ -75,7 +78,7 @@ Three concrete gaps remain. \emph{(Gap 1)} Neural studies of color describe geom
 %==============================================================================
 % Intro-5: Research questions and hypotheses
 %==============================================================================
-We ask whether an individual's cortical color geometry can serve as the reference for a personalized correction. To answer this, we characterize two adults with CVD, one with each major red--green subtype, against a reference group of healthy controls (see Methods). Observations from the single protan participant are exploratory and need independent replication.
+We ask whether an individual's cortical color geometry can serve as the reference for an individualized correction. To answer this, we characterize two adults with CVD, one with each major red--green subtype, against a reference group of healthy controls (see Methods).
 
 A stimulus-space filter is both warranted and tractable only in a specific regime. The displayed colors must stay neurally distinguishable, or the filter has no signal to act on. The continuous arrangement of hues must also be distorted, or there is nothing to correct. Our questions follow this logic.
 
@@ -86,6 +89,6 @@ A stimulus-space filter is both warranted and tractable only in a specific regim
 \item \textbf{Validate.} Does the filter move the cortical representation toward the healthy-control reference, more so than a deployed accessibility filter?
 \end{enumerate}
 
-We expect the continuous arrangement of hues to be selectively impaired while categorical discrimination is preserved, with the largest distortion among the blue-to-magenta hues. A few interpretable parameters should capture this distortion, and inverting them should yield a realizable, individualized correction.
+We expect the continuous arrangement of hues to be selectively impaired while categorical discrimination is preserved. A few interpretable parameters should capture this distortion, and inverting them should yield a realizable, individualized correction.
 
 Together, these steps yield a filter built for one individual. Its input is the cortical signal, its parameters are the fitted description, and its output is a stimulus shift. Each is defined at the level of the single observer, the level at which any correction must ultimately act. Because the sample holds one participant per subtype, this study tests the feasibility of the inversion: whether an individual's cortical color geometry can be turned into a realizable filter. It does not test whether per-person correction outperforms a subtype average, which would require several individuals within one subtype.

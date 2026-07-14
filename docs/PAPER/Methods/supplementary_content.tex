@@ -187,7 +187,7 @@ The retinal-family (R+C) model was evaluated alongside the 2-component model und
 
 \textbf{Model.} The retinal-plus-cortical (R+C) model is defined in \S\ref{sec:methods:candidates}: the subtype Machado cone-shift $\delta\theta_{\rm Mach}$~\citeNP{machado2009}, fixed by the confusion axis, scaled by a single cortical-gain parameter $g$ ($\delta\theta_{\rm RC} = (2-g)\,\delta\theta_{\rm Mach}$; $g = 1$ is retinal-only, $g = 2$ exact cortical cancellation;~\citeNP{tregillus2021}). It was fit by the same grid-search and held-out composite criterion as the 2-component model (\S\ref{sec:methods:selection}), so the two model classes are directly comparable on $\overline{L}_{\rm test}$.
 
-\textbf{Fits (Table~\ref{tab:modelfits}).} On the held-out composite, R+C failed for both participants. For the deutan participant, $\langle 100\%\rangle$ of resample solutions saturated the gain boundary ($g \to 3.0$), so the fit was rejected at the boundary-saturation gate as model misspecification (\S\ref{sec:results:rc_insufficient}). For the protan participant, R+C passed that gate ($\langle 41\%\rangle$ saturation, $g = 2.95$) but generalized worse than the adopted 2-component fit ($\overline{L}_{\rm test} = -0.86$ vs.\ $-1.54$). A gain $g > 2$ implies cortical overshoot past the undistorted hue, inconsistent with the participants' confirmed residual CVD; the structural cause is the single-axis degree-of-freedom deficit detailed in \S\ref{sec:results:rc_insufficient}.
+\textbf{Fits (Table~\ref{tab:modelfits}).} On the held-out composite, R+C failed for both participants. For the deutan participant, $100\%$ of resample solutions saturated the gain boundary ($g \to 3.0$), so the fit was rejected at the boundary-saturation gate as model misspecification (\S\ref{sec:results:rc_insufficient}). For the protan participant, R+C passed that gate ($41\%$ saturation, $g = 2.95$) but generalized worse than the adopted 2-component fit ($\overline{L}_{\rm test} = -0.86$ vs.\ $-1.54$). A gain $g > 2$ implies cortical overshoot past the undistorted hue, inconsistent with the participants' confirmed residual CVD; the structural cause is the single-axis degree-of-freedom deficit detailed in \S\ref{sec:results:rc_insufficient}.
 
 \textbf{Relation to $\Delta$RDM and LOCO.} Optimizing a retinal-family model directly against $\Delta$RDM also fails for both CVD participants. For the adopted 2-component model, the $\Delta$RDM cosine ($L_{\rm RDM}$) is itself a component of the selected composite loss (\S\ref{sec:methods:selection}); the forward-encoding LOCO family did not enter either adopted combination and is used only for diagnostic decoding.
 
@@ -200,8 +200,8 @@ The retinal-family (R+C) model was evaluated alongside the 2-component model und
     \toprule Participant & Model & Fitted parameters & Held-out fit \\ \midrule
     Deutan & 2-component & $\beta_s = 6^\circ,\ \beta_c = -42^\circ$ & $\overline{L}_{\rm test} = -2.36$ \\
     Protan & 2-component & $\beta_s = 2^\circ,\ \beta_c = +24^\circ$ & $\overline{L}_{\rm test} = -1.54$ \\ \midrule
-    Deutan & R+C & $g \to 3.0$ ($\langle 100\%\rangle$ saturated) & rejected (Gate 2) \\
-    Protan & R+C & $g = 2.95$ ($\langle 41\%\rangle$ saturated) & $\overline{L}_{\rm test} = -0.86$ \\ \bottomrule
+    Deutan & R+C & $g \to 3.0$ ($100\%$ saturated) & rejected (Gate 2) \\
+    Protan & R+C & $g = 2.95$ ($41\%$ saturated) & $\overline{L}_{\rm test} = -0.86$ \\ \bottomrule
   \end{tabular}
 \end{table}
 

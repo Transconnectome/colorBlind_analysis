@@ -46,7 +46,7 @@ OUT = HERE.resolve().parents[3] / "ICML_workshop" / "figures"
 matplotlib.rcParams.update({
     "font.family": "sans-serif",
     "font.sans-serif": ["Helvetica", "Arial", "DejaVu Sans"],
-    "font.size": 7, "axes.titlesize": 8,
+    "font.size": 7, "axes.titlesize": 16,   # landscape subject title 8->16 (2x)
     "pdf.fonttype": 42, "ps.fonttype": 42,
 })
 
@@ -72,9 +72,9 @@ def main():
         bs_s, bc_s = load_resample_argmins(cand)
         im = plot_panel(ax, comp, cand["fit_point"], bs_s, bc_s, cand["title"])
         # tighten labels for the narrow column
-        ax.set_xlabel(r"$\beta_c$ (°)", fontsize=7)
-        ax.set_ylabel(r"$\beta_s$ (°)", fontsize=7)
-        ax.tick_params(labelsize=6)
+        ax.set_xlabel(r"$\beta_c$ (°)", fontsize=10)   # 7->14 (2x)
+        ax.set_ylabel(r"$\beta_s$ (°)", fontsize=10)   # 7->14 (2x)
+        ax.tick_params(labelsize=12)                    # 6->12 (2x)
         land_axes.append(ax)
 
         # ---- right: inverted filter strip (8 hues x Original/Filtered) -------
@@ -93,20 +93,20 @@ def main():
                 if r == 0:
                     axc.set_title("ROYGCBPM"[c], fontsize=6, pad=1.5)
                 if c == 0:
-                    axc.set_ylabel("Orig" if r == 0 else "Filt", fontsize=6,
-                                   rotation=0, ha="right", va="center", labelpad=7)
+                    axc.set_ylabel("Orig" if r == 0 else "Filt", fontsize=12,
+                                   rotation=0, ha="right", va="center", labelpad=7)   # 6->12 (2x)
         # subject + params tag, raised clear of the hue-letter row and axes
         pos = outer[k, 1].get_position(fig)
         fig.text(pos.x0 + pos.width / 2, pos.y1 + 0.045,
                  f"{spec['subject']} ({spec['family']}):  "
                  f"$\\beta_s$={bs:+.0f}°, $\\beta_c$={bc:+.0f}°",
-                 ha="center", va="bottom", fontsize=7, fontweight="bold")
+                 ha="center", va="bottom", fontsize=14, fontweight="bold")   # 7->14 (2x)
 
     # shared colorbar for the two landscapes
-    cb = fig.colorbar(im, ax=land_axes, shrink=0.92, pad=0.015, aspect=26,
+    cb = fig.colorbar(im, ax=land_axes, shrink=0.94, pad=0.05, aspect=30,
                       location="right")
-    cb.set_label("composite loss (z; lower = better)", fontsize=6.5)
-    cb.ax.tick_params(labelsize=6)
+    cb.set_label("composite loss (z; lower = better)", fontsize=9)
+    cb.ax.tick_params(labelsize=8)
 
     handles = [
         Line2D([0], [0], marker="*", color="none", markerfacecolor="#d62728",
@@ -114,7 +114,7 @@ def main():
         Line2D([0], [0], marker="o", color="none", markerfacecolor="white",
                markeredgecolor="black", markersize=7, label="HC-resample argmins"),
     ]
-    land_axes[0].legend(handles=handles, loc="upper left", fontsize=5.8,
+    land_axes[0].legend(handles=handles, loc="upper left", fontsize=7,
                         framealpha=0.9, handletextpad=0.3, borderpad=0.3)
 
     OUT.mkdir(parents=True, exist_ok=True)

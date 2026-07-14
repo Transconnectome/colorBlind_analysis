@@ -106,8 +106,8 @@ Based on the program paper (docs/program_paper/main.tex), we address three prima
 
 - ✅ **Status**: Confirmed through three-dimensional analysis (Phase 1 complete)
   - **상태**: 3차원 분석을 통해 확인됨 (Phase 1 완료)
-- **Evidence**: Identical genotype (deuteranopia) → Opposite neural phenotypes (Sub-08 vs Sub-09)
-  - **근거**: 동일 유전형(녹색맹) → 정반대 신경 표현형 (Sub-08 vs Sub-09)
+- **Evidence**: CVD is heterogeneous → the three CVD participants show distinct 3-D distortion profiles (e.g. sub-08 deutan vs sub-09 protan differ on every axis)
+  - **근거**: CVD는 이질적 → 3인이 서로 다른 3차원 왜곡 프로파일 (예: sub-08 deutan vs sub-09 protan은 모든 축에서 상이)
   - Magnitude: L2 norm ratios 0.66-1.21 (±30% variation)
   - Sign/Baseline: Directional biases -0.41 to +0.32
   - Structure: RDM differences 0.118-0.505

@@ -328,6 +328,17 @@ analysis/phase0_preprocessing/results/
 analysis/future_phase3_behavioral_analysis/images/
 
 # ============================================
+# exp2_neural preprocessing QC figures (large PNGs, regenerable)
+# ============================================
+analysis/future_phase3_behavioral_analysis/exp2_neural/preproc_qc/
+analysis/future_phase3_behavioral_analysis/exp2_neural/preproc_qc_exp1/
+
+# ============================================
+# exp2_neural SLURM sbatch (local run configs, not tracked)
+# ============================================
+analysis/future_phase3_behavioral_analysis/exp2_neural/scripts/*.sbatch
+
+# ============================================
 # IRB / scan logs / sensitive experiment documents
 # ============================================
 experiments/

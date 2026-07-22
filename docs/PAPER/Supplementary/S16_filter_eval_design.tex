@@ -7,7 +7,7 @@
 \label{app:filter_eval}
 
 \paragraph{Comparator.}
-The deployed comparator was the macOS accessibility Color Filter (System Settings $>$ Accessibility $>$ Display, build 26.5.1), set at an intensity the participant self-tuned before scanning. It is the unmodified shipping product --- an operating-system-level post-display transform. We compared against this deployed filter rather than a re-implemented retinal-simulation transform so that the comparator is the correction an end user actually encounters. The personalized filter, by contrast, was rendered directly in PsychoPy from the frozen per-subject pre-image.
+The deployed comparator was the macOS accessibility Color Filter (System Settings $>$ Accessibility $>$ Display, build 26.5.1), set at an intensity the participant self-tuned before scanning. It is the unmodified shipping product --- an operating-system-level post-display transform. We compared against this deployed filter rather than a re-implemented retinal-simulation transform so that the comparator is the correction an end user actually encounters. The individualized filter, by contrast, was rendered directly in PsychoPy from the frozen per-subject pre-image.
 
 \paragraph{Acquisition.}
 Eight fMRI runs were acquired in ABBA-counterbalanced order, split evenly into four runs per filter. Scanner time set this count: a within-session two-condition design at six runs per condition would run roughly 90 minutes, beyond the 60--75-minute window over which participant attention and head motion stay acceptable. Four runs per condition ($\sim$60 minutes) sits at the recommended boundary.
@@ -18,7 +18,7 @@ A subsampling analysis on the six-run Session-1 data --- evaluating signal-quali
 \begin{figure}[tb]
   \centering
   \includegraphics[width=\linewidth]{figS16_adjacc_saturation}
-  \caption{\textbf{The primary interpolation metric is stable under run-count reduction.} LOCO adjacent accuracy (canonical FE-6 basis, OLS pseudoinverse decoder) as a function of the number of runs $n$, computed over all $\binom{6}{n}$ run subsets of the Session-1 data, per ROI. Black line, healthy-control mean $\pm$ SEM (shaded band); dashed line, the $3/8$ chance level; markers, the two CVD single cases (sub-08 deutan, sub-09 protan) and the deutan control sub-10. At hV4 the healthy-control mean stays above chance and the CVD deficit persists at every run count, including the deployed $n = 4$ (orange guide); the metric does not depend on having the full six runs.}
+  \caption{\textbf{The primary interpolation metric is stable under run-count reduction.} LOCO adjacent accuracy (canonical FE-6 basis, OLS pseudoinverse decoder) as a function of the number of runs $n$, computed over all $\binom{6}{n}$ run subsets of the Session-1 data, per ROI. Black line, healthy-control mean $\pm$ SEM (shaded band); dashed line, the $3/8$ chance level; markers, the two CVD single cases (sub-08 deutan, sub-09 protan). At hV4 the healthy-control mean stays above chance and the CVD deficit persists at every run count, including the deployed $n = 4$ (orange guide); the metric does not depend on having the full six runs.}
   \label{fig:adjacc_saturation}
 \end{figure}
 
@@ -27,3 +27,34 @@ Each condition's neural index was compared to the HC distribution as a standardi
 
 \paragraph{Behavioral battery.}
 JND staircases were run for eight hue pairs, and the eight-alternative forced-choice (8AFC) color-identification task comprised 64 trials. Both were compared to the unfiltered Session-1 baseline and to the HC distribution.
+
+\paragraph{Color classification (LORO).}
+Table~\ref{tab:exp2_loro} reports eight-way LORO classification accuracy for every ROI and condition in both participants. Every cell stayed well above the $0.125$ chance level, confirming that the displayed colors remained decodable and that neither filter degraded the second-session color signal.
+
+\begin{table}[tb]
+  \centering
+  \caption{\textbf{Second-session color classification (LORO eight-way accuracy).} Chance $= 0.125$. NF, no-filter (Session-1 baseline); Dep, deployed accessibility filter; Ind, individualized filter. HC, healthy-control mean ($n = 7$).}
+  \label{tab:exp2_loro}
+  \begin{tabular}{lccccccc}
+    \toprule
+     & & \multicolumn{3}{c}{Deutan (sub-08)} & \multicolumn{3}{c}{Protan (sub-09)} \\
+    \cmidrule(lr){3-5} \cmidrule(lr){6-8}
+    ROI & HC & NF & Dep & Ind & NF & Dep & Ind \\
+    \midrule
+    V1  & 0.71 & 0.79 & 0.84 & 0.72 & 0.79 & 0.91 & 0.66 \\
+    V2  & 0.71 & 0.79 & 0.69 & 0.62 & 0.83 & 0.75 & 0.72 \\
+    V3  & 0.77 & 0.67 & 0.78 & 0.69 & 0.81 & 1.00 & 0.69 \\
+    hV4 & 0.75 & 0.73 & 0.88 & 0.50 & 0.71 & 0.84 & 0.69 \\
+    \bottomrule
+  \end{tabular}
+\end{table}
+
+\paragraph{Forward-tuning encoding index.}
+Figure~\ref{fig:forward_tuning} shows the LOCO forward-tuning correlation $\rho$ to the canonical hue map, a secondary encoding index reported as corroboration only (it lies outside the validated Session-1 decoding pipeline). In the deutan participant the individualized filter reaches the HC level at hV4 ($\rho = +0.18$ vs.\ HC $+0.21$) while the deployed filter drives it negative ($\rho = -0.39$); in the protan participant the three conditions do not separate (all $\rho \approx -0.02$ at hV4).
+
+\begin{figure}[tb]
+  \centering
+  \includegraphics[width=\linewidth]{figS_forward_tuning}
+  \caption{\textbf{Forward-tuning encoding index (corroboration only).} LOCO forward-tuning correlation $\rho$ to the canonical hue map across V1--hV4, for the deutan (sub-08, left) and protan (sub-09, right) participants ($\uparrow$ HC-like). Gray bars, HC reference (mean $\pm$ SD, $n = 7$); markers, no-filter (gray circle), deployed accessibility filter (blue square), individualized filter (orange diamond). Stars, Crawford--Howell single-case deviation from the HC distribution ($^{*}p<.05$, $^{**}p<.01$).}
+  \label{fig:forward_tuning}
+\end{figure}

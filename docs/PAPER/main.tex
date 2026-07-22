@@ -73,7 +73,14 @@ Color vision deficiency (CVD) is typically corrected with generic filters design
 
 \begin{document}
 
+% apa6 'man' 모드는 \maketitle에서 Abstract 표제와 본문 첫 장의 제목 표제를
+% \section 레벨로 내보낸다. 위의 \setcounter{secnumdepth}{2} 때문에 이 둘까지
+% 번호가 붙어 "1 Abstract / 2 <제목> / 3 Introduction"으로 출력되었다.
+% front matter 동안만 번호를 끄고, 본문 진입 직전에 되살려 Introduction=1로 맞춘다.
+\setcounter{secnumdepth}{0}
 \maketitle
+\setcounter{secnumdepth}{2}
+\setcounter{section}{0}
 
 % Introduction Section
 \input{Introduction/introduction_v2}

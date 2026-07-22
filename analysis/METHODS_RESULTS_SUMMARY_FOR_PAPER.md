@@ -63,7 +63,23 @@
 - Filter mean |δθ|: deutan 26.3°, protan 16.2°
 - Held-out composite test-loss: deutan -2.36 (IQR 2.15), protan -1.54 (IQR 1.42); N=300 resamples
 - Identifiability: 2-comp 12/12 fail absolute recovery; 0/6 recovery survive FDR → descriptive embedding only
-- Exp2 (deutan only): Wilcoxon p=0.84; 8AFC 0.81 → 0.97
+- Exp2 filter validation: **N=2** (sub-08 deutan, sub-09 protan), 단일 세션·4 runs/조건 → **descriptive only**. 상세 = 아래 exp2 블록 · `exp2_neural/RESULTS.md` · ResearchNOTE §6.5.
+
+### Future Phase 3 — exp2 filter validation (N=2, descriptive)  → `future_phase3_behavioral_analysis/exp2_neural/RESULTS.md` · ResearchNOTE §6.5 · `future_phase4_geometry_synthesis/FINDINGS.md`
+
+2nd MRI: sub-08(deutan)+sub-09(protan), 조건 = no-filter / deployed accessibility filter / individualized filter. N=2, 4 runs/조건 → descriptive (Cohen's d vs HC; inferential p 없음). **명칭: "individualized filter"(구 Optimal/personalized), "deployed accessibility filter"(구 Window).**
+
+**primary — hV4 LOCO adjacent accuracy** (chance 0.375, HC 0.46±0.11) — 두 피험자 **정반대**:
+
+| | no-filter | deployed | individualized |
+|---|---|---|---|
+| sub-08 deutan | 0.23 | 0.25 | **0.31** (개선) |
+| sub-09 protan | 0.14 | 0.19 | **0.06** (역전, d_cc=−3.70) |
+
+- **geometry** (affected ROI: sub-08 V2 / sub-09 V1): sub-08은 양 필터가 HC서 **멀어짐**(NF 최근접), sub-09는 양 필터가 HC로 **회복하나 deployed≈individualized**(개인화-특이 아님). 둘 다 완전 HC 기하 미달.
+- **행동**: 두 필터 판별 복원; individualized가 **새 유의 편차 만들지 않은 유일 필터**(deployed는 sub-09 green-blue·cyan-magenta 유의화). Opt-vs-Win 순위불가(N=2).
+- **LORO**: 전 ROI×조건 chance(0.125) 훨씬 위 → 신호 보존.
+- **결론**: 필터 효과 phenotype-비일관, 효능 **미확인(열린 문제)**. 3층 프레이밍(§6.5): 확증=왜곡 특성화 / 탐색=필터효과 / 한계=N=2·지표불일치.
 
 ---
 
@@ -87,7 +103,7 @@
 |---|---|---|---|---|
 | PV-1 | sub-09 behavioral session (sub-08-equivalent JND 8-pair + 8AFC 64-trial) | Phase 3 | **High** | 데이터 미수집 — Phase 3 first priority |
 | ~~PV-2~~ | ~~Forward-model robustness (per-color LOCO, residual structure, GCV λ stability)~~ | Stage A | ✅ Done | **완료 2026-07-13** — hV4 3축 통과 (per-color p=0.485, residual r=0.053, λ plateau 7/7). 결과: Forward model 섹션 |
-| PV-3 | exp2 filter validation at adequate power | Phase 3 | **High** | N=2 underpowered (no domain sig Opt>Win) → effect-size + per-subject 재프레이밍, 추가 피험자/촬영 필요 |
+| PV-3 | exp2 filter validation at adequate power | Phase 3 | **High** | 재프레이밍 ✅ 완료(2026-07-14, N=2 descriptive 3층 — 논문 abstract/results_v4/discussion_v3 + ResearchNOTE §6.5 + summary exp2 블록). 잔여: 사전등록 target metric + 추가 피험자/촬영(확증엔 미충족) |
 | PV-4 | V1 disparity ↔ color-specificity gap | Stage A | Med | disparity sig (p=0.024)이나 RDM color-specificity n.s. (p=0.192/0.599) — 해석 미해결 |
 | PV-5 | Phase 2 SRM RDM metric test (correlation vs Euclidean, z-score vs min-max) | Stage A | Low | Deferred (TODO Deferred #4) |
 

@@ -19,13 +19,13 @@ The analysis follows three stages. First, we characterized each CVD participant'
 \begin{figure*}[tb]
   \centering
   \includegraphics[width=\textwidth]{fig1_generated_v2}
-  \caption{\textbf{Experimental paradigm and analysis pipeline.} \textbf{(A)} Stimulus set: 8 isoluminant CIE $L^{*}a^{*}b^{*}$ hues at 45\degree\ angular spacing ($L^{*} = 75$, chroma $= 40$; red--magenta).
-  \textbf{(B)} Retinotopic ROIs: V1, V2, V3, hV4 (standard retinotopic mapping).
+  \caption{\textbf{Stimuli, task, and analysis pipeline.} \textbf{(A)} Stimulus set: 8 isoluminant CIE $L^{*}a^{*}b^{*}$ hues at 45\degree\ angular spacing ($L^{*} = 75$, chroma $= 40$; red--magenta), shown in the $a^{*}b^{*}$ plane.
+  \textbf{(B)} Task: rapid serial visual presentation (RSVP). A fixation period (randomized 3--6\,s) is followed by a 1.5\,s uniform colored disc; 5--9 trials per color per run (Neurodesign-optimized allocation, identical across participants), six runs.
   \textbf{(C)} Analysis pipeline.
-  Stage A: two-stage GLM single-trial $\beta$ amplitudes, Procrustes-aligned across runs, projected into an SRM space trained on HC participants only.
-  Decoding: LORO (discrimination), LOCO (interpolation).
-  CVD characterization: 2-component cortical model with S-cone-axis ($\beta_s$) and confusion-axis ($\beta_c$) components. Pre-image yields per-subject stimulus-space filter.
-  HC: $n = 7$ (sub-01--07); deutan: the deutan participant; protan: the protan participant.}
+  Stage A (Alignment): two-stage GLM single-trial $\beta$ amplitudes, Procrustes-aligned across runs, projected into an SRM space trained on HC participants only.
+  Stage B (Neural feature): LORO discrimination, LOCO interpolation, and the SRM-space representational dissimilarity matrix (RDM).
+  Stage C (Modelling \& filter): a 2-component cortical model with S-cone-axis ($\beta_s$) and confusion-axis ($\beta_c$) components; its pre-image yields the per-subject stimulus-space filter.
+  HC: $n = 7$ (sub-01--07).}
   \label{fig:paradigm}
 \end{figure*}
 
@@ -43,7 +43,7 @@ Thirteen volunteers were recruited under Institutional Review Board approval (\#
 
 Eight isoluminant chromatic stimuli were drawn from CIE $L^{*}a^{*}b^{*}$ space at equal angular spacing ($0^\circ$--$315^\circ$, $45^\circ$ steps; $L^{*} = 75$, chroma $= 40$) \cite{cie1986}, spanning red, orange, yellow, green, cyan, blue, purple, and magenta (Figure~\ref{fig:paradigm}A). A gray filler ($a^{*} = b^{*} = 0$) served as a null condition.
 
-Stimuli were presented in a Rapid Serial Visual Presentation (RSVP) design to sustain attention and fixation. Each stimulus was a uniform circular chromatic patch (a colored disc, 1.5 s per stimulus) shown in pseudo-random order optimized with Neurodesign \cite{durnez2018}. Participants pressed a button upon detecting two consecutive 'K's within a rapid serial letter stream presented at the centre of the chromatic disc. Each run contained eight repetitions of all eight chromatic stimuli and the gray filler; inter-stimulus intervals were drawn from $\{3, 4.5, 6\}$ s. Each session comprised six runs ($\approx 7$ min each). The experiment was coded in PsychoPy 2022.2.5 \cite{peirce2019}.
+Stimuli were presented in a Rapid Serial Visual Presentation (RSVP) design to sustain attention and fixation. Each stimulus was a uniform circular chromatic patch (a colored disc, 1.5 s per stimulus) shown in pseudo-random order optimized with Neurodesign \cite{durnez2018}. Participants pressed a button upon detecting two consecutive 'K's within a rapid serial letter stream presented at the centre of the chromatic disc. Each run comprised 72 events. Because the schedule was optimized for detection power rather than for equal counts, trials were not balanced across colors within a run: each chromatic stimulus occurred 5--9 times per run (38--47 times across the six runs), with the remaining 14--20 events per run assigned to the gray filler. The same optimized schedule was used for every participant, so this allocation contributes a common component to all individual estimates; single-trial amplitudes were subsequently averaged within run and color, so all downstream analyses operated on a balanced 6 (run) $\times$ 8 (color) design. Inter-stimulus intervals were drawn from $\{3, 4.5, 6\}$ s. Each session comprised six runs ($\approx 7$ min each). The experiment was coded in PsychoPy 2022.2.5 \cite{peirce2019}.
 
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{Behavioral tasks}

@@ -7,6 +7,10 @@
 전제: post-cortical mapping HC=CVD → 차이는 (a) 망막 cone shift, (b) cortical opponent gain / stimulus dilation.
 Subjects: HC sub-01~07 (N=7); CVD sub-08 deutan, sub-09 protan, sub-10 deutan(near-normal → **분석 제외**).
 
+## Two Main Contributions (논문 헤드라인 — 초록/서론/결론 프레임의 축)
+1. **CVD 피질 색 표상 기하 왜곡의 규명 (finding).** 개인 CVD의 피질 색 표상 기하는 선행연구에 미규명이었음(선행 = HC 대상, group-level: Brouwer&Heeger 2009, Kuriki 2015; CVD fMRI = magnitude/gain[Tregillus 2021]·activation[Rina 2024]). 본 연구: 균일 신호 감쇠(magnitude)가 **아니라**, 표시 색의 **범주변별은 보존**되나 색 간 **연속 hue 기하가 선택적으로 왜곡**되며 그 양상이 **개인마다 다름**(왜곡 ROI: deutan V2, protan V1).
+2. **피질 기반 개인화 색교정 필터 프레임워크 (framework, first).** 개인 **자신의 피질 색 표상**에서 역산한 CVD 교정 필터 — 망막/스펙트럼 모델(EnChroma·Brettel·Machado·Daltonization)이 아님. 흐름: 왜곡을 2성분(S-cone축·confusion축 **hue rotation**)으로 모델링 → stimulus-space pre-image로 역산 → per-person 필터. **"first"의 정확한 스코프**: *피질 표상에서 역산한 CVD 필터*에 한정하며 "to our knowledge" 헤지 사용. LOCO/디코딩 자체는 first 아님(B&H가 HC LOCO 선행). Novelty 층위 = **필터 설계**이지 디코딩 방법이 아님.
+
 ## Pipeline (4 stages) — 현황
 | Stage | 목적 | 코드 | 상태 |
 |---|---|---|---|

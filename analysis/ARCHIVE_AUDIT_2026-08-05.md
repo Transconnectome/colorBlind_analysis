@@ -1,9 +1,9 @@
 # Archive Audit — analysis/ 디렉토리 정리
 
-**최초 감사**: 2026-08-05 · **정리 실행**: 2026-08-05 · **상태**: 실행 완료, 잔여 판단 4건
+**최초 감사**: 2026-08-05 · **정리 실행**: 2026-08-05 · **상태**: **종결** (R1–R4 전부 해소)
 
-> 완료된 항목은 이 문서에서 제거했습니다. 실행 내역은 각 폴더의 `_archive/README.md`에 범주별로 기록되어 있습니다.
-> 이 문서는 이제 **미해결 항목만** 다룹니다.
+> 실행 내역은 각 폴더의 `_archive/README.md`에 범주별로 기록되어 있습니다.
+> 남은 것은 §3 판단보류 파일 목록과 §4 별건(데이터 비대·죽은 tex 브랜치 등)뿐입니다.
 
 ---
 
@@ -41,52 +41,14 @@
 
 ---
 
-## 2. 미해결 — 판단 필요
+## 2. R1–R4 — 전부 종결 (2026-08-05)
 
-### R1. `01_discrimination.ipynb`의 E1.1 검증 셀이 폐기된 JSON을 봅니다
-
-노트북이 `cvd_cross_decoding_procrustes.json`(2026-02-18 **12:50**, all-subject SRM)을 읽습니다. 이는 5시간 뒤 순환성 제거를 위해 나온 RT-7 수정본(`cvd_cross_decoding_hconly.json`, **17:38**)이 대체한 파일입니다.
-
-**논문 주장 자체는 안전합니다.** `results_v4.tex:31`은 Figure 3A를 인용하고, 그 그림은 live 생산자가 있는 LORO 결과로 만들어집니다:
-
-| | V1 | V2 | V3 | V4 |
-|---|---|---|---|---|
-| sub-08 | 0.604 | 0.458 | 0.375 | 0.354 |
-| sub-09 | 0.625 | 0.438 | 0.312 | 0.354 |
-
-전부 chance 0.125를 크게 상회합니다.
-
-> ⚠ **다만 셀을 옮길 때 주의**: RT-7(비순환) cross-decoding 수치는 hV4에서 **더 약합니다** — sub-08 0.75 → **0.375** (permutation **p = 0.057**), sub-09 0.75 → 0.625. 폐기본 수치를 제시해서는 안 됩니다.
-
-**필요한 결정**: 셀을 (a) Figure 3A와 동일한 LORO 소스로 옮길지, (b) RT-7 `hconly` JSON으로 옮길지. (a)가 tex·그림·MAP.md와 모두 일치합니다.
-
-### R2. Fig 4 (`fig3_geometry`)는 재현 불가입니다
-
-`generate_fig3.py`는 4개 ROI(`V1, V2, V3, hV4`)의 ΔRDM을 요구하는데, 트리에 남은 유일한 `srm_precompute`는
-
-- **V1·V2만** 포함 (`manifest.json` → `rois: [V1, V2]`), 그리고
-- **2026-04-12**자로 **2026-05-16 label-scheme cutoff 이전**이며 `old_labels_pre_2026-05-16/`(13-bin 구 스킴) 아래에 있음
-
-따라서 아카이브본을 되살리는 것은 **오답**입니다. 게재된 `fig3_geometry.pdf`는 현재 트리에 재현 가능한 소스가 없습니다.
-
-**필요한 결정**: 현 label scheme으로 4-ROI ΔRDM precompute를 재생성할지, 아니면 Fig 4를 재현 불가 상태로 두고 supplementary에 명시할지.
-
-### R3. `METHODS_phase1_baseline.md`의 두 테이블이 아카이브된 코드 산출물입니다
-
-- "Pipeline Comparison (Whitening Assessment)" ← `_archive/whitening_tests/`
-- "Noise Ceiling Analysis" ← `_archive/noise_ceiling_phase1/`
-
-둘 다 **live tex에 대응 수치 0건**이라 정리 규칙대로 아카이브했으나, 이 두 항목에서만 내부 문서와 논문이 어긋납니다.
-
-**필요한 결정**: 두 테이블을 `METHODS_phase1_baseline.md`에서 제거할지, 아니면 아카이브 경로를 명시하는 provenance 주석을 달지.
-
-### R4. Method 3 채택의 정량적 근거가 없습니다
-
-`notion.md:2`에 "Method 3 (Header → MI) 채택"이라는 결론만 있고, 최종 코호트에서의 Method 2 vs Method 3 head-to-head 수치가 없습니다. 아카이브된 비교 자료는 **sub-06 단일 피험자** 기준이며 **Method 2가 이겼다고** 결론짓습니다.
-
-Reviewer의 "왜 BBR이 아니라 MI인가"에 답할 자료가 현재 없습니다. 정리와 무관한 사전 문제이나, `PREPROCESSING_FINAL_REPORT.md` §5에 함께 기록했습니다.
-
----
+| # | 항목 | 결정 및 조치 |
+|---|---|---|
+| **R1** | 노트북 E1.1 셀이 폐기된 JSON 참조 | **해소.** `build_notebooks.py`의 E1.1 셀을 Figure 3A와 동일한 LORO 소스(`results/loro/srm/sub-{08,09}_performance_raw.json` → `results.srm.{ROI}.ForwardEncoding[].acc_exact`)로 교체. 8/8 셀 전부 chance 0.125 통과 검증 완료 (sub-08 0.604/0.458/0.375/0.354, sub-09 0.625/0.438/0.312/0.354) |
+| **R2** | Fig 재현 불가 | **종결.** `generate_fig3.py`는 저자가 커밋 `6f66e67`("replace Fig 3 with data-derived workflow schematic")에서 이미 삭제한 상태였고, 디스크에 남아 있던 것은 untracked 잔여물이었습니다 — 이를 정리했습니다. ⚠ **정정**: 제가 앞서 "Fig 4는 대체되지 않았다"고 말한 것은 `6f66e67` 이전 상태를 보고 판단한 것으로 틀렸습니다. 다만 Methods 그림(`fig3_workflow`)과 Results 기하 패널(`fig3_geometry`)은 **서로 다른 그림**이며, 후자는 `results_v4.tex:75`에서 여전히 인용되고 생산 코드가 없습니다. 복구: `git show 6f66e67^:docs/PAPER/Figures/scripts/generate_fig3.py`. 상세는 `MAP.md` E3.3 |
+| **R3** | `METHODS_phase1_baseline.md`의 두 테이블 | **제거 완료.** Noise Ceiling / Pipeline Comparison(Whitening) 삭제, 아카이브 경로 포인터로 대체. 부수 발견으로 같은 문서의 stale Settings 2건도 정정 — "fMRIPrep 23.2.3"(미사용) → 실제 custom 파이프라인, "Voxel selection: Top 50% by FIR R²"(Baseline32 잔재) → none |
+| **R4** | Method 3 채택 근거 | **종결 — 조치 불요.** ROI 중첩 영상 자체가 두 방법 간 비교 대상이 되지 않는다는 저자 판단 |
 
 ## 3. 참고 — 판단보류로 남긴 파일
 

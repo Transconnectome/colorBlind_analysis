@@ -5,18 +5,17 @@
 - [Overall Performance (N=40 subject-ROI pairs, 10 subjects × 4 ROIs)](#overall-performance-n40-subject-roi-pairs-10-subjects--4-rois)
 - [Results by ROI](#results-by-roi)
 - [Results by Group](#results-by-group)
-- [Noise Ceiling Analysis (N=40 pairs, 10 subjects × 4 ROIs)](#noise-ceiling-analysis-n40-pairs-10-subjects--4-rois)
-- [Pipeline Comparison (Whitening Assessment, N=40)](#pipeline-comparison-whitening-assessment-n40)
+- [Removed 2026-08-05 — Noise Ceiling Analysis, Pipeline Comparison (Whitening)](#removed-2026-08-05--noise-ceiling-analysis-pipeline-comparison-whitening)
 - [Validation Status (Phase 1)](#validation-status-phase-1)
 
 ---
 
 ### Settings
 
-- **fMRIPrep**: version 23.2.3
+- **Preprocessing**: custom pipeline — FSL `bet2` → FreeSurfer `mri_coreg` (MI, header-initialized) → FSL FLIRT 12-DOF + FNIRT → MNI152NLin2009cAsym res-2. Driver: `phase0_preprocessing/scripts/run_method3_header_mi_all_subjects.sbatch`. **fMRIPrep is NOT used** — that name survives only as an output *directory* name (corrected 2026-08-05)
 - **Pipeline**: C010 (2nd-level drift removal) + Procrustes alignment
 - **1st-level GLM**: FIR basis (8 delays, 0–12s post-stimulus at TR=1.5s)
-- **Voxel selection**: Top 50% by FIR R²
+- **Voxel selection**: none. (Top-50%-by-FIR-R² belonged to the superseded Baseline32 pipeline; stored C010 amplitudes carry the full mask. Corrected 2026-08-05, matching `methods_v2.tex`.)
 - **2nd-level GLM**: 8 HRF + 8 HRF derivative + 12 per-run drift (linear + constant)
 - **Confounds**: None (motion/tissue/WM regression degrades signal by −60%)
 - **High-pass filtering**: None (drift regressors handle slow trends)
@@ -61,37 +60,26 @@
 
 > Note: CVD subjects show numerically higher decoding performance. This may reflect higher signal quality or genuine representational differences; it does not imply superior color processing.
 
-### Noise Ceiling Analysis (N=40 pairs, 10 subjects × 4 ROIs)
+### Removed 2026-08-05 — Noise Ceiling Analysis, Pipeline Comparison (Whitening)
 
-**Method**: Random Split-Half with Spearman-Brown correction (1,000 iterations)
+두 테이블을 이 문서에서 제거했습니다. 어느 쪽도 **논문 live tex에 대응 수치가 없고**, 생산 코드는 2026-08-05 정리에서 아카이브되었습니다.
 
-| ROI | N | Noise Ceiling (M ± SD) | RDM After Procrustes | % of Ceiling |
-|-----|---|----------------------|---------------------|-------------|
-| V1 | 10 | 0.582 ± 0.172 | 0.160 ± 0.154 | 24.2% |
-| V2 | 10 | 0.635 ± 0.200 | 0.200 ± 0.155 | 29.0% |
-| V3 | 10 | 0.525 ± 0.226 | 0.173 ± 0.174 | 23.2% |
-| hV4 | 9* | **0.697 ± 0.168** | **0.315 ± 0.186** | **41.8%** |
-| **Overall** | **39** | **0.610** | **0.212** | **29.6%** |
+| 제거된 테이블 | 생산 코드 (현 위치) |
+|---|---|
+| Noise Ceiling Analysis (N=40) | `phase1_procrustes_decoding/_archive/noise_ceiling_phase1/compute_noise_ceiling_analysis.py` |
+| Pipeline Comparison (Whitening, N=40) | `phase1_procrustes_decoding/_archive/whitening_tests/` |
 
-> *hV4: N=9, excluding sub-07 (only 16 voxels in C010 pipeline → correlation distance underdetermined → NaN). All other ROIs N=10.
-> Re-run on 2026-02-17 with sub-01 included (previously N=36). Dataset: `full_dataset_C010`. LOSO bounds: V1 [0.16, 0.38], V2 [0.29, 0.43], V3 [0.22, 0.40], hV4 [0.14, 0.36].
+수치가 필요하면 `git show 4b92d8e:analysis/METHODS_phase1_baseline.md`에서 확인할 수 있습니다.
 
-### Pipeline Comparison (Whitening Assessment, N=40)
+> 혼동 방지: 논문이 보고하는 noise ceiling (`results_v4.tex:122`, 52%/67%, `lagecastellanos2018`)은 **다른 양**입니다 — Phase-2의 HC split-half filter-fit ceiling이며 `future_phase2_filter_optimization/scripts/s18_heldout_predictive.py`가 생산합니다. 위 표의 Phase-1 RDM 기반 ceiling과 섞어 쓰지 마십시오.
 
-| Pipeline | RDM Reliability | Noise Ceiling | Status |
-|----------|---------------|---------------|--------|
-| Raw C010 | 0.028 ± 0.225 | −0.038 ± 0.434 | Poor |
-| **Raw → Procrustes** | **0.487 ± 0.253** | **0.613 ± 0.248** | **OPTIMAL** |
-| Raw → Whitening → Procrustes | 0.036 ± 0.153 | 0.020 ± 0.182 | −92% (harmful) |
-| Raw → Procrustes → Whitening | 0.259 ± 0.245 | 0.352 ± 0.315 | −47% (harmful) |
-
-> Whitening degrades performance regardless of order: estimated covariance conflates signal + noise, removing spatial color structure. 77.5% of pairs degraded when whitening applied after Procrustes.
+Whitening이 해로웠다는 결론 자체는 아래 Validation Status에 유지합니다.
 
 ### Validation Status (Phase 1)
 
 - [x] Procrustes alignment: 100% positive pairs, +1644% improvement (0.028 → 0.487)
 - [x] Whitening assessment: harmful, excluded
-- [x] Noise ceiling: ~30% utilization (per-subject split-half); pipeline-level RDM reliability 0.487 vs ceiling 0.613 (79%) uses different metric — see Noise Ceiling table for per-ROI breakdown
+- [x] Noise ceiling: ~30% utilization (per-subject split-half); pipeline-level RDM reliability 0.487 vs ceiling 0.613 (79%) uses a different metric. Per-ROI breakdown removed 2026-08-05 (see above)
 - [x] Temporal stability: method difference = 0.101 (excellent)
 - [x] Drift validation: 1st+2nd and 2nd-only produced identical HRF — passed
 - [x] Onset randomization: dropped (FIR with fixed ISI; timing jitter not applicable)

@@ -11,9 +11,10 @@ One notebook per experiment: `01_discrimination` (E1), `02_interpolation` (E2), 
 | E1.2 MannWhitney p=0.668 | `phase3_decoder_comparing/model_comparison_validation/scripts/validation_tests.py:477-678` (MW @651) | **import-callable** | `phase3_decoder_comparing/results/loro/srm/validation/cross_subject_generalization.json` ✓ (key `LDA/difference/p_value`=0.6681) | C010 amplitudes_{raw,procrustes,srm} |
 | E1.3 hV4 CH p=0.142 | `future_phase1_forward_model/scripts/_compute_paper_stats.py:48-57,234-243` | monolithic, stdout-only | ⚠ **no committed output** (inline print) | sub-*_loco.json |
 
-> **E1.1 source correction (2026-08-05).** `01_discrimination.ipynb` verifies E1.1
-> against `model_comparison_validation/results/cvd_cross_decoding/cvd_cross_decoding_procrustes.json`.
-> That file is the **pre-RT-7 run** (all-subject SRM, `alignment: procrustes`,
+> **E1.1 source correction (2026-08-05, resolved).** `01_discrimination.ipynb` used to
+> verify E1.1 against `…/cvd_cross_decoding/cvd_cross_decoding_procrustes.json`;
+> `build_notebooks.py` now reads the LORO source in the row above instead.
+> The old file is the **pre-RT-7 run** (all-subject SRM, `alignment: procrustes`,
 > 2026-02-18 12:50), superseded 5 hours later by the HC-only RT-7 fix
 > (`cvd_cross_decoding_hconly.json`, 17:38) that exists to remove that run's
 > circularity. Its producer had been deleted in commit `3ec8e51` and was restored
@@ -24,10 +25,9 @@ One notebook per experiment: `01_discrimination` (E1), `02_interpolation` (E2), 
 > from `results/loro/srm/sub-*_performance_raw.json` — a live source with a live
 > producer. Those LORO values clear chance comfortably (sub-08 V1 0.604 / V2 0.458
 > / V3 0.375 / V4 0.354; sub-09 0.625 / 0.438 / 0.312 / 0.354, all ≫ 0.125), so
-> **the manuscript claim is sound**; only the notebook's verification cell points
-> at the wrong file.
+> **the manuscript claim is sound**, and the notebook now checks the same numbers.
 >
-> ⚠ Note for whoever repoints the cell: the RT-7 (non-circular) cross-decoding
+> ⚠ If the cross-decoding analysis is ever reported: the RT-7 (non-circular) cross-decoding
 > numbers are *weaker at hV4* than the superseded ones (sub-08 0.75 → 0.375,
 > permutation p = 0.057; sub-09 0.75 → 0.625). Do not present the pre-RT-7 values.
 
@@ -45,21 +45,32 @@ One notebook per experiment: `01_discrimination` (E1), `02_interpolation` (E2), 
 | E3.1/E3.2/E3.7 disparity table | `phase2_SRM_across_between/rerun_loo_consistent.py:92-168,295-757` | monolithic, **`mpirun -np 1`** (SRM @46) | `…/results/loo_consistent/20260218_163819/loo_consistent_results.json` ✓ | phase1_preprocess_decoding C010 amplitudes_procrustes |
 | E3.3 ΔRDM heatmap | `docs/PAPER/Figures/scripts/generate_fig3.py:31,88` | figure generator | `future_phase2_filter_optimization/results/diagnostics/srm_precompute/delta_rdm_obs_srm_{roi}.npz` ⚠ **directory currently missing** | SRM-aligned amplitudes |
 | | ⚠ **corrected 2026-08-05** — the former pointer, `phase2_SRM_across_between/visualization/visualize_scattered_but_parallel.py`, was a schematic stub that never produced the published panel; it moved to `_archive/visualization_unused/` on 2026-08-05. | | | |
-
-> **Fig 4 (fig3\_geometry) is not currently regenerable — do not "restore" the archived precompute.**
-> The only surviving `srm_precompute` lives at
-> `future_phase2_filter_optimization/results/_archive/old_labels_pre_2026-05-16/phase2_artifacts/diagnostics/srm_precompute/`
-> and is unusable for two independent reasons:
-> 1. It covers **V1 and V2 only** (`manifest.json` → `rois: [V1, V2]`), while
->    `generate_fig3.py:39` requires `[V1, V2, V3, hV4]`.
-> 2. It is dated **2026-04-12**, i.e. **before the 2026-05-16 label-scheme cutoff**,
->    and is filed under `old_labels_pre_2026-05-16/` — the 13-bin scheme superseded
->    by `c3_relabel_p2a` 9-bin (project memory `feedback_label_scheme_cutoff`).
->
-> The published `fig3_geometry.pdf` therefore has no reproducible source in the tree.
-> Regenerating it requires a fresh 4-ROI ΔRDM precompute under the current label scheme.
 | E3.5 SRM k=4/4/3/3 | `…/validation/2C_optimal_k_selection/run_k_selection_cv.py:63-140` + `aggregate_k_selection.py:76-145`; canonical override `rerun_loo_consistent.py:60` | monolithic, MPI | `k_aggregation_results.json` ✓ | same |
 | | ⚠ **flag**: raw aggregation selects 4/5/4/6; paper 4/4/3/3 is a **hardcoded canonical override** (rerun L60). | | | |
+
+> **⚠ `fig3_geometry` (Results Fig, `results_v4.tex:75`) has no generator.**
+> `generate_fig3.py` was deleted by the author in commit `6f66e67`
+> ("docs: replace Fig 3 with data-derived workflow schematic"), which introduced
+> `fig3_workflow.png` + `fig3_assets/` for the **Methods** figure
+> (`methods_v2.tex:197`). The **Results** geometry panel `fig3_geometry.pdf`
+> (2026-05-12) is a separate figure, still committed and still cited — it simply
+> no longer has producing code. Recover the generator with:
+> `git show 6f66e67^:docs/PAPER/Figures/scripts/generate_fig3.py`
+>
+> It could not run anyway: it requires ΔRDM for **four ROIs** (`V1, V2, V3, hV4`),
+> but the only surviving `srm_precompute` —
+> `future_phase2_filter_optimization/results/_archive/old_labels_pre_2026-05-16/phase2_artifacts/diagnostics/srm_precompute/`
+> — is unusable on two independent counts:
+> 1. it covers **V1 and V2 only** (`manifest.json` → `rois: [V1, V2]`); and
+> 2. it is dated **2026-04-12**, i.e. **before the 2026-05-16 label-scheme cutoff**,
+>    filed under `old_labels_pre_2026-05-16/` — the 13-bin scheme superseded by
+>    `c3_relabel_p2a` 9-bin (project memory `feedback_label_scheme_cutoff`).
+>
+> **Do not "restore" that archived precompute.** The committed
+> `fig3_geometry.pdf` remains the published panel, cited at
+> `results_v4.tex:66,68,75` (`fig:geometry`). Rebuilding it requires a fresh
+> 4-ROI ΔRDM precompute under the current label scheme plus the recovered
+> generator.
 
 ## E4 — Simulator model selection  → notebook 04  (CURRENT v6 PCA canonical)
 | id | producing code (`future_phase2_filter_optimization/scripts/`) | committed output (`results/`) |

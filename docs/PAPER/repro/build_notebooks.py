@@ -56,20 +56,25 @@ nb01 = nb([
 
 | id | reported | source JSON | mode |
 |---|---|---|---|
-| E1.1 | both CVD > 0.125 every ROI | `phase3_decoder_comparing/.../cvd_cross_decoding_procrustes.json` | LOAD+VERIFY |
+| E1.1 | both CVD > 0.125 every ROI | `phase3_decoder_comparing/results/loro/srm/sub-{08,09}_performance_raw.json` | LOAD+VERIFY |
 | E1.2 | MannWhitney p=0.668 | `phase3_decoder_comparing/results/loro/srm/validation/cross_subject_generalization.json` | LOAD+VERIFY |
 | E1.3 | hV4 single-case p=0.142 | `_compute_paper_stats.py` (stdout only) | ⚠ FLAG |"""),
     SETUP,
     md("### E1.1 — 8-class LORO discrimination exceeds 0.125 chance at every ROI (both CVD)"),
     code("""
-j = U.load_json(U.DEC / "model_comparison_validation/results/cvd_cross_decoding/cvd_cross_decoding_procrustes.json")
-res = j["results"]
+# Source corrected 2026-08-05. This cell previously read
+# cvd_cross_decoding_procrustes.json -- the pre-RT-7 run (all-subject SRM),
+# superseded the same day by the HC-only fix that removes its circularity.
+# We now read the same LORO file that generate_fig2.py uses to draw Figure 3A,
+# which is what results_v4.tex actually cites.
+import numpy as np
+CHANCE = 1/8
 allpass = True
-for roi in ["V1", "V2", "V3", "V4"]:
-    ch = res[roi]["chance"]
-    for s in ["sub-08", "sub-09"]:
-        acc = res[roi]["cvd_cross"][s]
-        ok = U.check(f"E1.1 {roi} {s} acc>chance", acc, ch, mode="ge")
+for s in ["sub-08", "sub-09"]:
+    srm = U.load_json(U.DEC / f"results/loro/srm/{s}_performance_raw.json")["results"]["srm"]
+    for roi in ["V1", "V2", "V3", "V4"]:
+        acc = float(np.mean([f["acc_exact"] for f in srm[roi]["ForwardEncoding"]]))
+        ok = U.check(f"E1.1 {roi} {s} acc>chance", acc, CHANCE, mode="ge")
         allpass = allpass and ok
 print("all ROI/subj above chance:", allpass)
 """),

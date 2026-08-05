@@ -111,9 +111,9 @@ def main():
                  ha="left", va="center", fontsize=8.6, fontweight="bold",
                  rotation=90)
 
-    fig.subplots_adjust(left=0.105, right=0.99, top=0.90, bottom=0.07)
-    fig.suptitle("Per-subject stimulus-space correction filter "
-                 "(Original vs Filtered, by hue)", fontsize=10.5, y=0.975)
+    # No suptitle: Elsevier/NeuroImage require the figure title in the caption,
+    # not on the illustration itself. The LaTeX caption carries it (fig:filter).
+    fig.subplots_adjust(left=0.105, right=0.99, top=0.94, bottom=0.07)
     for ext in ("pdf", "png"):
         p = OUT / f"fig7_filter.{ext}"
         fig.savefig(p, dpi=300, bbox_inches="tight")

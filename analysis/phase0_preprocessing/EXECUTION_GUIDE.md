@@ -65,7 +65,7 @@ ssh haba6030@node2
 cd /scratch/connectome/haba6030/colorBlind/analysis/prep_trials
 
 # Submit SLURM job
-sbatch scripts/run_method2_header_bbr.sbatch
+# Method 2 was NOT adopted; code archived at _archive/registration_method_selection/
 
 # Check job status
 squeue -u haba6030
@@ -103,7 +103,7 @@ ssh haba6030@node2
 cd /scratch/connectome/haba6030/colorBlind/analysis/prep_trials
 
 # Submit SLURM job
-sbatch scripts/run_method3_header_mi.sbatch
+sbatch scripts/run_method3_header_mi_all_subjects.sbatch
 
 # Check job status
 squeue -u haba6030

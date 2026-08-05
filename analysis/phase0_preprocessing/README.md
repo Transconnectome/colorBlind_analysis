@@ -118,13 +118,13 @@ Expected: Dice < 0.80 (Too risky)
 
 **Method 3 first** (fastest, most promising):
 ```bash
-sbatch scripts/run_method3_header_mi.sbatch
+sbatch scripts/run_method3_header_mi_all_subjects.sbatch
 # 3 subjects × 30 min = 1.5h
 ```
 
 **Method 2 later** (when time available):
 ```bash
-sbatch scripts/run_method2_header_bbr.sbatch
+# Method 2 was NOT adopted; code archived at _archive/registration_method_selection/
 # 3 subjects × 8-10h = 24-30h
 ```
 
@@ -146,7 +146,7 @@ sbatch scripts/run_method2_header_bbr.sbatch
 
 **Last updated**: 2026-01-06
 
-- ✅ Scripts ready (`run_method2_header_bbr.sbatch`, `run_method3_header_mi.sbatch`)
+- ✅ Canonical: `run_method3_header_mi_all_subjects.sbatch` (exp1), `run_method3_header_mi_2nd.sbatch` (exp2). Method 2 and the 3-subject pilot are archived under `_archive/registration_method_selection/`.
 - ✅ Fixed: Method 2 now uses FreeSurfer BBR (not FSL)
 - ✅ Fixed: Removed `--verbose` from mri_coreg
 - ✅ Uploaded to server

@@ -116,8 +116,16 @@ future audit, but should be treated as superseded:
 | `s15_oos_reanalysis.py`, `s16_e2_srm_disparity.py` | Pipeline 3 (deprecated per PIPELINE_2_CLOSURE §Pipeline 3 status). |
 | `s13_multipoint_validation.py` | Round 1/2 predecessor; `s13_round3.py` supersedes. |
 | `c3_relabel_both_subjects.py`, `c3_relabel_p2a.py` | Label scheme — pre-2026-05-16 13-bin SUPERSEDED (project memory `feedback_label_scheme_cutoff`). |
-| `step1_fit_loco_v2.py`, `retinal_cortical.py`, `rc_opponent_1dof.py`, `lambda_3source.py`, `behav_loss.py`, `landscape_loader.py`, `utils_distortion_models.py`, `diagnostic_delta_rdm.py`, `s10_advisor_fixes.py`, `cycle6_raw_weight.py`, `s9_retroactive_defenses.py`, `fit_sigma_hc_8afc.py` | Older forwards / ad-hoc diagnostics absorbed into closure. |
+| `step1_fit_loco_v2.py`, `retinal_cortical.py`, `rc_opponent_1dof.py`, `lambda_3source.py`, `landscape_loader.py`, `s10_advisor_fixes.py`, `cycle6_raw_weight.py`, `s9_retroactive_defenses.py`, `fit_sigma_hc_8afc.py` | Older forwards / ad-hoc diagnostics absorbed into closure. All nine are already in `_archive_pre_closure/` with zero live importers (verified 2026-08-05). |
+| `forward_models/` (`two_component.py`, `three_component.py`, `opponent_gain.py`, `rc_2stage.py`) | Frozen `H_BASE` variant — sign-flipped δθ vs the closure forward at identical (β_s, β_c). Moved to `_archive_2026-08/frozen_forward_variant/` on 2026-08-05. Its only importer, `results/redteam/exp1_a13_forward_audit.py`, imports it *deliberately* to document the mismatch and was repointed in the same commit. |
 | `loco_distortion_fit.py` | Alternative entry — uses frozen H_BASE variant from `forward_models/two_component.py`. Not called by closure. |
+
+> **⚠ 2026-08-05 correction.** This table previously listed `behav_loss.py`,
+> `utils_distortion_models.py`, and `diagnostic_delta_rdm.py` as inactive. That
+> was wrong: the canonical fitter imports all three
+> (`s10b_v6_pca_rdm.py:30,36,37`; 14 / 2 / 5 live importers respectively).
+> They are **core library** — see `README.md` §1, which had it right. Trust
+> `README.md` §1 over this section where the two disagree.
 | `render_loco_canonical_4col.py`, `s5_tregillus_viz_4col.py`, `s5_viz_behav_4col.py`, `s7_best_models_4col.py` | Pre-2026-05-27 viz using h_base / frozen forward — display δθ inconsistent with closure. Use [`p2_primary_4col.py`](p2_primary_4col.py) instead. |
 | `scripts/visualization/visualize_phase3_preimage.py` | File header marks itself DEPRECATED (frame mismatch). Do not regenerate from this. |
 | `scripts/visualization/visualize_filter_candidates.py` | Forward not yet audited; treat as suspect until verified to match closure. |

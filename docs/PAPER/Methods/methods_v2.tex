@@ -13,7 +13,7 @@
 \section{Methods}
 \label{sec:methods}
 
-The analysis follows three stages. First, we characterized each CVD participant's cortical color representation with three neural analyses. Leave-one-run-out (LORO) decoding tested whether categorical discrimination is preserved (§\ref{sec:methods:loro}). Leave-one-color-out (LOCO) decoding tested whether continuous hue interpolation is impaired, producing a per-hue vulnerability profile (§\ref{sec:methods:loco}). A geometric analysis measured how the CVD representational geometry departs from the HC mean, in global dispersion (pairwise disparity) and per-pair structure ($\Delta$RDM) (§\ref{sec:methods:rdm}). Second, two candidate CVD distortion model classes were fit by minimizing a combination of neural and behavioural losses, with parameters selected by a pre-specified stability procedure (§\ref{sec:methods:candidates}--§\ref{sec:methods:selection}). Third, the fitted distortion was analytically inverted to yield a per-subject stimulus-space correction filter (§\ref{sec:methods:filter}); Figure~\ref{fig:pipeline} summarizes this fit-and-invert workflow. This filter was then evaluated in a repeat fMRI session and a behavioural discrimination battery (JND thresholds and 8AFC color identification; §\ref{sec:methods:behavioral}).
+The analysis follows three stages. First, we characterized each CVD participant's cortical color representation with three neural analyses. Leave-one-run-out (LORO) decoding tested whether color classification is preserved (§\ref{sec:methods:loro}). Leave-one-color-out (LOCO) decoding tested whether continuous hue interpolation is impaired, producing a per-hue vulnerability profile (§\ref{sec:methods:loco}). Two representational-geometry measures quantified how the CVD hue geometry departs from the HC reference, its overall distance (Procrustes disparity) and its per-pair difference ($\Delta$RDM) (§\ref{sec:methods:rdm}). Second, two candidate CVD distortion model classes were fit by minimizing a combination of neural and behavioral losses, with parameters selected by a pre-specified stability procedure (§\ref{sec:methods:candidates}--§\ref{sec:methods:selection}). Third, the fitted distortion was analytically inverted to yield a per-subject stimulus-space correction filter (§\ref{sec:methods:filter}); Figure~\ref{fig:pipeline} summarizes this fit-and-invert workflow. This filter was then evaluated in a repeat fMRI session and a behavioral battery (hue-discrimination JND thresholds and 8AFC color identification; §\ref{sec:methods:behavioral}).
 
 % ── Figure 1 ─────────────────────────────────────────────────────────────────
 \begin{figure*}[tb]
@@ -23,8 +23,8 @@ The analysis follows three stages. First, we characterized each CVD participant'
   \textbf{(B)} Task: rapid serial visual presentation (RSVP). A fixation period (randomized 3--6\,s) is followed by a 1.5\,s uniform colored disc; 5--9 trials per color per run (Neurodesign-optimized allocation, identical across participants), six runs.
   \textbf{(C)} Analysis pipeline.
   Stage A (Alignment): two-stage GLM single-trial $\beta$ amplitudes, Procrustes-aligned across runs, projected into an SRM space trained on HC participants only.
-  Stage B (Neural feature): LORO discrimination, LOCO interpolation, and the SRM-space representational dissimilarity matrix (RDM).
-  Stage C (Modelling \& filter): a 2-component cortical model with S-cone-axis ($\beta_s$) and confusion-axis ($\beta_c$) components; its pre-image yields the per-subject stimulus-space filter.
+  Stage B (Neural feature): LORO classification, LOCO interpolation, and the SRM-space representational dissimilarity matrix (RDM).
+  Stage C (Modeling \& filter): a 2-component cortical model with S-cone-axis ($\beta_s$) and confusion-axis ($\beta_c$) components; its pre-image yields the per-subject stimulus-space filter.
   HC: $n = 7$ (sub-01--07).}
   \label{fig:paradigm}
 \end{figure*}
@@ -43,20 +43,24 @@ Thirteen volunteers were recruited under Institutional Review Board approval (\#
 
 Eight isoluminant chromatic stimuli were drawn from CIE $L^{*}a^{*}b^{*}$ space at equal angular spacing ($0^\circ$--$315^\circ$, $45^\circ$ steps; $L^{*} = 75$, chroma $= 40$) \cite{cie1986}, spanning red, orange, yellow, green, cyan, blue, purple, and magenta (Figure~\ref{fig:paradigm}A). A gray filler ($a^{*} = b^{*} = 0$) served as a null condition.
 
-Stimuli were presented in a Rapid Serial Visual Presentation (RSVP) design to sustain attention and fixation. Each stimulus was a uniform circular chromatic patch (a colored disc, 1.5 s per stimulus) shown in pseudo-random order optimized with Neurodesign \cite{durnez2018}. Participants pressed a button upon detecting two consecutive 'K's within a rapid serial letter stream presented at the centre of the chromatic disc. Each run comprised 72 events. Because the schedule was optimized for detection power rather than for equal counts, trials were not balanced across colors within a run: each chromatic stimulus occurred 5--9 times per run (38--47 times across the six runs), with the remaining 14--20 events per run assigned to the gray filler. The same optimized schedule was used for every participant, so this allocation contributes a common component to all individual estimates; single-trial amplitudes were subsequently averaged within run and color, so all downstream analyses operated on a balanced 6 (run) $\times$ 8 (color) design. Inter-stimulus intervals were drawn from $\{3, 4.5, 6\}$ s. Each session comprised six runs ($\approx 7$ min each). The experiment was coded in PsychoPy 2022.2.5 \cite{peirce2019}.
+Stimuli were presented in a Rapid Serial Visual Presentation (RSVP) design to sustain attention and fixation. Each stimulus was a uniform circular chromatic patch (a colored disc, 1.5 s per stimulus) shown in pseudo-random order optimized with Neurodesign \cite{durnez2018}. Participants pressed a button upon detecting two consecutive 'K's within a rapid serial letter stream presented at the center of the chromatic disc. Each run comprised 72 events. Because the schedule was optimized for detection power rather than for equal counts, trials were not balanced across colors within a run: each chromatic stimulus occurred 5--9 times per run (38--47 times across the six runs), with the remaining 14--20 events per run assigned to the gray filler. The same optimized schedule was used for every participant, so this allocation contributes a common component to all individual estimates; single-trial amplitudes were subsequently averaged within run and color, so all downstream analyses operated on a balanced 6 (run) $\times$ 8 (color) design. Inter-stimulus intervals were drawn from $\{3, 4.5, 6\}$ s. Each session comprised six runs ($\approx 7$ min each). The experiment was coded in PsychoPy 2022.2.5 \cite{peirce2019}.
 
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{Behavioral tasks}
 \label{sec:methods:behavioral}
 % ──────────────────────────────────────────────────────────────────────────────
 
-Two behavioral tasks --- a just-noticeable-difference (JND) discrimination task and an eight-alternative forced-choice (8AFC) color-identification task --- were administered on the same day as the main scanning session (Session~1) for all participants. Both CVD participants additionally repeated both tasks under each filter in the second session (see the \nameref{sec:methods:filter_eval} section).
+Two behavioral tasks --- a just-noticeable-difference (JND) hue-discrimination task and an eight-alternative forced-choice (8AFC) color-identification task --- were administered on the same day as the main scanning session (Session~1) for all participants. Both CVD participants additionally repeated both tasks under each filter in the second session (see the \nameref{sec:methods:filter_eval} section).
 
 \paragraph{Just-noticeable difference (JND).}
-Color discrimination thresholds were estimated for eight hue pairs using two-interleaved 1-up/1-down adaptive staircases, each terminating after eight reversals \cite{levitt1971}. Pairs spanned four categories: (i) three pairs hypothesized as universally difficult for both CVD types (yellow--purple, blue--purple, red--orange), (ii) two pairs probing the deutan confusion axis (orange--yellow, yellow--green), (iii) two pairs probing the protan confusion axis (cyan--magenta, green--blue), and (iv) one control pair (red--cyan). For each pair, the JND ratio $\gamma = \gamma_{\rm CVD} / \bar{\gamma}_{\rm HC}$ was computed, where $\bar{\gamma}_{\rm HC}$ is the HC mean threshold. Ratios $\gamma > 1$ indicate elevated discrimination difficulty relative to HC. These ratios enter the fitting loss as described in \S\ref{sec:methods:twocomp}.
+Hue-discrimination thresholds were estimated for eight hue pairs using two-interleaved 1-up/1-down adaptive staircases, each terminating after eight reversals \cite{levitt1971}. Pairs spanned four categories: (i) three pairs hypothesized as universally difficult for both CVD types (yellow--purple, blue--purple, red--orange), (ii) two pairs probing the deutan confusion axis (orange--yellow, yellow--green), (iii) two pairs probing the protan confusion axis (cyan--magenta, green--blue), and (iv) one control pair (red--cyan). For each pair, the JND ratio $\gamma = \gamma_{\rm CVD} / \bar{\gamma}_{\rm HC}$ was computed, where $\bar{\gamma}_{\rm HC}$ is the HC mean threshold. Ratios $\gamma > 1$ indicate elevated hue-discrimination difficulty relative to HC. These ratios enter the fitting loss as described in \S\ref{sec:methods:twocomp}.
+% TERMINOLOGY (resolved 2026-08-05): "discrimination" is now reserved for the
+% BEHAVIORAL JND construct throughout the paper; the neural LORO construct is
+% "color classification". "hue pair" is the unified term (was "color pair" in
+% \S\ref{sec:methods:twocomp}).
 
 \paragraph{8AFC color identification.}
-On each trial a circular chromatic patch was presented, and participants selected the matching hue from eight options identical to the scanner stimulus set. Identification accuracy served as an independent behavioral readout and did not enter the fitting loss. It was compared to Ishihara classifications post-hoc.
+On each trial a circular chromatic patch was presented, and participants selected the matching hue from eight options identical to the scanner stimulus set. Identification accuracy served as an independent behavioral readout and did not enter the fitting loss. It was compared to the Ishihara screening outcome post-hoc.
 
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{MRI acquisition and preprocessing}
@@ -65,17 +69,37 @@ On each trial a circular chromatic patch was presented, and participants selecte
 
 Data were acquired on a Siemens 3T MAGNETOM Cima.X scanner with BioMatrix 3T coils. To constrain coverage to posterior occipital cortex we used 24 oblique slices perpendicular to the calcarine sulcus \cite{brouwer2009} (TR 1.5 s, TE 30 ms, FA $75^\circ$, $2 \times 2 \times 2$ mm, $96 \times 80$ matrix).
 
-Data were converted to BIDS format and defaced with ezBIDS \cite{levitas2024}. Functional images were registered to the T1w image via mutual-information coregistration (FreeSurfer \texttt{mri\_coreg}; \citeNP{wells1996, maes1997}). T1w-to-MNI normalization used 12-DOF affine (FSL FLIRT; \citeNP{jenkinson2002}) followed by nonlinear warping (FNIRT; \citeNP{andersson2007}), yielding 2 mm isotropic MNI-space BOLD data.
+Data were converted to BIDS format and defaced with ezBIDS \cite{levitas2024}. Preprocessing followed a custom pipeline rather than a standard container; no confound regression was applied at any stage (Supplementary~\S S1). The T1w image was skull-stripped (FSL \texttt{bet2}; \citeNP{smith2002}), and functional images were registered to it via mutual-information coregistration initialized from the scanner header (FreeSurfer \texttt{mri\_coreg}; \citeNP{wells1996, maes1997}). T1w-to-MNI normalization used 12-DOF affine (FSL FLIRT; \citeNP{jenkinson2002}) followed by nonlinear warping (FNIRT; \citeNP{andersson2007}) onto the MNI152NLin2009cAsym template, yielding 2 mm isotropic MNI-space BOLD data.
+% Description reconciled 2026-08-05 against the canonical driver
+% analysis/phase0_preprocessing/scripts/run_method3_header_mi_all_subjects.sbatch
+% (exp1) and run_method3_header_mi_2nd.sbatch (exp2): bet2 L190-192,
+% mri_coreg --regheader L253-266, FLIRT/FNIRT L298-311, template L311.
+% Method 2 (header->BBR) and the aCompCor confound path were never adopted;
+% their code is in analysis/phase0_preprocessing/_archive/.
 
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{ROI definition and response estimation}
 \label{sec:methods:roi}
 % ──────────────────────────────────────────────────────────────────────────────
 
-Bilateral V1, V2, V3, and hV4 were defined from the Wang probabilistic atlas \cite{wang2015} at $> 50\%$ probability, intersected with each participant's BOLD brain mask (voxel counts: V1 $655 \pm 214$; V2 $451 \pm 145$; V3 $103 \pm 29$; hV4 $63 \pm 22$; mean $\pm$ SD).
+Bilateral V1, V2, V3, and hV4 were defined from the Wang probabilistic atlas \cite{wang2015} at $> 50\%$ probability, intersected with each participant's BOLD brain mask (voxel counts: V1 $665 \pm 209$; V2 $458 \pm 113$; V3 $105 \pm 19$; hV4 $64 \pm 18$; mean $\pm$ SD, $n = 9$).
+% Voxel counts updated 2026-08-03 from the stored C010 amplitudes actually used
+% in every analysis: shape[2] of full_dataset_C010/sub-{01..09}/{ROI}/
+% amplitudes_procrustes.npy (n = 9; sub-10 excluded from all analyses).
+% Superseded values were V1 655+-214; V2 451+-145; V3 103+-29; hV4 63+-22 —
+% source and subject set unidentified; SDs differed most (V2 145 vs 113,
+% V3 29 vs 19). See docs/PAPER/TODO_additional_analysis.md A9.
+% Per-subject counts (sub-01..09):
+%   V1  568 405 858 858 858 858 330 560 692
+%   V2  402 335 557 557 557 557 258 400 498
+%   V3  106  94 115 115 115 115  59 114 115
+%   hV4  67  69  70  70  70  70  16  70  70   <- sub-07 hV4 = 16 (known outlier)
 
 Single-trial response amplitudes were estimated with a two-stage GLM \cite{dale1999, brouwer2009, brouwer2013}. First, an ROI-level hemodynamic response function (HRF) was extracted from a finite-impulse-response (FIR) model (8-TR basis set).
-Voxels in the top 50\% of variance explained by the mean ROI HRF were retained (V1 $328 \pm 107$; V2 $226 \pm 73$; V3 $52 \pm 15$; hV4 $32 \pm 11$ voxels).
+% R^2 voxel-selection sentence removed 2026-08-05: it belonged to the superseded
+% Baseline32 pipeline, whose orchestration code was archived the same day
+% (analysis/comprehensive/_archive/baseline32_orchestration/). C010 applies no
+% voxel selection. Full evidence: docs/PAPER/TODO_additional_analysis.md A9.
 Second, the estimated HRF was convolved with per-color design matrices and fitted by ridge regression to yield one amplitude per (voxel, color, run), organized as a $6 \times 8 \times V$ array per subject.
 
 Voxel amplitudes were aligned across runs using within-subject Procrustes rotation \cite{gower1975}: runs 2--6 were mapped to run 1 via the orthogonal transformation minimizing $\|X_\text{ref} - XQ\|_F$ (scaling prohibited).
@@ -91,14 +115,14 @@ Cross-subject alignment and dimensionality reduction were performed with the Sha
   \min_{W^{\mathrm{srm}}_i,\,S}\;\sum_{i=1}^N \|X_i - W^{\mathrm{srm}}_i S\|_F^2 \quad\text{s.t.}\quad {W^{\mathrm{srm}}_i}^\top W^{\mathrm{srm}}_i = I_k
 \end{equation}
 
-SRM was trained exclusively on the seven HC participants to avoid circular inference in CVD comparisons. Each CVD participant was subsequently projected into the fixed HC-derived space by solving $W^{\mathrm{srm}}_\text{CVD} = UV^\top$ where $U\Sigma V^\top = \text{SVD}(X_\text{CVD}\cdot S^\dagger)$. Reduced dimensions were chosen by mean-rank aggregation across seven-fold leave-one-subject-out (LOSO) cross-validation, using three SRM-quality metrics (RDM split-half reliability, cross-subject RDM correlation, and reconstruction error): V1 $k = 4$; V2 $k = 4$; V3 $k = 3$; hV4 $k = 3$.
+SRM was trained exclusively on the seven HC participants to avoid circular inference in CVD comparisons. Each CVD participant was subsequently projected into the fixed HC-derived space by solving $W^{\mathrm{srm}}_\text{CVD} = UV^\top$ where $U\Sigma V^\top = \text{SVD}(X_\text{CVD}\cdot S^\dagger)$. Reduced dimensions were chosen by mean-rank aggregation across seven-fold leave-one-subject-out (LOSO) cross-validation, in which one HC is withheld from SRM training on each fold, using three SRM-quality metrics (RDM split-half reliability, cross-subject RDM correlation, and reconstruction error): V1 $k = 4$; V2 $k = 4$; V3 $k = 3$; hV4 $k = 3$.
 
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{Forward encoding model}
 \label{sec:methods:encoding}
 % ──────────────────────────────────────────────────────────────────────────────
 
-Both discrimination (LORO) and interpolation (LOCO) decoding used the same forward encoding model \cite{brouwer2009}. The model represents each stimulus as a $F = 6$-dimensional channel vector $\mathbf{c}(\theta) = [c_1(\theta), \ldots, c_F(\theta)]^\top$, where $c_k(\theta) = \max\!\bigl(0,\,\cos(\theta - \theta_k)\bigr)^2$ is a half-wave rectified squared cosine tuned to preferred hue $\theta_k$ (preferred hues spaced equally at $60^\circ$; \citeNP{brouwer2009}). Stacking the eight stimulus channel vectors row-wise gives the channel design matrix $C \in \mathbb{R}^{8 \times F}$. Decoding and encoding optimize different targets and therefore use different estimators of the channel-to-voxel weight matrix $W \in \mathbb{R}^{F \times V}$ (distinct from the SRM mapping $W^{\mathrm{srm}}$).
+Both classification (LORO) and interpolation (LOCO) decoding used the same forward encoding model \cite{brouwer2009}. The model represents each stimulus as a $F = 6$-dimensional channel vector $\mathbf{c}(\theta) = [c_1(\theta), \ldots, c_F(\theta)]^\top$, where $c_k(\theta) = \max\!\bigl(0,\,\cos(\theta - \theta_k)\bigr)^2$ is a half-wave rectified squared cosine tuned to preferred hue $\theta_k$ (preferred hues spaced equally at $60^\circ$; \citeNP{brouwer2009}). Stacking the eight stimulus channel vectors row-wise gives the channel design matrix $C \in \mathbb{R}^{8 \times F}$. Decoding and encoding optimize different targets and therefore use different estimators of the channel-to-voxel weight matrix $W \in \mathbb{R}^{F \times V}$ (distinct from the SRM mapping $W^{\mathrm{srm}}$).
 
 \paragraph{Decoding (stimulus hue from voxels).}
 Decoding recovers the stimulus hue from voxel responses. We estimated $W$ by ordinary least squares (pseudoinverse) and inverted it. For a held-out voxel pattern $\mathbf{x}$, the channel activations were reconstructed as $\hat{\mathbf{c}} = W\mathbf{x}$, and the returned hue was the one whose basis vector had the highest Pearson correlation with $\hat{\mathbf{c}}$ (\citeNP{brouwer2009}; Figure~\ref{fig:forward}). Alternative decoders evaluated during model selection are described in Appendix~A.
@@ -115,25 +139,25 @@ Encoding predicts the voxel responses from the channels ($\hat{X} = CW$, with $\
   Stage 2 (training): the channel-to-voxel weights $W$ are fit by ordinary least squares for hue decoding, or by GCV-regularized ridge regression for voxel-response prediction (encoding).
   Stage 3 (testing): for a held-out voxel pattern, channel activations are reconstructed as $\hat{\mathbf{c}} = W\mathbf{x}$.
   Stage 4: the decoded hue is recovered as the angle whose basis vector has the highest Pearson correlation with the reconstructed channel pattern.
-  The same model serves both decoding schemes (Section~\ref{sec:methods:loro}): cross-run discrimination (LORO) and cross-color interpolation (LOCO). Their basis and correlation-based selection are identical, and only the held-out test set differs. Decoding uses the OLS pseudoinverse weights.}
+  The same model serves both decoding schemes (Section~\ref{sec:methods:loro}): cross-run classification (LORO) and cross-color interpolation (LOCO). Their basis and correlation-based selection are identical, and only the held-out test set differs. Decoding uses the OLS pseudoinverse weights.}
   \label{fig:forward}
 \end{figure*}
 
 % ──────────────────────────────────────────────────────────────────────────────
-\subsection{Two decoding schemes: cross-run discrimination and cross-color interpolation}
+\subsection{Two decoding schemes: cross-run classification and cross-color interpolation}
 \label{sec:methods:loro}
 % ──────────────────────────────────────────────────────────────────────────────
 
-Two complementary cross-validation schemes used the forward encoding model to characterize each participant's hue processing, differing only in what was held out. Leave-one-run-out (LORO) held out repeated presentations to test categorical discrimination, and leave-one-color-out (LOCO) held out entire hues to test continuous interpolation.
+Two complementary cross-validation schemes used the forward encoding model to characterize each participant's hue processing, differing only in what was held out. Leave-one-run-out (LORO) held out repeated presentations to test the categorical representation of the eight hues, measured as color classification. Leave-one-color-out (LOCO) held out entire hues to test the continuous representation, measured as hue interpolation.
 
-\paragraph{Cross-run discrimination (LORO)}
-Categorical discrimination was assessed with leave-one-run-out cross-validation in SRM-aligned space. For each of the six runs, $W$ was estimated on the remaining five runs using mean-subtracted SRM projections, and each held-out run's 8 color patterns were decoded by nearest-neighbour matching in channel-output space (the highest-correlation readout of \S\ref{sec:methods:encoding}). Primary discrimination performance was the 8-class exact accuracy (chance $= 1/8 = 0.125$), averaged across six folds.
+\paragraph{Cross-run classification (LORO)}
+Color classification was assessed with leave-one-run-out cross-validation in SRM-aligned space. For each of the six runs, $W$ was estimated on the remaining five runs using mean-subtracted SRM projections, and each held-out run's 8 color patterns were decoded by nearest-neighbor matching in channel-output space (the highest-correlation readout of \S\ref{sec:methods:encoding}). Primary classification performance was the 8-class exact accuracy (chance $= 1/8 = 0.125$), averaged across six folds.
 
 Group-level HC--CVD comparison used a Mann--Whitney $U$ test on cross-subject generalization scores: the encoding model trained on each HC participant's SRM-aligned data was applied to every other participant's aligned patterns, yielding 21 unique HC-to-HC and 14 HC-to-CVD pairwise generalization scores. Within-ROI single-case tests used the \citeA{crawford1998} modified $t$-test (one-tailed, lower).
 
 \paragraph{Cross-color interpolation (LOCO)}
 \label{sec:methods:loco}
-Continuous hue interpolation was assessed with leave-one-color-out cross-validation. Each of the 8 hues was held out in turn; $W$ was estimated on the remaining 7 hues using all 6 runs (pooled $42$-sample design matrix), and the held-out hue was predicted by nearest-neighbour matching in channel-output space.
+Continuous hue interpolation was assessed with leave-one-color-out cross-validation. Each of the 8 hues was held out in turn; $W$ was estimated on the remaining 7 hues using all 6 runs (pooled $42$-sample design matrix), and the held-out hue was predicted by nearest-neighbor matching in channel-output space.
 
 \subparagraph{Adjacent accuracy}
 The primary cross-color decoding metric was adjacent accuracy: the proportion of predictions that fell within $\pm 1$ hue step ($45^\circ$) of the target hue, averaged across the 6 runs of each test color (range $0$--$1$; chance level under a uniform random predictor $= 3/8 = 0.375$; exact-accuracy chance $= 1/8 = 0.125$). For HC above-chance testing and for pairwise HC--CVD comparisons at hV4, $p$-values were obtained from 1,000 random color-label permutations and from the \citeA{crawford1998} modified $t$-test (one-tailed, lower), respectively.
@@ -142,17 +166,17 @@ The primary cross-color decoding metric was adjacent accuracy: the proportion of
 The 8-dimensional vector of per-hue adjacent-accuracy values, $\mathbf{v} \in [0,1]^8$, constitutes each participant's \emph{hue vulnerability profile}. For group-level model fit, we report Spearman $\rho$ between the observed $\mathbf{v}$ and the $\mathbf{v}$ predicted by the CVD distortion model (see the \nameref{sec:methods:candidates} section). Per-hue group comparisons (Figure~\ref{fig:loco}C) used the \citeA{crawford1998} modified $t$-test (one-tailed, uncorrected). Effect sizes are reported as Hedges' $d$ \cite{hedges1985} with the Crawford--Howell correction for small-$n$ comparisons.
 
 % ──────────────────────────────────────────────────────────────────────────────
-\subsection{Geometric analysis of color representations}
+\subsection{Representational geometry}
 \label{sec:methods:rdm}
 % ──────────────────────────────────────────────────────────────────────────────
 
-To characterize the representational geometry in SRM-aligned space, we computed two measures. Mean pairwise disparity captures whether CVD geometry is globally more dispersed than HC. The between-group RDM difference, $\Delta$RDM, captures which color pairs drive the deviation and provides the per-pair geometry read-out that the inverse fit targets (§\ref{sec:methods:twocomp}).
+To characterize the representational geometry in SRM-aligned space, we computed two measures. Procrustes disparity captures how far the CVD geometry lies from the HC reference overall. The per-pair RDM difference ($\Delta$RDM) captures which color pairs drive that departure and is the readout that the inverse fit targets (§\ref{sec:methods:twocomp}).
 
-\paragraph{Pairwise disparity}
-For each participant and ROI, the RDM was the $8 \times 8$ matrix of pairwise correlation distances ($1 - \text{Pearson}\,r$). Mean pairwise disparity was the average of the 28 upper-triangle elements. To provide an unbiased HC reference for the held-out HC participant, the HC disparity distribution was estimated by a leave-one-subject-out (LOO) procedure. Under the directional prediction that CVD geometry is more dispersed than HC, individual CVD disparity was compared to the HC LOO distribution by the \citeA{crawford1998} modified $t$-test (one-tailed, upper; $\alpha = 0.05$). In this primary estimate the shared SRM space is trained on all seven HC, so each HC reference is in-sample whereas the projected CVD participant is out-of-sample. To control for this asymmetry we additionally computed a symmetric leave-one-subject-out (LOSO) estimate in which the shared space is retrained on six HC and the held-out HC is projected by SVD identically to each CVD participant, with the same Crawford--Howell test applied. The all-HC estimate is primary because every other analysis in the pipeline (LORO, LOCO, $\Delta$RDM, and the inverse fit) operates in that same space; the symmetric LOSO is reported as a disclosed sensitivity analysis (\cref{tab:disparity_loso}).
+\paragraph{Procrustes disparity}
+Disparity was the Procrustes distance between a participant's SRM-aligned $8 \times k$ pattern and the HC reference. Both patterns were column-centered and scaled to unit Frobenius norm, and disparity was the residual Frobenius norm after the optimal orthogonal rotation. To provide an unbiased HC reference for the held-out HC participant, the HC disparity distribution was estimated by a leave-one-HC-out (LOO) procedure, in which each HC participant is compared to the mean of the remaining six. Under the directional prediction that CVD geometry lies farther from the HC reference than HC geometry does, individual CVD disparity was compared to the HC LOO distribution by the \citeA{crawford1998} modified $t$-test (one-tailed, upper; $\alpha = 0.05$). In this primary estimate the shared SRM space is trained on all seven HC, so each HC reference is in-sample whereas the projected CVD participant is out-of-sample. To control for this asymmetry we additionally computed a symmetric leave-one-subject-out (LOSO) estimate in which the shared space is retrained on six HC and the held-out HC is projected by SVD identically to each CVD participant, with the same Crawford--Howell test applied. The all-HC estimate is primary because every other analysis in the pipeline (LORO, LOCO, $\Delta$RDM, and the inverse fit) operates in that same space; the symmetric LOSO is reported as a disclosed sensitivity analysis (\cref{tab:disparity_loso}).
 
-\paragraph{Geometric deviation from HC}
-The per-pair deviation of each CVD participant's RDM from the HC mean was $\Delta\text{RDM} = \text{RDM}_\text{CVD} - \overline{\text{RDM}}_\text{HC}$, where $\overline{\text{RDM}}_\text{HC}$ is the grand mean RDM over the seven HC participants (the per-pair pattern is shown as a heatmap, Figure~\ref{fig:geometry}A). This per-pair deviation structure is the target of the representational loss $L_{\rm RDM}$ used in the inverse fit (§\ref{sec:methods:twocomp}).
+\paragraph{Per-pair RDM difference ($\Delta$RDM)}
+For each participant and ROI, the RDM was the $8 \times 8$ matrix of pairwise correlation distances ($1 - \text{Pearson}\,r$) among the SRM-aligned color patterns. The per-pair difference between each CVD participant's RDM and the HC mean was $\Delta\text{RDM} = \text{RDM}_\text{CVD} - \overline{\text{RDM}}_\text{HC}$, where $\overline{\text{RDM}}_\text{HC}$ is the grand mean RDM over the seven HC participants (the per-pair pattern is shown as a heatmap, Figure~\ref{fig:geometry}A). This per-pair difference is the target of the representational loss $L_{\rm RDM}$ used in the inverse fit (§\ref{sec:methods:twocomp}).
 
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{Candidate CVD distortion models}
@@ -167,7 +191,7 @@ Two candidate model classes were evaluated. Each parameterizes the angular disto
   \includegraphics[width=\textwidth]{fig5_generated_v}
   \caption{\textbf{Inverse-problem workflow for individualized stimulus-space filter design.}
   \textbf{(1)} A two-parameter forward model expresses the per-hue distortion as $\delta\theta(\theta) = \beta_s\cos(\theta - 90^\circ) + \beta_c\cos(\theta - \theta_{\rm conf})$: an S-cone-axis component ($\beta_s$) plus a family-specific confusion-axis rotation ($\beta_c$; $\theta_{\rm conf} = 16^\circ$ protan, $150^\circ$ deutan).
-  \textbf{(2)} Three loss families quantify CVD--HC differences --- behavioural JND ratios ($\gamma$), neural representational $\Delta$RDM cosine, and hV4 forward-encoding LOCO; only the LOCO loss couples to the forward encoder.
+  \textbf{(2)} Three loss families quantify CVD--HC differences --- behavioral JND ratios ($\gamma$), neural representational $\Delta$RDM cosine, and hV4 forward-encoding LOCO; only the LOCO loss couples to the forward encoder.
   \textbf{(3)} A grid search over $(\beta_s, \beta_c)$ minimizes the $z$-scored composite to the selected fit $\hat\beta$.
   \textbf{(4)} The fitted forward map is analytically inverted: for each displayed hue $\theta$, the corrected stimulus $\theta_{\rm pre}$ solves $\theta_{\rm pre} + \delta\theta(\theta_{\rm pre}) = \theta$.
   \textbf{(5)} The per-subject filter is $\delta\theta_{\rm filter}(\theta) = \theta_{\rm pre} - \theta$.
@@ -206,10 +230,10 @@ where $\theta_{\rm conf}$ is the CVD-subtype confusion axis ($16^\circ$ protan; 
 Per-subject distortion parameters $(\beta_s,\beta_c)$ were estimated by finding the distortion that, when applied to HC-derived neural representations, best reproduces the observed CVD responses. Three loss families served as the fitting objective. A specific instance of a family --- for example, the aggregate JND ratio or the $\Delta$RDM loss at a single ROI --- is a \emph{loss atom}; candidate objectives are combinations of atoms, selected as described in \S\ref{sec:methods:selection}.
 
 \paragraph{Behavioral JND ratio ($L_\gamma$).}
-For each color pair, the JND ratio $\gamma = \gamma_{\rm CVD} / \bar{\gamma}_{\rm HC}$ quantifies how much more difficult discrimination is for a CVD observer relative to the HC mean (\S\ref{sec:methods:behavioral}). Two variants enter the fitting: a subtype-targeted pair ratio $\gamma_{\rm subtype}$ (the hue pair on each participant's confusion axis predicted to show the largest distortion) and an aggregate ratio $\gamma_{\rm all}$ averaged across all tested pairs. $L_\gamma$ penalises rank discordance between the model-predicted distortion magnitude at each pair (from Eq.\,\ref{eq:2comp}) and the observed $\gamma$ ordering.
+For each hue pair, the JND ratio $\gamma = \gamma_{\rm CVD} / \bar{\gamma}_{\rm HC}$ quantifies how much more difficult hue discrimination is for a CVD observer relative to the HC mean (\S\ref{sec:methods:behavioral}). Two variants enter the fitting: a subtype-targeted pair ratio $\gamma_{\rm subtype}$ (the hue pair on each participant's confusion axis predicted to show the largest distortion) and an aggregate ratio $\gamma_{\rm all}$ averaged across all tested pairs. $L_\gamma$ penalizes rank discordance between the model-predicted distortion magnitude at each pair (from Eq.\,\ref{eq:2comp}) and the observed $\gamma$ ordering.
 
 \paragraph{Representational $\Delta$RDM cosine ($L_{\rm RDM}$).}
-For a candidate distortion, a simulated deviation $\Delta\text{RDM}_{\rm sim}$ is obtained by applying $\delta\theta$ to the HC mean RDM and comparing it to the observed $\Delta\text{RDM}$ (\S\ref{sec:methods:rdm}). The loss is the cosine dissimilarity between the observed and simulated 28-element upper-triangle vectors:
+For a candidate distortion, a simulated difference $\Delta\text{RDM}_{\rm sim}$ is obtained by applying $\delta\theta$ to the HC mean RDM and comparing it to the observed $\Delta\text{RDM}$ (\S\ref{sec:methods:rdm}). The loss is the cosine dissimilarity between the observed and simulated 28-element upper-triangle vectors:
 %
 \begin{equation}
   L_{\rm RDM} = \frac{1 - \cos\!\bigl(\Delta\text{RDM}_{\rm sim},\,
@@ -234,7 +258,7 @@ Parameters were searched by exhaustive grid over $(\beta_s,\beta_c) \in [-90^\ci
 \label{sec:methods:selection}
 % ──────────────────────────────────────────────────────────────────────────────
 
-Per-subject loss combinations and model class were selected by a three-gate procedure applied to results from a 5-train/2-test HC resample ($N = 300$) and a strict 7-fold HC leave-one-out (LOO) using the same loss atoms.
+Per-subject loss combinations and model class were selected by a three-gate procedure applied to results from a 5-train/2-test HC resample ($N = 300$) and a strict 7-fold leave-one-HC-out using the same loss atoms.
 
 \paragraph{Gate 1: Directional precondition.}
 Only loss atoms where the CVD loss value exceeded the HC LOO distribution in the expected direction were admitted. Admission required signed Cohen's $d \geq +0.5$; atoms failing this gate were excluded from combination.

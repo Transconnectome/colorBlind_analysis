@@ -12,6 +12,14 @@
 #SBATCH --no-requeue
 #SBATCH --open-mode=append
 
+# ⚠ PROVENANCE ONLY — DO NOT RE-RUN (annotated 2026-08-05).
+# Steps 3-4 call scripts archived in the 2026-08-05 cleanup:
+#   phase3_decoder_comparing/_archive/superseded_phase1_reruns/phase1_cross_subject_loso.py
+#   comprehensive/_archive/baseline32_orchestration/generate_phase_summary.py
+# Both use the Baseline32 ${TIMESTAMP}/${DATASET} convention, not C010.
+# This file is kept as the record of how the ses-02 derivatives were produced.
+
+
 ################################################################################
 # Filter-Validation Downstream (sub-08/09 ses-02)
 #

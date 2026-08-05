@@ -529,7 +529,7 @@ echo "  Masks (MNI): ${OUTPUT_DIR}/sub-${SUBJECT_ID}/func/*_desc-brain_mask.nii.
 echo ""
 echo "Next steps:"
 echo "  1. Compute Dice:"
-echo "     python scripts/compute_dice.py --subject ${SUBJECT_ID} --method method3_header_mi"
+echo "     (method-selection Dice step retired 2026-08-05; code at _archive/registration_method_selection/)"
 echo ""
 echo "End time: $(date)"
 echo "================================================================================"

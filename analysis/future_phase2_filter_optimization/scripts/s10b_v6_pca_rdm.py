@@ -308,6 +308,31 @@ def enumerate_combos_sub09():
     return out
 
 
+def enumerate_combos_sub09_full():
+    """ROI audit (2026-08-05): sub-09 는 `SUBJECTS['sub-09']['rdm_rois'] = ['V1']` 로
+    V1 만 탐색되어 V2/V3/V4 RDM atom 이 생성조차 되지 않았다 (sub-08 은 4-ROI 전탐색).
+
+    **선택 규칙은 그대로다** (test_loss_median ASC → iqr ASC → boundary_rate < 0.5,
+    CLAUDE.md §2.5). 바뀌는 것은 탐색 격자의 ROI 축뿐이며, γ 축은 sub-09 원본과 동일하게
+    [none / GB(focal) / ALL] 로 둔다. 즉 §0 의 'selection rule reformulation 금지' 에
+    해당하지 않는, **truncate 된 격자의 완성**이다.
+
+    3 γ × 6 RDM × 2 LOCO − 1(all-empty) = 35 combos.
+    """
+    gamma_opts = [[], ['GB'], ['ALL']]
+    rdm_opts = [[], ['V1'], ['V2'], ['V3'], ['V4'], ['V1', 'V4']]
+    loco_opts = [[], ['V4']]
+    out = []
+    for g_a, r_r, l in itertools.product(gamma_opts, rdm_opts, loco_opts):
+        if not g_a and not r_r and not l:
+            continue
+        g_label = ','.join(g_a) if g_a else '_'
+        r_label = '+'.join(r_r) if r_r else '_'
+        out.append({'gamma_pairs': g_a, 'rdm_rois': r_r, 'loco_v4': bool(l),
+                     'label': f"γ{g_label}|RDM{r_label}|{'LOCO' if l else 'noLOCO'}"})
+    return out
+
+
 def aic_bic(test_loss_focal, k, n=2):
     if test_loss_focal is None or not np.isfinite(test_loss_focal) or test_loss_focal <= 0:
         return None, None
@@ -317,8 +342,12 @@ def aic_bic(test_loss_focal, k, n=2):
     return float(2 * k + n * np.log(L_per_n)), float(k * np.log(n) + n * np.log(L_per_n))
 
 
-def fit_subject(subject, combo_start=None, combo_end=None):
-    config = SUBJECTS[subject]
+def fit_subject(subject, combo_start=None, combo_end=None, audit_full_roi=False):
+    config = dict(SUBJECTS[subject])
+    if audit_full_roi:
+        # RDM atom 은 config['rdm_rois'] 로 *생성*되므로, 격자만 늘리면 atom 이 없어
+        # 조합이 조용히 비어버린다. 생성 목록도 함께 확장한다. (원본 dict 은 불변)
+        config['rdm_rois'] = list(ROIS)
     family = config['family']
     dl_sources = DELTA_LAMBDA_BY_FAMILY[family]
     focal_pair = config['focal_pair']
@@ -343,8 +372,11 @@ def fit_subject(subject, combo_start=None, combo_end=None):
     except Exception:
         cvd_jnd = None
 
-    combos = (enumerate_combos_sub08() if subject == 'sub-08'
-               else enumerate_combos_sub09())
+    if subject == 'sub-08':
+        combos = enumerate_combos_sub08()
+    else:
+        combos = (enumerate_combos_sub09_full() if audit_full_roi
+                   else enumerate_combos_sub09())
     if combo_start is not None and combo_end is not None:
         combos = combos[combo_start:combo_end]
         print(f"  Combo chunk: [{combo_start}:{combo_end}] = {len(combos)} combos", flush=True)
@@ -721,6 +753,10 @@ def main():
                          choices=['sub-08', 'sub-09'])
     parser.add_argument('--combo-start', type=int, default=None)
     parser.add_argument('--combo-end', type=int, default=None)
+    parser.add_argument('--audit-full-roi', action='store_true',
+                         help=('sub-09 의 RDM ROI 축을 V1 에서 V1--V4 로 완성해 동일 선택 규칙을 '
+                               '재적용 (canonical 결과 파일은 건드리지 않고 _roi_audit 로 저장). '
+                               'sub-08 은 이미 4-ROI 전탐색이라 무효.'))
     args = parser.parse_args()
 
     print("=" * 100, flush=True)
@@ -730,12 +766,15 @@ def main():
     print("=" * 100, flush=True)
 
     t0 = time.time()
-    storage = fit_subject(args.subject, args.combo_start, args.combo_end)
+    storage = fit_subject(args.subject, args.combo_start, args.combo_end,
+                           audit_full_roi=args.audit_full_roi)
     summary = summarize(storage)
     elapsed = round(time.time() - t0, 1)
     print(f"\n[{args.subject}] elapsed: {elapsed}s", flush=True)
 
     suffix = f"_{args.subject}"
+    if args.audit_full_roi:
+        suffix += "_roi_audit"
     if args.combo_start is not None:
         suffix += f"_c{args.combo_start:02d}-{args.combo_end:02d}"
     out_file = OUT_DIR / f"s10b_v6_pca_rdm_results{suffix}.json"

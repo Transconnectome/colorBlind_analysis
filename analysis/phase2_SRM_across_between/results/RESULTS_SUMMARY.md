@@ -1,6 +1,8 @@
 # C010 Between-Subject SRM Analysis Results
 
 **Date:** 2026-02-09  
+> ⚠️ **2026-08-05 추가**: 이 문서의 순열 p값은 투영 재적합 절차에서 나온 것으로 검정력이 없다(HC 0/7, 전 ROI). 동결 투영 재검정·색 특이성 행렬·순환 이동·LOSO 대조는 [`RESULTS_GEOMETRY_VALIDITY_2026-08-05.md`](RESULTS_GEOMETRY_VALIDITY_2026-08-05.md) 참조.  
+
 **Analysis:** HC vs CVD comparison using C010+Procrustes data  
 **Method:** Dual pipeline (Raw-Averaged vs Procrustes-Averaged SRM)
 

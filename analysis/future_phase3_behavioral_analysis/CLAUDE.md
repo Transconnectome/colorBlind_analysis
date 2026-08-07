@@ -30,8 +30,8 @@ future_phase2에서 유도한 개인별 필터를 CVD 피험자에게 적용하�
 - **OK**: "filter *derived from* fMRI-measured distortion", "improvements *in directions predicted by* our model", "consistent with mechanism"
 - **금지**: "improvement is *because of* our mechanism (causal)" — pipeline confound 때문.
 
-### Pipeline confound (#3) — 인정 + 우회 분석으로 mitigation
-Window (OS-level transform after PsychoPy) vs Optimal (PsychoPy direct render) = 서로 다른 rendering stage. 이건 양보 안 함. Limitation에 명시. 단 다음 mechanism-specific 분석은 pipeline confound의 *uniform-shift* prediction을 위배하므로 *partially robust*:
+### Pipeline confound (#3) — [철회 2026-07-14]
+**[2026-07-14 정책 변경]** deployed(구 Window)·personalized(구 Optimal)는 **둘 다 최종 모니터 표시색을 바꾸는 동일 층위의 색 변환**으로 간주한다. 이전의 *"OS-level transform after PsychoPy vs PsychoPy direct render = 서로 다른 rendering stage, 양보 안 함, Limitation 명시"* 입장은 **철회**하며, 논문에서 rendering-stage confound를 Limitation으로 서술하지 않는다(관련 문장 완전 삭제). 아래 A/B/C 분석은 confound 우회가 아니라 **조건 간 robustness 확인**으로 유지 가능:
 
 #### (A) RDM shape convergence to HC
 - 각 조건에서 V1/V4 RDM 계산 → HC RDM (exp1)과 cosine sim / Spearman ρ

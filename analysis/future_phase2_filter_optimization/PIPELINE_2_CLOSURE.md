@@ -332,9 +332,68 @@ NOT argmin stability, NOT closeness-to-oracle):
 
 - Sub-08: γ ∈ {none, OY, YG, YP, [OY,YG,YP], ALL} × RDM ∈ {none, V1, V2, V3, V4, V1+V4} × LOCO ∈ {off, V4}
   - 71 cells × 4 models = 284
-- Sub-09: γ ∈ {none, GB, ALL} × RDM ∈ {none, V1} × LOCO ∈ {off, V4}
+- Sub-09: γ ∈ {none, GB, ALL} × RDM ∈ {none, **V1**} × LOCO ∈ {off, V4}
   - 11 cells × 4 models = 44
 - 4 models = Machado 1-way / R+C × 3 Δλ sources (DPS_lit / Boehm_mid / JND_Lamb) / 2-Component
+
+> ⚠️ **ROI 축 비대칭** — sub-08 은 RDM ROI 를 4개 전탐색, sub-09 는 **V1 하나로 고정**.
+> `s10b_v6_pca_rdm.py:56-63` 의 `SUBJECTS['sub-09']['rdm_rois'] = ['V1']` (commit f64432c,
+> 2026-05-26) 때문이며, RDM atom 은 이 목록으로 *생성*되므로 sub-09 는 V2/V3/V4 atom 이
+> 만들어지지도 않았다. 당시 근거는 기록되어 있지 않다. → §2.1 audit 참조.
+
+### 2.1. ROI 축 audit (2026-08-05) — sub-09 미탐색분 완성
+
+**동기.** disparity 기반 ROI 지정이 색 라벨 순열 통제에서 무너졌다 (project memory
+`project_alignment_manufactures_correspondence`: 정렬 재적합 투영이 라벨 순열을 흡수 →
+논문 헤드라인 deutan V2 는 유효 통계량에서 **방향 역전**, protan V1 은 p=.079 trend 로 약화).
+필터·추가촬영이 불가한 상태에서 ROI 선택 근거를 재확인할 필요가 생겼다.
+
+**방법.** 선택 규칙은 **그대로** (§3.3: test_loss_median ASC → iqr ASC → boundary_rate < 0.5).
+truncate 된 ROI 축만 완성했다 — γ 축은 sub-09 원본대로 {none, GB, ALL} 유지, RDM ∈
+{none, V1, V2, V3, V4, V1+V4}, LOCO ∈ {off, V4} → 35 cells. **selection rule reformulation
+아님** (CLAUDE.md §0 위반 아님): 규칙 불변, 비어 있던 칸만 채움.
+
+- 신설 플래그: `s10b_v6_pca_rdm.py --audit-full-roi` (canonical 경로 불변, `SUBJECTS` dict
+  비파괴, 출력 suffix `_roi_audit`)
+- 결과: `results/s10_inclusion/s10b_v6_pca_rdm_results_sub-09_roi_audit.json` (481 s)
+
+**결과 — gate 통과 8/35, test_loss ASC:**
+
+| combo | test_loss | iqr | bdy | (β_s, β_c) |
+|---|---|---|---|---|
+| γALL\|RDM**V2**\|noLOCO | **−2.196** ← 탐색했다면 승자 | 1.67 | 0.00 | **(2, +24)** |
+| γGB\|RDMV2\|noLOCO | −2.176 | 1.67 | 0.00 | **(2, +24)** |
+| γALL\|RDMV1+V4\|noLOCO | −1.744 | 1.51 | 0.00 | **(2, +24)** |
+| γGB\|RDMV1+V4\|noLOCO | −1.728 | 1.50 | 0.00 | **(2, +24)** |
+| γALL\|RDM**V1**\|noLOCO | −1.539 ← **배포된 선택** | 1.42 | 0.00 | **(2, +24)** |
+| γGB\|RDMV1\|noLOCO | −1.519 | 1.41 | 0.00 | **(2, +24)** |
+| γALL\|RDM_\|noLOCO | −0.060 | 0.00 | 0.00 | (26, +4) |
+| γGB\|RDM_\|noLOCO | −0.032 | 0.02 | 0.00 | (34, −8) |
+
+RDMV3 / RDMV4 는 boundary_rate 1.00 / 0.54 로 **gate 탈락** ((50, +24) 산출).
+
+**판정.** ROI 를 탐색했더라면 V1 이 아니라 **V2 가 선택**되었을 것이다(−2.196 vs −1.539).
+그러나 **gate 를 통과하는 모든 RDM ROI (V1 · V2 · V1+V4) 가 동일한 (2°, +24°) 를 준다.**
+파라미터가 갈리는 것은 RDM atom 을 아예 뺀 combo 뿐이고 그쪽 test_loss 는 −0.06/−0.03 로
+훨씬 나쁘다. → **미탐색은 절차적 결함이되 배포 필터(S09-primary)에는 영향 없음.**
+
+**sub-08 대조 (canonical 결과 재집계, 신규 실행 없음).** ROI 는 자유항이었고
+γOY|RDMV2|noLOCO 가 **gate 통과 25개 중 1위** (−2.359, iqr 2.15, bdy 0.093, (6, −42) —
+원고 보고값 −2.36 과 일치). 차점 γYP|RDMV4|LOCO −2.203, V1 최선 γYP|RDMV1|noLOCO −1.716.
+승리 γ atom(γOY) 고정 후 ROI 만 교체 시 gate 통과분: V2|noLOCO (6, −42) · V3|noLOCO
+**(6, −42) 동일** · V2|LOCO (14, −48) · RDM없음 (16, −44) → 같은 사분면, β_c 2° 이내.
+
+**종합.** 두 피험자 모두 **ROI 선택은 neural loss 항의 위치를 정할 뿐 적합된 왜곡을
+결정하지 않는다.** deutan V2 는 held-out test-loss 로 획득된 선택이라 disparity 붕괴와
+무관하고, protan V1 은 사전지정이었으나 test-loss 최적 ROI(V2)와 파라미터 동치다.
+
+**한계.** audit 은 동일 HC pool · 동일 resample seed 를 쓰므로 독립 증거가 아니라
+**탐색 완결성 점검**이다.
+
+**원고 반영 (2026-08-05 적용 완료).** `docs/PAPER/Results/results_v4.tex` §"A common
+cortical model fits both CVD cases" 의 "RDM atom ↔ elevated disparity ROI 일치" 문단을
+삭제하고(원고가 이미 independent corroboration 아니라고 명시했으므로 삭제 비용 0),
+위 비대칭·audit 을 명시적으로 공개하는 문단으로 교체. stale TODO 주석 블록도 함께 제거.
 
 ---
 

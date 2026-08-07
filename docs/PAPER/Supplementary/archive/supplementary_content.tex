@@ -6,7 +6,10 @@
 
 \subsection*{\textbf{S1. Confound Regression and Temporal Filtering}}
 
-Within-run head motion was estimated via rigid-body realignment.
+Within-run head motion was estimated by rigid-body registration of every volume to its run's middle volume (FSL MCFLIRT) and summarized as framewise displacement \cite{power2012}, with rotations converted to displacement on a 50 mm sphere.
+Across the nine analyzed participants mean framewise displacement was $0.32 \pm 0.04$ mm (HC $0.31 \pm 0.04$, CVD $0.34 \pm 0.05$), and $16.2\%$ of volumes exceeded $0.5$ mm.
+These parameters served as a quality-control record only, and the analyzed images were resampled once from native BOLD space into MNI space.
+A gradient-echo field map was acquired in each session and linked to the functional runs through the BIDS \texttt{IntendedFor} field. The analyzed pipeline did not consume it, so the functional data retain susceptibility-induced distortion along the right--left phase-encoding direction.
 No temporal filtering or confound regression was applied; slow drift was modeled via linear per-run regressors in the general linear model.
 
 
@@ -84,7 +87,7 @@ where $X$ denotes the design matrix, $y$ is the observed response vector, $\hat{
 
 \subsection*{\textbf{S7. Leave-One-Out Consistent Disparity Estimation}}
 
-To quantify HC-CVD disparity with unbiased references, we used a leave-one-out (LOO) consistent procedure: for each fold $i$ (leaving out HC participant $i$), a reference pattern $R_{-i}$ was computed as the mean of the remaining six HC participants' aligned data.
+To quantify HC-CVD disparity with unbiased references, we used a leave-one-HC-out (LOO) consistent procedure: for each fold $i$ (leaving out HC participant $i$), a reference pattern $R_{-i}$ was computed as the mean of the remaining six HC participants' aligned data.
 Both the held-out $\text{HC}_i$ and both CVD participants were compared against this same reference $R_{-i}$, yielding disparity scores $d(\text{HC}_i, R_{-i})$ and $d(\text{CVD}_j, R_{-i})$.
 This ensures HC and CVD disparities are measured against identical references within each fold.
 Individual CVD disparity significance was assessed via \citeA{crawford1998} modified t-tests comparing each CVD participant's mean disparity (averaged across 7 folds) to the HC distribution ($n=7$, $df=6$).
@@ -94,7 +97,7 @@ The geometric-disparity tests (\S\ref{sec:results:geometry}) are reported primar
 
 \begin{table}[h]
 \centering
-\caption{Mean pairwise disparity, Crawford--Howell one-tailed single-case $t$ ($df = 6$) against the HC reference, in the primary common HC-trained SRM space and under the symmetric LOSO control, with the common-space case-control effect size $d_{cc} = t\sqrt{8/7}$ ($n = 7$). Bold: $p < 0.05$.}
+\caption{Procrustes disparity, Crawford--Howell one-tailed single-case $t$ ($df = 6$) against the HC reference, in the primary common HC-trained SRM space and under the symmetric LOSO control, with the common-space case-control effect size $d_{cc} = t\sqrt{8/7}$ ($n = 7$). Bold: $p < 0.05$.}
 \label{tab:disparity_loso}
 \begin{tabular}{llcccccc}
 \toprule
@@ -120,22 +123,22 @@ Protan & \textbf{V1} & $\mathbf{3.48}$ & $\mathbf{0.007}$ & $3.72$ & $\mathbf{2.
 
 \subsection*{\textbf{S8. Cross-Validation Procedures}}
 
-\subsection*{\textbf{Leave-One-Run-Out (LORO)}}
+\paragraph{Leave-one-run-out (LORO).}
 
 LORO evaluated whether individual colors could be distinguished from voxel response amplitudes, testing the consistency of neural color encoding across runs.
 For each of six runs, the corresponding response matrices ($B$, $C$) were held out as the test set, $W$ was trained on the remaining five runs.
-The held-out run's color patterns were then decoded by nearest-neighbour matching in channel-output space using the OLS pseudoinverse weights (Methods \S\ref{sec:methods:encoding}).
+The held-out run's color patterns were then decoded by nearest-neighbor matching in channel-output space using the OLS pseudoinverse weights (Methods \S\ref{sec:methods:encoding}).
 
-\subsection*{\textbf{Leave-One-Color-Out (LOCO)}}
+\paragraph{Leave-one-color-out (LOCO).}
 
 LOCO tested whether geometric relationships of circular hue space were preserved in neural representation by evaluating interpolation to held-out colors.
 For each color, all six run response matrices of the target color were held out. $W$ was trained on the remaining seven colors. The held-out color was then decoded from voxel responses using the OLS pseudoinverse weights, yielding the adjacent-accuracy vulnerability profile. The complementary voxel-response prediction (ridge-GCV encoding) enters only the fitting loss $L_{\rm LOCO}$, not the decoding metric (Methods \S\ref{sec:methods:encoding}).
 
-\subsection*{\textbf{Cross-run alignment and leakage control}}
+\paragraph{Cross-run alignment and leakage control.}
 
-The run-level Procrustes alignment (Methods, ROI definition and response estimation) maps runs 2--6 onto a fixed run-1 reference by an orthogonal rotation that uses no stimulus labels. Because the alignment target is a single fixed run rather than a jointly fitted shared space, the held-out run or color does not define the alignment frame. We further confirmed that re-estimating the Procrustes rotation within each cross-validation fold (nested alignment) leaves LORO classification accuracy essentially unchanged, ruling out test-set leakage from the alignment step.
+The run-level Procrustes alignment (Methods, ROI definition and response estimation) maps runs 2--6 onto a fixed run-1 reference by an orthogonal rotation that uses no stimulus labels. Because the alignment target is a single fixed run rather than a jointly fitted shared space, the held-out run or color does not define the alignment frame. We further confirmed that re-estimating the Procrustes rotation within each cross-validation fold (nested alignment) leaves LORO eight-way classification accuracy essentially unchanged, ruling out test-set leakage from the alignment step.
 
-\subsection*{\textbf{Leave-One-Subject-Out (LOSO)}}
+\paragraph{Leave-one-subject-out (LOSO).}
 
 LOSO evaluated zero-shot generalization to held-out participants.
 As LOSO requires cross-subject prediction, SRM-transformed data were used to align voxel spaces across participants.
@@ -147,15 +150,15 @@ This assessed whether the HC group-derived common space supported generalization
 
 \subsection*{\textbf{S9. Evaluation Metrics}}
 
-\subsection*{\textbf{Color Decoding Metrics}}
+\paragraph{Color decoding metrics.}
 
-Color decoding was evaluated using (1) mean absolute error (MAE) between predicted and true hue angles (chance = 90°, expected from a uniform random predictor on a circle), and (2) categorization accuracy with $\pm 22.5$° bins around each of the eight colors (chance = 12.5\% = 1/8).
+Color decoding was evaluated using (1) mean absolute error (MAE) between predicted and true hue angles (chance = 90°, expected from a uniform random predictor on a circle), and (2) eight-way classification accuracy, obtained by assigning the decoded hue to the nearest stimulus hue, equivalently a $\pm 22.5$° bin around each of the eight colors (chance = 12.5\% = 1/8).
 
-\subsection*{\textbf{Voxel Prediction Metrics}}
+\paragraph{Voxel prediction metrics.}
 
 Voxel response prediction was evaluated using Pearson correlation between predicted and observed response vectors, computed across all voxels and colors in the test set.
 
-\subsection*{\textbf{Statistical Significance}}
+\paragraph{Statistical significance.}
 
 Statistical significance of group comparisons (HC vs CVD) and individual CVD analyses was assessed using nonparametric permutation tests (10,000 iterations; \citeNP{nichols2002}).
 

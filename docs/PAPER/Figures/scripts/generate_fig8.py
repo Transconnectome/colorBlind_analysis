@@ -7,7 +7,7 @@ Paper version. Output → docs/PAPER/Figures/fig8_filter_eval.{png,pdf}
 
 Layout: 2 rows (subjects) x 3 columns (metrics)
   Row 1 = Deutan (sub-08),  Row 2 = Protan (sub-09)
-  Col A = LOCO adjacent accuracy (interpolation; chance 0.375; higher = HC-like)
+  Col A = LOCO adjacent accuracy (interpolation; chance 91/360 = 0.25; higher = HC-like)
   Col B = SRM disparity (shared-space alignment; lower = HC-like)
   Col C = RDM similarity to HC (Spearman; higher = HC-like)
 
@@ -30,6 +30,14 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.lines import Line2D
 from pathlib import Path
+
+# Adjacent-accuracy chance. The forward-encoding readout takes an argmax over all
+# 360 integer hues (utils_forward_model.decode_hue), and adjacent accuracy counts a
+# prediction correct when its circular error is <= 45 deg (loco_canonical.py). A
+# prediction drawn uniformly from that 360-hue output space lands inside the
+# tolerance on 91 of 360 draws. Verified by simulation (0.253 over 20,000 draws).
+# NOT 3/8 -- that holds only for decoders that output one of the eight stimulus hues.
+CHANCE_ADJ = 91 / 360
 from scipy import stats
 
 BASE = Path("/Users/jinilkim/LocalProj/colorBlind_analysis")
@@ -156,7 +164,7 @@ def draw_panel(ax, d, metric, letter, ylim=None, show_title=True):
     ax.tick_params(axis="both", labelsize=6.5, length=3)
     ax.axhline(0, color="#bbb", linewidth=0.6, zorder=0)
     if metric == "adjacc":
-        ax.axhline(0.375, color="#999", linestyle="--", linewidth=0.7, zorder=1)
+        ax.axhline(CHANCE_ADJ, color="#999", linestyle="--", linewidth=0.7, zorder=1)
     strip(ax)
 
     ax.text(-0.05, 1.06, letter, transform=ax.transAxes, fontsize=10, fontweight="bold",
@@ -199,7 +207,7 @@ def main():
                 vals += list(hcm + np.nan_to_num(hcs))
         vlo, vhi = min(vals), max(vals)
         if m == "adjacc":
-            vhi = max(vhi, 0.375)
+            vhi = max(vhi, CHANCE_ADJ)
         pad = (vhi - vlo) * 0.20 + 1e-6
         lo = min(vlo - pad * 0.5, 0.0)
         ylims[m] = (lo, vhi + pad)

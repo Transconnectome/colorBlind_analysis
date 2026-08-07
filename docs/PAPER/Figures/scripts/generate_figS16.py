@@ -4,7 +4,7 @@ figS16 — LOCO adjacent-accuracy run-count saturation (paper primary metric).
 
 Reads run_count_validation/adjacc_retention_summary.json (produced by
 analysis/future_phase3_behavioral_analysis/scripts/run_count_adjacc.py) and
-plots adjacent accuracy vs run count per ROI: HC mean ± SEM band, 3/8 chance
+plots adjacent accuracy vs run count per ROI: HC mean ± SEM band, 91/360 chance
 line, and the two CVD single cases (sub-08 deutan, sub-09 protan).
 Demonstrates the hV4 landmark retains at n=4.
 
@@ -18,14 +18,20 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
-BASE = Path("/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis")
+BASE = Path(__file__).resolve().parents[4]  # repo root (docs/PAPER/Figures/scripts -> repo)
 SUMM = BASE / "analysis/future_phase3_behavioral_analysis/run_count_validation/adjacc_retention_summary.json"
 OUTDIR = BASE / "docs/PAPER/Figures"
 
 ROIS = ["V1", "V2", "V3", "V4"]
 ROI_LABELS = ["V1", "V2", "V3", "hV4"]
 NVALS = [2, 3, 4, 5, 6]
-CHANCE = 3.0 / 8.0
+# Adjacent-accuracy chance. The forward-encoding readout takes an argmax over all
+# 360 integer hues (utils_forward_model.decode_hue), and adjacent accuracy counts a
+# prediction correct when its circular error is <= 45 deg (loco_canonical.py). A
+# prediction drawn uniformly from that 360-hue output space lands inside the
+# tolerance on 91 of 360 draws. Verified by simulation (0.253 over 20,000 draws).
+# NOT 3/8 -- that holds only for decoders that output one of the eight stimulus hues.
+CHANCE = 91 / 360
 
 HC_LINE = "#444444"
 HC_BAND = "#CCCCCC"
@@ -67,7 +73,7 @@ def main():
         ax.tick_params(labelsize=6.5, length=3)
         if j == 0:
             ax.set_ylabel("LOCO adjacent acc.", fontsize=7)
-        ax.text(2.05, CHANCE + 0.008, "chance 3/8", fontsize=5.5, color="#999", va="bottom")
+        ax.text(2.05, CHANCE + 0.008, "chance 0.25", fontsize=5.5, color="#999", va="bottom")
         strip(ax)
     axes[0].set_ylim(0.05, 0.62)
 

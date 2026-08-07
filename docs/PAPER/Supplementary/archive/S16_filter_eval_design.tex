@@ -3,7 +3,7 @@
 % macOS comparator specifics, run-count rationale (four per condition), single-case
 % inference detail, and the behavioral battery.
 
-\section*{Supplementary S16: Filter-evaluation session --- design and comparator}
+\subsection*{\textbf{S16. Filter-evaluation session: design and comparator}}
 \label{app:filter_eval}
 
 \paragraph{Comparator.}
@@ -19,6 +19,12 @@ A subsampling analysis on the six-run Session-1 data --- evaluating signal-quali
 % JND construct; the neural LORO construct is "color classification".
 
 \begin{figure}[tb]
+  % apa6 'man' defers every float to the end of the document (endfloat), so a
+  % counter renewal placed at the Supplementary section boundary would renumber
+  % the MAIN figures too. The renewal is therefore made inside each supplementary
+  % float, where it applies only to that float's caption. \setcounter is global;
+  % \renewcommand is not, so it must be repeated in every supplementary figure.
+  \renewcommand{\thefigure}{S\arabic{figure}}\setcounter{figure}{0}
   \centering
   \includegraphics[width=\linewidth]{figS16_adjacc_saturation}
   \caption{\textbf{Hue-interpolation adjacent accuracy as a function of the number of runs.} LOCO adjacent accuracy (canonical FE-6 basis, OLS pseudoinverse decoder) as a function of the number of runs $n$, computed over all $\binom{6}{n}$ run subsets of the Session-1 data, per ROI. Black line, healthy-control mean $\pm$ SEM (shaded band); dashed line, the $3/8$ chance level; markers, the two CVD single cases (sub-08 deutan, sub-09 protan). At hV4 the healthy-control mean stays above chance and the CVD deficit persists at every run count, including the deployed $n = 4$ (orange guide); the metric does not depend on having the full six runs.}
@@ -28,15 +34,15 @@ A subsampling analysis on the six-run Session-1 data --- evaluating signal-quali
 \paragraph{Single-case inference.}
 Each condition's neural index was compared to the HC distribution as a standardized single-case effect size (Cohen's $d$ against the HC mean and SD), reported in place of an inferential $p$ because the grand-mean permutation null is biased for this design. Robustness was assessed in two ways: by leave-one-run separation (the contrast holding after any single run is dropped) and by re-extracting both conditions on the no-filter baseline voxel set.
 
-\paragraph{Behavioral battery.}
+\paragraph{Psychophysical battery.}
 Hue-discrimination thresholds were estimated with JND staircases for eight hue pairs, and the eight-alternative forced-choice (8AFC) color-identification task comprised 64 trials. Both were compared to the unfiltered Session-1 baseline and to the HC distribution.
 
 \paragraph{Color classification (LORO).}
-Table~\ref{tab:exp2_loro} reports eight-way LORO classification accuracy for every ROI and condition in both participants. Every cell stayed well above the $0.125$ chance level, confirming that the displayed colors remained decodable and that neither filter degraded the second-session color signal.
+Table~\ref{tab:exp2_loro} reports LORO eight-way classification accuracy for every ROI and condition in both participants. Every cell stayed well above the $0.125$ chance level, confirming that the displayed colors remained decodable and that neither filter degraded the second-session color signal.
 
 \begin{table}[tb]
   \centering
-  \caption{\textbf{Second-session color classification (LORO eight-way accuracy).} Chance $= 0.125$. NF, no-filter (Session-1 baseline); Dep, deployed accessibility filter; Ind, individualized filter. HC, healthy-control mean ($n = 7$).}
+  \caption{\textbf{Second-session color classification (LORO eight-way classification accuracy).} Chance $= 0.125$. NF, no-filter (Session-1 baseline); Dep, deployed accessibility filter; Ind, individualized filter. HC, healthy-control mean ($n = 7$).}
   \label{tab:exp2_loro}
   \begin{tabular}{lccccccc}
     \toprule
@@ -56,6 +62,7 @@ Table~\ref{tab:exp2_loro} reports eight-way LORO classification accuracy for eve
 Figure~\ref{fig:forward_tuning} shows the LOCO forward-tuning correlation $\rho$ to the canonical hue map, a secondary encoding index reported as corroboration only (it lies outside the validated Session-1 decoding pipeline). In the deutan participant the individualized filter reaches the HC level at hV4 ($\rho = +0.18$ vs.\ HC $+0.21$) while the deployed filter drives it negative ($\rho = -0.39$); in the protan participant the three conditions do not separate (all $\rho \approx -0.02$ at hV4).
 
 \begin{figure}[tb]
+  \renewcommand{\thefigure}{S\arabic{figure}}  % see note on the previous figure
   \centering
   \includegraphics[width=\linewidth]{figS_forward_tuning}
   \caption{\textbf{Forward-tuning encoding index (corroboration only).} LOCO forward-tuning correlation $\rho$ to the canonical hue map across V1--hV4, for the deutan (sub-08, left) and protan (sub-09, right) participants ($\uparrow$ HC-like). Gray bars, HC reference (mean $\pm$ SD, $n = 7$); markers, no-filter (gray circle), deployed accessibility filter (blue square), individualized filter (orange diamond). Stars, Crawford--Howell single-case deviation from the HC distribution ($^{*}p<.05$, $^{**}p<.01$).}

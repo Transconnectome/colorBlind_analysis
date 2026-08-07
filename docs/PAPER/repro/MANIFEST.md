@@ -1,6 +1,6 @@
 # Reproduction Manifest — colorBlind PAPER (results_v4)
 
-Authoritative source: `docs/PAPER/main.tex` → `Results/results_v4.tex`, `Methods/methods_v2.tex`, `Methods/supplementary_content.tex`, `Supplementary/S3_identifiability.tex` (S15), `Figures/FIGURE_CAPTIONS.md`.
+Authoritative source: `docs/PAPER/main.tex` → `Results/results_v4.tex`, `Methods/methods_v2.tex`, `Supplementary/supplementary.tex`, `Supplementary/S3_identifiability.tex` (S15), `Figures/FIGURE_CAPTIONS.md`.
 Order: document order (Results §1→§9). Split by experiment. Precision = as printed.
 Env: local `conda activate srm`, Python 3.10 (numpy 1.24.3, scipy 1.11.3, sklearn 1.3.0, BrainIAK 0.11), seed=42.
 

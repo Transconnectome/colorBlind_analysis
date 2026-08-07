@@ -6,7 +6,8 @@ Panel A: LORO ForwardEncoding accuracy (SRM) — discrimination preserved in CVD
 Panel B: LOCO adjacent_acc (ForwardEncoding) — interpolation impaired in hV4
 Panel C: Per-hue adjacent_acc at hV4
 
-Chance: Panel A = 1/8 = 0.125 (exact). Panels B/C = 3/8 = 0.375 (adjacent).
+Chance: Panel A = 1/8 = 0.125 (exact). Panels B/C = 91/360 = 0.25 (adjacent);
+see the CHANCE_ADJ comment below for why this is not 3/8.
 Statistics: Crawford & Howell one-tailed t-test (vs HC distribution).
 """
 
@@ -33,7 +34,16 @@ ROI_LABELS  = ["V1", "V2", "V3", "hV4"]
 HUE_NAMES   = ["Red", "Org", "Yel", "Grn", "Cyn", "Blu", "Pur", "Mag"]
 
 CHANCE_EXACT = 0.125
-CHANCE_ADJ   = 3/8    # adjacent-accuracy chance (within +/-1 of 8 hues = 3/8)
+# Adjacent-accuracy chance. The forward-encoding readout takes an argmax over all
+# 360 integer hues (utils_forward_model.decode_hue), and adjacent accuracy counts
+# a prediction correct when its circular error is <= 45 deg (loco_canonical.py).
+# A prediction drawn uniformly from that 360-hue output space therefore lands
+# inside the tolerance on 91 of 360 draws. Verified by simulation: 20,000 random
+# channel responses give 0.253 (per-true-hue range 0.249-0.257) and an argmax
+# that is uniform over the eight 45-deg bins.
+# NOT 3/8 -- that value holds only for decoders whose output is one of the eight
+# stimulus hues (LDA/SVM/MLP via labels_to_hue in loco_baseline.py).
+CHANCE_ADJ   = 91 / 360
 
 HC_COLOR  = "#AAAAAA"
 HC_DOT    = "#555555"

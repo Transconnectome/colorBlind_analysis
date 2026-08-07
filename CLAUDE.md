@@ -5,7 +5,9 @@
 ## What / Why
 개인화 신경 기반 **inverse filter**로 CVD 피험자가 HC와 유사한 색 인지를 하게 만든다.
 전제: post-cortical mapping HC=CVD → 차이는 (a) 망막 cone shift, (b) cortical opponent gain / stimulus dilation.
-Subjects: HC sub-01~07 (N=7); CVD sub-08 deutan, sub-09 protan, sub-10 deutan(near-normal → **분석 제외**).
+Subjects: HC sub-01~07 (N=7); CVD sub-08 deutan, sub-09 protan, sub-10 deutan.
+**sub-10 = 전 분석 제외.** 사유 = **2차 실험(필터 검증 세션) 미통과**. 1차 세션 데이터는 존재하므로 `full_dataset_C010`을 비롯한 산출물에 sub-10이 남아 있고, 구 스크립트 상당수가 `CVD_SUBJECTS = sub-08..10`으로 하드코딩되어 있다.
+→ **저장된 결과를 인용하기 전에 CVD n을 반드시 확인할 것.** n=3이면 sub-10 포함이므로 재산출하거나 제외 후 재계산해야 한다. 논문 수치는 전부 n=2 (sub-08, sub-09) 기준.
 
 ## Two Main Contributions (논문 헤드라인 — 초록/서론/결론 프레임의 축)
 1. **CVD 피질 색 표상 기하 왜곡의 규명 (finding).** 개인 CVD의 피질 색 표상 기하는 선행연구에 미규명이었음(선행 = HC 대상, group-level: Brouwer&Heeger 2009, Kuriki 2015; CVD fMRI = magnitude/gain[Tregillus 2021]·activation[Rina 2024]). 본 연구: 균일 신호 감쇠(magnitude)가 **아니라**, 표시 색의 **범주변별은 보존**되나 색 간 **연속 hue 기하가 선택적으로 왜곡**되며 그 양상이 **개인마다 다름**(왜곡 ROI: deutan V2, protan V1).

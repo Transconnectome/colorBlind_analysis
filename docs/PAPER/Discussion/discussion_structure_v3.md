@@ -1,6 +1,10 @@
 # Discussion v3 — Structure, Evidence Pack & Writing Brief
 
 > Created 2026-06-08. Supersedes the spine of `discussion_v2.tex` (which was hV4-centric and leaned on a now-retired "detection–correction divergence" argument). This file is the **authoritative brief** for drafting Discussion v3 and the reference for downstream work.
+>
+> **§2 revised 2026-08-06** — the 2026-06-08 skeleton (8 paragraphs) no longer described the file. Two changes drove the rewrite. (a) Phase 3 data arrived, so the planned forward-looking ¶6 became a reported evaluation. (b) A `/revise-draft` pass split three paragraphs that mixed roles (§7). Current file: **17 paragraphs**. §0, §1, §3, §4 are unchanged and remain authoritative.
+>
+> §2 below is the reverse outline **as written**, not an intended outline. Regenerate it whenever the paragraph count changes, or drift checks in the next cycle are meaningless.
 
 ---
 
@@ -28,25 +32,61 @@ v2 framed the paper as **"hV4 color geometry → filter"** (an ROI-centric causa
 
 ---
 
-## 2. Paragraph-by-paragraph skeleton (topic sentences)
+## 2. Paragraph map (reverse outline as written, 2026-08-06)
 
-**¶1 — Executive summary** (Bannert-style: restate what we did + one-two punch of findings, then "these results suggest…"). CVD color deficit = individual geometric distortion of cortical color representation; RDM structure + LOCO function; neural+behavior jointly ground a personalized stimulus-space correction.
+`discussion_v3.tex` line numbers. One role per paragraph (§7); first sentence is the topic sentence (§8).
 
-**¶2 — C1: structural/geometric distortion (RQ1).** RDM (structure) and LOCO (functional consequence) are two views of one geometric distortion: ΔRDM shows *which pairwise distance structure* deviates from HC (V2 sub-08 p=0.040; V1 sub-09 p=0.007), LOCO shows *where the continuous-hue manifold readout breaks* (hV4 interpolation collapse at S-cone intermediates). CVD is structured warping of the cortical color manifold, not mere signal loss. Close on significance: this is *what kind of thing* the deficit is.
+### Executive summary
+| ¶ | L | Role | One-sentence summary |
+|---|---|---|---|
+| 1 | 15 | executive summary | Per-person filters were derived by inverting each participant's own cortical color model, the underlying representation was geometrically distorted rather than uniformly attenuated, and a two-person evaluation normalized behavioral thresholds while cortical interpolation effects split by participant. |
 
-**¶3 — C2a: neural identifies what behavior cannot.** Fitting behavioral (γ) and neural (RDM) atoms independently shows the neural component contributes information the behavioral loss cannot access (sub-09: RDM recovers a protan direction behavior-only cannot, β_c≈+4° behavioral-only fails; sub-08: RDM sharpens/stabilizes the argmin). Close on significance: neural structural information is *load-bearing* for the correction, not decorative.
+### `A geometric distortion of cortical color representation` — C1
+| ¶ | L | Role | One-sentence summary |
+|---|---|---|---|
+| 2 | 18 | finding + literature placement | The deficit is a structured distortion of cortical color geometry localized to a different area in each participant, resolved by RDM (structure) and LOCO (functional consequence). |
 
-**¶4 — C2b: individualization.** The method yields a per-person, neurally-grounded filter; the two fitted filters differ by subtype in magnitude and direction. **Scope: between-subtype (one deutan, one protan); within-subtype individuality is untested at N=2 and is the replication question.** Close on significance: architecture is individualizable by construction — the advance over population-average.
+### `A neurally grounded, individualizable correction filter` — C2
+| ¶ | L | Role | One-sentence summary |
+|---|---|---|---|
+| 3 | 21 | filter definition | Inverting each fitted model assigns every hue a single replacement color, and that replacement is the filter. |
+| 4 | 23 | novelty claim | This is the first filter derived from an individual's cortical color representation rather than a retinal model, and prior encoding-model inversions targeted response magnitude, not color arrangement. |
+| 5 | 25–27 | neural term is load-bearing (C2a) | The neural term recovered a rotation the behavioral loss missed, reinforced the one it found, and narrowed the argmin spread. |
+| 6 | 29 | individualization (C2b) | The two fitted distortions diverge in the sign of $\hat\beta_c$, and that sign held under HC resampling and leave-one-HC-out. |
+| 7 | 31 | caveat bounding ¶6 | Per-axis magnitudes are unidentifiable, the recovered quantity is the dominant-axis sign, that sign is basis-dependent in the protan participant, and subtype is confounded with individual. |
+| 8 | 33 | alternative-model rejection | The retinal-plus-gain class has one degree of freedom along the confusion axis, omits displacement away from it, and failed in fitting with $g > 2$. |
 
-**¶5 — caveat bounding ¶4 (brief).** What is robust is the 2-component **mechanism class** and the **direction (sign)** of the dominant confusion-axis term; per-axis magnitudes are not identifiable (0/6 checks; β_s below uncertainty; β_c=42° partial recovery only). Keep short — it bounds ¶4, does not re-defend.
+### `Filter evaluation`
+| ¶ | L | Role | One-sentence summary |
+|---|---|---|---|
+| 9 | 36 | behavioral results | The individualized filter kept every discrimination pair within the HC range and preserved identification accuracy, whereas the deployed filter left two pairs deviant in the protan participant. |
+| 10 | 38 | neural results | The neural effect varied by participant and by measure, geometry moved opposite to interpolation in each participant, and the protan geometric recovery occurred under both filters. |
+| 11 | 40 | neural interpretation + scope | The two readouts sit at different hierarchical levels and can vary independently, so two cases cannot settle the neural effect. |
 
-**¶6 — C3: performance (Phase 3, forward-looking).** Rationale = the retinal model is **structurally insufficient** (boundary saturation, over-compensation g>2 inconsistent with confirmed CVD, non-invertibility) → it *cannot represent* the measured distortion, so it cannot serve as the basis for an exact stimulus-space correction (independent of efficacy). Phase 3 (preregistered 2AFC) will test whether the personalized filter reduces JND at each participant's most vulnerable hues vs **OS-builtin (Windows/macOS) color filters** and a no-filter baseline. **If confirmed**, personalized neural-grounded correction is a deployable alternative to population-average approaches; **if not**, the cortical-distortion account requires revision. (Two-directional, falsifiable; do NOT assume success.)
+### `Limitations`
+| ¶ | L | Role | One-sentence summary |
+|---|---|---|---|
+| 12 | 43 | sample | Both the CVD sample ($N=2$) and the HC cohort ($n=7$) are too small for population-level claims or a significance test, and severity grading needs an anomaloscope. |
+| 13 | 45 | estimate robustness | Two reported estimates depend on analysis choices — the deutan V2 elevation on the alignment control, and $\hat\beta$ on the absence of confidence intervals. |
+| 14 | 47 | stimulus scope | The single isoluminant, iso-chroma locus leaves the correction untested outside it. |
+| 15 | 49 | fitting objective | The two neural loss terms are measured on different quantities at different ROIs, so a shared representation is needed before one objective can weight them jointly. |
 
-**¶7 — Limitations.** Four considerations bound the proof-of-concept scope: (1) N=2 CVD; (2) single isoluminant, iso-chroma locus (L*=75, chroma=40) — no luminance/saturation generalization; (3) HC pool n=6 at hV4 (descriptive anchor, not a test); (4) no parameter-level bootstrap CIs on (β_s, β_c).
+### `Conclusion`
+| ¶ | L | Role | One-sentence summary |
+|---|---|---|---|
+| 16 | 52 | what was derived | Each correction inverts that participant's own fitted cortical distortion and is therefore a per-person, not population-average, transform. |
+| 17 | 54 | field impact | Larger systematic studies can quantify these distortions and establish whether the correction generalizes. |
 
-**¶8 — Synthesis + broader impact.** Restate the program: encode each individual's cortical color geometry and invert it, vs a fixed population-average spectral shift. Close on forward-looking significance (paradigm: from population-average retinal correction to individual neural-geometry-grounded correction).
+### Changes from the 2026-06-08 skeleton
 
-**REMOVED from v2:** the upstream-input-rejection paragraph (LORO-preserved → not inherited deficit); the detection–correction "divergence" falsifier paragraph and its §S16 cosine statistic.
+| 구 계획 | 현행 | 사유 |
+|---|---|---|
+| ¶4 individualization / ¶5 caveat — 별도 2문단 | ¶6 (L29) / ¶7 (L31) | 한때 병합돼 있던 것을 계획대로 복원 |
+| ¶6 = C3 performance, **Phase 3 forward-looking TODO** | ¶9–¶11 = 실제 수행된 2인 평가 | Phase 3 데이터 확보 |
+| ¶7 Limitations, `Four considerations` 단일 문단 | ¶12–¶15, 6항목 4문단 | 항목 추가(정렬 대조 비대칭, 손실항 이질성) + §7 분할 |
+| ¶8 Synthesis + broader impact | ¶16–¶17 | 결론 2문단 분리 |
+
+**REMOVED from v2 (변동 없음):** the upstream-input-rejection paragraph (LORO-preserved → not inherited deficit); the detection–correction "divergence" falsifier paragraph and its §S16 cosine statistic.
 
 ---
 

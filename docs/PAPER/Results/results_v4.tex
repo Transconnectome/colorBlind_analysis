@@ -28,7 +28,7 @@
 
 A corrective stimulus-space filter is valid only if the target hues remain decodable from the visual cortex of a CVD individual. We verified this precondition using leave-one-run-out (LORO) cross-validation of the forward encoding model in SRM-aligned space.
 
-Both CVD participants exceeded the 0.125 exact-accuracy chance level at every ROI (Figure~\ref{fig:loco}A). A cross-subject generalization test of the same forward encoding model (HC-to-HC vs.\ HC-to-CVD pair-wise cross-decoding, all ROIs pooled) showed no HC--CVD difference (Mann--Whitney $U$ test, 21 HC-to-HC vs.\ 14 HC-to-CVD pairs, $p = 0.668$; Supplementary~\S S14). The same null held at the within-ROI level at hV4 (Crawford \& Howell $t$-test, both CVD subjects within the HC range, $p = 0.142$). The 8 scanner stimuli therefore remain individually decodable at the cortical level in both CVD participants, in line with prior work on CVD above-threshold identification \cite{boehm2014, bosten2019}.
+Both CVD participants exceeded the 0.125 exact-accuracy chance level at every ROI (Figure~\ref{fig:loco}A). Their accuracies also sat inside the healthy-control distribution at every ROI, with no single-case comparison reaching significance (Crawford--Howell, eight tests, all $p \geq 0.095$; at hV4 both participants gave $d_{cc} = -0.95$, $p = 0.407$; Supplementary~\S S19). A forward encoding model trained on the healthy controls and applied to a CVD participant decoded that participant's held-out runs at $0.432$ on average, far above the $0.125$ chance level ($t(7) = 6.51$, $p < 0.001$), so the control-derived mapping transfers to the CVD data. The 8 scanner stimuli therefore remain individually decodable at the cortical level in both CVD participants, in line with prior work on CVD above-threshold identification \cite{boehm2014, bosten2019}.
 
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{Hue interpolation is reduced at hV4 in both CVD cases}
@@ -37,7 +37,7 @@ Both CVD participants exceeded the 0.125 exact-accuracy chance level at every RO
 
 We next tested whether continuous hue interpolation fails in CVD, using leave-one-color-out (LOCO) decoding of the forward encoding model. Among the four retinotopic ROIs, only hV4 supported above-chance hue interpolation in HC (adjacent accuracy $0.47 \pm 0.05$, mean $\pm$ SEM over $n = 6$ HC, sub-07 excluded at hV4 for insufficient voxels; $p = 0.008$ under $1{,}000$ per-subject label permutations). V1--V3 did not significantly exceed chance even though the colors remained decodable across runs (V1 $p = 0.164$; V2 and V3 below chance). This is consistent with hV4 as the primary interpolation gate, replicating \citeA{brouwer2009}.
 
-Both CVD participants fell at or below the adjacent-accuracy chance level at hV4 (Figure~\ref{fig:loco}B). The reduction was significant in the protan participant, whose adjacent accuracy of $0.13$ fell below the HC distribution (Crawford \& Howell $t = -2.91$, $p = 0.017$, $d_{cc} = -3.14$). In the deutan participant the reduction was a comparably large effect that did not reach significance (adjacent accuracy $0.25$, $d_{cc} = -1.99$, $t = -1.84$, $p = 0.063$), in line with the limited power of a single-case test against $n = 6$ controls.
+Adjacent accuracy at hV4 reached $0.13$ in the protan participant and $0.25$ in the deutan participant, against a healthy-control mean of $0.47$ and a chance level of $0.25$ (Figure~\ref{fig:loco}B). The protan value fell below the HC distribution (Crawford \& Howell $t = -2.91$, $p = 0.017$, $d_{cc} = -3.14$). The deutan value carried a comparably large effect at $p = 0.063$ ($d_{cc} = -1.99$, $t = -1.84$), in line with the power of a single-case test against $n = 6$ controls.
 
 Descriptively, the reduction was not uniform across hues. Both participants showed zero adjacent accuracy at hV4 for the S-cone intermediate colors blue, purple, and magenta (Figure~\ref{fig:loco}C). Per-hue single-case tests (Crawford \& Howell, one-tailed, uncorrected and exploratory) reached significance at no individual hue against the $n = 6$ HC distribution. These per-hue accuracies form each participant's hue vulnerability profile $\mathbf{v} \in [0,1]^8$.
 
@@ -45,10 +45,10 @@ Descriptively, the reduction was not uniform across hues. Both participants show
 \begin{figure*}[tb]
   \centering
   \includegraphics[width=\textwidth]{fig2_loro_loco}
-  \caption{\textbf{Color classification and hue interpolation across V1--hV4 in the two CVD participants and healthy controls.} \textbf{(A)} LORO classification accuracy (forward encoding model, 8-class, SRM-aligned), V1--hV4.
+  \caption{\textbf{Color classification and hue interpolation across V1--hV4 in the two CVD participants and healthy controls.} \textbf{(A)} LORO eight-way classification accuracy (forward encoding model, SRM-aligned), V1--hV4.
   HC mean $\pm$ SEM ($n = 7$; $n = 6$ at hV4, sub-07 excluded for low voxel count; gray); the deutan participant (orange square), the protan participant (teal triangle).
   Chance = $1/8$.
-  \textbf{(B)} LOCO adjacent accuracy ($\pm 1$ hue step; chance $= 3/8$).
+  \textbf{(B)} LOCO adjacent accuracy (prediction within $45^\circ$ of the target hue; chance $= 0.25$).
   \emph{$*$}: the protan participant below HC at hV4 (Crawford \& Howell $t = -2.91$, $p = 0.017$; exploratory single-case finding); the deutan participant $t = -1.84$, $p = 0.063$, n.s.
   \textbf{(C)} Per-hue adjacent accuracy at hV4, HC bars $\pm$ SEM ($n = 6$).
   Per-hue single-case tests (Crawford \& Howell, one-tailed, uncorrected and exploratory) reached significance at no individual hue; the deficit concentrated on the S-cone intermediate hues blue, purple, and magenta, where both participants showed zero adjacent accuracy.
@@ -57,29 +57,24 @@ Descriptively, the reduction was not uniform across hues. Both participants show
 \end{figure*}
 
 % ──────────────────────────────────────────────────────────────────────────────
-\subsection{Color geometry is distorted at a distinct ROI in each CVD case}
+\subsection{Geometric deviation localizes to a distinct ROI in each CVD case}
 \label{sec:results:geometry}
 % ──────────────────────────────────────────────────────────────────────────────
 
-To characterize the geometric basis of the LOCO impairment, we compared the pairwise representational structure of CVD and HC participants in a shared SRM-aligned space. For each CVD participant we computed disparity and the per-pair RDM difference from the HC mean ($\Delta\text{RDM} = \text{RDM}_\text{CVD} - \overline{\text{RDM}}_\text{HC}$).
+To characterize the geometric basis of the LOCO impairment, we compared the representational geometry of CVD and HC participants in a shared SRM-aligned space. Procrustes disparity indexes how far a participant's whole geometry lies from the HC reference.
 
-The ROI of elevated disparity differs between the two CVD participants: V2 in the deutan participant and V1 in the protan participant (Figure~\ref{fig:geometry}B). The protan participant showed significantly elevated disparity specifically at V1 (Crawford \& Howell $p = 0.007$ in the common HC space; $p = 0.045$ under the symmetric LOSO control), with no elevation at V2, V3, or hV4. The deutan participant showed elevated disparity at V2 (common-space $p = 0.040$) that attenuated to a non-significant trend under the symmetric LOSO control ($p = 0.116$), with no elevation at V1, V3, or hV4. Full test statistics and effect sizes ($t$, $d_{cc}$) for both estimators are reported in \cref{tab:disparity_loso}.
+The ROI of elevated disparity differs between the two CVD participants, V2 in the deutan participant and V1 in the protan participant (Figure~\ref{fig:geometry}B). The protan participant showed elevated disparity specifically at V1, under both the common HC space ($p = 0.007$) and the symmetric LOSO reference ($p = 0.045$), with no elevation at V2, V3, or hV4. The deutan participant showed elevated disparity at V2 in the common HC space ($p = 0.040$), which did not survive the symmetric LOSO reference ($p = 0.116$, $d_{cc} = 1.42$), with no elevation at V1, V3, or hV4. The direction and magnitude of the deutan effect were preserved under the LOSO reference while the confidence interval widened, so the two estimators differ in precision rather than in sign. Distinguishing an attenuated effect from an absent one at this ROI requires a larger cohort. Full test statistics and effect sizes ($t$, $d_{cc}$) for both estimators are reported in \cref{tab:disparity_loso}.
 
-The $\Delta$RDM heatmaps (Figure~\ref{fig:geometry}A) reveal subject-specific distortion structures. The deutan participant shows elevated distances among S-cone intermediate pairs at V2, and the protan participant shows a broader reorganization of pairwise distances at V1. Disparity tests how far the whole SRM-aligned geometry lies from the HC leave-one-out reference, whereas $\Delta$RDM shows which color pairs deviate and in which direction; the disparity elevation --- significant and LOSO-robust at V1 in the protan participant, a common-space trend at V2 in the deutan participant --- is independent evidence that the cortical color representation is geometrically distorted.
-
-Together, the interpolation deficit (§\ref{sec:results:loco}) and the geometric distortion (this section) identify a structured target for correction. In each participant the continuous arrangement of hues is displaced in a direction and magnitude specific to that individual. We next fit this distortion with a low-dimensional model --- using each participant's neural representational geometry and behavioral hue-discrimination thresholds (§\ref{sec:results:twocomp}) --- and invert the fitted model into a per-subject stimulus-space correction (§\ref{sec:results:filter}).
+The two cases differ in where the deviation lies and in how strongly it is supported. Because the deviation is not shared, a family-level correction cannot serve both. In each participant the continuous arrangement of hues is displaced in a direction and magnitude specific to that individual, which is what a personalized correction is required to capture. We next fit this distortion with a low-dimensional model --- using each participant's neural representational geometry and psychophysical hue-discrimination thresholds (§\ref{sec:results:twocomp}) --- and invert the fitted model into a per-subject stimulus-space correction (§\ref{sec:results:filter}).
 
 % ── Figure 4 ─────────────────────────────────────────────────────────────────
 \begin{figure*}[tb]
   \centering
-  \includegraphics[width=\textwidth]{fig3_geometry}
-  \caption{\textbf{Representational geometry of color in the two CVD participants relative to the healthy-control mean.} \textbf{(A)} $\Delta$RDM $= \text{RDM}_\text{CVD} - \overline{\text{RDM}}_\text{HC}$ in SRM-aligned space at each subject's primary ROI (the deutan participant V2, the protan participant V1).
-  Warm: CVD distances larger than HC mean; cool: smaller.
-  \textbf{(B)} Procrustes disparity to the HC reference per subject per ROI.
-  HC band: group mean $\pm 1$ SD ($n = 7$); individual HC LOO as dots.
-  Crawford \& Howell tests in the common HC space (the deutan participant V2: $p = 0.040$; the protan participant V1: $p = 0.007$); under a symmetric LOSO control the protan participant V1 remains significant ($p = 0.045$) and the deutan participant V2 attenuates to a trend ($p = 0.116$). Exploratory single-case.
-  (A) shows the directional pattern of the per-pair differences. (B) tests the distance of the whole geometry from the HC LOO reference.
-  Each subject showed elevated disparity at a single, distinct ROI (the deutan participant V2; the protan participant V1).}
+  \includegraphics[width=\textwidth]{fig3_geometry_r6}
+  \caption{\textbf{Procrustes disparity to the healthy-control reference.}
+  Disparity per participant per ROI, which indexes the distance of the whole geometry from that reference.
+  HC band, group mean $\pm 1$ SD ($n = 7$); dots, individual HC leave-one-out values.
+  Single-case comparisons used the Crawford--Howell modified $t$ against the HC leave-one-out distribution. The asterisk marks the one comparison that reaches $p < 0.05$ under the symmetric LOSO reference, which is the inferential estimate (\S\ref{sec:methods:rdm}); test statistics under both references are given in \cref{tab:disparity_loso}. Exploratory single-case.}
   \label{fig:geometry}
 \end{figure*}
 
@@ -94,7 +89,7 @@ For the protan participant, saturation was lower ($41\%$, $g = 2.95$) and did no
 
 A gain $g > 2$ implies that cortical processing reverses the direction of the retinal shift past the undistorted hue (Section~\ref{sec:methods:candidates}). Both participants scored below the Ishihara criterion (the deutan participant: 5/14 plates correct; the protan participant: 7/14), confirming residual CVD under standard viewing conditions. A fitted $g > 2$ is therefore internally inconsistent with confirmed CVD status: the model claims overcompensation where the participants demonstrably show impairment. Therefore, the saturated boundary is a model failure, not a valid parameter estimate.
 
-The structural cause is a degree-of-freedom deficit. The function $\delta\theta = (2 - g)\cdot\delta\theta_{\rm Mach}$ displaces hues only along the fixed confusion axis. No value of $g$ can account for distortions in directions orthogonal to that axis. R+C is therefore excluded as a filter candidate.
+The R+C family also carries a degree-of-freedom restriction. The function $\delta\theta = (2 - g)\cdot\delta\theta_{\rm Mach}$ displaces hues along the fixed confusion axis alone, for every value of $g$. It therefore omits displacement away from that axis, including along the S-cone axis of the 2-component model. R+C is excluded as a filter candidate.
 
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{A common cortical model fits both CVD cases}
@@ -111,27 +106,22 @@ The strict 7-fold LOO IQR was $(0^\circ, 0^\circ)$. However, this stability is s
 
 For neither participant did the LOCO loss family enter the selected combination; both winning combinations were JND-plus-$\Delta$RDM.
 
-The RDM atom in each subject's winning combination corresponded to the ROI of elevated geometric disparity: V2 for the deutan participant (common-space $p = 0.040$; LOSO trend $p = 0.116$) and V1 for the protan participant ($p = 0.007$; LOSO $p = 0.045$, Section~\ref{sec:results:geometry}). The loss combination was selected by held-out test-loss. The significant disparity ROI was identified separately, by Crawford--Howell tests on disparity amplitude. %% TODO (terminology, 2026-08-05): "geometric deviation" below is a SUPERORDINATE covering
-%% BOTH pairwise disparity AND the per-pair RDM difference. Do NOT swap it for
-%% "per-pair RDM difference" -- that would drop disparity. Rewrite the clause, e.g.
-%% "...both read out the same per-ROI departure of the CVD geometry from the HC reference".
-%% Blocked on the axis-4 correction (the disparity metric description).
-These are distinct procedures, but both read out the same per-ROI CVD--HC geometric deviation, so their agreement on ROI is expected and we do not treat it as independent corroboration.
+The ROI supplying the RDM atom was fixed differently in the two participants, and we report that asymmetry explicitly. For the deutan participant the ROI was a free term in the search: all four retinotopic ROIs entered the combination grid, and $\gamma_{\rm OY} + L_{\rm RDM}^{(V2)}$ ranked first among the 25 combinations passing the boundary-saturation gate (Section~\ref{sec:methods:selection}), at $\overline{L}_{\rm test} = -2.36$ against $-2.20$ for the next combination and $-1.72$ for the best V1 combination. For the protan participant the ROI was pre-specified as V1 and was not searched. Completing the ROI axis post hoc under the same selection rule selects V2 instead ($\overline{L}_{\rm test} = -2.20$ vs.\ $-1.54$ for V1), but every ROI that passes the gate --- V1, V2, and V1$+$V4 --- returns the identical estimate $(\hat\beta_s, \hat\beta_c) = (2^\circ, +24^\circ)$, so the filter carried into the second session is unaffected. The same invariance holds for the deutan participant within its selected psychophysical atom, where V2 and V3 both return $(6^\circ, -42^\circ)$ and dropping the RDM atom entirely returns $(16^\circ, -44^\circ)$. The ROI choice therefore locates the neural loss term but does not determine the fitted distortion.
 
 On held-out folds, both fitted distortions reproduced the observed CVD geometry, beating the no-correction baseline on all 7 folds and ranking in the top $5$--$8\%$ of grid combinations.
 The HC noise ceiling --- the best fit achievable given HC data noise --- was estimated from split-half HC amplitude reliability \cite{lagecastellanos2018} and is conservative because CVD amplitude noise is excluded. Relative to this ceiling, the fits reached $52\%$ (the deutan participant) and $67\%$ (the protan participant) of the way from baseline to ceiling (held-out losses in \cref{tab:modelfits}).
 
 
 % ──────────────────────────────────────────────────────────────────────────────
-\subsection{Neural data identifies what behavior cannot}
+\subsection{Neural data identifies what psychophysics alone cannot}
 \label{sec:results:neural_role}
 % ──────────────────────────────────────────────────────────────────────────────
 
-Fitting behavioral ($\gamma$) and neural (RDM) loss atoms independently reveals three benefits of using the neural component.
+Fitting psychophysical ($\gamma$) and neural (RDM) loss atoms independently reveals three benefits of using the neural component.
 
-First, the neural term captures a protan cortical direction that the behavioral loss cannot resolve. The protan participant's behavioral-only fit yielded $\hat\beta_c \approx +4^\circ$ and did not beat the no-correction baseline ($\Delta L = +0.01$, 3/7 folds). The RDM term captures a signal that the behavioral loss cannot detect for this participant.
+First, the neural term captures a protan cortical direction that the psychophysical loss cannot resolve. The protan participant's psychophysical-only fit yielded $\hat\beta_c \approx +4^\circ$ and did not beat the no-correction baseline ($\Delta L = +0.01$, 3/7 folds). The RDM term captures a signal that the psychophysical loss cannot detect for this participant.
 
-Second, the neural term stabilizes the argmin for the deutan participant. The behavioral-only and combined fits share the same argmin $(6^\circ, -42^\circ)$, confirming that the behavioral atom independently locates the deutan direction; the neural-only fit independently corroborates this direction with an estimate of $\hat\beta_c = -26^\circ$.
+Second, the neural term stabilizes the argmin for the deutan participant. The psychophysical-only and combined fits share the same argmin $(6^\circ, -42^\circ)$, confirming that the psychophysical atom independently locates the deutan direction; the neural-only fit independently corroborates this direction with an estimate of $\hat\beta_c = -26^\circ$.
 Adding the RDM atom reduced the boundary saturation rate from $23\%$ to $9.3\%$, sharpening the argmin without shifting it.
 
 Third, the neural term enhances parameter stability by reducing its IQR in both participants. For the deutan participant, adding the neural term reduced the HC-resample IQR from $(18^\circ, 6^\circ)$ to $(8^\circ, 2^\circ)$ (PCA) and $(10^\circ, 4^\circ)$ (SRM). For the protan participant, the IQR narrowed from $(6^\circ, 4^\circ)$ to $(0^\circ, 0^\circ)$ (PCA, deterministic) and $(0^\circ, 2^\circ)$ (SRM).
@@ -140,9 +130,9 @@ Third, the neural term enhances parameter stability by reducing its IQR in both 
 \label{sec:results:identifiability}
 % ──────────────────────────────────────────────────────────────────────────────
 
-These fits recover the distortion's mechanism class and the direction of its dominant axis, but not its precise per-axis magnitudes. Parameter recovery fails across all pre-specified identifiability checks (0/6 significant after FDR correction, BH $\alpha = 0.05$; Supplementary~\S S15). The voxel-level parameter-recovery test yielded $f_{10^\circ} < 0.30$ for both production candidates. The non-dominant axes ($|\hat\beta_s| \leq 6^\circ$ for both participants) fall below the effective parameter uncertainty of $\sim\!20^\circ$--$25^\circ$ and are not recoverable (Supplementary~\S S15). The dominant axis ($|\hat\beta_c| = 42^\circ$ for the deutan participant) exceeds this uncertainty and is partially recoverable: when CVD responses are simulated from a known distortion and re-fitted, the recovered $\hat\beta_c$ deviates from the true value by $4.7^\circ$ on average (Supplementary~\S S15).
+These fits recover the distortion's mechanism class and the direction of its dominant axis, but not its precise per-axis magnitudes. Parameter recovery fails across all pre-specified identifiability checks (0/6 significant after FDR correction, BH $\alpha = 0.05$; Supplementary~\S S16). The voxel-level parameter-recovery test yielded $f_{10^\circ} < 0.30$ for both production candidates. The non-dominant axes ($|\hat\beta_s| \leq 6^\circ$ for both participants) fall below the effective parameter uncertainty of $\sim\!20^\circ$--$25^\circ$ and are not recoverable (Supplementary~\S S16). The dominant axis ($|\hat\beta_c| = 42^\circ$ for the deutan participant) exceeds this uncertainty and is partially recoverable: when CVD responses are simulated from a known distortion and re-fitted, the recovered $\hat\beta_c$ deviates from the true value by $4.7^\circ$ on average (Supplementary~\S S16).
 
-Consistent with the partial recoverability of the dominant axis, the sign of $\hat\beta_c$ --- the distortion direction --- is stable across held-out reference sets (Section~\ref{sec:results:twocomp}). The deutan participant consistently returns $\hat\beta_c < 0$ across all LOO folds and resamples. The protan participant consistently returns $\hat\beta_c > 0$ under the PCA-basis loss; sign stability under the SRM-basis loss was not verified (Supplementary~\S S15). The distortion direction is recoverable even when its magnitude is not.
+Consistent with the partial recoverability of the dominant axis, the sign of $\hat\beta_c$ --- the distortion direction --- is stable across held-out reference sets (Section~\ref{sec:results:twocomp}). The deutan participant consistently returns $\hat\beta_c < 0$ across all LOO folds and resamples. The protan participant consistently returns $\hat\beta_c > 0$ under the PCA-basis loss; sign stability under the SRM-basis loss was not verified (Supplementary~\S S16). The distortion direction is recoverable even when its magnitude is not.
 
 The loss landscape shows where this magnitude indeterminacy lies. Although each participant's selected fit is the global minimum on the full data (Figure~\ref{fig:landscape}), the per-resample argmins do not all concentrate there.
 For the protan participant, $87.7\%$ recur at the selected fit, but a secondary basin near $(32^\circ, 0^\circ)$ marks a metric-dependent alternative.
@@ -183,23 +173,23 @@ The two fits differ in the magnitude and direction of the dominant confusion-axi
   Bottom block: the protan participant, $(\hat\beta_s, \hat\beta_c) = (2^\circ, +24^\circ)$.
   The filtered stimulus is the exact numerical pre-image of the fitted 2-component transform; the per-hue correction $\delta\theta_{\rm filter} = \theta_{\rm pre} - \theta$ is annotated beneath each \emph{Filtered} swatch (8/8 pre-images exact, residual $< 0.001^\circ$ for both subjects).
   Rendering coordinate space: STIM\_LAB CIELab (project convention).
-  Neural validation (hue-interpolation adjacent accuracy and representational geometry) and behavioral validation (JND thresholds and 8AFC color identification) in second sessions in both participants are reported in \cref{fig:filter_eval}; replication in more individuals remains for future work.}
+  Neural validation (hue-interpolation adjacent accuracy and representational geometry) and psychophysical validation (JND thresholds and 8AFC color identification) in second sessions in both participants are reported in \cref{fig:filter_eval}; replication in more individuals remains for future work.}
   \label{fig:filter}
 \end{figure*}
 
 % ──────────────────────────────────────────────────────────────────────────────
-\subsection{Behavioral and neural filter evaluation}
+\subsection{Psychophysical and neural filter evaluation}
 \label{sec:results:filter_eval}
 % ──────────────────────────────────────────────────────────────────────────────
 
 \paragraph{Filter evaluation.}
-We evaluated the two filters in a second session in both CVD participants, using the same two neural readouts as the first session: hue interpolation (hV4 LOCO accuracy) and representational geometry (SRM-aligned disparity and RDM). We report, in turn, the behavioral outcome, the color-classification precondition, and the two neural readouts.
+We evaluated the two filters in a second session in both CVD participants, using the same two neural readouts as the first session: hue interpolation (hV4 LOCO accuracy) and representational geometry (SRM-aligned disparity and RDM). We report, in turn, the psychophysical outcome, the color-classification precondition, and the two neural readouts.
 
-\paragraph{Behavioral.}
-Behaviorally, both filters improved hue-discrimination thresholds and color identification in the deutan participant. The baseline deficit (JND mean $|z| = 2.24$; the orange--yellow, yellow--green, and yellow--purple pairs each exceeded the HC maximum) was removed by both the deployed ($|z| = 0.85$) and the individualized ($|z| = 0.78$) filter, neither leaving a significant deviant pair. 8AFC color identification rose from $0.81$ (95\% CI $[0.70, 0.89]$) to $0.97$ ($[0.89, 0.99]$) under both (Wilson score interval, $n = 64$). The two filters could not be ranked (Wilcoxon $p = 0.84$). The protan participant had no significant baseline deviant pair, though one (green--blue, a protan confusion-axis pair) was trending ($p = 0.070$). Under the deployed filter green--blue became significantly deviant ($p = 0.003$) and a second pair appeared (cyan--magenta $p = 0.001$), whereas the individualized filter normalized green--blue ($p = 0.44$) and produced no deviant pair; mean $|$JND$-$HC$|$ (in HC SD units) was lower under the individualized filter (no-filter $0.90 \approx$ individualized $0.93 \ll$ deployed $1.78$). 8AFC color identification, already at ceiling without a filter ($1.00$, 95\% CI $[0.94, 1.00]$; Wilson score interval, $n = 64$), was preserved by the individualized filter ($0.98$, $[0.92, 1.00]$) but reduced by the deployed filter ($0.86$, $[0.75, 0.92]$). Of the two filters, only the individualized filter introduced no new significant deviation in either participant. Whether it is superior to the deployed filter remains to be established with more participants.
+\paragraph{Psychophysics.}
+Both filters improved hue-discrimination thresholds and color identification in the deutan participant. The baseline deficit (JND mean $|z| = 2.24$; the orange--yellow, yellow--green, and yellow--purple pairs each exceeded the HC maximum) was removed by both the deployed ($|z| = 0.85$) and the individualized ($|z| = 0.78$) filter, neither leaving a significant deviant pair. 8AFC color identification rose from $0.81$ (95\% CI $[0.70, 0.89]$) to $0.97$ ($[0.89, 0.99]$) under both (Wilson score interval, $n = 64$). The two filters could not be ranked (Wilcoxon $p = 0.84$). The protan participant had no significant baseline deviant pair, though one (green--blue, a protan confusion-axis pair) was trending ($p = 0.070$). Under the deployed filter green--blue became significantly deviant ($p = 0.003$) and a second pair appeared (cyan--magenta $p = 0.001$), whereas the individualized filter normalized green--blue ($p = 0.44$) and produced no deviant pair; mean $|$JND$-$HC$|$ (in HC SD units) was lower under the individualized filter (no-filter $0.90 \approx$ individualized $0.93 \ll$ deployed $1.78$). 8AFC color identification, already at ceiling without a filter ($1.00$, 95\% CI $[0.94, 1.00]$; Wilson score interval, $n = 64$), was preserved by the individualized filter ($0.98$, $[0.92, 1.00]$) but reduced by the deployed filter ($0.86$, $[0.75, 0.92]$). Of the two filters, only the individualized filter introduced no new significant deviation in either participant. Whether it is superior to the deployed filter remains to be established with more participants.
 
 \paragraph{Colors remained decodable.}
-All eight hues remained decodable under both filters in both participants. LORO eight-way accuracy stayed well above the $0.125$ chance level at every ROI and in every condition (all cells $\geq 0.50$; HC $0.71$--$0.77$; Supplementary Table~\ref{tab:exp2_loro}). The color signal was intact in both.
+All eight hues remained decodable under both filters in both participants. LORO eight-way classification accuracy stayed well above the $0.125$ chance level at every ROI and in every condition (all cells $\geq 0.50$; HC $0.71$--$0.77$; Supplementary Table~\ref{tab:exp2_loro}). The color signal was intact in both.
 
 \begin{figure*}[tb]
   \centering
@@ -211,7 +201,7 @@ All eight hues remained decodable under both filters in both participants. LORO 
     deployed accessibility filter (blue square), individualized filter (orange diamond);
     dashed line, chance.
     \textbf{(A, D)} LOCO adjacent accuracy ($\pm 1$ hue step; interpolation; $\uparrow$ HC-like;
-    chance $= 3/8$; hV4 is the validated ROI).
+    chance $= 0.25$; hV4 is the validated ROI).
     \textbf{(B, E)} SRM disparity into the HC shared space ($\downarrow$ HC-like).
     \textbf{(C, F)} Shared-space RDM similarity to HC ($\uparrow$ HC-like).
     Filter effects on hV4 interpolation differed between the two participants (individualized
@@ -224,7 +214,7 @@ All eight hues remained decodable under both filters in both participants. LORO 
 \end{figure*}
 
 \paragraph{Interpolation.}
-For color interpolation (LOCO decoding), the two participants gave opposite results. In the deutan participant, the individualized filter partially improved adjacent accuracy (no-filter $0.23 \to$ individualized $0.31$; HC $0.46 \pm 0.11$), whereas the deployed filter did not (deployed $0.25$). The accuracy stayed below both the HC level and the $3/8$ chance threshold ($d_{cc} = -1.35$ vs.\ HC; deployed $d_{cc} = -1.94$). In the protan participant the trend reversed. Interpolation accuracy under the individualized filter was below the unfiltered baseline (no-filter $0.14$, deployed $0.19$, individualized $0.06$; individualized $d_{cc} = -3.70$), the lowest of the three conditions. The individualized filter thus improved interpolation in the deutan participant only, and the effect did not replicate in the protan participant. A secondary forward-tuning encoding index corroborated the deutan improvement (hV4 $\rho = +0.18$ vs.\ HC $+0.21$; deployed $\rho = -0.39$) but did not separate the conditions in the protan participant (Fig.~\ref{fig:forward_tuning}).
+For color interpolation (LOCO decoding), the two participants gave opposite results. In the deutan participant, the individualized filter partially improved adjacent accuracy (no-filter $0.23 \to$ individualized $0.31$; HC $0.46 \pm 0.11$), whereas the deployed filter did not (deployed $0.25$). Both conditions stayed below the HC level ($d_{cc} = -1.35$ individualized, $-1.94$ deployed), and the individualized value alone exceeded the $0.25$ chance level. In the protan participant the trend reversed. Interpolation accuracy under the individualized filter was below the unfiltered baseline (no-filter $0.14$, deployed $0.19$, individualized $0.06$; individualized $d_{cc} = -3.70$), the lowest of the three conditions, and all three fell below the $0.25$ chance level. The individualized filter thus improved interpolation in the deutan participant only, and the effect did not replicate in the protan participant. A secondary forward-tuning encoding index corroborated the deutan improvement (hV4 $\rho = +0.18$ vs.\ HC $+0.21$; deployed $\rho = -0.39$) but did not separate the conditions in the protan participant (Fig.~\ref{fig:forward_tuning}).
 
 \paragraph{Geometry.}
-Neither filter fully restored the representational geometry to the HC level, and the two participants moved in opposite directions (Fig.~\ref{fig:filter_eval}B,C,E,F). In the deutan participant the unfiltered baseline was the closest to HC of the three conditions, while both filters increased the difference from HC (V2 SRM disparity no-filter $0.72 \to$ deployed $0.84$ / individualized $0.77$, HC $0.49$; V2 RDM similarity to HC no-filter $0.57 \to$ deployed $0.15$ / individualized $-0.13$, HC-self $0.50$). In the protan participant the unfiltered baseline was the most distorted of the three, while both filters reduced the difference from HC (V1 SRM disparity no-filter $0.76 \to$ deployed $0.63$ / individualized $0.62$, HC $0.45$; V1 RDM similarity no-filter $0.25 \to$ deployed $0.49$ / individualized $0.30$, HC-self $0.66$). This protan recovery was comparable between the two filters, so it was not specific to the individualized filter.
+Neither filter fully restored the representational geometry to the HC level, and the direction of the filter effect reversed between the two participants (Fig.~\ref{fig:filter_eval}B,C,E,F). In the deutan participant the unfiltered baseline was the closest to HC of the three conditions, while both filters increased the difference from HC (V2 SRM disparity no-filter $0.72 \to$ deployed $0.84$ / individualized $0.77$, HC $0.49$; V2 RDM similarity to HC no-filter $0.57 \to$ deployed $0.15$ / individualized $-0.13$, HC-self $0.50$). In the protan participant the unfiltered baseline was the most distorted of the three, while both filters reduced the difference from HC (V1 SRM disparity no-filter $0.76 \to$ deployed $0.63$ / individualized $0.62$, HC $0.45$; V1 RDM similarity no-filter $0.25 \to$ deployed $0.49$ / individualized $0.30$, HC-self $0.66$). This protan recovery was equivalent between the two filters on SRM disparity and larger under the deployed filter on RDM similarity. It was therefore not specific to the individualized filter.

@@ -104,7 +104,7 @@
   number = {2},
   pages = {825--841},
   year = {2002},
-  doi = {10.1016/s1053-8119(02)91132-8}
+  doi = {10.1006/nimg.2002.1132}
 }
 
 @article{wells1996,
@@ -212,24 +212,33 @@
   doi = {10.1523/JNEUROSCI.2472-13.2013}
 }
 
+% Corrected 2026-08-06: previous entry (Durnez/Moerkerke/Nichols, JOSS 3(32):564,
+% doi 10.21105/joss.00564) was wrong on author, venue and DOI — that JOSS DOI does
+% not resolve. Verified against Crossref + bioRxiv API.
 @article{durnez2018,
-  author = {Durnez, J. and Moerkerke, B. and Nichols, T. E.},
-  title = {neurodesign: optimal experimental designs for task fMRI},
-  journal = {Journal of Open Source Software},
-  volume = {3},
-  number = {32},
-  pages = {564},
+  author = {Durnez, J. and Blair, R. and Poldrack, R. A.},
+  title = {Neurodesign: Optimal experimental designs for task fMRI},
+  journal = {bioRxiv},
   year = {2018},
-  doi = {10.21105/joss.00564}
+  doi = {10.1101/119594},
+  note = {Preprint; v2 posted 18 March 2018 (originally posted 2017). Key kept as
+          durnez2018 to match the cited version and existing citation keys}
 }
 
-@article{pedregosa2011,
-  author  = {Pedregosa, Fabian and Varoquaux, Ga{\"e}l and Gramfort, Alexandre and Michel, Vincent and Thirion, Bertrand and Grisel, Olivier and Blondel, Mathieu and Prettenhofer, Peter and Weiss, Ron and Dubourg, Vincent and Vanderplas, Jake and Passos, Alexandre and Cournapeau, David and Brucher, Matthieu and Perrot, Matthieu and Duchesnay, {\'E}douard},
-  title   = {Scikit-learn: Machine Learning in {Python}},
-  journal = {Journal of Machine Learning Research},
-  volume  = {12},
-  pages   = {2825--2830},
-  year    = {2011}
+% pedregosa2011 (scikit-learn) removed 2026-08-07. Its only citation was in §S6,
+% where it attributed GCV to sklearn.linear_model.RidgeCV. RidgeCV appears zero
+% times in analysis/; the actual implementation is a custom SVD-based routine
+% (utils_forward_model.py:gcv_select_alpha). Restore the entry if scikit-learn
+% is cited for a component the code genuinely uses.
+
+@article{walther2016,
+  author  = {Walther, Alexander and Nili, Hamed and Ejaz, Naveed and Alink, Arjen and Kriegeskorte, Nikolaus and Diedrichsen, J{\"o}rn},
+  title   = {Reliability of dissimilarity measures for multi-voxel pattern analysis},
+  journal = {NeuroImage},
+  volume  = {137},
+  pages   = {188--200},
+  year    = {2016},
+  doi     = {10.1016/j.neuroimage.2015.12.012}
 }
 
 @article{peirce2019,
@@ -265,7 +274,8 @@
 @techreport{andersson2007,
   author = {Andersson, J. L. and Jenkinson, M. and Smith, S.},
   title = {Non-linear registration aka spatial normalisation},
-  institution = {FMRIB},
+  institution = {FMRIB Centre, University of Oxford},
+  address = {Oxford, United Kingdom},
   type = {Technical Report},
   number = {TR07JA2},
   year = {2007}
@@ -343,30 +353,38 @@
 % --- CVD neuroimaging, close competitors ---
 
 @article{rina2024,
-  author = {Rina, A. and others},
-  title = {Investigating neural processing of color in normal and impaired vision: an fMRI case study in Daltonism and achromatopsia},
+  author = {Rina, A.},
+  title = {Investigating Neural Processing of Color in Normal and Impaired Vision},
   journal = {medRxiv},
   year = {2024},
-  note = {Preprint},
-  doi = {10.1101/2024.12.22.24319498}
+  doi = {10.1101/2024.12.22.24319498},
+  note = {Preprint, version 1 posted 26 December 2024. Single-authored; author
+          list and title verified against Crossref and the medRxiv API 2026-08-07}
 }
 
 @article{tregillus2021,
   author = {Tregillus, K. E. M. and Isherwood, Z. J. and Vanston, J. E. and Engel, S. A. and MacLeod, D. I. A. and Kuriki, I. and Webster, M. A.},
   title = {Color compensation in anomalous trichromats assessed with fMRI},
   journal = {Current Biology},
+  volume = {31},
+  number = {5},
+  pages = {936--942.e4},
   year = {2021},
-  doi = {10.1016/j.cub.2021.01.039}
+  doi = {10.1016/j.cub.2020.11.039},
+  note = {DOI corrected 2026-08-07. The previous value 10.1016/j.cub.2021.01.039
+          resolves to an unrelated Current Biology article on TOG-domain proteins}
 }
 
+% Corrected 2026-08-06: author, title and pages were all wrong. Verified against
+% Crossref and the article PDF (Vision Research 203 (2023) 108153).
 @article{robinson2023,
-  author = {Robinson, M. M. and Tregillus, K. E. M. and Webster, M. A.},
-  title = {Nonlinear cortical encoding of color inferred from the McCollough effect in anomalous trichromats},
+  author = {Robinson, A. E. and Bosten, J. M. and MacLeod, D. I. A.},
+  title = {Nonlinear cortical encoding of color predicts enhanced McCollough effects in anomalous trichromats},
   journal = {Vision Research},
   volume = {203},
-  pages = {108158},
+  pages = {108153},
   year = {2023},
-  doi = {10.1016/j.visres.2022.108158}
+  doi = {10.1016/j.visres.2022.108153}
 }
 
 % --- S-cone compensation / behavioural benchmark for β_s ---
@@ -439,6 +457,8 @@
   doi = {10.7554/eLife.82566}
 }
 
+% Note: key says 2019 but the paper is 2018 (Nat Neurosci 21(9):1148--1160).
+% Year field below is correct; key left unchanged so existing \cite calls keep working.
 @article{kriegeskorte2019,
   author = {Kriegeskorte, N. and Douglas, P. K.},
   title = {Cognitive computational neuroscience},
@@ -452,12 +472,18 @@
 
 % --- Digital display filter comparators ---
 
-@inproceedings{shen2016,
-  author = {Shen, W. and Mao, X. and Hu, X. and Wong, T.-T.},
-  title = {Seamless visual sharing with color vision deficiencies},
-  booktitle = {ACM Transactions on Graphics (SIGGRAPH)},
-  year = {2016},
-  note = {DOI TODO_VERIFY}
+% Resolved 2026-08-06: DOI verified via Crossref; recast as an article entry since ACM TOG
+% is the journal of record. Local PDF in Prior_works is the ACM DL citation page,
+% not the full text — obtain the article before citing specifics.
+@article{shen2016,
+  author  = {Shen, Wuyao and Mao, Xiangyu and Hu, Xinghong and Wong, Tien-Tsin},
+  title   = {Seamless visual sharing with color vision deficiencies},
+  journal = {ACM Transactions on Graphics},
+  volume  = {35},
+  number  = {4},
+  pages   = {1--12},
+  year    = {2016},
+  doi     = {10.1145/2897824.2925878}
 }
 
 % ============================================================
@@ -505,9 +531,9 @@
   journal = {Journal of the Optical Society of America A},
   volume = {29},
   number = {3},
-  pages = {A313--A320},
+  pages = {313--320},
   year = {2012},
-  doi = {10.1364/JOSAA.29.00A313}
+  doi = {10.1364/JOSAA.29.000313}
 }
 
 @article{wilson2019,
@@ -619,7 +645,7 @@
   number = {12},
   pages = {4869--4884},
   year = {2015},
-  doi = {10.1093/cercor/bhv194}
+  doi = {10.1093/cercor/bhv198}
 }
 
 @article{bannert2018,
@@ -630,16 +656,20 @@
   number = {15},
   pages = {3657--3668},
   year = {2018},
-  doi = {10.1523/JNEUROSCI.2237-17.2018}
+  doi = {10.1523/JNEUROSCI.2307-17.2018}
 }
 
+% Corrected 2026-08-06: title was a paraphrase, not the published title; DOI and
+% eLocator added. Verified against Crossref and the article PDF.
 @article{bannert2025,
   author = {Bannert, M. M. and Bartels, A.},
-  title = {Color across human brains: Shared cortical representation of color in healthy observers},
+  title = {Large-Scale Color Biases in the Retinotopic Functional Architecture Are Region Specific and Shared across Human Brains},
   journal = {Journal of Neuroscience},
   volume = {45},
   number = {42},
+  pages = {e2717202025},
   year = {2025},
+  doi = {10.1523/JNEUROSCI.2717-20.2025}
 }
 
 @article{brouwer2013additional,
@@ -765,12 +795,15 @@
 % --- Akalin 2025 & Hayashi 2024-2025 (framed as non-neural competitors) ---
 
 % Confirmed via NotebookLM 2026-05-13
+% Corrected 2026-08-06: title was a paraphrase; author list completed. Verified
+% against Crossref and the article PDF.
 @article{akalin2025,
-  author  = {Akalin, N. and others},
-  title   = {Improved CVD correction filter using traditional Daltonization
-             with MobileNet evaluation},
+  author  = {Akal{\i}n, Fatma and Aksoy, Nilg{\"u}n {\"O}zkan and Top, Dilara and Kara, Esma},
+  title   = {Improved Filter Designs Using Image Processing Techniques for
+             Color Vision Deficiency ({CVD}) Types},
   journal = {Symmetry},
   volume  = {17},
+  number  = {7},
   pages   = {1046},
   year    = {2025},
   doi     = {10.3390/sym17071046},
@@ -884,5 +917,81 @@
   volume = {59},
   number = {3},
   pages = {2142--2154},
-  year = {2012}
+  year = {2012},
+  doi = {10.1016/j.neuroimage.2011.10.018}
+}
+
+@article{ohkoba2021,
+  author = {Ohkoba, M. and Ishikawa, T. and Hira, S. and Ohtsuka, S. and Ayama, M.},
+  title = {Color representations of normals and congenital red--green color deficiencies: Estimation of individual results based on color vision model},
+  journal = {Color Research \& Application},
+  volume = {47},
+  number = {3},
+  pages = {565--584},
+  year = {2021},
+  doi = {10.1002/col.22763}
+}
+
+@article{saysani2018,
+  author = {Saysani, A. and Corballis, M. C. and Corballis, P. M.},
+  title = {The colour of words: how dichromats construct a colour space},
+  journal = {Visual Cognition},
+  volume = {26},
+  number = {8},
+  pages = {601--607},
+  year = {2018},
+  doi = {10.1080/13506285.2018.1524804}
+}
+
+@article{bashivan2019,
+  author = {Bashivan, P. and Kar, K. and DiCarlo, J. J.},
+  title = {Neural population control via deep image synthesis},
+  journal = {Science},
+  volume = {364},
+  number = {6439},
+  pages = {eaav9436},
+  year = {2019},
+  doi = {10.1126/science.aav9436}
+}
+
+@article{gu2021,
+  author = {Gu, Z. and Jamison, K. W. and Khosla, M. and Allen, E. J. and Wu, Y. and St-Yves, G. and Naselaris, T. and Kay, K. and Sabuncu, M. R. and Kuceyeski, A.},
+  title = {{NeuroGen}: Activation optimized image synthesis for discovery neuroscience},
+  journal = {NeuroImage},
+  volume = {247},
+  pages = {118812},
+  year = {2021},
+  doi = {10.1016/j.neuroimage.2021.118812}
+}
+
+@inproceedings{shinkle2025,
+  author = {Shinkle, M. W. and Lescroart, M. D.},
+  title = {Visualizing and controlling cortical responses using voxel-weighted activation maximization},
+  booktitle = {IEEE/CVF Conference on Computer Vision and Pattern Recognition Workshops (CVPRW)},
+  pages = {4825--4829},
+  year = {2025},
+  doi = {10.1109/CVPRW67362.2025.00471}
+}
+
+@article{saysani2021,
+  author = {Saysani, A. and Corballis, M. C. and Corballis, P. M.},
+  title = {Seeing colour through language: Colour knowledge in the blind and sighted},
+  journal = {Visual Cognition},
+  volume = {29},
+  number = {1},
+  pages = {63--71},
+  year = {2021},
+  doi = {10.1080/13506285.2020.1866726}
+}
+
+@misc{dcm2bids,
+  author = {Bor{\'e}, Arnaud and Guay, Samuel and Bedetti, Christophe and Meisler, Steven and GuenTher, Nick},
+  title = {Dcm2Bids (version 3.2.0)},
+  howpublished = {Software},
+  publisher = {Zenodo},
+  doi = {10.5281/zenodo.2614078},
+  url = {https://github.com/UNFmontreal/Dcm2Bids},
+  year = {2024},
+  note = {Concept DOI resolves to the latest archived release. Version 3.2.0 has
+          no version-specific Zenodo record; archiving stopped at v3.1.1}
 }

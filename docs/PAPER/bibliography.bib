@@ -225,11 +225,21 @@
           durnez2018 to match the cited version and existing citation keys}
 }
 
-% pedregosa2011 (scikit-learn) removed 2026-08-07. Its only citation was in §S6,
-% where it attributed GCV to sklearn.linear_model.RidgeCV. RidgeCV appears zero
-% times in analysis/; the actual implementation is a custom SVD-based routine
-% (utils_forward_model.py:gcv_select_alpha). Restore the entry if scikit-learn
-% is cited for a component the code genuinely uses.
+% pedregosa2011: the §S6 GCV attribution to sklearn.linear_model.RidgeCV was
+% false (RidgeCV appears zero times in analysis/; GCV is a custom SVD routine in
+% utils_forward_model.py:gcv_select_alpha) and was removed 2026-08-07. The entry
+% is retained because scikit-learn is genuinely used elsewhere: LedoitWolf for
+% the crossnobis noise covariance, PCA/CCA for the replication analysis, and
+% LinearDiscriminantAnalysis in the decoder comparison. Cited from the
+% Reproducibility software list.
+@article{pedregosa2011,
+  author  = {Pedregosa, Fabian and Varoquaux, Ga{\"e}l and Gramfort, Alexandre and Michel, Vincent and Thirion, Bertrand and Grisel, Olivier and Blondel, Mathieu and Prettenhofer, Peter and Weiss, Ron and Dubourg, Vincent and Vanderplas, Jake and Passos, Alexandre and Cournapeau, David and Brucher, Matthieu and Perrot, Matthieu and Duchesnay, {\'E}douard},
+  title   = {Scikit-learn: Machine Learning in {Python}},
+  journal = {Journal of Machine Learning Research},
+  volume  = {12},
+  pages   = {2825--2830},
+  year    = {2011}
+}
 
 @article{walther2016,
   author  = {Walther, Alexander and Nili, Hamed and Ejaz, Naveed and Alink, Arjen and Kriegeskorte, Nikolaus and Diedrichsen, J{\"o}rn},
@@ -252,12 +262,23 @@
   doi = {10.3758/s13428-018-01193-y}
 }
 
+% Replaced 2026-08-07: the previous entry ("Slice planning perpendicular to
+% calcarine sulcus for retinotopic mapping", J Neurosci Methods, in preparation)
+% matches no existing publication — Crossref indexes only three Ryu & Lee works
+% (J Vis 2019; bioRxiv 2023; Commun Biol 2024) and no such methods paper exists.
+% The real source for the slice prescription is the Communications Biology paper
+% below, whose Methods state: "Twenty-four oblique slices orthogonal to the
+% Calcarine sulcus were prescribed at the most posterior part at the occipital
+% pole" (same SNU Brain Imaging Center protocol, 1.5 s TR, 2 mm isotropic).
 @article{ryu2024,
-  author = {Ryu, J. and Lee, S.-H.},
-  title = {Slice planning perpendicular to calcarine sulcus for retinotopic mapping},
-  journal = {Journal of Neuroscience Methods},
-  note = {In preparation},
-  year = {2024}
+  author  = {Ryu, Juhyoung and Lee, Sang-Hun},
+  title   = {Bounded contribution of human early visual cortex to the topographic anisotropy in spatial extent perception},
+  journal = {Communications Biology},
+  volume  = {7},
+  number  = {1},
+  pages   = {178},
+  year    = {2024},
+  doi     = {10.1038/s42003-024-05846-x}
 }
 
 @article{maes1997,
@@ -928,7 +949,7 @@
   volume = {47},
   number = {3},
   pages = {565--584},
-  year = {2021},
+  year = {2022},
   doi = {10.1002/col.22763}
 }
 
@@ -994,4 +1015,27 @@
   year = {2024},
   note = {Concept DOI resolves to the latest archived release. Version 3.2.0 has
           no version-specific Zenodo record; archiving stopped at v3.1.1}
+}
+
+@techreport{fidaner2005,
+  author      = {Fidaner, Onur and Lin, Poliang and Ozguven, Nevran},
+  title       = {Analysis of Color Blindness},
+  institution = {Stanford University},
+  type        = {Psych 221 Project Report},
+  year        = {2005},
+  note        = {Widely replicated open implementation of LMS-error-shift Daltonization;
+                 the report itself credits the Vischeck daltonization model and the
+                 Vi\'enot--Brettel--Mollon simulation}
+}
+
+@article{simonliedtke2016,
+  author  = {Simon-Liedtke, Joschua T. and Farup, Ivar},
+  title   = {Evaluating color vision deficiency daltonization methods using a behavioral visual-search method},
+  journal = {Journal of Visual Communication and Image Representation},
+  volume  = {35},
+  pages   = {236--247},
+  year    = {2016},
+  doi     = {10.1016/j.jvcir.2015.12.014},
+  note    = {Peer-reviewed anchor for the Daltonization claim (akalin2025 and its
+             source Elrefaei 2018 are both downstream re-implementations)}
 }

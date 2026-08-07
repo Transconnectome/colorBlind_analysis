@@ -317,16 +317,30 @@ Further quantities were recorded for each candidate outside the ranking. The hel
 \label{sec:methods:identifiability}
 % ──────────────────────────────────────────────────────────────────────────────
 
-Four pre-specified checks were run on each production candidate before any parameter was reported. (1)~Parameter recovery: synthetic CVD data at a known ground truth were forward-projected through each HC donor's encoder with spatially correlated voxel noise, and the full fitting pipeline was re-run ($n = 140$ per candidate); recovery was summarized by $f_{10^\circ}$, the fraction of refits within $10^\circ$ of ground truth on both axes (pass $f_{10^\circ} \geq 0.5$, $|\text{bias}| < 10^\circ$). (2)~Origin-recovery null: the same synthesis with ground truth at $(0^\circ, 0^\circ)$ and each donor's real JND, recording the procedure's per-axis uncertainty floor (excluded from the test pool, as it returns no $p$-value). (3)~HC pseudo-CVD specificity: each HC participant's real amplitudes were substituted into the CVD slot in turn, giving a seven-member null and a one-sided rank-distance percentile. (4)~Color-label permutation: trial labels of the real CVD data were shuffled $N = 1000$ times with the HC reference held fixed, giving a one-sided $p_{\rm perm}$. The three test-bearing checks across the two production candidates (six tests) were corrected together under the Benjamini--Hochberg false-discovery rate ($\alpha = 0.05$); outcomes are reported in \S\ref{sec:results:identifiability}.
+Four pre-specified checks were run on each production candidate before any parameter was reported.
+
+\paragraph{Parameter recovery.}
+This test establishes whether a known distortion can be recovered at the present sample size and noise level. Synthetic CVD responses were generated at a known ground truth by passing that distortion through each control participant's encoder. Noise matched that participant's residual structure, using the top 20 principal components of its spatial covariance and an AR(1) correlation of $0.3$ across runs. The grid fit was re-run on each synthetic dataset, giving $n = 140$ refits per candidate from seven control encoders and twenty noise realizations. Recovery was summarized by $f_{10^\circ}$, the fraction of refits within $10^\circ$ of ground truth on both axes, against a pass criterion of $f_{10^\circ} \geq 0.5$ with $|\text{bias}| < 10^\circ$. The refit repeats the grid search rather than the full selection procedure, so it measures recoverability at a fixed loss combination.
+
+\paragraph{Origin-recovery null.}
+This test records the spread the procedure returns when no distortion is present, which sets its per-axis uncertainty floor. The same synthesis was run with ground truth at $(0^\circ, 0^\circ)$ and each control participant's real JND. It returns no $p$-value and was excluded from the test pool.
+
+\paragraph{HC pseudo-CVD specificity.}
+This test asks whether a control participant placed in the CVD position yields a comparable estimate. Each HC participant's real amplitudes were substituted into the CVD slot in turn, giving a seven-member null and a one-sided rank-distance percentile.
+
+\paragraph{Color-label permutation.}
+This test asks whether the estimate depends on which color evoked which response. The eight color labels of the real CVD amplitudes were permuted $N = 1000$ times, with the same permutation applied across ROIs and the HC pool left unchanged, giving a one-sided $p_{\rm perm}$.
+
+The three test-bearing checks across the two production candidates gave six tests, corrected together under the Benjamini--Hochberg false-discovery rate ($\alpha = 0.05$). Outcomes are reported in \S\ref{sec:results:identifiability}.
 
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{Stimulus-space filter}
 \label{sec:methods:filter}
 % ──────────────────────────────────────────────────────────────────────────────
 
-The subject-specific correction filter was derived as the pre-image of the fitted 2-component transform $T(\hat{\beta}_s, \hat{\beta}_c): \theta \mapsto \theta + \delta\theta(\theta;\hat{\beta}_s,\hat{\beta}_c)$. For each of the 8 displayed hues $\theta_k$, we solved for the input angle $\tilde{\theta}_k$ such that $T(\tilde{\theta}_k) = \theta_k$, yielding a per-hue correction $\delta\theta_k^{\rm filt} = \tilde{\theta}_k - \theta_k$. A CVD observer viewing $\tilde{\theta}_k$ thus receives, under the model, the same cortical hue representation as a healthy control observer viewing $\theta_k$.
+The correction filter for each participant is the pre-image of the fitted transform $T(\hat{\beta}_s, \hat{\beta}_c): \theta \mapsto \theta + \delta\theta(\theta;\hat{\beta}_s,\hat{\beta}_c)$. For each of the eight displayed hues $\theta_k$ we solved $T(\tilde{\theta}_k) = \theta_k$ for the input angle $\tilde{\theta}_k$, which gives a per-hue correction $\delta\theta_k^{\rm filt} = \tilde{\theta}_k - \theta_k$. Under the model, a CVD observer viewing $\tilde{\theta}_k$ then obtains the cortical hue representation that a healthy control observer obtains when viewing $\theta_k$.
 
-Pre-images were computed by numerical inversion of the forward map (Brent's-method root-finding) to a convergence tolerance of $< 0.001^\circ$.
+Each pre-image was located by Brent root-finding on the residual $T(\theta) - \theta_k$, searched within $\pm 60^\circ$ of the target and refined to a bracket tolerance of $10^{-9}$ degrees. The transform is not guaranteed to be invertible for arbitrary parameters, so every solution was verified by forward-substitution. All eight hues resolved to within $10^{-3}$ degrees of their target for both deployed parameter sets, and the procedure rejects a parameter set that leaves any hue unresolved.
 
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{Filter evaluation}
@@ -335,13 +349,13 @@ Pre-images were computed by numerical inversion of the forward map (Brent's-meth
 
 Both CVD participants completed a second scanning session that compared the individualized filter and a deployed macOS accessibility filter against the unfiltered Session-1 baseline. The individualized filter was the per-subject 2-component stimulus-space pre-image, with parameters frozen from the main analysis and therefore out-of-sample. Acquisition, comparator, run-count, and single-case-inference details are given in Supplementary~\S\ref{app:filter_eval}.
 
-On the second-session data we recomputed, within each condition, the primary Session-1 interpolation metric (LOCO adjacent accuracy, \S\ref{sec:methods:loco}), LORO classification, SRM Procrustes disparity into the HC shared space, and the representational dissimilarity matrices. As a secondary encoding index we also computed the forward-tuning correlation, the Spearman $\rho$ between each ROI's per-hue decoded hue and the canonical hue map. Because it indexes the encoding fit rather than the validated decoding readout, it is reported as corroboration only.
+On the second-session data we recomputed, within each condition, the primary Session-1 interpolation metric (LOCO adjacent accuracy, \S\ref{sec:methods:loco}), LORO classification, SRM Procrustes disparity into the HC shared space, and the representational dissimilarity matrices. As a secondary encoding index we also computed the forward-tuning correlation, the Pearson $r$ between the predicted and the observed voxel pattern at each held-out hue, averaged over the eight hues. It indexes the encoding fit rather than the decoding accuracy that carries the comparison, and is reported as corroboration only.
 
-Each condition's neural index was reported as a standardized single-case effect size (Cohen's $d$ against the HC distribution) rather than an inferential $p$, because the grand-mean permutation null is biased for this design. In both CVD participants, the JND and 8AFC tasks (\S\ref{sec:methods:psychophysical}) were repeated under each filter, each compared to the unfiltered Session-1 baseline and to the HC distribution; this interleaved, cross-session psychophysical comparison is descriptive.
+Each condition's neural index was reported as a standardized single-case effect size (Cohen's $d$ against the HC distribution) rather than an inferential $p$, because the grand-mean permutation null is biased for this design. In both CVD participants, the JND and 8AFC tasks (\S\ref{sec:methods:psychophysical}) were repeated under each filter, each compared to the unfiltered Session-1 baseline and to the HC distribution. This interleaved, cross-session psychophysical comparison is descriptive.
 
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{Reproducibility}
 \label{sec:methods:repro}
 % ──────────────────────────────────────────────────────────────────────────────
 
-All analyses were conducted in Python 3.10 (numpy 1.24.3, scipy 1.11.3, scikit-learn 1.3.0, BrainIAK 0.11). Random seeds were fixed (\texttt{seed=42}) for all permutation tests and bootstrap resampling. Analysis code and preprocessing scripts are available at \url{https://github.com/Transconnectome/colorBlind_analysis}. Anonymized preprocessed data are available on reasonable request to the corresponding author.
+All analyses were conducted in Python 3.10 with numpy 1.24.3, scipy 1.11.3, scikit-learn 1.3.0 \cite{pedregosa2011}, and BrainIAK 0.11. Random seeds were fixed for every permutation test and bootstrap. Most analyses used seed 42, while the parameter-recovery synthesis used 31337 and the color-label permutation used 27182, and each script records its own value. Analysis code and preprocessing scripts are available at \url{https://github.com/Transconnectome/colorBlind_analysis}. Anonymized preprocessed data are available on reasonable request to the corresponding author.

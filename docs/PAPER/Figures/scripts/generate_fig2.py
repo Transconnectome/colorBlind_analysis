@@ -2,13 +2,30 @@
 """
 Figure 2 — LORO (discrimination) vs LOCO (interpolation) dissociation in CVD
 =============================================================================
-Panel A: LORO ForwardEncoding accuracy (SRM) — discrimination preserved in CVD
+Panel A: LORO ForwardEncoding accuracy — discrimination preserved in CVD
 Panel B: LOCO adjacent_acc (ForwardEncoding) — interpolation impaired in hV4
 Panel C: Per-hue adjacent_acc at hV4
 
+Alignment space (2026-08-07). Both panels use the PROCRUSTES-aligned amplitudes,
+which are the canonical Phase-1 input (utils_forward_model.load_amplitudes reads
+amplitudes_procrustes.npy and has no SRM path, so loco_canonical.py and the
+adjacent-accuracy permutation test both run in this space). Before this revision
+panel B mixed spaces -- HC came from results/loco_srm while CVD came from
+results/loco_decoding_comparison, which is procrustes -- and panel A was SRM while
+the reported statistics were procrustes. SRM is retained only where a common space
+is required (cross-subject transfer, representational geometry) and the SRM
+LORO/LOCO tables are reported in Supplementary S20 as an alignment robustness check.
+
+Sample: n = 7 HC at every ROI. sub-07 is retained at hV4 despite its low voxel
+count (16 vs 67-70 in the other six); excluding it leaves every conclusion
+unchanged and slightly weakens the CVD contrasts.
+
 Chance: Panel A = 1/8 = 0.125 (exact). Panels B/C = 91/360 = 0.25 (adjacent);
 see the CHANCE_ADJ comment below for why this is not 3/8.
-Statistics: Crawford & Howell one-tailed t-test (vs HC distribution).
+Statistics: Crawford & Howell t-test vs the HC distribution. Panel A is two-tailed
+(the hypothesis is preservation); panels B/C are one-tailed lower (directional deficit).
+Panel B annotates significance only at regions passing the permutation gate
+(PERM_PASS_ROIS) -- accuracies for all four regions are plotted regardless.
 """
 
 import json
@@ -19,13 +36,27 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 from matplotlib.lines import Line2D
 import os
+import sys
+from pathlib import Path
 from scipy import stats
 
-BASE = "/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis"
-LOCO_FILE   = f"{BASE}/analysis/phase3_decoder_comparing/results/loco_decoding_comparison/decoding_comparison_full.json"
-LOCO_HC_DIR = f"{BASE}/analysis/phase3_decoder_comparing/results/loco_srm"
-LORO_DIR    = f"{BASE}/analysis/phase3_decoder_comparing/results/loro/srm"
+# Repo root, resolved from this file: docs/PAPER/Figures/scripts/ -> parents[4].
+BASE = str(Path(__file__).resolve().parents[4])
+LORO_DIR    = f"{BASE}/analysis/phase3_decoder_comparing/results/loro/procrustes"
+C010_DIR    = (f"{BASE}/analysis/phase1_procrustes_decoding/results/visualization/"
+               f"full_dataset_C010_with_residuals")
 OUT_DIR     = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# LOCO is computed here by the canonical Phase-1 routine rather than read from
+# phase3_decoder_comparing/results/loco/procrustes. Those stored values come from a
+# second implementation (test_decoding_methods.py -> loro_baseline.loco_cv) and agree
+# with the canonical routine at 35 of the 36 subject-by-ROI cells; the exception is
+# sub-07 hV4 (16 voxels), which differs by 0.0042. Computing from loco_canonical
+# keeps the figure, the reported statistics and the permutation null on one
+# implementation. Runtime is about a minute.
+sys.path.insert(0, f"{BASE}/analysis/future_phase1_forward_model/scripts")
+from loco_canonical import loco_forward_readouts
+from utils_forward_model import create_basis_matrix, HUE_ANGLES
 
 SUBS_HC  = [f"{i:02d}" for i in range(1, 8)]
 SUBS_CVD = ["08", "09"]
@@ -44,6 +75,13 @@ CHANCE_EXACT = 0.125
 # NOT 3/8 -- that value holds only for decoders whose output is one of the eight
 # stimulus hues (LDA/SVM/MLP via labels_to_hue in loco_baseline.py).
 CHANCE_ADJ   = 91 / 360
+
+# Regions credited with hue interpolation, i.e. those whose healthy-control mean
+# exceeds the per-subject color-label permutation null (Methods, Cross-color
+# interpolation). Single-case CVD comparisons are pre-specified to be reported
+# only in these regions, so panel B annotates significance only here. Accuracies
+# for all four regions are plotted regardless.
+PERM_PASS_ROIS = {"V4"}
 
 HC_COLOR  = "#AAAAAA"
 HC_DOT    = "#555555"
@@ -78,38 +116,28 @@ def _lab2rgb(L, a, b):
 HUE_RGB = [_lab2rgb(*lab) for lab in COLOR_LAB]
 
 # ── Load data ─────────────────────────────────────────────────────────────────
-with open(LOCO_FILE) as f:
-    loco_cvd_raw = json.load(f)
+# LOCO: canonical FE-6 OLS readout, per-hue adjacent accuracy (loco_canonical).
+_HUES  = np.asarray(HUE_ANGLES, dtype=float)
+_C8    = create_basis_matrix(_HUES, 6, "fe")
+_BASIS = create_basis_matrix(np.arange(360), 6, "fe")
 
-loco_acc = {}
-for sub in SUBS_CVD + ["10"]:
-    loco_acc[sub] = {}
-    for roi in ROIS:
-        loco_acc[sub][roi] = loco_cvd_raw[sub][roi]["ForwardEncoding"]["adjacent_acc"]
+def _loco_per_hue(sub, roi):
+    amp = np.load(f"{C010_DIR}/sub-{sub}/{roi}/amplitudes_procrustes.npy")
+    return loco_forward_readouts(amp, _C8, basis_full=_BASIS,
+                                 decoder="ols", tasks=("adj",))["adj"]
 
-for sub in SUBS_HC:
-    with open(f"{LOCO_HC_DIR}/sub-{sub}_loco.json") as f:
-        d = json.load(f)
-    loco_acc[sub] = {}
-    for roi in ROIS:
-        loco_acc[sub][roi] = d["results"][roi]["ForwardEncoding"]["overall_adjacent_acc"]
+loco_per_hue = {sub: {roi: _loco_per_hue(sub, roi) for roi in ROIS}
+                for sub in SUBS_HC + SUBS_CVD}
 
-hue_acc_08 = {}
-hue_acc_09 = {}
-for fold in loco_cvd_raw["08"]["V4"]["ForwardEncoding"]["fold_results"]:
-    hue_acc_08[fold["test_color"]] = fold["adjacent_acc"]
-for fold in loco_cvd_raw["09"]["V4"]["ForwardEncoding"]["fold_results"]:
-    hue_acc_09[fold["test_color"]] = fold["adjacent_acc"]
+loco_acc = {sub: {roi: float(loco_per_hue[sub][roi].mean()) for roi in ROIS}
+            for sub in SUBS_HC + SUBS_CVD}
 
-hue_acc_hc = {i: [] for i in range(8)}
-for sub in SUBS_HC:
-    with open(f"{LOCO_HC_DIR}/sub-{sub}_loco.json") as f:
-        d = json.load(f)
-    for fold in d["results"]["V4"]["ForwardEncoding"]["fold_results"]:
-        hue_acc_hc[fold["test_color"]].append(fold["adjacent_acc"])
+hue_acc_08 = {i: float(loco_per_hue["08"]["V4"][i]) for i in range(8)}
+hue_acc_09 = {i: float(loco_per_hue["09"]["V4"][i]) for i in range(8)}
+hue_acc_hc = {i: [float(loco_per_hue[s]["V4"][i]) for s in SUBS_HC] for i in range(8)}
 
 hue_acc_hc_mean = np.array([np.mean(hue_acc_hc[i]) for i in range(8)])
-hue_acc_hc_sem  = np.array([np.std(hue_acc_hc[i], ddof=1) / np.sqrt(7) for i in range(8)])
+hue_acc_hc_sem  = np.array([np.std(hue_acc_hc[i], ddof=1) / np.sqrt(len(SUBS_HC)) for i in range(8)])
 hue_acc_08_arr  = np.array([hue_acc_08[i] for i in range(8)])
 hue_acc_09_arr  = np.array([hue_acc_09[i] for i in range(8)])
 
@@ -117,18 +145,18 @@ loro_acc = {}
 for sub in SUBS_HC + SUBS_CVD:
     with open(f"{LORO_DIR}/sub-{sub}_performance_raw.json") as f:
         d = json.load(f)
-    srm = d["results"]["srm"]
+    space = d["results"]["procrustes"]
     loro_acc[sub] = {}
     for roi in ROIS:
-        folds = srm[roi]["ForwardEncoding"]
+        folds = space[roi]["ForwardEncoding"]
         loro_acc[sub][roi] = np.mean([fold["acc_exact"] for fold in folds])
 
 loco_hc_mean = np.array([np.mean([loco_acc[s][r] for s in SUBS_HC]) for r in ROIS])
-loco_hc_sem  = np.array([np.std([loco_acc[s][r] for s in SUBS_HC], ddof=1)/np.sqrt(7) for r in ROIS])
+loco_hc_sem  = np.array([np.std([loco_acc[s][r] for s in SUBS_HC], ddof=1)/np.sqrt(len(SUBS_HC)) for r in ROIS])
 loco_hc_ind  = {r: [loco_acc[s][r] for s in SUBS_HC] for r in ROIS}
 
 loro_hc_mean = np.array([np.mean([loro_acc[s][r] for s in SUBS_HC]) for r in ROIS])
-loro_hc_sem  = np.array([np.std([loro_acc[s][r] for s in SUBS_HC], ddof=1)/np.sqrt(7) for r in ROIS])
+loro_hc_sem  = np.array([np.std([loro_acc[s][r] for s in SUBS_HC], ddof=1)/np.sqrt(len(SUBS_HC)) for r in ROIS])
 loro_hc_ind  = {r: [loro_acc[s][r] for s in SUBS_HC] for r in ROIS}
 
 def crawford_howell(x_i, hc_vals, tail="lower"):
@@ -148,12 +176,12 @@ def crawford_howell(x_i, hc_vals, tail="lower"):
         p = 2 * stats.t.sf(abs(t), df=n - 1)
     return t, p
 
-# Panel A (LORO accuracy) — one-sided lower (deficit = lower accuracy)
+# Panel A (LORO accuracy) — two-tailed; the hypothesis here is preservation
 ch_loro_per_roi = {}
 for r in ROIS:
     ch_loro_per_roi[r] = {
-        "08": crawford_howell(loro_acc["08"][r], loro_hc_ind[r], tail="lower"),
-        "09": crawford_howell(loro_acc["09"][r], loro_hc_ind[r], tail="lower"),
+        "08": crawford_howell(loro_acc["08"][r], loro_hc_ind[r], tail="two"),
+        "09": crawford_howell(loro_acc["09"][r], loro_hc_ind[r], tail="two"),
     }
 ch_loro_08 = ch_loro_per_roi["V4"]["08"]
 ch_loro_09 = ch_loro_per_roi["V4"]["09"]
@@ -204,7 +232,7 @@ def _sig_label(p):
 
 def plot_bars(ax, hc_mean, hc_sem, hc_ind, v08, v09,
               ylabel, chance, y_lo, y_hi,
-              per_roi_p08=None, per_roi_p09=None):
+              per_roi_p08=None, per_roi_p09=None, sig_rois=None):
     ax.bar(x, hc_mean, width=bw, color=HC_COLOR, zorder=2, linewidth=0)
     ax.errorbar(x, hc_mean, yerr=hc_sem, fmt="none",
                 color="#333333", capsize=2.5, linewidth=0.9, zorder=3)
@@ -228,6 +256,8 @@ def plot_bars(ax, hc_mean, hc_sem, hc_ind, v08, v09,
     if per_roi_p08 is not None and per_roi_p09 is not None:
         y_pad = (y_hi - y_lo) * 0.028
         for i, roi in enumerate(ROIS):
+            if sig_rois is not None and roi not in sig_rois:
+                continue
             lbl08, fs08, fw08 = _sig_label(per_roi_p08[roi])
             lbl09, fs09, fw09 = _sig_label(per_roi_p09[roi])
             if lbl08:
@@ -276,7 +306,8 @@ plot_bars(ax_b,
           chance=CHANCE_ADJ,
           y_lo=0.0, y_hi=0.85,
           per_roi_p08={r: ch_loco_per_roi[r]["08"][1] for r in ROIS},
-          per_roi_p09={r: ch_loco_per_roi[r]["09"][1] for r in ROIS})
+          per_roi_p09={r: ch_loco_per_roi[r]["09"][1] for r in ROIS},
+          sig_rois=PERM_PASS_ROIS)
 
 ax_b.text(0.0, 1.20, "B", transform=ax_b.transAxes,
           fontsize=10, fontweight="bold", va="bottom", ha="left")

@@ -95,12 +95,18 @@ METRICS = {
 METRIC_ORDER = ["adjacc", "srm", "rdm"]
 
 
-def panel_data(hl, cv, metric):
+def panel_data(hl, cv, metric, rm=None):
     tail = METRICS[metric][0]
     d = {"hc_mean": [], "hc_sd": [], "hc_dots": [], "n": [],
          "nofilter": [], "window": [], "optimal": [], "tail": tail}
     for roi in ROIS:
-        h = hl[roi]; c = cv[roi]
+        h = hl[roi]
+        # Geometry panels use the run-matched estimates (HC reference and the
+        # unfiltered baseline rebuilt from 4 runs over all C(6,4)=15 subsets) so
+        # that every panel compares equal amounts of data. The interpolation
+        # panel was already run-matched via the *_n4 fields. exp2_convergent's
+        # 6-run geometry values are retained in that file for reference only.
+        c = (rm["rois"][roi] if rm is not None else cv[roi])
         if metric == "adjacc":
             d["hc_mean"].append(h["hc_loco_adjacc_n4_mean"])
             d["hc_sd"].append(h["hc_loco_adjacc_n4_sd"])
@@ -187,7 +193,11 @@ def main():
     for sub, _ in SUBJECTS:
         hl = json.load(open(RESDIR / f"exp2_hc_likeness_sub-{sub}_{args.variant}.json"))
         cv = json.load(open(RESDIR / f"exp2_convergent_sub-{sub}_{args.variant}.json"))
-        data[sub] = {m: panel_data(hl, cv, m) for m in METRIC_ORDER}
+        rm_path = RESDIR / f"exp2_runmatched_geometry_sub-{sub}_{args.variant}.json"
+        rm = json.load(open(rm_path)) if rm_path.exists() else None
+        if rm is None:
+            raise SystemExit(f"missing run-matched geometry: {rm_path}")
+        data[sub] = {m: panel_data(hl, cv, m, rm) for m in METRIC_ORDER}
 
     # Shared y-limits per metric column (across both subject rows)
     ylims = {}

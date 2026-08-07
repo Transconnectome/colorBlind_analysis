@@ -37,6 +37,7 @@ trial_type `color_1..8` = red,orange,yellow,green,cyan,blue,purple,magenta (+bla
 ## Naming & output
 phase 폴더 `phase{N}_*`(frozen) / `future_phase{N}_*`(active) / `_archive`(폐기). 데이터셋 토큰 `C010`.
 출력 flat, **timestamp 서브디렉토리 금지**(SLURM array 충돌), per-subject `sub-{ID}_*.json`, 배치당 `config.json` 1개.
+**Figure captions**: NeuroImage 관례를 따라 **측정 대상·방법·기호·검정 방향만** 기술하고 결과 문장은 넣지 않는다. 전역 `~/.claude/writing/academic_writing_rules.md` §13("캡션은 takeaway를 진술")과 충돌하며, 이 프로젝트에서는 본 규칙이 우선한다.
 
 ## Env & gotchas
 **서버 = `node1`** (`ssh node1`, 147.47.200.153). 작업폴더 `/scratch/connectome/haba6030/colorBlind`.

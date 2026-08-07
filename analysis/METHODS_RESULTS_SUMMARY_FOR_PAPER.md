@@ -53,10 +53,14 @@
   - *GCV λ stability* (`lambda_stability_loco.py` → `lambda_stability.json`): hV4 GCV α가 73% fold에서 α=1로 수렴(log₁₀α SD=0.46); encoding ρ은 α 전구간(0.001–1000)에서 peak의 ≥90% 유지 = **λ-무관 plateau (7/7 grid pts)**, GCV ρ 0.205 ≈ peak fixed ρ 0.208 → p~0.044가 λ 우연 아님. (V1/V2 modal α=10, plateau 2–3/7로 더 민감하나 GO 근거는 hV4.)
 
 ### PAPER — interpolation (adjacent accuracy @hV4, FE-6 OLS)  → `../docs/PAPER/repro/PERMUTATIONS.md`
-- HC 0.465 ± 0.044 (n=6, sub-07 excluded); above-chance permutation **p=0.008** (N=1000 per-subject)
-- deutan 0.25 (Crawford-Howell t=-1.84, p=0.063 n.s., d_cc=-1.99); protan 0.13 (t=-2.91, p=0.017, d_cc=-3.14)
-- per-hue single-case: **NO individual hue significant** (blue p=0.072, purple 0.205, magenta 0.122)
-- LORO discrimination: both CVD > 0.125 chance at all ROIs
+> **2026-08-07 재산출.** 정렬 공간을 Procrustes로 통일하고(§ 아래) sub-07을 포함해 **n=7**로 전 ROI 재계산. 이전 수치(n=6, hV4 p=0.008)는 ROI마다 n이 달라 비교 불가였다.
+- HC 0.456 ± 0.039 (n=7); above-chance permutation **p=0.011** (N=1000 per-subject, seed 42). 순열 귀무 mean = **0.346**, 해석적 chance 0.25가 아님
+- 전 ROI 순열: V1 p=0.164 (obs 0.393), V2 p=0.424 (0.357), V3 p=0.586 (0.339), **hV4 p=0.011 (0.456)** → 게이트 통과는 hV4 단독
+- deutan 0.25 (Crawford-Howell t=-1.89, p=0.054 n.s., d_cc=-2.02); protan 0.13 (t=-3.04, p=0.012, d_cc=-3.25)
+- per-hue single-case: **NO individual hue significant** (blue p=0.051, purple 0.229, magenta 0.096)
+- LORO discrimination: both CVD > 0.125 chance at all ROIs (최저 0.375 @hV4); 단일사례 8검정 전부 p ≥ 0.189 (양측), |d_cc| 0.25–1.58
+- **정렬 공간 정책**: 피험자 내 판독(LORO/LOCO) = Procrustes (`utils_forward_model.load_amplitudes`가 정본), 피험자 간 비교(교차전이·기하) = SRM. SRM 판본은 논문 Supplementary §S20
+- driver: `docs/PAPER/repro/_perm_adjacent_n7.py` (정본 `loco_canonical`과 1e-12 일치 검증 내장, 4 ROI 3분)
 
 ### Future Phase 2 — Filter  → `future_phase2_filter_optimization/README.md`
 - 2-comp argmin: deutan (β_s=6°, β_c=-42°), protan (β_s=2°, β_c=+24°)
@@ -114,7 +118,7 @@
 ### Completed
 - [x] **Future Phase 1: Forward Model Validation** — Ridge-GCV + FE-6 validated. 3/4 ROIs pass gate (V1, V2, hV4). Basis ablation confirms FE-6 > Fourier.
 - [x] **Future Phase 2: Filter Optimization** — 2-component fit + analytic inverse filter; per-subject argmin and |δθ| frozen (see future_phase2 closure docs).
-- [x] **PAPER adjacent-accuracy permutations** — per ROI complete: hV4 p=0.008 (above chance); V1 p=0.164 (n.s.); V2/V3 below chance. Only hV4 supports above-chance interpolation. See `../docs/PAPER/repro/PERMUTATIONS.md`.
+- [x] **PAPER adjacent-accuracy permutations** — 2026-08-07 재산출, n=7 Procrustes 통일: hV4 p=0.011 (통과); V1 0.164, V2 0.424, V3 0.586 (미통과, 단 **네 ROI 모두 해석적 chance 0.25 초과** — 판별자는 순열 귀무 ~0.35). driver `docs/PAPER/repro/_perm_adjacent_n7.py`.
 - [x] **Forward model robustness (PV-2, 2026-07-13)** — 3축 완료: per-color dominance (hV4 Friedman p=0.485), residual structure (hV4 r=0.053), GCV λ stability (hV4 ρ plateau 7/7, GCV 0.205≈peak 0.208). hV4 GO는 색/잔차/λ 임의선택에 무관. `results/loco_reinforcement/{per_color_breakdown,residual_structure,lambda_stability}.json`.
 
 ### Active

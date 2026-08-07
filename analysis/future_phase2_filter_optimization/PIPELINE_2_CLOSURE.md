@@ -336,10 +336,14 @@ NOT argmin stability, NOT closeness-to-oracle):
   - 11 cells × 4 models = 44
 - 4 models = Machado 1-way / R+C × 3 Δλ sources (DPS_lit / Boehm_mid / JND_Lamb) / 2-Component
 
-> ⚠️ **ROI 축 비대칭** — sub-08 은 RDM ROI 를 4개 전탐색, sub-09 는 **V1 하나로 고정**.
-> `s10b_v6_pca_rdm.py:56-63` 의 `SUBJECTS['sub-09']['rdm_rois'] = ['V1']` (commit f64432c,
-> 2026-05-26) 때문이며, RDM atom 은 이 목록으로 *생성*되므로 sub-09 는 V2/V3/V4 atom 이
-> 만들어지지도 않았다. 당시 근거는 기록되어 있지 않다. → §2.1 audit 참조.
+> **ROI 축 비대칭 — 근거 확정 (2026-08-07)** — sub-08 은 RDM ROI 를 4개 전탐색,
+> sub-09 는 **V1 하나**. 사유는 **Step 1 precondition gate** 다. `precondition_table.json`
+> 의 `L_RDM` Cohen d 가 sub-09 에서 **V1 0.805 (PASS) / V2 −0.233 / V3 −0.476 /
+> hV4 −0.238 (전부 fail)** 이므로, "통과 cells 가 Step 2 진입" 규칙상 sub-09 의 RDM 축은
+> V1 하나만 남는다. sub-08 은 네 ROI 전부 통과(2.310 / 1.937 / 0.857 / 2.188)라 4개가 들어갔다.
+> `s10b_v6_pca_rdm.py:56-63` 의 `SUBJECTS['sub-09']['rdm_rois'] = ['V1']` 는 이 측정 결과를
+> 코드에 반영한 것이며, 근거 주석이 생략되었을 뿐이다(commit f64432c, 2026-05-26).
+> → §2.1 audit 은 Gate 2·3 만 적용하므로 그 V2 1위는 Gate 1 미통과 atom 이다.
 
 ### 2.1. ROI 축 audit (2026-08-05) — sub-09 미탐색분 완성
 

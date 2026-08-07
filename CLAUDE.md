@@ -39,7 +39,10 @@ phase 폴더 `phase{N}_*`(frozen) / `future_phase{N}_*`(active) / `_archive`(폐
 출력 flat, **timestamp 서브디렉토리 금지**(SLURM array 충돌), per-subject `sub-{ID}_*.json`, 배치당 `config.json` 1개.
 
 ## Env & gotchas
-`conda activate srm`(local) / `nilearn`(server: node3 SSH·GPU / node2·node4 SLURM).
+**서버 = `node1`** (`ssh node1`, 147.47.200.153). 작업폴더 `/scratch/connectome/haba6030/colorBlind`.
+`ccsl1/2/3` 은 **이 프로젝트와 무관** — 쓰지 말 것. `connectome`(147.47.200.154)·`node3` 는 접속 불가한 때가 있으니 node1 우선.
+서버 전용 데이터: `derivatives/full_dataset_C010_exp2{,_matched}`(exp2 amplitude)는 **로컬에 없음**. BrainIAK 도 서버에만 있음.
+`conda activate srm`(local) / `nilearn`(server: node2·node4 SLURM).
 SLURM: `--partition`/`--qos` **금지**, `--chdir=<abs>` 필수, shell script **LF only**, 서버 seaborn 금지.
 BrainIAK: `mpirun -np 1 python …` (bare python 금지). NotebookLM: 단일 `ColorBlind_comprehensive`만, 새 notebook **생성 금지**.
 

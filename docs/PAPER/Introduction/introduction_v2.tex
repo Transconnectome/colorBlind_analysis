@@ -1,5 +1,36 @@
-% Introduction Section — v2 (2026-04-17; restructured 2026-06-11; revised 2026-07-22)
+% Introduction Section — v2 (2026-04-17; restructured 2026-06-11; revised 2026-07-22;
+% citation audit 2026-08-07/08)
 % Supersedes Introduction/introduction.tex (v1).
+%
+% 2026-08-07/08 citation audit (인용 전수 대조; 근거 = Notion "Citations" 페이지):
+%   - Intro-1: "27 nm" 인용을 somers2024(2차 문헌) -> bosten2019, neitz2011로 교체.
+%   - Intro-2: 외양/수행 해리를 명시하고 alvaro2022 주 결과 반영. brettel1997의 범위를
+%     dichromacy로 한정(원논문은 이색형색각 전용). Daltonization 인용을 akalin2025 ->
+%     fidaner2005, simonliedtke2016으로 교체(추적 결과 akalin -> Elrefaei 2018 ->
+%     Fidaner 2005). gomezrobledo2018을 망막 수준 개인화의 한계 근거로 추가.
+%   - Intro-3a: parkes2009는 intermediate color를 지지하지 않아(저자가 future work로
+%     명시) kuriki2015와 문장 분리. bannert2025의 "geometry is shared across observers"
+%     삭제 — 원논문은 cross-observer identification이고 저자 한계 1번이 공간적
+%     corepresentation 가능성을 인정.
+%   - Intro-3b: 두괄 문장의 "those response patterns" 삭제(boehm2014/basim2025는
+%     정신물리학이라 피질 반응이 아님). tregillus2021 ROI를 ventral V2/V3로 정정.
+%     V1 주장을 "match the reduction predicted" -> "weaker than in normal trichromats"로
+%     완화(V1 보상 배율 2.94, 유의 상회는 V2v/V3v뿐이며 저자가 V1 내 보상 가능성 유지).
+%   - Intro-3c: saysani2018과 ohkoba2021 사이의 dichromat/anomalous 대조 삭제 — Ohkoba
+%     표본 20명 중 13명이 이색형색각자라 대조가 성립하지 않고, 차이는 방법(진단·휘도
+%     통제)에서 온다. 각 절에 자극 유형 명시. "tenfold among the same diagnosis"는 개인별
+%     진단 매핑 미확인으로 검증 불가하여 "more than tenfold across observers"로 교체.
+%     문단 마무리를 "must be built from cortical measurements"에서 교체 — cortical
+%     수식어가 없어 지각적 색 표상으로 읽히면 ohkoba2021이 반례가 되고(판단만으로 모델
+%     구축 + 3D LUT 역산 제안), 피질 표상으로 읽으면 동어반복이며, must는 :32-33 방침과
+%     어긋남.
+%   - Intro-3d: bannert2018 -> brouwer2009로 문헌 교체. bannert2018은 색 3범주만 사용해
+%     hue geometry 근거가 될 수 없고(저자 한계 2번), 행동 연결도 화면에 색이 없는 심상
+%     1-back에서 나옴. brouwer2009의 PCA 진행 구조(V4/VO1 원형 진행, V1은 찬스;
+%     클러스터링 p=0.02 / 진행 p=0.04)가 hV4 기준 ROI 선택의 직접 근거.
+%   - bibliography.bib: fidaner2005, simonliedtke2016 추가. bannert2018, akalin2025 삭제
+%     (build chain 인용 0회). ohkoba2021 year 2021 -> 2022(vol 47 = 2022년 권).
+%     아래 2026-07-22 항목의 bannert2018 기술은 당시 이력이며 현재는 삭제된 상태.
 %
 % 2026-07-22 revision (저자 TODO 15건 협의 처리; 협의록 = Introduction/feedback_0722.md):
 %   - Intro-1: threshold-psychophysics 측정 문장과 Ishihara 문장 삭제(측정은 Methods 소관).
@@ -73,12 +104,12 @@ What has been measured in CVD is the strength of the color signal. Anomalous tri
 
 Color deficiency also changes where colors lie relative to one another. Anomalous trichromats still describe stimuli with all four hue primaries, but each primary lands on a different stimulus than it does for normal trichromats~\citep{emery2021}. When dichromats judge the difference between color samples, red and green fall close together, and the map recovered from those judgments has one axis where normal trichromats have two~\citep{saysani2018}. When protan and deutan observers judge the difference between Munsell chips, the map keeps two axes but is dented at yellow and purple-blue. The size of that dent varies more than tenfold across observers, and some show no dent at all~\citep{ohkoba2021}. All of these are reports. The same relative positions have yet to be measured in the cortical response.
 
-We take the individual's own cortical color representation as the reference and invert it into a correction on the stimulus. Among the regions that carry this geometry, only hV4 predicts behavior on a trial-by-trial basis in a color judgment task~\citep{bannert2018}. Our design adopts the premise that shifting an individual's hV4 color geometry toward that of the healthy controls moves their color perception with it.
+We take the individual's own cortical color representation as the reference and invert it into a correction on the stimulus. Of these regions, hV4 is where the arrangement of responses follows perceptual color space~\citep{brouwer2009}. Our design adopts the premise that shifting an individual's hV4 color geometry toward that of the healthy controls moves their color perception with it.
 
 %==============================================================================
 % Intro-4: Gaps
 %==============================================================================
-Three gaps remain. \emph{(Gap 1)} The cortical color geometry of an individual with CVD remains to be described. Existing descriptions come from healthy observers and are reported at the group level~\citep{brouwer2009, brouwer2013, kuriki2015}. \emph{(Gap 2)} The distances between colors have not been measured in the cortical response in CVD. fMRI in CVD has reported response magnitude, including contrast-response gain in anomalous trichromacy~\citep{tregillus2021} and activation in single cases of dichromacy and achromatopsia~\citep{rina2024}. \emph{(Gap 3)} A filter inverted from an individual's own cortical representation remains underinvestigated. Existing designs invert retinal models.
+Three gaps remain. \emph{(Gap 1)} The cortical color geometry of an individual with CVD remains to be described. Existing descriptions come from healthy observers~\citep{brouwer2009, brouwer2013, kuriki2015}. \emph{(Gap 2)} The distances between colors have not been measured in the cortical response in CVD. fMRI in CVD has reported response magnitude, including contrast-response gain in anomalous trichromacy~\citep{tregillus2021} and activation in one dichromat and two observers with achromatopsia~\citep{rina2024}. \emph{(Gap 3)} A filter inverted from an individual's own cortical representation remains underinvestigated. Existing designs invert models of the retina~\citep{brettel1997, machado2009} or maps of an individual's color judgments~\citep{ohkoba2021}.
 
 %==============================================================================
 % Intro-5: Research questions and hypotheses

@@ -669,16 +669,11 @@
   doi = {10.1093/cercor/bhv198}
 }
 
-@article{bannert2018,
-  author = {Bannert, M. M. and Bartels, A.},
-  title = {Human V4 activity patterns predict behavioral performance in imagery of object color},
-  journal = {Journal of Neuroscience},
-  volume = {38},
-  number = {15},
-  pages = {3657--3668},
-  year = {2018},
-  doi = {10.1523/JNEUROSCI.2307-17.2018}
-}
+% Removed 2026-08-08: bannert2018 (Bannert & Bartels, J Neurosci 38(15):3657-3668).
+% Cited nowhere in the build chain after Intro-3d revision. The study used three color
+% categories only, so it cannot support a claim about hue geometry, and its behavioral
+% link came from an imagery task with no color on screen. Replaced at Introduction
+% line 76 by brouwer2009 (PCA progression through perceptual color space in V4/VO1).
 
 % Corrected 2026-08-06: title was a paraphrase, not the published title; DOI and
 % eLocator added. Verified against Crossref and the article PDF.
@@ -816,21 +811,12 @@
 % --- Akalin 2025 & Hayashi 2024-2025 (framed as non-neural competitors) ---
 
 % Confirmed via NotebookLM 2026-05-13
-% Corrected 2026-08-06: title was a paraphrase; author list completed. Verified
-% against Crossref and the article PDF.
-@article{akalin2025,
-  author  = {Akal{\i}n, Fatma and Aksoy, Nilg{\"u}n {\"O}zkan and Top, Dilara and Kara, Esma},
-  title   = {Improved Filter Designs Using Image Processing Techniques for
-             Color Vision Deficiency ({CVD}) Types},
-  journal = {Symmetry},
-  volume  = {17},
-  number  = {7},
-  pages   = {1046},
-  year    = {2025},
-  doi     = {10.3390/sym17071046},
-  note    = {Pixel-level Daltonization; CNN used only as automated judge,
-             not neural modeling; non-competitor for neural-filter framing}
-}
+% Removed 2026-08-08: akalin2025 (Akalin et al., Symmetry 17(7):1046).
+% Cited nowhere in the build chain after the Intro-2 Daltonization revision. It was
+% carrying the Daltonization citation, but it is a downstream application paper whose
+% own method traces back through Elrefaei (2018) to Fidaner et al. (2005). Replaced at
+% Introduction line 63 by fidaner2005 (the origin) and simonliedtke2016 (a
+% peer-reviewed evaluation).
 
 % NotebookLM 2026-05-13: ACL-style preprint, exact venue + DOI not confirmed
 @misc{hayashi2024,
@@ -1021,6 +1007,7 @@
   author      = {Fidaner, Onur and Lin, Poliang and Ozguven, Nevran},
   title       = {Analysis of Color Blindness},
   institution = {Stanford University},
+  address     = {Stanford, CA},
   type        = {Psych 221 Project Report},
   year        = {2005},
   note        = {Widely replicated open implementation of LMS-error-shift Daltonization;

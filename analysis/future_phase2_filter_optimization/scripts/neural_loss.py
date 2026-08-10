@@ -22,6 +22,13 @@ from pathlib import Path
 SCRIPT_DIR = Path(__file__).resolve().parent
 ROOT = SCRIPT_DIR.parents[2]
 DATA_C010_DIR = ROOT / "analysis" / "phase1_procrustes_decoding" / "results" / "full_dataset_C010"
+# Sensitivity arms (U2, 2026-08-10). The published amplitudes stay the default, so
+# every existing reproduction path is unchanged; set COLORBLIND_AMP_ROOT to point a
+# single run at another preprocessing arm, e.g.
+#   COLORBLIND_AMP_ROOT=.../visualization/full_dataset_C010_motreg
+import os as _os  # noqa: E402
+if _os.environ.get("COLORBLIND_AMP_ROOT"):
+    DATA_C010_DIR = Path(_os.environ["COLORBLIND_AMP_ROOT"])
 OUT_DIR = SCRIPT_DIR.parent / "results" / "neural_loss"
 
 sys.path.insert(0, str(SCRIPT_DIR))

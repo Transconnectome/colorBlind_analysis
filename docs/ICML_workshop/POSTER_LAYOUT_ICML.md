@@ -67,7 +67,7 @@ Header carries: SNU crest · title (navy) + authors + affiliations · SD4H ribbo
   - Neural: **only the model-derived filter** restores hV4 LOCO ρ toward HC (+0.18 ≈ HC 0.21); the macOS filter pushes it *further away* (−0.39). Δ = 3.2 HC-SD, run-separated.
   - **Scope label on the panel**: descriptive proof-of-concept, Sub-08, n=4/condition, no permutation; macOS (OS-level) vs PsychoPy rendering differs.
 
-> **Verified numbers** (from `future_phase3_behavioral_analysis/exp2_neural/results/exp2_hc_likeness_sub-08_native.json`
+> **Verified numbers** (from `phase6_behavioral_analysis/exp2_neural/results/exp2_hc_likeness_sub-08_native.json`
 > + `results/exp2_behavior/sub-08_summary.json`): hV4 LOCO ρ — HC 0.208±0.179; no-filter −0.272; macOS −0.388;
 > Optimal +0.179. JND — baseline 0.187 / macOS 0.080 / Optimal 0.080 / HC 0.104; Wilcoxon Opt-vs-Win p=0.844.
 > **Endpoint correction (2026-06-28):** primary = **hV4 LOCO + behavioral recovery**; V1 within-condition LOCO ρ

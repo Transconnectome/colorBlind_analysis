@@ -1,6 +1,6 @@
 # Proposed Rewrites — HYBRID BEST integration — 2026-05-13
 
-**Source of truth**: `analysis/future_phase2_filter_optimization/results/SUMMARY.md` §🏆 LIT2NEURAL HYBRID (2026-05-13)
+**Source of truth**: `analysis/phase5_filter_optimization/results/SUMMARY.md` §🏆 LIT2NEURAL HYBRID (2026-05-13)
 
 **Decisions** (user, 2026-05-13):
 - Fig 4 + Fig 5 모두 HYBRID parameters: sub-08 (16°, +40°), sub-09 (12°, −30°)

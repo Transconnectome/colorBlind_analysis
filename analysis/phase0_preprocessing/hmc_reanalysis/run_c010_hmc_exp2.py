@@ -3,7 +3,7 @@
 run_c010_hmc_exp2.py — HMC 재산출용 exp2 C010 실행기 (Candidate A, 2026-08-05)
 
 `run_c010_hmc.py`의 exp2 대응본. 동일 원칙: 원본 스크립트
-`analysis/future_phase3_behavioral_analysis/exp2_neural/scripts/exp2_C010_conditions.py`
+`analysis/phase6_behavioral_analysis/exp2_neural/scripts/exp2_C010_conditions.py`
 를 고치지 않고 import 한 뒤 경로 상수만 재바인딩한다.
 
 원본의 `OUTPUT_DIR`은 `main()` 안에서 mask variant 에 따라 설정되므로 `main()`을 우회하고
@@ -25,7 +25,7 @@ import sys
 from pathlib import Path
 
 SRC = Path("/scratch/connectome/haba6030/colorBlind/analysis"
-           "/future_phase3_behavioral_analysis/exp2_neural/scripts/exp2_C010_conditions.py")
+           "/phase6_behavioral_analysis/exp2_neural/scripts/exp2_C010_conditions.py")
 DEFAULT_FMRIPREP = Path("/storage/connectome/haba6030/fmriprep_out_method3_2nd_hmc")
 DERIV = Path("/scratch/connectome/haba6030/colorBlind/derivatives")
 

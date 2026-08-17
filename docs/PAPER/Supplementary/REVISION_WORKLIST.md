@@ -7,33 +7,54 @@
 
 ---
 
-## 1. 부록 최종 구성 (S1–S19, 본문 서술 순)
+## 1. 부록 최종 구성 (S1–S21, 본문 서술 순)
+
+> **2026-08-17 정정.** 이 표는 S1–S19 로 적혀 있었으나 실제 파일은 **S1–S21** 이다. 이후 `S11. Alignment Robustness for the Within-Subject Readouts` 와 `S15. Session-1 Hue-Discrimination Thresholds` 두 절이 삽입되었고, 그 결과 구 S11 이하가 전부 밀렸다. 아래 표는 `Supplementary/supplementary.tex` 의 실제 heading 을 그대로 옮긴 것이다.
 
 단일 파일 `Supplementary/supplementary.tex`. `main.tex`가 `\section{Supplementary Methods}` 아래에 `\input` 한다.
 
-| # | 섹션 | 대응 Methods 절 |
+| # | 섹션 (실제 heading) | 구 표 번호 |
 |---|---|---|
-| S1 | Confound regression and temporal filtering | MRI acquisition and preprocessing |
-| S2 | Uncorrected acquisition artifacts | 〃 |
-| S3 | Image orientation initialization | 〃 |
-| S4 | Quality control | ROI definition |
-| S5 | Mean activation analysis | 〃 |
-| S6 | Dimensionality selection (K) | Shared Response Model |
-| S7 | Generalized cross-validation for ridge | Forward encoding model |
-| S8 | Cross-validation procedures | Two decoding schemes |
-| S9 | Evaluation metrics | 〃 |
-| S10 | Comparison with alternative decoders | 〃 |
-| S11 | LOO-consistent disparity estimation | Representational geometry |
-| S12 | Validity of the geometric comparison | 〃 |
-| S13 | Alignment-independent checks | 〃 |
-| S14 | Retinal-family model comparison | Candidate distortion models |
-| S15 | HC magnitude anchor | Parameter selection |
-| S16 | Identifiability checks | Identifiability and recovery |
-| S17 | Filter-evaluation design and comparator | Filter evaluation |
-| S18 | Statistical analysis | Statistics |
-| S19 | Effect sizes for single-case comparisons | 〃 |
+| S1 | Confound Regression and Temporal Filtering | S1 |
+| S2 | Uncorrected acquisition artifacts (§ 안에 `Motion sensitivity analysis` 문단 포함) | S2 |
+| S3 | Image Orientation Initialization | S3 |
+| S4 | Quality Control | S4 |
+| S5 | Mean Activation Analysis | S5 |
+| S6 | Dimensionality Selection (K-Selection) | S6 |
+| S7 | Generalized Cross-Validation for Ridge Regression | S7 |
+| S8 | Cross-Validation Procedures | S8 |
+| S9 | Evaluation Metrics | S9 |
+| S10 | Comparison with alternative decoders | S10 |
+| **S11** | **Alignment Robustness for the Within-Subject Readouts** | **신설 — 구 표에 없음** |
+| S12 | Leave-One-Out Consistent Disparity Estimation | S11 |
+| S13 | Validity of the geometric comparison | S12 |
+| S14 | Alignment-independent checks on the disparity measure | S13 |
+| **S15** | **Session-1 Hue-Discrimination Thresholds** | **신설 — 구 표에 없음** |
+| S16 | Comparison with Retinal-Family Distortion Models | S14 |
+| S17 | HC leave-one-out magnitude-anchor distribution | S15 |
+| S18 | Identifiability checks | S16 |
+| S19 | Filter-evaluation session: design and comparator | S17 |
+| S20 | Statistical Analysis | S18 |
+| S21 | Effect Sizes for Single-Case Comparisons | S19 |
 
-표 S1–S15, 그림 S1–S2. 본문 참조 12건 전부 검증 완료.
+**본문 참조 재검증 (2026-08-17, 17건 전수)** — `Results/results_v4.tex`, `Methods/methods_v2.tex`, `Supplementary/supplementary.tex` 의 `\S S…` 를 전부 뽑아 문맥과 실제 절 제목을 대조했다. **17/17 정상.** 참조는 이미 신 번호를 쓰고 있었고, stale 한 것은 이 표뿐이었다. 원고 수정 불요.
+
+| 위치 | 참조 | 대조 결과 |
+|---|---|---|
+| results:29 | S11 | SRM 정렬 공간 재현 → `Alignment Robustness` ✔ |
+| results:31, methods:189 | S21 | 단일사례 효과크기 → `Effect Sizes` ✔ |
+| results:88 | S15 | 8쌍 임계값 → `Session-1 Hue-Discrimination Thresholds` ✔ |
+| results:140, 142 | S18 | 식별성·6개 사전지정 검정 → `Identifiability checks` ✔ |
+| results:190, 212, 235 | S19 | 2차 세션·run-matched → `Filter-evaluation session` ✔ |
+| methods:76 ×2 | S1 | confound regression 미적용·FD → `Confound Regression` ✔ |
+| methods:76 | S2 | 움직임 회귀 재산출 → S2 내 `Motion sensitivity analysis` 문단 ✔ |
+| methods:149 | S10 | 대체 디코더 5종 → `Comparison with alternative decoders` ✔ |
+| methods:152 | S7 | GCV → `Generalized Cross-Validation` ✔ |
+| methods:200 | S12 | disparity 두 추정 → `Leave-One-Out Consistent Disparity` ✔ |
+| methods:203 | S5 | 전체 반응 크기 → `Mean Activation Analysis` ✔ |
+| supp:909 | S11 | within-subject readout 대비 → `Alignment Robustness` ✔ |
+
+**주의 — 신설 절 번호.** `REVISION_PLAN_PRESUBMISSION_2026-08-10.md` H 항목은 β_c 부호 강건성을 "§S16 신설"로 적었으나 S16 은 이미 `Comparison with Retinal-Family Distortion Models` 이다. **신설 번호는 S22 여야 한다.**
 
 ---
 

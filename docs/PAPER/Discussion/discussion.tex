@@ -97,7 +97,7 @@ In HC, hV4 showed above-chance continuous-hue interpolation, consistent with pro
 
 %% FIX (2026-04-19): "hV4 showed positive correlations" is inconsistent
 %% with the project's encoder K* selection (hV4 optimum at K = 3, V3 at
-%% K = 8; see future_phase1_forward_model/README.md). The sign of the
+%% K = 8; see phase4_forward_model/README.md). The sign of the
 %% k–LOCO relation is negative for V1/V2 and non-monotonic for higher
 %% areas, with an intermediate optimum for hV4.
 Our analysis of different basis functions revealed a tradeoff between dimensionality and interpolation performance. V1/V2 showed negative correlations between $k$ (number of channels) and LOCO performance, whereas hV4 and V3 reached their optima at intermediate-to-large $k$ ($K^{\ast}_{hV4} = 3$, $K^{\ast}_{V3} = 8$). This pattern suggests that optimal channel configurations differ across the visual hierarchy---consistent with proposals that early areas encode color with high resolution but limited generalization, while higher areas trade resolution for generalizability.

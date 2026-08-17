@@ -71,7 +71,7 @@
 
 수치가 필요하면 `git show 4b92d8e:analysis/METHODS_phase1_baseline.md`에서 확인할 수 있습니다.
 
-> 혼동 방지: 논문이 보고하는 noise ceiling (`results_v4.tex:122`, 52%/67%, `lagecastellanos2018`)은 **다른 양**입니다 — Phase-2의 HC split-half filter-fit ceiling이며 `future_phase2_filter_optimization/scripts/s18_heldout_predictive.py`가 생산합니다. 위 표의 Phase-1 RDM 기반 ceiling과 섞어 쓰지 마십시오.
+> 혼동 방지: 논문이 보고하는 noise ceiling (`results_v4.tex:122`, 52%/67%, `lagecastellanos2018`)은 **다른 양**입니다 — Phase-2의 HC split-half filter-fit ceiling이며 `phase5_filter_optimization/scripts/s18_heldout_predictive.py`가 생산합니다. 위 표의 Phase-1 RDM 기반 ceiling과 섞어 쓰지 마십시오.
 
 Whitening이 해로웠다는 결론 자체는 아래 Validation Status에 유지합니다.
 

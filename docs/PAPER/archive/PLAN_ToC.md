@@ -410,7 +410,7 @@ Use: **"Cortical color geometry in color vision deficiency: an individualized 2-
 3. **Book Session 2 MRI slot** (PI action). 3 CVD subjects × 1 hour each = 3 hours minimum; same-day behavioural slot for sub-08 required.
 4. Draft §R-1, §R-2, §R-3 Results text with strict Crawford-Howell / permutation statistics (no group-d= language).
 5. Update `Methods/methods_streamlined.tex` with §M-6 to §M-8 (cone-shift models, pre-image + Jacobian, HC-FPR single-line reference).
-6. Add Jacobian bijectivity check script (`preimage_jacobian_check.py`) in `analysis/future_phase2_filter_optimization/scripts/`.
+6. Add Jacobian bijectivity check script (`preimage_jacobian_check.py`) in `analysis/phase5_filter_optimization/scripts/`.
 7. Request `repo-maintainer` for final figure inventory (F1–F5 paths + source scripts).
 
 ## 9.4 Risk register

@@ -40,7 +40,7 @@ per-subject voxel PCA(K=6) 공간을 쓴다(s10b_v6_pca_rdm.py).
 출력
 ----
 analysis/validation/results/within_hc_reliability.json          (canonical)
-analysis/future_phase3_behavioral_analysis/exp2_neural/results/  (사본)
+analysis/phase6_behavioral_analysis/exp2_neural/results/  (사본)
 
 실행
 ----
@@ -68,7 +68,7 @@ MIN_VOX = 20                              # exp2 후속 분석과 동일 (sub-07
 N_PERM = 200                              # SRM 색 라벨 순열 통제 반복 수
 
 OUT_CANON = ROOT / "analysis/validation/results/within_hc_reliability.json"
-OUT_COPY = (ROOT / "analysis/future_phase3_behavioral_analysis/exp2_neural"
+OUT_COPY = (ROOT / "analysis/phase6_behavioral_analysis/exp2_neural"
                    "/results/within_hc_reliability.json")
 
 

@@ -15,7 +15,7 @@
 ## Results location
 
 - Task별 optimal 선정, bootstrap CI, cross-decoding 결과: 이 폴더의 `README.md` 및 `results/`.
-- FE 6-channel W 결과는 `future_phase1_forward_model`, `future_phase2_filter_optimization`의 입력.
+- FE 6-channel W 결과는 `phase4_forward_model`, `phase5_filter_optimization`의 입력.
 
 ## Rule of action
 

@@ -24,9 +24,9 @@ from scipy import stats
 REPO = Path(__file__).resolve().parents[3]
 REPRO = Path(__file__).resolve().parent          # docs/PAPER/repro (committed null arrays live here)
 ANALYSIS = REPO / "analysis"
-P1 = ANALYSIS / "future_phase1_forward_model"
-P2 = ANALYSIS / "future_phase2_filter_optimization"
-P3 = ANALYSIS / "future_phase3_behavioral_analysis"
+P1 = ANALYSIS / "phase4_forward_model"
+P2 = ANALYSIS / "phase5_filter_optimization"
+P3 = ANALYSIS / "phase6_behavioral_analysis"
 SRM = ANALYSIS / "phase2_SRM_across_between"
 DEC = ANALYSIS / "phase3_decoder_comparing"
 # local C010 amplitudes (procrustes), shape (6, 8, V) per subject/ROI

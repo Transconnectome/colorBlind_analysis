@@ -54,7 +54,7 @@ OUT_DIR     = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # sub-07 hV4 (16 voxels), which differs by 0.0042. Computing from loco_canonical
 # keeps the figure, the reported statistics and the permutation null on one
 # implementation. Runtime is about a minute.
-sys.path.insert(0, f"{BASE}/analysis/future_phase1_forward_model/scripts")
+sys.path.insert(0, f"{BASE}/analysis/phase4_forward_model/scripts")
 from loco_canonical import loco_forward_readouts
 from utils_forward_model import create_basis_matrix, HUE_ANGLES
 
@@ -290,9 +290,9 @@ plot_bars(ax_a,
 
 ax_a.text(0.0, 1.20, "A", transform=ax_a.transAxes,
           fontsize=10, fontweight="bold", va="bottom", ha="left")
-ax_a.text(0.07, 1.21, "Discrimination", transform=ax_a.transAxes,
+ax_a.text(0.105, 1.21, "Discrimination", transform=ax_a.transAxes,
           fontsize=7.5, va="bottom", ha="left", color="#222", fontweight="bold")
-ax_a.text(0.07, 1.10, "LORO (leave-one-run-out)", transform=ax_a.transAxes,
+ax_a.text(0.105, 1.10, "LORO (leave-one-run-out)", transform=ax_a.transAxes,
           fontsize=6.5, va="bottom", ha="left", color="#555")
 
 # ── Panel B: LOCO (leave-one-color-out, interpolation) ───────────────────────
@@ -311,9 +311,9 @@ plot_bars(ax_b,
 
 ax_b.text(0.0, 1.20, "B", transform=ax_b.transAxes,
           fontsize=10, fontweight="bold", va="bottom", ha="left")
-ax_b.text(0.07, 1.21, "Interpolation", transform=ax_b.transAxes,
+ax_b.text(0.105, 1.21, "Interpolation", transform=ax_b.transAxes,
           fontsize=7.5, va="bottom", ha="left", color="#222", fontweight="bold")
-ax_b.text(0.07, 1.10, "LOCO (leave-one-color-out)", transform=ax_b.transAxes,
+ax_b.text(0.105, 1.10, "LOCO (leave-one-color-out)", transform=ax_b.transAxes,
           fontsize=6.5, va="bottom", ha="left", color="#555")
 
 # ── Panel C: Per-hue at hV4 (LOCO, same encoding as A/B) ─────────────────────
@@ -359,10 +359,10 @@ ax_c.tick_params(axis="both", labelsize=6.5, length=3)
 strip_spines(ax_c)
 ax_c.text(0.0, 1.20, "C", transform=ax_c.transAxes,
           fontsize=10, fontweight="bold", va="bottom", ha="left")
-ax_c.text(0.07, 1.21, "Per-hue interpolation at hV4",
+ax_c.text(0.105, 1.21, "Per-hue interpolation at hV4",
           transform=ax_c.transAxes,
           fontsize=7.5, va="bottom", ha="left", color="#222", fontweight="bold")
-ax_c.text(0.07, 1.10, "LOCO (leave-one-color-out)",
+ax_c.text(0.105, 1.10, "LOCO (leave-one-color-out)",
           transform=ax_c.transAxes,
           fontsize=6.5, va="bottom", ha="left", color="#555")
 

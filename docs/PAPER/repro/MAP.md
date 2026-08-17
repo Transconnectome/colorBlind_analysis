@@ -7,7 +7,7 @@ One notebook per experiment: `01_discrimination` (E1), `02_interpolation` (E2), 
 | id | producing code | callable | committed output | input |
 |---|---|---|---|---|
 | E1.1 LORO 8-class | `phase3_decoder_comparing/model_comparison_validation/scripts/loro_baseline.py` | monolithic CLI | `phase3_decoder_comparing/results/loro/srm/sub-{01..10}_performance_raw.json` ✓ (`results.srm.{ROI}.ForwardEncoding[].acc_exact`) | C010 amplitudes |
-| | ⚠ **corrected 2026-08-05** — see note below. `future_phase1_forward_model/…/validate_loro_loco_loso.py` → `sub-*_loro.json` reports voxel_corr / R² / rdm_corr, **not** 8-class accuracy, so it cannot back the "exceeded 0.125 chance" claim. | | | |
+| | ⚠ **corrected 2026-08-05** — see note below. `phase4_forward_model/…/validate_loro_loco_loso.py` → `sub-*_loro.json` reports voxel_corr / R² / rdm_corr, **not** 8-class accuracy, so it cannot back the "exceeded 0.125 chance" claim. | | | |
 | E1.2 cross-subject generalization | `phase3_decoder_comparing/model_comparison_validation/scripts/validation_tests.py:477-678` (MW @651) | **import-callable** | `phase3_decoder_comparing/results/loro/srm/validation/cross_subject_generalization.json` ✓ (key `ForwardEncoding/difference`; the manuscript reports the **ForwardEncoding** entry recomputed with sub-10 excluded, $U = 163.5$, $p = 0.052$, $r_{rb} = 0.46$ — the stored `p_value` 0.6681 is the **LDA** entry with sub-10 included and no longer appears in the paper) | C010 amplitudes_{raw,procrustes,srm} |
 | E1.3 hV4 single-case | `phase3_decoder_comparing/results/loro/srm/sub-{01..09}_performance_raw.json` (`results.srm.V4.ForwardEncoding[].acc_exact`, 6-fold mean; Crawford--Howell computed from the HC n=7 distribution) | — | ✓ inputs committed; the statistic itself is inline | C010 amplitudes |
 | | ⚠ **corrected 2026-08-07.** The former entry mapped this row to `_compute_paper_stats.py` Crawford--Howell on LOCO `mean_voxel_corr`; that route yields CH p = 0.076 / 0.346, not 0.142. **p = 0.142 was never a Crawford--Howell test** — it is a Mann--Whitney (HC n=7 vs CVD n=2) on hV4 LORO **LDA** accuracy, documented at `docs/PAPER/Figures/fig2_notes.md:22-24`. The manuscript now reports an actual Crawford--Howell on ForwardEncoding accuracy instead ($d_{cc} = -0.95$, $p = 0.407$ for both participants). See `docs/PAPER/Supplementary/DECODER_AUDIT_2026-08-07.md` §8. | | | |
@@ -35,7 +35,7 @@ One notebook per experiment: `01_discrimination` (E1), `02_interpolation` (E2), 
 ## E2 — Interpolation / per-hue  → notebook 02
 | id | producing code | callable | committed output | input |
 |---|---|---|---|---|
-| E2.1-2.7 adjacent acc + per-hue CH | `future_phase1_forward_model/scripts/loco_canonical.py:44-115` `loco_forward_readouts` (FE-6 OLS) | **import-callable** | ⚠ **no committed per-hue adj output**; my regen is de-facto driver | C010 V4 amplitudes_procrustes |
+| E2.1-2.7 adjacent acc + per-hue CH | `phase4_forward_model/scripts/loco_canonical.py:44-115` `loco_forward_readouts` (FE-6 OLS) | **import-callable** | ⚠ **no committed per-hue adj output**; my regen is de-facto driver | C010 V4 amplitudes_procrustes |
 | E2.1/2.2 adj-acc above-chance perm, all 4 ROIs (hV4 p=0.011, V1 0.164, V2 0.424, V3 0.586) | driver `docs/PAPER/repro/_perm_adjacent_n7.py` (per-subject design, N=1000, seed 42, n=7) | repro driver, self-verifying | `perm_adjacent_n7.json` + `perm_n7_null_{V1,V2,V3,hV4}.npy` ✓ | C010 amplitudes_procrustes |
 | | ⚠ **superseded 2026-08-07.** `_perm_definitive_hv4.py` (hV4, n=6) and `_perm_v1.py` (V1, n=7) used different HC samples, so their p-values were not comparable across regions, and V2/V3 were never run under this design — the manuscript's "V2 and V3 below chance" had no computed backing. The new driver runs all four at n=7. It reimplements `loco_forward_readouts(..., 'ols', ('adj',))` exactly (verified to 1e-12 over 60 cases) because the canonical routine costs ~8 h per region at V1; the bottleneck is `decode_hue`'s 360 `np.corrcoef` calls per pattern plus a per-fold `lstsq` whose design matrix never changes. | | | |
 | (superseded) voxel_corr 8! perm p=0.044 | `permutation_test_loco.py` voxel_corr metric | monolithic | `…/results/loco_reinforcement/permutation_test.json` ✓ — **no longer cited in tex** | same |
@@ -45,7 +45,7 @@ One notebook per experiment: `01_discrimination` (E1), `02_interpolation` (E2), 
 | id | producing code | callable | committed output | input |
 |---|---|---|---|---|
 | E3.1/E3.2/E3.7 disparity table | `phase2_SRM_across_between/rerun_loo_consistent.py:92-168,295-757` | monolithic, **`mpirun -np 1`** (SRM @46) | `…/results/loo_consistent/20260218_163819/loo_consistent_results.json` ✓ | phase1_preprocess_decoding C010 amplitudes_procrustes |
-| E3.3 ΔRDM heatmap | `docs/PAPER/Figures/scripts/generate_fig3.py:31,88` | figure generator | `future_phase2_filter_optimization/results/diagnostics/srm_precompute/delta_rdm_obs_srm_{roi}.npz` ⚠ **directory currently missing** | SRM-aligned amplitudes |
+| E3.3 ΔRDM heatmap | `docs/PAPER/Figures/scripts/generate_fig3.py:31,88` | figure generator | `phase5_filter_optimization/results/diagnostics/srm_precompute/delta_rdm_obs_srm_{roi}.npz` ⚠ **directory currently missing** | SRM-aligned amplitudes |
 | | ⚠ **corrected 2026-08-05** — the former pointer, `phase2_SRM_across_between/visualization/visualize_scattered_but_parallel.py`, was a schematic stub that never produced the published panel; it moved to `_archive/visualization_unused/` on 2026-08-05. | | | |
 | E3.5 SRM k=4/4/3/3 | `…/validation/2C_optimal_k_selection/run_k_selection_cv.py:63-140` + `aggregate_k_selection.py:76-145`; canonical override `rerun_loo_consistent.py:60` | monolithic, MPI | `k_aggregation_results.json` ✓ | same |
 | | ⚠ **flag**: raw aggregation selects 4/5/4/6; paper 4/4/3/3 is a **hardcoded canonical override** (rerun L60). | | | |
@@ -61,7 +61,7 @@ One notebook per experiment: `01_discrimination` (E1), `02_interpolation` (E2), 
 >
 > It could not run anyway: it requires ΔRDM for **four ROIs** (`V1, V2, V3, hV4`),
 > but the only surviving `srm_precompute` —
-> `future_phase2_filter_optimization/results/_archive/old_labels_pre_2026-05-16/phase2_artifacts/diagnostics/srm_precompute/`
+> `phase5_filter_optimization/results/_archive/old_labels_pre_2026-05-16/phase2_artifacts/diagnostics/srm_precompute/`
 > — is unusable on two independent counts:
 > 1. it covers **V1 and V2 only** (`manifest.json` → `rois: [V1, V2]`); and
 > 2. it is dated **2026-04-12**, i.e. **before the 2026-05-16 label-scheme cutoff**,
@@ -75,7 +75,7 @@ One notebook per experiment: `01_discrimination` (E1), `02_interpolation` (E2), 
 > generator.
 
 ## E4 — Simulator model selection  → notebook 04  (CURRENT v6 PCA canonical)
-| id | producing code (`future_phase2_filter_optimization/scripts/`) | committed output (`results/`) |
+| id | producing code (`phase5_filter_optimization/scripts/`) | committed output (`results/`) |
 |---|---|---|
 | E4.1/4.2 R+C reject | `s10b_v6_pca_rdm.py:216-226` grid_eval_rc | `s10_inclusion/s10b_v6_pca_rdm_results_sub-{08,09}.json` ✓ |
 | E4.4/4.5 2-comp argmin | `s10b_v6_pca_rdm.py:229-239` + `s17_hc_loo.py` | same + `s10_inclusion/s17_hc_loo_results.json` ✓ |
@@ -86,7 +86,7 @@ One notebook per experiment: `01_discrimination` (E1), `02_interpolation` (E2), 
 | E4.13 pre-image 26.3/16.2 | `exp2_compute_preimage.py:18-44` (brentq @42) | `exp2_preimage/sub-{08,09}_2component_preimage.json` ✓ |
 
 ## E5 — Identifiability S15  → notebook 05  (CURRENT v6 PCA)
-| id | producing code (`future_phase2_filter_optimization/scripts/`) | committed output (`results/redteam/`) |
+| id | producing code (`phase5_filter_optimization/scripts/`) | committed output (`results/redteam/`) |
 |---|---|---|
 | E5.2 Test1 f10 | `param_recovery_voxel.py:1-300` | `param_recovery_voxel_v6_pca_v2.json` ✓ |
 | E5.3 Test2a / E5.4 Test2b | `null_within_hc_loo.py:1-150` | `null_within_hc_loo_v6_pca.json` ✓ |
@@ -102,7 +102,7 @@ One notebook per experiment: `01_discrimination` (E1), `02_interpolation` (E2), 
 > `exp2_neural/SUB09_MANUSCRIPT_TODO.md` §C1 lists the tex lines that still
 > assert non-collection and must be revised.
 
-| id | producing code (`future_phase3_behavioral_analysis/exp2_neural/scripts/`) | committed output | sub-09? |
+| id | producing code (`phase6_behavioral_analysis/exp2_neural/scripts/`) | committed output | sub-09? |
 |---|---|---|---|
 | E6.1 LOCO ρ + Δρ + d | `exp2_hc_likeness.py:53-59,210-412` (calls loco_canonical) | `results/exp2_hc_likeness_sub-0{8,9}_{native,matched}.json` ✓ | YES |
 | E6.2a/b LORO/LOCO acc | `exp2_hc_likeness.py:93-146` | same json ✓ | YES |

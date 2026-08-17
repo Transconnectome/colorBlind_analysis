@@ -12,7 +12,7 @@ Per-subject 4 columns (left → right):
     4. CVD(Filtered)         — simulated CVD percept of the filtered stimulus
 
 Parameters: Option C BEST argmins from
-    analysis/future_phase2_filter_optimization/results/SUMMARY.md (2026-05-13)
+    analysis/phase5_filter_optimization/results/SUMMARY.md (2026-05-13)
         sub-08 deutan : (β_s, β_c) = (40°, +26°), axis 150°
         sub-09 protan : (β_s, β_c) = (12°, −28°), axis 16°
 
@@ -31,7 +31,7 @@ from matplotlib.gridspec import GridSpec
 # ── Paths ────────────────────────────────────────────────────────────────────
 ROOT    = Path("/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/"
                "Projects/colorBlind_analysis")
-SCRIPTS = ROOT / "analysis/future_phase2_filter_optimization/scripts"
+SCRIPTS = ROOT / "analysis/phase5_filter_optimization/scripts"
 OUT     = ROOT / "docs/PAPER/Figures"
 
 sys.path.insert(0, str(SCRIPTS))

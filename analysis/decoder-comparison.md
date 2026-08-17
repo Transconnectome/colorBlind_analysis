@@ -17,7 +17,7 @@ readouts are reported; the dissociation below is recorded for completeness/trans
 
 ## The double dissociation (our data — HC group mean, Procrustes voxel space)
 
-Source: `future_phase1_forward_model/results/validation/validation/sub-*_loco.json`
+Source: `phase4_forward_model/results/validation/validation/sub-*_loco.json`
 (per-decoder, per-fold). Chance: adjacent 3/8 = 0.375, exact 1/8 = 0.125. MAE in degrees.
 **Decoders are columns** (`_ols` = α=0 pseudoinverse, `_gcv` = ridge-GCV); **bold** = winner
 per metric. Left block = **decoding** (α=0 should win); right block = **encoding** (GCV should win).
@@ -101,7 +101,7 @@ favors ols (hV4 no-filter adj **ols 0.250 vs gcv 0.021** — gcv collapse). Use 
 ## hV4-restricted view — the permutation-valid ROI (both aspects)
 
 LOCO interpolation is statistically real **only at hV4**. Group-level HC permutation
-(n=7, 10,000 perms, `future_phase1_forward_model/results/loco_reinforcement/permutation_test.json`),
+(n=7, 10,000 perms, `phase4_forward_model/results/loco_reinforcement/permutation_test.json`),
 on the forward-model LOCO metric:
 
 | ROI | observed | p_perm | |
@@ -142,7 +142,7 @@ permutation observed (0.183) is the forward-model ρ metric (ridge-GCV voxel_cor
    `loco_accuracy_within` now uses **α=0** (was ridge-GCV → collapsed HC to chance);
    `loco_rho_within` keeps ridge-GCV. Re-run pending verification (HC hV4 should return to
    ~0.46 n6).
-3. **Shared canonical** *(DONE 2026-06-13)*: `future_phase1_forward_model/scripts/loco_canonical.py`
+3. **Shared canonical** *(DONE 2026-06-13)*: `phase4_forward_model/scripts/loco_canonical.py`
    — `loco_forward_readouts(amp, C8, basis_full, decoder, tasks)` gives {rho, adj, exact} per
    decoder. `exp2_hc_likeness.py` and `exp2_decoder_2x2.py` both delegate to it (no more
    divergent reimplementation — the root cause of the exp2 bug). FROZEN `utils_forward_model`
@@ -153,6 +153,6 @@ permutation observed (0.183) is the forward-model ρ metric (ridge-GCV voxel_cor
 
 ## Provenance
 
-- Decoding/encoding per-decoder numbers: `future_phase1_forward_model/results/validation/validation/sub-*_loco.json` (Procrustes voxel space; keys `ols`, `ridge_gcv`, each with `folds[].errors`, `folds[].pred_hues`, `mean_voxel_corr`).
+- Decoding/encoding per-decoder numbers: `phase4_forward_model/results/validation/validation/sub-*_loco.json` (Procrustes voxel space; keys `ols`, `ridge_gcv`, each with `folds[].errors`, `folds[].pred_hues`, `mean_voxel_corr`).
 - Paper Fig 2/3 LOCO (SRM α=0): `phase3_decoder_comparing/results/loco_srm/sub-*_loco.json` (`results[ROI].ForwardEncoding`, params `{alpha:0, n_channels:6}`, `alignment:srm`).
 - Numbers regenerated 2026-06-13 (NaN-guarded per-run aggregation).

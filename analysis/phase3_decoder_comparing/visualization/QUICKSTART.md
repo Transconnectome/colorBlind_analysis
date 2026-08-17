@@ -21,7 +21,7 @@ python analysis/phase3_decoder_comparing/visualization/create_cvd_distortion_fig
 
 **Expected output:**
 ```
-analysis/future_phase2_filter_optimization/figures/cvd_distortion_figure_V2.png
+analysis/phase5_filter_optimization/figures/cvd_distortion_figure_V2.png
 ```
 - Size: ~15-20 MB
 - Resolution: 6000×4800 pixels (300 DPI)

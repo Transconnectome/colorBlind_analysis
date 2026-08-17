@@ -28,7 +28,7 @@ import numpy as np
 from skimage.color import deltaE_ciede2000
 
 ROOT = Path(__file__).resolve().parents[3]
-P2 = ROOT / "analysis/future_phase2_filter_optimization"
+P2 = ROOT / "analysis/phase5_filter_optimization"
 sys.path.insert(0, str(P2 / "scripts"))
 
 from forward_models.two_component import pre_image_2comp   # noqa: E402

@@ -20,7 +20,7 @@ colormap, symmetric scale rule and hue colour strips are reproduced unchanged.
 
 Data (unchanged, no recomputation)
 ----------------------------------
-    analysis/future_phase2_filter_optimization/results/_archive/
+    analysis/phase5_filter_optimization/results/_archive/
         old_labels_pre_2026-05-16/phase2_artifacts/diagnostics/srm_precompute/
         delta_rdm_obs_srm_{V1,V2}.npz          keys: sub_08, sub_09, sub_10
 This is the same precompute the committed `fig3_geometry.pdf` (2026-05-12) was
@@ -54,7 +54,7 @@ from scipy.spatial.distance import squareform
 
 # --- Paths -------------------------------------------------------------------
 BASE = Path(__file__).resolve().parents[3].parent   # repo root
-DELTA_RDM_DIR = (BASE / 'analysis/future_phase2_filter_optimization/results/'
+DELTA_RDM_DIR = (BASE / 'analysis/phase5_filter_optimization/results/'
                         '_archive/old_labels_pre_2026-05-16/phase2_artifacts/'
                         'diagnostics/srm_precompute')
 OUT_DIR = BASE / 'docs/PAPER/Figures/fig3_assets'

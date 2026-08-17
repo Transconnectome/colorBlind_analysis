@@ -17,13 +17,13 @@
 | `phase2_procrustes_cvd_hc/` | **스크립트 전량 아카이브** | 0 (README/CLAUDE.md/notion.md만) |
 | `phase2_SRM_across_between/` | ~42개 아카이브 (5범주) | canonical + 2C + A3/A4/A5 + utils |
 | `analysis/validation/` | ~50개 아카이브 (6범주) | **3** (2026-07-23자 진행 중 작업) + utils |
-| `future_phase1_forward_model/` | ~40개 아카이브 (11범주) | **19 py + 5 sbatch** |
+| `phase4_forward_model/` | ~40개 아카이브 (11범주) | **19 py + 5 sbatch** |
 | `phase3_decoder_comparing/` | ~24개 아카이브 (7범주) | 22 (S-A 종속 4건 포함) |
-| `future_phase2_filter_optimization/` | 4소그룹 아카이브 | 기존 정리 상태 유지 |
-| `future_phase3_behavioral_analysis/` | ~10개 아카이브 (4범주) — **최초 정리** | 12 |
+| `phase5_filter_optimization/` | 4소그룹 아카이브 | 기존 정리 상태 유지 |
+| `phase6_behavioral_analysis/` | ~10개 아카이브 (4범주) — **최초 정리** | 12 |
 | `analysis/utils/` | 3개 아카이브 | 1 |
 | `docs/PAPER/Figures/scripts/` | `generate_fig1.py`, `generate_fig4.py` 아카이브 | 7 |
-| `future_phase4_geometry_synthesis/`, `phase_supplementary/` | 조치 없음 | 전량 유지 |
+| `future_phase3_geometry_synthesis/`, `phase_supplementary/` | 조치 없음 | 전량 유지 |
 
 ### 문서 정정 (완료)
 
@@ -57,10 +57,10 @@ archive하지 않고 원위치에 둔 항목입니다. 근거가 약해 자동 �
 | 파일 | 위치 | 보류 사유 |
 |---|---|---|
 | `project_filtered_session.py` | `phase2_SRM_across_between/` | MAP.md E6.2d가 exp2 SRM을 `exp2_convergent.py`로 배정 → 대체된 것으로 보이나 **명시적 폐기 기록 없음** |
-| `step_{a..d}_*.py` (4) | `future_phase1_forward_model/scripts/` | 프로젝트 CLAUDE.md는 canonical로 지정, 폴더 CLAUDE.md는 "group prior 계열 기각". E1.1의 `prior_only`/`prior_finetune` arm 상류 |
+| `step_{a..d}_*.py` (4) | `phase4_forward_model/scripts/` | 프로젝트 CLAUDE.md는 canonical로 지정, 폴더 CLAUDE.md는 "group prior 계열 기각". E1.1의 `prior_only`/`prior_finetune` arm 상류 |
 | `n1_stouffer_omnibus.py` 외 robustness 3종 | 〃 | `TODO_robustness_supplement.md`가 main.tex 체인에 없음. supplement 발행 여부에 종속 |
 | `group_prior.py`, `plot_lambda_curve.py` | `phase3_decoder_comparing/.../scripts/` | S-A(decoder Supplementary)에 group prior λ blending을 **포함할지 미정**. 제외하면 archive 대상 |
-| `filter_input_stability.py` | `future_phase3_behavioral_analysis/scripts/` | 출력 JSON은 있으나 REPORT/SUMMARY/tex 참조 0건 |
+| `filter_input_stability.py` | `phase6_behavioral_analysis/scripts/` | 출력 JSON은 있으나 REPORT/SUMMARY/tex 참조 0건 |
 | `analyze_c010_procrustes_effects.py` | `phase1_procrustes_decoding/` | `_residuals` 판본과 near-duplicate이나 **서로 다른 live C010 변종**을 대상으로 함 (canonical SRM은 non-residual, LOCO/exp2는 residual) |
 
 ### 이번 정리로 live importer가 0이 된 공유 유틸

@@ -38,7 +38,7 @@ python generate_fig7_filter.py       # imports two_comp + stim_lab_render
 ```
 
 These three scripts import canonical modules from
-`analysis/future_phase2_filter_optimization/scripts/` (added to `sys.path` at
+`analysis/phase5_filter_optimization/scripts/` (added to `sys.path` at
 runtime). They are reproducible in-repo but **not** standalone — they depend on
 that package and, for fig 6, on the local C010 amplitudes at
 `analysis/phase1_procrustes_decoding/results/full_dataset_C010/`.

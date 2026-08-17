@@ -1,7 +1,7 @@
 # SD4H_draft_v6.1.tex — Closure-Alignment Revision Plan
 
 - **Date**: 2026-06-01
-- **Purpose**: `SD4H_draft_v6.1.tex` 를 `analysis/future_phase2_filter_optimization/PIPELINE_2_CLOSURE.md` (2026-06-01) 에 정렬. SD4H@ICML reviewer (Rating 3 Accept / Confidence 2) 피드백 동시 반영.
+- **Purpose**: `SD4H_draft_v6.1.tex` 를 `analysis/phase5_filter_optimization/PIPELINE_2_CLOSURE.md` (2026-06-01) 에 정렬. SD4H@ICML reviewer (Rating 3 Accept / Confidence 2) 피드백 동시 반영.
 - **Status**: 방향 확정 (DIRECTION LOCKED) — .tex 편집은 미실행. 다음 세션에서 §"실행 체크리스트" 순서로 진행.
 - **User decisions (this session)**:
   1. Fit scope = **γ+RDM 그대로** (closure 후보와 정확히 일치; neural-only 대신 선택 → §0.1 circularity disclosure 의무 발생)
@@ -34,7 +34,7 @@ v6.1 드래프트는 closure 이전 상태. loss 하나를 바꾸면 모델 선�
 프로젝트의 문서화된 입장은 줄곧 **descriptive + 행동검증 대기**였다. reframe 은 *입장 변경*이 아니라 드래프트 prose 를 그 입장으로 *정렬*하는 것.
 
 근거:
-- `future_phase2_filter_optimization/CLAUDE.md §0`: "Specificity claim은 selection criterion이 아니다 … descriptive reporting으로만 … p-value/FPR claim은 보류" (Cycle 9~13 확정)
+- `phase5_filter_optimization/CLAUDE.md §0`: "Specificity claim은 selection criterion이 아니다 … descriptive reporting으로만 … p-value/FPR claim은 보류" (Cycle 9~13 확정)
 - `§0.1` (2026-05-16): paper 에 P2a/P1 primary endpoint 보고 금지, "별도 수집된 behavioral test … TO BE COLLECTED" 가 유일한 paper-reportable validation
 - closure L587: "selection rule 변경 없음 ('specificity 는 selection criterion 아님' 정책 유지)"
 - closure L707: "Phase 3 행동 실험이 sole verification path"
@@ -144,9 +144,9 @@ closure 후보의 γ 는 **per-pair JND** (color-naming P2a/P1 과 다른 행동
 
 | 파일 | 역할 |
 |---|---|
-| `analysis/future_phase2_filter_optimization/PIPELINE_2_CLOSURE.md` | ground truth — 5-step pipeline, final candidates, limitations, null battery |
-| `analysis/future_phase2_filter_optimization/closure.md` | 4-test verification 요약 (user-facing) |
-| `analysis/future_phase2_filter_optimization/CLAUDE.md` §0, §0.1 | descriptive-only / specificity-not-criterion / circularity 정책 |
+| `analysis/phase5_filter_optimization/PIPELINE_2_CLOSURE.md` | ground truth — 5-step pipeline, final candidates, limitations, null battery |
+| `analysis/phase5_filter_optimization/closure.md` | 4-test verification 요약 (user-facing) |
+| `analysis/phase5_filter_optimization/CLAUDE.md` §0, §0.1 | descriptive-only / specificity-not-criterion / circularity 정책 |
 | `results/s10_inclusion/s10b_v6_pca_rdm_results_{sub-08,sub-09}.json` | Phase B v6 PCA canonical fit 출력 (숫자 재검증 소스) |
 | `scripts/s10b_v6_pca_rdm.py` | canonical fitter (algorithm box 소스) |
 | `scripts/s17_hc_loo.py` | strict 7-fold HC LOO |

@@ -11,7 +11,7 @@ Argmins (white ★):
 
 Data source: results/axis_3way/sub-{08,09}_V4_Stockman{150,16}_landscape.json
             + results/CANDIDATE/tier2_v4ccc_srm_rdm/*_landscape.json
-loaded through analysis/future_phase2_filter_optimization/scripts/p2amax_neural_only_loss.load_neural_grids.
+loaded through analysis/phase5_filter_optimization/scripts/p2amax_neural_only_loss.load_neural_grids.
 """
 
 import sys
@@ -25,7 +25,7 @@ import matplotlib.pyplot as plt
 # ── Paths ────────────────────────────────────────────────────────────────────
 ROOT = Path("/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/"
             "colorBlind_analysis")
-SCRIPTS = ROOT / "analysis/future_phase2_filter_optimization/scripts"
+SCRIPTS = ROOT / "analysis/phase5_filter_optimization/scripts"
 OUT     = ROOT / "docs/PAPER/Figures"
 
 sys.path.insert(0, str(SCRIPTS))

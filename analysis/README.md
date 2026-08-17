@@ -185,8 +185,8 @@ Earlier reference-based Procrustes approach (before SRM):
 
 ### Future Phases
 
-- **Future Phase 1** (`future_phase1_forward_model/`): 360-degree hue encoder (SRQ3)
-- **Future Phase 2** (`future_phase2_filter_optimization/`): CVD stimulus-space filter optimization (SRQ4)
+- **Future Phase 1** (`phase4_forward_model/`): 360-degree hue encoder (SRQ3)
+- **Future Phase 2** (`phase5_filter_optimization/`): CVD stimulus-space filter optimization (SRQ4)
 
 ### Archived (superseded)
 

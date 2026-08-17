@@ -8,7 +8,7 @@
 > 두 파일 모두 `_backup`이라 `main.tex`의 `\input` 체인 밖이다.)
 
 **범위 결정**: GCV λ(α) plateau/안정성 점검은 **이번 범위에서 제외**한다 — 현재 파이프라인에서 GCV를 거의 쓰지 않는다.
-(참고 수치는 `analysis/future_phase1_forward_model/RESULTS.md:290-299`에 남아 있음.)
+(참고 수치는 `analysis/phase4_forward_model/RESULTS.md:290-299`에 남아 있음.)
 
 ## 추가할 항목 (4개)
 

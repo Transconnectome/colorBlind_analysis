@@ -86,7 +86,7 @@ E6 notebook = deutan-only now; protan cells stubbed/parameterized, to fill when 
 1. **E2.6 corrected**: draft's "blue d=2.20 p=0.042 significant" removed 2026-06-25 — contamination from SRM V2 (d=2.20) + V2 blue-purple (p=0.042); real per-hue CH n.s. (blue |d|=1.87 p=0.072).
 2. **E2.1 / E2.3 / E2.4 — RESOLVED 2026-06-28**: an earlier draft reported hV4 p=0.044 (voxel_corr 8! perm) and CH −1.58/0.082 & −2.48/0.024. The manuscript (`results_v4.tex` L38–40, rebuilt 2026-06-28) has since **adopted the reproduced adjacent-accuracy values** — hV4 p=0.008 (1,000 per-subj perms), V1 p=0.164, deutan −1.84/0.063/−1.99, protan −2.91/0.017/−3.14. The `reported=` targets above and in nb02 now track the current tex; all reproduce exactly. The old numbers no longer appear anywhere in the tex tree (grep-verified).
 3. **No committed driver** produces per-hue adjacent accuracy (E2.5–E2.7) — only `loco_canonical` library fn; regen script is de facto driver.
-4. **E1.2 / E3.1–E3.2 / E4 / E5 source folders**: span phase3_decoder_comparing (E1.2), phase2_SRM_across_between + phase2_procrustes_cvd_hc (E3), future_phase2_filter_optimization (E4, E5) — to be mapped in Phase 2.
+4. **E1.2 / E3.1–E3.2 / E4 / E5 source folders**: span phase3_decoder_comparing (E1.2), phase2_SRM_across_between + phase2_procrustes_cvd_hc (E3), phase5_filter_optimization (E4, E5) — to be mapped in Phase 2.
 5. `N=⟨300⟩` printed with literal `\langle\rangle` placeholder brackets in tex — confirm final N at Phase 2 (E4.11, E5).
 
 ## Verifier reconciliation (paper-analyst, 2026-06-26)

@@ -44,7 +44,7 @@
 | `phase_a/sub-08_V4_machado_1way.json` | Sub-08 Machado fit |
 | `phase_a/sub-09_V4_machado_1way.json` | Sub-09 Machado fit |
 
-All paths relative to `analysis/future_phase2_filter_optimization/results/fits/`
+All paths relative to `analysis/phase5_filter_optimization/results/fits/`
 
 ## Style
 - Sub-08 (deutan): orange (#E07B2C)

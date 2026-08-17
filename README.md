@@ -274,7 +274,7 @@ Our filter development follows a 2-phase approach: forward model validation (com
 - **LOSO Zero-Shot**: hV4 ZS ≈ LORO (p=0.913) — group prior validated as prediction engine
 - **Track B (CVD Prediction)**: Per-subject K* adopted (sub-08 K*=8 → 6.4× LOCO improvement); anisotropic basis and hierarchical FE rejected
 
-**Documents**: `analysis/future_phase1_forward_model/README.md`, `analysis/future_phase1_forward_model/RESULTS.md`
+**Documents**: `analysis/phase4_forward_model/README.md`, `analysis/phase4_forward_model/RESULTS.md`
 
 ---
 
@@ -296,7 +296,7 @@ where ψ(θ) = Σ_k [a_k sin(kθ) + b_k cos(kθ)]   (Fourier parameterization)
 - sub-09 (protan): 7 FDR pairs (V1 magenta axis), dual dissociation with sub-08
 - sub-10 (deutan, compensated): 0 FDR pairs, HC-like — cortical compensation case study
 
-**Documents**: `analysis/phase2_procrustes_cvd_hc/README.md` (CVD–HC SRM pair-level distortion; 구 `future_phase2_filter_optimization/pre_validation/notion_prevalidation.md`은 commit 58bce39에서 삭제)
+**Documents**: `analysis/phase2_procrustes_cvd_hc/README.md` (CVD–HC SRM pair-level distortion; 구 `phase5_filter_optimization/pre_validation/notion_prevalidation.md`은 commit 58bce39에서 삭제)
 
 ---
 
@@ -468,8 +468,8 @@ colorBlind_analysis/
 │   ├── archive/phase3_procrustes_filter/          # Legacy: Exploratory filter learning
 │   │
 │   ├── archive/future_phase1_hyperalignment/      # Archived: HC hyperalignment (superseded by SRM)
-│   ├── future_phase1_forward_model/       # SRQ3: 360° encoder ✅ (ridge_gcv, hV4 GO)
-│   ├── future_phase2_filter_optimization/ # SRQ4: Stimulus-space filter 🎯 (planned)
+│   ├── phase4_forward_model/       # SRQ3: 360° encoder ✅ (ridge_gcv, hV4 GO)
+│   ├── phase5_filter_optimization/ # SRQ4: Stimulus-space filter 🎯 (planned)
 │   │
 │   ├── comprehensive/                     # Cross-phase analyses
 │   ├── validation/                        # Cross-pipeline validation
@@ -501,7 +501,7 @@ colorBlind_analysis/
 
 **`prediction_model_workspace/`** — Legacy development workspace (superseded)
 - Early experimental scripts and planning documents
-- Active code has migrated to `analysis/future_phase1_forward_model/` and `analysis/future_phase2_filter_optimization/`
+- Active code has migrated to `analysis/phase4_forward_model/` and `analysis/phase5_filter_optimization/`
 
 ---
 

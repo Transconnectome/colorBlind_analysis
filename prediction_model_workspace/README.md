@@ -104,8 +104,8 @@ prediction_model_workspace/
 
 **메인 분석 디렉토리** (최종 완성된 분석):
 - `../analysis/archive/future_phase1_hyperalignment/` - Phase 1 계획 (workspace 완료 시 phase1_hyperalignment로 변경)
-- `../analysis/future_phase1_forward_model/` - Phase 2 계획
-- `../analysis/future_phase2_filter_optimization/` - Phase 3 계획
+- `../analysis/phase4_forward_model/` - Phase 2 계획
+- `../analysis/phase5_filter_optimization/` - Phase 3 계획
 
 **문서 참조**:
 - 메인 README.md에서 이 workspace 설명: `../README.md` (Project Structure 섹션)

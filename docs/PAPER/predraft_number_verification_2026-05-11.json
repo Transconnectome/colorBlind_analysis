@@ -66,7 +66,7 @@
     }
   },
   "full_per_hue_statistics": {
-    "data_source": "analysis/future_phase1_forward_model/results/loco_reinforcement/per_color_breakdown.json",
+    "data_source": "analysis/phase4_forward_model/results/loco_reinforcement/per_color_breakdown.json",
     "roi": "hV4",
     "n_hc": 7,
     "formula": "Crawford-Howell modified t: t = (x_cvd - hc_mean) / (hc_sd * sqrt((n+1)/n)); df=n-1=6; d_cohens = |x_cvd - hc_mean| / hc_sd",
@@ -125,6 +125,6 @@
     "status": "PRE-DRAFT VALUES NOT REPRODUCIBLE AS STATED",
     "action": "DO NOT add pre-draft d=1.37/d=1.54 values to manuscript without identifying source script and reconfirming. The p-values (0.046 for blue, ~0.060 for purple) are approximately reproducible, but d values differ substantially. The canonical data supports reporting: sub-09 blue p=0.046 (one-tailed CH), sub-08 purple p=0.066 (two-tailed CH). The d values to report are ~2.1-2.4, not 1.37/1.54.",
     "recommended_update_to_predraft": "Revise pre-draft §4 abstract key numbers: 'CVD failure at blue (d=2.15, p=0.046 one-tailed, sub-09; Crawford-Howell), purple (d=2.40, p=0.066 two-tailed, sub-08)' OR use only p-values and describe direction (both subjects below HC range at blue).",
-    "data_source_to_use": "analysis/future_phase1_forward_model/results/loco_reinforcement/per_color_breakdown.json, hV4 section"
+    "data_source_to_use": "analysis/phase4_forward_model/results/loco_reinforcement/per_color_breakdown.json, hV4 section"
   }
 }

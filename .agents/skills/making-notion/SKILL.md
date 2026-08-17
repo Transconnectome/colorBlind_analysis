@@ -20,9 +20,9 @@ recommended-model: sonnet
 |--------|------|------|
 | **SRM 결과** | `analysis/phase2_SRM_across_between/results/loo_consistent/*/loo_consistent_results.json` | Phase 2 그룹 비교, 개인 검정 |
 | **디코더 결과** | `analysis/phase3_decoder_comparing/results/loco/sub-*_loco.json` | LORO/LOCO 성능, 교차 디코딩 |
-| **필터 검증** | `analysis/future_phase2_filter_optimization/pre_validation/results/fdr_corrected/*.json` | FDR 보정, 색 쌍 z-score |
+| **필터 검증** | `analysis/phase5_filter_optimization/pre_validation/results/fdr_corrected/*.json` | FDR 보정, 색 쌍 z-score |
 | **방법론 요약** | `analysis/METHODS_RESULTS_SUMMARY_FOR_PAPER.md` | 전체 파이프라인, 검증 지표 |
-| **프로젝트 현황** | `analysis/future_phase2_filter_optimization/pre_validation/PROJECT_STATUS_*.md` | 전략 변경, Go/No-Go 기준 |
+| **프로젝트 현황** | `analysis/phase5_filter_optimization/pre_validation/PROJECT_STATUS_*.md` | 전략 변경, Go/No-Go 기준 |
 | **README** | `analysis/phase*/README.md` | 각 phase 설명, 파일 구조 |
 
 ---

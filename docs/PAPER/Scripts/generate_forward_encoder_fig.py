@@ -62,7 +62,7 @@ def create_pipeline_figure(out_dir):
     channel_centers = [0, 60, 120, 180, 240, 300]
 
     # ====================== STAGE 1: Color → Channel ======================
-    ax1.set_title('Stage 1: Color $\\to$ Channel\n(Basis Functions)',
+    ax1.set_title('Stage 1: Color → Channel\n(Basis Functions)',
                   fontsize=12, fontweight='bold', pad=10)
     theta_bg = np.linspace(0, 360, 360)
     for ang in theta_bg:
@@ -86,7 +86,7 @@ def create_pipeline_figure(out_dir):
     ax1.grid(True, alpha=0.25, linestyle='--')
 
     # ====================== STAGE 2: Channel → Voxel (Training) ======================
-    ax2.set_title('Stage 2: Channel $\\to$ Voxel (Train)\n(Linear mapping W)',
+    ax2.set_title('Stage 2: Channel → Voxel (Train)\n(Linear mapping W)',
                   fontsize=12, fontweight='bold', pad=10)
     ax2.axis('off')
     ax2.set_xlim(0, 10)
@@ -125,13 +125,13 @@ def create_pipeline_figure(out_dir):
     ax2.text(8.2, 8.7, 'Voxels', ha='center', va='center',
              fontsize=9, fontweight='bold',
              bbox=dict(boxstyle='round,pad=0.4', facecolor='lightblue', alpha=0.8))
-    ax2.text(5, 1.2, r'$\mathbf{B} = \mathbf{C}\mathbf{W}^\top$',
+    ax2.text(5, 1.2, r'$\mathbf{B} = \mathbf{C}\mathbf{W}^\mathsf{T}$',
              ha='center', va='center', fontsize=13, fontweight='bold',
              bbox=dict(boxstyle='round,pad=0.6', facecolor='white',
                        edgecolor='black', linewidth=1.5))
 
     # ====================== STAGE 3: Voxel → Channel (Testing) ======================
-    ax3.set_title('Stage 3: Voxel $\\to$ Channel (Test)\n(Inverse mapping)',
+    ax3.set_title('Stage 3: Voxel → Channel (Test)\n(Inverse mapping)',
                   fontsize=12, fontweight='bold', pad=10)
     ax3.axis('off')
     ax3.set_xlim(0, 10)
@@ -176,7 +176,7 @@ def create_pipeline_figure(out_dir):
                        edgecolor='black', linewidth=1.5))
 
     # ====================== STAGE 4: Channel → Color ======================
-    ax4.set_title('Stage 4: Channel $\\to$ Color\n(Correlation selection)',
+    ax4.set_title('Stage 4: Channel → Color\n(Correlation selection)',
                   fontsize=12, fontweight='bold', pad=10)
     ax4.axis('off')
     ax4.set_xlim(0, 10)
@@ -240,7 +240,7 @@ def create_pipeline_figure(out_dir):
              bbox=dict(boxstyle='round,pad=0.6', facecolor='white',
                        edgecolor='black', linewidth=1.5))
 
-    fig.suptitle('Forward encoding model: hue tuning $\\to$ voxel mapping $\\to$ decoding',
+    fig.suptitle('Forward encoding model: hue tuning → voxel mapping → decoding',
                  fontsize=14, fontweight='bold', y=0.97)
 
     out_png = os.path.join(out_dir, 'fig_forward_encoder.png')

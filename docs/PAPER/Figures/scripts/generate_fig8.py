@@ -41,7 +41,7 @@ CHANCE_ADJ = 91 / 360
 from scipy import stats
 
 BASE = Path("/Users/jinilkim/LocalProj/colorBlind_analysis")
-RESDIR = BASE / "analysis/future_phase3_behavioral_analysis/exp2_neural/results"
+RESDIR = BASE / "analysis/phase6_behavioral_analysis/exp2_neural/results"
 OUTDIR = BASE / "docs/PAPER/Figures"
 
 ROIS = ["V1", "V2", "V3", "V4"]

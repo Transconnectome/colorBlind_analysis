@@ -50,7 +50,7 @@ The earlier ❌ on the E4 held-out L_test was a *notebook bug* (wrong γ-variant
 | E4.5 | protan L_test −1.54 (IQR 1.42) | −1.539 (1.417) `s10b summary['γALL\|RDMV1\|noLOCO']…` | ✅ |
 | E4.1/4.2 R+C, E4.8 NC%, E4.9/4.10 | saturation / 52%/67% / IQR | not auto-checked | 📎 pointer (s10b/s18 JSON) |
 
-> **Resolved (was ❌):** the L_test mismatch was a notebook bug — the combo key must be the production γ-variant (`γOY` deutan / `γALL` protan), not the generic `γ_` atom (which gives −2.14/−2.12). With the right key it reproduces to 3 decimals. Source: `s10b_v6_pca_rdm.py`, documented in `future_phase2_filter_optimization/PIPELINE_2_CLOSURE.md`.
+> **Resolved (was ❌):** the L_test mismatch was a notebook bug — the combo key must be the production γ-variant (`γOY` deutan / `γALL` protan), not the generic `γ_` atom (which gives −2.14/−2.12). With the right key it reproduces to 3 decimals. Source: `s10b_v6_pca_rdm.py`, documented in `phase5_filter_optimization/PIPELINE_2_CLOSURE.md`.
 
 ## E5 — Identifiability S15  (nb05: 6/6, LOAD+VERIFY)
 | id | reported | produced | verdict |

@@ -180,12 +180,12 @@ the loss-function semantics (above) are the primary justification.
 - The embedded BEST_4col canonical PNGs still print "P2a=..." inside
   their per-subject headers. Manuscript banner/caption avoids the term;
   if those internal labels should be removed, regenerate canonical PNGs
-  via `analysis/future_phase2_filter_optimization/results/generate_best_viz.py`
+  via `analysis/phase5_filter_optimization/results/generate_best_viz.py`
   with a P2a-suppression flag.
 
 ### Source files
 
-- Canonical viz generator: `analysis/future_phase2_filter_optimization/results/generate_best_viz.py`
+- Canonical viz generator: `analysis/phase5_filter_optimization/results/generate_best_viz.py`
 - Phase 2 BEST params + per-subject metadata: `results/BEST_summary.json`
 - Phase 2 closure document: `results/SUMMARY.md`
 
@@ -227,5 +227,5 @@ Panel B (pre-image scatter)와 Panel C (signed δθ bars)는 모두 **숫자**�
 ### Deferred
 
 - Natural image recoloring (Shen 2016 Fig 12 식의 fruit/flower 자연 이미지): 본 프로젝트는 8 hue stimulus space에 국한되므로 자연 이미지 추출 어려움. supplementary로 검토.
-- JND/behavioral validation bar (NotebookLM Do #3): future_phase3_behavioral_analysis 결과 통합 시 추가.
+- JND/behavioral validation bar (NotebookLM Do #3): phase6_behavioral_analysis 결과 통합 시 추가.
 - Red zoom-in inset on critical CVD-collapse: Machado collapse는 Panel B(현재 2-comp만)를 Machado 비교로 재구성하면 가능. 별도 supplementary로.

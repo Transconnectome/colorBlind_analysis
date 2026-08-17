@@ -132,7 +132,7 @@ v2 framed the paper as **"hV4 color geometry → filter"** (an ROI-centric causa
 
 ## 4. Anti-overstatement constraints (CRITICAL — apply to every paragraph)
 
-From project policy (`future_phase2_filter_optimization/CLAUDE.md` §0, §2.6; memory `project_v6_pca_closure`, `feedback_physiological_grounding`):
+From project policy (`phase5_filter_optimization/CLAUDE.md` §0, §2.6; memory `project_v6_pca_closure`, `feedback_physiological_grounding`):
 - **Descriptive only.** No specificity claim (HC FPR 100%; no p-value/FPR claim). State as "mechanism class (sign quadrant) descriptive."
 - **No absolute (β_s, β_c) or g physiological interpretation.** R+C is an exploratory descriptive companion (near-degenerate loss; g unstable); **no etiological claim**.
 - **"Individual" = between-subtype at N=2**, never within-subtype.

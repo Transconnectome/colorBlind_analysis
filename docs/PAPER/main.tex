@@ -1,59 +1,55 @@
-\documentclass[
-    a4paper,
-    man,
-    british
-]{apa6}
-
-\usepackage[british]{babel}
-\usepackage[utf8]{inputenc}
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{graphicx}
-\usepackage{epstopdf}
-\usepackage{csquotes}
-\usepackage[hidelinks]{hyperref}
-\usepackage{apacite}  % REQUIRED for BibTeX APA citations
-\usepackage[nameinlink]{cleveref}  % \cref{} — load after hyperref and apacite
-\usepackage{gensymb}  % \degree symbol
 % =====================================================================
-% Number the section headings (matches PSYCH_THESIS fix). apa6 'man' mode
-% leaves \section/\subsection unnumbered, so every \ref{sec:...} stored an
-% empty number field ({}) in the .aux and rendered as a blank "(§)" /
-% "Section )" — 34 such labels / 41 cross-references across the body.
-% Numbering them (depth 2 = \section + \subsection; \paragraph stays
-% unnumbered) gives \ref/\cref a value to print and resolves all of them.
-% Note: APA's "no heading numbers" is a manuscript-submission convention;
-% switch to \nameref-based refs instead if strict APA numbering-free
-% headings are required for the target venue.
-\setcounter{secnumdepth}{2}
-\usepackage{booktabs} % \toprule, \midrule, \bottomrule in tables
-\usepackage{xcolor}   % \textcolor — load after hyperref is not needed; xcolor is safe here
+% Imaging Neuroscience submission.
+% Class: imag-ms-template.cls (journal-supplied, copied from
+% imaging_neuro_tex/). Migrated from apa6[man,british] on 2026-08-17.
+%
+% What the class already loads -- do NOT load these again:
+%   mathtools/amsthm/amsfonts/amssymb, setspace[doublespacing],
+%   threeparttable, booktabs, graphicx, rotating[figuresright], enumitem,
+%   biblatex[natbib=true,backend=biber,style=apa], algorithm2e, mathrsfs,
+%   hyperref[breaklinks=true].
+% It also sets sans-serif as the default family, 12pt, and \pagestyle{headings}
+% (page numbers), which together satisfy the journal's typography requirements.
+%
+% The apa6 \setcounter{secnumdepth} workaround is gone: this class is
+% article-based, so \section/\subsection are numbered natively and
+% "1 Introduction" falls out without intervention.
+% =====================================================================
+\documentclass{imag-ms-template}
+
+\usepackage[american]{babel}   % body spelling is American throughout
+\usepackage{csquotes}          % biblatex requests it when babel is present
+\usepackage{epstopdf}
+\usepackage{gensymb}           % \degree
+\usepackage{xcolor}
+\usepackage[nameinlink]{cleveref}  % after the class's hyperref
+
+% Line numbers. The class ships these commented out at its foot; enabling them
+% here keeps the class file pristine. The amsmath patch below is required
+% because lineno otherwise drops numbered display equations (8 in this
+% manuscript: 6 in Methods, 2 in Supplementary).
+\usepackage{lineno}
+\newcommand*\linenomathpatch[1]{%
+  \expandafter\let\csname old#1\expandafter\endcsname\csname #1\endcsname
+  \expandafter\let\csname oldend#1\expandafter\endcsname\csname end#1\endcsname
+  \renewenvironment{#1}%
+    {\linenomath\csname old#1\endcsname}%
+    {\csname oldend#1\endcsname\endlinenomath}%
+}
+\linenomathpatch{equation}
+
 \newcommand{\todo}[1]{\textcolor{red}{#1}}
 \providecommand{\doi}[1]{\href{https://doi.org/#1}{doi:#1}}
 
-% CHANGED: biblatex → bibtex (80% faster, no Overleaf timeout)
-% \usepackage[
-%     style=apa,
-%     backend=biber,
-%     sortcites=true,
-%     sorting=nyt,
-% ]{biblatex}
-% \DeclareLanguageMapping{british}{british-apa}
-% \let \citeNP \cite
-% \let \citeA \textcite
-% \let \cite \parencite
-% \addbibresource{bibliography.bib}
+% Citation commands. The class loads biblatex with natbib=true, so \citep and
+% \citet work natively; the body's 37 \citep calls need no change. The apa6
+% aliases that used to sit here are gone, and the three apacite-only forms were
+% rewritten in the body files:
+%   apacite \cite   (parenthetical)      -> \parencite
+%   apacite \citeA  (textual)            -> \textcite
+%   apacite \citeNP (no parentheses)     -> \citealp
+\addbibresource{bibliography.bib}
 
-% BibTeX commands already work with apa6 class:
-% \citeA{} → Author (2020)
-% \citeNP{} → Author (2020)
-% \cite{} → (Author, 2020)
-
-% natbib-style aliases for files authored with \citep/\citet
-\let\citep\cite
-\let\citet\citeA
-
-% Graphics path
 \graphicspath{{Figures/}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -61,26 +57,32 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \title{Individual-specific distortion of cortical hue geometry in color vision deficiency informs personalized color correction}
-\shorttitle{Cortical hue geometry distortion in CVD}
-\author{Jinil Kim}
-\affiliation{Seoul National University}
 
-\keywords{color vision deficiency, anomalous trichromacy, fMRI, cortical color representation, individualized color correction}
-
-\abstract{
-Color vision deficiency (CVD) is typically corrected with generic filters designed from a retina-based model. Such filters change how colors appear but improve color discrimination only in some products and tasks. Filter design omits visual cortex, where the retinal loss and the observer's partial compensation combine. How that combination reshapes color representation in CVD remains underinvestigated. Here we show that CVD distorts the geometry of the cortical color representation rather than weakening its overall signal. We scanned two adults with CVD, one with each red--green subtype, and seven healthy controls. All eight colors remained decodable from cortical activity in both CVD participants, whereas the continuous hue geometry departed from controls, differently in each individual. We modeled each distortion as a hue rotation along two color-space axes and inverted the fit into a personalized stimulus-space filter. Both CVD participants completed a second session of fMRI and behavioral testing to evaluate the filters. Under the individualized filter, the four hue-discrimination thresholds that had exceeded the control range in the first session (three for deutan, one marginal for protan) moved within that range. This small sample cannot establish superiority over a deployed accessibility filter. The direction of cortical change differed across participants and measures, and neither reached the healthy reference. This study identifies a previously uncharacterized geometric distortion of the cortical color representation in CVD and introduces, to our knowledge, the first cortically grounded framework for individualized color correction. Systematic studies can quantify these distortions and provide a new class of personalized filters.
+% Author list and order fixed to match the ICML SD4H workshop contribution
+% (docs/ICML_workshop/SD4H_cameraready_pathB.tex:61-73), per author agreement.
+% Jiook Cha is the principal investigator and the custodian of record for the
+% study data; requests for data access go to him (see Data and Code
+% Availability).
+\author{%
+Jinil Kim,$^{1,2\ast}$ Albert Minkue Cho,$^{3}$ Jungwoo Seo,$^{4}$ Jiook Cha$^{2,4\ast}$\\
+{\small $^{1}$Department of Linguistics, Seoul National University, Seoul, South Korea}\\
+{\small $^{2}$Department of Psychology, Seoul National University, Seoul, South Korea}\\
+{\small $^{3}$Department of Electrical and Computer Engineering, Seoul National University, Seoul, South Korea}\\
+{\small $^{4}$Department of Brain \& Cognitive Sciences, Seoul National University, Seoul, South Korea}\\
+{\small $^{\ast}$Correspondence: Jinil Kim (haba6030@snu.ac.kr), Jiook Cha (connectome@snu.ac.kr)}
 }
 
 \begin{document}
 
-% apa6 'man' 모드는 \maketitle에서 Abstract 표제와 본문 첫 장의 제목 표제를
-% \section 레벨로 내보낸다. 위의 \setcounter{secnumdepth}{2} 때문에 이 둘까지
-% 번호가 붙어 "1 Abstract / 2 <제목> / 3 Introduction"으로 출력되었다.
-% front matter 동안만 번호를 끄고, 본문 진입 직전에 되살려 Introduction=1로 맞춘다.
-\setcounter{secnumdepth}{0}
+\linenumbers
+
 \maketitle
-\setcounter{secnumdepth}{2}
-\setcounter{section}{0}
+
+\keywords{color vision deficiency, anomalous trichromacy, fMRI, cortical color representation, individualized color correction}
+
+\begin{abstract}
+Color vision deficiency (CVD) is typically corrected with generic filters designed from a retina-based model. Such filters change how colors appear but improve color discrimination only in some products and tasks. Filter design omits visual cortex, where the retinal loss and the observer's partial compensation combine. How that combination reshapes color representation in CVD remains underinvestigated. Here we show that CVD distorts the geometry of the cortical color representation rather than weakening its overall signal. We scanned two adults with CVD, one with each red--green subtype, and seven healthy controls. All eight colors remained decodable from cortical activity in both CVD participants, whereas the continuous hue geometry departed from controls, differently in each individual. We modeled each distortion as a hue rotation along two color-space axes and inverted the fit into a personalized stimulus-space filter. Both CVD participants completed a second session of fMRI and behavioral testing to evaluate the filters. Under the individualized filter, the four hue-discrimination thresholds that had exceeded the control range in the first session (three for deutan, one marginal for protan) moved within that range. This small sample cannot establish superiority over a deployed accessibility filter. The direction of cortical change differed across participants and measures, and neither reached the healthy reference. This study identifies a previously uncharacterized geometric distortion of the cortical color representation in CVD and introduces, to our knowledge, the first cortically grounded framework for individualized color correction. Systematic studies can quantify these distortions and provide a new class of personalized filters.
+\end{abstract}
 
 % Introduction Section
 \input{Introduction/introduction_v2}
@@ -96,47 +98,141 @@ Color vision deficiency (CVD) is typically corrected with generic filters design
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
-% Back matter — required by NeuroImage (Elsevier)
+% Back matter — Imaging Neuroscience order and section names.
 %
-% STATUS: placeholders. Every \todo{} below renders in red and MUST be replaced
-% with final text before submission. CRediT and Data availability are mandatory
-% for NeuroImage; a missing statement is caught at the submission system stage.
-% Open decision recorded in Supplementary/REVISION_WORKLIST.md (F4):
-%   data deposit (OSF / OpenNeuro, DOI) vs. access on request. Methods currently
-%   states access on request, so the two must be reconciled once decided.
+% IN Guide for Authors mandates, in this order:
+%   Data and Code Availability (mandatory) → Author Contributions (mandatory)
+%   → Funding (optional) → Declaration of Competing Interests (mandatory)
+%   → Acknowledgements (optional) → Supplementary → References.
+% The previous arrangement followed Elsevier/NeuroImage and has been replaced.
+%
+% STATUS: remaining \todo{} blocks render in red and MUST be resolved before
+% submission. Checklist: SUBMISSION_CHECKLIST_IMAGING_NEURO.md
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
 \clearpage
 
-\section*{CRediT authorship contribution statement}
+\section*{Data and Code Availability}
 
-\todo{[FILL AT SUBMISSION] Assign the 14 CRediT roles to each author, e.g.
-Jinil Kim: Conceptualization, Methodology, Software, Formal analysis,
-Investigation, Data curation, Visualization, Writing --- original draft,
-Writing --- review \& editing. Confirm the final author list first.}
+All analysis and preprocessing code needed to reproduce the reported results is
+openly available at \url{https://github.com/Transconnectome/colorBlind_analysis}
+\todo{[FILL AT SUBMISSION] and archived at Zenodo DOI xx.xxxx/zenodo.xxxxxxx.
+IN asks for a persistent identifier; make the repository public and mint a
+release DOI before submission so that reviewers can access it.}
 
-\section*{Declaration of competing interests}
+% Deposit of derived data was examined against the approved protocol and the
+% signed consent form (docs/archive/final_IRB.pdf, docs/archive/[변경2차] IRB
+% No. 2510_002-023.pdf) on 2026-08-16 and is NOT permitted: the protocol places
+% all study data in a principal-investigator-only encrypted store, and the
+% consent form contains no secondary-use, third-party-provision, or public
+% deposit clause. Open deposit would require a new ethics submission. The
+% restricted-access statement below is therefore the whole of the data half.
 
-\todo{[FILL AT SUBMISSION] State whether any author holds a competing financial
-or personal interest. Use the Elsevier template sentence when none applies.}
+The neuroimaging and behavioural data cannot be shared openly. The protocol
+approved by the Seoul National University Institutional Review Board (SNUIRB
+No.~2510/002-023), and the written consent obtained under it, place all study
+data in an encrypted store to which the principal investigator controls access,
+and neither document provides for secondary use by third parties or for deposit
+in a public repository. Under Article 16(3) of the Seoul National University
+Research Ethics Guidelines, the de-identified study data are retained for five
+years and, thereafter, for as long as the principal investigator can maintain
+custody of them, so that the integrity of the reported analyses can be verified.
+Requests for access should be directed to the principal investigator (Jiook Cha,
+connectome@snu.ac.kr) and are granted subject to (i) a formal data sharing
+agreement between the requesting institution and Seoul National University,
+(ii) approval of the intended use by the requesting researcher's local ethics
+committee, and (iii) a short project outline describing that use; a request that
+falls outside the scope of the original consent additionally requires a new
+submission to the Seoul National University Institutional Review Board.
+Co-authorship is not a condition of access. Requests are answered within eight
+weeks.
+
+\section*{Author Contributions}
+
+% Format follows published Imaging Neuroscience practice: author INITIALS, roles
+% separated by semicolons, shared roles grouped across authors, CRediT wording
+% with an em-dash in "Writing---original draft" / "Writing---review & editing".
+% Reference article: Imaging Neuroscience, doi:10.1162/IMAG.a.55 (PMC12319998),
+% whose statement reads "J.Y.: Conceptualization; Data curation; Formal
+% analysis; ... Y.S.W. and C.H.A.B.: Validation; Investigation; and
+% Writing---review & editing."
+%
+% Roles supplied by the corresponding author 2026-08-17. Two mappings were
+% applied, because CRediT has no matching term for the labels given:
+%   "result interpretation" -> Formal analysis (CRediT: "application of
+%       statistical, mathematical, computational, or other formal techniques to
+%       analyze or synthesize study data"); interpretation has no separate role.
+%   "data collection" / "recruitment" -> Investigation.
+% Funding acquisition is assigned to all four authors: the award is a university
+% undergraduate programme applied for jointly.
+% J.S. is marked (supporting) on Conceptualization at the author's own request;
+% CRediT degree-of-contribution qualifiers are carried by the Editorial Manager
+% submission form and are reproduced here for consistency with it.
+
+J.K.: Conceptualization; Methodology; Software; Validation; Formal analysis;
+Investigation; Data curation; Visualization; Project administration; Funding
+acquisition; Writing---original draft; and Writing---review \& editing.
+A.M.C.: Conceptualization; Methodology; Formal analysis; Investigation; Data
+curation; Project administration; Funding acquisition; and Writing---review \&
+editing. J.S.: Conceptualization (supporting); Investigation; Funding
+acquisition; and Writing---review \& editing. J.C.: Conceptualization;
+Methodology; Validation; Resources; Supervision; Funding acquisition; and
+Writing---review \& editing.
+
+\section*{Funding}
+
+This work was supported by the Independent Research Support Program of the
+College of Liberal Studies, Seoul National University.
+% Source recorded in the approved protocol, docs/archive/final_IRB.pdf p.2,
+% field "yeongubi jiwongigwan" = SNU College of Liberal Studies independent
+% research support programme. The programme issues no grant number (confirmed
+% 2026-08-17), so none is given.
+The programme does not issue grant numbers.
+
+\section*{Declaration of Competing Interests}
+
+The authors declare that they have no known competing financial interests or
+personal relationships that could have appeared to influence the work reported
+in this paper. No patent has been filed on the correction filter described here,
+and no author has a financial relationship with a supplier of colour-correction
+eyewear or display software.
+
+% Both sampled Imaging Neuroscience research articles carry a short back-matter
+% "Ethics" section in addition to the statement in Methods (doi:10.1162/IMAG.a.55,
+% doi:10.1162/imag_a_00455). The Guide for Authors does not list it, but house
+% practice does, so it is included here; the fuller statement stays in Methods.
+\section*{Ethics}
+
+The study was approved by the Seoul National University Institutional Review
+Board (SNUIRB No.~2510/002-023) and was conducted in accordance with the
+Declaration of Helsinki. Written informed consent was obtained from all
+participants for being included in the study.
 
 \section*{Acknowledgements}
 
-\todo{[FILL AT SUBMISSION] Funding sources with grant numbers, scanner facility,
-and non-author contributions.}
+Imaging was carried out at the Seoul National University Brain Imaging Center,
+and the authors thank its staff for their support.
+\todo{[CONFIRM] Add any non-author contributions, and check the centre's
+preferred citation wording for acknowledgements.}
 
-\section*{Data availability}
-
-\todo{[FILL AT SUBMISSION] Name the repository holding the preprocessed
-amplitudes and the analysis code, with the access conditions and a DOI or URL.
-Reconcile with the corresponding sentence in Methods.}
+% AI-tool disclosure. Required by the MIT Press ethics policy, which asks that
+% use of AI tools to produce text, images or graphics, or to collect data, be
+% described in the manuscript and repeated in the cover letter. Scope below is
+% PROVISIONAL (recorded 2026-08-17) and must be re-checked immediately before
+% submission: if the tools are also used for prose during the remaining
+% revision, this sentence has to be widened to cover drafting.
+The authors used AI-based coding assistants to review and edit analysis code,
+and an AI image-generation tool to produce the schematic pipeline panels of
+\todo{[CONFIRM] name the figures, e.g. Figures 1 and 3}. All analyses,
+results, and text are the authors' own, and the authors take full
+responsibility for the content of this article, including any part produced
+with the assistance of such tools.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % References
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
-\bibliographystyle{apacite}
-\bibliography{bibliography}
+\printbibliography
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -151,7 +247,7 @@ Reconcile with the corresponding sentence in Methods.}
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
 \clearpage
-\section{Supplementary Methods}
+\section*{Supplementary Methods}
 \input{Supplementary/supplementary}
 
 \end{document}

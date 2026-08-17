@@ -22,5 +22,5 @@ SRM(Shared Response Model)로 HC와 CVD를 공통 신경 공간에 정렬한 뒤
 1. 확정된 k 값과 세 가지 bias fix(HC-only SRM / LOO-HC / 동일 LOO refs)를 원복하지 않는다.
 2. BrainIAK 실행은 반드시 `mpirun -np 1 python …` (bare python 금지).
 3. sub-07 hV4는 voxel 수 부족 → 상관거리 nan, hV4 그룹 통계 제외.
-4. ΔRDM·필터·inverse 관련 작업은 이 폴더가 아닌 `future_phase2_filter_optimization/`에서.
+4. ΔRDM·필터·inverse 관련 작업은 이 폴더가 아닌 `phase5_filter_optimization/`에서.
 5. 결과 저장 규칙: flat `results/<name>/` + `config.json` 1개.

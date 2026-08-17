@@ -39,7 +39,7 @@ HC_SUBJECTS = [f'sub-{i:02d}' for i in range(1, 8)]
 ROI_DIR_MAP = {'V1': 'V1', 'V2': 'V2', 'V3': 'V3', 'hV4': 'V4'}
 
 # FDR results path
-FDR_RESULTS_PATH = BASE_DIR / 'analysis/future_phase2_filter_optimization/pre_validation/results/fdr_corrected/filter_pre_validation_fdr_corrected.json'
+FDR_RESULTS_PATH = BASE_DIR / 'analysis/phase5_filter_optimization/pre_validation/results/fdr_corrected/filter_pre_validation_fdr_corrected.json'
 
 
 def load_subject_data(subject_id, roi):
@@ -538,7 +538,7 @@ def create_cvd_distortion_figure(roi='V2', output_path=None):
 
     # Save
     if output_path is None:
-        output_dir = BASE_DIR / 'analysis/future_phase2_filter_optimization/figures'
+        output_dir = BASE_DIR / 'analysis/phase5_filter_optimization/figures'
         output_dir.mkdir(parents=True, exist_ok=True)
         output_path = output_dir / f'cvd_distortion_figure_{roi}.png'
 

@@ -105,7 +105,7 @@ per-color accuracy + Wilson CI is primary; GLMM (Firth-penalized if attempted) i
 - [ ] **Supplement**: Crawford–Howell per-pair baseline-deficit table, both subjects (§1/§2 numbers).
 - [ ] **Supplement**: RSVP per-color accuracy panel (§3) + separation/GLMM caveat.
 - [ ] **Canonical script**: promote the scratchpad analyses into
-      `analysis/future_phase3_behavioral_analysis/analyze_exp2_mllm.py` (JND MixedLM int/slope +
+      `analysis/phase6_behavioral_analysis/analyze_exp2_mllm.py` (JND MixedLM int/slope +
       pair bootstrap + RSVP Wilson/per-color), writing to `results/exp2_behavior/`. (Currently only
       prototyped in session scratchpad.)
 - [ ] Verify main-text |z| numbers (2.24 → 0.85/0.78) against the canonical script output before submission.

@@ -15,7 +15,7 @@ detect oddball target, 6 runs × 8 colours/run).
 **Canonical colours:**  
 The 8 hue patches use CIELab values from
 `analysis/utils/utils_color_decoding.py` (`COLOR_LAB`) and
-`analysis/future_phase2_filter_optimization/scripts/stim_lab_render.py`
+`analysis/phase5_filter_optimization/scripts/stim_lab_render.py`
 (`STIM_LAB`). These are screenshot-derived values representing what subjects
 actually saw on the MRI projector — identical to the values used in all
 downstream analysis figures.

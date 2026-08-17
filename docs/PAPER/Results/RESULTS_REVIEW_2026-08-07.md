@@ -335,4 +335,4 @@ V1–V3 는 HC 자신이 순열 귀무를 넘지 못하므로(§3.2: V1 p=.164, 
 |---|---|
 | Fig 4·6 캡션 문체 (범례 세미콜론, 결과 서술 포함 여부) | 미착수 — Fig 2·7·8 과 같은 기준 적용 필요 |
 | `docs/PAPER/repro/` 의 `.npy` 커밋 판단 | `perm_n7_null_*.npy` 4 개 신규. 프로젝트 규칙상 `*.npy` 스테이징 차단 대상이나 기존 `perm_definitive_hv4_null.npy` 는 커밋돼 있음 |
-| `exp2_runmatched_geometry.py` 리포 반영 | 현재 서버에만 존재. `analysis/future_phase3_behavioral_analysis/exp2_neural/scripts/` 로 가져와야 재현 가능 |
+| `exp2_runmatched_geometry.py` 리포 반영 | 현재 서버에만 존재. `analysis/phase6_behavioral_analysis/exp2_neural/scripts/` 로 가져와야 재현 가능 |

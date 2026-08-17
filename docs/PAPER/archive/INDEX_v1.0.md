@@ -6,13 +6,13 @@
 >
 > **Version line** (extend at the bottom of the file in §X):
 > - v1.0 (2026-05-01): first INDEX cut. Locks Results §R-1..§R-6 restructure (LOCO+LORO combined, SRM ΔRDM repositioned, HC FPR promoted, phenotype dropped). Inherits PLAN_ToC §9.1 locked decisions (eLife primary, case-study framing, n=2 effective CVD).
-> - **v1.1 (2026-05-04)**: framework reconciliation with `future_phase2_filter_optimization/CLAUDE.md` §0 (locked 2026-05-03). Adds §0 Framework Decision (specificity-as-descriptive lock, no selection-rule reformulation). Removes closed-testing rule (Machado→R+C) — replaced by per-subject behavioral-PASS-overrides-LOCO. Fixes Sub-08 R+C `g=+2.25 → g=−2.25` (sign error inherited from `results_v3.tex`). Sub-08 R+C structurally retired (behav §2 YG-C collapse). Sub-08 behavioral observed (2026-04-17, not preregistered). §R-6 4-pillar specificity defense reframed as descriptive disclosure. Adds §2.5 loss inventory (2026-05-03) and per-subject status table.
+> - **v1.1 (2026-05-04)**: framework reconciliation with `phase5_filter_optimization/CLAUDE.md` §0 (locked 2026-05-03). Adds §0 Framework Decision (specificity-as-descriptive lock, no selection-rule reformulation). Removes closed-testing rule (Machado→R+C) — replaced by per-subject behavioral-PASS-overrides-LOCO. Fixes Sub-08 R+C `g=+2.25 → g=−2.25` (sign error inherited from `results_v3.tex`). Sub-08 R+C structurally retired (behav §2 YG-C collapse). Sub-08 behavioral observed (2026-04-17, not preregistered). §R-6 4-pillar specificity defense reframed as descriptive disclosure. Adds §2.5 loss inventory (2026-05-03) and per-subject status table.
 
 ---
 
 # §0 Framework Decision (READ FIRST — 절대 재논의 금지)
 
-> **Source of truth**: `analysis/future_phase2_filter_optimization/CLAUDE.md` §0. This INDEX must remain consistent with that lock. Any narrative draft that violates §0 is invalid.
+> **Source of truth**: `analysis/phase5_filter_optimization/CLAUDE.md` §0. This INDEX must remain consistent with that lock. Any narrative draft that violates §0 is invalid.
 
 **Filter selection rule (locked)**: per-subject **LOCO-best descriptive fit + behavioral validation**.
 
@@ -157,7 +157,7 @@
 - **CVD**: 2 main + 1 incidental (Supp).
   - Sub-08 (male, mild–moderate deuteranomalous): Ishihara 8/14 plates misread; 8AFC accuracy 0.71; confusion clustering on c2/c3 (orange/yellow) vs c7 (purple), mean confusion 28%.
   - Sub-09 (male, moderate–severe protanomalous): Ishihara 11/14 misread; 8AFC 0.62; confusion extended along the L-M opponent range with magenta (c8) outlier.
-  - Sub-10 (male, near-normal deutan, Supp only): Ishihara 2/14 misread; 8AFC 0.88 — indistinguishable from HC. Excluded from main analyses per `future_phase2_filter_optimization/CLAUDE.md` rule 7 (behavioral follow-up infeasible at this severity).
+  - Sub-10 (male, near-normal deutan, Supp only): Ishihara 2/14 misread; 8AFC 0.88 — indistinguishable from HC. Excluded from main analyses per `phase5_filter_optimization/CLAUDE.md` rule 7 (behavioral follow-up infeasible at this severity).
 - **Crawford-Howell single-case statement** (closes §M-1): given n=2 effective CVD, all CVD-vs-HC inferences below use Crawford & Howell's (1998) single-case modified t-statistics with leave-one-out HC reference; we make no group-level CVD claim.
 
 **Citations**: `ishihara1917`, `crawford1998`, `schuett2023`.
@@ -267,8 +267,8 @@
 
 ## §M-Reproducibility
 
-- Code: `analysis/future_phase2_filter_optimization/scripts/`; canonical SRM pipeline: `rerun_loo_consistent.py`; LOCO: `loco_baseline.py`; cone-shift fits: `step2c_retinal_cortical.py`, `loco_distortion_fit.py`; pre-image: `preimage_search.py` (+ `preimage_jacobian_check.py` to be added per §M-7).
-- Data: `derivatives/full_dataset_C010` on server `node3`; behavioral data: `analysis/future_phase3_behavioral_analysis/`.
+- Code: `analysis/phase5_filter_optimization/scripts/`; canonical SRM pipeline: `rerun_loo_consistent.py`; LOCO: `loco_baseline.py`; cone-shift fits: `step2c_retinal_cortical.py`, `loco_distortion_fit.py`; pre-image: `preimage_search.py` (+ `preimage_jacobian_check.py` to be added per §M-7).
+- Data: `derivatives/full_dataset_C010` on server `node3`; behavioral data: `analysis/phase6_behavioral_analysis/`.
 
 ---
 
@@ -593,7 +593,7 @@ CVD alters continuous cortical hue geometry with individually-patterned distorti
   - Add new §R-5 (behavioral, conditional).
   - Promote v3 §R-6 "case-level specificity" paragraph → standalone §R-6 with HC FPR figure.
 - [ ] Methods edits: §M-6 (cone-shift loss + closed-testing), §M-7 (bijectivity Jacobian script), §M-8 (HC FPR pointer to §R-6).
-- [ ] Add `analysis/future_phase2_filter_optimization/scripts/preimage_jacobian_check.py`.
+- [ ] Add `analysis/phase5_filter_optimization/scripts/preimage_jacobian_check.py`.
 
 ## §8.2 Phase 1b — Session-2 decision gate
 
@@ -702,7 +702,7 @@ CVD alters continuous cortical hue geometry with individually-patterned distorti
   - Bibliography 22-citation batch incorporated (PLAN_ToC §10.4).
   - PLAN_ToC.md retained as decision-log archive (frozen at v1.0 cut-over).
 
-- **v1.1 (2026-05-04)**: Reconciliation with `future_phase2_filter_optimization/CLAUDE.md` §0 (2026-05-03 lock) and `behav_validation.md` §3 (sub-08 PASS 2026-04-17).
+- **v1.1 (2026-05-04)**: Reconciliation with `phase5_filter_optimization/CLAUDE.md` §0 (2026-05-03 lock) and `behav_validation.md` §3 (sub-08 PASS 2026-04-17).
   - **Added §0 Framework Decision** (top of file, before #Title): filter selection rule, specificity-as-descriptive, behavioral-PASS-overrides-LOCO, no selection-rule reformulation, override procedure.
   - **Removed closed-testing rule** (Machado→R+C if NS) from §M-6c; replaced by per-subject independent fits + behavioral validation.
   - **Fixed Sub-08 R+C g sign**: `+2.25 → −2.25` (sign-inversion + 25% amplification per behav §2-2 + memory). v1.0 inherited error from `results_v3.tex`.

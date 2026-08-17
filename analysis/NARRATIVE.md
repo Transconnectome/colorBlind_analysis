@@ -29,7 +29,7 @@ CVD 피험자가 HC와 유사한 색 인지를 하도록 개인화된 **inverse 
 
 향후 RDM/SRM의 broader role (예: cross-validation으로 활용, 또는 mechanism evidence로 재해석)은 Phase 3 결과 후 검토.
 
-### Stage B — Forward 모델 적합 (future_phase1_forward_model)
+### Stage B — Forward 모델 적합 (phase4_forward_model)
 
 **역할**: HC primary percept → CVD primary percept 변환의 mechanistic 모델 후보 평가.
 
@@ -48,9 +48,9 @@ CVD 피험자가 HC와 유사한 색 인지를 하도록 개인화된 **inverse 
 - Gen-4 task #22: Machado가 family-specific (protan vs deutan) 구별 못함
 - → "모델이 신호를 잡는다"는 기술적 사실이지만 specificity는 별도 검증 필요
 
-저장 위치: `future_phase1_forward_model/results/validation/`
+저장 위치: `phase4_forward_model/results/validation/`
 
-### Stage C — 필터 도출 + Specificity (future_phase2_filter_optimization, 현재)
+### Stage C — 필터 도출 + Specificity (phase5_filter_optimization, 현재)
 
 **역할**: Forward 모델의 numerical inverse → stimulus-space pre-image filter, 그리고 도출된 filter가 진짜 CVD signal을 잡는지 통계적 검증.
 
@@ -73,7 +73,7 @@ Pre-image: 2-component forward 모델의 numerical inverse, 8/8 colors exact.
 | sub-09 | V4-only | β_s=0, β_c=2 | near-trivial (no compensation) |
 | sub-09 | V1+V4 avg | β_s=30.5, β_c=12 | yellow −34°, green −30° |
 
-시각화: `future_phase2_filter_optimization/results/figures/filter_visualization_phase3/`
+시각화: `phase5_filter_optimization/results/figures/filter_visualization_phase3/`
 
 #### Specificity 검증 (Cycle 9~10f, 종결)
 
@@ -106,7 +106,7 @@ Pre-image: 2-component forward 모델의 numerical inverse, 8/8 colors exact.
   - 이론적 cross-ROI (V4|V1: LOCO-V4 + RDM-V1)는 specificity 오히려 *악화* (FP 2/6)
   - → cross-ROI rule은 manuscript에서 "exploratory finding requires Phase 3 validation"으로만 reporting
 
-### Stage D — 행동/뇌영상 검증 (future_phase3_behavioral_analysis, 예정)
+### Stage D — 행동/뇌영상 검증 (phase6_behavioral_analysis, 예정)
 
 **역할**: 도출된 필터를 CVD 피험자에게 적용했을 때 (a) 색 구분 (JND), (b) 색 명명 (naming), (c) 신경 normalization (fMRI repetition suppression)이 개선되는지 검증.
 
@@ -242,8 +242,8 @@ L_cross(β_s, β_c) = α · l_topk_jaccard(V4, β_s, β_c)   ← LOCO-derived, V
 | `phase2_procrustes_cvd_hc/` | RDM 차이 (descriptive only) |
 | `phase2_SRM_across_between/` | sub-09 V1 p=0.007*, sub-08 V2 p=0.040* (descriptive) |
 | `phase3_decoder_comparing/` | Pooled W LOCO/LORO 결과 |
-| `future_phase1_forward_model/results/validation/` | LOCO json (ridge_gcv) |
-| `future_phase2_filter_optimization/action_plans/` | PLAN04, NARRATIVE 등 |
-| `future_phase2_filter_optimization/results/cycle_filter_refinement/` | Cycle 1~10f 결과 |
-| `future_phase2_filter_optimization/results/figures/filter_visualization_phase3/` | **Phase 3 candidate filters viz** |
-| `future_phase3_behavioral_analysis/` | (planning, 미작성) |
+| `phase4_forward_model/results/validation/` | LOCO json (ridge_gcv) |
+| `phase5_filter_optimization/action_plans/` | PLAN04, NARRATIVE 등 |
+| `phase5_filter_optimization/results/cycle_filter_refinement/` | Cycle 1~10f 결과 |
+| `phase5_filter_optimization/results/figures/filter_visualization_phase3/` | **Phase 3 candidate filters viz** |
+| `phase6_behavioral_analysis/` | (planning, 미작성) |

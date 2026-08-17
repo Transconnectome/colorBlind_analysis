@@ -1,7 +1,7 @@
 # Camera-Ready Revision Outline — Path B (closure-canonical reframe)
 
 **Target**: ICML 2026 GenBio workshop (camera-ready of `SD4H_draft_v6.1.tex`)
-**Source of truth**: `future_phase2_filter_optimization/PIPELINE_2_CLOSURE.md` (2026-06-01) + `CLAUDE.md` §0/§2.6/§3
+**Source of truth**: `phase5_filter_optimization/PIPELINE_2_CLOSURE.md` (2026-06-01) + `CLAUDE.md` §0/§2.6/§3
 **Path B = closure-canonical reframe**: the April v6.1 Results conflict with the June-1 closure; this outline encodes the reconciled structure. Do NOT carry over v6.1 Results values.
 
 > **Scope of this artifact**: planning only. No `.tex` edits. All "TBD" items require a data/render step before final numbers — do not fabricate.

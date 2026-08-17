@@ -213,7 +213,7 @@ Targets:
 
 ## 관련 문서
 
-- `analysis/future_phase2_filter_optimization/AGENTS.md` §0 (Framework Decision)
-- `analysis/future_phase2_filter_optimization/results/SUMMARY.md` (현재 상태)
-- `analysis/future_phase2_filter_optimization/results/CANDIDATE/v4ccc_ltopk/hc_specificity.csv` (norm 기반 specificity 예시)
-- `analysis/future_phase2_filter_optimization/raw_behav.md` (P2a ground truth)
+- `analysis/phase5_filter_optimization/AGENTS.md` §0 (Framework Decision)
+- `analysis/phase5_filter_optimization/results/SUMMARY.md` (현재 상태)
+- `analysis/phase5_filter_optimization/results/CANDIDATE/v4ccc_ltopk/hc_specificity.csv` (norm 기반 specificity 예시)
+- `analysis/phase5_filter_optimization/raw_behav.md` (P2a ground truth)

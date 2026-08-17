@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 
 _P2_SCRIPTS = (Path(__file__).resolve().parents[5]
-               / "analysis" / "future_phase2_filter_optimization" / "scripts")
+               / "analysis" / "phase5_filter_optimization" / "scripts")
 sys.path.insert(0, str(_P2_SCRIPTS))
 from stim_lab_render import render_at_hue                      # noqa: E402
 from two_comp import THETA_CONF                                # noqa: E402
@@ -47,7 +47,7 @@ SUBJECTS = [
 
 matplotlib.rcParams.update({
     "font.family": "sans-serif",
-    "font.sans-serif": ["Helvetica", "Arial", "DejaVu Sans"],
+    "font.sans-serif": ["Arial", "Helvetica", "DejaVu Sans"],  # Arial first: IN requires Arial or Helvetica; kept uniform across all figures
     "font.size": 8, "pdf.fonttype": 42, "ps.fonttype": 42,
 })
 

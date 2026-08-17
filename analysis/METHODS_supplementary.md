@@ -57,7 +57,7 @@
 ## Filter Pre-Validation (B1–B3) — 2026-02-18
 
 > **Purpose**: Validate per-pair z-score claims before filter implementation (filter_design_plan.md §7.1).
-> **Script**: `analysis/future_phase2_filter_optimization/pre_validation/filter_pre_validation.py`
+> **Script**: `analysis/phase5_filter_optimization/pre_validation/filter_pre_validation.py`
 > **Runtime**: 22s local (BrainIAK SRM, 1000 bootstrap × SRM retrain)
 
 ### Settings

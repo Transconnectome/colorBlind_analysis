@@ -55,10 +55,10 @@ window 조건: sub-08 6.83× (6/8), sub-09 1.28× (4/8).
 
 ### 포인터
 
-- 코드: `analysis/future_phase3_behavioral_analysis/scripts/jnd_noise_floor.py`
-- 결과: `analysis/future_phase3_behavioral_analysis/results/exp2_behavior/jnd_noise_floor.json`
+- 코드: `analysis/phase6_behavioral_analysis/scripts/jnd_noise_floor.py`
+- 결과: `analysis/phase6_behavioral_analysis/results/exp2_behavior/jnd_noise_floor.json`
 - 입력: `data/behavior/sub-0{1..9}_jnd_ses1_no_filter_summary.csv`, `data/behavior/2nd_exp/{sid}/jnd_ses2_run{1,2}_*_summary.csv`
-- 맥락: `analysis/future_phase3_behavioral_analysis/results/exp2_behavior/behavioral_summary_exp1_exp2.md`
+- 맥락: `analysis/phase6_behavioral_analysis/results/exp2_behavior/behavioral_summary_exp1_exp2.md`
 - 실행: `conda activate srm && python scripts/jnd_noise_floor.py`
 
 ### 논문 반영 판단 (미결)
@@ -92,7 +92,7 @@ sub-09은 exp2에서 **preservation** 논리를 담당한다(`behavioral_summary
 
 - 입력: `data/behavior/2nd_exp/sub-09/jnd_ses2_run2_optimal_sub-09_summary.csv` (`staircase_id`, `start_level`, `jnd_mean`, `jnd_std`, `n_reversals`, `n_trials`)
 - trial 단위: `data/behavior/*_trials.csv`
-- 필터 생성: `analysis/future_phase2_filter_optimization/`
+- 필터 생성: `analysis/phase5_filter_optimization/`
 
 ---
 
@@ -119,7 +119,7 @@ somers2024를 "필터는 appearance를 바꾸지만 threshold discrimination은 
 ### 포인터
 
 - 문헌: `docs/Prior_works/by_section/introduction/introduction_prevFilters_somers2024.pdf`
-- 우리 결과: `analysis/future_phase3_behavioral_analysis/results/exp2_behavior/behavioral_summary_exp1_exp2.md` §2
+- 우리 결과: `analysis/phase6_behavioral_analysis/results/exp2_behavior/behavioral_summary_exp1_exp2.md` §2
 
 ---
 
@@ -278,8 +278,8 @@ s18은 채택 ROI만 보고한다. 전 ROI를 보면 sub-08의 neural-only 해�
 
 ### 포인터
 
-- 선행 분석: `analysis/future_phase2_filter_optimization/results/s10_inclusion/s18_INTERPRETATION.md`, `s18_heldout_predictive.{md,json}`, 코드 `scripts/s18_heldout_predictive.py`
-- 본 재현 코드: `analysis/future_phase2_filter_optimization/scripts/neural_only_ablation.py`
+- 선행 분석: `analysis/phase5_filter_optimization/results/s10_inclusion/s18_INTERPRETATION.md`, `s18_heldout_predictive.{md,json}`, 코드 `scripts/s18_heldout_predictive.py`
+- 본 재현 코드: `analysis/phase5_filter_optimization/scripts/neural_only_ablation.py`
 - 본 재현 결과: `.../results/s10_inclusion/neural_only_ablation.json`
 - 피팅 코드: `.../scripts/s10b_v6_pca_rdm.py` (원자 L74–214, 결합 L556–585), 그리드 `.../scripts/two_comp.py` L47–48
 - 채택 조합 출처: `docs/PAPER/Results/results_v4.tex`, 폴더 `CLAUDE.md` §3
@@ -381,7 +381,7 @@ Methods는 "MNI"라고만 쓴다. COBIDAS는 **specific name + modality + resolu
 | 9 | run당 볼륨 수 | `Number of volumes` 필수(Y) | "≈7 min, TR 1.5 s"에서 유도 가능하나 미기재 |
 | 10 | T1w 획득 파라미터 전체 | `Essential sequence & imaging parameters` | 본문에 해부 스캔 기술 자체가 없음 |
 | 11 | Phase-encoding 방향 / multiband factor / partial Fourier | `Imaging type` | 미기재 (2 mm EPI 왜곡 해석에 필요) |
-| 12 | Motion QC 요약 (mean FD 등) | `Quality control reports` | **데이터 보유** — `future_phase3_behavioral_analysis/exp2_neural/preproc_qc/`, tSNR 값 산출됨 |
+| 12 | Motion QC 요약 (mean FD 등) | `Quality control reports` | **데이터 보유** — `phase6_behavioral_analysis/exp2_neural/preproc_qc/`, tSNR 값 산출됨 |
 | 13 | 분석 유형 라벨 ("Representational Similarity Analysis", "Multivariate intra-subject predictive") | `Analysis type` 필수(Y) | 내용은 있으나 COBIDAS 표준 명칭 미사용 |
 | 14 | 템플릿 구체명 (위 ★) | `Intersubject registration` | 저장소 보유 |
 
@@ -405,7 +405,7 @@ Methods는 "MNI"라고만 쓴다. COBIDAS는 **specific name + modality + resolu
 - 대조 대상: `docs/PAPER/Methods/methods_v2.tex` §MRI acquisition and preprocessing(L67–73), §ROI definition(L76–86); `docs/PAPER/Supplementary/supplementary.tex` S1, S11
 - 저장소 기록: `analysis/METHODS_phase1_baseline.md` L14–33; `docs/PREPROCESSING_METHOD_UPDATE_2025-12-18.md` §6.3, §7.3, L324, L345
 - 전처리 코드: `analysis/phase0_preprocessing/scripts/` (`generate_confounds_mcflirt.py`, `run_method3_header_mi_all_subjects.sbatch`)
-- QC 자료: `analysis/future_phase3_behavioral_analysis/exp2_neural/preproc_qc/`, `preproc_qc_exp1/`
+- QC 자료: `analysis/phase6_behavioral_analysis/exp2_neural/preproc_qc/`, `preproc_qc_exp1/`
 - 템플릿 파일: `analysis/phase0_preprocessing/templates/MNI152NLin2009cAsym_res-2_brain_mask.nii.gz`
 
 ### ✅ 파이프라인 확정 (2026-08-03, 사용자 확인)

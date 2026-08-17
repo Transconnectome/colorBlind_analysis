@@ -3,7 +3,7 @@
 figS16 — LOCO adjacent-accuracy run-count saturation (paper primary metric).
 
 Reads run_count_validation/adjacc_retention_summary.json (produced by
-analysis/future_phase3_behavioral_analysis/scripts/run_count_adjacc.py) and
+analysis/phase6_behavioral_analysis/scripts/run_count_adjacc.py) and
 plots adjacent accuracy vs run count per ROI: HC mean ± SEM band, 91/360 chance
 line, and the two CVD single cases (sub-08 deutan, sub-09 protan).
 Demonstrates the hV4 landmark retains at n=4.
@@ -19,7 +19,7 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
 BASE = Path(__file__).resolve().parents[4]  # repo root (docs/PAPER/Figures/scripts -> repo)
-SUMM = BASE / "analysis/future_phase3_behavioral_analysis/run_count_validation/adjacc_retention_summary.json"
+SUMM = BASE / "analysis/phase6_behavioral_analysis/run_count_validation/adjacc_retention_summary.json"
 OUTDIR = BASE / "docs/PAPER/Figures"
 
 ROIS = ["V1", "V2", "V3", "V4"]

@@ -23,8 +23,8 @@ recommended-model: sonnet
 | `phase2_SRM` | `analysis/phase2_SRM_across_between/` | SRM 기반 정렬 + 그룹 비교 |
 | `phase2_procrustes` | (phase2 내) | Procrustes 정렬 + CVD-HC 비교 |
 | `phase3` | `analysis/phase3_decoder_comparing/` | 디코더 모델 비교 (LORO + LOCO) |
-| `future_phase1` | `analysis/future_phase1_forward_model/` | 360° hue 인코더 (SRQ3) |
-| `future_phase2` | `analysis/future_phase2_filter_optimization/` | CVD 필터 최적화 (SRQ4) |
+| `future_phase1` | `analysis/phase4_forward_model/` | 360° hue 인코더 (SRQ3) |
+| `future_phase2` | `analysis/phase5_filter_optimization/` | CVD 필터 최적화 (SRQ4) |
 
 ---
 

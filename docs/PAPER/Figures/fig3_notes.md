@@ -12,8 +12,8 @@ Output: `fig3_output.png` (300 DPI), `fig3_output.pdf` (vector)
 Each cell (i,j) shows how much larger the correlation distance between colors i and j is in the CVD subject relative to the HC mean, after SRM alignment.
 
 **Data source**: Precomputed ΔRDM upper-triangle vectors (28 pairs from 8×8 RDM):
-- `analysis/future_phase2_filter_optimization/results/diagnostics/srm_precompute/delta_rdm_obs_srm_V1.npz`
-- `analysis/future_phase2_filter_optimization/results/diagnostics/srm_precompute/delta_rdm_obs_srm_V2.npz`
+- `analysis/phase5_filter_optimization/results/diagnostics/srm_precompute/delta_rdm_obs_srm_V1.npz`
+- `analysis/phase5_filter_optimization/results/diagnostics/srm_precompute/delta_rdm_obs_srm_V2.npz`
 
 **Subjects and primary ROIs**:
 - Sub-08 (deutan) shown at V2 — V2 is sub-08's primary ROI where Crawford & Howell t-test is significant (p = .040*)

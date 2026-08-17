@@ -303,18 +303,18 @@ analysis/make_zscore_heatmap.py
 # ============================================
 # Future Phase 2: Legacy filter optimization (superseded by cone-shift pipeline)
 # ============================================
-analysis/future_phase2_filter_optimization/archive_legacy/
+analysis/phase5_filter_optimization/archive_legacy/
 
 # ============================================
 # Cleanup archives (internal, regenerable; too large to track)
 # ============================================
-analysis/future_phase2_filter_optimization/results/_archive/
-analysis/future_phase2_filter_optimization/scripts/_archive/
+analysis/phase5_filter_optimization/results/_archive/
+analysis/phase5_filter_optimization/scripts/_archive/
 
 # ============================================
 # Consolidated binary data (regenerable via consolidate_landscapes_to_parquet.py)
 # ============================================
-analysis/future_phase2_filter_optimization/results/landscapes_consolidated.parquet
+analysis/phase5_filter_optimization/results/landscapes_consolidated.parquet
 *.parquet
 
 # ============================================
@@ -325,18 +325,18 @@ analysis/phase0_preprocessing/results/
 # ============================================
 # Behavioral analysis illustrative images (WIP, large PNGs)
 # ============================================
-analysis/future_phase3_behavioral_analysis/images/
+analysis/phase6_behavioral_analysis/images/
 
 # ============================================
 # exp2_neural preprocessing QC figures (large PNGs, regenerable)
 # ============================================
-analysis/future_phase3_behavioral_analysis/exp2_neural/preproc_qc/
-analysis/future_phase3_behavioral_analysis/exp2_neural/preproc_qc_exp1/
+analysis/phase6_behavioral_analysis/exp2_neural/preproc_qc/
+analysis/phase6_behavioral_analysis/exp2_neural/preproc_qc_exp1/
 
 # ============================================
 # exp2_neural SLURM sbatch (local run configs, not tracked)
 # ============================================
-analysis/future_phase3_behavioral_analysis/exp2_neural/scripts/*.sbatch
+analysis/phase6_behavioral_analysis/exp2_neural/scripts/*.sbatch
 
 # ============================================
 # IRB / scan logs / sensitive experiment documents
@@ -358,3 +358,6 @@ colorblind_sketch.pptx
 # 부록 통합 2026-08-07: S1-S18 이 docs/PAPER/Supplementary/supplementary.tex 로 병합됨.
 # 구 분할본은 이력 보존용으로만 남긴다.
 docs/PAPER/Supplementary/archive/
+
+# post-hoc sensitivity layer (2026-08-17): keep JSON/md/py, ignore bulky QC figures
+analysis/future_phase1_sensitivity/figures/

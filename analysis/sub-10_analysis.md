@@ -1,6 +1,6 @@
 # sub-10 재분석 — CVD signature 탐색 (exploratory)
 
-_2026-06-28. `future_phase2_filter_optimization/CLAUDE.md` §A7/Rule 7 (sub-10 분석 제외)에 대한 **명시적 exploratory override**. production filter selection 불변경, supplementary 탐색 전용._
+_2026-06-28. `phase5_filter_optimization/CLAUDE.md` §A7/Rule 7 (sub-10 분석 제외)에 대한 **명시적 exploratory override**. production filter selection 불변경, supplementary 탐색 전용._
 
 ## 0. 질문
 

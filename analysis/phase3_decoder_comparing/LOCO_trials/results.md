@@ -577,7 +577,7 @@ V1은 방향(orientation), 공간주파수(spatial frequency), 위상(phase) 등
 
 ### SRM 공간 한계 — Pre-validation 결과 종합
 
-Phase 1b 결과와 `future_phase2_filter_optimization/pre_validation/notion.md`의 사전 검증을 종합하면, **SRM 공간은 연속 색 구조에 부적합**하다:
+Phase 1b 결과와 `phase5_filter_optimization/pre_validation/notion.md`의 사전 검증을 종합하면, **SRM 공간은 연속 색 구조에 부적합**하다:
 
 | 문제 | 증거 |
 |------|------|
@@ -826,7 +826,7 @@ W_combined = λ × W_individual + (1-λ) × W_group.
 
 ## Phase 4: Procrustes Filter (★ Main Path)
 
-**이 phase의 상세 결과는 `analysis/future_phase2_filter_optimization/`에 기록됨.**
+**이 phase의 상세 결과는 `analysis/phase5_filter_optimization/`에 기록됨.**
 
 Procrustes 공간에서 FE W matrix 변환으로 CVD 색 표상 교정. SRM은 검증 전용.
 

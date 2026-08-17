@@ -86,7 +86,7 @@ LORO 8-way exact accuracy, SRM 공간, HC 평균 (n=7). 출처 `results/loro/srm
 
 | 파일 | 판독 방식 |
 |---|---|
-| `future_phase1_forward_model/scripts/loco_canonical.py:104` | 360-hue FE basis에서 디코드 후 `round(pv/45)` = 최근접 자극 hue |
+| `phase4_forward_model/scripts/loco_canonical.py:104` | 360-hue FE basis에서 디코드 후 `round(pv/45)` = 최근접 자극 hue |
 | `phase3_decoder_comparing/.../loro_baseline.py:428-429` | 360-hue를 거치지 않고 **8개 템플릿에 직접 argmax** |
 
 45° 간격에서 "최근접 자극 hue 할당"과 "±22.5° 빈"은 정의상 같은 연산이므로 `methods_v2.tex:149`와 부록 S9의 서술은 정합한다. 그러나 **두 구현이 일반적으로 동일한 결과를 내지는 않는다** — 360-hue 상관 프로파일의 argmax가 속한 빈이 8-템플릿 상관의 최댓값과 항상 일치하지는 않기 때문이다.

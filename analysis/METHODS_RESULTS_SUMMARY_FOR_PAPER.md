@@ -14,9 +14,9 @@
 | Phase 2 — SRM between-subject | `METHODS_phase2_srm.md` · `phase2_SRM_across_between/*.md` | group/individual disparity, convergent validity, SRM battery |
 | Phase 2 — Procrustes CVD–HC | `phase2_procrustes_cvd_hc/README.md` | 3-D heterogeneity characterization (RQ2/SRQ1) |
 | Phase 2b — Decoder comparison | `METHODS_phase2b_decoders.md` · `phase3_decoder_comparing/README.md` | LORO/LOCO model comparison, LDA/FE |
-| Future Phase 1 — Forward model | `future_phase1_forward_model/RESULTS.md` | ridge-GCV + FE-6 encoder, GO/NO-GO gate |
-| Future Phase 2 — Filter optimization | `future_phase2_filter_optimization/README.md` + closure docs | 2-comp fit, inverse filter, model selection |
-| Future Phase 3 — Behavioral / exp2 | `future_phase3_behavioral_analysis/README.md` | filter validation (JND, 8AFC), 2nd session |
+| Future Phase 1 — Forward model | `phase4_forward_model/RESULTS.md` | ridge-GCV + FE-6 encoder, GO/NO-GO gate |
+| Future Phase 2 — Filter optimization | `phase5_filter_optimization/README.md` + closure docs | 2-comp fit, inverse filter, model selection |
+| Future Phase 3 — Behavioral / exp2 | `phase6_behavioral_analysis/README.md` | filter validation (JND, 8AFC), 2nd session |
 | PAPER reproduction | `../docs/PAPER/repro/REPORT.md` · `PERMUTATIONS.md` | reproduce ledger + adjacent-accuracy per-ROI permutations |
 | Supplementary validations | `METHODS_supplementary.md` | permutation/bootstrap/split-half battery |
 | Univariate signal | `phase_supplementary/README.md` | overall-signal control |
@@ -40,10 +40,11 @@
 
 ### Phase 2b — Decoder comparison  → `METHODS_phase2b_decoders.md`
 - LORO best = LDA+SRM (0.793, ICC=0.666); LOCO interpolation = ForwardEncoding (sole interpolator)
-- Cross-subject generalization: HC→CVD 0.665 vs HC→HC, Mann-Whitney p=0.668
+- Cross-subject generalization: **HC→CVD 0.432 (8 cells) vs HC→HC 0.526 (28 cells), Mann-Whitney U=163.5, p=0.052, r_rb=0.46** (ForwardEncoding, sub-10 제외).
+  ⚠️ 구값 `0.665 / p=0.668` 은 **LDA + sub-10 포함**이며 인용 금지 (`docs/PAPER/Supplementary/DECODER_AUDIT_2026-08-07.md` §8)
 - Channel→color readout linear (FE_SVM ≈ FE)
 
-### Future Phase 1 — Forward model  → `future_phase1_forward_model/RESULTS.md`
+### Future Phase 1 — Forward model  → `phase4_forward_model/RESULTS.md`
 - Encoder: ridge-GCV + FE-6 basis (smooth_tikh rejected)
 - HC LOCO > 0: V1 p=0.012; HC > CVD gap V1 d=1.61 (p=0.021), V2 d=1.85 (p=0.022)
 - 3/4 ROIs pass GO/NO-GO (V1, V2, hV4 GO; V3 NO-GO)
@@ -59,21 +60,21 @@
 - deutan 0.25 (Crawford-Howell t=-1.89, p=0.054 n.s., d_cc=-2.02); protan 0.13 (t=-3.04, p=0.012, d_cc=-3.25)
 - per-hue single-case: **NO individual hue significant** (blue p=0.051, purple 0.229, magenta 0.096)
 - LORO discrimination: both CVD > 0.125 chance at all ROIs (최저 0.375 @hV4); 단일사례 8검정 전부 p ≥ 0.189 (양측), |d_cc| 0.25–1.58
-- **정렬 공간 정책**: 피험자 내 판독(LORO/LOCO) = Procrustes (`utils_forward_model.load_amplitudes`가 정본), 피험자 간 비교(교차전이·기하) = SRM. SRM 판본은 논문 Supplementary §S20
+- **정렬 공간 정책**: 피험자 내 판독(LORO/LOCO) = Procrustes (`utils_forward_model.load_amplitudes`가 정본), 피험자 간 비교(교차전이·기하) = SRM. SRM 판본은 논문 Supplementary **§S11** (2026-08-07 재번호 이전 §S20)
 - driver: `docs/PAPER/repro/_perm_adjacent_n7.py` (정본 `loco_canonical`과 1e-12 일치 검증 내장, 4 ROI 3분)
 
-### Future Phase 2 — Filter  → `future_phase2_filter_optimization/README.md`
+### Future Phase 2 — Filter  → `phase5_filter_optimization/README.md`
 - 2-comp argmin: deutan (β_s=6°, β_c=-42°), protan (β_s=2°, β_c=+24°)
 - Filter mean |δθ|: deutan 26.3°, protan 16.2°
 - Held-out composite test-loss: deutan -2.36 (IQR 2.15), protan -1.54 (IQR 1.42); N=300 resamples
 - Identifiability: 2-comp 12/12 fail absolute recovery; 0/6 recovery survive FDR → descriptive embedding only
 - Exp2 filter validation: **N=2** (sub-08 deutan, sub-09 protan), 단일 세션·4 runs/조건 → **descriptive only**. 상세 = 아래 exp2 블록 · `exp2_neural/RESULTS.md` · ResearchNOTE §6.5.
 
-### Future Phase 3 — exp2 filter validation (N=2, descriptive)  → `future_phase3_behavioral_analysis/exp2_neural/RESULTS.md` · ResearchNOTE §6.5 · `future_phase4_geometry_synthesis/FINDINGS.md`
+### Future Phase 3 — exp2 filter validation (N=2, descriptive)  → `phase6_behavioral_analysis/exp2_neural/RESULTS.md` · ResearchNOTE §6.5 · `future_phase3_geometry_synthesis/FINDINGS.md`
 
 2nd MRI: sub-08(deutan)+sub-09(protan), 조건 = no-filter / deployed accessibility filter / individualized filter. N=2, 4 runs/조건 → descriptive (Cohen's d vs HC; inferential p 없음). **명칭: "individualized filter"(구 Optimal/personalized), "deployed accessibility filter"(구 Window).**
 
-**primary — hV4 LOCO adjacent accuracy** (chance 0.375, HC 0.46±0.11) — 두 피험자 **정반대**:
+**primary — hV4 LOCO adjacent accuracy** (chance **0.25** = 91/360, HC 0.46±0.11, n=6 at hV4) — 두 피험자 **정반대**:
 
 | | no-filter | deployed | individualized |
 |---|---|---|---|

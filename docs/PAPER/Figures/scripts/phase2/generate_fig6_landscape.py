@@ -24,7 +24,7 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import Normalize
 
 _P2_SCRIPTS = (Path(__file__).resolve().parents[5]
-               / "analysis" / "future_phase2_filter_optimization" / "scripts")
+               / "analysis" / "phase5_filter_optimization" / "scripts")
 sys.path.insert(0, str(_P2_SCRIPTS))
 from two_comp import BS_GRID, BC_GRID                                   # noqa: E402
 from viz_closure_ground_plot import (                                   # noqa: E402
@@ -35,7 +35,7 @@ OUT = Path(__file__).resolve().parents[2]
 
 matplotlib.rcParams.update({
     "font.family": "sans-serif",
-    "font.sans-serif": ["Helvetica", "Arial", "DejaVu Sans"],
+    "font.sans-serif": ["Arial", "Helvetica", "DejaVu Sans"],  # Arial first: IN requires Arial or Helvetica; kept uniform across all figures
     "font.size": 9, "axes.titlesize": 10, "pdf.fonttype": 42, "ps.fonttype": 42,
 })
 

@@ -16,11 +16,15 @@ Subjects: HC sub-01~07 (N=7); CVD sub-08 deutan, sub-09 protan, sub-10 deutan.
 ## Pipeline (4 stages) — 현황
 | Stage | 목적 | 코드 | 상태 |
 |---|---|---|---|
-| A | HC–CVD 신경차 (SRM/RDM/LOCO) | `phase1_procrustes_decoding`,`phase2_SRM_across_between`,`phase2_procrustes_cvd_hc`,`phase3_decoder_comparing`,`future_phase1_forward_model` | Complete |
-| B+C | simulator 피팅 → stimulus-space 필터(pre-image) | **`future_phase2_filter_optimization`** | closure-ready |
-| D | 필터 검증 (JND + fMRI, exp2) | `future_phase3_behavioral_analysis` | Planning (N=2) |
+| A | HC–CVD 신경차 (SRM/RDM/LOCO) | `phase1_procrustes_decoding`,`phase2_SRM_across_between`,`phase2_procrustes_cvd_hc`,`phase3_decoder_comparing`,`phase4_forward_model` | Complete |
+| B+C | simulator 피팅 → stimulus-space 필터(pre-image) | **`phase5_filter_optimization`** | closure-ready |
+| D | 필터 검증 (JND + fMRI, exp2) | `phase6_behavioral_analysis` | Complete (N=2) |
+| E | **사후 분석** | `future_phase1_sensitivity`, `future_phase2_topology`, `future_phase3_geometry_synthesis` | Active |
 
-작업은 기본적으로 `future_phase2_filter_optimization/` 우선; 시작 전 그 폴더 CLAUDE.md(§0 Framework Decision) 정독.
+**폴더 재편 2026-08-17**: `future_phase{1,2,3}_*` → `phase{4,5,6}_*` (본 파이프라인 완료), `phase4_topology` → `future_phase2_topology`, `future_phase4_geometry_synthesis` → `future_phase3_geometry_synthesis`. `future_phase*` 는 이제 **사후 분석 계층**을 뜻한다.
+- `future_phase1_sensitivity` — 전처리 축 검정. 정리 문서 = 그 폴더 `README.md`, arm 스크립트·산출·그림 동봉
+
+필터 관련 작업은 `phase5_filter_optimization/` 우선; 시작 전 그 폴더 CLAUDE.md(§0 Framework Decision) 정독. 전처리 강건성 관련은 `future_phase1_sensitivity/README.md` 정독.
 
 ## Data flow
 raw `data/sub-*/` → fmriprep `derivatives/` → **C010 amplitudes** = 모든 하위 phase 입력:
@@ -29,13 +33,13 @@ trial_type `color_1..8` = red,orange,yellow,green,cyan,blue,purple,magenta (+bla
 자극 = **균일 색 원반**(grating 아님 — 스크립트 RadialStim은 런타임 미렌더); 논문·그림은 "uniform disc"로 기술.
 
 ## Canonical scripts
-- Forward model: `future_phase1_forward_model/step_{a..d}_*.py`, `loco_canonical.py`
+- Forward model: `phase4_forward_model/step_{a..d}_*.py`, `loco_canonical.py`
 - SRM: `phase2_SRM_across_between/rerun_loo_consistent.py` (원복 금지)
-- Filter fit: `future_phase2_filter_optimization/scripts/s10b_v6_pca_rdm.py` (v6 PCA canonical)
+- Filter fit: `phase5_filter_optimization/scripts/s10b_v6_pca_rdm.py` (v6 PCA canonical)
 - PsychoPy exp: `~/…/OneDrive-Personal/Projects/colorBlind/colorBlind_test.py` (repo 밖)
 
 ## Naming & output
-phase 폴더 `phase{N}_*`(frozen) / `future_phase{N}_*`(active) / `_archive`(폐기). 데이터셋 토큰 `C010`.
+phase 폴더 `phase{N}_*`(본 파이프라인, frozen) / `future_phase{N}_*`(**사후 분석**, active) / `_archive`(폐기). 데이터셋 토큰 `C010`.
 출력 flat, **timestamp 서브디렉토리 금지**(SLURM array 충돌), per-subject `sub-{ID}_*.json`, 배치당 `config.json` 1개.
 **Figure captions**: NeuroImage 관례를 따라 **측정 대상·방법·기호·검정 방향만** 기술하고 결과 문장은 넣지 않는다. 전역 `~/.claude/writing/academic_writing_rules.md` §13("캡션은 takeaway를 진술")과 충돌하며, 이 프로젝트에서는 본 규칙이 우선한다.
 

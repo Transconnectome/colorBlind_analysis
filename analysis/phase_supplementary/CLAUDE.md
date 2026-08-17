@@ -22,4 +22,4 @@
 3. 결과 저장: flat `results/`, 그림은 `figures/`, png+pdf 동시 출력.
 4. seaborn 금지 (matplotlib only).
 5. 이 폴더는 LOCO accuracy(exp2) 작업과 무관 — 그건
-   `future_phase3_behavioral_analysis/exp2_neural/`.
+   `phase6_behavioral_analysis/exp2_neural/`.

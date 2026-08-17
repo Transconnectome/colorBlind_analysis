@@ -37,7 +37,7 @@ FIG5   = BASE / 'docs/PAPER/Figures/fig5_preimage.png'
 # CEMB unused — Stage A uses synthetic scatter (see Panel C section)
 
 # ── Load sub-08 pre-image JSON ─────────────────────────────────────────────────
-_P08_JSON = (BASE / 'analysis/future_phase2_filter_optimization/results/fits'
+_P08_JSON = (BASE / 'analysis/phase5_filter_optimization/results/fits'
              '/preimage_2component/sub-08_V4_2component_preimage.json')
 try:
     with open(_P08_JSON) as _f:

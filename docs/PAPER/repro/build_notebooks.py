@@ -213,7 +213,7 @@ nb04 = nb([
     PROV,
     md("""**Source & code map**
 
-| id | reported | source JSON (`future_phase2_filter_optimization/results/`) | mode |
+| id | reported | source JSON (`phase5_filter_optimization/results/`) | mode |
 |---|---|---|---|
 | E4.4 | deutan argmin (6,−42), L_test −2.36 (IQR 2.15) | `s10b…sub-08.json` `summary['γOY|RDMV2|noLOCO'].per_model.2comp` | LOAD+VERIFY |
 | E4.5 | protan argmin (2,+24), L_test −1.54 (IQR 1.42) | `…sub-09.json` `summary['γALL|RDMV1|noLOCO']…` | LOAD+VERIFY |
@@ -255,7 +255,7 @@ U.check("E4.13 protan mean|dtheta|", U.preimage_mean_abs_delta("09"), 16.2, tol=
 nb05 = nb([
     md("# 05 — Identifiability checks S15 (E5)\nResults §7, S15. **LOAD+VERIFY** (v6 PCA redteam)."),
     PROV,
-    md("""**Source & code map** (`future_phase2_filter_optimization/results/redteam/`)
+    md("""**Source & code map** (`phase5_filter_optimization/results/redteam/`)
 
 | id | reported | source JSON | mode |
 |---|---|---|---|
@@ -295,7 +295,7 @@ nb06 = nb([
 Results §8–9, Fig 8. **LOAD+VERIFY**. ⚠ **deutan (sub-08) only** — protan (sub-09)
 2nd session NOT yet collected; all numbers single-case descriptive."""),
     PROV,
-    md("""**Source & code map** (`future_phase3_behavioral_analysis/`)
+    md("""**Source & code map** (`phase6_behavioral_analysis/`)
 
 | id | reported | source JSON | mode |
 |---|---|---|---|

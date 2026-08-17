@@ -26,12 +26,12 @@ import sys
 # ---------------------------------------------------------------------------
 _SCRIPT_DIR = Path(__file__).resolve().parent
 _PROJECT_DIR = _SCRIPT_DIR.parents[2]   # colorBlind_analysis/
-_PIPELINE_DIR = _PROJECT_DIR / 'analysis' / 'future_phase2_filter_optimization'
+_PIPELINE_DIR = _PROJECT_DIR / 'analysis' / 'phase5_filter_optimization'
 _RESULT_DIR = _PIPELINE_DIR / 'results' / 'loco_filter'
 _OUT_DIR = _SCRIPT_DIR / 'figures'
 _OUT_DIR.mkdir(exist_ok=True)
 
-_FWD_DIR = str(_PIPELINE_DIR.parent / 'future_phase1_forward_model' / 'scripts')
+_FWD_DIR = str(_PIPELINE_DIR.parent / 'phase4_forward_model' / 'scripts')
 _SCRIPTS_DIR = str(_PIPELINE_DIR / 'scripts')
 if _FWD_DIR not in sys.path:
     sys.path.insert(0, _FWD_DIR)

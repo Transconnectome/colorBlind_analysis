@@ -20,7 +20,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
-RES_DIR = PROJECT_ROOT / "analysis" / "future_phase3_behavioral_analysis" / \
+RES_DIR = PROJECT_ROOT / "analysis" / "phase6_behavioral_analysis" / \
     "run_count_validation"
 
 # Aesthetics

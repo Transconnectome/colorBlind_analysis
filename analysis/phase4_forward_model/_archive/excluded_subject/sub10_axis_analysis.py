@@ -19,7 +19,7 @@ from itertools import combinations
 BASE = os.path.dirname(os.path.abspath(__file__))
 PROJECT = os.path.dirname(os.path.dirname(BASE))
 ALIGNED_DIR = os.path.join(PROJECT, "analysis/phase2_SRM_across_between/results/c010/combined_with_aligned")
-LOCO_DIR = os.path.join(PROJECT, "analysis/future_phase1_forward_model/results/loco_reinforcement")
+LOCO_DIR = os.path.join(PROJECT, "analysis/phase4_forward_model/results/loco_reinforcement")
 AMP_DIR = os.path.join(PROJECT, "analysis/phase1_procrustes_decoding/results/full_dataset_C010")
 
 COLOR_NAMES = ['red', 'orange', 'yellow', 'green', 'cyan', 'blue', 'purple', 'magenta']

@@ -2,7 +2,7 @@
 # run_all.sh — Sequential orchestrator with SLURM dependency chaining
 #
 # Usage (from server):
-#   cd /scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model
+#   cd /scratch/connectome/haba6030/colorBlind/analysis/phase4_forward_model
 #   bash run_all.sh
 
 set -e

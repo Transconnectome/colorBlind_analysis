@@ -58,7 +58,7 @@ from forward_voxel_synth import (                                # noqa: E402
 )
 from s8_loo_train_test import jnd_baseline_from_pool             # noqa: E402
 
-_PHASE1_FWD = SCRIPT_DIR.parents[1] / "future_phase1_forward_model" / "scripts"
+_PHASE1_FWD = SCRIPT_DIR.parents[1] / "phase4_forward_model" / "scripts"
 sys.path.insert(0, str(_PHASE1_FWD))
 from utils_forward_model import create_basis_full, HUE_ANGLES   # noqa: E402
 

@@ -46,7 +46,7 @@ Before any exp2 data analysis:
 - Compute HYPO / HC-equivalent lists per subject
 - Save to `results/hypo_prediction/sub-{ID}_hypo_pairs.json` with timestamp
 - Commit to git with tag `exp2_hypo_preregister`
-- Document the (Δλ, g) values used (from `future_phase2_filter_optimization/results/...`)
+- Document the (Δλ, g) values used (from `phase5_filter_optimization/results/...`)
 
 ### Validation hypothesis (analysis B)
 ```

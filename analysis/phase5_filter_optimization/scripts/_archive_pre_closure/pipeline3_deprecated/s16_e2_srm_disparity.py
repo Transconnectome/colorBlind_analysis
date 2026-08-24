@@ -33,7 +33,7 @@ from brainiak.funcalign.srm import SRM
 from scipy.interpolate import interp1d
 
 ROOT_AMPL = Path('/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase1_procrustes_decoding/results/visualization/full_dataset_C010_with_residuals')
-OUT_DIR = Path('/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase2_filter_optimization/results/oos_reanalysis_v1')
+OUT_DIR = Path('/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase5_filter_optimization/results/oos_reanalysis_v1')
 
 HC_SUBJECTS = [f'sub-0{i}' for i in range(1, 8)]
 ROI_K = {'V1': 4, 'V2': 4, 'V4': 3}

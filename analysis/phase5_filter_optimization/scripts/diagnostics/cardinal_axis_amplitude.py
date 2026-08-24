@@ -27,7 +27,7 @@ DATA = Path('/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/'
             'visualization/full_dataset_C010_with_residuals')
 
 OUT = Path('/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/'
-           'colorBlind_analysis/analysis/future_phase2_filter_optimization/'
+           'colorBlind_analysis/analysis/phase5_filter_optimization/'
            'results/cardinal_axis_amplitude')
 OUT.mkdir(parents=True, exist_ok=True)
 

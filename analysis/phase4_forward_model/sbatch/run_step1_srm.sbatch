@@ -5,7 +5,7 @@
 #SBATCH --mem=8G
 #SBATCH --time=01:00:00
 #SBATCH --no-requeue
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase4_forward_model
 #SBATCH --output=logs/step1_srm_%j.out
 #SBATCH --error=logs/step1_srm_%j.err
 

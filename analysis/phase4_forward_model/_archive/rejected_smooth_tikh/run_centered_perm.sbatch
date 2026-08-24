@@ -5,7 +5,7 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --time=08:00:00
 #SBATCH --no-requeue
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase4_forward_model
 #SBATCH --output=logs/centered_perm.out
 #SBATCH --error=logs/centered_perm.err
 

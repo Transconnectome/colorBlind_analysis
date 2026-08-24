@@ -44,10 +44,10 @@ python3 generate_fig2.py
 | fig_forward_encoder | ArialMT, Arial-Bold/ItalicMT | ✅ |
 | figS_forward_tuning | ArialMT, Arial-BoldMT | ✅ |
 | figS16_adjacc_saturation | ArialMT, Arial-Bold/ItalicMT | ✅ |
-| **fig1_generated_v2** | **DejaVuSans 계열** | ❌ 생성 스크립트 부재 — 수작업 합성물 |
-| **fig3_workflow** | **Aptos**(합성 원본 기준) | ❌ PowerPoint 수작업 합성물 |
+| fig1_paradigm_v3 (Figure 1) | ArialMT, Arial-Bold/ItalicMT | ✅ **2026-08-18 해결** — `generate_fig1_v3.py` 로 전면 재작성 |
+| fig3_workflow (Figure 3) | ArialMT, Arial-BoldMT | ✅ **2026-08-18 해결** — PowerPoint 재출력 |
 
-두 잔여 파일은 §아래 참조.
+**잔여 없음. `main.pdf` 전체에서 DejaVu·Aptos·Cmsy 가 모두 사라졌다.**
 
 ## fig3_workflow — PowerPoint 경로
 
@@ -57,10 +57,26 @@ python3 generate_fig2.py
 **LibreOffice 자동 변환은 실패했다.** XML 에서 Aptos→Arial 치환 후 `soffice --headless --convert-to pdf` 한 결과, 페이지 크기가 842×299.5 → 960×540 으로 바뀌고 텍스트 메트릭 차이로 레이아웃이 깨졌다:
 박스 제목 잘림(`Candidate loss atoms`→`Candidate loss`, `Personalized filter`→`Personalized`), `Not selected` 배지→`Not`, 박스 1 수식이 테두리 밖으로 넘침.
 
-**따라서 PowerPoint 에서 수동 처리해야 한다.** 편의를 위해 글꼴만 Arial 로 치환한 `Presentation1_arial_fontpatched.pptx` 를 같은 폴더에 두었다. 절차:
-1. PowerPoint 로 연다
-2. 텍스트 상자 넘침·잘림을 눈으로 확인하고 상자 크기/폰트 크기를 조정한다
-3. PDF 로 내보내고 `fig3_workflow_composited.pdf` 및 `fig3_workflow.png` 를 갱신한다
-4. `pdffonts` 로 Arial 만 남았는지 확인한다
+### 해결 (2026-08-18)
 
-원본 `Presentation1.pptx` 는 손대지 않았다.
+사용자가 PowerPoint 에서 재출력했다 → `fig3_assets/Presentation1_arial_fontpatched.{pdf,png}`.
+
+검증 결과:
+
+| 항목 | 결과 |
+|---|---|
+| 임베드 폰트 | ArialMT + Arial-BoldMT **만** (Aptos·DejaVu·Cmsy 전무) |
+| LibreOffice 가 깨뜨렸던 지점 | 5개 박스 제목 전부 완전, `Not selected` 배지 완전, 박스 1 수식이 테두리 안 — **전부 정상** |
+| CropBox | `[43.37, 139.89, 800.24, 417.55]` = 756.87×277.66 — 콘텐츠 밴드로 잡혀 LaTeX 가 여백을 자동 제거 (원본보다 타이트) |
+
+**부수 이득**: 원고가 이제 `fig3_workflow.pdf`(벡터)를 집는다. 이전에는 래스터 PNG 였으므로 인쇄 품질이 개선됐다.
+
+반영: `fig3_workflow.pdf` / `fig3_workflow_composited.pdf` / `fig3_workflow.png`(RGBA→RGB 평탄화, 300 dpi) 갱신. 구 Aptos 판본은 `archive/fig3_aptos_superseded_2026-08-18/` 로 이동. 원본 `Presentation1.pptx` 는 손대지 않았다.
+
+## fig1_generated_v2 (Figure 1) — 유일한 잔여
+
+이미지 생성 AI 산출물이고 생성 스크립트가 없다. 아카이브의 `generate_fig1.py` 는 다른 산출물(`fig1_paradigm`)을 만들지만, 그 도크스트링에 **실제 해부 렌더링**이 있다고 기록되어 있다.
+
+> `B  Real ROI flatmap: V1/V2/V3/hV4 on inflated brain (nilearn + VTPM Wang 2015 maxprob atlas)`
+
+권장 경로: 뇌·ROI 패널은 이 실제 렌더링을 쓰고, 박스·화살표·텍스트는 PowerPoint(Arial)로 조립한다. 그러면 ① 폰트 요건 충족 ② AI 이미지가 사라져 공개 문안이 코드 첨삭만으로 축소(`COVER_LETTER_DRAFT.md` 블록 4 초안 B) ③ AI 생성 뇌 해부의 신뢰성 위험 제거.

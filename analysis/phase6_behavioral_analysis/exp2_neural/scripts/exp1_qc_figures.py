@@ -25,7 +25,7 @@ from nilearn import plotting
 
 FMRIPREP = Path("/storage/connectome/haba6030/fmriprep_out_method3_header_mi")
 ROIDIR   = Path("/scratch/connectome/haba6030/colorBlind/analysis/roi_masks/method3_header_mi")
-OUTBASE  = Path("/scratch/connectome/haba6030/colorBlind/analysis/future_phase3_behavioral_analysis/exp2_neural/preproc_qc_exp1")
+OUTBASE  = Path("/scratch/connectome/haba6030/colorBlind/analysis/phase6_behavioral_analysis/exp2_neural/preproc_qc_exp1")
 N_RUNS = 6
 ROIS = ["V1", "V2", "V3", "hV4"]
 

@@ -2,8 +2,8 @@
 #SBATCH --job-name=cb_filt_prep
 #SBATCH --array=1-2
 #SBATCH --chdir=/scratch/connectome/haba6030/colorBlind
-#SBATCH --output=/scratch/connectome/haba6030/colorBlind/analysis/future_phase3_behavioral_analysis/comprehensive_pipeline/logs/01_preprocess_sub-%a_%A.out
-#SBATCH --error=/scratch/connectome/haba6030/colorBlind/analysis/future_phase3_behavioral_analysis/comprehensive_pipeline/logs/01_preprocess_sub-%a_%A.err
+#SBATCH --output=/scratch/connectome/haba6030/colorBlind/analysis/phase6_behavioral_analysis/comprehensive_pipeline/logs/01_preprocess_sub-%a_%A.out
+#SBATCH --error=/scratch/connectome/haba6030/colorBlind/analysis/phase6_behavioral_analysis/comprehensive_pipeline/logs/01_preprocess_sub-%a_%A.err
 #SBATCH --time=12:00:00
 #SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
@@ -62,7 +62,7 @@ mkdir -p ${SUBJECTS_DIR}
 # Output namespaces under ses-02 to preserve ses-01
 mkdir -p ${OUTPUT_DIR}/sub-${SUBJECT_ID}/ses-${SESSION}/{func,anat,transforms}
 mkdir -p ${WORK_DIR}
-mkdir -p ${PROJECT_ROOT}/analysis/future_phase3_behavioral_analysis/comprehensive_pipeline/logs
+mkdir -p ${PROJECT_ROOT}/analysis/phase6_behavioral_analysis/comprehensive_pipeline/logs
 
 # -----------------------------------------------------------------------------
 # Input files (ses-02 BIDS; fall back to ses-01 anat if ses-02 anat absent)

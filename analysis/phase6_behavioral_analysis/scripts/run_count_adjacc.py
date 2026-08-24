@@ -27,7 +27,7 @@ import numpy as np
 from joblib import Parallel, delayed
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
-sys.path.insert(0, str(PROJECT_ROOT / "analysis" / "future_phase1_forward_model" / "scripts"))
+sys.path.insert(0, str(PROJECT_ROOT / "analysis" / "phase4_forward_model" / "scripts"))
 
 from loco_canonical import loco_forward_readouts  # noqa: E402
 from utils_forward_model import (  # noqa: E402
@@ -37,7 +37,7 @@ from utils_forward_model import (  # noqa: E402
 
 BASELINE_DIR = PROJECT_ROOT / "analysis" / "phase1_procrustes_decoding" / \
     "results" / "visualization" / "full_dataset_C010_with_residuals"
-OUT_DIR = PROJECT_ROOT / "analysis" / "future_phase3_behavioral_analysis" / \
+OUT_DIR = PROJECT_ROOT / "analysis" / "phase6_behavioral_analysis" / \
     "run_count_validation"
 
 ROIS = ["V1", "V2", "V3", "V4"]

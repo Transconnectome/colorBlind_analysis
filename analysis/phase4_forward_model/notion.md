@@ -1135,7 +1135,7 @@ LOCO는 W를 매 fold 재추정 → df 부족 직접 영향. Filter는 W 고정(
 2. **Filter T_ψ 최적화** — W_CVD @ C(T_ψ(θ)) ≈ Y_HC(θ) 최소화, Fourier k=1~2
 3. **LOCO-style 검증** — 7색으로 T_ψ 학습 → 1색 예측 (과적합 방지)
 4. **행동 과제(JND 2AFC) 연계** — T_ψ 예측과 JND 변화 비교
-5. **`future_phase2_filter_optimization/`으로 전환**
+5. **`phase5_filter_optimization/`으로 전환**
 
 ### 12f. 의사결정 기준
 
@@ -1252,7 +1252,7 @@ theta → T_psi(theta) → C(T_psi(theta)) → W_CVD @ C(T_psi(theta)) ≈ Y_HC
 ## 부록 B: 프로젝트 구조
 
 ```
-future_phase1_forward_model/
+phase4_forward_model/
 ├── scripts/
 │   ├── (30+ 기존 baseline 스크립트)
 │   ├── dimensionality/                          ← Exp C1/C2
@@ -1563,7 +1563,7 @@ V2만 Isomap이 MDS보다 우수 → L−M cone-opponent 축의 곡면 다양체
 
 ### D.7 데이터 참조
 
-- **스크립트**: `future_phase2_filter_optimization/target_prevalidation/cielab_vs_angular_rdm.py`
+- **스크립트**: `phase5_filter_optimization/target_prevalidation/cielab_vs_angular_rdm.py`
 - **결과 디렉토리**: `target_prevalidation/results/cielab_diagnostic/`
 - **JSON 요약**: `cielab_diagnostic_summary.json` (stress 곡선, Mantel 검정, persistent homology, 고차원 MDS, isomap, 피험자별, 판정 프레임워크)
 - **그림**: `fig1_stress_curve.png` ~ `fig6_per_subject.png`

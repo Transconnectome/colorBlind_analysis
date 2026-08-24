@@ -19,8 +19,8 @@
 
 | | 개수 | 항목 |
 |---|---|---|
-| ❌ **차단** | **2** | B5 커버레터 블록 1·2·4 · B6 추천 심사자 **충돌 확인**(후보 초안은 완료) |
-| 🟡 잠정 | 2 | B7 AI 사용 진술(그림 번호·투고 직전 재확인) · B2c back matter 잔여 `\todo` 3건(Zenodo DOI·감사 문구·AI 그림 번호) |
+| ❌ **차단** | **2** | B5 커버레터 블록 1·2 · B6 추천 심사자 **충돌 확인**(후보 초안은 완료) |
+| 🟡 잠정 | 2 | B7 AI 사용 진술(투고 직전 재확인) · B2c back matter 잔여 `\todo` **2건**(Zenodo DOI·감사 문구) |
 | 🔴 **정확성** | **1** | **X1 — `Supplementary/supplementary.tex:46` 이 현재 사실과 다른 문장을 담고 있다.** 형식 항목이 아니라 원고 내용 오류이며, 두 개의 미반영 수정계획(§10.3 P0)에 함께 걸려 있다 |
 | ⚠ 확인 | 4 | W5 그림 폰트(**8/9 완료**, 잔여 2건은 수작업 합성물) · W6 코드 공개 상태 · W7 PDF 최신성 · W8 scope 논증 · W10 공저자 승인·CC BY 동의 |
 | ✅ 충족 | 23 | 윤리·동의·키워드·절 번호·본문 순서·부록 분량·표 서식·참고문헌 · 저자/교신 정보 · back matter 구성 · 데이터 가용성 문안 · **파생데이터 공개 가부 판정(W9)** · **Funding 지원기관** |
@@ -115,7 +115,7 @@ IN 의 scope 문장은 임상군 연구를 **질환 효과 보고**로 읽는 �
 | # | 요건 | 상태 | 근거 / 조치 |
 |---|---|---|---|
 | 4.1 | 전 요소 통합 **단일 PDF** | ⚠ | 현재 `main.pdf` = **72쪽**(클래스 전환으로 92 → 72). `colorblind_main.pdf` 는 2026-08-08 빌드로 stale — **W7: 본문 P0–P5 반영 후 최종 재빌드** |
-| 4.2 | 그림·표를 의도 위치에 인라인 | ✅ | 본문 그림 8개(Methods 3 / Results 5), Supplementary 그림 2 · 표 17. 전 `\includegraphics` 대상 파일 실존 확인 완료 |
+| 4.2 | 그림·표를 **의도 위치에** 인라인 (IN 이 명시적으로 권장) | ✅ | **클래스 전환 후 문제가 드러나 수정했다.** apa6 `man` 은 APA 관례상 모든 플로트를 끝으로 보냈고, 전환 후에도 기본 float 파라미터로는 8개가 33–40쪽에 몰렸다(Figure 1 이 첫 언급보다 28쪽 뒤). ① `figure*`(2단 플로트, 단일 컬럼 클래스에서 배치 불가) → `figure` 8건 ② `[tb]` → `[htbp]` 6건 ③ `topfraction`/`textfraction` 등 완화. 결과 **8/8 이 자기 소속 섹션 안에 배치**(Methods 5–21쪽, Results 22–32쪽), 69쪽으로 감소 |
 | 4.3 | 페이지 번호 | ✅ | apa6 `man` 모드 기본 출력 |
 | ~~W1~~ | 줄 번호 (ideally) | ✅ | **적용.** `lineno` + `\linenumbers`. amsmath 패치를 함께 넣어 numbered display equation 8개(Methods 6 · Supplementary 2)가 전부 살아남는 것을 (1)–(8) 번호로 확인 |
 | ~~W4~~ | **IN 제공 style file** 사용 | ✅ | **전환 완료 (2026-08-17).** `apa6[man,british]` → `imag-ms-template`(리포지토리 내 `imaging_neuro_tex/` 에 있던 저널 제공 클래스). 서지는 apacite/BibTeX → **biblatex/biber(style=apa)**, 인용 93건 remap(`\cite`→`\parencite` 33, `\citep` 37 은 natbib=true 로 무변경, `\citeA`→`\textcite` 13, `\citeNP`→`\citealp` 10). 저자 블록은 apa6 전용 `\fourauthors`/`\authornote` 대신 위첨자 소속 + correspondence 줄로 재작성. `secnumdepth` 우회 코드는 예상대로 불필요해져 삭제 |
@@ -129,7 +129,7 @@ IN 의 scope 문장은 임상군 연구를 **질환 효과 보고**로 읽는 �
 |---|---|---|
 | 5.1 | Word 또는 LaTeX 원본 제출 (+ 컴파일된 PDF 동봉), TeX 패키지 전 요소 포함 | ⚠ Overleaf 패키지 `overleaf_upload.zip` 갱신 필요 |
 | 5.2 | 그림을 **본문 인라인 + 개별 파일**로 동시 제공. PDF/EPS/JPG/PNG/TIFF, 개당 ~10MB 이하 | ✅ 최대 `fig3_workflow_composited.pdf` 3.3MB — 전 파일 10MB 이하 |
-| **W5** | 그림 내부 폰트 **Arial 또는 Helvetica** | 🟡 **8/9 완료.** `MATPLOTLIBRC` 로 Arial + mathtext 강제 후 전 그림 재생성·육안 검증. 방법과 근거는 [`Figures/scripts/FONT_POLICY.md`](Figures/scripts/FONT_POLICY.md). **잔여 2건은 수작업 합성물**: `fig1_generated_v2`(생성 스크립트 부재), `fig3_workflow`(PowerPoint 합성, 글꼴 Aptos) |
+| ~~W5~~ | 그림 내부 폰트 **Arial 또는 Helvetica** | ✅ **10/10 완료 (2026-08-18).** `main.pdf` 전체 폰트 감사에서 DejaVu·Aptos·Cmsy 전무. 경로: ① `MATPLOTLIBRC` 로 Arial+mathtext 강제 후 8건 재생성·육안 검증(fig2 패널 라벨 겹침 결함 1건 발견·수정) ② Figure 3 = PowerPoint 재출력(벡터화 부수 이득) ③ Figure 1 = `generate_fig1_v3.py` 로 전면 재작성. 방법·검증은 [`Figures/scripts/FONT_POLICY.md`](Figures/scripts/FONT_POLICY.md) |
 | 5.3 | 표는 표 객체로(탭/콤마 텍스트 금지), **음영·색상 글자 금지** | ✅ Supplementary 17개 표 전부 `booktabs`, `\rowcolor`/`\cellcolor`/`\textcolor` 사용 0건. (주의: `main.tex:31` 의 `\todo{}` 가 빨간 글자 — B2 해소 시 함께 제거) |
 | 5.4 | Supplementary ≤ 100MB, 설명 텍스트(제목·캡션) 동반 → PDF 권장 | ✅ 텍스트·표 위주 |
 
@@ -295,7 +295,8 @@ IN 공고문은 제한적 접근 **자체**를 금지하지 않는다. 금지하
 |---|---|---|
 | **D2** | 공저자 2인(A.M.C., J.S.)의 **CRediT 역할** 회신 — 선택지·확정분은 §10.1a | B2(Author Contributions) |
 | ~~D3~~ | ✅ **해소 (2026-08-17)** — 과제번호 없음, 이해충돌 없음. `main.tex` Funding·Competing Interests 실문장 반영 | — |
-| **D4** | 🟡 **잠정 반영** — 코드 첨삭 + 파이프라인 그림 제작으로 기재. **① 어느 Figure 인지 번호 확정, ② 투고 직전 재확인**(남은 수정에서 산문 작성에 사용하면 문안을 넓혀야 함) | B7 |
+| ~~D4a~~ | ✅ **해소** — 그림 번호 확정(빌드 대조): AI 이미지 생성 = **Figure 1**(`fig1_generated_v2`). Figure 3(`fig3_workflow`)은 matplotlib 에셋의 PowerPoint 수작업 합성으로 AI 요소 없음. 본문·커버레터 문안 작성 완료 |
+| **D4b** | 🟡 **투고 직전 재확인** — Figure 1 재작성으로 AI 이미지가 사라져 진술이 **코드 첨삭만**으로 축소됐다(초안 B). 남은 개정에서 LLM 으로 산문을 다듬으면 drafting 까지 넓혀야 한다 | B7 |
 | **D5** | 공저자 3인의 **투고본 승인 + CC BY 동의** | W10 |
 | **D6** | 데이터 요청 **응답 기한** (예: 8주) | `main.tex` 의 `[CONFIRM]` |
 | **D7** | (선택, 논문 일정과 분리) 파생데이터 공개를 위한 **2차적 이용 IRB 신규 심의** 착수 여부 | 향후 데이터 공개. 투고 자체는 막지 않는다 |
@@ -316,6 +317,14 @@ IN 공고문은 제한적 접근 **자체**를 금지하지 않는다. 금지하
 > Every neural endpoint was recomputed with the six motion parameters and their temporal derivatives added to the second-level design matrix.
 
 presubmission 계획 §2 가 **"현행 §S2 L46 은 사실과 다르다"** 로 명시한 문장이다. 실제 재산출된 것은 disparity·동결 투영 순열·split-half 신뢰도뿐이었고 hV4 LOCO adjacent accuracy 는 그 시점에 재산출된 적이 없었다. 이후 산출했으므로 1차 세션에 한해서는 참이 되었으나 **exp2 종점은 여전히 재산출되지 않았으므로 범위 한정 문구가 필요**하다. 계획 §2 에 교체 문안이 있다. **형식 항목보다 우선한다.**
+
+**X2 — 자극 명세와 분석에 쓰인 값의 불일치 (2026-08-18 발견).** `Methods/methods_v2.tex:44` 는 이렇게 진술한다.
+
+> All eight shared a lightness of $L^{*} = 75$ and a chroma of $40$
+
+그러나 필터 피팅과 physical RDM 이 실제로 소비하는 값(`analysis/utils/utils_color_decoding.py` `COLOR_LAB` = `phase5 stim_lab_render.STIM_LAB`)은 **L\* 57.3–74.6, chroma 41.6–72.6, hue 간격 29.8–67.6°** 다. 리포지토리 자체가 이 구분을 기록한다 — `phase5_filter_optimization/scripts/visualization/_archive/visualize_cone_shift_colors.py:14,53` 이 `idealized L*=75/chroma=40` 과 `what subjects saw` 를 명시적으로 나눈다. `COLOR_LAB` 의 출처는 `screenshots (visual inspection)` 으로, 색채계 측정이 아니다.
+
+Methods 는 이미 `The display was used at its factory calibration without further colorimetric verification in the scanner environment.` 를 공개하고 있으나, 명세값을 실현된 사실로 진술하는 문장은 그대로 남아 있다. **Figure 1 패널 A 는 현행 캡션·Methods 와 일치하도록 명세값(45° 등간격)으로 그렸다** (`generate_fig1_v3.py` 도크스트링에 근거 기록). 공개하기로 결정하면 스크립트의 `SHOW_MEASURED = True` 로 스크린샷 추정값 레이어가 켜지며, **캡션·Methods 문장을 같은 커밋에서 함께 고쳐야 한다.**
 
 **주의 — 계획 H 의 슬롯 충돌.** presubmission 계획은 β_c 부호 강건성을 "§S16 신설"로 적었으나, 현재 S16 은 이미 `Comparison with Retinal-Family Distortion Models` 이고 supplementary 는 S21 까지 차 있다. **신설 번호는 S22 가 되어야 한다** (= 계획 I3 이 지적한 번호표 stale 의 실제 영향).
 

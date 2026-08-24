@@ -1,4 +1,4 @@
-# future_phase2_filter_optimization — CLAUDE.md : CURRENT FOCUS
+# phase5_filter_optimization — CLAUDE.md : CURRENT FOCUS
 
 **Stage B + C** · **Status**: ACTIVE.
 

@@ -45,7 +45,7 @@ _SCRIPTS_DIR = _THIS_DIR.parent
 if str(_SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPTS_DIR))
 
-# `machado_simulator` adds future_phase1_forward_model/scripts to sys.path on
+# `machado_simulator` adds phase4_forward_model/scripts to sys.path on
 # import, which makes `stockman_cone_shift` importable below.
 from machado_simulator import (  # noqa: E402
     machado_mixed_fundamentals,

@@ -22,11 +22,11 @@ from pathlib import Path
 # ---------------------------------------------------------------------------
 LOCO_DIR = Path(
     '/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/'
-    'colorBlind_analysis/analysis/future_phase1_forward_model/results/validation'
+    'colorBlind_analysis/analysis/phase4_forward_model/results/validation'
 )
 OUT_DIR = Path(
     '/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/'
-    'colorBlind_analysis/analysis/future_phase2_filter_optimization/'
+    'colorBlind_analysis/analysis/phase5_filter_optimization/'
     'results/diagnostics/loco_confusion_direction'
 )
 OUT_DIR.mkdir(parents=True, exist_ok=True)

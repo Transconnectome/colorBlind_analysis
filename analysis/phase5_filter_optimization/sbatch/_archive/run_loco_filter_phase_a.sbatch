@@ -7,7 +7,7 @@
 #SBATCH --mem=8G
 #SBATCH --time=01:00:00
 #SBATCH --no-requeue
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization/cone_shift_pipeline
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase5_filter_optimization/cone_shift_pipeline
 # ---------------------------------------------------------------------------
 # LOCO Filter Phase A v2: R+C g extended [-3,3] + Fourier DE (3 restarts)
 #

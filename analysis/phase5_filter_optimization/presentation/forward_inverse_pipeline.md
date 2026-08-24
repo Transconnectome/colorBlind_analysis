@@ -93,7 +93,7 @@ horizontal arrows above the image connecting the four columns, plus a small
 equation card on the right (~28% width) and one footer takeaway.
 
 REFERENCED IMAGE (insert verbatim, do not regenerate):
-  /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase2_filter_optimization/results/BEST_4col_sub-08_V4_LOCO_canonical_bs38_bcm14.png
+  /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase5_filter_optimization/results/BEST_4col_sub-08_V4_LOCO_canonical_bs38_bcm14.png
 
 ARROW BAND (across the top of the image, between column headers):
   Column 1 → Column 2:  curved arrow labeled  "Forward map  f_2C  (CVD distortion)"

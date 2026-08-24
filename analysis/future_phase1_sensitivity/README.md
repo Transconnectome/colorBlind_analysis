@@ -5,6 +5,8 @@
 > **exp1 과 exp2 는 성격이 다르므로 분리해 기록한다** (§0.2). 두 절을 같은 무게로 읽으면 안 된다.
 >
 > **위치**: `analysis/future_phase1_sensitivity/` — 산출은 `results/`, 그림은 `figures/`, arm 스크립트는 `scripts/`. `scripts/` 의 스크립트들은 `docs/PAPER/repro/_repro_util.py` 를 데이터 루트 정의로 계속 참조한다(경로 shim 포함).
+>
+> **공동연구자 공유용 요약** = [`TEAM_BRIEF_2026-08-18.md`](TEAM_BRIEF_2026-08-18.md). exp1 만 다루며 왜 돌렸는지 → 어떻게 → 결과 → 핵심 결론별 서술안(C1–C8) 순서다. 이 문서는 그 뒤에 오는 **상세 표 전량**이다.
 
 ---
 
@@ -135,6 +137,21 @@ $n = 7$, 관측값 / 순열 $p$.
 
 *단서*: 발표 Figure 3A 는 SRM 공간 LORO 이고 위는 진폭 위 직접 계산이므로 정확 재현이 아니라 **구조적 확인**이다. 정성 주장은 두 계산 모두에서 성립한다.
 
+### 2.5b disparity 개인별 전체 표 — 대체 서술의 근거
+
+Crawford–Howell 개인 검정, $t$ ($p$). 정본 표는 job 168367 로 새로 산출했다(발표본은 두 셀만 공개).
+
+| arm | | V1 | V2 | V3 | hV4 |
+|---|---|---|---|---|---|
+| 정본 | deutan | 1.1 (.157) | **2.1 (.040)** | 1.9 (.052) | 0.2 (.411) |
+| 정본 | protan | **3.5 (.007)** | 1.0 (.181) | 0.1 (.466) | 1.1 (.150) |
+| `hmc_v2` | deutan | **2.4 (.027)** | −1.0 (.825) | 0.6 (.293) | 0.4 (.351) |
+| `hmc_v2` | protan | **1.6 (.077)** | 1.0 (.186) | 1.1 (.151) | 1.4 (.101) |
+
+**네 셀 전부에서 최소 한 ROI 가 $p<.10$ 이고 각 셀의 최대 $t$ 는 전부 양수다.** protan 의 최대 영역은 두 arm 모두 **V1** 로 일치하고, 바뀌는 것은 deutan 뿐이다(V2 → V1). deutan V2 는 $t$ 가 $+2.1 \to -1.0$ 으로 부호가 뒤집히므로 **그 셀 자체는 살릴 수 없다.**
+
+→ 무너진 것은 **어느 영역이 왜곡을 지는가** 이지 **왜곡이 있는가** 가 아니다. 대체 서술 전문은 [`STATUS_ADDITIONAL_ANALYSIS_2026-08-15.md`](../../docs/PAPER/STATUS_ADDITIONAL_ANALYSIS_2026-08-15.md) §대체 서술.
+
 ### 2.6 필터 $\hat\beta_c$ 부호 — 3축 (판정 규칙 사전 확정)
 
 `U2_BETA_SIGN_PRESPEC.md` §6: 주 판정 = $\hat\beta_c$ **부호**, 크기는 판정에 쓰지 않는다(2성분 모형 12/12 절대복구 실패 → descriptive embedding). $N=300$ 재표집.
@@ -151,6 +168,24 @@ $n = 7$, 관측값 / 순열 $p$.
 ### 2.7 부수 검정 — SDC 미적용 정당화
 
 전 9명 필드맵. ROI 커버리지 100%, header 정렬 정확, 정합 불량 0명. **ROI 내 미분 변위 0.05–0.38 복셀** → 미적용이 정량적으로 정당화된다. sub-07 은 왜곡이 아니라 **슬랩 커버리지 실패**(V1 330/858, hV4 16/70).
+
+### 2.8 BBR vs header-MI — 정합 방법 채택 근거
+
+`analysis/prep_trials/method2_header_bbr`(fMRIPrep BBR)와 정본 header-MI 가 **같은 공간**(MNI152NLin2009cAsym res-2)에 있어 직접 비교했다. run-1 평균 BOLD 이진화 후 슬랩 중심.
+
+| | Δx | Δy | Δz | \|d\| |
+|---|---|---|---|---|
+| sub-01 | $+2.20$ | $-0.64$ | $+2.47$ | **3.37 mm** (1.7 복셀) |
+| sub-03 | $+1.12$ | $-1.30$ | $+1.81$ | **2.49 mm** (1.2 복셀) |
+| sub-06 | $+4.40$ | $-1.80$ | $-1.89$ | **5.12 mm** (2.6 복셀) |
+
+**⚠ "완전 실패" 로 쓰지 않는다.** 오버레이는 sub-03·sub-06 에서 BBR 슬랩이 전상방으로 밀려 후두극·소뇌 커버리지를 일부 잃는 것을 보여주지만, **sub-01 은 두 방법이 거의 같다.** 3명 중 2명의 체계적 이동이지 총체적 실패가 아니다.
+
+**쓸 수 있는 것은 변위 수치다.** 부분 FOV 취득에서 슬랩이 2.5–5.1 mm 이동하면 취득한 후두 신호가 두정 좌표로 배정된다. **SDC 미적용 변위(0.1–0.8 mm)의 6–50배**이고 채택 당시 기록의 "10 mm 오차 위험" 과 같은 자릿수다.
+
+*단서*: 이는 fMRIPrep 의 BBR 산출물이다. 커스텀 파이프라인 안에서의 BBR 시도와 다를 수 있으며, 그 경우 `method2_header_bbr/sub-*.html` 의 coregistration 패널이 더 정확한 근거다.
+
+그림 `figures/bbr_qc/` (12장 + 비교 합성 3장), 수치 `results/bbr_vs_mi_displacement.json`.
 
 ---
 
@@ -276,5 +311,7 @@ run_method3_header_mi_2nd.sbatch:371   fnirt --in=orig.mgz    ← 전체 머리�
 | exp2 진폭 | `derivatives/full_dataset_C010_exp2_harm_hmc_matched` |
 | exp2 종점 | `analysis/phase6_behavioral_analysis/exp2_neural/results/exp2_{hc_likeness,runmatched_geometry}_sub-0{8,9}_matched_harmhmc.json` |
 | exp2 arm 비교 | `results/{exp2_endpoints_arms,exp2_disparity_arms}.json` |
+| **disparity 개인별 2-arm** | `results/disparity_individual_arms.json` |
+| **BBR vs MI 변위** | `results/bbr_vs_mi_displacement.json`, `figures/bbr_qc/` |
 
 **재현 훅**: `COLORBLIND_AMP_ROOT`(필터 적합) · `COLORBLIND_HC_C010` / `COLORBLIND_EXP2_C010` / `COLORBLIND_ARM_TAG`(exp2 종점). 모두 기본값이 발표 경로이므로 기존 재현 경로는 불변이다.

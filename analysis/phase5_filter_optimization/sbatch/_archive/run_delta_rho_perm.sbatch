@@ -8,7 +8,7 @@
 #SBATCH --time=06:00:00
 #SBATCH --no-requeue
 #SBATCH --array=0-9
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization/cone_shift_pipeline
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase5_filter_optimization/cone_shift_pipeline
 # ---------------------------------------------------------------------------
 # B. Δρ permutation re-definition (peer_review/problematic_params_and_loss.md §4.3 #5)
 #

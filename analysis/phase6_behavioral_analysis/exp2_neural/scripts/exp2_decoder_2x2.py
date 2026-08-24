@@ -18,7 +18,7 @@ import numpy as np
 from pathlib import Path
 
 ROOT = Path("/scratch/connectome/haba6030/colorBlind")
-sys.path.insert(0, str(ROOT / "analysis" / "future_phase1_forward_model" / "scripts"))
+sys.path.insert(0, str(ROOT / "analysis" / "phase4_forward_model" / "scripts"))
 from utils_forward_model import create_basis_matrix, HUE_ANGLES
 from loco_canonical import loco_forward_readouts  # shared canonical impl
 
@@ -52,7 +52,7 @@ def main():
     EXP2 = ROOT / "derivatives" / ("full_dataset_C010_exp2" if args.variant == "native"
                                    else "full_dataset_C010_exp2_matched")
     HC_C010 = ROOT / "derivatives" / "full_dataset_C010"
-    OUT = ROOT / "analysis" / "future_phase3_behavioral_analysis" / "exp2_neural" / "results"
+    OUT = ROOT / "analysis" / "phase6_behavioral_analysis" / "exp2_neural" / "results"
     print(f"SUBJECT={subj}  VARIANT={args.variant}  EXP2={EXP2.name}")
 
     results = {}

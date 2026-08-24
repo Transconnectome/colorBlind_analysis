@@ -6,7 +6,7 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
 #SBATCH --nodelist=node2
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase4_forward_model
 
 # Voxel Color Preference Mapping (Bannert & Bartels 2025 framework)
 # KDE-based visualization of which voxels prefer which colors
@@ -14,7 +14,7 @@
 source ~/.bashrc
 conda activate nilearn
 
-export PYTHONPATH="/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model/scripts:${PYTHONPATH}"
+export PYTHONPATH="/scratch/connectome/haba6030/colorBlind/analysis/phase4_forward_model/scripts:${PYTHONPATH}"
 
 BASELINE_DIR="/scratch/connectome/haba6030/colorBlind/derivatives/full_dataset_C010"
 OUTPUT_DIR="results/population_organization/voxel_preference"

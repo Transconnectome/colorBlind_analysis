@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""utils_p4.py — shared helpers for future_phase4_geometry_synthesis (CONSUMER layer).
+"""utils_p4.py — shared helpers for future_phase3_geometry_synthesis (CONSUMER layer).
 
 Reads exp2_neural Stage-1 embedding JSON (coords already computed) and provides:
   - classical MDS (double-centred eigendecomposition -> coords + eigenvalues)
@@ -23,8 +23,8 @@ from scipy.linalg import orthogonal_procrustes
 HERE = Path(__file__).resolve().parent
 P4 = HERE.parent
 ANALYSIS = P4.parent
-EXP2_RES = ANALYSIS / "future_phase3_behavioral_analysis" / "exp2_neural" / "results"
-BEHAV_RES = ANALYSIS / "future_phase3_behavioral_analysis" / "results" / "exp2_behavior"
+EXP2_RES = ANALYSIS / "phase6_behavioral_analysis" / "exp2_neural" / "results"
+BEHAV_RES = ANALYSIS / "phase6_behavioral_analysis" / "results" / "exp2_behavior"
 LOO_JSON = (ANALYSIS / "phase2_SRM_across_between" / "results" / "loo_consistent"
             / "20260218_163819" / "loo_consistent_results.json")
 

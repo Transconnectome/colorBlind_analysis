@@ -1,4 +1,4 @@
-# future_phase3_behavioral_analysis — CLAUDE.md
+# phase6_behavioral_analysis — CLAUDE.md
 
 **Stage D** · **Status**: Planning / preparation.
 

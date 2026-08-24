@@ -36,9 +36,9 @@ import sys
 HERE = Path(__file__).resolve().parent
 EXP2_RES = HERE.parent / "results"
 FILTER_RES = (HERE.parents[2]
-              / "future_phase2_filter_optimization/results/exp2_preimage")
+              / "phase5_filter_optimization/results/exp2_preimage")
 sys.path.insert(0, str(HERE.parents[2]
-                       / "future_phase2_filter_optimization/scripts"))
+                       / "phase5_filter_optimization/scripts"))
 from stim_lab_render import STIM_LAB_ARR, lab2rgb  # measured CIELab of 8 colours
 
 TRIU = np.triu_indices(8, k=1)          # 28 upper-triangle pairs

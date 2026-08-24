@@ -20,7 +20,7 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path('/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/'
-            'colorBlind_analysis/analysis/future_phase2_filter_optimization')
+            'colorBlind_analysis/analysis/phase5_filter_optimization')
 RES = ROOT / 'results'
 LANDSCAPE_DIR = RES / 'cycles'
 

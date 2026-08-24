@@ -26,6 +26,16 @@ import argparse
 import json
 import sys
 
+import sys as _sys
+from pathlib import Path as _Path
+
+# Moved out of docs/PAPER/repro on 2026-08-17 (analysis/future_phase1_sensitivity).
+# _repro_util still lives there and stays the single definition of the data roots.
+_REPRO = _Path(__file__).resolve().parents[3] / "docs" / "PAPER" / "repro"
+_sys.path.insert(0, str(_REPRO))
+OUT = _Path(__file__).resolve().parent.parent / "results"
+OUT.mkdir(parents=True, exist_ok=True)
+
 import numpy as np
 from scipy import stats
 
@@ -150,9 +160,9 @@ def run_arm(arm):
               f"deutan={cvd['deutan']['adjacent']:.3f} (p={cvd['deutan']['p_one_tailed_lower']:.3f})  "
               f"protan={cvd['protan']['adjacent']:.3f} (p={cvd['protan']['p_one_tailed_lower']:.3f})",
               flush=True)
-        np.save(U.REPRO / f"perm_arm_{arm}_null_{roi}.npy", null)
+        np.save(OUT / f"perm_arm_{arm}_null_{roi}.npy", null)
 
-    with open(U.REPRO / f"perm_adjacent_arm_{arm}.json", "w") as f:
+    with open(OUT / f"perm_adjacent_arm_{arm}.json", "w") as f:
         json.dump(out, f, indent=1)
     return out
 

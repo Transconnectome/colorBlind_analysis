@@ -34,7 +34,7 @@ from scipy.stats import spearmanr, binom
 # Path setup (same pattern as loco_distortion_fit.py)
 # ---------------------------------------------------------------------------
 _SCRIPT_DIR = Path(__file__).resolve().parent
-_PHASE2_DIR = _SCRIPT_DIR.parent  # future_phase2_filter_optimization/
+_PHASE2_DIR = _SCRIPT_DIR.parent  # phase5_filter_optimization/
 sys.path.insert(0, str(_SCRIPT_DIR.parent))
 
 # Server has pipeline scripts under cone_shift_pipeline/scripts/
@@ -44,7 +44,7 @@ if _CONE_DIR.exists() and str(_CONE_DIR) not in sys.path:
 
 # Forward model utils: try analysis/ level (parent^3) then repo root (parent^4)
 for _base in [_PHASE2_DIR.parent, _PHASE2_DIR.parent.parent]:
-    _fwd = _base / 'future_phase1_forward_model' / 'scripts'
+    _fwd = _base / 'phase4_forward_model' / 'scripts'
     if _fwd.exists() and str(_fwd) not in sys.path:
         sys.path.insert(0, str(_fwd))
         break

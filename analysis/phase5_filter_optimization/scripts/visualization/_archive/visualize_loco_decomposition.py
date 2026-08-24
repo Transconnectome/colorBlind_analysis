@@ -33,7 +33,7 @@ _STEP0_DIR = _RESULT_DIR / 'step0_precompute'
 _LOCO_2COMP_DIR = _RESULT_DIR / 'fits' / 'phase_a_2component'
 
 # Forward model utils
-_FWD_DIR = str(_PIPELINE_DIR.parent / 'future_phase1_forward_model' / 'scripts')
+_FWD_DIR = str(_PIPELINE_DIR.parent / 'phase4_forward_model' / 'scripts')
 if _FWD_DIR not in sys.path:
     sys.path.insert(0, _FWD_DIR)
 if str(_SCRIPT_DIR) not in sys.path:

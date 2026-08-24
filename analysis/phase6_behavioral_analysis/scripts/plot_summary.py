@@ -22,7 +22,7 @@ import numpy as np
 from matplotlib.gridspec import GridSpec
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
-VALID_DIR = PROJECT_ROOT / "analysis" / "future_phase3_behavioral_analysis" / \
+VALID_DIR = PROJECT_ROOT / "analysis" / "phase6_behavioral_analysis" / \
     "run_count_validation"
 FIG_DIR = VALID_DIR / "figs"
 N_VALUES = [2, 3, 4, 5, 6]

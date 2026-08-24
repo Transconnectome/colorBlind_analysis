@@ -5,7 +5,7 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --time=01:00:00
 #SBATCH --no-requeue
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase5_filter_optimization
 #SBATCH --output=logs/exp_c_delta_vuln_%j.out
 #SBATCH --error=logs/exp_c_delta_vuln_%j.err
 

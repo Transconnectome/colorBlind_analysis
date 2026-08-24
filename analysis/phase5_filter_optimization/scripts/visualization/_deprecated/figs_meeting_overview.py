@@ -65,7 +65,7 @@ hax.axis("off")
 hax.add_patch(mpatches.Rectangle((0, 0), 1, 1, facecolor=ACCENT, edgecolor="none"))
 hax.text(0.012, 0.55, "Phase 2 — Personalized Inverse Filter for CVD",
          color="white", fontsize=15.5, fontweight="bold", va="center")
-hax.text(0.012, 0.18, "Pipeline · Models · Status · Next   |   future_phase2_filter_optimization",
+hax.text(0.012, 0.18, "Pipeline · Models · Status · Next   |   phase5_filter_optimization",
          color="#cfd8e3", fontsize=9.5, va="center")
 hax.text(0.988, 0.5, "2026-05-04", color="white", fontsize=10.5, ha="right", va="center", fontstyle="italic")
 
@@ -265,7 +265,7 @@ for i, (badge, bcol, title, body, sub) in enumerate(steps):
 
 # Footer
 fig.text(0.5, 0.005,
-         "References — future_phase2_filter_optimization/CLAUDE.md §0–§8 · behav_validation.md §3 · loss_inventory.md (Cycle 15) · LOCO_FILTER_PLAN.md",
+         "References — phase5_filter_optimization/CLAUDE.md §0–§8 · behav_validation.md §3 · loss_inventory.md (Cycle 15) · LOCO_FILTER_PLAN.md",
          ha="center", fontsize=7.0, color=GREY, style="italic")
 
 plt.savefig(OUT, dpi=160, bbox_inches="tight", facecolor=BG)

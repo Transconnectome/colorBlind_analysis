@@ -51,7 +51,7 @@ HC_IDS = [f'sub-0{i}' for i in range(1, 8)]
 CVD_IDS = ['sub-08', 'sub-09']
 
 _HERE = os.path.dirname(os.path.abspath(__file__))            # .../scripts
-PHASE = os.path.dirname(_HERE)                                # .../future_phase3_behavioral_analysis
+PHASE = os.path.dirname(_HERE)                                # .../phase6_behavioral_analysis
 ROOT = os.path.dirname(os.path.dirname(PHASE))                # repo root
 BEH = os.path.join(ROOT, 'data', 'behavior')
 OUTDIR = os.path.join(PHASE, 'results', 'exp2_behavior')

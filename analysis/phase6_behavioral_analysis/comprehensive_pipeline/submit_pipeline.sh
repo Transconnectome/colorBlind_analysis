@@ -8,7 +8,7 @@ set -e
 PROJECT_ROOT=/scratch/connectome/haba6030/colorBlind
 cd ${PROJECT_ROOT}
 
-PIPE_DIR=analysis/future_phase3_behavioral_analysis/comprehensive_pipeline
+PIPE_DIR=analysis/phase6_behavioral_analysis/comprehensive_pipeline
 mkdir -p ${PIPE_DIR}/logs
 
 echo "Submitting preprocess..."

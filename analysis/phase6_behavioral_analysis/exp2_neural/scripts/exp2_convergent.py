@@ -28,7 +28,7 @@ from scipy.stats import pearsonr, spearmanr, t as t_dist
 
 ROOT = Path("/scratch/connectome/haba6030/colorBlind")
 HC_C010 = ROOT / "derivatives" / "full_dataset_C010"
-OUT_DIR = ROOT / "analysis" / "future_phase3_behavioral_analysis" / "exp2_neural" / "results"
+OUT_DIR = ROOT / "analysis" / "phase6_behavioral_analysis" / "exp2_neural" / "results"
 
 HC_SUBJS = ['sub-01', 'sub-02', 'sub-03', 'sub-04', 'sub-05', 'sub-06', 'sub-07']
 ROIS = ['V1', 'V2', 'V3', 'V4']

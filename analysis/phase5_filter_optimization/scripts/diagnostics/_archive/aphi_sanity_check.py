@@ -32,7 +32,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-ROOT = Path(__file__).resolve().parents[2]  # future_phase2_filter_optimization
+ROOT = Path(__file__).resolve().parents[2]  # phase5_filter_optimization
 INVENTORY_CSV = ROOT / 'results' / 'inventory' / 'loss_inventory.csv'
 CYCLE15_CSV = ROOT / 'results' / 'cycles' / 'cycle15_mwjaccard_cross.csv'
 PHASE_A_DIR = ROOT / 'results' / 'fits' / 'phase_a_2component'

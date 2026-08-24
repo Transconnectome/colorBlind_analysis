@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --job-name=cb_filt_down
 #SBATCH --chdir=/scratch/connectome/haba6030/colorBlind
-#SBATCH --output=/scratch/connectome/haba6030/colorBlind/analysis/future_phase3_behavioral_analysis/comprehensive_pipeline/logs/02_downstream_%j.out
-#SBATCH --error=/scratch/connectome/haba6030/colorBlind/analysis/future_phase3_behavioral_analysis/comprehensive_pipeline/logs/02_downstream_%j.err
+#SBATCH --output=/scratch/connectome/haba6030/colorBlind/analysis/phase6_behavioral_analysis/comprehensive_pipeline/logs/02_downstream_%j.out
+#SBATCH --error=/scratch/connectome/haba6030/colorBlind/analysis/phase6_behavioral_analysis/comprehensive_pipeline/logs/02_downstream_%j.err
 #SBATCH --time=24:00:00
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=3

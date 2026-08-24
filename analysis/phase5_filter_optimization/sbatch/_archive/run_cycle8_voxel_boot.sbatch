@@ -8,7 +8,7 @@
 #SBATCH --mem=4G
 #SBATCH --time=1:00:00
 #SBATCH --no-requeue
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase5_filter_optimization
 
 # Plan 04 Cycle 8 #1: HC subject resample bootstrap on voxel-axis L.
 # 6 cells: (V1|V2|V4) x (08|09).

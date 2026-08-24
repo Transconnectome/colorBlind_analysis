@@ -16,9 +16,9 @@
 The analysis proceeded in three stages, summarized in Figure~\ref{fig:paradigm}C. First, we characterized each CVD participant's cortical color representation with three neural analyses. Leave-one-run-out (LORO) decoding tested whether color classification remained intact (§\ref{sec:methods:loro}). Leave-one-color-out (LOCO) decoding tested whether continuous hue interpolation was impaired and yielded a per-hue vulnerability profile (§\ref{sec:methods:loco}). Procrustes disparity quantified how far each CVD hue geometry departed from the healthy-control reference (§\ref{sec:methods:rdm}). Second, we fitted two classes of CVD distortion model by minimizing a combined neural and psychophysical loss. Parameters were selected by a pre-specified three-gate procedure (§\ref{sec:methods:candidates}--§\ref{sec:methods:selection}). Finally, we inverted each fitted distortion numerically to obtain a per-subject stimulus-space correction filter (§\ref{sec:methods:filter}). Figure~\ref{fig:pipeline} summarizes the fitting and inversion procedure. Each filter was evaluated in a second session that combined fMRI with the two psychophysical tasks described in §\ref{sec:methods:psychophysical}.
 
 % ── Figure 1 ─────────────────────────────────────────────────────────────────
-\begin{figure*}[tb]
+\begin{figure}[htbp]
   \centering
-  \includegraphics[width=\textwidth]{fig1_generated_v2}
+  \includegraphics[width=\textwidth]{fig1_paradigm_v3}
   \caption{\textbf{Stimuli, task, and analysis pipeline.} \textbf{(A)} Stimulus set: 8 CIE $L^{*}a^{*}b^{*}$ hues at matched lightness, 45\degree\ angular spacing ($L^{*} = 75$, chroma $= 40$; red--magenta), shown in the $a^{*}b^{*}$ plane.
   \textbf{(B)} Task: rapid serial visual presentation (RSVP). A fixation period (randomized 3--6\,s) is followed by a 1.5\,s uniform colored disc; 5--9 trials per color per run (Neurodesign-optimized allocation, identical across participants), six runs.
   \textbf{(C)} Analysis pipeline.
@@ -27,7 +27,7 @@ The analysis proceeded in three stages, summarized in Figure~\ref{fig:paradigm}C
   Stage C (Modeling \& filter): a 2-component cortical model with S-cone-axis ($\beta_s$) and confusion-axis ($\beta_c$) components; its pre-image yields the per-subject stimulus-space filter.
   HC: $n = 7$ (sub-01--07).}
   \label{fig:paradigm}
-\end{figure*}
+\end{figure}
 
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{Participants}
@@ -152,7 +152,7 @@ Decoding recovers the stimulus hue from voxel responses. We estimated $W$ by ord
 Encoding predicts the voxel responses from the channels as $\hat{X} = CW$, where $\hat{X} \in \mathbb{R}^{8 \times V}$. We estimated $W$ by ridge regression. A single penalty $\alpha$ was chosen for each fit by generalized cross-validation \parencite{golub1979}, minimizing the GCV score averaged over the voxels of the ROI (Supplementary~\S S7). Regularization is warranted because the few stimuli and the correlated basis channels would otherwise overfit $W$ and degrade prediction of held-out responses \parencite{kay2008,naselaris2011}. This ridge prior is isotropic and imposes no spatial structure on the voxels.
 
 % ── Figure 2 ─────────────────────────────────────────────────────────────────
-\begin{figure*}[!htbp]
+\begin{figure}[!htbp]
   \centering
   \includegraphics[width=\textwidth]{fig_forward_encoder}
   \caption{\textbf{Forward encoding model schematic.}
@@ -162,7 +162,7 @@ Encoding predicts the voxel responses from the channels as $\hat{X} = CW$, where
   Stage 4: the decoded hue is recovered as the angle, among all 360 integer hues, whose basis vector has the highest Pearson correlation with the reconstructed channel pattern.
   The same model serves both decoding schemes (Section~\ref{sec:methods:loro}): cross-run classification (LORO) and cross-color interpolation (LOCO). Their basis and correlation-based selection are identical, and only the held-out test set differs. Decoding uses the OLS pseudoinverse weights.}
   \label{fig:forward}
-\end{figure*}
+\end{figure}
 
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{Two decoding schemes: cross-run classification and cross-color interpolation}
@@ -210,7 +210,7 @@ The two estimates serve different purposes. Every other stage of the pipeline op
 Two candidate model classes were evaluated. Each parameterizes the angular distortion $\delta\theta(\theta)$ that maps the displayed hue angle $\theta$ to the angle perceived by a CVD observer.
 
 % ── Pipeline schematic — inverse-problem workflow ────────────────────────────
-\begin{figure*}[tb]
+\begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{fig3_workflow}
   \caption{\textbf{Fitting a per-subject cortical distortion and inverting it into a stimulus-space filter.}
@@ -221,7 +221,7 @@ Two candidate model classes were evaluated. Each parameterizes the angular disto
   \textbf{(5)} The individualized filter is $\delta\theta_{\rm filter}(\theta) = \theta_{\rm pre} - \theta$; three of the eight hues are shown for the deutan participant, and the full eight-hue filter for both participants is in Figure~\ref{fig:filter}.
   Hue wheels and swatches are computed from each participant's fitted parameters; the schematic reports no new statistics.}
   \label{fig:pipeline}
-\end{figure*}
+\end{figure}
 
 \paragraph{Candidate Model 1: retinal-plus-gain (R+C).}
 The prevailing account attributes CVD color distortion to a cone-spectral shift at the retinal level \parencite{machado2009}, optionally augmented by a cortical compensation gain $g$ \parencite{boehm2014,tregillus2021}:

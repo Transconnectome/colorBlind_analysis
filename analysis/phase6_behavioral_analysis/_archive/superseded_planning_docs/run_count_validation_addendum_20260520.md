@@ -229,7 +229,7 @@ Script: `scripts/run_count_subsample.py`. Output: `run_count_validation/v1_allro
 - **B. Behavioral LMM power simulation**: Phase 1 기존 JND 데이터에서 within-subject SD 추출 → simr/statsmodels Monte Carlo로 가정 effect size별 power 곡선. 결과가 §4.1 옵션 선택 및 §7-B의 Pass-4 기준을 binding함.
 
 ### Step 1 — 19일 plan §5 subsampling 실행 (1 person-day SLURM)
-- `analysis/future_phase3_behavioral_analysis/scripts/run_count_subsample.py` 작성 (19일 plan §5 deliverable). 본 addendum 반영하여 `--paired_filter_mode` flag 추가 (실제 paired filter data는 Phase 2 데이터에서 *가상*으로 simulate하거나 단일 condition 6-run subsample만 우선).
+- `analysis/phase6_behavioral_analysis/scripts/run_count_subsample.py` 작성 (19일 plan §5 deliverable). 본 addendum 반영하여 `--paired_filter_mode` flag 추가 (실제 paired filter data는 Phase 2 데이터에서 *가상*으로 simulate하거나 단일 condition 6-run subsample만 우선).
 - 모든 C(6, n) subset × 3 ROI × 10 subject × 5 metric → ~8,500 fits, <1초/fit으로 local 또는 node2.
 - Permutation null은 19일 plan §7 Step 3 budgeted scope (n=4, n=6 만, anchor 8개만) — 16 subsets × 8 anchors × 5,000 perm ≈ 680K fits, SLURM array ~4 wall-hours.
 

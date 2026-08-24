@@ -622,7 +622,7 @@ L_i_normalized = (L_i − μ_HC_pool_Li) / σ_HC_pool_Li
 
 **Sub-09 의 L_behav_α weight=0 정당화 (advisor potential challenge 대비)**:
 - 8AFC = 100.00% accuracy (sub-09, 64 trials, 0 errors)
-- Reference: `future_phase3_behavioral_analysis/results/N7_UPDATE_SUMMARY.md §3` + `analyze_jnd_sub09.py` output
+- Reference: `phase6_behavioral_analysis/results/N7_UPDATE_SUMMARY.md §3` + `analyze_jnd_sub09.py` output
 - Any params* (any g, β_s, β_c) producing softmax with non-degenerate σ predicts >90% accuracy → ceiling
 - ∴ L_behav_α(any params; sub-09 obs) ≈ 0 → no gradient → uninformative
 - Solution: drop L_behav_α for sub-09, use L_behav_γ alone (sub-09 JND HYPO 1/8 + HYPER 3/8 + ≈HC 4/8 = sufficient signal)

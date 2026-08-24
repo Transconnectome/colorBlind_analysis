@@ -32,7 +32,7 @@ if _os.environ.get("COLORBLIND_AMP_ROOT"):
 OUT_DIR = SCRIPT_DIR.parent / "results" / "neural_loss"
 
 sys.path.insert(0, str(SCRIPT_DIR))
-_PHASE1_FWD = ROOT / "analysis" / "future_phase1_forward_model" / "scripts"
+_PHASE1_FWD = ROOT / "analysis" / "phase4_forward_model" / "scripts"
 sys.path.insert(0, str(_PHASE1_FWD))
 
 from utils_forward_model import (

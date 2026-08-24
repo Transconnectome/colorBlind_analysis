@@ -44,7 +44,7 @@
 | 차용 항목 | 어떤 형태로 | 우리 implementation |
 |---|---|---|
 | **Cortical compensation 가설** | R+C 의 $g$ 가 *cortical opponent gain* 을 표현 (V1 이후 amplification) | `retinal_cortical.py:machado_with_opponent_gain` |
-| **Hierarchy 가설** (V1 < V2v < V3v compensation 강도) | hV4 를 primary fit ROI 로, V1 을 secondary 로 둔 forward LOCO gate | `future_phase1_forward_model/results/loco_reinforcement/` |
+| **Hierarchy 가설** (V1 < V2v < V3v compensation 강도) | hV4 를 primary fit ROI 로, V1 을 secondary 로 둔 forward LOCO gate | `phase4_forward_model/results/loco_reinforcement/` |
 | **Test structure (4-step null/free-parameter separation)** ⭐ | **현재 partial** — reduction-null bootstrap test 미구현 (A5 pending) | TBD `scripts/reduction_null_test.py` |
 
 ⭐ Test structure 차용이 **paper-level inheritance 중 가장 강한 것**. PI 가 요구한 "기존 모델이 행동을 어떻게 썼는지" 의 정공 답.
@@ -108,9 +108,9 @@
 
 | 측정 | 위치 | 우리 paradigm 에서의 위치 |
 |---|---|---|
-| **JND** (8 hue pair, adaptive 2AFC staircase) | `future_phase3_behavioral_analysis/results/jnd_summary.csv` | HC group reference n=7. sub-08 vs HC 의 *per-pair ratio* = Tregillus 의 t 등가물. |
+| **JND** (8 hue pair, adaptive 2AFC staircase) | `phase6_behavioral_analysis/results/jnd_summary.csv` | HC group reference n=7. sub-08 vs HC 의 *per-pair ratio* = Tregillus 의 t 등가물. |
 | **8AFC accuracy** (64 trial, RSVP color category discrimination) | `data/behavior/sub-08_rsvp_8afc_ses1_run1.csv` | per-hue confusion structure. LOCO-vulnerable hue 와의 set-intersection 검정 가능. |
-| **Per-hue integration table** | `future_phase3_behavioral_analysis/behavioral_alignment_2026-05-19.md` | δθ filter / 8AFC acc / LOCO sig / JND vs HC / 방향 의 통합 표. **LOCO–JND 6/6 concordance** 이미 추출됨. |
+| **Per-hue integration table** | `phase6_behavioral_analysis/behavioral_alignment_2026-05-19.md` | δθ filter / 8AFC acc / LOCO sig / JND vs HC / 방향 의 통합 표. **LOCO–JND 6/6 concordance** 이미 추출됨. |
 
 → **Tregillus 식 test-structure inheritance 가 sub-08 으로 *지금 가능***. Phase 3 acquisition wait 불필요.
 

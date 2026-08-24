@@ -123,11 +123,11 @@ Create slide 5 titled "Recoverability II — A 2-DOF Cortical Model Is Bijective
 Layout: two images side-by-side (left 50% / right 50%), bullets at bottom (full width).
 
 Insert image 1 from absolute path (left half):
-/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase2_filter_optimization/results/2component_comprehensive_v2/sub-08_delta_theta_bars.png
+/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase5_filter_optimization/results/2component_comprehensive_v2/sub-08_delta_theta_bars.png
 Caption under left image: "sub-08 (deutan): 2-component preimage — mean |δθ| = 46.3°, max = 104.2°."
 
 Insert image 2 from absolute path (right half):
-/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase2_filter_optimization/results/2component_comprehensive_v2/sub-09_delta_theta_bars.png
+/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase5_filter_optimization/results/2component_comprehensive_v2/sub-09_delta_theta_bars.png
 Caption under right image: "sub-09 (protan): 2-component preimage — mean |δθ| = 20.1°, max = 48.1°."
 
 Bullet block at bottom:
@@ -218,7 +218,7 @@ Create slide 8 titled "Physiological Grounding: Model Design Choices Supported b
 Layout: full-width figure on top (≈60%), structured bullet block below.
 
 Insert image from absolute path:
-/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase2_filter_optimization/results/figures/literature_convergence/beta_s_emery_convergence.png
+/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase5_filter_optimization/results/figures/literature_convergence/beta_s_emery_convergence.png
 Position: centered, full width of slide.
 
 Bullet block below figure (two columns):
@@ -256,7 +256,7 @@ Create slide 9 titled "Cortical Compensation Hierarchy: V1 Deficit Disappears at
 Layout: full-width figure on top (≈55%), structured content below.
 
 Insert image from absolute path:
-/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase2_filter_optimization/results/figures/literature_convergence/tregillus_compensation_hierarchy.png
+/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase5_filter_optimization/results/figures/literature_convergence/tregillus_compensation_hierarchy.png
 Position: centered, full width of slide.
 
 Content below figure — a compact 3-row table + takeaway:
@@ -288,7 +288,7 @@ Create slide 10 titled "Literature Verification Summary — Three Independent Li
 Layout: full-width figure on top (≈65%), compact summary below.
 
 Insert image from absolute path:
-/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase2_filter_optimization/results/figures/literature_convergence/literature_convergence_summary.png
+/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase5_filter_optimization/results/figures/literature_convergence/literature_convergence_summary.png
 Position: centered, full width of slide.
 
 Summary below figure (3 numbered points):

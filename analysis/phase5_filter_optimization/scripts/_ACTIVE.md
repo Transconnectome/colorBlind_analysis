@@ -93,7 +93,7 @@ SLURM jobs and pre-v6 run logs.
 | [`neural_loss.py`](neural_loss.py) | `s10b_v6_pca_rdm`, `s17_hc_loo` | `L_LOCO`, `L_RDM`, `precompute_loco_W_within` |
 | [`s8_loo_train_test.py`](s8_loo_train_test.py) | `s10a_precondition`, `s10b_v6_pca_rdm`, `s17_hc_loo`, `s12b_phase_c_v2` | `jnd_baseline_from_pool`, `DELTA_LAMBDA_BY_FAMILY` |
 | [`machado_simulator.py`](machado_simulator.py) | `rc_1dof.py`, viz | Machado-Smith cone-shift fundamentals |
-| `../future_phase1_forward_model/scripts/utils_forward_model.py` | most closure scripts | `create_basis_full`, `HUE_ANGLES` (external dep — Phase 1 module) |
+| `../phase4_forward_model/scripts/utils_forward_model.py` | most closure scripts | `create_basis_full`, `HUE_ANGLES` (external dep — Phase 1 module) |
 
 These helpers are **not** standalone closure entry-points but cannot be
 removed without breaking the closure scripts.

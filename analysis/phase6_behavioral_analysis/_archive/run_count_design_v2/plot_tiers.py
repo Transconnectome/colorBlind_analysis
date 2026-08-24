@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
-VALID_DIR = PROJECT_ROOT / "analysis" / "future_phase3_behavioral_analysis" / \
+VALID_DIR = PROJECT_ROOT / "analysis" / "phase6_behavioral_analysis" / \
     "run_count_validation"
 FIG_DIR = VALID_DIR / "figs"
 FIG_DIR.mkdir(parents=True, exist_ok=True)

@@ -12,7 +12,7 @@ individualized-filter pipeline. Narrative source of truth:
 > subdirectory breaks the whole pipeline. Organize *logically* (this README),
 > not physically.
 >
-> External dep: `../future_phase1_forward_model/scripts/utils_forward_model.py`
+> External dep: `../phase4_forward_model/scripts/utils_forward_model.py`
 > (`create_basis_full`, `HUE_ANGLES`) — Phase 1 module, added to path by the scripts.
 
 **Environment**: `conda activate srm` (local). All inputs are local (no server).

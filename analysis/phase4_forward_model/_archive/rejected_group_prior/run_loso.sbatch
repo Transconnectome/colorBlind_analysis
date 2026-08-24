@@ -7,7 +7,7 @@
 #SBATCH --mem=32G
 #SBATCH --nodelist=node2
 #SBATCH --no-requeue
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase4_forward_model
 
 # LOSO Zero-Shot Validation
 # Refits SRM per fold (no leakage), direct eval on all 8 colors

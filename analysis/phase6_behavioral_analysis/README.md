@@ -1,4 +1,4 @@
-# future_phase3_behavioral_analysis — README
+# phase6_behavioral_analysis — README
 
 **Stage D · Status (2026-05-30): Planning, exp2 design finalized**
 
@@ -32,7 +32,7 @@ Rationale: Mechanism은 Phase 1-2에서 origin 확보 (V1 cone-shift + V4 cortic
 ## Folder layout
 
 ```
-future_phase3_behavioral_analysis/
+phase6_behavioral_analysis/
 ├── CLAUDE.md                          # active policy + exp2 design
 ├── README.md                          # this file
 ├── notion.md                          # pre-analysis narrative (older — see CLAUDE.md for current)
@@ -49,7 +49,7 @@ future_phase3_behavioral_analysis/
 - exp1 (baseline, no filter) C010 amplitudes: `/scratch/connectome/haba6030/colorBlind/derivatives/full_dataset_C010/{subject}/{ROI_dir}/amplitudes_procrustes.npy`, shape (6, 8, n_voxels)
 - exp2 data path: TBD when collected
 - HC reference RDM (for analyses A–C): from Phase 1-2 results (`phase2_SRM_across_between/`, `phase2_procrustes_cvd_hc/`)
-- 2-comp model (for analyses B, D): `future_phase2_filter_optimization/` — pre-image generator + parameter fitter
+- 2-comp model (for analyses B, D): `phase5_filter_optimization/` — pre-image generator + parameter fitter
 
 ## Implementation TODOs
 

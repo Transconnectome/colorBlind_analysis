@@ -7,7 +7,7 @@
 #SBATCH --mem=8G
 #SBATCH --time=00:30:00
 #SBATCH --no-requeue
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization/cone_shift_pipeline
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase5_filter_optimization/cone_shift_pipeline
 # ---------------------------------------------------------------------------
 # Task-Oriented Separation Search for Sub-09
 #

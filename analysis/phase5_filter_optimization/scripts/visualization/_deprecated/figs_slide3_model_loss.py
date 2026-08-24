@@ -241,7 +241,7 @@ for i in range(3):
 
 # Footer
 fig.text(0.5, 0.005,
-         "Sources: future_phase2_filter_optimization/CLAUDE.md §0–§8  ·  README.md §3  ·  loss_inventory.md  ·  behav_validation.md §3",
+         "Sources: phase5_filter_optimization/CLAUDE.md §0–§8  ·  README.md §3  ·  loss_inventory.md  ·  behav_validation.md §3",
          ha="center", fontsize=7.2, color=GREY, style="italic")
 
 plt.savefig(OUT, dpi=160, bbox_inches="tight", facecolor=BG)

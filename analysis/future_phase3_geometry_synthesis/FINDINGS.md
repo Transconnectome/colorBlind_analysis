@@ -1,9 +1,9 @@
-# FINDINGS — future_phase4_geometry_synthesis
+# FINDINGS — future_phase3_geometry_synthesis
 
 > **Q**: SRM와 FE-6 forward model이 같은 색 기하(embedding)를 복원하는가? 필터 조건 포함.
 > **작성**: 2026-07-14 · **데이터**: C010 (exp1 nofilter + exp2 window/optimal), sub-08/09, matched
 > **재현 앵커**: git `c9ff902` · scripts `p4_overlay_viz.py` / `p4_geometry_decomposition.py` / `p4_percolor_loco.py`
-> **입력(소비, recompute 안 함)**: `../future_phase3_behavioral_analysis/exp2_neural/results/exp2_embeddings_sub-{08,09}_matched.json` (Stage 1 coords), `exp2_geometry_derived_*.json` (Stage 2)
+> **입력(소비, recompute 안 함)**: `../phase6_behavioral_analysis/exp2_neural/results/exp2_embeddings_sub-{08,09}_matched.json` (Stage 1 coords), `exp2_geometry_derived_*.json` (Stage 2)
 
 이 문서는 **탐색적/기술적(descriptive)** 결과다. N=2 CVD, 8점. **유의성 주장 아님**, metric-shopping 방지 위해 metric 3종·subject 2명을 모두 병기한다.
 

@@ -21,9 +21,9 @@ import numpy as np
 # --------------------------------------------------------------------- paths
 SCRIPT = Path(__file__).resolve()
 PROJECT = SCRIPT.parents[4]
-SCRIPTS = PROJECT / "analysis" / "future_phase2_filter_optimization" / "scripts"
+SCRIPTS = PROJECT / "analysis" / "phase5_filter_optimization" / "scripts"
 sys.path.insert(0, str(SCRIPTS))
-sys.path.insert(0, str(PROJECT / "analysis" / "future_phase1_forward_model" / "scripts"))
+sys.path.insert(0, str(PROJECT / "analysis" / "phase4_forward_model" / "scripts"))
 
 from machado_simulator import machado_shifted_hue
 from stockman_cone_shift import (

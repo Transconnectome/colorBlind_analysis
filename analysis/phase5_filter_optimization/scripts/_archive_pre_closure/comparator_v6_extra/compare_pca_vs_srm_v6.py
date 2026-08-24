@@ -17,7 +17,7 @@ from pathlib import Path
 
 RES_DIR = Path('/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/'
                 'Projects/colorBlind_analysis/analysis/'
-                'future_phase2_filter_optimization/results/s10_inclusion')
+                'phase5_filter_optimization/results/s10_inclusion')
 
 
 def load_summary(path: Path) -> dict:

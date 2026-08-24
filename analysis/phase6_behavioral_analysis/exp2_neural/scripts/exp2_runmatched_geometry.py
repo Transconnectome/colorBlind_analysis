@@ -33,7 +33,7 @@ import numpy as np
 from scipy.stats import spearmanr
 
 SCRIPTS = Path("/scratch/connectome/haba6030/colorBlind/analysis/"
-               "future_phase3_behavioral_analysis/exp2_neural/scripts")
+               "phase6_behavioral_analysis/exp2_neural/scripts")
 sys.path.insert(0, str(SCRIPTS))
 
 from exp2_convergent import (            # noqa: E402

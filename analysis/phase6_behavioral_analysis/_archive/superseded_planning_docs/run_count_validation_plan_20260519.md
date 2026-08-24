@@ -55,10 +55,10 @@ Pool / fold mechanics (disambiguate "n_runs"):
 - LORO (run generalization): n_runs CV folds. n=2 = 1 train / 1 test, unstable; report but interpret cautiously.
 
 Code reuse:
-- `analysis/future_phase2_filter_optimization/scripts/loco_distortion_fit.py` (accepts run mask)
+- `analysis/phase5_filter_optimization/scripts/loco_distortion_fit.py` (accepts run mask)
 - `analysis/phase3_decoder_comparing/model_comparison_validation/scripts/loco_baseline.py`
 - `analysis/phase2_SRM_across_between/rerun_loo_consistent.py` (LOO-HC + Crawford-Howell)
-- `analysis/future_phase2_filter_optimization/scripts/diagnostic_delta_rdm.py`
+- `analysis/phase5_filter_optimization/scripts/diagnostic_delta_rdm.py`
 
 New utility needed: `run_count_subsample.py` — wraps existing scripts with `--run_mask` arg over enumerated subsets.
 
@@ -122,8 +122,8 @@ Per HC subject (sub-01..07), per n_runs, per ROI: fraction of subsets giving LOC
 
 ## 5. Deliverables & file paths
 
-- Scripts: `analysis/future_phase3_behavioral_analysis/scripts/run_count_subsample.py` (new wrapper), plus subset-aware patches to `loco_distortion_fit.py`, `diagnostic_delta_rdm.py`. Existing scripts must accept `--run_mask` (binary 6-vector) without re-running SRM training (W is run-position-agnostic at the current stage).
-- Results: `analysis/future_phase3_behavioral_analysis/run_count_validation/`
+- Scripts: `analysis/phase6_behavioral_analysis/scripts/run_count_subsample.py` (new wrapper), plus subset-aware patches to `loco_distortion_fit.py`, `diagnostic_delta_rdm.py`. Existing scripts must accept `--run_mask` (binary 6-vector) without re-running SRM training (W is run-position-agnostic at the current stage).
+- Results: `analysis/phase6_behavioral_analysis/run_count_validation/`
   - `per_subject_per_n_runs.json` (one per subject)
   - `landmark_retention.json` (the §3.3 table)
   - `hc_fpr_per_n.json`
@@ -134,7 +134,7 @@ Per HC subject (sub-01..07), per n_runs, per ROI: fraction of subsets giving LOC
   - F3: HC FPR vs n_runs
   - F4: 2-component β_s/β_c CI shrinkage curves
   - F5: LOCO→JND concordance retention
-- Reporting doc: `analysis/future_phase3_behavioral_analysis/run_count_validation/REPORT.md`
+- Reporting doc: `analysis/phase6_behavioral_analysis/run_count_validation/REPORT.md`
 
 ---
 

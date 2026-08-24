@@ -8,7 +8,7 @@ Step 2: Compare shifted opponent RDM with SRM CVD RDM (Mantel-style).
 Runs locally (conda env: srm).
 
 Usage:
-    cd analysis/future_phase1_forward_model
+    cd analysis/phase4_forward_model
     python scripts/cone_shift_validation.py
 """
 
@@ -32,7 +32,7 @@ from stockman_cone_shift import (
 # Paths
 BASE = Path(__file__).resolve().parent.parent
 CONE_SHIFT_JSON = BASE / 'results' / 'cone_shift' / 'cone_shift_results.json'
-SRM_RESULTS_JSON = (BASE.parent / 'future_phase2_filter_optimization' /
+SRM_RESULTS_JSON = (BASE.parent / 'phase5_filter_optimization' /
                     'pre_validation' / 'results' /
                     'filter_pre_validation_results.json')
 OUTPUT_DIR = BASE / 'results' / 'cone_shift'

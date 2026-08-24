@@ -27,16 +27,16 @@ import matplotlib.pyplot as plt
 from pathlib import Path
 
 # ── paths ──────────────────────────────────────────────────────────────
-ROOT = Path(__file__).resolve().parents[1]  # future_phase3_behavioral_analysis/
+ROOT = Path(__file__).resolve().parents[1]  # phase6_behavioral_analysis/
 PROJ = ROOT.parent.parent                    # colorBlind_analysis/
-WEIGHT_DIR = PROJ / 'analysis' / 'future_phase1_forward_model' / 'results' / 'subject_weights'
+WEIGHT_DIR = PROJ / 'analysis' / 'phase4_forward_model' / 'results' / 'subject_weights'
 OUT_DIR = ROOT / 'results' / 'gradient_profile'
 FIG_DIR = ROOT / 'figures'
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 FIG_DIR.mkdir(parents=True, exist_ok=True)
 
 # ── add utils path ────────────────────────────────────────────────────
-sys.path.insert(0, str(PROJ / 'analysis' / 'future_phase1_forward_model' / 'scripts'))
+sys.path.insert(0, str(PROJ / 'analysis' / 'phase4_forward_model' / 'scripts'))
 from utils_forward_model import create_basis_full, N_CHANNELS
 
 # ── constants ─────────────────────────────────────────────────────────

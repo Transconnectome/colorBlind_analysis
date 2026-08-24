@@ -89,7 +89,7 @@ L_fit = α·L_vuln + β·L_rank + δ·L_rdm + ε·L_smooth
 |---|---|
 | Filter form 선정 | 3 model class 중 2-component 채택; **pre-image 8/8 exact** + behavioral filter pipeline 일관성 (R+C 는 sub-09 arc-compression 4/8 fail) |
 | Per-subject (β_s, β_c) 선정 | hV4 LOCO L_fit 최소화하는 grid argmin (26×51=1326 points, β_s ∈ [0,50] step 2, β_c ∈ [−50,50] step 2) |
-| ROI 선정 (V4 vs V1/V2/V3) | **(독립 prior) Forward LOCO gate** at HC group level: hV4 p=0.044 (단일 검정), V1/V2/V3 NS — Phase 1 결과 (`future_phase1_forward_model/results/loco_reinforcement/permutation_test.json`) |
+| ROI 선정 (V4 vs V1/V2/V3) | **(독립 prior) Forward LOCO gate** at HC group level: hV4 p=0.044 (단일 검정), V1/V2/V3 NS — Phase 1 결과 (`phase4_forward_model/results/loco_reinforcement/permutation_test.json`) |
 | Per-subject BEST | sub-08 (β_s, β_c) = (38°, −14°); sub-09 (6°, −22°) — `BEST_summary.json` |
 
 ## 7. Evaluation criterion
@@ -172,7 +172,7 @@ L_fit = α·L_vuln + β·L_rank + δ·L_rdm + ε·L_smooth
 - `scripts/loco_distortion_fit.py:85-280` — loss 정의 + grid search
 - `scripts/step1_fit_loco_v2.py:103-300` — LOCO simulation + permutation
 - `scripts/diagnostic_delta_rdm.py:80-310` — RDM/ΔRDM 정의
-- `future_phase1_forward_model/results/loco_reinforcement/permutation_test.json` — independent ROI gate
+- `phase4_forward_model/results/loco_reinforcement/permutation_test.json` — independent ROI gate
 
 **확인 필요 (slide 발표 시 PI 질문 대비)**
 

@@ -31,7 +31,7 @@ from nilearn import plotting
 
 FMRIPREP = Path("/storage/connectome/haba6030/fmriprep_out_method3_2nd")
 ROIDIR   = Path("/scratch/connectome/haba6030/colorBlind/analysis/roi_masks/method3_header_mi")
-OUTBASE  = Path("/scratch/connectome/haba6030/colorBlind/analysis/future_phase3_behavioral_analysis/exp2_neural/preproc_qc")
+OUTBASE  = Path("/scratch/connectome/haba6030/colorBlind/analysis/phase6_behavioral_analysis/exp2_neural/preproc_qc")
 N_RUNS = 8
 ROIS = ["V1", "V2", "V3", "hV4"]          # disk name == display name here
 ROI_DISK = {"V1": "V1", "V2": "V2", "V3": "V3", "hV4": "hV4"}

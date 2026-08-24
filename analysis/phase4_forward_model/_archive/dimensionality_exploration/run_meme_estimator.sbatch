@@ -6,7 +6,7 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
 #SBATCH --nodelist=node2
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase4_forward_model
 
 # MEME Estimator for Unbiased Dimensionality
 # Implements eigenmoment matching (Li et al. 2014, Pospisil & Pillow 2024)

@@ -13,7 +13,7 @@ whether cone shift explains the observed CVD distortion pattern.
 Runs locally (conda env: srm).
 
 Usage:
-    cd analysis/future_phase1_forward_model
+    cd analysis/phase4_forward_model
     python scripts/afix_pair_distance.py
 """
 
@@ -24,9 +24,9 @@ from itertools import combinations
 from scipy.stats import spearmanr, pearsonr
 
 # Paths
-BASE = Path(__file__).resolve().parent.parent  # future_phase1_forward_model
+BASE = Path(__file__).resolve().parent.parent  # phase4_forward_model
 CONE_SHIFT_JSON = BASE / 'results' / 'cone_shift' / 'cone_shift_results.json'
-SRM_RESULTS_JSON = (BASE.parent / 'future_phase2_filter_optimization' /
+SRM_RESULTS_JSON = (BASE.parent / 'phase5_filter_optimization' /
                     'pre_validation' / 'results' /
                     'filter_pre_validation_results.json')
 OUTPUT_DIR = BASE / 'results' / 'cone_shift'

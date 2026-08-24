@@ -24,7 +24,7 @@ from pathlib import Path
 from scipy.stats import spearmanr
 
 ROOT = Path("/scratch/connectome/haba6030/colorBlind")
-sys.path.insert(0, str(ROOT / "analysis" / "future_phase1_forward_model" / "scripts"))
+sys.path.insert(0, str(ROOT / "analysis" / "phase4_forward_model" / "scripts"))
 from utils_forward_model import create_basis_matrix, HUE_ANGLES
 from loco_canonical import loco_forward_readouts
 
@@ -151,7 +151,7 @@ def main():
         self_r = [float(spearmanr(rdms[i], np.delete(rdms, i, axis=0).mean(0))[0]) for i in range(len(rdms))]
         out['_hc_voxel_rdm_self'][roi] = {'spearman_self_loo_mean': float(np.mean(self_r)), 'n': len(rdms)}
 
-    outpath = ROOT / "analysis/future_phase3_behavioral_analysis/exp2_neural/results/exp2_followup_native.json"
+    outpath = ROOT / "analysis/phase6_behavioral_analysis/exp2_neural/results/exp2_followup_native.json"
     outpath.write_text(json.dumps(out, indent=1))
     print(f"SAVED {outpath}")
     # quick console summary

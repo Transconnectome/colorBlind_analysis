@@ -185,8 +185,8 @@ Bottom takeaway (italic green):
 Style: 16:9, sans-serif, single blue accent. Do NOT generate images.
 Insert images at the indicated absolute paths (provided in user message).
 Image absolute paths:
-  - /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase2_filter_optimization/presentation/figures/data/activation_overview.png
-  - /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase2_filter_optimization/presentation/figures/data/model_vs_baseline.png
+  - /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase5_filter_optimization/presentation/figures/data/activation_overview.png
+  - /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase5_filter_optimization/presentation/figures/data/model_vs_baseline.png
 ```
 
 ## B. Python data figures  (already exist — academic style with axis numbers)
@@ -577,7 +577,7 @@ Footer (italic 9pt grey, full width):
 Style: 16:9, sans-serif, single blue accent (#1f4e79). Do NOT generate images.
 Insert image at the indicated absolute path (provided in user message).
 Image absolute path:
-  /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase2_filter_optimization/presentation/figures/data/slide5_rc_panels.png
+  /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase5_filter_optimization/presentation/figures/data/slide5_rc_panels.png
 ```
 
 ## B. Python data figure  (already rendered)
@@ -594,7 +594,7 @@ Image absolute path:
 Re-render after parameter change:
 ```bash
 conda activate srm
-python analysis/future_phase2_filter_optimization/scripts/visualization/figs_slide5_rc_panels.py
+python analysis/phase5_filter_optimization/scripts/visualization/figs_slide5_rc_panels.py
 ```
 
 ## C. Generative schematic
@@ -804,7 +804,7 @@ To generate the schematics:
 ## Regeneration commands
 
 ```bash
-cd analysis/future_phase2_filter_optimization
+cd analysis/phase5_filter_optimization
 conda activate srm
 
 # Channel B — academic data figures (re-run if numbers change)
@@ -827,5 +827,5 @@ python scripts/visualization/figs_slide5_rc_panels.py    # Slide 5 supplementary
 - `behav_validation.md` §3 — sub-08 behavioral verdict matrix
 - `results/inventory/loss_inventory.{md,csv}` — loss inventory ratings
 - `analysis/phase3_decoder_comparing/README.md` — LORO 3-alignment × 6-model table
-- `analysis/future_phase1_forward_model/RESULTS.md` — LOCO ridge_gcv, FE-K ablation
+- `analysis/phase4_forward_model/RESULTS.md` — LOCO ridge_gcv, FE-K ablation
 - `analysis/phase2_SRM_across_between/results/activation_prior/activation_prior_results.json` — activation per-color/group

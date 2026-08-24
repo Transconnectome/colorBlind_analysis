@@ -8,7 +8,7 @@
 #SBATCH --time=04:00:00
 #SBATCH --no-requeue
 #SBATCH --array=0-2
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization/cone_shift_pipeline
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase5_filter_optimization/cone_shift_pipeline
 # ---------------------------------------------------------------------------
 # A. R+C-2D rotation pilot (3-DOF: Δλ, g_RG, g_YB)
 #

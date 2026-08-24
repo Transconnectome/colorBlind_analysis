@@ -239,7 +239,7 @@ ax.legend(handles=legend_els, fontsize=7.5, facecolor='white',
 
 # ── Save ──────────────────────────────────────────────────────────────────────
 outpath = ('/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/'
-           'colorBlind_analysis/analysis/future_phase3_behavioral_analysis/'
+           'colorBlind_analysis/analysis/phase6_behavioral_analysis/'
            'figures/hue_circle_before_after.png')
 plt.savefig(outpath, dpi=150, bbox_inches='tight', facecolor='white')
 print(f'Saved: {outpath}')

@@ -28,7 +28,7 @@ from pathlib import Path
 import numpy as np
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
-VALID_DIR = PROJECT_ROOT / "analysis" / "future_phase3_behavioral_analysis" / \
+VALID_DIR = PROJECT_ROOT / "analysis" / "phase6_behavioral_analysis" / \
     "run_count_validation"
 
 ROIS = ["V1", "V2", "V3", "V4"]

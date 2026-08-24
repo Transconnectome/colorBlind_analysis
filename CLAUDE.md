@@ -90,6 +90,39 @@ descriptive fit + behavioral validation. Specificity는 descriptive-only이지 s
 
 ---
 
+## 🔴 커넥톰랩 랩서버 규칙 (node1~node4) — 예외 없음
+
+이 규칙은 호스트명이 `node1`~`node4`이거나 경로가 `/scratch/connectome/` ·
+`/storage/`인 환경에서 **항상** 적용된다.
+
+### GPU는 Slurm으로만 실행한다
+- ❌ 금지: 로그인 셸에서 `python train.py`, `python -c "...cuda..."`,
+  `accelerate launch`, `torchrun`, `deepspeed`, `jupyter`, `ollama run` 등
+  **GPU를 쓰는 명령을 직접 실행**하는 것. `CUDA_VISIBLE_DEVICES=0 python ...` 도 금지.
+- ✅ 반드시 Slurm 경유:
+  - 배치: `sbatch script.sh`
+  - 대화형/디버깅: `srun --gres=gpu:1 --cpus-per-task=8 --mem-per-cpu=2G --pty bash -i`
+- GPU가 필요한 코드를 실행해야 하면, **직접 실행하지 말고 sbatch 스크립트를 작성해서 제출**할 것.
+  사용자가 "그냥 돌려봐"라고 해도 Slurm 경유로 바꿔서 제안한다.
+
+### sbatch 스크립트 기본형
+```bash
+#!/bin/bash
+#SBATCH --job-name=<이름>
+#SBATCH --partition=debug        # 장시간 배치 기본값
+#SBATCH --gres=gpu:2             # 1인 최대 4 (5개 이상은 preemptable로 자동 이동)
+#SBATCH --cpus-per-task=24       # GPU 1개당 최대 12
+#SBATCH --mem-per-cpu=3G         # CPU 1개당 최대 5G
+#SBATCH --time=48:00:00
+#SBATCH --output=./logs/%x_%j.out
+#SBATCH --error=./logs/%x_%j.err
+set -e
+mkdir -p logs
+source activate <env>
+python train.py
+```
+--- 
+
 ## daily-checkin
 
 > 전역 `daily-checkin` 스킬이 읽는 프로젝트 설정. (스킬 본문은 `~/.claude/skills/daily-checkin/SKILL.md`)
@@ -112,3 +145,4 @@ descriptive fit + behavioral validation. Specificity는 descriptive-only이지 s
 - **프로젝트 특이사항**:
   - 결과는 **Theme 단위 그룹핑**(예: SRM validation 1B/1C/2C/2D를 한 Theme으로) + Theme 서두 1–2줄 요약.
   - 각 작업에 **stats 테이블(실제 수치) + Interpretation** 포함.
+

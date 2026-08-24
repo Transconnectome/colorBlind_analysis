@@ -28,9 +28,9 @@ from pathlib import Path
 from scipy import stats
 
 # ── paths ──────────────────────────────────────────────────────────────
-ROOT = Path(__file__).resolve().parents[1]  # future_phase3_behavioral_analysis/
+ROOT = Path(__file__).resolve().parents[1]  # phase6_behavioral_analysis/
 PROJ = ROOT.parent.parent                    # colorBlind_analysis/
-PRECOMP = PROJ / 'analysis' / 'future_phase2_filter_optimization' / 'cone_shift_pipeline' / 'results' / 'precomputed'
+PRECOMP = PROJ / 'analysis' / 'phase5_filter_optimization' / 'cone_shift_pipeline' / 'results' / 'precomputed'
 OUT_DIR = ROOT / 'results' / 'srm_position_displacement'
 FIG_DIR = ROOT / 'figures'
 OUT_DIR.mkdir(parents=True, exist_ok=True)

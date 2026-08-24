@@ -1,4 +1,4 @@
-# future_phase1_forward_model/_archive
+# phase4_forward_model/_archive
 
 **아카이브 일자**: 2026-08-05 · **근거**: `analysis/ARCHIVE_AUDIT_2026-08-05.md` §2.7
 

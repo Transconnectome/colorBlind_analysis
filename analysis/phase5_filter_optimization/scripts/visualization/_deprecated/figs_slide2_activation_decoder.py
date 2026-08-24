@@ -217,7 +217,7 @@ for paper, repl, ext in rows:
 # Footer
 fig.text(0.5, 0.012,
          "Sources: phase2_SRM_across_between/.../activation_prior_results.json   ·   "
-         "phase3_decoder_comparing/README.md   ·   future_phase1_forward_model/RESULTS.md",
+         "phase3_decoder_comparing/README.md   ·   phase4_forward_model/RESULTS.md",
          ha="center", fontsize=7.5, color="#777", style="italic")
 
 plt.savefig(OUT, dpi=160, bbox_inches="tight", facecolor=BG)

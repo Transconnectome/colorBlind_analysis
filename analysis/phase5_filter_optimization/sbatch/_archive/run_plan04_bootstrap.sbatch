@@ -8,7 +8,7 @@
 #SBATCH --mem=4G
 #SBATCH --time=2:00:00
 #SBATCH --no-requeue
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase5_filter_optimization
 
 # Plan 04 Cycle 4 deferred: HC bootstrap variance for primary cells.
 # Cells: V1+V4 + sub-{08, 09} (sub-10 sanity excluded).

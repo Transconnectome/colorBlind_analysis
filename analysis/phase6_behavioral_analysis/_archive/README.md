@@ -1,4 +1,4 @@
-# future_phase3_behavioral_analysis/_archive
+# phase6_behavioral_analysis/_archive
 
 **아카이브 일자**: 2026-08-05 · **근거**: `analysis/ARCHIVE_AUDIT_2026-08-05.md` §2.10
 이 폴더는 이번이 **최초 정리**입니다.

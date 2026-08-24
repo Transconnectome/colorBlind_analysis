@@ -43,7 +43,7 @@ import numpy as np
 
 _PHASE2_DIR = Path(__file__).resolve().parent.parent
 for _base in [_PHASE2_DIR.parent, _PHASE2_DIR.parent.parent]:
-    _fwd = _base / 'future_phase1_forward_model' / 'scripts'
+    _fwd = _base / 'phase4_forward_model' / 'scripts'
     if _fwd.exists() and str(_fwd) not in sys.path:
         sys.path.insert(0, str(_fwd))
         break

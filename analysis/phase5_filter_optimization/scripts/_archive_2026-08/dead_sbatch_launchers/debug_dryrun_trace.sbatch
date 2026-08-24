@@ -5,7 +5,7 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --time=00:30:00
 #SBATCH --no-requeue
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase5_filter_optimization
 #SBATCH --output=logs/dbg_trace_%j.out
 #SBATCH --error=logs/dbg_trace_%j.err
 
@@ -26,7 +26,7 @@ from neural_loss import load_amplitudes as _load_amps, ROI_K
 from behav_loss import load_jnd_per_pair as _load_jnd
 from forward_voxel_synth import (precompute_per_hc_W, estimate_noise_per_hc,
                                   synthesize_voxel_response)
-sys.path.insert(0, '../future_phase1_forward_model/scripts')
+sys.path.insert(0, '../phase4_forward_model/scripts')
 from utils_forward_model import create_basis_full, HUE_ANGLES
 import numpy as np
 

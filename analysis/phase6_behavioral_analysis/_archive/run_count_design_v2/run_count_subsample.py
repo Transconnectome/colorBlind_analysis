@@ -30,8 +30,8 @@ import numpy as np
 # Path setup — reuse existing canonical machinery
 # ---------------------------------------------------------------------------
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
-sys.path.insert(0, str(PROJECT_ROOT / "analysis" / "future_phase1_forward_model" / "scripts"))
-sys.path.insert(0, str(PROJECT_ROOT / "analysis" / "future_phase2_filter_optimization" / "scripts"))
+sys.path.insert(0, str(PROJECT_ROOT / "analysis" / "phase4_forward_model" / "scripts"))
+sys.path.insert(0, str(PROJECT_ROOT / "analysis" / "phase5_filter_optimization" / "scripts"))
 
 from utils_forward_model import (  # noqa: E402
     HC_SUBJECTS, CVD_SUBJECTS, N_COLORS, HUE_ANGLES,
@@ -44,7 +44,7 @@ BASELINE_DIR = PROJECT_ROOT / "analysis" / "phase1_procrustes_decoding" / \
 
 ROIS_TO_TEST = ["V1", "V2", "V3", "V4"]  # V4 == hV4 on disk
 ALL_SUBJECTS = HC_SUBJECTS + CVD_SUBJECTS  # 10 subjects
-OUT_DIR = PROJECT_ROOT / "analysis" / "future_phase3_behavioral_analysis" / \
+OUT_DIR = PROJECT_ROOT / "analysis" / "phase6_behavioral_analysis" / \
     "run_count_validation"
 
 

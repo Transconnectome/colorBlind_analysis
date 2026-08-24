@@ -316,7 +316,7 @@ Pass criteria (CVD-test = sub-08 + sub-09 only; sub-10 = null control, reported 
 모든 raw data + figures는 `run_count_validation/`에 저장. 재현:
 
 ```bash
-cd analysis/future_phase3_behavioral_analysis
+cd analysis/phase6_behavioral_analysis
 conda activate srm
 python scripts/run_count_saturation.py  # ~60s
 python scripts/run_count_tier1.py        # ~3s

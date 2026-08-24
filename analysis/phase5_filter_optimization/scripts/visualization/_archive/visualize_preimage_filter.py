@@ -30,7 +30,7 @@ _SCRIPT_DIR = Path(__file__).resolve().parent
 sys.path.insert(0, str(_SCRIPT_DIR.parent))
 
 _FWD_DIR = str(Path(__file__).resolve().parent.parent.parent.parent
-               / 'future_phase1_forward_model' / 'scripts')
+               / 'phase4_forward_model' / 'scripts')
 sys.path.insert(0, _FWD_DIR)
 
 from visualize_cone_shift_colors import (  # noqa: E402

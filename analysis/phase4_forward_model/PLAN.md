@@ -338,7 +338,7 @@ Values: mean ± SEM across 10 subjects. Bold = best per column.
 ### Directory Structure
 
 ```
-future_phase1_forward_model/
+phase4_forward_model/
 ├── PLAN.md                          # This document
 ├── notion.md                        # Algorithm documentation (Korean)
 ├── README.md                        # Phase overview
@@ -1245,7 +1245,7 @@ Phase 3. Behavioral Validation
 **Rationale**: Literature-driven analyses (Pospisil, Bannert, Kuriki) organized by research question, not chronologically mixed with baseline scripts.
 
 ```
-future_phase1_forward_model/
+phase4_forward_model/
 ├── scripts/
 │   ├── (30+ existing baseline scripts)              ← UNCHANGED
 │   │   ├── step_a_fit_srm.py

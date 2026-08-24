@@ -7,7 +7,7 @@
 #SBATCH --mem=16G
 #SBATCH --nodelist=node2
 #SBATCH --no-requeue
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase4_forward_model
 
 # Cone-shift-informed CVD prediction evaluation
 # Requires: cone_shift_validation_results.json (from local cone_shift_validation.py)

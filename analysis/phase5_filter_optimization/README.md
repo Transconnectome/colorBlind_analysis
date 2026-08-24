@@ -1,4 +1,4 @@
-# future_phase2_filter_optimization
+# phase5_filter_optimization
 
 **Status**: Pipeline 2 CLOSURE READY (2026-05-27) → Phase 3 행동 실험 진입 대기
 
@@ -40,7 +40,7 @@
 ## 폴더 구조
 
 ```
-future_phase2_filter_optimization/
+phase5_filter_optimization/
 ├── README.md                          ← (본 문서) navigation + final candidates
 ├── PIPELINE_2_CLOSURE.md              ← MAIN: 5-step axis + RQ + limitations + Phase C seed audit
 ├── CLAUDE.md                          ← project instructions

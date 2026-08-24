@@ -4,7 +4,7 @@
 anisotropic ellipse, *invertible* → inverse filter is coherent) or a **collapse**
 (E2: ring → 1-D line, loop opens, *non-invertible* → filter premise breaks)?
 
-This complements `future_phase1_forward_model/scripts/dimensionality/`, which
+This complements `phase4_forward_model/scripts/dimensionality/`, which
 measured **population** dimensionality (voxel covariance). That cannot see the
 ring; this folder measures the **configuration** geometry of the 8 hues directly.
 

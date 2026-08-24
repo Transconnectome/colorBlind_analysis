@@ -1,4 +1,4 @@
-# phase4_topology — CLAUDE.md
+# future_phase2_topology — CLAUDE.md
 
 **Stage**: A-side geometry characterization (complements Phase-1 population dimensionality).
 **Status**: First pass complete (descriptive, null-leaning).
@@ -21,7 +21,7 @@ failure and to the inverse-filter invertibility premise.
 ## Reuse policy (enforced)
 
 - Data loading / subject groups / ROI map / `save_config` are **imported** from
-  `future_phase1_forward_model/scripts/utils_forward_model.py`. Do NOT re-implement.
+  `phase4_forward_model/scripts/utils_forward_model.py`. Do NOT re-implement.
 - Crawford & Howell single-case = project-canonical formula (n=3 CVD standard).
 - matplotlib only (no seaborn). Flat output `results/<name>/` + one `config.json`.
 

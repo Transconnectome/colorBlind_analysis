@@ -28,8 +28,8 @@ OUT = (SCRIPT.parents[2] / "presentation" / "figures" / "data" /
        "slide5_rc_panels.png")
 OUT.parent.mkdir(parents=True, exist_ok=True)
 
-# Reuse the Stockman loader from future_phase1_forward_model
-sys.path.insert(0, str(PROJECT / "analysis" / "future_phase1_forward_model" / "scripts"))
+# Reuse the Stockman loader from phase4_forward_model
+sys.path.insert(0, str(PROJECT / "analysis" / "phase4_forward_model" / "scripts"))
 from stockman_cone_shift import load_stockman_fundamentals, shift_cone_sensitivity
 
 # --------------------------------------------------------------------- style
@@ -226,7 +226,7 @@ axD.legend(handles=[h_ret2, h_fin], loc="upper left", frameon=True,
 
 # ============================================================ footer
 fig.text(0.5, 0.015,
-          "Companion: future_phase2_filter_optimization/mathematical_basis.md §10  ·  "
+          "Companion: phase5_filter_optimization/mathematical_basis.md §10  ·  "
           "5 monochromatic test stimuli (Stockman 2-deg).",
           ha="center", fontsize=8.5, style="italic", color="#666")
 

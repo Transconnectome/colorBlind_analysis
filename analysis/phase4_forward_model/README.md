@@ -226,7 +226,7 @@ Resolves whether CVD K-sensitivity reflects genuine dimensionality reduction or 
 ## Directory Structure
 
 ```
-future_phase1_forward_model/
+phase4_forward_model/
 |
 |-- scripts/                        # All analysis scripts
 |   |-- step_a_fit_srm.py           # Core pipeline step A

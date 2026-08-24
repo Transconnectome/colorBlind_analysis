@@ -6,7 +6,7 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --mem=16G
 #SBATCH --nodelist=node2
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase4_forward_model
 
 # Eigenspectrum Decay Analysis (Pospisil & Pillow 2024 framework)
 # Computes PCA eigenvalues and fits broken power law

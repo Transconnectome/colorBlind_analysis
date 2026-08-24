@@ -36,7 +36,7 @@ HC_C010 = ROOT / "derivatives" / "full_dataset_C010"
 LOCAL_C010 = Path("/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/"
                   "colorBlind_analysis/analysis/phase1_procrustes_decoding/results/"
                   "visualization/full_dataset_C010_with_residuals")
-PHASE1 = Path(__file__).resolve().parents[3] / "future_phase1_forward_model" / "scripts"
+PHASE1 = Path(__file__).resolve().parents[3] / "phase4_forward_model" / "scripts"
 sys.path.insert(0, str(PHASE1))
 from utils_forward_model import create_basis_matrix, HUE_ANGLES, fit_W_ridge, gcv_select_alpha  # noqa
 from loco_canonical import loco_forward_readouts  # noqa

@@ -33,8 +33,8 @@ import numpy as np
 from joblib import Parallel, delayed
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
-sys.path.insert(0, str(PROJECT_ROOT / "analysis" / "future_phase1_forward_model" / "scripts"))
-sys.path.insert(0, str(PROJECT_ROOT / "analysis" / "future_phase2_filter_optimization" / "scripts"))
+sys.path.insert(0, str(PROJECT_ROOT / "analysis" / "phase4_forward_model" / "scripts"))
+sys.path.insert(0, str(PROJECT_ROOT / "analysis" / "phase5_filter_optimization" / "scripts"))
 
 # Import LOCO helpers
 from utils_forward_model import (  # noqa: E402
@@ -43,7 +43,7 @@ from utils_forward_model import (  # noqa: E402
 )
 from utils_distortion_models import get_design_matrix  # noqa: E402
 # Import crossnobis helpers from our v1 script
-sys.path.insert(0, str(PROJECT_ROOT / "analysis" / "future_phase3_behavioral_analysis" / "scripts"))
+sys.path.insert(0, str(PROJECT_ROOT / "analysis" / "phase6_behavioral_analysis" / "scripts"))
 from run_count_crossnobis import (  # noqa: E402
     crossnobis_rdm, rdm_upper_vec, split_half_pairs, general_split_pairs,
 )
@@ -54,7 +54,7 @@ BASELINE_DIR = PROJECT_ROOT / "analysis" / "phase1_procrustes_decoding" / \
 
 ROIS_TO_TEST = ["V1", "V2", "V3", "V4"]
 ALL_SUBJECTS = HC_SUBJECTS + CVD_SUBJECTS
-OUT_DIR = PROJECT_ROOT / "analysis" / "future_phase3_behavioral_analysis" / \
+OUT_DIR = PROJECT_ROOT / "analysis" / "phase6_behavioral_analysis" / \
     "run_count_validation"
 N_JOBS = 10
 N_RUNS_TOTAL = 6

@@ -35,7 +35,7 @@ _LOCO_DIR = _RESULT_DIR / 'fits'
 _C010_ROOT = (_PIPELINE_DIR.parent / 'phase1_procrustes_decoding' /
               'results' / 'visualization' / 'full_dataset_C010_with_residuals')
 
-_FWD_DIR = str(_PIPELINE_DIR.parent / 'future_phase1_forward_model' / 'scripts')
+_FWD_DIR = str(_PIPELINE_DIR.parent / 'phase4_forward_model' / 'scripts')
 if _FWD_DIR not in sys.path:
     sys.path.insert(0, _FWD_DIR)
 if str(_SCRIPT_DIR) not in sys.path:

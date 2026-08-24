@@ -44,7 +44,7 @@ from neural_loss import HUE_ANGLES, ROI_K  # noqa: E402  (after sys.path mutatio
 from two_comp import forward_2comp, THETA_CONF  # noqa: E402
 
 # encoder
-_PHASE1_FWD = SCRIPT_DIR.parents[1] / "future_phase1_forward_model" / "scripts"
+_PHASE1_FWD = SCRIPT_DIR.parents[1] / "phase4_forward_model" / "scripts"
 sys.path.insert(0, str(_PHASE1_FWD))
 from utils_forward_model import (  # noqa: E402
     create_basis_full,

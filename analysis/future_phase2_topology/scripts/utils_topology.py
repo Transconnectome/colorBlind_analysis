@@ -4,7 +4,7 @@ utils_topology.py — Stimulus-configuration (8-hue ring) geometry primitives.
 
 Phase 4 asks a DIFFERENT question from the Phase-1 dimensionality scripts:
 
-    Phase-1 (future_phase1_forward_model/scripts/dimensionality/):
+    Phase-1 (phase4_forward_model/scripts/dimensionality/):
         POPULATION dimensionality — eigenspectrum of the n_voxels x n_voxels
         covariance over 48 (run x color) samples. "How many voxel-population
         modes carry signal." Color identity is collapsed into samples.
@@ -30,7 +30,7 @@ import numpy as np
 from scipy import stats
 
 # --- Reuse the canonical loader + constants (do NOT re-implement) -----------
-_FWD = Path(__file__).resolve().parents[2] / 'future_phase1_forward_model' / 'scripts'
+_FWD = Path(__file__).resolve().parents[2] / 'phase4_forward_model' / 'scripts'
 sys.path.insert(0, str(_FWD))
 from utils_forward_model import (        # noqa: E402
     load_amplitudes, save_config, get_subject_group,

@@ -14,7 +14,7 @@ Method:
   - Spearman correlation between the two 28-element vectors
 
 Input:
-  - future_phase2_filter_optimization/pre_validation/results/crossnobis_pairs/
+  - phase5_filter_optimization/pre_validation/results/crossnobis_pairs/
   - results/validation/sub-*_loco.json (FE LOCO pred_hues)
 Output: results/cross_phase/
 
@@ -23,7 +23,7 @@ Note: SRM crossnobis data covers V1, V2, V3 only (not hV4).
 Usage:
     conda activate srm
     python scripts/cross_phase_correlation.py \
-        --crossnobis_path ../../future_phase2_filter_optimization/pre_validation/results/crossnobis_pairs/crossnobis_pair_analysis.json \
+        --crossnobis_path ../../phase5_filter_optimization/pre_validation/results/crossnobis_pairs/crossnobis_pair_analysis.json \
         --validation_dir results/validation \
         --output_dir results/cross_phase
 """
@@ -392,7 +392,7 @@ def save_results(correlations, output_dir):
 def main():
     parser = argparse.ArgumentParser(description='Exp A6: Cross-Phase Correlation')
     parser.add_argument('--crossnobis_path', type=str,
-                        default='../../future_phase2_filter_optimization/pre_validation/results/crossnobis_pairs/crossnobis_pair_analysis.json')
+                        default='../../phase5_filter_optimization/pre_validation/results/crossnobis_pairs/crossnobis_pair_analysis.json')
     parser.add_argument('--validation_dir', type=str, default='results/validation')
     parser.add_argument('--output_dir', type=str, default='results/cross_phase')
     args = parser.parse_args()

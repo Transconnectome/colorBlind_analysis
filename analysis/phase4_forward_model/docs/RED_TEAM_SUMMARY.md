@@ -148,7 +148,7 @@ OVERALL VERDICT: MAJOR REVISION (submittable after experiments)
 ```bash
 # Submit cross-phase validation experiments (SUMMARY Exp A4-A6)
 ssh haba6030@node3 << 'EOF'
-cd /scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model
+cd /scratch/connectome/haba6030/colorBlind/analysis/phase4_forward_model
 sbatch sbatch/run_dimensionality.sbatch
 sbatch sbatch/run_voxel_preference.sbatch
 EOF

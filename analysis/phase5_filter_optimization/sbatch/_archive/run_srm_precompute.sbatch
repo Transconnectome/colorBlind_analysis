@@ -7,7 +7,7 @@
 #SBATCH --mem=8G
 #SBATCH --time=00:30:00
 #SBATCH --no-requeue
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase5_filter_optimization
 # ---------------------------------------------------------------------------
 # Step 0: SRM Precompute for V1/V2 (Task A prerequisite)
 #

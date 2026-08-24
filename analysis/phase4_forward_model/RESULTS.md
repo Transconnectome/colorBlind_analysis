@@ -1081,7 +1081,7 @@ LOCO re-estimates W per fold → df shortage directly impacts results. Filter fr
 2. **Filter T_ψ optimization** — minimize ||W_CVD @ C(T_ψ(θ)) − Y_HC(θ)||², Fourier k=1~2
 3. **LOCO-style validation** — train T_ψ on 7 colors → predict 1 (overfitting control)
 4. **Behavioral task (JND 2AFC) linkage** — compare T_ψ predictions with JND changes
-5. **Transition to `future_phase2_filter_optimization/`**
+5. **Transition to `phase5_filter_optimization/`**
 
 ### 7e. Decision Rules
 
@@ -1422,7 +1422,7 @@ V2 is the only ROI where Isomap outperforms MDS, suggesting a curved manifold st
 
 ### A.7 Data References
 
-- **Script**: `future_phase2_filter_optimization/target_prevalidation/cielab_vs_angular_rdm.py`
+- **Script**: `phase5_filter_optimization/target_prevalidation/cielab_vs_angular_rdm.py`
 - **Results directory**: `target_prevalidation/results/cielab_diagnostic/`
 - **JSON summary**: `cielab_diagnostic_summary.json` (stress curves, Mantel tests, persistent homology, higher-D MDS, isomap, per-subject, decision framework)
 - **Figures**: `fig1_stress_curve.png` through `fig6_per_subject.png`

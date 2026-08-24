@@ -38,7 +38,7 @@ data and projects them onto the existing reference.
 ```bash
 ssh haba6030@node3
 cd /scratch/connectome/haba6030/colorBlind
-bash analysis/future_phase3_behavioral_analysis/comprehensive_pipeline/submit_pipeline.sh
+bash analysis/phase6_behavioral_analysis/comprehensive_pipeline/submit_pipeline.sh
 ```
 
 ## Prerequisites — `--session` flag in 4 scripts
@@ -65,13 +65,13 @@ filenames written by `rerun_loo_consistent.py` differ, extend the
 
 ```bash
 # CRLF check
-file analysis/future_phase3_behavioral_analysis/comprehensive_pipeline/*.sbatch \
-     analysis/future_phase3_behavioral_analysis/comprehensive_pipeline/submit_pipeline.sh
+file analysis/phase6_behavioral_analysis/comprehensive_pipeline/*.sbatch \
+     analysis/phase6_behavioral_analysis/comprehensive_pipeline/submit_pipeline.sh
 # expect: 'ASCII text'  (no 'with CRLF line terminators')
 
 # sbatch lint
-sbatch --test-only analysis/future_phase3_behavioral_analysis/comprehensive_pipeline/01_preprocess_filter.sbatch
-sbatch --test-only analysis/future_phase3_behavioral_analysis/comprehensive_pipeline/02_downstream_filter.sbatch
+sbatch --test-only analysis/phase6_behavioral_analysis/comprehensive_pipeline/01_preprocess_filter.sbatch
+sbatch --test-only analysis/phase6_behavioral_analysis/comprehensive_pipeline/02_downstream_filter.sbatch
 # expect 'Job N would be submitted' for each
 ```
 
@@ -88,9 +88,9 @@ Temporarily edit both sbatch files: set `SESSION=01`, `SUBJECTS=(08)`, and
 change the SRM/LOSO output dirs to a throwaway `_SMOKE` suffix. Then submit:
 
 ```bash
-bash analysis/future_phase3_behavioral_analysis/comprehensive_pipeline/submit_pipeline.sh
+bash analysis/phase6_behavioral_analysis/comprehensive_pipeline/submit_pipeline.sh
 squeue -u $USER
-tail -f analysis/future_phase3_behavioral_analysis/comprehensive_pipeline/logs/*.out
+tail -f analysis/phase6_behavioral_analysis/comprehensive_pipeline/logs/*.out
 ```
 
 Expected end state:

@@ -42,7 +42,7 @@ Both CVD participants fell below the control distribution at hV4, significantly 
 The reduction concentrated on the S-cone intermediate hues. Both participants gave zero adjacent accuracy at hV4 for blue, purple, and magenta (Figure~\ref{fig:loco}C). Per-hue single-case tests reached $p \geq 0.051$ at every hue (Crawford \& Howell, one-tailed, uncorrected and exploratory), with blue the largest deviation in both participants ($d_{cc} = -2.06$). The per-hue accuracies form each participant's hue vulnerability profile $\mathbf{v} \in [0,1]^8$.
 
 % ── Figure 3 ─────────────────────────────────────────────────────────────────
-\begin{figure*}[tb]
+\begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{fig2_loro_loco}
   \caption{\textbf{Color classification and hue interpolation across V1--hV4 in the two CVD participants and healthy controls.} All panels are computed on the Procrustes-aligned amplitudes with $n = 7$ healthy controls at every ROI. Gray bars give the control mean $\pm$ SEM, the orange square the deutan participant, and the teal triangle the protan participant.
@@ -50,7 +50,7 @@ The reduction concentrated on the S-cone intermediate hues. Both participants ga
   \textbf{(B)} Adjacent accuracy from leave-one-color-out cross-validation, the proportion of predictions falling within $45^\circ$ of the target hue. The dashed line marks the analytic chance level of $0.25$. Accuracies are shown for all four ROIs. Asterisks give one-tailed single-case Crawford--Howell comparisons and appear only at ROIs whose control mean exceeds the color-label permutation null.
   \textbf{(C)} Per-hue adjacent accuracy at hV4. Per-hue comparisons are one-tailed, uncorrected, and exploratory across the eight hues.}
   \label{fig:loco}
-\end{figure*}
+\end{figure}
 
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{Geometric deviation localizes to a distinct ROI in each CVD case}
@@ -66,7 +66,7 @@ The deutan participant showed elevated disparity at V2 in the common HC space ($
 The two CVD participants differ in where the deviation lies and in how strong it is. Because each deviation is participant-specific, a single family-level correction would match only one of them. In each participant the continuous arrangement of hues is displaced in a direction and magnitude specific to that individual, which a personalized correction must therefore offset.
 
 % ── Figure 4 ─────────────────────────────────────────────────────────────────
-\begin{figure*}[tb]
+\begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{fig3_geometry_r6}
   \caption{\textbf{Procrustes disparity to the healthy-control reference.}
@@ -76,7 +76,7 @@ The two CVD participants differ in where the deviation lies and in how strong it
   Asterisks mark $p < 0.05$ under the symmetric LOSO reference, which is the inferential estimate (\S\ref{sec:methods:rdm}).
   Test statistics under both references are given in \cref{tab:disparity_loso}.}
   \label{fig:geometry}
-\end{figure*}
+\end{figure}
 
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{Hue-discrimination thresholds are elevated on each participant's own confusion axis}
@@ -144,7 +144,7 @@ Only the deutan confusion-axis amplitude exceeds the error of the recovery proce
 Within the deutan fit the two axes are constrained to different degrees. Across the 300 resamples $\hat\beta_c$ concentrates at $-42^\circ$ and $-44^\circ$ ($202$ of $300$) and stays within $[-48^\circ, -36^\circ]$, whereas $\hat\beta_s$ distributes almost uniformly from $0^\circ$ to $14^\circ$.
 
 % ── Figure 6 — per-subject loss landscape ────────────────────────────────────
-\begin{figure*}[tb]
+\begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{fig6_landscape}
   \caption{\textbf{Per-subject loss landscape and parameter uncertainty.}
@@ -154,7 +154,7 @@ Within the deutan fit the two axes are constrained to different degrees. Across 
   It is a descriptive low-dimensional embedding of the distortion rather than a physiological point estimate (Section~\ref{sec:results:identifiability}).
   White points give the per-resample argmins over $N = 300$ HC 5-train/2-test resamples.}
   \label{fig:landscape}
-\end{figure*}
+\end{figure}
 
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{Per-subject stimulus-space filter}
@@ -168,7 +168,7 @@ For the deutan participant ($\hat\beta_s = 6^\circ$, $\hat\beta_c = -42^\circ$, 
 The dominant confusion-axis term carries opposite signs in the two participants, $-42^\circ$ against $+24^\circ$, and their confusion axes differ as well, at $150^\circ$ against $16^\circ$. The two effects partly cancel, so the resulting corrections share a direction at six of the eight hues and oppose each other at yellow and purple.
 
 % ── Figure 7 — per-subject stimulus-space filter (Original | Filtered) ───────
-\begin{figure*}[!htbp]
+\begin{figure}[!htbp]
   \centering
   \includegraphics[width=\textwidth]{fig7_filter}
   \caption[Per-subject stimulus-space correction filter]{\textbf{Per-subject stimulus-space correction filter.}
@@ -179,7 +179,7 @@ The dominant confusion-axis term carries opposite signs in the two participants,
   Rendering coordinate space: STIM\_LAB CIELab (project convention).
   Neural validation of both filters in a second session is shown in \cref{fig:filter_eval}. The psychophysical outcomes are reported in Section~\ref{sec:results:filter_eval}.}
   \label{fig:filter}
-\end{figure*}
+\end{figure}
 
 % ──────────────────────────────────────────────────────────────────────────────
 \subsection{Psychophysical and neural filter evaluation}
@@ -201,7 +201,7 @@ Only the individualized filter left both participants free of new deviant pairs.
 \paragraph{Colors remained decodable.}
 All eight hues remained decodable under both filters in both participants. LORO eight-way classification accuracy stayed above the $0.125$ chance level at every ROI and in every condition, with the lowest cell at $0.50$ against an HC range of $0.71$ to $0.77$ (Supplementary Table~\ref{tab:exp2_loro}).
 
-\begin{figure*}[tb]
+\begin{figure}[htbp]
   \centering
   \includegraphics[width=\textwidth]{fig8_filter_eval}
   \caption{\textbf{Hue interpolation and representational geometry under each filter in the second
@@ -224,7 +224,7 @@ All eight hues remained decodable under both filters in both participants. LORO 
     distribution ($^{*}p<.05$, $^{**}p<.01$, $^{***}p<.001$). The forward-tuning encoding index is
     in Fig.~\ref{fig:forward_tuning}.}
   \label{fig:filter_eval}
-\end{figure*}
+\end{figure}
 
 \paragraph{Interpolation.}
 At hV4 the individualized filter raised interpolation in the deutan participant and lowered it in the protan participant. Adjacent accuracy in the deutan participant went from $0.23$ unfiltered to $0.31$ under the individualized filter and $0.25$ under the deployed one, against an HC mean of $0.46 \pm 0.11$. Both conditions stayed below the HC level ($d_{cc} = -1.35$ individualized, $-1.94$ deployed), and the individualized value alone exceeded the $0.25$ chance level. In the protan participant the individualized filter gave the lowest of the three conditions at $0.06$ ($d_{cc} = -3.70$), against $0.14$ unfiltered and $0.19$ deployed, and all three fell below chance.

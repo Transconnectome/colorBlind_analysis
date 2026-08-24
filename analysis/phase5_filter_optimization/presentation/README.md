@@ -38,7 +38,7 @@ presentation/
 ## Regenerate Python data figures
 
 ```bash
-cd analysis/future_phase2_filter_optimization
+cd analysis/phase5_filter_optimization
 conda activate srm
 
 python scripts/visualization/figs_activation_overview.py

@@ -6,7 +6,7 @@
 #SBATCH --time=01:30:00
 #SBATCH --no-requeue
 #SBATCH --array=1-10%5
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase4_forward_model
 #SBATCH --output=logs/improved_%a_%j.out
 #SBATCH --error=logs/improved_%a_%j.err
 

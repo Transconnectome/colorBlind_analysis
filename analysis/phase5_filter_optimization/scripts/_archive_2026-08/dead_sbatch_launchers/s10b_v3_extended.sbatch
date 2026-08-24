@@ -6,7 +6,7 @@
 #SBATCH --cpus-per-task=2
 #SBATCH --mem=12G
 #SBATCH --no-requeue
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase5_filter_optimization
 #SBATCH --output=logs/s10b_v3_%A_%a.out
 #SBATCH --error=logs/s10b_v3_%A_%a.err
 

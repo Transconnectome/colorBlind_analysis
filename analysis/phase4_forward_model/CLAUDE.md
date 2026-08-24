@@ -1,4 +1,4 @@
-# future_phase1_forward_model — CLAUDE.md
+# phase4_forward_model — CLAUDE.md
 
 **Stage A→B bridge** · **Status**: Core pipeline complete.
 

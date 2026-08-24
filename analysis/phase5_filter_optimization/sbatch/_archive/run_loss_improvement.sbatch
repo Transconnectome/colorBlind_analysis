@@ -8,7 +8,7 @@
 #SBATCH --time=02:00:00
 #SBATCH --no-requeue
 #SBATCH --array=0-8
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase5_filter_optimization
 # ---------------------------------------------------------------------------
 # Loss improvement diagnostic landscapes
 #

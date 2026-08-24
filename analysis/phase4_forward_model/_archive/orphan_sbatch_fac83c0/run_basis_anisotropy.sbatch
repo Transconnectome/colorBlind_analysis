@@ -7,7 +7,7 @@
 #SBATCH --mem=16G
 #SBATCH --nodelist=node2
 #SBATCH --no-requeue
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase4_forward_model
 
 # A2: Basis Anisotropy Test
 # Uniform vs cool-dense vs warm-dense channel spacing
@@ -15,7 +15,7 @@
 source ~/.bashrc
 conda activate nilearn
 
-export PYTHONPATH="/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model/scripts:${PYTHONPATH}"
+export PYTHONPATH="/scratch/connectome/haba6030/colorBlind/analysis/phase4_forward_model/scripts:${PYTHONPATH}"
 
 BASELINE_DIR="/scratch/connectome/haba6030/colorBlind/derivatives/full_dataset_C010"
 

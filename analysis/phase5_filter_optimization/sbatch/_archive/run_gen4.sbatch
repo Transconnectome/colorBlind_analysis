@@ -7,7 +7,7 @@
 #SBATCH --mem=16G
 #SBATCH --time=04:00:00
 #SBATCH --no-requeue
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization/cone_shift_pipeline
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase5_filter_optimization/cone_shift_pipeline
 # ---------------------------------------------------------------------------
 # Resource sizing rationale (K ≤ 6, V ≈ 300–1000, 8 colors):
 #   • Matrices are tiny → BLAS with >4 threads is SLOWER (sync overhead).
@@ -34,7 +34,7 @@
 #   step4_summary           — summary_table.csv + matplotlib figures
 #
 # Submission (from project root on node3/login):
-#   sbatch analysis/future_phase2_filter_optimization/cone_shift_pipeline/sbatch/run_gen4.sbatch
+#   sbatch analysis/phase5_filter_optimization/cone_shift_pipeline/sbatch/run_gen4.sbatch
 # ---------------------------------------------------------------------------
 
 set -eo pipefail

@@ -49,7 +49,7 @@
 
 ### 근거
 
-`docs/PAPER/repro/_perm_adjacent_arm.py` → `perm_adjacent_arm_{with_residuals,motreg,motshift}.json`.
+`analysis/future_phase1_sensitivity/scripts/_perm_adjacent_arm.py` → `perm_adjacent_arm_{with_residuals,motreg,motshift}.json`.
 `verify()` 가 4 ROI 전부에서 정본 `loco_canonical` 과 1e-12 일치를 확인한다. 원본 arm 은 발표값을 정확히 재현한다 (V1 .393/p=.164, V2 .357/.424, V3 .339/.586, hV4 .456/.011).
 
 **현행 §S2 L46 은 사실과 다르다.**
@@ -206,7 +206,7 @@ Shifted control   & $0.483$ & $0.127$ & $.002$ & $0.375$ ($.229$, $-0.85$) & $0.
 
 ### 근거
 
-`analysis/future_phase3_behavioral_analysis/scripts/a2_staircase_diagnosis.py`
+`analysis/phase6_behavioral_analysis/scripts/a2_staircase_diagnosis.py`
 → `results/exp2_behavior/a2_staircase_diagnosis.json`
 
 전체 13개 trial 파일 **208 staircase 전수 스캔**. 제시 가능한 최대 수준은 0.95다. 그 수준에서 오답을 낸 staircase는 **정확히 2개**이고 둘 다 sub-08 세션-1 orange–yellow(sc0, sc1)다.
@@ -278,7 +278,7 @@ Shifted control   & $0.483$ & $0.127$ & $.002$ & $0.375$ ($.229$, $-0.85$) & $0.
 
 ## 9. H — U2 β_c 부호 강건성
 
-> 실행 전 확정 문서: [`analysis/future_phase2_filter_optimization/U2_BETA_SIGN_PRESPEC.md`](../../analysis/future_phase2_filter_optimization/U2_BETA_SIGN_PRESPEC.md) (커밋 `cdcb6ae`, 실행 전 커밋됨)
+> 실행 전 확정 문서: [`analysis/phase5_filter_optimization/U2_BETA_SIGN_PRESPEC.md`](../../analysis/phase5_filter_optimization/U2_BETA_SIGN_PRESPEC.md) (커밋 `cdcb6ae`, 실행 전 커밋됨)
 
 ### 왜 이것만 성격이 다른가
 
@@ -431,9 +431,9 @@ A·B·C 는 한 묶음이다. B 의 단서 문장이 §S2 의 새 표를 가리�
 
 | 항목 | 스크립트 | 결과 |
 |---|---|---|
-| A·B | `docs/PAPER/repro/_perm_adjacent_arm.py` | `perm_adjacent_arm_{with_residuals,motreg,motshift}.json`, `perm_arm_*_null_*.npy` |
+| A·B | `analysis/future_phase1_sensitivity/scripts/_perm_adjacent_arm.py` | `perm_adjacent_arm_{with_residuals,motreg,motshift}.json`, `perm_arm_*_null_*.npy` |
 | C | `analysis/validation/scripts/disparity_frozen_permutation.py`, `color_specificity_arm_comparison.py` | `disparity_frozen_permutation_motshift.json`, `color_specificity_arm_comparison.json` |
-| D·E | `analysis/future_phase3_behavioral_analysis/scripts/a2_staircase_diagnosis.py` | `results/exp2_behavior/a2_staircase_diagnosis.json` |
+| D·E | `analysis/phase6_behavioral_analysis/scripts/a2_staircase_diagnosis.py` | `results/exp2_behavior/a2_staircase_diagnosis.json` |
 
 ---
 
@@ -441,7 +441,7 @@ A·B·C 는 한 묶음이다. B 의 단서 문장이 §S2 의 새 표를 가리�
 
 | | 경로 |
 |---|---|
-| prespec (실행 전 커밋 `cdcb6ae`) | `analysis/future_phase2_filter_optimization/U2_BETA_SIGN_PRESPEC.md` |
+| prespec (실행 전 커밋 `cdcb6ae`) | `analysis/phase5_filter_optimization/U2_BETA_SIGN_PRESPEC.md` |
 | 재현 게이트 (발표 arm) | `results/s10_inclusion/u2_baseline/s10b_v6_pca_rdm_results_sub-0{8,9}_c*.json` |
 | 회귀 arm | `results/s10_inclusion/u2_motreg/s10b_v6_pca_rdm_results_sub-0{8,9}_c*.json` |
 | override | `scripts/neural_loss.py` `COLORBLIND_AMP_ROOT` (기본값 = 발표 경로) |

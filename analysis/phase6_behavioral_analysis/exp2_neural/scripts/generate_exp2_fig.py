@@ -27,8 +27,8 @@ from pathlib import Path
 from scipy import stats
 
 BASE = Path("/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis")
-RESDIR = BASE / "analysis/future_phase3_behavioral_analysis/exp2_neural/results"
-OUTDIR = BASE / "analysis/future_phase3_behavioral_analysis/exp2_neural/figures"
+RESDIR = BASE / "analysis/phase6_behavioral_analysis/exp2_neural/results"
+OUTDIR = BASE / "analysis/phase6_behavioral_analysis/exp2_neural/figures"
 
 ROIS = ["V1", "V2", "V3", "V4"]
 ROI_LABELS = ["V1", "V2", "V3", "hV4"]

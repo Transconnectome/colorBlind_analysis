@@ -6,7 +6,7 @@ Three conditions per subject:
   window    = exp2 (ses2) macOS Color Filter (deployed product, subject-tuned)
   optimal   = exp2 (ses2) personalized 2-comp pre-image filter (PsychoPy render)
 
-Framing (per future_phase3_behavioral_analysis/CLAUDE.md, Path A):
+Framing (per phase6_behavioral_analysis/CLAUDE.md, Path A):
   - JND/RSVP = OUTCOME comparison only. Window vs Optimal is subject to a
     rendering-pipeline confound (OS transform vs PsychoPy direct), so neither
     a win nor a tie here is interpretable as personalization (that lives in the

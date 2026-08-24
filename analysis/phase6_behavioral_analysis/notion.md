@@ -116,7 +116,7 @@ SRM z-score = (CVD 거리 - HC 평균) / HC SD (SRM 공유 공간). 양수 = 과
 | cyan-blue | -0.95 | — | — | Type A: L-M 혼동 |
 | red-cyan | — | +0.60 | — | — |
 
-> **출처**: `analysis/future_phase2_filter_optimization/pre_validation/notion_prevalidation.md` §1-1
+> **출처**: `analysis/phase5_filter_optimization/pre_validation/notion_prevalidation.md` §1-1
 
 ### 2-2. Crossnobis RDM 차이 (Phase 2, 원 복셀 공간)
 
@@ -150,7 +150,7 @@ Crawford-Howell 검정: sub-08 개인 LOCO voxel_corr vs HC 분포 (df=6, 단측
 | V2 | **yellow** | -0.693 | +0.003 | -3.94 | **0.0077** |
 | V2 | **cyan** | -0.211 | +0.186 | -4.26 | **0.0053** |
 
-> **출처**: `analysis/future_phase1_forward_model/RESULTS.md` §3d
+> **출처**: `analysis/phase4_forward_model/RESULTS.md` §3d
 
 ### 2-4. Forward Model — LOCO 그룹 요약
 
@@ -161,7 +161,7 @@ Crawford-Howell 검정: sub-08 개인 LOCO voxel_corr vs HC 분포 (df=6, 단측
 | V3 | +0.023 (0.240) | -0.008 (0.163) | +0.14 | 0.819 |
 | hV4 | +0.183 (0.200) | -0.058 (0.207) | +1.19 | 0.169 |
 
-> **출처**: `analysis/future_phase1_forward_model/RESULTS.md` §2b
+> **출처**: `analysis/phase4_forward_model/RESULTS.md` §2b
 
 ---
 
@@ -579,10 +579,10 @@ sim = corr(W_CVD_shifted.flatten(), W_HC_mean.flatten())
 | HC Group 통계 | `results/hc_group_metrics.json`, `results/jnd_summary.csv` | Phase 3 (분석) |
 | HC1/HC2 RSVP | `data/behav_pilot/HC_rsvp_8afc_ses1_run1.csv`, `HC2_*` | Phase 3 (행동) |
 | CVD RSVP | `data/behav_pilot/sub-08_rsvp_8afc_ses1_run1.csv` | Phase 3 (행동) |
-| SRM z-score | `analysis/future_phase2_filter_optimization/pre_validation/notion_prevalidation.md` §1-1 | Phase 2 (SRM 사전검증) |
+| SRM z-score | `analysis/phase5_filter_optimization/pre_validation/notion_prevalidation.md` §1-1 | Phase 2 (SRM 사전검증) |
 | Crossnobis diff | `analysis/phase2_SRM_across_between/results/color_pair_analysis/color_pair_analysis_V{1,2}.json` | Phase 2 (SRM) |
-| LOCO 색별 | `analysis/future_phase1_forward_model/RESULTS.md` §3d | Future Phase 1 (Forward Model) |
-| LOCO 그룹 격차 | `analysis/future_phase1_forward_model/RESULTS.md` §2b | Future Phase 1 (Forward Model) |
+| LOCO 색별 | `analysis/phase4_forward_model/RESULTS.md` §3d | Future Phase 1 (Forward Model) |
+| LOCO 그룹 격차 | `analysis/phase4_forward_model/RESULTS.md` §2b | Future Phase 1 (Forward Model) |
 | 원추세포 모델 | `data/behav_pilot/cone_model_verify.py` | Phase 3 (행동) |
 | Gradient 검증 | `scripts/analysis_gradient_profile.py`, `results/gradient_profile/summary.json` | Phase 3 (검증) |
 | Tier 비교 | §9 (이 문서) | Phase 3 (검증, 2026-03-27) |

@@ -27,7 +27,7 @@ from scipy.optimize import brentq
 
 _THIS = Path(__file__).resolve().parent
 _PHASE2 = _THIS.parent
-for _p in [_PHASE2, _PHASE2.parent / 'future_phase1_forward_model' / 'scripts']:
+for _p in [_PHASE2, _PHASE2.parent / 'phase4_forward_model' / 'scripts']:
     if str(_p) not in sys.path:
         sys.path.insert(0, str(_p))
 

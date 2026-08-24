@@ -237,7 +237,7 @@ for i, (badge, bcol, title, body) in enumerate(nexts):
 
 # Footer
 fig.text(0.5, 0.005,
-         "Sources: future_phase2_filter_optimization/CLAUDE.md §3, §5  ·  behav_validation.md §3  ·  README.md  ·  project_phase2_closure (memory)",
+         "Sources: phase5_filter_optimization/CLAUDE.md §3, §5  ·  behav_validation.md §3  ·  README.md  ·  project_phase2_closure (memory)",
          ha="center", fontsize=7.2, color=GREY, style="italic")
 
 plt.savefig(OUT, dpi=160, bbox_inches="tight", facecolor=BG)

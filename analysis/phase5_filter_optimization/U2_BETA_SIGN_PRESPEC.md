@@ -64,7 +64,7 @@ production filter    ──  β 에서 해석적으로 유도
 
 ```bash
 conda activate srm
-cd analysis/future_phase2_filter_optimization
+cd analysis/phase5_filter_optimization
 export COLORBLIND_AMP_ROOT=$PWD/../phase1_procrustes_decoding/results/visualization/full_dataset_C010_motreg
 python scripts/s10b_v6_pca_rdm.py --subject sub-08 --combo-start 15 --combo-end 16
 python scripts/s10b_v6_pca_rdm.py --subject sub-09 --combo-start 9  --combo-end 10

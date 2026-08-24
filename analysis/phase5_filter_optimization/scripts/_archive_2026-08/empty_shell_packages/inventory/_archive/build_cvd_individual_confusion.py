@@ -24,8 +24,8 @@ from pathlib import Path
 from collections import defaultdict
 
 ROOT = Path(__file__).resolve().parents[3]
-CSV_IN = ROOT / 'analysis' / 'future_phase2_filter_optimization' / 'results' / 'diagnostics/decoder_loco' / 'decoder_loco_long.csv'
-OUT = ROOT / 'analysis' / 'future_phase2_filter_optimization' / 'results' / 'diagnostics/decoder_loco' / 'per_cvd'
+CSV_IN = ROOT / 'analysis' / 'phase5_filter_optimization' / 'results' / 'diagnostics/decoder_loco' / 'decoder_loco_long.csv'
+OUT = ROOT / 'analysis' / 'phase5_filter_optimization' / 'results' / 'diagnostics/decoder_loco' / 'per_cvd'
 OUT.mkdir(parents=True, exist_ok=True)
 
 CVD = {

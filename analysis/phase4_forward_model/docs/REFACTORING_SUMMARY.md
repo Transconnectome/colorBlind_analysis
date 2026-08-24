@@ -11,7 +11,7 @@
 ### 1. Folder Structure (NEW)
 
 ```diff
-future_phase1_forward_model/
+phase4_forward_model/
 ├── scripts/
 │   ├── (30+ existing files)                     # UNCHANGED ✓
 +   ├── dimensionality/                          # NEW
@@ -119,17 +119,17 @@ Level 2: Organization (Bannert Validation)
 ### Upload (Single Command)
 
 ```bash
-cd /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase1_forward_model
+cd /Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase4_forward_model
 
 scp -r scripts/dimensionality scripts/population_organization sbatch \
-    haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model/
+    haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/phase4_forward_model/
 ```
 
 ### Run (Recommended)
 
 ```bash
 ssh haba6030@node3
-cd /scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model
+cd /scratch/connectome/haba6030/colorBlind/analysis/phase4_forward_model
 
 sbatch sbatch/run_dimensionality.sbatch      # Eigenspectrum + MEME (2h)
 sbatch sbatch/run_voxel_preference.sbatch    # Voxel preference (1h)

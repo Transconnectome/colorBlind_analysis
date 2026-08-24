@@ -7,7 +7,7 @@
 #SBATCH --output=logs/intercept_perm_%j.out
 #SBATCH --error=logs/intercept_perm_%j.err
 #SBATCH --no-requeue
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase4_forward_model
 
 source ~/.bashrc
 conda activate nilearn

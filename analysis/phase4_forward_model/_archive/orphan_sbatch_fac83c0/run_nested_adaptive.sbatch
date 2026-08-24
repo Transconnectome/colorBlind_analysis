@@ -12,8 +12,8 @@
 source ~/.bashrc
 conda activate nilearn
 
-SCRIPT_DIR=/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model/scripts
-OUTPUT_DIR=/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model/results/nested_adaptive
+SCRIPT_DIR=/scratch/connectome/haba6030/colorBlind/analysis/phase4_forward_model/scripts
+OUTPUT_DIR=/scratch/connectome/haba6030/colorBlind/analysis/phase4_forward_model/results/nested_adaptive
 BASELINE_DIR=/scratch/connectome/haba6030/colorBlind/derivatives/full_dataset_C010
 
 mkdir -p ${OUTPUT_DIR}

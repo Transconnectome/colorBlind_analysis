@@ -38,7 +38,7 @@ import sys
 # Path setup
 # ============================================================================
 _SCRIPT_DIR = Path(__file__).resolve().parent
-_FWD_DIR = str(_SCRIPT_DIR.parent.parent.parent / 'future_phase1_forward_model' / 'scripts')
+_FWD_DIR = str(_SCRIPT_DIR.parent.parent.parent / 'phase4_forward_model' / 'scripts')
 if _FWD_DIR not in sys.path:
     sys.path.insert(0, _FWD_DIR)
 sys.path.insert(0, str(_SCRIPT_DIR.parent))

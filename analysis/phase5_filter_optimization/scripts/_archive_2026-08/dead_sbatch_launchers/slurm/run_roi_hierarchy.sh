@@ -5,7 +5,7 @@
 #SBATCH --mem=8G
 #SBATCH --time=02:00:00
 #SBATCH --array=0-5
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase5_filter_optimization
 #SBATCH --output=results/loco_filter/roi_hierarchy/slurm_%A_%a.out
 #SBATCH --no-requeue
 

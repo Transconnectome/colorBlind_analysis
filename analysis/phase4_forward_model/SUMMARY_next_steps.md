@@ -113,7 +113,7 @@ conda activate srm && python analysis/phase3_decoder_comparing/model_comparison_
 
 **실행**:
 ```
-위치:    analysis/future_phase1_forward_model/
+위치:    analysis/phase4_forward_model/
 Script:  scripts/basis_anisotropy_test.py               ← TO CREATE
 SLURM:   sbatch/run_basis_anisotropy.sbatch             ← TO CREATE
 분석:    scripts/analyze_basis_anisotropy.py             ← TO CREATE
@@ -144,7 +144,7 @@ SLURM:   sbatch/run_basis_anisotropy.sbatch             ← TO CREATE
 
 **실행**:
 ```
-위치:    analysis/future_phase1_forward_model/
+위치:    analysis/phase4_forward_model/
 Script:  scripts/signed_circular_bias.py                ← TO CREATE (로컬 실행 가능 — 기존 nested LOCO JSON 사용)
 결과:    results/signed_bias/
 ```
@@ -172,7 +172,7 @@ Script:  scripts/signed_circular_bias.py                ← TO CREATE (로컬 �
 
 **실행**:
 ```
-위치:    analysis/future_phase1_forward_model/
+위치:    analysis/phase4_forward_model/
 Script:  scripts/pairwise_residual_heatmap.py           ← TO CREATE (로컬 실행)
 결과:    results/pairwise_residual/
 ```
@@ -194,7 +194,7 @@ Script:  scripts/pairwise_residual_heatmap.py           ← TO CREATE (로컬 �
 
 **실행**:
 ```
-위치:    analysis/future_phase1_forward_model/
+위치:    analysis/phase4_forward_model/
 Script:  scripts/confusion_structure.py                 ← TO CREATE (로컬 실행)
 결과:    results/confusion_structure/
 ```
@@ -209,9 +209,9 @@ Script:  scripts/confusion_structure.py                 ← TO CREATE (로컬 �
 
 **방법**:
 - SRM prevalidation: 28 crossnobis pairwise distances per CVD subject per ROI
-  - 소스: `future_phase2_filter_optimization/pre_validation/results/crossnobis_pairs/`
+  - 소스: `phase5_filter_optimization/pre_validation/results/crossnobis_pairs/`
 - FE LOCO: 28 pairwise voxel_corr 차이 per subject per ROI
-  - 소스: `future_phase1_forward_model/results/nested_adaptive/`
+  - 소스: `phase4_forward_model/results/nested_adaptive/`
 - Spearman correlation: 두 28-element vectors 간
 - 기존 부분 결과: crossnobis-SRM r=0.33–0.70
 
@@ -223,9 +223,9 @@ Script:  scripts/confusion_structure.py                 ← TO CREATE (로컬 �
 
 **실행**:
 ```
-위치:    analysis/future_phase1_forward_model/
+위치:    analysis/phase4_forward_model/
 Script:  scripts/cross_phase_correlation.py             ← TO CREATE (로컬 실행)
-입력:    future_phase2_filter_optimization/pre_validation/results/ + results/nested_adaptive/
+입력:    phase5_filter_optimization/pre_validation/results/ + results/nested_adaptive/
 결과:    results/cross_phase/
 ```
 
@@ -271,7 +271,7 @@ centers_shifted = centers_uniform + Δ(θ)
 
 **실행**:
 ```
-위치:    analysis/future_phase1_forward_model/
+위치:    analysis/phase4_forward_model/
 Script:  scripts/subject_k_selection.py                 ← TO CREATE
 SLURM:   sbatch/run_subject_k.sbatch                    ← TO CREATE
 결과:    results/subject_k/
@@ -318,7 +318,7 @@ SLURM:   sbatch/run_subject_k.sbatch                    ← TO CREATE
 
 **실행**:
 ```
-위치:    analysis/future_phase1_forward_model/
+위치:    analysis/phase4_forward_model/
 Script:  scripts/fit_anisotropic_basis.py               ← TO CREATE
 SLURM:   sbatch/run_anisotropic.sbatch                  ← TO CREATE
 분석:    scripts/analyze_anisotropic.py                  ← TO CREATE
@@ -355,7 +355,7 @@ minimize ||Y_CVD - (W̄_HC + ΔW) @ C||² + λ × ||ΔW||²_F
 
 **실행**:
 ```
-위치:    analysis/future_phase1_forward_model/
+위치:    analysis/phase4_forward_model/
 Script:  scripts/fit_hierarchical_fe.py                 ← TO CREATE
 SLURM:   sbatch/run_hierarchical.sbatch                 ← TO CREATE
 분석:    scripts/analyze_hierarchical.py                 ← TO CREATE
@@ -404,7 +404,7 @@ RT-5 해결: CVD의 K-sensitivity가 **genuine dimensionality reduction (biology
 
 **실행**:
 ```
-위치:    analysis/future_phase1_forward_model/
+위치:    analysis/phase4_forward_model/
 Script:  scripts/dimensionality/analyze_eigenspectrum_decay.py   ← READY
 SLURM:   sbatch/run_dimensionality.sbatch (combined with C2)    ← READY
 결과:    results/dimensionality/eigenspectrum/
@@ -425,7 +425,7 @@ SLURM:   sbatch/run_dimensionality.sbatch (combined with C2)    ← READY
 
 **실행**:
 ```
-위치:    analysis/future_phase1_forward_model/
+위치:    analysis/phase4_forward_model/
 Script:  scripts/dimensionality/fit_meme_eigenspectrum.py       ← READY
 SLURM:   sbatch/run_dimensionality.sbatch (C1과 순차 실행)      ← READY
 결과:    results/dimensionality/meme/
@@ -449,7 +449,7 @@ SLURM:   sbatch/run_dimensionality.sbatch (C1과 순차 실행)      ← READY
 
 **실행**:
 ```
-위치:    analysis/future_phase1_forward_model/
+위치:    analysis/phase4_forward_model/
 Script:  scripts/population_organization/map_voxel_color_preference.py  ← READY
 SLURM:   sbatch/run_voxel_preference.sbatch                            ← READY
 결과:    results/population_organization/voxel_preference/
@@ -464,8 +464,8 @@ SLURM:   sbatch/run_voxel_preference.sbatch                            ← READY
 | Job | 위치 | Node | 예상 시간 | 상태 |
 |-----|------|:----:|:---------:|:----:|
 | Exp A1 (FE-K MAE retry) | `phase3_decoder_comparing/model_comparison_validation/` | node2 | ~30분 | READY |
-| Exp C1+C2 (Dimensionality) | `future_phase1_forward_model/` | node2 | ~20분 | READY |
-| Exp C3 (Population org) | `future_phase1_forward_model/` | node2 | ~15분 | READY |
+| Exp C1+C2 (Dimensionality) | `phase4_forward_model/` | node2 | ~20분 | READY |
+| Exp C3 (Population org) | `phase4_forward_model/` | node2 | ~15분 | READY |
 
 3개 job 동시 제출 가능 (node2 독립 실행).
 
@@ -480,23 +480,23 @@ scp analysis/phase3_decoder_comparing/model_comparison_validation/run_loco_fek_r
 haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/phase2_decoder_comparing/model_comparison_validation/
 
 # (b) Dimensionality + Population org (이미 scripts/ 와 sbatch/ 에 존재하는 경우 해당 디렉토리만)
-scp analysis/future_phase1_forward_model/scripts/dimensionality/analyze_eigenspectrum_decay.py \
-analysis/future_phase1_forward_model/scripts/dimensionality/fit_meme_eigenspectrum.py \
-haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model/scripts/dimensionality/
+scp analysis/phase4_forward_model/scripts/dimensionality/analyze_eigenspectrum_decay.py \
+analysis/phase4_forward_model/scripts/dimensionality/fit_meme_eigenspectrum.py \
+haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/phase4_forward_model/scripts/dimensionality/
 
-scp analysis/future_phase1_forward_model/scripts/population_organization/map_voxel_color_preference.py \
-haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model/scripts/population_organization/
+scp analysis/phase4_forward_model/scripts/population_organization/map_voxel_color_preference.py \
+haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/phase4_forward_model/scripts/population_organization/
 
-scp analysis/future_phase1_forward_model/sbatch/run_dimensionality.sbatch \
-analysis/future_phase1_forward_model/sbatch/run_voxel_preference.sbatch \
-haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model/sbatch/
+scp analysis/phase4_forward_model/sbatch/run_dimensionality.sbatch \
+analysis/phase4_forward_model/sbatch/run_voxel_preference.sbatch \
+haba6030@node3:/scratch/connectome/haba6030/colorBlind/analysis/phase4_forward_model/sbatch/
 
 # 2. 병렬 제출
 ssh haba6030@node3 << 'EOF'
 cd /scratch/connectome/haba6030/colorBlind
 sbatch analysis/phase2_decoder_comparing/model_comparison_validation/run_loco_fek_retry.sbatch
-sbatch analysis/future_phase1_forward_model/sbatch/run_dimensionality.sbatch
-sbatch analysis/future_phase1_forward_model/sbatch/run_voxel_preference.sbatch
+sbatch analysis/phase4_forward_model/sbatch/run_dimensionality.sbatch
+sbatch analysis/phase4_forward_model/sbatch/run_voxel_preference.sbatch
 EOF
 ```
 
@@ -507,7 +507,7 @@ EOF
 | Exp A3 (Signed bias) | `results/nested_adaptive/sub-*_V4_nested_adaptive.json` | `results/signed_bias/` |
 | Exp A4 (28-pair heatmap) | `results/nested_adaptive/` + `results/validation/` | `results/pairwise_residual/` |
 | Exp A5 (Confusion) | `results/nested_adaptive/` | `results/confusion_structure/` |
-| Exp A6 (Cross-phase) | `results/nested_adaptive/` + `future_phase2_filter_optimization/pre_validation/results/` | `results/cross_phase/` |
+| Exp A6 (Cross-phase) | `results/nested_adaptive/` + `phase5_filter_optimization/pre_validation/results/` | `results/cross_phase/` |
 
 > 모두 기존 다운로드된 nested LOCO JSON과 SRM prevalidation 결과 사용. `conda activate srm && python scripts/xxx.py`
 
@@ -583,7 +583,7 @@ subject to  ||ψ||² < ε   (small correction)
 
 ### 생성 필요 (TO CREATE)
 
-| File | 위치 (all `future_phase1_forward_model/`) | Track | Priority |
+| File | 위치 (all `phase4_forward_model/`) | Track | Priority |
 |------|------|:-----:|:--------:|
 | `scripts/signed_circular_bias.py` | 로컬 실행 | A3 | HIGH |
 | `scripts/pairwise_residual_heatmap.py` | 로컬 실행 | A4 | HIGH |

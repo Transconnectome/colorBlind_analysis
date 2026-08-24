@@ -35,7 +35,7 @@ PI 가 Phase 2 review 에서 **"Model selection criteria 가 evaluation criteria
 |---|---|
 | Contrast variation (Tregillus CRF fit) | **❌ 없음** — 8 colors at *fixed contrast*. CRF 의 4 자유 파라미터 (R_max, c50, p, q) 와 sc 를 분리 추정하는 것은 수학적으로 불가능 (NotebookLM 사실 점검 2026-05-20). |
 | Hue scaling proportion (Emery cosine fit) | **❌ 없음** — P2a 는 categorical color naming. Emery 본인 명시: "color naming vs scaling 은 본질적으로 다른 개인차 패턴" (Emery 2021 Discussion). |
-| Behavioral threshold / discrimination data (Tregillus-style null anchor) | **⚠️ Partial — sub-08 가용, sub-09 미수집** (2026-05-20 정정). sub-08 에 **JND** (8 hue pair, adaptive 2AFC staircase) + **8AFC** (64 trials, RSVP category discrimination) + HC reference n=7 모두 가용 (`future_phase3_behavioral_analysis/results/jnd_summary.csv`, `data/behavior/sub-08_rsvp_8afc_ses1_run1.csv`). sub-09 는 8AFC CSV 없음, 신속 acquisition 가능. **LOCO–JND concordance 이미 6/6 (sub-08)** — 행동-신경 anchor 가 *지금 강하게 존재*. |
+| Behavioral threshold / discrimination data (Tregillus-style null anchor) | **⚠️ Partial — sub-08 가용, sub-09 미수집** (2026-05-20 정정). sub-08 에 **JND** (8 hue pair, adaptive 2AFC staircase) + **8AFC** (64 trials, RSVP category discrimination) + HC reference n=7 모두 가용 (`phase6_behavioral_analysis/results/jnd_summary.csv`, `data/behavior/sub-08_rsvp_8afc_ses1_run1.csv`). sub-09 는 8AFC CSV 없음, 신속 acquisition 가능. **LOCO–JND concordance 이미 6/6 (sub-08)** — 행동-신경 anchor 가 *지금 강하게 존재*. |
 
 → Option 1 의 *Tregillus-style*: **sub-08 으로 즉시 prototype 가능**, sub-09 acquisition 1 session 으로 완성. Option 1 의 *Emery-style*: hue scaling paradigm 자체가 새로 필요 (Phase 3 acquisition).
 
@@ -113,8 +113,8 @@ PI 가 "기존 모델이 행동을 어떻게 썼는지" 라고 요구한 것의 
 - `critique_double_dipping_20260519.md` — Reviewer-style critique (B1-B5, C1-C3, D1-D3).
 - `CLAUDE.md` §0 — Framework decision (specificity claim 금지, P2a reporting policy).
 - `raw_behav.md` — sub-08/09 의 categorical color naming (P2a primary input).
-- `../future_phase3_behavioral_analysis/behavioral_alignment_2026-05-19.md` — **sub-08 의 per-hue JND/8AFC/LOCO/δθ 통합 표 + LOCO–JND 6/6 concordance** (Option 3 의 behavioral anchor source).
-- `../future_phase3_behavioral_analysis/results/jnd_summary.csv` — 8 pair JND, HC n=7 reference.
+- `../phase6_behavioral_analysis/behavioral_alignment_2026-05-19.md` — **sub-08 의 per-hue JND/8AFC/LOCO/δθ 통합 표 + LOCO–JND 6/6 concordance** (Option 3 의 behavioral anchor source).
+- `../phase6_behavioral_analysis/results/jnd_summary.csv` — 8 pair JND, HC n=7 reference.
 - `data/behavior/sub-08_rsvp_8afc_ses1_run1.csv` — 8AFC 64-trial confusion matrix.
 
 ---

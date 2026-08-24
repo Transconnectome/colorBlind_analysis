@@ -2,7 +2,7 @@
 
 Sources:
   analysis/phase3_decoder_comparing/README.md  (LORO 3-alignment × 6-model table)
-  analysis/future_phase1_forward_model/RESULTS.md  (LOCO ridge_gcv HC-CVD gap, FE-K ablation)
+  analysis/phase4_forward_model/RESULTS.md  (LOCO ridge_gcv HC-CVD gap, FE-K ablation)
 
 Layout: 2×2 quadrant
   Q1 (top-left)  : LORO classification — 6 models × 3 alignments heatmap
@@ -292,7 +292,7 @@ for i, (paper, role, base, repl, ext, hcol) in enumerate(rows):
 # Footer
 fig.text(0.5, 0.02,
          "Sources: phase3_decoder_comparing/README.md (LORO 3-alignment × 6-model)   ·   "
-         "future_phase1_forward_model/RESULTS.md (LOCO ridge_gcv, FE-K ablation)",
+         "phase4_forward_model/RESULTS.md (LOCO ridge_gcv, FE-K ablation)",
          ha="center", fontsize=7.5, color="#777", style="italic")
 
 plt.savefig(OUT, dpi=160, bbox_inches="tight", facecolor=BG)

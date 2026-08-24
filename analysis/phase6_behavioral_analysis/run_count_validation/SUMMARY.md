@@ -186,7 +186,7 @@ Within-run color label shuffle은 global activation pattern을 보존하여 Pear
 
 ### 재현 (전체 ~3 min on local)
 ```bash
-cd analysis/future_phase3_behavioral_analysis
+cd analysis/phase6_behavioral_analysis
 conda activate srm
 python scripts/run_count_saturation.py  # ~60s
 python scripts/run_count_tier1.py        # ~3s

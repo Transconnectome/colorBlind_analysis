@@ -1989,7 +1989,7 @@ S9 통합 목적: 사용자 catch 과 advisor catch 가 *같은 issue 의 양면
 
 **Why impossible in current pipeline**:
 - V_s mismatch (subject 별 voxel 수 다름)
-- Phase 1 의 cross-subject alignment (Procrustes/SRM) 시도 REJECTED — SRM-based prior pipeline 이 within-subject ridge 보다 inferior (future_phase1_forward_model/README.md)
+- Phase 1 의 cross-subject alignment (Procrustes/SRM) 시도 REJECTED — SRM-based prior pipeline 이 within-subject ridge 보다 inferior (phase4_forward_model/README.md)
 - Small-n HC pool (n=7) → shared encoder fit 시 variance 너무 큼
 
 **Conceptual rationale (current asymmetry)**:

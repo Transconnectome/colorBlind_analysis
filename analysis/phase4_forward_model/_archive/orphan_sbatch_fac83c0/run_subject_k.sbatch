@@ -7,7 +7,7 @@
 #SBATCH --mem=16G
 #SBATCH --nodelist=node2
 #SBATCH --no-requeue
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase4_forward_model
 
 # B1: Subject-Specific K Selection
 # Sweeps K in [2,3,4,5,6,8,10,12] for each subject x ROI
@@ -15,7 +15,7 @@
 source ~/.bashrc
 conda activate nilearn
 
-export PYTHONPATH="/scratch/connectome/haba6030/colorBlind/analysis/future_phase1_forward_model/scripts:${PYTHONPATH}"
+export PYTHONPATH="/scratch/connectome/haba6030/colorBlind/analysis/phase4_forward_model/scripts:${PYTHONPATH}"
 
 BASELINE_DIR="/scratch/connectome/haba6030/colorBlind/derivatives/full_dataset_C010"
 

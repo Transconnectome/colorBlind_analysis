@@ -5,9 +5,9 @@
 #SBATCH --mem=16G
 #SBATCH --time=12:00:00
 #SBATCH --no-requeue
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization
-#SBATCH --output=/scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization/sbatch/cycle_bootstrap/logs/boot_main_%A_%a.out
-#SBATCH --error=/scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization/sbatch/cycle_bootstrap/logs/boot_main_%A_%a.err
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase5_filter_optimization
+#SBATCH --output=/scratch/connectome/haba6030/colorBlind/analysis/phase5_filter_optimization/sbatch/cycle_bootstrap/logs/boot_main_%A_%a.out
+#SBATCH --error=/scratch/connectome/haba6030/colorBlind/analysis/phase5_filter_optimization/sbatch/cycle_bootstrap/logs/boot_main_%A_%a.err
 #SBATCH --array=0-8
 
 # Array index → (subject, roi, model)
@@ -23,7 +23,7 @@ ROI=${ROIS[$SLURM_ARRAY_TASK_ID]}
 MODEL=${MODELS[$SLURM_ARRAY_TASK_ID]}
 
 DATA_DIR=/scratch/connectome/haba6030/colorBlind/derivatives/full_dataset_C010
-OUT_DIR=/scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization/results/cycle_bootstrap/main
+OUT_DIR=/scratch/connectome/haba6030/colorBlind/analysis/phase5_filter_optimization/results/cycle_bootstrap/main
 
 mkdir -p "$OUT_DIR" "$(dirname "$0")/logs"
 

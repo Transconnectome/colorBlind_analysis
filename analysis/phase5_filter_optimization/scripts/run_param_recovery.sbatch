@@ -5,7 +5,7 @@
 #SBATCH --cpus-per-task=4
 #SBATCH --time=08:00:00
 #SBATCH --no-requeue
-#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/future_phase2_filter_optimization
+#SBATCH --chdir=/scratch/connectome/haba6030/colorBlind/analysis/phase5_filter_optimization
 #SBATCH --output=logs/param_recovery_%j.out
 #SBATCH --error=logs/param_recovery_%j.err
 

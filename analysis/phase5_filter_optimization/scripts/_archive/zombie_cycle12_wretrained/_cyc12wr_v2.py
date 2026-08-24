@@ -1,15 +1,15 @@
 """resumable wretrained runner v2."""
 import sys, time, json, os
-sys.path.insert(0, "/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase2_filter_optimization/scripts")
-sys.path.insert(0, "/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase2_filter_optimization/scripts/older_cycles/cycle_loss_redesign")
-sys.path.insert(0, "/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase1_forward_model/scripts")
+sys.path.insert(0, "/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase5_filter_optimization/scripts")
+sys.path.insert(0, "/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase5_filter_optimization/scripts/older_cycles/cycle_loss_redesign")
+sys.path.insert(0, "/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase4_forward_model/scripts")
 import numpy as np
 from pathlib import Path
 from utils_forward_model import load_amplitudes, N_COLORS
 from step1_fit_loco_v2 import simulate_mean_hc_loco_legacy, load_cvd_loco_target
 from loss_redesign_smoke import get_2component_design, compute_extended_loss
 LOCAL_DATA = Path("/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase1_procrustes_decoding/results/visualization/full_dataset_C010_with_residuals")
-OUT_DIR = Path("/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/future_phase2_filter_optimization/results/fixedW_onlyTest")
+OUT_DIR = Path("/Users/jinilkim/Library/CloudStorage/OneDrive-Personal/Projects/colorBlind_analysis/analysis/phase5_filter_optimization/results/fixedW_onlyTest")
 LOG_PATH = OUT_DIR / ".wretrained_sweep.log"
 log_f = open(LOG_PATH, "a"); sys.stdout = log_f; sys.stderr = log_f
 SUBJ_ARG = sys.argv[1] if len(sys.argv) > 1 else "08"

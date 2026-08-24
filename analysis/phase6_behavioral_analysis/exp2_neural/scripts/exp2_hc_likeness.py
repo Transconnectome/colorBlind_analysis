@@ -11,7 +11,7 @@ CONVERGENT (descriptive): LORO color-decoding accuracy; RDM cosine to HC-mean.
 Scope: sub-08 only, single-subject DESCRIPTIVE (Cohen's d, no inferential p).
 V1 primary; V2/V3 supporting; V4(hV4) descriptive-only.
 
-Reuses FROZEN helpers from future_phase1_forward_model/utils_forward_model.py.
+Reuses FROZEN helpers from phase4_forward_model/utils_forward_model.py.
 LOCO loop reimplemented locally to read n_runs from data shape (canonical
 neural_loss.precompute_loco_W_within hardcodes N_RUNS=6).
 """
@@ -26,13 +26,13 @@ N_RUNS_EXP2 = 4   # exp2 runs per condition; HC subsampled to this for fair d
 
 ROOT = Path("/scratch/connectome/haba6030/colorBlind")
 HC_C010 = ROOT / "derivatives" / "full_dataset_C010"
-OUT_DIR = ROOT / "analysis" / "future_phase3_behavioral_analysis" / "exp2_neural" / "results"
+OUT_DIR = ROOT / "analysis" / "phase6_behavioral_analysis" / "exp2_neural" / "results"
 # EXP2_C010 + output filename set per variant in main():
 #   native  -> full_dataset_C010_exp2          (858 vox @V1; no-filter anchor 560 -> voxel caveat)
 #   matched -> full_dataset_C010_exp2_matched  (560 vox; voxel-identical to no-filter anchor)
 EXP2_C010 = None
 
-sys.path.insert(0, str(ROOT / "analysis" / "future_phase1_forward_model" / "scripts"))
+sys.path.insert(0, str(ROOT / "analysis" / "phase4_forward_model" / "scripts"))
 from utils_forward_model import (
     create_basis_matrix, HUE_ANGLES, fit_W_ridge, gcv_select_alpha,
     decode_hue, circular_distance,

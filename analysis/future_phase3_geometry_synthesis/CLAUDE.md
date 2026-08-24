@@ -1,16 +1,16 @@
-# CLAUDE.md — future_phase4_geometry_synthesis
+# CLAUDE.md — future_phase3_geometry_synthesis
 
 ## §0 성격 (필독)
 **소비(consumer) 층.** exp2_neural Stage-1/2 산출 JSON을 읽어 **시각화·기전분해·null·per-color**만 추가한다.
 신경 amplitude를 다시 로드하거나 SRM/FE를 recompute **하지 않는다** (서버·brainiak 불필요, pure JSON arithmetic + matplotlib).
 
 ## 입력 (모두 로컬 존재)
-- Stage 1 coords: `../future_phase3_behavioral_analysis/exp2_neural/results/exp2_embeddings_sub-{ID}_{variant}.json`
+- Stage 1 coords: `../phase6_behavioral_analysis/exp2_neural/results/exp2_embeddings_sub-{ID}_{variant}.json`
   - `rois.{ROI}.embeddings.{procrustes|srm|fe_latent}.{hc_ref|conditions.{nofilter|window|optimal}}.coords` (procrustes 8×V, srm 8×K, fe_latent 8×6)
   - `dist_eucl`/`dist_corr` (28-vec), `rois.{ROI}.loco.{cond}.{decoded_hue,hue_error_deg,confusion(8×8)}`
 - Stage 2 파생: `.../exp2_geometry_derived_sub-{ID}_{variant}.json` (agreement/displacement/jnd_correlation) — 교차검증용
 - HC self-consistency (병기용): `../phase2_SRM_across_between/results/loo_consistent/20260218_163819/loo_consistent_results.json` → `results.{ROI}.rdm_correlations.hc_hc.mean`
-- JND: `../future_phase3_behavioral_analysis/results/exp2_behavior/sub-{ID}_jnd_compare.csv`
+- JND: `../phase6_behavioral_analysis/results/exp2_behavior/sub-{ID}_jnd_compare.csv`
 
 ## 스크립트 (scripts/)
 - `utils_p4.py` — 공유: JSON 로더, classical MDS(고유값 포함), RDM(eucl/corr), Procrustes 분해, label-perm null, anisotropy, HC-consistency 로더

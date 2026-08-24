@@ -40,7 +40,7 @@ _PHASE2_DIR = _SCRIPT_DIR.parent
 sys.path.insert(0, str(_SCRIPT_DIR))
 
 for _base in [_PHASE2_DIR.parent, _PHASE2_DIR.parent.parent]:
-    _fwd = _base / 'future_phase1_forward_model' / 'scripts'
+    _fwd = _base / 'phase4_forward_model' / 'scripts'
     if _fwd.exists() and str(_fwd) not in sys.path:
         sys.path.insert(0, str(_fwd))
         break
@@ -55,7 +55,7 @@ from utils_distortion_models import (
 )
 
 LOCAL_BASELINE = _PHASE2_DIR.parent / 'phase1_preprocess_decoding' / 'results' / 'full_dataset_C010'
-FWD_RESULTS = _PHASE2_DIR.parent / 'future_phase1_forward_model' / 'results'
+FWD_RESULTS = _PHASE2_DIR.parent / 'phase4_forward_model' / 'results'
 
 CVD_TYPE = {'08': 'deutan', '09': 'protan', '10': 'deutan'}  # sub-10 is mild deutan per project CLAUDE.md §6
 

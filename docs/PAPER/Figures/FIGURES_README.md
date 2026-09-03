@@ -12,7 +12,7 @@ The map below is checked against `main.aux` (2026-09-02 build).
 |----:|-------------------|----------------------------|-----------------------------------------------|------------|------|
 | 1   | `fig:paradigm`    | `fig1_paradigm_v3`         | `scripts/generate_fig1_v3.py`                 | schematic  | — (mpl; replaces AI-generated `fig1_generated_v2`) |
 | 2   | `fig:forward`     | `fig_forward_encoder`      | `scripts/generate_forward_encoder_fig.py` (moved out of `../archive/` 2026-09-02) | schematic | — (illustrative; no suptitle/stage subtitles since 2026-09-02 — the caption carries them) |
-| 3   | `fig:pipeline`    | `fig3_workflow`            | manual PowerPoint composite of `fig3_assets/box*` (from `scripts/generate_box2_delta_rdm_r6.py` etc.) | schematic | — (illustrative) |
+| 3   | `fig:pipeline`    | `fig3_workflow`            | PowerPoint composite of `fig3_assets/box*`; box 2 rebuilt by `scripts/generate_box2_loss_gates.py` and inserted by `scripts/patch_fig3_box2.py` | schematic | — (illustrative; box 2 shows the procedure only since 2026-09-03 — the selected combinations moved to Results) |
 | 4   | `fig:loco`        | `fig2_loro_loco`           | `scripts/generate_fig2.py`                    | data chart | LORO/LOCO results (adjacent accuracy, chance 91/360) |
 | 5   | `fig:geometry`    | `fig3_geometry_r6`         | `scripts/generate_fig3_geometry_r6.py`        | data chart | Procrustes disparity (single panel, no asterisks — §5.1 2026-09-02) |
 | 6   | `fig:filter`      | `fig7_filter`              | `scripts/phase2/generate_fig7_filter.py`      | rendering  | analytical pre-image (no in-panel text since 2026-09-02: subject/β labels and per-hue δθ moved to caption/text) |
@@ -27,6 +27,25 @@ The map below is checked against `main.aux` (2026-09-02 build).
 - Moved to `old/`: `fig3_workflow_composited.pdf` (md5-identical duplicate of `fig3_workflow.pdf`), `fig3_geometry.pdf` (pre-R6 two-panel version), `fig5_generated_v.png` + `fig5_notes.md` (no `fig5` figure exists in the manuscript), `fig3_workflow.png` (unused raster copy; LaTeX resolves the PDF).
 - `submission_assets/fig3_workflow.tif` — journal-submission-only TIFF, not read by LaTeX.
 - `.DS_Store` is gitignored.
+
+## Figure 3 is the one PowerPoint composite
+
+Its slide (`fig3_assets/Presentation1_arial_fontpatched.pptx`) carries a full-slide background PICTURE that renders an OLDER version of the whole figure, with live shapes on top, so editing a box means covering that region rather than only deleting shapes. The 2026-09-03 box-2 rebuild is scripted end to end:
+
+```bash
+conda activate srm
+cd docs/PAPER/Figures/scripts
+export MATPLOTLIBRC="$PWD/inrc"
+python generate_box2_loss_gates.py          # the new box-2 asset
+python patch_fig3_box2.py --export          # patch the .pptx, export a PDF
+cd ..
+pdfcrop --bbox "6.0 73.0 956.4 417.8" \
+        fig3_assets/Presentation1_box2_2026-09-03.pdf fig3_workflow.pdf
+```
+
+`patch_fig3_box2.py` also rewrites the font stack inside the embedded wheel SVGs, which declare matplotlib's default list with DejaVu Sans ahead of Arial. Without that step LibreOffice substitutes DejaVu for the wheel labels and the export stops being Arial-only; check with `pdffonts fig3_workflow.pdf`.
+
+**The .pptx files are not tracked by git.** They are the only source able to regenerate this figure, so keep them.
 
 ## Canonical Phase-2 parameters (PIPELINE_2_CLOSURE.md 2026-06-01)
 

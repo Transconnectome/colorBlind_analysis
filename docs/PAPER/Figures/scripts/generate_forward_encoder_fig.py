@@ -11,6 +11,11 @@ descriptive second lines of the stage titles are removed -- the LaTeX caption
 (fig:forward) carries the full stage descriptions.  Remaining text is enlarged
 so it stays legible after the ~3x reduction to \textwidth, and the font is
 pinned to Arial per the submission requirement.
+
+2026-09-03 (author request): the equation boxes sat directly under the stage
+diagrams while empty canvas remained beneath them.  They are moved down into
+that band, which both separates them from the diagrams and removes the dead
+margin at the foot of the figure.
 """
 
 import os
@@ -64,7 +69,7 @@ def create_basis_function_plot(hue_deg=0):
 
 def create_pipeline_figure(out_dir):
     fig = plt.figure(figsize=(13, 3.6))
-    gs = fig.add_gridspec(1, 4, wspace=0.30, left=0.04, right=0.99, top=0.90, bottom=0.10)
+    gs = fig.add_gridspec(1, 4, wspace=0.30, left=0.04, right=0.99, top=0.90, bottom=0.13)
     ax1 = fig.add_subplot(gs[0, 0])
     ax2 = fig.add_subplot(gs[0, 1])
     ax3 = fig.add_subplot(gs[0, 2])
@@ -135,7 +140,7 @@ def create_pipeline_figure(out_dir):
     ax2.text(8.2, 8.7, 'Voxels', ha='center', va='center',
              fontsize=14, fontweight='bold',
              bbox=dict(boxstyle='round,pad=0.4', facecolor='lightblue', alpha=0.8))
-    ax2.text(5, 1.2, r'$\mathbf{B} = \mathbf{C}\mathbf{W}^\mathsf{T}$',
+    ax2.text(5, 0.35, r'$\mathbf{B} = \mathbf{C}\mathbf{W}^\mathsf{T}$',
              ha='center', va='center', fontsize=18, fontweight='bold',
              bbox=dict(boxstyle='round,pad=0.6', facecolor='white',
                        edgecolor='black', linewidth=1.5))
@@ -179,7 +184,7 @@ def create_pipeline_figure(out_dir):
     ax3.text(8, 8.7, 'Pred. channels', ha='center', va='center',
              fontsize=14, fontweight='bold',
              bbox=dict(boxstyle='round,pad=0.4', facecolor='wheat', alpha=0.8))
-    ax3.text(5, 1.2, r'$\hat{\mathbf{c}} = \mathbf{W}\mathbf{x}$',
+    ax3.text(5, 0.35, r'$\hat{\mathbf{c}} = \mathbf{W}\mathbf{x}$',
              ha='center', va='center', fontsize=18, fontweight='bold',
              bbox=dict(boxstyle='round,pad=0.6', facecolor='white',
                        edgecolor='black', linewidth=1.5))
@@ -242,7 +247,7 @@ def create_pipeline_figure(out_dir):
                                   arrowstyle='->', mutation_scale=20,
                                   linewidth=2.5, color='red', zorder=15))
 
-    ax4.text(5, 1.2,
+    ax4.text(5, 0.35,
              r'$\hat\theta = \arg\max_{\theta}\,\mathrm{corr}(\hat{\mathbf{c}},\mathbf{c}(\theta))$',
              ha='center', va='center', fontsize=16, fontweight='bold',
              bbox=dict(boxstyle='round,pad=0.6', facecolor='white',

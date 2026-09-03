@@ -47,7 +47,7 @@ OUTDIR = BASE / "docs/PAPER/Figures"
 ROIS = ["V1", "V2", "V3", "V4"]
 ROI_LABELS = ["V1", "V2", "V3", "hV4"]
 
-SUBJECTS = [("08", "Deutan (sub-08)"), ("09", "Protan (sub-09)")]
+SUBJECTS = [("08", "Deutan"), ("09", "Protan")]
 
 # Wong colorblind-safe palette
 HC_BAR = "#CCCCCC"
@@ -90,7 +90,7 @@ def strip(ax):
 METRICS = {
     "adjacc": ("lower", True,  "LOCO adjacent accuracy", "Adjacent accuracy"),
     "srm":    ("upper", False, "SRM disparity",          "SRM disparity"),
-    "rdm":    ("lower", True,  "RDM similarity to HC",    "Spearman ρ to HC"),
+    "rdm":    ("lower", True,  "RDM similarity to controls",    "Spearman ρ to controls"),
 }
 METRIC_ORDER = ["adjacc", "srm", "rdm"]
 
@@ -192,7 +192,7 @@ def draw_panel(ax, d, metric, letter, ylim=None, show_title=True):
     ax.text(-0.05, 1.06, letter, transform=ax.transAxes, fontsize=10, fontweight="bold",
             va="bottom", ha="left")
     if show_title:
-        arrow = "  (↑ HC-like)" if higher_better else "  (↓ HC-like)"
+        arrow = "  (↑ control-like)" if higher_better else "  (↓ control-like)"
         ax.text(0.5, 1.14, title, transform=ax.transAxes, fontsize=7.3, va="bottom",
                 ha="center", color="#222", fontweight="bold")
         ax.text(0.5, 1.05, arrow.strip(), transform=ax.transAxes, fontsize=6.2,
@@ -255,7 +255,7 @@ def main():
                         color="#111")
 
     handles = [
-        mpatches.Patch(facecolor=HC_BAR, label="HC reference (mean ± SD)", edgecolor="none"),
+        mpatches.Patch(facecolor=HC_BAR, label="Control reference (mean ± SD)", edgecolor="none"),
         Line2D([0], [0], color="#999", linestyle="--", linewidth=0.9, label="chance (91/360)"),
     ] + [Line2D([0], [0], marker=COND_STYLE[c][1], color="w", markerfacecolor=COND_STYLE[c][0],
                 markersize=6, label=COND_STYLE[c][2], linewidth=0) for c in CONDS]
@@ -277,13 +277,13 @@ def main():
         return d["nofilter"][i], d["window"][i], d["optimal"][i], d["hc_mean"][i]
     for sub in ["08", "09"]:
         nf, wn, op, hc = row(sub, "adjacc", "V4")
-        print(f"adjacc hV4 sub-{sub}: NF {nf:.2f} Dep {wn:.2f} Pers {op:.2f} HC {hc:.2f}")
+        print(f"adjacc hV4 sub-{sub}: NF {nf:.2f} Dep {wn:.2f} Pers {op:.2f} Ctrl {hc:.2f}")
     for sub, roi in [("08", "V2"), ("09", "V1")]:
         nf, wn, op, hc = row(sub, "srm", roi)
-        print(f"srm {roi} sub-{sub}: NF {nf:.2f} Dep {wn:.2f} Pers {op:.2f} HC {hc:.2f}")
+        print(f"srm {roi} sub-{sub}: NF {nf:.2f} Dep {wn:.2f} Pers {op:.2f} Ctrl {hc:.2f}")
     for sub, roi in [("08", "V2"), ("09", "V1")]:
         nf, wn, op, hc = row(sub, "rdm", roi)
-        print(f"rdm {roi} sub-{sub}: NF {nf:.2f} Dep {wn:.2f} Pers {op:.2f} HCself {hc:.2f}")
+        print(f"rdm {roi} sub-{sub}: NF {nf:.2f} Dep {wn:.2f} Pers {op:.2f} Ctrl-self {hc:.2f}")
 
 
 if __name__ == "__main__":

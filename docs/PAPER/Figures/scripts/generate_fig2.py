@@ -368,13 +368,13 @@ ax_c.text(0.105, 1.10, "LOCO (leave-one-color-out)",
 
 # ── Shared legend ─────────────────────────────────────────────────────────────
 legend_handles = [
-    mpatches.Patch(facecolor=HC_COLOR, label="HC mean ± SEM", edgecolor="none"),
+    mpatches.Patch(facecolor=HC_COLOR, label="Control mean ± SEM", edgecolor="none"),
     Line2D([0], [0], marker="o", color="w", markerfacecolor=HC_DOT,
-           markersize=5, label="HC individuals", linewidth=0),
+           markersize=5, label="Individual controls", linewidth=0),
     Line2D([0], [0], marker="s", color="w", markerfacecolor=S08_COLOR,
-           markersize=6, label="sub-08 (deutan)", linewidth=0),
+           markersize=6, label="Deutan", linewidth=0),
     Line2D([0], [0], marker="^", color="w", markerfacecolor=S09_COLOR,
-           markersize=6, label="sub-09 (protan)", linewidth=0),
+           markersize=6, label="Protan", linewidth=0),
 ]
 fig.legend(handles=legend_handles, loc="lower center",
            ncol=4, fontsize=6.5, frameon=False,
@@ -387,7 +387,7 @@ fig.savefig(out_png, dpi=300, bbox_inches="tight")
 fig.savefig(out_pdf, bbox_inches="tight")
 print(f"Saved: {out_png}")
 
-print("\nCrawford & Howell — hV4 (parametric t, df=6); test: CVD performance < HC")
+print("\nCrawford & Howell — hV4 (parametric t, df=6); test: CVD performance < controls")
 print("  LORO accuracy (one-sided lower, deficit = lower accuracy):")
 print(f"    sub-08: t={ch_loro_08[0]:.3f}, p={ch_loro_08[1]:.4f}")
 print(f"    sub-09: t={ch_loro_09[0]:.3f}, p={ch_loro_09[1]:.4f}")

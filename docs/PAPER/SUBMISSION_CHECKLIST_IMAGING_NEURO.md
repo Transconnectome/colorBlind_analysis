@@ -332,8 +332,8 @@ Methods 는 이미 `The display was used at its factory calibration without furt
 
 | # | 항목 | 대상 | 근거 문서 |
 |---|---|---|---|
-| **P1** | 제목 T4 교체 | `main.tex:63` (현행 `Individual-specific distortion…` 그대로) | `REVISION_PLAN_HMC_DISCLOSURE` M9 |
-| **P2** | 초록 교체 (M7 + M8 IN 판, `differently in each individual` 제거) | `main.tex` abstract | 동 M7·M8, `FRAMING…` §4 |
+| ~~P1~~ | ✅ **완료 (2026-09-01)** 제목 T4 교체 | `main.tex:75` = `From cortical hue-geometry distortion to individualized stimulus-space correction in color vision deficiency` | `MANUSCRIPT_EDITS_CONSOLIDATED` §1.1 (M9) |
+| ~~P2~~ | ✅ **완료 (2026-09-01)** 초록 교체 = **M7**(`differently in each individual` 제거) + **14번 문장 삭제**. 결과 234 단어 / 13 문장. **M8(강건성 문장 추가)은 폐기됐다** — 취약한 주장을 빼는 쪽으로 대체됐으므로 강건성 문장을 넣지 않는다 | `main.tex` abstract | `MANUSCRIPT_EDITS_CONSOLIDATED` §1.0·§1.2·§1.3 |
 | **P3** | 본문 HMC disclosure 6곳 (M1–M6) | `results_v4.tex:40,56,60`, §3.3, `discussion_v3.tex:33,69` | 동 §1 |
 | **P4** | Discussion 한계 문단 확장 + §S2 문단·표(`tab:hmc_robustness`) + 그림 캡션 별표 강등 | `discussion_v3.tex:60`, `supplementary.tex`, Fig 3 | 동 §2·§3·§4 |
 | **P5** | 서론 첫 문단을 §1.1 의 허용 프레이밍으로 재작성 | `introduction_v2.tex` | 본 문서 §1.1 |

@@ -42,10 +42,10 @@ matplotlib.rcParams.update({
 CANDIDATES = [
     dict(id="S08_bc_dom", subject="sub-08", family="deutan",
          combo_key="γOY|RDMV2|noLOCO", gamma_atoms=["OY"], rdm_rois=["V2"],
-         fit_point=(6.0, -42.0), title="Sub-08 (deutan)"),
+         fit_point=(6.0, -42.0), title="Deutan"),
     dict(id="S09_bc_rot", subject="sub-09", family="protan",
          combo_key="γALL|RDMV1|noLOCO", gamma_atoms=["ALL"], rdm_rois=["V1"],
-         fit_point=(2.0, 24.0), title="Sub-09 (protan)"),
+         fit_point=(2.0, 24.0), title="Protan"),
 ]
 
 
@@ -100,7 +100,7 @@ def main():
                markeredgecolor="white", markersize=15, label="selected fit (argmin)"),
         Line2D([0], [0], marker="o", color="none", markerfacecolor="white",
                markeredgecolor="black", markersize=8,
-               label="HC-resample argmins (N=300)"),
+               label="Control-resample argmins (N=300)"),
     ]
     axes[0].legend(handles=handles, loc="upper left", fontsize=8,
                    framealpha=0.9, handletextpad=0.4)

@@ -16,12 +16,12 @@
 |---|---|
 | ~~**1. §7 형식 (I3 → I4)**~~ | I3 은 2026-08-17 에 해소됨(§6). **I4(Methods 중복본 참가자 수 상충)만 남는다** — 5분, 아무 때나 |
 | **1.9 N3 검정 이름 확정** | §4.5b 문안을 쓰기 **전에** `color-correspondence permutation` 명칭을 정한다. 나중에 바꾸면 문안·캡션·Methods 한 문단을 다시 손대야 한다 (§0.6) |
-| **2. §5 Supplementary** | §4.1 이 §S1 을 파이프라인 절로 재편하고 §4.0 이 거기에 SDC 문단을 얹는 구조. 역순이면 §S1 을 두 번 재편한다 |
-| **2.5 §1.5 Methods 움직임 문단 + §S1 해체** | §S1·§S2·§S4 와 **한 벌**이다(rev.5). 본문에서 내려보내는 FD 분포를 **§S4** 가 받고, 본문이 §S2 와 §S4 를 가리키므로 **부록 세 문안을 먼저 확정한 뒤** 본문을 넣는다. §1.5(e-3) 의 `no confound regression` 절 삭제도 같은 회차. 번호 당기기는 여기서 하지 않는다(5단계) |
+| **2. §5 Supplementary** | §4.1 이 §S2 을 파이프라인 절로 재편하고 §4.0 이 거기에 SDC 문단을 얹는 구조. 역순이면 §S2 을 두 번 재편한다 |
+| **2.5 §1.5 Methods 움직임 문단 + §S2 해체** | §S2·§S3·§S4 와 **한 벌**이다(rev.5). 본문에서 내려보내는 FD 분포를 **§S4** 가 받고, 본문이 §S3 와 §S4 를 가리키므로 **부록 세 문안을 먼저 확정한 뒤** 본문을 넣는다. §1.5(e-3) 의 `no confound regression` 절 삭제도 같은 회차. 번호 당기기는 여기서 하지 않는다(5단계) |
 | **3. §2 Results → §3 Discussion → ~~§1 제목·초록~~** | 초록은 본문이 확정된 뒤 마지막에. **⚠ 2026-09-01 에 §1.1–§1.3 을 먼저 반영해 이 순서를 어겼다.** 본문 §2·§3 을 반영한 뒤 **초록을 한 번 재대조할 것** — 특히 §2.5(M3)·§3.1(M5) 이 개인화 논거를 ROI 편재에서 $\hat\beta_c$ 방향과 심리물리 축으로 옮기므로, 초록 8번 문장의 `each` 가 여전히 그 논거와 맞는지 확인한다 |
 | **3.5 §4.10 중복 정리·이동** | §4.0–§4.9 문안을 전부 반영한 **뒤에** 한다. 먼저 하면 `supplementary.tex` 줄번호가 밀려 §4.0·§4.1·§4.5·§4.8 의 앵커가 어긋난다 |
 | **4. §6 그림 (+ §5.3 · §5.4)** | 별표 제거는 조판 마지막. 단 **§5.3(패널 `B` 삭제)은 §2.4 와 같은 회차**에 해야 한다 |
-| ~~**5. §S 번호 당기기 (§1.5 e-2)**~~ | **✅ 완료 (2026-09-02)** — S2–S21 → S1–S20. 제목 20개와 `\S S…` 참조 전량(Supplementary 24건 · Methods 22건 · Results 11건 · Discussion 2건)을 함께 이동했고, 출처 주석의 절 번호도 새 번호로 맞췄다. **이 시점 이후 이 문서의 §4.x 에 적힌 `§S…` 번호는 구 번호다** — 각 항목의 반영 완료 주석에 새 번호를 병기했다 |
+| ~~**5. §S 번호 당기기 (§1.5 e-2)**~~ | **✅ 완료 (2026-09-02)** — S2–S21 → S1–S20. 제목 20개와 `\S S…` 참조 전량(Supplementary 24건 · Methods 22건 · Results 11건 · Discussion 2건)을 함께 이동했고, 출처 주석의 절 번호도 새 번호로 맞췄다. 2026-09-03 에 본문 첫 인용 순서로 다시 전면 재번호했고, **이 문서의 `§S…` 표기는 그 현행 번호로 일괄 갱신되어 있다**(대응표 = `words_trimming.md` §0.0) |
 
 **차단 항목**: **I2 (데이터 공개 방침)** — IRB 확인이 투고 저널 관리 에이전트 쪽에서 진행 중. 결론 전까지 Methods 문장과 Data availability 절을 **둘 다 비워 둔다**(한쪽만 채우면 상충한다).
 
@@ -106,7 +106,7 @@ hV4 단독성은 **게이트의 두 파이프라인 재현**(.011 / .023)만으�
 
 또한 보간·disparity 는 **배치의 모양**을, 순환이동은 **라벨의 위치**를 묻는다. sub-09 V1 은 45° 로 되돌리면 $0.788$ 로 통제군 평균 아래이므로 그 ROI 에서 모양은 온전하다. 2성분 모형에는 균일 회전 항이 없어($\bar{\delta\theta} = 0$) 이 성분을 표현하지도 못한다.
 
-**배치**: 정량 결과와 대안 설명은 **§4.5b (§S10)** 에만 둔다. Results 와 Discussion 에는 넣지 않는다. 다만 sub-09 V1 의 색 특이성 실패를 §S10 표에 싣는 이상 그 설명도 같이 실어야 한다. 빼면 그 셀이 근거 없는 귀무로 남는다.
+**배치**: 정량 결과와 대안 설명은 **§4.5b (§S17)** 에만 둔다. Results 와 Discussion 에는 넣지 않는다. 다만 sub-09 V1 의 색 특이성 실패를 §S17 표에 싣는 이상 그 설명도 같이 실어야 한다. 빼면 그 셀이 근거 없는 귀무로 남는다.
 
 ## 0.5 핵심 결론별 서술 규칙 — C1–C8 (2026-09-01 개정)
 
@@ -124,7 +124,7 @@ hV4 단독성은 **게이트의 두 파이프라인 재현**(.011 / .023)만으�
 | **C6** | 범주 보존 / 연속 기하 손상의 해리 | **유지되고 강해진다.** 근거는 disparity 가 아니라 **LORO 보존(두 파이프라인)** 과 **hV4 LOCO 감소 + hV4 단독 게이트(두 파이프라인)** 다. 선행연구의 균일 gain 감소와 구별되는 지점 | §2.3, §2.4, §3.1 |
 | **C7** | 필터 $\hat\beta_c$ | **deutan 2축 유지**($-42$, $-48$) / **protan 반전**($+24 \to -24$). 배포값은 동결값 그대로 보고, protan 파라미터에 생리학적 해석 부여 금지 | §3.2, §4.7 |
 | **C8** | 역산·심리물리 | 불변. 해석적 단계임을 명시 | 확인만 |
-| ~~**C9**~~ | ~~왜곡의 형태는 회전이다~~ | **철회.** 45° 순환이동은 §S10 의 대안 설명으로만 둔다. 사유 = §0.4-D | §4.5b |
+| ~~**C9**~~ | ~~왜곡의 형태는 회전이다~~ | **철회.** 45° 순환이동은 §S17 의 대안 설명으로만 둔다. 사유 = §0.4-D | §4.5b |
 
 **금지 표현**
 
@@ -166,7 +166,7 @@ hV4 단독성은 **게이트의 두 파이프라인 재현**(.011 / .023)만으�
 | # | 조치 |
 |---|---|
 | **1+2 병합** | `All eight colors remain decodable` 와 `Hue interpolation is reduced at hV4` 를 한 소절로 합치고 제목을 **`Categorical identification is preserved while hue interpolation fails at hV4`** 로 한다. 마지막 문장에서 해리를 진술하고 그것이 SNR 설명을 배제함을 밝힌다 |
-| **3 압축** | disparity 소절을 324 → 약 150 단어. 개인별 ROI 표와 LOSO 귀무는 §S1 로. 제목은 `Hue geometry departs from the control reference in both CVD cases` |
+| **3 압축** | disparity 소절을 324 → 약 150 단어. 개인별 ROI 표와 LOSO 귀무는 §S2 로. 제목은 `Hue geometry departs from the control reference in both CVD cases` |
 | **10 재정렬** | Filter evaluation → Psychophysics → **Identification (신설)** → Colors remained decodable → Interpolation → Geometry. 근거 강도 순이다 |
 | **5–9 불변** | 필터 도출 절차가 방법 기여이므로 줄이지 않는다 |
 
@@ -174,7 +174,7 @@ hV4 단독성은 **게이트의 두 파이프라인 재현**(.011 / .023)만으�
 
 필터의 $L_{\rm RDM}$ 이 그 RDM 차이 구조를 읽는다. 근거를 보이지 않고 그것으로 적합했다고 쓸 수 없다. **대신 성격을 바꾼다.** 검정 결과가 아니라 **손실이 평가하는 양의 기술**로 제시한다. 적합은 서술적이고 필터 표적 ROI 는 held-out test-loss 로 선정됐다.
 
-**Methods 에 추가할 한 문장** (`sec:methods:selection` 끝):
+**Methods 에 추가할 한 문장** (`sec:methods:selection` 끝) ✅ **반영 완료 (2026-09-03)** — `These ablation refits entered no selection decision…` 문단 뒤에 새 문단으로 추가. 실제로는 두 문장이다:
 
 > The loss treats the representational geometry as a descriptive quantity. Target regions follow from held-out test-loss, so the fitted parameters stand independently of the inferential status of any single disparity contrast.
 
@@ -225,7 +225,7 @@ hV4 단독성은 **게이트의 두 파이프라인 재현**(.011 / .023)만으�
 
 ### 1.3 초록 마지막 `main.tex:89` — 14번 문장 삭제 ✅ **반영 완료 (2026-09-01)**
 
-## 1.5 `Methods/methods_v2.tex` — 두 파이프라인 서술 + §S1 해체 ✅ **반영 완료 (2026-09-02)**
+## 1.5 `Methods/methods_v2.tex` — 두 파이프라인 서술 + §S2 해체 ✅ **반영 완료 (2026-09-02)**
 
 > **후속 수정 (2026-09-02, §5 검증 빌드 중 발견)**: 반영된 본문에 수식 모드 누락 2건이 있어 빌드가 실패했다. `:44` `(3840 \times 2160)` → `$3840 \times 2160$`, `:109` `(\hat{\mathbf{c}})` → `$\hat{\mathbf{c}}$` 로 정정 후 빌드 클린.
 
@@ -233,13 +233,13 @@ hV4 단독성은 **게이트의 두 파이프라인 재현**(.011 / .023)만으�
 
 > **⚠ 앞 문장들은 손대지 않는다.** 정규화 서술(`Normalization to the ICBM 152 Nonlinear Asymmetric 2009c template (MNI152NLin2009cAsym) used a twelve-parameter affine transform (FLIRT) followed by nonlinear warping (FNIRT) ..., yielding 2\,mm isotropic BOLD data in MNI space.`)은 교체 대상이 **아니다.** 아래 문안의 `this composed transform` 이 그 문장을 받는다.
 
-**교체 대상 (현행 마지막 네 문장)**: `Each functional volume was resampled once ...` 부터 `... (Supplementary~\S S1).` 까지.
+**교체 대상 (현행 마지막 네 문장)**: `Each functional volume was resampled once ...` 부터 `... (Supplementary~\S S2).` 까지.
 
 **교체**
 
-> Each functional volume was resampled once by this composed transform, without slice-timing correction, head-motion correction, susceptibility distortion correction, or spatial smoothing. Because a single transform served every volume in a run, the same spatial interpolation applied throughout. Head-motion correction composes a volume-specific rigid term with that transform. The resampling then attenuates high spatial frequencies and leaves a residual signal change that follows the estimated displacement, raising the error variance of each voxel time series \parencite{grootoonk2000}. Multivoxel pattern analysis operates on those per-voxel values, so every neural endpoint was computed under both pipelines and both are reported. The second pipeline estimated each volume's rigid term with MCFLIRT \parencite{jenkinson2002} and composed it with the normalization transform before the single resampling. The head-motion quality-control record appears in Supplementary~\S S1.
+> Each functional volume was resampled once by this composed transform, without slice-timing correction, head-motion correction, susceptibility distortion correction, or spatial smoothing. Because a single transform served every volume in a run, the same spatial interpolation applied throughout. Head-motion correction composes a volume-specific rigid term with that transform. The resampling then attenuates high spatial frequencies and leaves a residual signal change that follows the estimated displacement, raising the error variance of each voxel time series \parencite{grootoonk2000}. Multivoxel pattern analysis operates on those per-voxel values, so every neural endpoint was computed under both pipelines and both are reported. The second pipeline estimated each volume's rigid term with MCFLIRT \parencite{jenkinson2002} and composed it with the normalization transform before the single resampling. The head-motion quality-control record appears in Supplementary~\S S2.
 
-같은 문단 앞쪽의 `and no confound regression was applied at any stage (Supplementary~\S S1)` 절을 **삭제한다.** 런별 선형 표류 회귀자가 실제로 존재하므로 그 전칭 부정은 틀렸다. 표류 회귀자 서술은 §S1 로 옮긴다.
+같은 문단 앞쪽의 `and no confound regression was applied at any stage (Supplementary~\S S2)` 절을 **삭제한다.** 런별 선형 표류 회귀자가 실제로 존재하므로 그 전칭 부정은 틀렸다. 표류 회귀자 서술은 §S2 로 옮긴다.
 
 **설계 의도 다섯.**
 
@@ -264,26 +264,26 @@ hV4 단독성은 **게이트의 두 파이프라인 재현**(.011 / .023)만으�
 
 **→ 문안 판정.** (a) 문안은 확립된 세 명제만 인용하고, MVPA 는 **그 결과가 본 분석의 측정량에 닿는 이유**를 설명하는 데만 쓴다. 디코딩 성능 손해를 주장하지 않는다.
 
-**본 자료의 실측 둘은 §S1 에 싣되 선택의 근거로 쓰지 않는다.** ROI tSNR $-1.97\%$(V1 $-2.69$, V2 $-1.88$, V3 $-1.66$, hV4 $-1.75$), 런 부트스트랩 95% CI 평균 폭이 hV4 에서 $0.206 \to 0.255$(4개 ROI 중 3개에서 증가). 산출 `results/boot_runs_{with_residuals,hmc_v2}.json`.
+**본 자료의 실측 둘은 §S2 에 싣되 선택의 근거로 쓰지 않는다.** ROI tSNR $-1.97\%$(V1 $-2.69$, V2 $-1.88$, V3 $-1.66$, hV4 $-1.75$), 런 부트스트랩 95% CI 평균 폭이 hV4 에서 $0.206 \to 0.255$(4개 ROI 중 3개에서 증가). 산출 `results/boot_runs_{with_residuals,hmc_v2}.json`.
 
 **금지 표현**: `realignment would have introduced noise`(반사실 단정), `motion was negligible`(방어 불가), `smoothing degrades decoding`(문헌 미확립).
 
 **추가 인용 필요**: `grootoonk2000` 이 `bibliography.bib` 에 없다. PDF 는 `docs/Prior_works/Preprocessing/Grootoonk(2000)_interpolation_realignment.pdf`, NotebookLM `ColorBlind_comprehensive` 에 등록됨. DOI `10.1006/nimg.1999.0515`.
 
-### (c) §S1 은 삭제한다
+### (c) §S2 은 삭제한다
 
-§S1 `Confound Regression and Temporal Filtering` 은 본문 `:70` 한 문단이 두 번 가리키는 것이 전부이고(다른 참조 0건), 내용은 전부 갈 곳이 있다.
+§S2 `Confound Regression and Temporal Filtering` 은 본문 `:70` 한 문단이 두 번 가리키는 것이 전부이고(다른 참조 0건), 내용은 전부 갈 곳이 있다.
 
-| §S1 의 내용 | 행선지 |
+| §S2 의 내용 | 행선지 |
 |---|---|
-| MCFLIRT 추정 + FD 분포 · $16.2\%$ | **§S2** (파이프라인 절의 QC 문단) |
-| `served as a quality-control record only, ... resampled once` | **삭제** (본문·§S2 와 삼중 중복) |
-| 필드맵 미소비로 왜곡이 남는다 | **§S2** (§4.0 과 한자리) |
-| 표류 회귀자 · 시간 필터링 없음 | **§S2** |
+| MCFLIRT 추정 + FD 분포 · $16.2\%$ | **§S3** (파이프라인 절의 QC 문단) |
+| `served as a quality-control record only, ... resampled once` | **삭제** (본문·§S3 와 삼중 중복) |
+| 필드맵 미소비로 왜곡이 남는다 | **§S3** (§4.0 과 한자리) |
+| 표류 회귀자 · 시간 필터링 없음 | **§S3** |
 
-**§S2 의 제목도 바꾼다.** 재정렬판을 함께 보고하므로 `Uncorrected acquisition artifacts` 는 맞지 않는다. `Preprocessing pipelines and sensitivity analyses` 류로 바꾸고 그 아래에 파이프라인 정의, QC 기록, 종점 2열 표를 둔다.
+**§S3 의 제목도 바꾼다.** 재정렬판을 함께 보고하므로 `Uncorrected acquisition artifacts` 는 맞지 않는다. `Preprocessing pipelines and sensitivity analyses` 류로 바꾸고 그 아래에 파이프라인 정의, QC 기록, 종점 2열 표를 둔다.
 
-**번호 당기기는 맨 마지막에 한 번에 한다.** S2–S21 → S1–S20. 대상은 상호참조 **19건**(S2·S5·S7·S8·S10·S11·S12·S15·S18·S19·S21)과 제목 20개다. §S1 을 가리키는 2건은 삭제되는 문단 안에 있어 별도 조치가 필요 없다. 먼저 하면 이 문서의 §4.x 앵커가 전부 무효가 되므로 §4.x 반영이 끝난 뒤에 한다(순서 표 5단계).
+**번호 당기기는 맨 마지막에 한 번에 한다.** S2–S21 → S1–S20. 대상은 상호참조 **19건**(S2·S5·S7·S8·S10·S11·S12·S15·S18·S19·S21)과 제목 20개다. §S2 을 가리키는 2건은 삭제되는 문단 안에 있어 별도 조치가 필요 없다. 먼저 하면 이 문서의 §4.x 앵커가 전부 무효가 되므로 §4.x 반영이 끝난 뒤에 한다(순서 표 5단계).
 
 ### (d) 연쇄 — §4.9 와의 정합
 
@@ -331,7 +331,7 @@ hV4 단독성은 **게이트의 두 파이프라인 재현**(.011 / .023)만으�
 
 전체 104개 쌍 중 1개 셀이고 주장에 영향이 없다. 초록의 protan 근거는 **green–blue** 이며 그 쌍은 두 트랙이 정상 수렴한다(0.135 / 0.080). 수렴 트랙만 쓰면 $z$ 가 $+1.33 \to -0.58$, 평균 $\lvert z\rvert$ 가 $0.93 \to 0.84$ 로 **저자에게 유리한 방향**이므로 평균을 유지하는 현행이 보수적이다.
 
-**이관처 = §4.6b (§S12 쌍별 스테어케이스 전수 표 + 표 아래 설명).** 전수 표를 실으면 독자가 직접 보고 판단하므로 각주보다 정보가 많고 선택적으로 읽히지 않는다.
+**이관처 = §4.6b (§S1 쌍별 스테어케이스 전수 표 + 표 아래 설명).** 전수 표를 실으면 독자가 직접 보고 판단하므로 각주보다 정보가 많고 선택적으로 읽히지 않는다.
 
 ---
 
@@ -370,11 +370,11 @@ hV4 단독성은 **게이트의 두 파이프라인 재현**(.011 / .023)만으�
 
 **0 을 넘지 않는 유일한 칸조차 구간이 $[-5.93,\ -0.41]$ 로 하한과 상한이 14배 차이 난다.** 재정렬 파이프라인에서는 두 칸 모두 0 을 포함한다. 이 표본에서 효과의 **크기는 추정되지 않는다.** (산출: `scipy.stats.nct` 비중심 $t$ 역산, $n=7$. Primary 두 칸이 발표본 값과 일치해 계산 방식이 검증됨)
 
-→ **조치**: 효과크기를 유의성의 대체물로 쓰지 않는다. 구간은 §S1 에 싣는다. 본문 대응구는 §2.2 문장 1의 `at this sample size the size of the reduction is not estimable` 이다. 주장을 지는 것은 **순위 배치**이고, 순위 진술은 분포 가정도 구간도 필요 없어 표본이 작을수록 상대적으로 유리한 유일한 형태다.
+→ **조치**: 효과크기를 유의성의 대체물로 쓰지 않는다. 구간은 §S2 에 싣는다. 본문 대응구는 §2.2 문장 1의 `at this sample size the size of the reduction is not estimable` 이다. 주장을 지는 것은 **순위 배치**이고, 순위 진술은 분포 가정도 구간도 필요 없어 표본이 작을수록 상대적으로 유리한 유일한 형태다.
 
 ### 2.10 sub-09 V1 의 45° 순환이동 — Results 미수록
 
-사유 = **§0.4-D**. 정량 결과와 대안 설명은 **§4.5b (§S10)** 에만 두고, Discussion 에도 넣지 않는다.
+사유 = **§0.4-D**. 정량 결과와 대안 설명은 **§4.5b (§S17)** 에만 두고, Discussion 에도 넣지 않는다.
 
 ---
 
@@ -394,7 +394,7 @@ hV4 단독성은 **게이트의 두 파이프라인 재현**(.011 / .023)만으�
 
 ### 3.3 균일 회전 항 부재 (F · U10) — ⚠ **Discussion 미수록으로 변경 (2026-08-25)**
 
-> **종전 안**: `discussion_v3.tex:48` 문단 끝에 *"모형에 균일 회전 항이 없어 §S10 의 45° 재배열을 표현할 수 없다"* 를 넣는다. 등급 필수.
+> **종전 안**: `discussion_v3.tex:48` 문단 끝에 *"모형에 균일 회전 항이 없어 §S17 의 45° 재배열을 표현할 수 없다"* 를 넣는다. 등급 필수.
 >
 > **철회.** 이 항목은 **C9(45° 를 주 주장으로) 를 전제로 만들어졌다.** 원 지시(`REVISION_PLAN_MOTION_GEOMETRY_2026-08-06` §5)는 45° 를 소견으로 내세우던 시점의 것이고, 그때는 *"당신 모형이 그 회전을 표현 못 하지 않느냐"* 를 선제할 필요가 있었다. **C9 를 철회한 이상(§0.4-F) 선제할 주장이 없다.**
 
@@ -432,7 +432,7 @@ hV4 단독성은 **게이트의 두 파이프라인 재현**(.011 / .023)만으�
 | # | |
 |---|---|
 | 1 | **한계를 앞세우고 무엇이 남는지로 닫는다.** 세 번째 문단이 두 파이프라인에서 견디는 결과를 진술해 문단이 순수한 철회로 읽히지 않게 한다 |
-| 2 | **$L_{\rm RDM}$ 방어가 여기 들어간다.** §0.7-D 는 Methods 한 문장으로 계획했으나, §S10 에서 색 특이성이 보정 파이프라인에서 전멸했으므로 Discussion 에서도 답해야 한다. 리뷰어는 *"적합에 쓴 신경 구조가 두 번째 파이프라인에서 사라진다"* 를 여기서 묻는다 |
+| 2 | **$L_{\rm RDM}$ 방어가 여기 들어간다.** §0.7-D 는 Methods 한 문장으로 계획했으나, §S17 에서 색 특이성이 보정 파이프라인에서 전멸했으므로 Discussion 에서도 답해야 한다. 리뷰어는 *"적합에 쓴 신경 구조가 두 번째 파이프라인에서 사라진다"* 를 여기서 묻는다 |
 | 3 | **두 참가자를 대비시키지 않는다.** deutan 과 protan 을 각각 그 자체로 진술한다 |
 
 ### 3.5 `:69` — M6 · 결론
@@ -460,28 +460,28 @@ hV4 단독성은 **게이트의 두 파이프라인 재현**(.011 / .023)만으�
 
 ## 4. `Supplementary/supplementary.tex`
 
-### 4.0 §S1 `Susceptibility distortion` 문단 — SDC 변위 실측 ★ **신규 항목** (등급: 필수) ✅ **반영 완료 (2026-09-02)** — `roi_shift_summary.csv` 에서 문안의 수치 전부 재현 확인 후 교체. 절 번호는 당기기 뒤 **§S1**
+### 4.0 §S2 `Susceptibility distortion` 문단 — SDC 변위 실측 ★ **신규 항목** (등급: 필수) ✅ **반영 완료 (2026-09-02)** — `roi_shift_summary.csv` 에서 문안의 수치 전부 재현 확인 후 교체. 절 번호는 당기기 뒤 **§S2**
 
-### 4.1 §S1 — 파이프라인 정의 + LOCO 2열 표 (등급: 필수) ✅ **반영 완료 (2026-09-02)** — (a)(b)(c) 는 종전 회차에 반영돼 있었고(2열 표는 `tab:motion_loco` 가 아니라 `tab:interp_arms` 로 존재), 이번에 (c) 의 `Neither single-case contrast reached significance…` 문장과 (d) 의 격자 제한 문장을 보간 표 아래에 추가
+### 4.1 §S2 — 파이프라인 정의 + LOCO 2열 표 (등급: 필수) ✅ **반영 완료 (2026-09-02)** — (a)(b)(c) 는 종전 회차에 반영돼 있었고(2열 표는 `tab:motion_loco` 가 아니라 `tab:interp_arms` 로 존재), 이번에 (c) 의 `Neither single-case contrast reached significance…` 문장과 (d) 의 격자 제한 문장을 보간 표 아래에 추가
 
 **⚠ 철자**: 원고는 미국식(`american`)으로 통일돼 있다. 위 문안의 `analyzed` 를 유지할 것. **`supplementary.tex:535` 의 `analysed` 는 현행 원고의 오류이므로 함께 고친다.**
 
 ### 4.2 · 4.3 — 폐기 항목의 이관처
 
-종전의 §S1 재정렬 문단 신설안과 `tab:hmc_robustness` 는 **2 arm 결정으로 대체됐다.** 재정렬은 별도 문단이 아니라 §S1 의 파이프라인 정의와 종점 2열 표에 통합된다.
+종전의 §S2 재정렬 문단 신설안과 `tab:hmc_robustness` 는 **2 arm 결정으로 대체됐다.** 재정렬은 별도 문단이 아니라 §S2 의 파이프라인 정의와 종점 2열 표에 통합된다.
 
 | 종전 위치 | 새 위치 |
 |---|---|
-| 재정렬 서술 | §1.5 (Methods) + §S1 파이프라인 정의 |
-| tSNR $-1.97\%$ · ROI 겹침 | §S1 QC 문단 |
+| 재정렬 서술 | §1.5 (Methods) + §S2 파이프라인 정의 |
+| tSNR $-1.97\%$ · ROI 겹침 | §S2 QC 문단 |
 | 종점 표 | §4.1 `tab:motion_loco` 2열로 통합 |
 | ICC 2행 | **삭제** (§0.4-C) |
 
 **원칙 하나는 유효하다 — 품질 수치로 종점을 기각하지 않는다.** tSNR 은 파이프라인 특성 기술이지 어느 결과를 버리는 근거가 아니다.
 
-### 4.4 §S1 / §S2 — G + BBR QC 그림 ✅ **반영 완료 (2026-09-02)** — §S1 에 `Choice of registration method.` 문단 신설. 2층 정당화(fMRIPrep 실패 → 커스텀 / BBR 육안 실패 → MI)와 `전뇌 중첩 지표는 BBR 을 선호하나 슬랩 오위치에 둔감` 선제 공개를 넣었고, Dice 수치는 인용하지 않았다
+### 4.4 §S2 / §S3 — G + BBR QC 그림 ✅ **반영 완료 (2026-09-02)** — §S2 에 `Choice of registration method.` 문단 신설. 2층 정당화(fMRIPrep 실패 → 커스텀 / BBR 육안 실패 → MI)와 `전뇌 중첩 지표는 BBR 을 선호하나 슬랩 오위치에 둔감` 선제 공개를 넣었고, Dice 수치는 인용하지 않았다
 
-### 4.5 §S10 (`supplementary.tex:464-468`) — 회귀자 시간축 대조 확장 ⚠ **폐기 (2026-09-01)**
+### 4.5 §S17 (`supplementary.tex:464-468`) — 회귀자 시간축 대조 확장 ⚠ **폐기 (2026-09-01)**
 
 이 항목은 `motreg` 와 `motshift` 를 전제로 한 논증이었다. 둘 다 원고에서 빠지므로(§0.4-A) **문안 전체를 폐기한다.**
 
@@ -497,7 +497,7 @@ hV4 단독성은 **게이트의 두 파이프라인 재현**(.011 / .023)만으�
 - **BH 보정 범위는 현행 유지**(파이프라인별 35셀). 두 파이프라인은 같은 데이터의 대안 전처리이므로 70셀 합산은 과보정이다.
 - deutan V2 의 $q$ 정확값이 $0.0525$ 이므로 원고 표기를 `.052` → **`.053`** 으로 정정했다.
 
-### 4.5b §S10 — hue 순환이동으로 sub-09 V1 의 색 특이성 귀무를 설명한다 ★ **신규 (2026-08-25)** ✅ **반영 완료 (2026-09-02)** — 대부분 종전 회차에 들어가 있었고, 이번에 빠져 있던 둘을 채웠다. ① 신호 부족이 아니라는 근거(split-half $.847$, LORO $0.79$) ② 해석 세 진술 중 (iii)`disparity 가 두 파이프라인 모두에서 상승해 있으므로 재배열만으로 설명되지 않는다`. `motreg` 열은 §0.4-A 에 따라 넣지 않았다. 절 번호는 당기기 뒤 **§S10**
+### 4.5b §S17 — hue 순환이동으로 sub-09 V1 의 색 특이성 귀무를 설명한다 ★ **신규 (2026-08-25)** ✅ **반영 완료 (2026-09-02)** — 대부분 종전 회차에 들어가 있었고, 이번에 빠져 있던 둘을 채웠다. ① 신호 부족이 아니라는 근거(split-half $.847$, LORO $0.79$) ② 해석 세 진술 중 (iii)`disparity 가 두 파이프라인 모두에서 상승해 있으므로 재배열만으로 설명되지 않는다`. `motreg` 열은 §0.4-A 에 따라 넣지 않았다. 절 번호는 당기기 뒤 **§S17**
 
 > **⚠ §4.5 의 순환이동과 다른 것이다.** §4.5 는 **회귀자를 시간축에서** 순환이동시키는 대조이고, 여기는 **hue 라벨을 색 바퀴에서** 한 칸씩 돌리는 분석이다. 이름이 겹치므로 원고에서 **`time-shifted regressors`** 와 **`cyclic hue relabeling`** 으로 명확히 구분해 쓴다.
 
@@ -505,13 +505,13 @@ hV4 단독성은 **게이트의 두 파이프라인 재현**(.011 / .023)만으�
 
 **⚠ 모형 포함 여부를 언급하지 않는다 (2026-08-25).** 종전 초안에 *"a rigid one-step shift is also outside the two-component model … (Discussion)"* 가 있었으나 삭제했다. 주장하지 않는 성분에 대해 모형의 표현력을 논하면 **없는 약점을 만든다.** 근거는 §3.3(미수록 사유). 또한 RDM 은 라벨 순열에 민감하므로 *"필터가 이 성분에 무관하다"* 도 단정할 수 없다 — **양쪽 다 말하지 않는 것이 정확하다.**
 
-### 4.6 §S12 `tab:jnd_baseline` — D · 범위 절단 각주 ✅ **반영 완료 (2026-09-02)** — 문안 (a) 는 캡션 끝에, (b) 는 §4.6b 표 바로 앞 문단으로. 세미콜론은 §0.7-E 에 따라 두 문장으로 분리. 절 번호는 당기기 뒤 **§S12**
+### 4.6 §S1 `tab:jnd_baseline` — D · 범위 절단 각주 ✅ **반영 완료 (2026-09-02)** — 문안 (a) 는 캡션 끝에, (b) 는 §4.6b 표 바로 앞 문단으로. 세미콜론은 §0.7-E 에 따라 두 문장으로 분리. 절 번호는 당기기 뒤 **§S1**
 
-### 4.6b §S12 — 쌍별 스테어케이스 전수 표 ★ **신규 (2026-08-25)** (등급: 필수) ✅ **반영 완료 (2026-09-02)** — `_staircase_pairs_table.py` 를 실행해 표가 이 문서의 것과 일치함을 확인한 뒤 삽입(`tab:staircase_pairs` = Table S12). 표 아래 문안도 함께 넣었고 세미콜론만 분리했다
+### 4.6b §S1 — 쌍별 스테어케이스 전수 표 ★ **신규 (2026-08-25)** (등급: 필수) ✅ **반영 완료 (2026-09-02)** — `_staircase_pairs_table.py` 를 실행해 표가 이 문서의 것과 일치함을 확인한 뒤 삽입(`tab:staircase_pairs` = Table S19). 표 아래 문안도 함께 넣었고 세미콜론만 분리했다
 
 **⚠ 값을 조정하지 않는다.** 208개 중 이 한 트랙만 문제이므로 제외 규칙을 세우면 사후적으로 보이고, 조정 방향이 결론에 유리한 쪽이라 더 그렇다. **평균 유지 + 전량 공개**가 방어 가능한 선택이다.
 
-### 4.7 H 문안의 배치 ✅ **해소 (2026-09-02)** — 부록 재편으로 신설이 불필요해졌다. $\hat\beta_c$ 부호 통계는 현 **§S14 Identifiability checks** 에 있고 Discussion 은 그 절을 가리킨다
+### 4.7 H 문안의 배치 ✅ **해소 (2026-09-02)** — 부록 재편으로 신설이 불필요해졌다. $\hat\beta_c$ 부호 통계는 현 **§S12 Identifiability checks** 에 있고 Discussion 은 그 절을 가리킨다
 
 ### 4.8 `:815` — 비교자 범위 문서화 ★ 신규
 
@@ -561,7 +561,7 @@ CVD 교정 필터는 채널 이득을 재분배하므로 후자가 발생할 개
 
 **정직하게 적을수록 우리 위치가 나아질 가능성이 높은 항목이다** — 단, 그 진술은 실측 후에만 할 수 있다.
 
-### 4.9 §S1 — `exp2` 종점의 전처리 arm 재산출 ★ 신규 (2026-08-17) ✅ **반영 완료 (2026-09-02, 문안 정정 후)** — ⚠ **이 절의 문안에 오류가 있었다.** `of twenty directional contrasts, thirteen reversed` 는 이 절의 판정 블록과 `exp2_endpoints_arms.json` 의 `counting_note` 가 **둘 다 금지하는 합산**이다. 반영본은 `native 10 중 8, matched 10 중 5` 로 나누어 적었다. 선택지 (i)(앵커 arm 명시 구)도 함께 넣었고, 기하가 더 안정적이라는 진술을 절대값 없이 두 문장으로 덧붙였다
+### 4.9 §S2 — `exp2` 종점의 전처리 arm 재산출 ★ 신규 (2026-08-17) ✅ **반영 완료 (2026-09-02, 문안 정정 후)** — ⚠ **이 절의 문안에 오류가 있었다.** `of twenty directional contrasts, thirteen reversed` 는 이 절의 판정 블록과 `exp2_endpoints_arms.json` 의 `counting_note` 가 **둘 다 금지하는 합산**이다. 반영본은 `native 10 중 8, matched 10 중 5` 로 나누어 적었다. 선택지 (i)(앵커 arm 명시 구)도 함께 넣었고, 기하가 더 안정적이라는 진술을 절대값 없이 두 문장으로 덧붙였다
 
 **⚠ 이것을 근거로 종점을 교체하지 않는다.** 사전 선언된 주 종점은 **hV4 LOCO adjacent accuracy** 이고(산출 로그도 `*** PRIMARY ENDPOINT (hV4) ***` 로 명시), 그것이 불안정한 쪽이다. "기하가 안정적이니 그쪽을 보자"는 사후 종점 교체다. **정확한 진술** = *사전 선언된 주 종점은 arm 간에 불안정하고, 수렴 지표인 기하는 더 안정적이며 사전지정 ROI 에서 방향이 유지된다.*
 
@@ -590,11 +590,11 @@ CVD 교정 필터는 채널 이득을 재분배하므로 후자가 발생할 개
 
 > **근거는 분량이 아니라 중복이다.** Methods 는 6,115 단어로 본문의 약 45%를 차지하지만 IN 은 상한을 두지 않는다. **방법 논문으로 재배치한 이상(§0.7) 방법 서술을 줄이면 기여 자체가 줄어든다.** 아래는 중복이 확인된 것과, 기여가 아닌 보조 자료에 한정한다.
 
-#### (a) S8 ↔ Methods `Two decoding schemes` — 중복 (등급: 권장) ✅ **반영 완료 (2026-09-02)** — S8(현 §S7)의 LORO·LOCO 절차 서술을 삭제하고 Methods 포인터 한 문단으로 축약. 고유 내용인 leakage control 과 LOSO 문단은 유지
+#### (a) S8 ↔ Methods `Two decoding schemes` — 중복 (등급: 권장) ✅ **반영 완료 (2026-09-02)** — S8(현 §S5)의 LORO·LOCO 절차 서술을 삭제하고 Methods 포인터 한 문단으로 축약. 고유 내용인 leakage control 과 LOSO 문단은 유지
 
-#### (b) S9 ↔ S20 — 중복이면서 수치가 어긋난다 (등급: **필수**) ✅ **반영 완료 (2026-09-02)** — 구 S8·S9 가 현 **§S6 Cross-validation procedures and evaluation metrics** 로 병합되고 통계는 현 **§S16 Statistical Analysis** 로 일원화됐다
+#### (b) S9 ↔ S20 — 중복이면서 수치가 어긋난다 (등급: **필수**) ✅ **반영 완료 (2026-09-02)** — 구 S8·S9 가 현 **§S7 Cross-validation procedures and evaluation metrics** 로 병합되고 통계는 현 **§S15 Statistical Analysis** 로 일원화됐다
 
-#### (c) 이동 — 한 건만 남는다 ✅ **확인 완료 (2026-09-02)** — R+C·Machado 파라미터화는 **이미 §S16(현 §S15)에 있고** Methods 에는 한 줄 포인터만 남아 있다. Methods 에 `machado`·`stockman`·$\Delta\lambda$ 잔존 없음을 grep 으로 확인했으므로 추가 조치가 없다
+#### (c) 이동 — 한 건만 남는다 ✅ **확인 완료 (2026-09-02)** — R+C·Machado 파라미터화는 **이미 §S15(현 §S13)에 있고** Methods 에는 한 줄 포인터만 남아 있다. Methods 에 `machado`·`stockman`·$\Delta\lambda$ 잔존 없음을 grep 으로 확인했으므로 추가 조치가 없다
 
 #### (c-2) Methods `Inverse fitting` 정리 ✅ **반영 완료 (2026-09-02)** — 872 → 716 단어
 
@@ -645,19 +645,19 @@ CVD 교정 필터는 채널 이득을 재분배하므로 후자가 발생할 개
 |---|---|---|
 | A1 | **부록 그림 번호 붕괴** | `fig:landscape` 에만 `\renewcommand{\thefigure}` 이 없어 본문 **Figure 8** 로 조판되고 있었다(본문 그림은 7개). 리셋을 첫 부록 그림으로 옮겨 **S1 / S2 / S3** 로 정정 |
 | A2 | **`\S\ref{app:…}` 가 `§4.5` 로 렌더링** | `\subsection*` 은 번호가 없어 직전 번호 있는 절(Discussion 4.5)을 집는다. PDF 에 `Supplementary §4.5` 가 실제로 인쇄돼 있었다. 본문 나머지와 같은 하드코딩 `\S S…` 로 교체(Methods 1건 · Discussion 2건) |
-| A3 | **부록 8개 절이 본문 미인용** | S3·S4·S6·S8·S9·S14·S17·S20(구 번호)에 Methods 의 해당 지점에서 인용을 추가. 이제 S1–S20 전부가 최소 1회 인용된다 |
-| A4 | **`0.35` 순열 귀무의 포인터 오지정** | `results_v4.tex:34` 이 §S10(구)을 가리켰으나 그 값은 §S2(구) `tab:interp_arms` 캡션에만 있다. **§S1** 로 재지정 |
-| A5 | **부록 내부 포인터 둘** | `whether the deviation is specific to color is treated in S12` → **§S10**(구 S13). 리지 페널티가 디코딩을 저하시킨다는 근거 `(\S S8)` → **§S9**(구 S10, `tab:loco_decoders` 가 실제 근거) |
+| A3 | **부록 8개 절이 본문 미인용** | S3·S4·S6·S8·S9·S14·S17·S20(구 번호)에 Methods 의 해당 지점에서 인용을 추가. 이제 부록 전 절이 최소 1회 인용된다 |
+| A4 | **`0.35` 순열 귀무의 포인터 오지정** | `results_v4.tex:34` 이 §S17(구)을 가리켰으나 그 값은 §S3(구) `tab:interp_arms` 캡션에만 있다. **§S2** 로 재지정 |
+| A5 | **부록 내부 포인터 둘** | `whether the deviation is specific to color is treated in S12` → **§S17**(구 S13). 리지 페널티가 디코딩을 저하시킨다는 근거 `(\S S8)` → **§S8**(구 S10, `tab:loco_decoders` 가 실제 근거) |
 | A6 | **§0.5 C4 금지 표현 1건** | `Both CVD participants carried color-specific geometry, at different ROIs.` 의 뒷부분 삭제 |
 | A7 | **영국식 철자 6건** | `behaviour`·`favour(ed)`·`penalises` → 미국식. 원고는 `american` 으로 통일돼 있다 |
-| A8 | **§S3 QC 가 sub-10 을 포함하고 있었다** | `ROI coverage averaged 84.3% (SD 21.7%) across the ten scanned participants … all participants entered the downstream analyses` 는 **n=10 기준이고 마지막 절은 사실과 다르다**(sub-10 은 전 분석 제외). `Method_method3_header_mi/results.json` 에서 n=9 로 재산출해 **83.5% (SD 22.7%) · 유효복셀 99.5%** 로 교체하고 집계 방식(참가자별 4 ROI × 6런 평균)을 명시. sub-07 의 30.8% 는 불변. 구 84.3% 는 n=10 의 **셀 풀링** 값이고 SD 21.7% 는 n=10 의 **참가자별** 값이어서 두 집계가 섞여 있었다 |
+| A8 | **§S10 QC 가 sub-10 을 포함하고 있었다** | `ROI coverage averaged 84.3% (SD 21.7%) across the ten scanned participants … all participants entered the downstream analyses` 는 **n=10 기준이고 마지막 절은 사실과 다르다**(sub-10 은 전 분석 제외). `Method_method3_header_mi/results.json` 에서 n=9 로 재산출해 **83.5% (SD 22.7%) · 유효복셀 99.5%** 로 교체하고 집계 방식(참가자별 4 ROI × 6런 평균)을 명시. sub-07 의 30.8% 는 불변. 구 84.3% 는 n=10 의 **셀 풀링** 값이고 SD 21.7% 는 n=10 의 **참가자별** 값이어서 두 집계가 섞여 있었다 |
 | A9 | **표 중복** | `tab:motion_arms`(S1)의 Primary 두 열이 `tab:disparity_loso`(S6)와 완전히 같다. 캡션에 재수록임을 명시 |
 | A10 | **조판 넘침** | `tab:motion_arms` 가 30.5pt 넘쳐 있었다. `\small` 로 해소. 남은 넘침 3건은 전부 Supplementary 밖의 기존 항목 |
 
 **남은 부산물 둘 (조치 안 함, 기록만)**
 
 - ~~그림 **파일명**이 구 절 번호를 쓴다~~ → **해소 (2026-09-02, 저자 지시).** `figS18_landscape` → `figS1_landscape`, `figS16_adjacc_saturation` → `figS2_adjacc_saturation`, `figS_forward_tuning` → `figS3_forward_tuning`. 이제 **조판되는 그림 번호**를 담는다. 생성 스크립트 3개도 같은 이름으로 옮겼고, `FIGURES_README.md`·`FIGURE_CAPTIONS.md`·`FONT_POLICY.md`·`generate_fig8.py` 의 참조를 함께 고쳤다. 본문 그림 파일명은 §5.4(c) 결정대로 그대로 둔다.
-- §S17 의 Test 1 / 2a / 2b / 2c 네 표가 `\label` 없이 Table **S14–S17** 번호를 차지한다. 번호열은 연속이고 본문이 이름으로 부르므로 조판 결함은 아니다.
+- §S14 의 Test 1 / 2a / 2b / 2c 네 표가 `\label` 없이 Table **S14–S17** 번호를 차지한다. 번호열은 연속이고 본문이 이름으로 부르므로 조판 결함은 아니다.
 
 **§8.1 금지 목록 두 행을 갱신했다 (2026-09-02).** `hmc_v2 종점 전량` 행은 §0.4-A 가 뒤집은 옛 결정 위에 쓰인 것이어서 **철회**하고, 대신 그 값들에 걸리는 인용 규칙 셋(서술적 셀 · 영역 귀속 금지 · Primary 한정 유의성)을 명시했다. `exp2 "14칸"` 행은 JSON 의 `prespecified_cells = 14` 확인으로 **해소**했고, 금지가 남는 것은 방향 대비의 variant 간 합산임을 분명히 했다.
 
@@ -669,24 +669,100 @@ CVD 교정 필터는 채널 이득을 재분배하므로 후자가 발생할 개
 
 | 지적 | 조치 |
 |---|---|
-| `Nuisance model.` 문단이 필요한가 | **문단 해체.** 표류 회귀자·시간 필터 미적용은 Methods `:86` 의 GLM 서술과 겹치므로 §S1 `The two pipelines.` 안의 한 구로 축약했고, 필드맵 미소비 문장은 §4.0 이 지정한 대로 `Susceptibility distortion.` 서두로 옮겼다. 적용하지 않은 것을 절 제목으로 세우던 구조가 사라진다 |
-| `Regressing the motion parameters…` 가 지금 파이프라인과 맞는가 | **문장 삭제. 지적이 맞다.** 이 문장의 `run-shifted null` 은 `motshift` 이고, §0.4-A 가 `motreg` 와 함께 원고에서 뺀 arm 이다. §4.5 가 §S10 쪽 같은 성격의 문장을 *"존재하지 않는 대조를 가리킨다"* 며 삭제하도록 했는데 §S1 쪽 잔여분이 남아 있었다 |
+| `Nuisance model.` 문단이 필요한가 | **문단 해체.** 표류 회귀자·시간 필터 미적용은 Methods `:86` 의 GLM 서술과 겹치므로 §S2 `The two pipelines.` 안의 한 구로 축약했고, 필드맵 미소비 문장은 §4.0 이 지정한 대로 `Susceptibility distortion.` 서두로 옮겼다. 적용하지 않은 것을 절 제목으로 세우던 구조가 사라진다 |
+| `Regressing the motion parameters…` 가 지금 파이프라인과 맞는가 | **문장 삭제. 지적이 맞다.** 이 문장의 `run-shifted null` 은 `motshift` 이고, §0.4-A 가 `motreg` 와 함께 원고에서 뺀 arm 이다. §4.5 가 §S17 쪽 같은 성격의 문장을 *"존재하지 않는 대조를 가리킨다"* 며 삭제하도록 했는데 §S2 쪽 잔여분이 남아 있었다 |
 | `was acquired without the defacing step` | **경위 삭제.** 수정된 arm 에서 결과 일치를 확인했으므로 우리가 먼저 결함 이력을 말할 이유가 없다. `The second session was reprocessed with the anatomical images harmonized to the first and with head-motion correction` 로 바꿨다 |
 
 **전반 집약.** 절 **20 → 17**, 조판 **69 → 67 쪽**.
 
 | 유형 | 내용 |
 |---|---|
-| **절 병합 3건** | 구 §S2 `Image Orientation`(37 단어) → §S1 `Registration` 문단. 구 §S8 `Evaluation Metrics`(90) → §S7 로 합쳐 `Cross-validation procedures and evaluation metrics`. 구 §S16 `HC magnitude anchor`(130) → §S14 `Identifiability checks` 의 한 문단(Test 2b 와 같은 HC 재적합을 쓰므로 같은 자리) |
-| **중복 삭제** | §S10 이 `35칸 중 16, BH 7 생존`을 두 문단에서 반복 · protan V1 `.758 → .010` 을 두 번 진술 · §S14 가 파라미터 불확실성을 세 곳에서 서로 다른 반올림으로 진술(20/25, 22/26, 16/24) · §S14 의 FDR 요약이 서두 문단과 완전 중복 · §S13 이 `Fitting.` 블록에서 서두 문장을 그대로 반복 · §S11 이 결론 문장을 서두에서 이미 진술 |
+| **절 병합 3건** | 구 §S3 `Image Orientation`(37 단어) → §S2 `Registration` 문단. 구 §S16 `Evaluation Metrics`(90) → §S5 로 합쳐 `Cross-validation procedures and evaluation metrics`. 구 §S15 `HC magnitude anchor`(130) → §S12 `Identifiability checks` 의 한 문단(Test 2b 와 같은 HC 재적합을 쓰므로 같은 자리) |
+| **중복 삭제** | §S17 이 `35칸 중 16, BH 7 생존`을 두 문단에서 반복 · protan V1 `.758 → .010` 을 두 번 진술 · §S12 가 파라미터 불확실성을 세 곳에서 서로 다른 반올림으로 진술(20/25, 22/26, 16/24) · §S12 의 FDR 요약이 서두 문단과 완전 중복 · §S11 이 `Fitting.` 블록에서 서두 문장을 그대로 반복 · §S9 이 결론 문장을 서두에서 이미 진술 |
 | **문체** | 한 문장 한 줄로 끊어져 있던 문단을 이어 붙이고, §0.7-E 에 따라 본문 산문의 세미콜론·콜론을 문장 분리로 바꿨다(캡션의 목록 구분자는 유지). `Pass criterion:` 형태의 전보체 서술을 완전한 문장으로 |
-| **절 번호** | S1–S20 → **S1–S17**. 참조 33건, 제목 17개, 출처 주석을 함께 이동했다. 병합된 절을 가리키던 Methods 인용 3건은 병합처로 합치면서 중복 인용을 제거했다 |
+| **절 번호** | 21개 판 → **S1–S17**(2026-09-02), 이어서 본문 첫 인용 순서에 맞추어 전면 재번호(2026-09-03). 참조 33건, 제목 17개, 출처 주석을 함께 이동했다. 병합된 절을 가리키던 Methods 인용 3건은 병합처로 합치면서 중복 인용을 제거했다 |
 
-**검증.** 조판 클린(67쪽, undefined reference 0건, Supplementary 내 넘침 0건). 세션 시작본과 숫자 토큰을 대조해 **삭제된 수치가 전부 의도된 것임을 확인**했다(중복 진술 제거 · n=10 → n=9 재산출 · `N = 1000` → `$N = 1{,}000$` 표기 통일). 대조 과정에서 §S16 의 `nichols2002` 인용이 §4.10(b) 문단 삭제로 원고 전체에서 사라진 것을 발견해 §S16 의 집단 순열 문장에 되살렸다.
+**검증.** 조판 클린(67쪽, undefined reference 0건, Supplementary 내 넘침 0건). 세션 시작본과 숫자 토큰을 대조해 **삭제된 수치가 전부 의도된 것임을 확인**했다(중복 진술 제거 · n=10 → n=9 재산출 · `N = 1000` → `$N = 1{,}000$` 표기 통일). 대조 과정에서 §S15 의 `nichols2002` 인용이 §4.10(b) 문단 삭제로 원고 전체에서 사라진 것을 발견해 §S15 의 집단 순열 문장에 되살렸다.
 
 > **⚠ 이 문서의 §4.x 에 적힌 `§S…` 는 이제 두 세대 전 번호다.** 대응표: 구 S2→S1, S3→S2, S4→S3, S5→S4, S6→S5, S7·S8→S6, S9→S7, S10→S8, S11→S9, S12→S10, S13→S11, S14→S12, S15→S13, S16·S17→S14, S18→S15, S19→S16, S20→S17. (구 번호는 §1.5(c) 이전 기준으로 여기서 다시 한 칸 더 올라간다.)
 
-**세션 중 저자 편집 감지.** §S10 의 deutan V2 보정값이 세션 시작본의 `q = .052` 에서 현재 `q = .053` 으로 바뀌어 있다. 이 변경은 본 작업에서 하지 않았으므로 저자 편집으로 보고 그대로 두었다. 같은 시각에 `discussion_v3.tex` 도 짧아져 있었고, 번호 갱신은 그 편집본 위에 적용됐다.
+**세션 중 저자 편집 감지.** §S17 의 deutan V2 보정값이 세션 시작본의 `q = .052` 에서 현재 `q = .053` 으로 바뀌어 있다. 이 변경은 본 작업에서 하지 않았으므로 저자 편집으로 보고 그대로 두었다. 같은 시각에 `discussion_v3.tex` 도 짧아져 있었고, 번호 갱신은 그 편집본 위에 적용됐다.
+
+---
+
+## 6.7 Supplementary 문장 단위 점검 (2026-09-03, 두괄식 · 단일 의미)
+
+**§6.6 의 압축이 만든 부작용을 되돌리는 회차다.** 단어 수를 줄이려고 문장을 합치면서 한 문장에 두세 개의 주장이 실린 곳이 생겼고, 이번에 전부 분해했다. 기준은 **문장 하나가 한 가지만 말한다**이며, 분량은 목표가 아니다.
+
+**자체 점검에서 나온 결함 넷 (지시서 밖).**
+
+| # | 결함 | 조치 |
+|---|---|---|
+| B1 | **§S7 의 자기 서술이 틀렸다.** §6.6 에서 구 §S16 `Evaluation Metrics` 를 §S5(현 §S7)에 병합했는데, 절 서두는 여전히 `This section reports the two procedural checks` 였다. 실제로는 네 문단이다 | `the fold-level checks and the evaluation metrics` 로 정정 |
+| B2 | **§S6 가 지시 대상 없는 대명사로 시작했다.** `This penalty applies to…` 의 `This` 가 절 첫 문장이라 받을 것이 없다 | `The ridge penalty applies to…` |
+| B3 | **§S10 마지막 문장이 같은 주장을 두 번 했다.** `resides in the representational pattern rather than in response amplitude, so the cortical color response retains its strength while its geometry departs` 는 앞뒤가 동어반복 | 뒷절 삭제, 결론을 문단 앞으로 |
+| B4 | **§S15 의 `nichols2002` 가 원고에서 사라져 있었다** (§6.6 검증에서 발견, 그 회차에 복구) | 집단 순열 문장에 재인용 |
+
+**두괄식 정리 6개 절.** 절 또는 문단의 결론이 뒤에 놓여 있던 곳을 앞으로 옮겼다.
+
+| 절 | 종전 첫 문장 | 개정 첫 문장 |
+|---|---|---|
+| §S2 `Classification and interpolation` | 재산출 절차 | `The two readouts dissociate under both pipelines.` |
+| §S2 `Session-2 endpoints` | 재처리 절차 | `We report both preprocessing arms … and draw no directional conclusion …` |
+| §S2 `Susceptibility distortion` | 필드맵 취득 | `Susceptibility distortion within the analyzed ROIs is predominantly subvoxel and spatially smooth …` |
+| §S3 | 산출 방법 | `ROI coverage averaged $83.5\%$ …` |
+| §S10 | 비교 절차 | `Both CVD participants fell inside the control distribution on every activation metric at every ROI.` |
+| §S4 | 선택 절차 | `SRM used $k = 4$ at V1 and V2 and $k = 3$ at V3 and hV4 …` |
+| §S16 | 왜 Procrustes 를 쓰는가 | `The two alignment spaces agree on the pattern that carries the Results.` |
+| §S17 | `This section reports …` (메타 문장) | `The color-correspondence permutation carries power only when the shared projection is held fixed …` |
+| §S11 | 적합 절차 | `The retinal-family (R+C) model does not represent the fitted distortion and saturated its gain boundary in both participants.` |
+| §S12 | 선택되지 않은 $L_{\rm LOCO}$ 정의 | `Four pre-specified checks bound what the fit can estimate.` ($L_{\rm LOCO}$ 정의는 그 뒤 문단으로. §4.10(c-2) 가 지정한 "§S12 서두" 안에 그대로 있다) |
+
+**단일 의미 분해 약 30문장.** 대표적으로 §S2 파이프라인 서술의 3중 문장, §S2 세션-2 의 `Eight of the ten … as did five of the ten …, and the two masks disagree`, §S2 registration 의 `because … so …` 3단 연결, §S13 run-matching 의 60단어 문장, §S7 의 `(1) … and (2) …` 지표 정의를 각각 둘에서 셋으로 나눴다.
+
+**§S4 목록 제거.** `\begin{itemize}` 4항목(각 한 줄)을 한 문장으로 합쳤다.
+
+**결과.** 산문 6,828 → 7,115 단어(§4.x 필수 추가분 약 880 단어 포함), **문장 360개 · 평균 19.6단어**, 42단어 초과 문장 0개(남은 3건은 수식 뒤 where-절과 절 경계 오검출). 절 17개, 조판 67쪽, undefined reference 0건.
+
+**숫자 무결성.** 세션 시작본과 대조해 감소한 토큰 19종이 전부 의도된 것임을 재확인했다. 이번 회차에서 새로 줄어든 것은 §S10 의 중복 `p = 0.182` 하나와, §S7 지표 정의에서 `12.5\% = 1/8` 의 뒤쪽 동어반복뿐이다.
+
+---
+
+## 6.8 Supplementary ↔ 본문 정합 개정 (2026-09-03, 3축 점검)
+
+Results·Discussion 현행본을 통독한 뒤 부록을 (1) 본문과의 수치·주장 일치, (2) 표현, (3) §0.7 프레임(방법 논문 · 효능 미주장 · 영역 미귀속) 기준으로 대조했다. **본문 핵심 수치 26종을 부록에서 교차 확인해 26/26 일치.**
+
+**(1) 본문과 어긋나거나 본문이 하지 않는 주장 — 7건 정정**
+
+| 위치 | 문제 | 조치 |
+|---|---|---|
+| §S13 LORO | `neither filter degraded the second-session color signal` 은 본문에 없는 주장이며, 최저 셀 0.50 은 HC 범위 0.71–0.77 **아래**다 | 주장 삭제, 최저 셀과 HC 범위를 수치로 병기 |
+| §S13 forward tuning | `reaches the HC level` — $+0.18$ 대 $+0.21$ 은 본문 `against` 다 | `approaches` |
+| §S9 | `the two ROIs carrying the single-case elevations` — 영역 귀속 서술 (§0.5 C4) | 삭제, `V1 and V2` 만 |
+| §S8 | 유의성 진술에 파이프라인 한정어 없음 (§0.5 C3) | `In the primary pipeline` 추가 + `tab:motion_arms` 참조 |
+| §S15 | Crawford 검정의 꼬리를 `CVD disparity exceeds HC` 한 방향만 적음 | 종점별 꼬리(disparity 상측 · 보간 하측 · 분류·활성 양측) 명시 |
+| §S10 | `the procedure used for the geometric and interpolation endpoints` 가 양측/단측 차이를 흐림 | `applied one-tailed to …` 로 구분 |
+| §S14 | `sub-10 is excluded here as everywhere else` — 본문에 없는 참가자 ID | 삭제(Methods 가 이미 제외를 서술) |
+
+**(2) 표현**
+
+- 내부 용어 제거: `S08-robust`/`S09-primary` → Deutan/Protan(표 4개 포함), `production argmin/loss/candidates` → `selected`, `Phase-1` 과 2026 년 월 표기 삭제, `zero-shot` 삭제, `canonical FE-6 basis` → `six-channel basis`, `canonical hue map` → `reference hue map`, `pre-specified deficit regions` → `target regions`(§0.7-D 의 Methods 문장과 일치).
+- 절 제목 17개를 본문과 같은 sentence case 로 통일. 콜론·괄호 제거(`Filter-evaluation session: design and comparator` → `… session design and comparator`, `(K-Selection)` 삭제).
+- 모호한 강조어를 수치로 교체: `essentially unchanged` → `moved from 0.456 to 0.445`, `well below` → 실제 값 병기, `far above` 삭제.
+- `\citealp` 2건을 `\textcite`/`\parencite` 로(괄호 없는 인용이 문장 안에서 어색했다). `Two rows require care` → `Two rows are constant-output artifacts`. §S7 의 메타 문장 삭제, §S1 를 소견으로 시작.
+
+**(3) 프레임 정합 — 확인 결과**
+
+| 항목 | 부록 진술 | 판정 |
+|---|---|---|
+| 해리(기여 1) | §S2 `The two readouts dissociate under both pipelines.` | 본문 §results:loco 와 일치 |
+| 신호 강도 | §S10 `resides in the representational pattern rather than in response amplitude` | 초록 `distorts the geometry rather than weakening its overall signal` 과 일치 |
+| 영역 미귀속 | §S2 `Individual cells of this grid are descriptive …` ×2, §S9 귀속 서술 삭제 | Discussion `leaving the cortical locus … undetermined` 과 일치 |
+| 효능 미주장 | §S2 세션-2 `draw no directional conclusion`, §S13 `neither filter degraded` 삭제 | Results `Neither index attributes the geometric recovery to individualization` 과 일치 |
+| 파라미터 지위 | §S12 `descriptive embedding … rather than a point estimate` | Results·Discussion 과 일치 |
+| R+C | §S11 `does not represent the fitted distortion and saturated its gain boundary` | Results §rc_insufficient 와 일치 |
+
+조판 67쪽, undefined reference 0건. 숫자 무결성 재확인(감소분은 전부 코드명·연월·참가자 ID 삭제와 중복 제거).
 
 ---
 
@@ -734,7 +810,7 @@ CVD 교정 필터는 채널 이득을 재분배하므로 후자가 발생할 개
 | **BBR vs MI Dice 0.33–0.50 / 0.27–0.36, ROI coverage 99.95% / 85.4%** | `_archive/registration_method_selection/` | 지표가 슬랩 오위치에 둔감해 **BBR 을 지지한다.** 아카이브 method3 는 FSL MNI152 로 돌아 정본과 공간도 다르다. **§4.4** |
 | **DVARS $-16.3\%$, tSNR $+18.6\%$** | sub-01 run-1 파일럿 | **보간 2회 구버전** 산출. 단일 보간 정본에서는 부호가 반대다(tSNR $-1.9$–$3.0\%$) |
 | **`motreg` hV4 protan 45° 이동 $p<.0001$** | `shift_gain_ch.json` | 통제군 이득 SD 가 $0.4\%$ 로 붕괴해 $t$ 가 31 까지 부풀었다. 45° 주장은 **V1 두 arm 에만** 건다. **§2.10** |
-| ~~**`hmc_v2` 종점 전량**~~ | `disparity_individual_arms.json`, `perm_adjacent_arm_hmc_v2.json`, `results/loso_arms/loo_consistent_hmc_v2.json` | **행 철회 (2026-09-02).** 이 행은 `hmc_v2` 를 원고에서 뺀다는 옛 결정 위에 쓰였고, **§0.4-A(2026-09-01)가 그 결정을 뒤집어 두 파이프라인을 나란히 보고하기로 확정했다.** 현행 §S1 의 `tab:motion_arms` 와 `tab:interp_arms` 가 여기 나열된 값들(deutan V1 $p$=.027, deutan V2 $p$=.825, protan V1 $p$=.077, hV4 $p$=.108/.242)을 이미 싣고 있다. **대신 인용 규칙 셋이 이 값들에 걸린다** — ⓐ 개별 셀은 서술적이며 본문 주장을 받치지 않는다(§4.1-d 문장이 두 표 아래에 붙어 있다), ⓑ 영역 귀속을 주장하지 않는다(§0.5 C4), ⓒ 유의성 주장은 Primary 한정이고 재정렬판의 민감성을 함께 적는다(§0.5 C3) |
+| ~~**`hmc_v2` 종점 전량**~~ | `disparity_individual_arms.json`, `perm_adjacent_arm_hmc_v2.json`, `results/loso_arms/loo_consistent_hmc_v2.json` | **행 철회 (2026-09-02).** 이 행은 `hmc_v2` 를 원고에서 뺀다는 옛 결정 위에 쓰였고, **§0.4-A(2026-09-01)가 그 결정을 뒤집어 두 파이프라인을 나란히 보고하기로 확정했다.** 현행 §S2 의 `tab:motion_arms` 와 `tab:interp_arms` 가 여기 나열된 값들(deutan V1 $p$=.027, deutan V2 $p$=.825, protan V1 $p$=.077, hV4 $p$=.108/.242)을 이미 싣고 있다. **대신 인용 규칙 셋이 이 값들에 걸린다** — ⓐ 개별 셀은 서술적이며 본문 주장을 받치지 않는다(§4.1-d 문장이 두 표 아래에 붙어 있다), ⓑ 영역 귀속을 주장하지 않는다(§0.5 C4), ⓒ 유의성 주장은 Primary 한정이고 재정렬판의 민감성을 함께 적는다(§0.5 C3) |
 | **exp2 "14칸"** | `STATUS` §4.4 | **해소 (2026-09-02).** `exp2_endpoints_arms.json` 의 `prespecified_cells` 가 **14** 로 적혀 있어 "14" 는 사전 확정 종점의 수가 맞고, "20" 은 그것을 측정한 셀의 수다. 둘은 다른 것을 세므로 충돌이 아니다. **여전히 금지되는 것은 방향 대비의 합산이다** — `native` 8/10 과 `matched` 5/10 을 "20 중 13" 으로 묶으면 안 되며, JSON 의 `counting_note` 가 같은 취지로 적혀 있다. §4.9 반영본은 두 variant 를 나누어 적었다 |
 
 **상세 논거**: [`REVISION_PLAN_HMC_DISCLOSURE_2026-08-15.md`](REVISION_PLAN_HMC_DISCLOSURE_2026-08-15.md) · [`REVISION_PLAN_PRESUBMISSION_2026-08-10.md`](REVISION_PLAN_PRESUBMISSION_2026-08-10.md) · [`STATUS_ADDITIONAL_ANALYSIS_2026-08-15.md`](STATUS_ADDITIONAL_ANALYSIS_2026-08-15.md) · [`FRAMING_JNEURO_IMAGINGNEURO_2026-08-16.md`](FRAMING_JNEURO_IMAGINGNEURO_2026-08-16.md) · [`FILTER_ROBUSTNESS_ARMS.md`](../../analysis/phase5_filter_optimization/FILTER_ROBUSTNESS_ARMS.md)

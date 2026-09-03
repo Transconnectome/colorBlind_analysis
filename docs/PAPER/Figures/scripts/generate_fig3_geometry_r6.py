@@ -110,8 +110,8 @@ def make_figure():
     }
     markers = {'sub-08': 'o', 'sub-09': 's'}
     labels = {
-        'sub-08': 'Sub-08 (deutan)',
-        'sub-09': 'Sub-09 (protan)',
+        'sub-08': 'Deutan',
+        'sub-09': 'Protan',
     }
 
     # HC confidence band
@@ -124,10 +124,10 @@ def make_figure():
     hc_stds = np.array(hc_stds)
 
     ax_b.fill_between(x, hc_means - hc_stds, hc_means + hc_stds,
-                      alpha=0.18, color='#4CAF50', label='HC mean $\\pm$ 1 SD',
+                      alpha=0.18, color='#4CAF50', label='Control mean $\\pm$ 1 SD',
                       zorder=1)
     ax_b.plot(x, hc_means, color='#2E7D32', linewidth=1.2, linestyle='--',
-              marker='D', markersize=4, label='HC mean', zorder=2,
+              marker='D', markersize=4, label='Control mean', zorder=2,
               markerfacecolor='white', markeredgewidth=1.0)
 
     # HC individual LOO points (same jitter seed as the original)

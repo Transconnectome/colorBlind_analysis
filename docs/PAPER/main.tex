@@ -1,3 +1,10 @@
+% !TEX TS-program = pdflatex
+% !TEX encoding = UTF-8 Unicode
+% !BIB TS-program = biber
+% TeXShop reads the three lines above. The third one matters: this manuscript
+% uses biblatex with backend=biber, and TeXShop's default BibTeX button
+% overwrites main.bbl with an empty file, which strips every citation and the
+% whole reference list from the PDF. Typeset -> BibTeX -> Typeset -> Typeset.
 % =====================================================================
 % Imaging Neuroscience submission.
 % Class: imag-ms-template.cls (journal-supplied, copied from
@@ -23,6 +30,19 @@
 \usepackage{gensymb}           % \degree
 \usepackage{xcolor}
 \usepackage[nameinlink]{cleveref}  % after the class's hyperref
+
+% Supplementary sections carry their own S-counter so that \cref resolves the
+% number. Reordering the supplementary renumbers every cross-reference; nothing
+% in the main text hardcodes "S12".
+\newcounter{suppsec}
+\renewcommand{\thesuppsec}{S\arabic{suppsec}}
+\crefname{suppsec}{\S}{\S\S}
+\Crefname{suppsec}{\S}{\S\S}
+\newcommand{\suppsection}[2]{%
+  \refstepcounter{suppsec}%
+  \subsection*{\textbf{\thesuppsec. #1}}%
+  \label{#2}%
+}
 
 % Line numbers. The class ships these commented out at its foot; enabling them
 % here keeps the class file pristine. The amsmath patch below is required
@@ -89,7 +109,7 @@ Jinil Kim,$^{a}$ Albert Minkue Cho,$^{a}$ Jungwoo Seo,$^{a}$ Jiook Cha$^{a\ast}$
 \keywords{color vision deficiency,  fMRI, cortical color representation, individualized color correction}
 
 \begin{abstract}
-Color vision deficiency (CVD) is typically corrected with generic filters designed from a retina-based model. Such filters change how colors appear but improve color discrimination only in some products and tasks. Filter design omits visual cortex, where the retinal loss and the observer's partial compensation combine. How that combination reshapes color representation in CVD remains underinvestigated. Here we show that CVD distorts the geometry of the cortical color representation rather than weakening its overall signal. We scanned two adults with CVD, one with each red--green subtype, and seven healthy controls. All eight colors remained decodable from cortical activity in both CVD participants, whereas the continuous hue geometry departed from controls in both. We modeled each distortion as a hue rotation along two color-space axes and inverted the fit into a personalized stimulus-space filter. Both CVD participants completed a second session of fMRI and behavioral testing to evaluate the filters. Under the individualized filter, the four hue-discrimination thresholds that had exceeded the control range in the first session (three for deutan, one marginal for protan) moved within that range. This small sample cannot establish superiority over a deployed accessibility filter. The direction of cortical change differed across participants and measures, and neither reached the healthy reference. This study identifies a previously uncharacterized geometric distortion of the cortical color representation in CVD and introduces, to our knowledge, the first cortically grounded framework for individualized color correction.
+Color vision deficiency (CVD) is typically corrected with generic filters designed from a retina-based model. Such filters change how colors appear but improve color discrimination only in some products and tasks. Filter design omits visual cortex, where the retinal loss and the observer's partial compensation combine. How that combination reshapes color representation in CVD remains underinvestigated. Here we show that categorical hue information remains decodable in CVD while the continuous geometry of cortical color representation is distorted. We scanned two adults with CVD, one with each red--green subtype, and seven color-normal controls. All eight colors remained decodable from cortical activity in both CVD participants, whereas the continuous hue geometry departed from controls in both. We modeled each distortion as a hue rotation along two color-space axes and inverted the fit into a personalized stimulus-space filter. Both CVD participants completed a second session of fMRI and behavioral testing to evaluate the filters. Under the individualized filter, the four hue-discrimination thresholds that had exceeded the control range in the first session (three for deutan, one marginal for protan) moved within that range. This small sample cannot establish superiority over a deployed accessibility filter. The direction of cortical change differed across participants and measures, and neither reached the control reference. This study characterizes a previously undescribed geometric distortion of the cortical color representation in CVD and introduces, to our knowledge, the first cortically grounded framework for individualized color correction.
 \end{abstract}
 
 % Introduction Section
@@ -148,8 +168,8 @@ the analysis outputs rather than from an AI tool.
 No figure contains AI-generated content. Every figure is produced by the analysis
 and figure scripts released with the paper.
 
-The AI tools used were \todo{[FILL BEFORE SUBMISSION] exact tool names with
-version numbers, e.g. "Claude Code (Claude Opus 4.1)".}
+The AI tool used was Claude Code 2.1.259 (Anthropic), running the Claude Opus 5
+model.
 
 The authors take full responsibility for the content of this article, including
 any part prepared with the assistance of these tools.
@@ -191,13 +211,31 @@ weeks.
 
 \section*{Author Contributions}
 
-% Format follows published Imaging Neuroscience practice: author INITIALS, roles
-% separated by semicolons, shared roles grouped across authors, CRediT wording
-% with an em-dash in "Writing---original draft" / "Writing---review & editing".
-% Reference article: Imaging Neuroscience, doi:10.1162/IMAG.a.55 (PMC12319998),
-% whose statement reads "J.Y.: Conceptualization; Data curation; Formal
-% analysis; ... Y.S.W. and C.H.A.B.: Validation; Investigation; and
-% Writing---review & editing."
+% Format follows the published Imaging Neuroscience article used as this
+% manuscript's style reference: Kwon et al., Imaging Neuroscience 3 (2025),
+% doi:10.1162/imag_a_00440, whose statement names each author in full and states
+% that author's roles in prose ("Junbeom Kwon: Junbeom Kwon served as the primary
+% investigator and was instrumental in ...").
+%
+% This supersedes the earlier initials-plus-semicolons form modeled on
+% doi:10.1162/IMAG.a.55. Both forms are published IN practice; the full-name form
+% was chosen by the authors 2026-09-04. Every CRediT role carried by the previous
+% version is preserved below, in CRediT vocabulary:
+%   Jinil Kim          Conceptualization, Methodology, Software, Validation,
+%                      Formal analysis, Investigation, Data curation,
+%                      Visualization, Project administration, Funding
+%                      acquisition, Writing---original draft,
+%                      Writing---review & editing
+%   Albert Minkue Cho  Conceptualization, Methodology, Formal analysis,
+%                      Investigation, Data curation, Project administration,
+%                      Funding acquisition, Writing---review & editing
+%   Jungwoo Seo        Conceptualization (supporting), Investigation, Funding
+%                      acquisition, Writing---review & editing
+%   Jiook Cha          Conceptualization, Methodology, Validation, Resources,
+%                      Supervision, Funding acquisition, Writing---review &
+%                      editing
+% The Editorial Manager submission form collects the same roles as taxonomy
+% terms with degree-of-contribution qualifiers; keep the two consistent.
 %
 % Roles supplied by the corresponding author 2026-08-17. Two mappings were
 % applied, because CRediT has no matching term for the labels given:
@@ -206,20 +244,32 @@ weeks.
 %       analyze or synthesize study data"); interpretation has no separate role.
 %   "data collection" / "recruitment" -> Investigation.
 % Funding acquisition is assigned to all four authors: the award is a university
-% undergraduate programme applied for jointly.
-% J.S. is marked (supporting) on Conceptualization at the author's own request;
-% CRediT degree-of-contribution qualifiers are carried by the Editorial Manager
-% submission form and are reproduced here for consistency with it.
+% undergraduate programme applied for jointly, which the closing sentence states.
 
-J.K.: Conceptualization; Methodology; Software; Validation; Formal analysis;
-Investigation; Data curation; Visualization; Project administration; Funding
-acquisition; Writing---original draft; and Writing---review \& editing.
-A.M.C.: Conceptualization; Methodology; Formal analysis; Investigation; Data
-curation; Project administration; Funding acquisition; and Writing---review \&
-editing. J.S.: Conceptualization (supporting); Investigation; Funding
-acquisition; and Writing---review \& editing. J.C.: Conceptualization;
-Methodology; Validation; Resources; Supervision; Funding acquisition; and
-Writing---review \& editing.
+Jinil Kim: Jinil Kim served as the primary investigator and led the
+conceptualization and the methodology of the study. Jinil Kim wrote the analysis
+software, collected the neuroimaging and psychophysical data, and curated and
+validated them. Jinil Kim also led the formal analysis and the interpretation of
+the results, produced the figures, administered the project, and drafted the
+original manuscript.
+
+Albert Minkue Cho: Albert Minkue Cho contributed to the conceptualization and the
+methodology of the study and took part in participant recruitment and data
+collection and curation. Albert Minkue Cho also carried out part of the formal
+analysis, shared responsibility for project administration, and reviewed and
+edited the manuscript.
+
+Jungwoo Seo: Jungwoo Seo contributed to the conceptualization of the study in a
+supporting role and took part in data collection. Jungwoo Seo also reviewed and
+edited the manuscript.
+
+Jiook Cha: Jiook Cha, as the corresponding author, took on a supervisory role,
+providing overall guidance and direction for the project. Jiook Cha contributed
+to the conceptualization and the methodology, validated the analyses, and
+provided the imaging and computational resources on which the study depended.
+Jiook Cha also reviewed and edited the manuscript.
+
+All four authors applied jointly for the funding that supported this work.
 
 % Both sampled Imaging Neuroscience research articles carry a short back-matter
 % "Ethics" section in addition to the statement in Methods (doi:10.1162/IMAG.a.55,
@@ -245,8 +295,6 @@ This work was supported by the SNU Student-directed Education Undergraduate
 Research Program through the SNU College, Seoul National University (2025), and
 by the Undergraduate Social Science Research Grant through the College of Social
 Sciences, Seoul National University (2026).
-\todo{[CONFIRM] (a) whether "the SNU College" should name a specific college, as
-the second grant does; (b) whether either programme issues a grant number.}
 
 \section*{Declaration of Competing Interests}
 

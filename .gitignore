@@ -348,6 +348,9 @@ experiments/
 # ============================================
 colorblind_sketch.pptx
 *.pptx
+# ... except the Figure 3 slide: fig3_workflow is the one manuscript figure that
+# is a PowerPoint composite, so this file is its only regenerable source.
+!docs/PAPER/Figures/fig3_assets/Presentation1_box2_2026-09-03.pptx
 
 # ============================================
 # IDE / agent local state

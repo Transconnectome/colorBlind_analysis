@@ -38,8 +38,8 @@ HC_BAND = "#CCCCCC"
 C_DEUT = "#D55E00"   # sub-08 deutan (orange)
 C_PROT = "#029E73"   # sub-09 protan (teal)
 C_S10 = "#BBBBBB"    # sub-10 deutan control (faint)
-CVD = {"08": (C_DEUT, "s", "sub-08 deutan"),
-       "09": (C_PROT, "^", "sub-09 protan")}
+CVD = {"08": (C_DEUT, "s", "Deutan"),
+       "09": (C_PROT, "^", "Protan")}
 
 
 def strip(ax):
@@ -57,7 +57,7 @@ def main():
         hc_m = np.array([d[str(n)]["hc_mean"] for n in NVALS])
         hc_e = np.array([d[str(n)]["hc_sem"] for n in NVALS])
         ax.fill_between(NVALS, hc_m - hc_e, hc_m + hc_e, color=HC_BAND, zorder=1)
-        ax.plot(NVALS, hc_m, color=HC_LINE, lw=1.4, zorder=3, label="HC mean ± SEM")
+        ax.plot(NVALS, hc_m, color=HC_LINE, lw=1.4, zorder=3, label="Control mean ± SEM")
         ax.axhline(CHANCE, color="#999", ls="--", lw=0.8, zorder=2)
         for subj, (col, mk, _) in CVD.items():
             yv = np.array([d[str(n)]["cvd"][subj]["adjacc"] for n in NVALS])
@@ -77,7 +77,7 @@ def main():
         strip(ax)
     axes[0].set_ylim(0.05, 0.62)
 
-    handles = [Line2D([0], [0], color=HC_LINE, lw=1.4, label="HC mean ± SEM")] + \
+    handles = [Line2D([0], [0], color=HC_LINE, lw=1.4, label="Control mean ± SEM")] + \
         [Line2D([0], [0], color=c, marker=m, lw=1.0, markersize=4, label=l)
          for c, m, l in CVD.values()]
     fig.legend(handles=handles, loc="lower center", ncol=4, fontsize=6.3,

@@ -52,10 +52,10 @@ Legend output type: STAT / TABLE / FIG / PROC(procedural threshold).
 | E4.6 | R§5 | LOCO loss family entered NEITHER winning combo (both JND+ΔRDM) | STAT |
 | E4.7 | R§5 | RDM atom ROI = elevated-disparity ROI (V2 deutan p=0.040; V1 protan p=0.007) | STAT |
 | E4.8 | R§5 | both fits beat no-correction baseline on all 7 folds; top 5–8% of grid combos; noise-ceiling reached **52%** (deutan), **67%** (protan) | STAT |
-| E4.9 | R§6 | protan behavioral-only fit β̂_c≈+4°, ΔL=+0.01, 3/7 folds (no beat); deutan behavioral-only & combined share argmin (6°,−42°); neural-only β̂_c=−26° | STAT |
+| E4.9 | R§6 | **모든 argmin 은 N=300 HC 재표집 중앙값 경로(PCA)**. protan behavioral-only (26°,+4°), ΔL=+0.01, 3/7 folds; deutan behavioral-only (16°,−44°) vs combined (6°,−42°); neural-only deutan (4°,−26°), protan (0°,+24°). ⚠ 전체 7-HC 풀 단일적합 경로(`s18_heldout_predictive.json` `standalone_full_pool`)는 deutan behavioral-only 를 (6°,−42°) 로 주므로 두 경로를 섞지 말 것 | STAT |
 | E4.10 | R§6 | deutan: adding RDM cut boundary saturation **23% → 9.3%**; IQR (18°,6°)→(8°,2°) PCA, (10°,4°) SRM; protan IQR (6°,4°)→(0°,0°) PCA, (0°,2°) SRM | STAT |
 | E4.11 | M§sel | 3-gate: G1 admit if signed Cohen's **d ≥ +0.5** vs HC LOO; G2 reject if **≥50%** boundary saturation; G3 median held-out L_test (N=⟨300⟩ 5-train/2-test) then IQR | PROC |
-| E4.12 | M§grid | grid (β_s,β_c)∈[−90,90]² @2° = **8,281 cells**; β_s≥0; R+C g∈[0,3] | PROC |
+| E4.12 | M§grid | grid β_s∈[0,50] @2° (26) × β_c∈[−50,50] @2° (51) = **1,326 cells** (`scripts/two_comp.py:47-48`); R+C g∈[0,3] @0.05 (61) | PROC |
 | E4.13 | R§8/Fig7 | filter mean |δθ|: deutan **26.3°**, protan **16.2°**; 8/8 pre-images exact, residual <0.01° (Results) / **<0.001°** (Methods L246, captions — authoritative) | STAT |
 | E4.14 | supp S13 | HC LOO ‖β̂‖ range: deutan loss 30.5°–58.1° (mean 49.1°), protan loss 23.4°–55.5° (mean 35.7°); CVD ‖β̂‖ = deutan 42.4°, protan 24.1° (both within HC range) | STAT |
 
@@ -71,8 +71,7 @@ Legend output type: STAT / TABLE / FIG / PROC(procedural threshold).
 | E5.6 | R§7 | dominant axis β̂_c recovery bias **4.7°** (deutan); non-dominant |β̂_s|≤6° not recoverable | STAT |
 
 ## E6 — Filter evaluation, 2nd session (Results §8–9, Fig 8) — INCLUDED
-**⚠ DEPENDENCY: deutan (sub-08) only collected. protan (sub-09) 2nd session NOT YET acquired.**
-E6 notebook = deutan-only now; protan cells stubbed/parameterized, to fill when sub-09 data arrives. Mark every E6 number as single-case deutan, descriptive.
+**2026-08-05 정정: sub-09 2차 세션도 수집 완료** (`MAP.md:96-103`). 종전의 "protan 미수집" 표기는 폐기한다. E6 수치는 두 참가자 모두 단일사례·기술 통계다.
 
 | id | section | reported value | type |
 |---|---|---|---|

@@ -43,9 +43,9 @@ HUE_8 = np.array([0.0, 45.0, 90.0, 135.0, 180.0, 225.0, 270.0, 315.0])
 HUE_NAMES = ["Red", "Orange", "Yellow", "Green", "Cyan", "Blue", "Purple", "Magenta"]
 
 SUBJECTS = [
-    dict(label="Sub-08\n(deutan)", subject="sub-08", family="deutan",
+    dict(label="Deutan", subject="sub-08", family="deutan",
          beta_s=6.0, beta_c=-42.0),
-    dict(label="Sub-09\n(protan)", subject="sub-09", family="protan",
+    dict(label="Protan", subject="sub-09", family="protan",
          beta_s=2.0, beta_c=24.0),
 ]
 

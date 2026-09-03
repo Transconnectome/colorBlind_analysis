@@ -1,6 +1,6 @@
 # 디코더 비교 감사 기록 — 2026-08-07
 
-> 부록 S10(Comparison with alternative decoders) 작성 과정에서 커밋된 산출물을 전수 대조한 결과.
+> 부록 S4(Comparison with alternative decoders) 작성 과정에서 커밋된 산출물을 전수 대조한 결과.
 > **이 문서의 모든 수치는 `.json`에서 직접 읽었다.** 요약 마크다운은 근거로 쓰지 않았다.
 > 대조 결과 기존 계획 문서 두 건이 사실과 달랐으므로, 같은 조사를 반복하지 않도록 남긴다.
 
@@ -10,7 +10,7 @@
 
 | 확인 사항 | 반영 위치 |
 |---|---|
-| 6개 디코더 LORO·LOCO 표 | 부록 **S10**, Table S7·S8 |
+| 6개 디코더 LORO·LOCO 표 | 부록 **S4**, Table S3·S4 |
 | 판독 provenance, 제외 계열, K 복원 | S10 헤더 주석 |
 | nested 정렬 대조 | 부록 **S8** (Cross-validation procedures) 말미 |
 | 교차피험자 일반화 정정 | 본문 `results_v4.tex:31`, 부록 **S19** |

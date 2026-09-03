@@ -34,7 +34,7 @@ OUTDIR = BASE / "docs/PAPER/Figures"
 
 ROIS = ["V1", "V2", "V3", "V4"]
 ROI_LABELS = ["V1", "V2", "V3", "hV4"]
-SUBJECTS = [("08", "Deutan (sub-08)"), ("09", "Protan (sub-09)")]
+SUBJECTS = [("08", "Deutan"), ("09", "Protan")]
 
 # Wong colorblind-safe palette (matched to fig8)
 HC_BAR = "#CCCCCC"
@@ -128,7 +128,7 @@ def draw_panel(ax, d, letter, ylim, show_title):
     if show_title:
         ax.text(0.5, 1.14, "LOCO forward-tuning ρ", transform=ax.transAxes, fontsize=7.5,
                 va="bottom", ha="center", color="#222", fontweight="bold")
-        ax.text(0.5, 1.04, "Encoding — voxel-pattern prediction  (↑ HC-like)",
+        ax.text(0.5, 1.04, "Encoding — voxel-pattern prediction  (↑ control-like)",
                 transform=ax.transAxes, fontsize=6.3, va="bottom", ha="center", color="#666")
 
 
@@ -171,7 +171,7 @@ def main():
                 fontweight="bold", va="bottom", ha="center", color="#111")
 
     handles = [
-        mpatches.Patch(facecolor=HC_BAR, label="HC reference (mean ± SD)", edgecolor="none"),
+        mpatches.Patch(facecolor=HC_BAR, label="Control reference (mean ± SD)", edgecolor="none"),
     ] + [Line2D([0], [0], marker=COND_STYLE[c][1], color="w", markerfacecolor=COND_STYLE[c][0],
                 markersize=6, label=COND_STYLE[c][2], linewidth=0) for c in CONDS]
     fig.legend(handles=handles, loc="lower center", ncol=4, fontsize=6.8, frameon=False,
@@ -189,7 +189,7 @@ def main():
     for sub in ["08", "09"]:
         d = data[sub]; i = ROIS.index("V4")
         print(f"rho hV4 sub-{sub}: NF {d['nofilter'][i]:.2f} Dep {d['window'][i]:.2f} "
-              f"Pers {d['optimal'][i]:.2f} HC {d['hc_mean'][i]:.2f}")
+              f"Pers {d['optimal'][i]:.2f} Ctrl {d['hc_mean'][i]:.2f}")
 
 
 if __name__ == "__main__":

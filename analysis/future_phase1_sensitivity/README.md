@@ -8,6 +8,17 @@
 >
 > **공동연구자 공유용 요약** = [`TEAM_BRIEF_2026-08-18.md`](TEAM_BRIEF_2026-08-18.md). exp1 만 다루며 왜 돌렸는지 → 어떻게 → 결과 → 핵심 결론별 서술안(C1–C8) 순서다. 이 문서는 그 뒤에 오는 **상세 표 전량**이다.
 
+> **⚠ 2026-08-24 갱신 — 원고 반영 범위가 바뀌었다.** 저자 결정으로 **`hmc_v2`(재정렬 arm)를 원고에서 제외**하고, 재정렬 미적용의 근거를 Methods 에서 **보간 비용**으로 제시한다. 원고가 보고하는 arm 은 `with_residuals` · `motreg` · `motshift` 셋이다.
+>
+> **이 문서는 4 arm 기록으로 그대로 둔다.** 사후 검토와 리뷰어 대응의 근거 자료이므로 삭제하지 않는다. 다만 아래 두 가지는 **원고에 쓰지 않는다.**
+>
+> | 항목 | 처리 |
+> |---|---|
+> | **ICC(2,1) = 0.825 (hV4), −0.005 (V1)** | **인용 금지.** 정본↔`hmc_v2` 쌍 전용이고, `motreg` 로 바꾸면 통제군 n=7 에서 V2(0.826)가 hV4(0.634)를 앞선다. arm 내부 split-half 로 바꿔도 hV4 와 V2 차이가 0.02 다. 게다가 n=9 값은 **CVD 두 명의 극단값이 피험자 간 분산을 키워 부풀린 것**이다 |
+> | **`hmc_v2` 종점 전량** | 원고 미수록. 저장소에는 남는다 |
+>
+> 결정 기록 = [`HMC_REANALYSIS_PRESPEC.md` 부록 A](../phase0_preprocessing/HMC_REANALYSIS_PRESPEC.md) · 원고 반영안 = [`MANUSCRIPT_EDITS_CONSOLIDATED.md` §0.4](../../docs/PAPER/MANUSCRIPT_EDITS_CONSOLIDATED.md)
+
 ---
 
 ## 0. 이 문서의 범위
@@ -48,7 +59,7 @@
 | 결과 | 전처리 축에서 |
 |---|---|
 | HC 연속 hue 보간은 hV4 단독 | **유지** — 4 arm 전부 통과, 다른 ROI 는 어느 arm 도 미통과 |
-| hV4 지표 신뢰도 | **ICC(2,1) = 0.825** (V1 −0.005) — 신규 자산 |
+| hV4 지표 신뢰도 | ~~ICC(2,1) = 0.825~~ — **인용 금지 (2026-08-24).** arm 쌍 의존 + CVD 포함이 부풀린 값 |
 | 8색 범주 식별 보존 | **유지** — 두 arm 전 ROI 에서 chance 1.8배 이상 |
 | 필터 역산 8/8 exact | 불변 (수학) |
 | 심리물리 전량 | 불변 (전처리 무관) |
@@ -85,7 +96,23 @@ $n = 7$, 관측값 / 순열 $p$.
 | V2 | 0.471 |
 | V1 | $-0.005$ |
 
-**§2.1 의 게이트 순서와 일치한다.** 게이트를 통과하는 유일한 ROI 가 전처리 재현성도 유일하게 높다. 현행 원고는 hV4 단독성을 색 라벨 순열 **하나로만** 정당화하는데, ICC 는 **두 번째 독립 축**에서 같은 결론을 준다 — 논문에 유리한 사실이므로 본문에 올린다.
+**⚠ 이 절은 원고에 쓰지 않는다 (2026-08-24 확정).** 위 값은 정본↔`hmc_v2` 쌍에서만 성립한다. 다른 방식으로 계산하면 순서가 무너진다.
+
+| 계산 방식 | hV4 | V3 | V2 | V1 |
+|---|---|---|---|---|
+| 정본↔`hmc_v2` (n=9) | **0.825** | 0.662 | 0.471 | −0.005 |
+| 정본↔`motreg` (n=9) | 0.710 | 0.502 | 0.615 | −0.037 |
+| 정본↔`motshift` (n=9) | 0.809 | 0.670 | 0.553 | **0.642** |
+| 정본↔`motreg` (**HC만 n=7**) | 0.634 | 0.678 | **0.826** | 0.067 |
+| 정본 arm 내부 split-half (n=9) | 0.744 | 0.518 | 0.724 | 0.485 |
+
+두 가지가 확인된다. 첫째, `motreg` 로 바꾸면 통제군만 볼 때 **V2 가 hV4 를 앞선다.** 둘째, n=9 와 n=7 의 차이가 큰 이유는 **CVD 두 명이 hV4 에서 양 arm 모두 낮은 값을 가져 피험자 간 분산을 키우기 때문**이며, ICC 는 그 분산을 분모에 쓰므로 값이 올라간다. 즉 0.825 는 **CVD 포함이 부풀린 값**이다.
+
+Dice 표와 같은 구조다(§2.8 단서 참조). 리뷰어가 HC 만으로 재계산하면 무너진다.
+
+→ hV4 단독성은 **§2.1 순열 게이트의 arm 간 재현만으로** 지탱한다. 같은 검정이 세 arm 에서 세 번 같은 답을 준 것이고, 다른 세 ROI 는 어느 arm 에서도 통과하지 못한다. 보조 축을 무리하게 만들지 않는다.
+
+산출 `results/icc_all_pairs.json`, 스크립트 `scripts/_icc_all_pairs.py`. 원본 hmc 쌍은 `results/arm_agreement.json`.
 
 ### 2.3 CVD 개인 수준 — hV4 단일사례 (Crawford–Howell, 단측)
 
@@ -124,18 +151,24 @@ $n = 7$, 관측값 / 순열 $p$.
 
 > **기여 2 는 영향받지 않는다.** 필터 표적 ROI 는 disparity 가 아니라 **held-out test-loss** 로 선정됐다(deutan V2 = 4-ROI 1위 $-2.359$; protan V1 은 하드코딩이나 gate 통과 ROI 전부 동일 해). 배포 필터 파라미터 불변. 다만 **disparity–필터 ROI 일치를 시사하는 서술은 삭제**해야 한다.
 
-### 2.5 LORO 8-way 색 식별 (chance = 0.125)
+### 2.5 LORO 8-way 색 식별 (chance = 0.125) — 정본 readout, 2 파이프라인
 
-| ROI | HC 정본 / hmc | deutan 정본 / hmc | protan 정본 / hmc |
+> **산출 경로가 중요하다.** 발표본 LORO(`tab:alignment` 의 Procrustes 열)는 `phase3_decoder_comparing` 의 **`ForwardEncoding acc_exact`** 이며, 진폭 위에서 손으로 재구현하면 **재현되지 않는다**(FE-6/OLS 재구현 결과 HC V2 0.568 vs 발표 0.607, deutan V3 0.354 vs 0.396). 따라서 정본 드라이버 `loro_baseline.py` 를 각 arm 트리에 그대로 돌려 산출한다.
+>
+> 스크립트 `scripts/_loro_eightway_arm.py`, 산출 `results/loro_eightway_arms.json`. **재현 게이트 내장**: `with_residuals` 열이 발표본 LORO 열과 정확히 일치하지 않으면 실패한다(현재 4/4 통과).
+>
+> 종전 §2.5 표는 HC 평균이 발표본과 어긋나 **폐기**했다 → [`_archive/superseded_loro_recompute/`](_archive/superseded_loro_recompute/README.md). 정성 결론은 그 표와 이 표가 같다.
+
+| ROI | HC 정본 / 재정렬 | deutan 정본 / 재정렬 | protan 정본 / 재정렬 |
 |---|---|---|---|
-| V1 | 0.571 / 0.515 | 0.562 / 0.229 | 0.562 / 0.521 |
-| V2 | 0.574 / 0.512 | 0.521 / 0.521 | 0.562 / 0.333 |
-| V3 | 0.589 / 0.560 | 0.375 / 0.479 | 0.458 / 0.500 |
-| hV4 | 0.500 / 0.577 | 0.375 / 0.583 | 0.375 / 0.396 |
+| V1 | 0.580 / 0.503 | 0.562 / **0.229** | 0.562 / 0.521 |
+| V2 | 0.607 / 0.503 | 0.521 / 0.479 | 0.562 / 0.333 |
+| V3 | 0.574 / 0.542 | 0.396 / 0.479 | 0.458 / 0.500 |
+| hV4 | 0.488 / 0.569 | 0.375 / 0.583 | 0.375 / 0.396 |
 
-**최저 셀(deutan V1 hmc = 0.229)도 chance 의 1.8배다.** `All eight colors remained decodable` 는 두 arm 에서 유지된다.
+**16셀 전부 Crawford–Howell 양측 $p \ge .10$** 이므로 어느 셀도 통제군과 유의하게 다르지 않다. 양측인 이유는 분류의 가설이 **보존**이기 때문이며(Methods), 보간 검정이 단측인 것과 구분된다. 최저 셀은 재정렬 arm 의 deutan V1 = 0.229 로 chance 의 1.8배이므로, `All eight colors remained decodable` 는 두 파이프라인에서 유지된다.
 
-*단서*: 발표 Figure 3A 는 SRM 공간 LORO 이고 위는 진폭 위 직접 계산이므로 정확 재현이 아니라 **구조적 확인**이다. 정성 주장은 두 계산 모두에서 성립한다.
+→ 원고 반영: `tab:interp_arms` 에 **LORO 패널 신설**(hV4 행), Results §LORO 한 절, Discussion 해리 문장의 *"held under head-motion correction"*.
 
 ### 2.5b disparity 개인별 전체 표 — 대체 서술의 근거
 
@@ -305,7 +338,12 @@ run_method3_header_mi_2nd.sbatch:371   fnirt --in=orig.mgz    ← 전체 머리�
 | **HMC ROI 겹침 그림** | `figures/hmc_full/` |
 | **SDC 코호트 QC 그림** | `figures/sdc_cohort/` |
 | **sub-07 커버리지 진단 그림** | `figures/coverage_diag/` |
+| **hue 순환이동 이득 검정** | `results/shift_gain_ch.json`, `scripts/_shift_gain_ch.py` — **원고에서는 §S13 대안 설명**(주 주장 아님, `MANUSCRIPT_EDITS_CONSOLIDATED` §0.4-F) |
+| **ICC 전 쌍 재계산** | `results/icc_all_pairs.json`, `scripts/_icc_all_pairs.py` — **인용 금지** (§2.2) |
+| **sub-07 제외 재산출** | `results/sub07_leaveout_hV4.json`, `scripts/_sub07_leaveout.py` |
 | **arm 스크립트** | `scripts/{_perm_adjacent_arm,_arm_agreement,_boot_runs_arm,_perm_mae_arm,_fig_delta_loco}.py` |
+| **LORO 8분류 2 파이프라인** | `results/loro_eightway_arms.json`, `scripts/_loro_eightway_arm.py` — 원고 `tab:interp_arms` LORO 패널의 출처. 재현 게이트 내장 (§2.5) |
+| **폐기된 LORO 재산출** | `_archive/superseded_loro_recompute/` — 구 §2.5 표. **인용 금지** (HC 평균이 발표본과 불일치) |
 | $\hat\beta_c$ 3축 | `analysis/phase5_filter_optimization/results/{filter_robustness_arms/beta_sign_three_arms.json, s10_inclusion/u2_{baseline,motreg,hmc_v2}/}` |
 | SDC 정량 | `analysis/phase0_preprocessing/results/roi_shift_summary.csv` |
 | exp2 진폭 | `derivatives/full_dataset_C010_exp2_harm_hmc_matched` |

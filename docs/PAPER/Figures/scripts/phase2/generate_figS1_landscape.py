@@ -1,4 +1,4 @@
-"""Figure 6 — Per-subject loss landscape over (beta_s, beta_c) with argmin cloud.
+"""Supplementary Figure (S18) — Per-subject loss landscape over (beta_s, beta_c) with argmin cloud.
 
 Publication version (2026-06-05). Two CVD subjects side-by-side, single clean
 composite panel each (no per-atom sub-panels, no internal jargon). Reuses the
@@ -9,7 +9,7 @@ Canonical fits (PIPELINE_2_CLOSURE.md 2026-06-01):
   sub-08 deutan  (beta_s=+6,  beta_c=-42)   gamma_OY  + RDM_V2
   sub-09 protan  (beta_s=+2,  beta_c=+24)   gamma_all + RDM_V1
 
-Output: docs/PAPER/Figures/fig6_landscape.{pdf,png}
+Output: docs/PAPER/Figures/figS1_landscape.{pdf,png}
 """
 from __future__ import annotations
 
@@ -106,7 +106,7 @@ def main():
                    framealpha=0.9, handletextpad=0.4)
 
     for ext in ("pdf", "png"):
-        p = OUT / f"fig6_landscape.{ext}"
+        p = OUT / f"figS1_landscape.{ext}"
         fig.savefig(p, dpi=300, bbox_inches="tight")
         print("saved:", p)
     plt.close(fig)

@@ -80,7 +80,7 @@ Rendering coordinate space: STIM_LAB CIELab (project convention, `scripts/stim_l
 
 | F1/F5 stimulus space "DKL (Derrington–Krauskopf–Lennie)" → CIE L\*a\*b\* (L\*=75, chroma 40 on a\*–b\* plane) per CLAUDE.md | ✓ Fixed |
 
-Note: this doc's "Figure 4" loss landscape = compiled `fig6_landscape` (renumbered); compiled captions in `results_v4.tex` already current.
+Note: this doc's "Figure 4" loss landscape = `figS1_landscape` (moved from main Fig 6 to Supplementary §S17, renumbered from §S18 by the S2–S21 → S1–S20 pull, 2026-09-02; renders as Supp Fig S1); the compiled caption now lives in `supplementary.tex`.
 
 ## 2026-05-11 — issues fixed
 

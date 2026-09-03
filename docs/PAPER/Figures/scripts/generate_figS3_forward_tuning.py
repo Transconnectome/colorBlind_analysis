@@ -15,7 +15,7 @@ Conditions (display renaming; JSON keys unchanged):
   window   -> "Deployed"      (blue square)
   optimal  -> "Personalized"  (orange diamond)
 
-Usage: python generate_figS_forward_tuning.py [--variant native|matched]
+Usage: python generate_figS3_forward_tuning.py [--variant native|matched]
 """
 import json
 import argparse
@@ -178,8 +178,8 @@ def main():
                bbox_to_anchor=(0.5, 0.02), handletextpad=0.4, columnspacing=1.6)
 
     OUTDIR.mkdir(parents=True, exist_ok=True)
-    png = OUTDIR / "figS_forward_tuning.png"
-    pdf = OUTDIR / "figS_forward_tuning.pdf"
+    png = OUTDIR / "figS3_forward_tuning.png"
+    pdf = OUTDIR / "figS3_forward_tuning.pdf"
     fig.savefig(png, dpi=300, bbox_inches="tight")
     fig.savefig(pdf, bbox_inches="tight")
     print(f"Saved: {png}")

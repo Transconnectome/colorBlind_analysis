@@ -25,20 +25,18 @@ PANELS
   C  Analysis pipeline: Stage A alignment -> Stage B neural features
      -> Stage C modeling and filter inversion.
 
-PANEL A SHOWS THE NOMINAL SPECIFICATION (L* = 75, chroma = 40, 45 deg spacing),
-which is what Methods sec:methods:stimuli and the current caption describe.
-It is NOT what the screenshot-derived estimates say. `analysis/utils/
-utils_color_decoding.py` COLOR_LAB (== phase5 `stim_lab_render.STIM_LAB`), the
-values the filter fitting and physical RDM actually consume, give L* 57.3-74.6,
-chroma 41.6-72.6, and hue steps of 29.8-67.6 deg. The repository already records
-the distinction (`phase5_filter_optimization/scripts/visualization/_archive/
-visualize_cone_shift_colors.py:14,53`: "idealized L*=75/chroma=40" vs "what
-subjects saw"). Reconciling the Methods sentence with those estimates is a
-manuscript-text decision, tracked as a P0 item in
-SUBMISSION_CHECKLIST_IMAGING_NEURO.md; it is deliberately NOT made here, because
-a figure must not assert something its own caption and Methods contradict.
-If the disclosure is adopted, set SHOW_MEASURED = True below and update the
-caption in the same commit.
+SWATCH COLORS (2026-09-02, author decision): all swatches are rendered from
+the canonical screenshot-derived STIM_LAB values (`analysis/utils/
+utils_color_decoding.py` COLOR_LAB == phase5 `stim_lab_render.STIM_LAB`,
+duplicated below as MEASURED_LAB), i.e. the same color source the other
+figures use (e.g. fig7_filter via stim_lab_render.render_at_hue). The earlier
+version colored the swatches from the nominal L* = 75 / chroma = 40
+specification and visibly disagreed with the panel-B screen captures and with
+Figure 6. Panel-A GEOMETRY (dot positions, 45-deg labels) still shows the
+nominal design specification; reconciling the Methods L*/chroma sentence with
+the screenshot estimates remains the P0 manuscript-text item tracked in
+SUBMISSION_CHECKLIST_IMAGING_NEURO.md (SHOW_MEASURED overlays those a*b*
+positions when enabled).
 
 Fonts: run with MATPLOTLIBRC pointed at Figures/scripts/inrc so Arial is used for
 text and for mathtext. See Figures/scripts/FONT_POLICY.md.
@@ -59,9 +57,8 @@ from PIL import Image
 FIGDIR = Path(__file__).resolve().parent.parent
 OUT_STEM = FIGDIR / "fig1_paradigm_v3"
 
-# Ratio of panel-B axes width to height on the page, used to keep the square
-# screen captures square. Derived from the gridspec below; update together.
-PANEL_B_ASPECT = (7.0 * 0.50) / (4.75 * 0.55)
+# Panel-B square-capture aspect is computed at runtime from the laid-out axes
+# (see panel_b), so gridspec/figsize changes cannot silently stretch the discs.
 
 SHOW_MEASURED = False  # see the module docstring before enabling
 
@@ -103,12 +100,9 @@ def lab_to_srgb(L, a, b):
 
 
 def stim_rgb():
-    out = []
-    for h in HUES:
-        a = C_NOMINAL * np.cos(np.radians(h))
-        b = C_NOMINAL * np.sin(np.radians(h))
-        out.append(lab_to_srgb(L_NOMINAL, a, b))
-    return out
+    """Swatch colors: canonical STIM_LAB rendering (what was displayed),
+    matching stim_lab_render-based figures. Geometry stays nominal."""
+    return [lab_to_srgb(L, a, b) for L, a, b in MEASURED_LAB]
 
 
 # ─── Panel A ──────────────────────────────────────────────────────────────────
@@ -154,19 +148,27 @@ def panel_b(ax):
     ax.set_ylim(0, 100)
     ax.axis("off")
 
+    bb = ax.get_position()
+    fig = ax.get_figure()
+    panel_b_aspect = (bb.width * fig.get_figwidth()) / (bb.height * fig.get_figheight())
+
     frames = [
-        ("rsvp_fix.png", "Fixation\n3–6 s"),
-        ("rsvp_stim_red.png", "Colored disc\n1.5 s"),
-        ("rsvp_stim_kblack.png", "Letter stream\n1-back on K"),
+        ("sources/rsvp_fix.png", "Fixation\n3–6 s"),
+        ("sources/rsvp_stim_red.png", "Colored disc\n1.5 s"),
+        ("sources/rsvp_stim_kblack.png", "Letter stream\n1-back on K"),
     ]
     # Fractions of the panel axes; each capture gets its own square inset so the
     # disc cannot be stretched.
-    side, gap, y0 = 0.285, 0.075, 0.30
-    x = 0.035
+    side, gap = 0.285, 0.060
+    # vertically center the capture strip (labels included) on the row midline,
+    # matching panel A; hug the left edge of the panel instead of overflowing right
+    strip_h = side * panel_b_aspect
+    y0 = 0.5 - strip_h / 2 + 0.055
+    x = 0.0
     for fname, label in frames:
         # Height compensates for the panel's non-square shape so the capture,
         # and therefore the disc, stays square on the page.
-        sub = ax.inset_axes([x, y0, side, side * PANEL_B_ASPECT],
+        sub = ax.inset_axes([x, y0, side, side * panel_b_aspect],
                             transform=ax.transAxes)
         img = np.asarray(Image.open(FIGDIR / fname).convert("RGB"))
         sub.imshow(img, aspect="equal")
@@ -180,47 +182,69 @@ def panel_b(ax):
         x += side + gap
 
     for k in range(2):
-        xa = 0.035 + (k + 1) * side + k * gap
-        ymid = y0 + side * PANEL_B_ASPECT / 2
-        ax.annotate("", xy=(xa + gap - 0.012, ymid),
-                    xytext=(xa + 0.012, ymid),
+        xa = 0.0 + (k + 1) * side + k * gap
+        ymid = y0 + side * panel_b_aspect / 2
+        ax.annotate("", xy=(xa + gap - 0.006, ymid),
+                    xytext=(xa + 0.006, ymid),
                     xycoords=ax.transAxes, textcoords=ax.transAxes,
                     arrowprops=dict(arrowstyle="-|>", lw=0.9, color="0.3",
                                     mutation_scale=8))
-    ax.text(0.5, y0 + side * PANEL_B_ASPECT + 0.045,
-            "72 events per run · 6 runs · ISI 3 / 4.5 / 6 s",
-            transform=ax.transAxes, fontsize=6, ha="center", va="bottom", color="0.3")
+    # run-count / ISI header removed (2026-09-02, author request): the caption
+    # and Methods carry those numbers.
 
 
 # ─── Panel C ──────────────────────────────────────────────────────────────────
+# 2026-09-02 (author request): the three stage boxes carried bullet-point TEXT
+# only. Each stage is now depicted graphically; the wording lives in the
+# fig:paradigm caption. Only short anchor labels (LORO / LOCO / RDM, etc.)
+# remain in the panel.
+
+def _square_inset(ax, x0, y0, w):
+    """Square inset in panel-C axes fractions; compensates the panel aspect."""
+    bb = ax.get_position()
+    fig = ax.get_figure()
+    asp = (bb.width * fig.get_figwidth()) / (bb.height * fig.get_figheight())
+    sub = ax.inset_axes([x0, y0, w, w * asp], transform=ax.transAxes)
+    sub.set_xlim(-1.6, 1.6)
+    sub.set_ylim(-1.6, 1.6)
+    sub.set_aspect("equal")
+    sub.axis("off")
+    return sub
+
+
+def _mini_ring(sub, rgbs, rot=0.0, ghost_rot=None, skip=None, r=1.05, s=11):
+    """8-hue ring; optional misaligned ghost run and a held-out (skipped) hue."""
+    sub.add_patch(Circle((0, 0), r, fill=False, ec="0.85", lw=0.5))
+    if ghost_rot is not None:
+        for h, rgb in zip(HUES, rgbs):
+            a = np.radians(h + ghost_rot)
+            sub.scatter(r * np.cos(a), r * np.sin(a), s=s, facecolors="none",
+                        edgecolors=[rgb], linewidths=0.7)
+    for h, rgb in zip(HUES, rgbs):
+        a = np.radians(h + rot)
+        if skip is not None and h == skip:
+            sub.scatter(r * np.cos(a), r * np.sin(a), s=s + 3, facecolors="none",
+                        edgecolors="0.35", linewidths=0.7, linestyle="--")
+            continue
+        sub.scatter(r * np.cos(a), r * np.sin(a), s=s, c=[rgb],
+                    edgecolors="0.3", linewidths=0.35)
+
+
 def panel_c(ax):
     ax.set_xlim(0, 100)
     ax.set_ylim(0, 100)
     ax.axis("off")
 
     stages = [
-        ("Stage A · Alignment", [
-            "Two-stage GLM: one amplitude\nper color per run",
-            "Procrustes rotation across runs",
-            "SRM space trained on controls only",
-        ], "#1f4e79"),
-        ("Stage B · Neural features", [
-            "LORO — color classification",
-            "LOCO — hue interpolation",
-            "RDM — representational geometry",
-        ], "#1e6b52"),
-        ("Stage C · Model and filter", [
-            "2-component cortical model",
-            "($\\beta_s$ S-cone axis, $\\beta_c$ confusion axis)",
-            "Pre-image inversion",
-            "Per-subject stimulus-space filter",
-        ], "#a33a2b"),
+        ("Stage A · Alignment", "#1f4e79"),
+        ("Stage B · Neural features", "#1e6b52"),
+        ("Stage C · Model and filter", "#a33a2b"),
     ]
 
     bw, bgap, by, bh = 29.7, 4.3, 6.0, 88.0
     hdr = 13.0
     x = 0.7
-    for title, items, col in stages:
+    for title, col in stages:
         ax.add_patch(FancyBboxPatch((x, by), bw, bh, boxstyle="round,pad=0.6,rounding_size=1.5",
                                     fc="white", ec=col, lw=1.0, zorder=2))
         ax.add_patch(FancyBboxPatch((x, by + bh - hdr), bw, hdr,
@@ -228,18 +252,6 @@ def panel_c(ax):
                                     fc=col, ec=col, lw=1.0, zorder=3))
         ax.text(x + bw / 2, by + bh - hdr / 2, title, fontsize=7.0, fontweight="bold",
                 ha="center", va="center", color="white", zorder=4)
-
-        # One slot per item, evenly filling the body, so the box is never
-        # top-packed above empty space.
-        body_top, body_bot = by + bh - hdr - 4.0, by + 4.0
-        n = len(items)
-        slot = (body_top - body_bot) / n
-        for i, it in enumerate(items):
-            ytop = body_top - i * slot - 1.0
-            ax.text(x + 2.2, ytop, "•", fontsize=6.2, ha="left", va="top",
-                    color=col, zorder=4)
-            ax.text(x + 5.0, ytop, it, fontsize=6.2, ha="left", va="top",
-                    color="0.15", zorder=4, linespacing=1.35)
         x += bw + bgap
 
     for k in range(2):
@@ -248,14 +260,115 @@ def panel_c(ax):
                                     arrowstyle="-|>", mutation_scale=8,
                                     lw=1.0, color="0.35", zorder=5))
 
+    rgbs = stim_rgb()
+    glyph_y = 0.30          # inset bottom, panel fractions
+    label_y = 0.195         # anchor-label baseline
+    sw_a, sw_b, sw_c = 0.095, 0.078, 0.095
+
+    # Stage A: misaligned per-run patterns -> one shared space
+    sub = _square_inset(ax, 0.030, glyph_y, sw_a)
+    _mini_ring(sub, rgbs, ghost_rot=24.0)
+    ax.text(0.030 + sw_a / 2, label_y, "per-run\npatterns", transform=ax.transAxes,
+            fontsize=5.6, ha="center", va="top", color="0.25", linespacing=1.3)
+    ax.annotate("", xy=(0.176, 0.50), xytext=(0.138, 0.50), xycoords=ax.transAxes,
+                arrowprops=dict(arrowstyle="-|>", lw=0.8, color="0.35",
+                                mutation_scale=7))
+    sub = _square_inset(ax, 0.180, glyph_y, sw_a)
+    _mini_ring(sub, rgbs)
+    ax.text(0.180 + sw_a / 2, label_y, "shared space\n(HC-trained SRM)",
+            transform=ax.transAxes, fontsize=5.6, ha="center", va="top",
+            color="0.25", linespacing=1.3)
+
+    # Stage B: LORO (diagonal confusion), LOCO (held-out hue decoded), RDM
+    # six runs as color strips (each run contains all 8 hues); the top strip is
+    # pulled out with a dashed outline = the held-out run
+    sub = _square_inset(ax, 0.362, glyph_y, sw_b)
+    n_runs, seg_w, row_h, row_gap = 6, 2.2 / 8, 0.30, 0.115
+    y_top = (n_runs * (row_h + row_gap)) / 2
+    for rr in range(n_runs):
+        yb = y_top - (rr + 1) * (row_h + row_gap)
+        held = (rr == 0)
+        xoff = 0.30 if held else 0.0
+        for k, rgb in enumerate(rgbs):
+            sub.add_patch(plt.Rectangle((-1.1 + xoff + k * seg_w, yb), seg_w, row_h,
+                                        fc=rgb, ec="none",
+                                        alpha=0.55 if held else 1.0))
+        sub.add_patch(plt.Rectangle((-1.1 + xoff, yb), 8 * seg_w, row_h,
+                                    fill=False, ec="0.25", lw=0.6,
+                                    linestyle="--" if held else "-"))
+    ax.text(0.362 + sw_b / 2, label_y, "LORO\nclassification", transform=ax.transAxes,
+            fontsize=5.6, ha="center", va="top", color="0.25", linespacing=1.3)
+
+    sub = _square_inset(ax, 0.462, glyph_y, sw_b)
+    _mini_ring(sub, rgbs, skip=225, r=1.05, s=9)
+    aa = np.radians(235.0)
+    sub.add_patch(FancyArrowPatch((0, 0), (0.78 * np.cos(aa), 0.78 * np.sin(aa)),
+                                  arrowstyle="-|>", mutation_scale=5,
+                                  lw=0.9, color="0.2"))
+    ax.text(0.462 + sw_b / 2, label_y, "LOCO\ninterpolation", transform=ax.transAxes,
+            fontsize=5.6, ha="center", va="top", color="0.25", linespacing=1.3)
+
+    # pairwise representational distance: a similar pair sits close (short
+    # double arrow), a dissimilar pair far (long double arrow)
+    sub = _square_inset(ax, 0.562, glyph_y, sw_b)
+    def _pair(y, i, j, x1, x2):
+        sub.scatter([x1, x2], [y, y], s=16, c=[rgbs[i], rgbs[j]],
+                    edgecolors="0.3", linewidths=0.4, zorder=5)
+        sub.add_patch(FancyArrowPatch((x1 + 0.16, y), (x2 - 0.16, y),
+                                      arrowstyle="<|-|>", mutation_scale=4,
+                                      lw=0.8, color="0.3"))
+    _pair(0.62, 0, 1, -0.72, 0.72)     # red-orange: similar, short
+    _pair(-0.62, 0, 4, -1.15, 1.15)    # red-cyan: dissimilar, long
+    ax.text(0.562 + sw_b / 2, label_y, "RDM\ngeometry", transform=ax.transAxes,
+            fontsize=5.6, ha="center", va="top", color="0.25", linespacing=1.3)
+
+    # Stage C: fitted hue rotation -> pre-image filter (Original / Filtered)
+    sub = _square_inset(ax, 0.700, glyph_y, sw_c)
+    _mini_ring(sub, rgbs, r=1.05, s=9)
+    for h0, dd in ((90.0, -34.0), (180.0, -30.0), (315.0, 28.0)):
+        a0, a1 = np.radians(h0), np.radians(h0 + dd)
+        rr = 1.38
+        sub.add_patch(FancyArrowPatch((rr * np.cos(a0), rr * np.sin(a0)),
+                                      (rr * np.cos(a1), rr * np.sin(a1)),
+                                      connectionstyle=f"arc3,rad={0.22 if dd > 0 else -0.22}",
+                                      arrowstyle="-|>", mutation_scale=6,
+                                      lw=1.0, color="0.2"))
+    ax.text(0.700 + sw_c / 2, label_y,
+            "fitted rotation\n($\\beta_s$, $\\beta_c$)", transform=ax.transAxes,
+            fontsize=5.6, ha="center", va="top", color="0.25", linespacing=1.3)
+    ax.annotate("", xy=(0.848, 0.50), xytext=(0.810, 0.50), xycoords=ax.transAxes,
+                arrowprops=dict(arrowstyle="-|>", lw=0.8, color="0.35",
+                                mutation_scale=7))
+    sub = _square_inset(ax, 0.852, glyph_y, sw_c)
+    sub.set_xlim(-1.6, 1.6); sub.set_ylim(-1.6, 1.6)
+    # same color source as the ring dots: canonical STIM_LAB anchors; the
+    # filtered swatch rotates the hue keeping that anchor's L*/chroma
+    demo_idx = [1, 3, 6]           # 45 deg orange, 135 deg green, 270 deg purple
+    for i, k in enumerate(demo_idx):
+        xc = -1.05 + i * 1.05
+        L0, a0, b0 = MEASURED_LAB[k]
+        sub.add_patch(plt.Rectangle((xc - 0.42, 0.30), 0.84, 0.84,
+                                    fc=lab_to_srgb(L0, a0, b0), ec="0.4", lw=0.4))
+        ch = float(np.hypot(a0, b0))
+        hp = np.degrees(np.arctan2(b0, a0)) - 28.0
+        ap = ch * np.cos(np.radians(hp))
+        bp = ch * np.sin(np.radians(hp))
+        sub.add_patch(plt.Rectangle((xc - 0.42, -1.14), 0.84, 0.84,
+                                    fc=lab_to_srgb(L0, ap, bp), ec="0.4", lw=0.4))
+        sub.add_patch(FancyArrowPatch((xc, 0.24), (xc, -0.24),
+                                      arrowstyle="-|>", mutation_scale=4,
+                                      lw=0.8, color="0.35"))
+    ax.text(0.852 + sw_c / 2, label_y, "pre-image\nfilter", transform=ax.transAxes,
+            fontsize=5.6, ha="center", va="top", color="0.25", linespacing=1.3)
+
 
 # ─── Assemble ─────────────────────────────────────────────────────────────────
 def main():
-    fig = plt.figure(figsize=(7.0, 4.75))
-    gs = fig.add_gridspec(2, 2, height_ratios=[1.0, 0.62],
+    fig = plt.figure(figsize=(7.0, 4.05))
+    gs = fig.add_gridspec(2, 2, height_ratios=[0.80, 0.62],
                           width_ratios=[0.88, 1.12],
                           left=0.075, right=0.985, top=0.935, bottom=0.035,
-                          wspace=0.20, hspace=0.42)
+                          wspace=0.20, hspace=0.38)
 
     ax_a = fig.add_subplot(gs[0, 0])
     ax_b = fig.add_subplot(gs[0, 1])

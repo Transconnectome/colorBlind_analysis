@@ -12,7 +12,7 @@ Layout: 2 rows (subjects) x 3 columns (metrics)
   Col C = RDM similarity to HC (Spearman; higher = HC-like)
 
 The forward-tuning LOCO-rho panel now lives in the appendix figure
-(generate_figS_forward_tuning.py).
+(generate_figS3_forward_tuning.py).
 
 Conditions (display renaming; JSON keys unchanged):
   nofilter -> "No-filter"     (gray circle)
@@ -138,17 +138,33 @@ def draw_panel(ax, d, metric, letter, ylim=None, show_title=True):
     x = np.arange(len(ROIS)); bw = 0.6
     hc_mean = np.array(d["hc_mean"], float); hc_sd = np.array(d["hc_sd"], float)
 
-    ax.bar(x, hc_mean, width=bw, color=HC_BAR, zorder=2, linewidth=0)
+    # In the interpolation panels V1-V3 carry no interpretation (the controls do
+    # not exceed the color-label permutation null there): transparent bars with a
+    # dashed outline, muted markers, and no significance stars.
+    muted = {0, 1, 2} if metric == "adjacc" else set()
+
+    bars = ax.bar(x, hc_mean, width=bw, color=HC_BAR, zorder=2, linewidth=0)
+    for i in muted:
+        bars[i].set_facecolor("none")
+        bars[i].set_edgecolor("#aaaaaa")
+        bars[i].set_linestyle("--")
+        bars[i].set_linewidth(0.9)
     if np.isfinite(hc_sd).any():
-        ax.errorbar(x, hc_mean, yerr=np.nan_to_num(hc_sd), fmt="none",
-                    color="#333", capsize=2.5, linewidth=0.9, zorder=3)
+        for i in range(len(ROIS)):
+            if not np.isfinite(hc_sd[i]):
+                continue
+            ax.errorbar([x[i]], [hc_mean[i]], yerr=[hc_sd[i]], fmt="none",
+                        color="#333", capsize=2.5, linewidth=0.9, zorder=3,
+                        alpha=0.35 if i in muted else 1.0)
 
     offs = {"nofilter": -0.22, "window": 0.0, "optimal": 0.22}
     for cond in CONDS:
         col, mk, _ = COND_STYLE[cond]
         yv = np.array(d[cond], float)
-        ax.plot(x + offs[cond], yv, marker=mk, color=col, markersize=6, linewidth=0,
-                markeredgecolor="white", markeredgewidth=0.6, zorder=5)
+        for i in range(len(ROIS)):
+            ax.plot([x[i] + offs[cond]], [yv[i]], marker=mk, color=col, markersize=6,
+                    linewidth=0, markeredgecolor="white", markeredgewidth=0.6, zorder=5,
+                    alpha=0.35 if i in muted else 1.0)
 
     if ylim is not None:
         ax.set_ylim(ylim)
@@ -157,7 +173,7 @@ def draw_panel(ax, d, metric, letter, ylim=None, show_title=True):
         col = COND_STYLE[cond][0]
         yv = np.array(d[cond], float)
         for i in range(len(ROIS)):
-            if not np.isfinite(hc_sd[i]):
+            if i in muted or not np.isfinite(hc_sd[i]):
                 continue
             _, p = crawford_howell(yv[i], hc_mean[i], hc_sd[i], d["n"][i], d["tail"])
             s = sig_star(p)
@@ -240,7 +256,7 @@ def main():
 
     handles = [
         mpatches.Patch(facecolor=HC_BAR, label="HC reference (mean ± SD)", edgecolor="none"),
-        Line2D([0], [0], color="#999", linestyle="--", linewidth=0.9, label="chance (3/8)"),
+        Line2D([0], [0], color="#999", linestyle="--", linewidth=0.9, label="chance (91/360)"),
     ] + [Line2D([0], [0], marker=COND_STYLE[c][1], color="w", markerfacecolor=COND_STYLE[c][0],
                 markersize=6, label=COND_STYLE[c][2], linewidth=0) for c in CONDS]
     fig.legend(handles=handles, loc="lower center", ncol=5, fontsize=6.8, frameon=False,

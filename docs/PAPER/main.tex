@@ -72,20 +72,12 @@
 % Document Information
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\title{Individual-specific distortion of cortical hue geometry in color vision deficiency informs personalized color correction}
+\title{Preserved categorical identification with impaired hue interpolation in color vision deficiency motivates a cortically derived correction filter}
 
-% Author list and order fixed to match the ICML SD4H workshop contribution
-% (docs/ICML_workshop/SD4H_cameraready_pathB.tex:61-73), per author agreement.
-% Jiook Cha is the principal investigator and the custodian of record for the
-% study data; requests for data access go to him (see Data and Code
-% Availability).
 \author{%
-Jinil Kim,$^{1,2\ast}$ Albert Minkue Cho,$^{3}$ Jungwoo Seo,$^{4}$ Jiook Cha$^{2,4\ast}$\\
-{\small $^{1}$Department of Linguistics, Seoul National University, Seoul, South Korea}\\
-{\small $^{2}$Department of Psychology, Seoul National University, Seoul, South Korea}\\
-{\small $^{3}$Department of Electrical and Computer Engineering, Seoul National University, Seoul, South Korea}\\
-{\small $^{4}$Department of Brain \& Cognitive Sciences, Seoul National University, Seoul, South Korea}\\
-{\small $^{\ast}$Correspondence: Jinil Kim (haba6030@snu.ac.kr), Jiook Cha (connectome@snu.ac.kr)}
+Jinil Kim,$^{a}$ Albert Minkue Cho,$^{a}$ Jungwoo Seo,$^{a}$ Jiook Cha$^{a\ast}$\\
+{\small $^{a}$Seoul National University, Seoul, South Korea}\\
+{\small $^{\ast}$Correspondence: Jiook Cha (connectome@snu.ac.kr)}
 }
 
 \begin{document}
@@ -94,10 +86,10 @@ Jinil Kim,$^{1,2\ast}$ Albert Minkue Cho,$^{3}$ Jungwoo Seo,$^{4}$ Jiook Cha$^{2
 
 \maketitle
 
-\keywords{color vision deficiency, anomalous trichromacy, fMRI, cortical color representation, individualized color correction}
+\keywords{color vision deficiency,  fMRI, cortical color representation, individualized color correction}
 
 \begin{abstract}
-Color vision deficiency (CVD) is typically corrected with generic filters designed from a retina-based model. Such filters change how colors appear but improve color discrimination only in some products and tasks. Filter design omits visual cortex, where the retinal loss and the observer's partial compensation combine. How that combination reshapes color representation in CVD remains underinvestigated. Here we show that CVD distorts the geometry of the cortical color representation rather than weakening its overall signal. We scanned two adults with CVD, one with each red--green subtype, and seven healthy controls. All eight colors remained decodable from cortical activity in both CVD participants, whereas the continuous hue geometry departed from controls, differently in each individual. We modeled each distortion as a hue rotation along two color-space axes and inverted the fit into a personalized stimulus-space filter. Both CVD participants completed a second session of fMRI and behavioral testing to evaluate the filters. Under the individualized filter, the four hue-discrimination thresholds that had exceeded the control range in the first session (three for deutan, one marginal for protan) moved within that range. This small sample cannot establish superiority over a deployed accessibility filter. The direction of cortical change differed across participants and measures, and neither reached the healthy reference. This study identifies a previously uncharacterized geometric distortion of the cortical color representation in CVD and introduces, to our knowledge, the first cortically grounded framework for individualized color correction. Systematic studies can quantify these distortions and provide a new class of personalized filters.
+Color vision deficiency (CVD) is typically corrected with generic filters designed from a retina-based model. Such filters change how colors appear but improve color discrimination only in some products and tasks. Filter design omits visual cortex, where the retinal loss and the observer's partial compensation combine. How that combination reshapes color representation in CVD remains underinvestigated. Here we show that CVD distorts the geometry of the cortical color representation rather than weakening its overall signal. We scanned two adults with CVD, one with each red--green subtype, and seven healthy controls. All eight colors remained decodable from cortical activity in both CVD participants, whereas the continuous hue geometry departed from controls in both. We modeled each distortion as a hue rotation along two color-space axes and inverted the fit into a personalized stimulus-space filter. Both CVD participants completed a second session of fMRI and behavioral testing to evaluate the filters. Under the individualized filter, the four hue-discrimination thresholds that had exceeded the control range in the first session (three for deutan, one marginal for protan) moved within that range. This small sample cannot establish superiority over a deployed accessibility filter. The direction of cortical change differed across participants and measures, and neither reached the healthy reference. This study identifies a previously uncharacterized geometric distortion of the cortical color representation in CVD and introduces, to our knowledge, the first cortically grounded framework for individualized color correction.
 \end{abstract}
 
 % Introduction Section
@@ -127,6 +119,40 @@ Color vision deficiency (CVD) is typically corrected with generic filters design
 %%%%%%%%%%%%%%%%%%%%%%%%%
 
 \clearpage
+
+% Declaration of the use of AI.
+% Required as a standalone end-matter section by the Imaging Neuroscience Guide
+% for Authors, which asks for (i) the role AI played in planning and carrying out
+% the research, (ii) the exact tools and version numbers, and (iii) the role AI
+% played in generating figures. The guide also requires the same disclosure in
+% the cover letter -- keep the two worded identically.
+%
+% Supersedes the paragraph that previously sat unlabelled after Acknowledgements
+% and asserted "No figure, text, statistical result, or numerical value in this
+% article was produced by an AI tool". That sentence was inaccurate: AI tools
+% were used to reword author-written draft text and to check spelling and
+% grammar. Scope confirmed by the authors 2026-09-01.
+\section*{Declaration of the use of AI}
+
+With respect to the research described in this paper, AI tools played no part in
+the study design, in the choice of analyses, or in the interpretation of the
+results. AI-based coding assistants were used to review the analysis code and to
+check its correctness against the committed data. Every result reported here was
+produced by executing that code, and the authors verified the outputs.
+
+With respect to the preparation of the manuscript, the authors used AI tools to
+check spelling and grammar and to reword draft text written by the authors. All
+statistical results and numerical values reported in the paper were taken from
+the analysis outputs rather than from an AI tool.
+
+No figure contains AI-generated content. Every figure is produced by the analysis
+and figure scripts released with the paper.
+
+The AI tools used were \todo{[FILL BEFORE SUBMISSION] exact tool names with
+version numbers, e.g. "Claude Code (Claude Opus 4.1)".}
+
+The authors take full responsibility for the content of this article, including
+any part prepared with the assistance of these tools.
 
 \section*{Data and Code Availability}
 
@@ -195,24 +221,6 @@ acquisition; and Writing---review \& editing. J.C.: Conceptualization;
 Methodology; Validation; Resources; Supervision; Funding acquisition; and
 Writing---review \& editing.
 
-\section*{Funding}
-
-This work was supported by the Independent Research Support Program of the
-College of Liberal Studies, Seoul National University.
-% Source recorded in the approved protocol, docs/archive/final_IRB.pdf p.2,
-% field "yeongubi jiwongigwan" = SNU College of Liberal Studies independent
-% research support programme. The programme issues no grant number (confirmed
-% 2026-08-17), so none is given.
-The programme does not issue grant numbers.
-
-\section*{Declaration of Competing Interests}
-
-The authors declare that they have no known competing financial interests or
-personal relationships that could have appeared to influence the work reported
-in this paper. No patent has been filed on the correction filter described here,
-and no author has a financial relationship with a supplier of colour-correction
-eyewear or display software.
-
 % Both sampled Imaging Neuroscience research articles carry a short back-matter
 % "Ethics" section in addition to the statement in Methods (doi:10.1162/IMAG.a.55,
 % doi:10.1162/imag_a_00455). The Guide for Authors does not list it, but house
@@ -224,30 +232,36 @@ Board (SNUIRB No.~2510/002-023) and was conducted in accordance with the
 Declaration of Helsinki. Written informed consent was obtained from all
 participants for being included in the study.
 
+\section*{Funding}
+
+% Funding text confirmed by the authors 2026-09-01. It supersedes the earlier
+% statement naming the Independent Research Support Program of the College of
+% Liberal Studies, which was taken from the approved protocol
+% (docs/archive/final_IRB.pdf p.2) and is no longer the funding of record.
+% The only editorial change to the supplied wording is punctuation: the supplied
+% text read "... (2025). and Undergraduate Social Science Research Grant ...",
+% which is joined here into a single sentence.
+This work was supported by the SNU Student-directed Education Undergraduate
+Research Program through the SNU College, Seoul National University (2025), and
+by the Undergraduate Social Science Research Grant through the College of Social
+Sciences, Seoul National University (2026).
+\todo{[CONFIRM] (a) whether "the SNU College" should name a specific college, as
+the second grant does; (b) whether either programme issues a grant number.}
+
+\section*{Declaration of Competing Interests}
+
+The authors declare that they have no known competing financial interests or
+personal relationships that could have appeared to influence the work reported
+in this paper. No patent has been filed on the correction filter described here,
+and no author has a financial relationship with a supplier of colour-correction
+eyewear or display software.
+
 \section*{Acknowledgements}
 
 Imaging was carried out at the Seoul National University Brain Imaging Center,
 and the authors thank its staff for their support.
 \todo{[CONFIRM] Add any non-author contributions, and check the centre's
 preferred citation wording for acknowledgements.}
-
-% AI-tool disclosure. Required by the MIT Press ethics policy, which asks that
-% use of AI tools to produce text, images or graphics, or to collect data, be
-% described in the manuscript and repeated in the cover letter (same wording).
-%
-% Scope as of 2026-08-18: coding assistants only. The former Figure 1 was an
-% image-generation product; it was replaced by Figures/scripts/generate_fig1_v3.py
-% (archive/fig1_ai_superseded_2026-08-18/), so no figure now contains
-% AI-generated content and the image clause was removed.
-%
-% RE-CHECK IMMEDIATELY BEFORE SUBMISSION: if these tools are used on prose during
-% the remaining revision, the first sentence must be widened to cover drafting.
-In line with the MIT Press policy on AI tools, we disclose that the authors used
-AI-based coding assistants to review and edit the analysis code. No figure, text,
-statistical result, or numerical value in this article was produced by an AI
-tool; every figure is generated by the analysis and figure scripts released with
-the paper. The authors take full responsibility for the content of this article,
-including any part prepared with the assistance of such tools.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % References
@@ -256,12 +270,6 @@ including any part prepared with the assistance of such tools.
 \printbibliography
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%
-% Appendix A — Alternative Model Comparison (Results supplement)
-%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\clearpage
-\input{Results/appendix_alternative_models}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % Supplementary Methods

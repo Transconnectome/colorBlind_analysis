@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-figS16 — LOCO adjacent-accuracy run-count saturation (paper primary metric).
+figS2_adjacc_saturation — LOCO adjacent-accuracy run-count saturation (paper primary metric).
 
 Reads run_count_validation/adjacc_retention_summary.json (produced by
 analysis/phase6_behavioral_analysis/scripts/run_count_adjacc.py) and
@@ -8,7 +8,7 @@ plots adjacent accuracy vs run count per ROI: HC mean ± SEM band, 91/360 chance
 line, and the two CVD single cases (sub-08 deutan, sub-09 protan).
 Demonstrates the hV4 landmark retains at n=4.
 
-Output → docs/PAPER/Figures/figS16_adjacc_saturation.{png,pdf}
+Output → docs/PAPER/Figures/figS2_adjacc_saturation.{png,pdf}
 """
 import json
 from pathlib import Path
@@ -86,8 +86,8 @@ def main():
 
     OUTDIR.mkdir(parents=True, exist_ok=True)
     for ext in ("png", "pdf"):
-        fig.savefig(OUTDIR / f"figS16_adjacc_saturation.{ext}", dpi=300, bbox_inches="tight")
-    print("Saved:", OUTDIR / "figS16_adjacc_saturation.png")
+        fig.savefig(OUTDIR / f"figS2_adjacc_saturation.{ext}", dpi=300, bbox_inches="tight")
+    print("Saved:", OUTDIR / "figS2_adjacc_saturation.png")
 
 
 if __name__ == "__main__":

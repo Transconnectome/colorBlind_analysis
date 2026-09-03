@@ -5,12 +5,24 @@ Adapted from docs/OHBM_abstract/create_encoding_pipeline_figure.py — same 4 st
 (Color → Channel → Voxel → Channel → Color), rearranged 2x2 → 1x4 landscape.
 
 Output: docs/PAPER/Figures/fig_forward_encoder.{png,pdf}
+
+2026-09-02 (author request, same policy as fig7_filter): the suptitle and the
+descriptive second lines of the stage titles are removed -- the LaTeX caption
+(fig:forward) carries the full stage descriptions.  Remaining text is enlarged
+so it stays legible after the ~3x reduction to \textwidth, and the font is
+pinned to Arial per the submission requirement.
 """
 
 import os
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.patches import FancyArrowPatch, Circle, Rectangle
+import matplotlib
+matplotlib.rcParams.update({
+    "font.family": "sans-serif",
+    "font.sans-serif": ["Arial", "Helvetica", "DejaVu Sans"],
+    "pdf.fonttype": 42, "ps.fonttype": 42,
+})
 
 COLOR_LAB = {
     'color_1': [59.90, 62.69, 3.78],
@@ -51,8 +63,8 @@ def create_basis_function_plot(hue_deg=0):
 
 
 def create_pipeline_figure(out_dir):
-    fig = plt.figure(figsize=(20, 5.2))
-    gs = fig.add_gridspec(1, 4, wspace=0.30, left=0.04, right=0.99, top=0.84, bottom=0.10)
+    fig = plt.figure(figsize=(13, 3.6))
+    gs = fig.add_gridspec(1, 4, wspace=0.30, left=0.04, right=0.99, top=0.90, bottom=0.10)
     ax1 = fig.add_subplot(gs[0, 0])
     ax2 = fig.add_subplot(gs[0, 1])
     ax3 = fig.add_subplot(gs[0, 2])
@@ -62,8 +74,7 @@ def create_pipeline_figure(out_dir):
     channel_centers = [0, 60, 120, 180, 240, 300]
 
     # ====================== STAGE 1: Color → Channel ======================
-    ax1.set_title('Stage 1: Color → Channel\n(Basis Functions)',
-                  fontsize=12, fontweight='bold', pad=10)
+    ax1.set_title('Stage 1', fontsize=20, fontweight='bold', pad=12)
     theta_bg = np.linspace(0, 360, 360)
     for ang in theta_bg:
         r = max(0, np.cos(np.deg2rad(ang)))
@@ -78,16 +89,15 @@ def create_pipeline_figure(out_dir):
         ax1.plot(angles, response, linewidth=2.2, color=color, alpha=0.85)
         ax1.plot([center], [1.0], 'o', markersize=8, color=color,
                  markeredgecolor='black', markeredgewidth=1.2, zorder=10)
-    ax1.set_xlabel('Hue angle (deg)', fontsize=10)
-    ax1.set_ylabel('Channel response', fontsize=10)
+    ax1.set_xlabel('Hue angle (deg)', fontsize=16)
+    ax1.set_ylabel('Channel response', fontsize=16)
     ax1.set_xlim(0, 360)
     ax1.set_ylim(-0.05, 1.15)
-    ax1.tick_params(labelsize=9)
+    ax1.tick_params(labelsize=13)
     ax1.grid(True, alpha=0.25, linestyle='--')
 
     # ====================== STAGE 2: Channel → Voxel (Training) ======================
-    ax2.set_title('Stage 2: Channel → Voxel (Train)\n(Linear mapping W)',
-                  fontsize=12, fontweight='bold', pad=10)
+    ax2.set_title('Stage 2', fontsize=20, fontweight='bold', pad=12)
     ax2.axis('off')
     ax2.set_xlim(0, 10)
     ax2.set_ylim(0, 10)
@@ -98,7 +108,7 @@ def create_pipeline_figure(out_dir):
                         edgecolor='black', linewidth=1.5, zorder=5)
         ax2.add_patch(circle)
         ax2.text(1.4, y, f'C{i+1}', ha='right', va='center',
-                 fontsize=9, fontweight='bold')
+                 fontsize=14, fontweight='bold')
 
     voxel_y = np.linspace(2.5, 7.5, 8)
     for i, y in enumerate(voxel_y):
@@ -106,7 +116,7 @@ def create_pipeline_figure(out_dir):
                          edgecolor='black', linewidth=1.2, zorder=5)
         ax2.add_patch(rect)
         ax2.text(8.95, y, f'V{i+1}', ha='left', va='center',
-                 fontsize=8, fontweight='bold')
+                 fontsize=13, fontweight='bold')
 
     np.random.seed(42)
     for _ in range(20):
@@ -120,19 +130,18 @@ def create_pipeline_figure(out_dir):
                  color=color, alpha=alpha_, linewidth=lw, zorder=1)
 
     ax2.text(2, 8.7, 'Channels', ha='center', va='center',
-             fontsize=9, fontweight='bold',
+             fontsize=14, fontweight='bold',
              bbox=dict(boxstyle='round,pad=0.4', facecolor='wheat', alpha=0.8))
     ax2.text(8.2, 8.7, 'Voxels', ha='center', va='center',
-             fontsize=9, fontweight='bold',
+             fontsize=14, fontweight='bold',
              bbox=dict(boxstyle='round,pad=0.4', facecolor='lightblue', alpha=0.8))
     ax2.text(5, 1.2, r'$\mathbf{B} = \mathbf{C}\mathbf{W}^\mathsf{T}$',
-             ha='center', va='center', fontsize=13, fontweight='bold',
+             ha='center', va='center', fontsize=18, fontweight='bold',
              bbox=dict(boxstyle='round,pad=0.6', facecolor='white',
                        edgecolor='black', linewidth=1.5))
 
     # ====================== STAGE 3: Voxel → Channel (Testing) ======================
-    ax3.set_title('Stage 3: Voxel → Channel (Test)\n(Inverse mapping)',
-                  fontsize=12, fontweight='bold', pad=10)
+    ax3.set_title('Stage 3', fontsize=20, fontweight='bold', pad=12)
     ax3.axis('off')
     ax3.set_xlim(0, 10)
     ax3.set_ylim(0, 10)
@@ -143,7 +152,7 @@ def create_pipeline_figure(out_dir):
                          edgecolor='black', linewidth=1.2, zorder=5)
         ax3.add_patch(rect)
         ax3.text(0.55, y, f'V{i+1}', ha='right', va='center',
-                 fontsize=8, fontweight='bold')
+                 fontsize=13, fontweight='bold')
 
     channel_y_pred = np.linspace(3, 7, 6)
     for i, y in enumerate(channel_y_pred):
@@ -151,8 +160,8 @@ def create_pipeline_figure(out_dir):
                         edgecolor='black', linewidth=1.5,
                         linestyle='--', zorder=5)
         ax3.add_patch(circle)
-        ax3.text(8.6, y, f'$\\hat{{C}}_{i+1}$', ha='left', va='center',
-                 fontsize=9, fontweight='bold')
+        ax3.text(8.45, y, f'$\\hat{{C}}_{i+1}$', ha='left', va='center',
+                 fontsize=14, fontweight='bold')
 
     for _ in range(20):
         v_idx = np.random.randint(0, 8)
@@ -165,19 +174,18 @@ def create_pipeline_figure(out_dir):
                  color=color, alpha=alpha_, linewidth=lw, zorder=1)
 
     ax3.text(1.55, 8.7, 'Test voxels', ha='center', va='center',
-             fontsize=9, fontweight='bold',
+             fontsize=14, fontweight='bold',
              bbox=dict(boxstyle='round,pad=0.4', facecolor='lightcoral', alpha=0.8))
     ax3.text(8, 8.7, 'Pred. channels', ha='center', va='center',
-             fontsize=9, fontweight='bold',
+             fontsize=14, fontweight='bold',
              bbox=dict(boxstyle='round,pad=0.4', facecolor='wheat', alpha=0.8))
     ax3.text(5, 1.2, r'$\hat{\mathbf{c}} = \mathbf{W}\mathbf{x}$',
-             ha='center', va='center', fontsize=13, fontweight='bold',
+             ha='center', va='center', fontsize=18, fontweight='bold',
              bbox=dict(boxstyle='round,pad=0.6', facecolor='white',
                        edgecolor='black', linewidth=1.5))
 
     # ====================== STAGE 4: Channel → Color ======================
-    ax4.set_title('Stage 4: Channel → Color\n(Correlation selection)',
-                  fontsize=12, fontweight='bold', pad=10)
+    ax4.set_title('Stage 4', fontsize=20, fontweight='bold', pad=12)
     ax4.axis('off')
     ax4.set_xlim(0, 10)
     ax4.set_ylim(0, 10)
@@ -190,11 +198,11 @@ def create_pipeline_figure(out_dir):
                          facecolor=colors_bf[i], edgecolor='black',
                          linewidth=1.2, alpha=0.85, zorder=5)
         ax4.add_patch(rect)
-        ax4.text(x, 3.3, f'$\\hat{{C}}_{i+1}$', ha='center', va='top',
-                 fontsize=8, fontweight='bold')
+        # per-bar channel labels removed (2026-09-02): duplicated Stage 3 and
+        # overlapped after the font enlargement; the caption defines the bars.
 
     ax4.text(2.3, 7.6, 'Predicted pattern', ha='center', va='center',
-             fontsize=9, fontweight='bold',
+             fontsize=14, fontweight='bold',
              bbox=dict(boxstyle='round,pad=0.4', facecolor='wheat', alpha=0.8))
 
     arrow = FancyArrowPatch((4.0, 5), (4.8, 5),
@@ -236,12 +244,11 @@ def create_pipeline_figure(out_dir):
 
     ax4.text(5, 1.2,
              r'$\hat\theta = \arg\max_{\theta}\,\mathrm{corr}(\hat{\mathbf{c}},\mathbf{c}(\theta))$',
-             ha='center', va='center', fontsize=11, fontweight='bold',
+             ha='center', va='center', fontsize=16, fontweight='bold',
              bbox=dict(boxstyle='round,pad=0.6', facecolor='white',
                        edgecolor='black', linewidth=1.5))
 
-    fig.suptitle('Forward encoding model: hue tuning → voxel mapping → decoding',
-                 fontsize=14, fontweight='bold', y=0.97)
+    # suptitle removed (2026-09-02): figure title belongs in the LaTeX caption.
 
     out_png = os.path.join(out_dir, 'fig_forward_encoder.png')
     out_pdf = os.path.join(out_dir, 'fig_forward_encoder.pdf')
@@ -253,5 +260,5 @@ def create_pipeline_figure(out_dir):
 
 
 if __name__ == '__main__':
-    out = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'Figures')
+    out = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
     create_pipeline_figure(os.path.normpath(out))

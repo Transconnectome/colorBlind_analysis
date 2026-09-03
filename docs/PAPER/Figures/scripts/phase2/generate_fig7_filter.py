@@ -6,7 +6,11 @@ each subject is a 2-row block (Original / Filtered). Two subjects stacked.
   columns: 8 scanner hues (Red ... Magenta)
   rows   : [sub-08 Original, sub-08 Filtered, sub-09 Original, sub-09 Filtered]
   Filtered = render_at_hue(theta_pre)  (corrected stimulus = pre-image)
-  per-hue filter shift delta-theta = theta_pre - theta annotated on Filtered rows
+
+2026-09-02 (author request): the far-left subject/(beta_s, beta_c) block labels
+and the per-hue delta-theta annotations are removed from the panel -- they were
+too small to read at print size.  Block identity and the fitted betas live in
+the LaTeX caption; the per-hue corrections are reported in the Results text.
 
 Canonical 2-Component fits (PIPELINE_2_CLOSURE.md 2026-06-01, A13 raw forward):
   sub-08 deutan  (beta_s=+6,  beta_c=-42)
@@ -66,11 +70,17 @@ def main():
     n_sub = len(SUBJECTS)
     nrow = 2 * n_sub            # Original/Filtered per subject
     ncol = 8
-    # height ratios: insert a thin spacer row between subject blocks
-    fig, axes = plt.subplots(
-        nrow, ncol, figsize=(10.2, 4.6),
-        gridspec_kw={"wspace": 0.06, "hspace": 0.30},
-    )
+    # a thin spacer row between the two subject blocks makes the 2+2 grouping
+    # visible now that the far-left block labels are gone (caption refers to
+    # "top block" / "bottom block")
+    fig = plt.figure(figsize=(10.2, 4.6))
+    gs = fig.add_gridspec(nrow + 1, ncol, height_ratios=[1, 1, 0.45, 1, 1],
+                          wspace=0.06, hspace=0.30)
+    grid_row = [0, 1, 3, 4]     # skip the spacer row (index 2)
+    axes = np.empty((nrow, ncol), dtype=object)
+    for r in range(nrow):
+        for c in range(ncol):
+            axes[r, c] = fig.add_subplot(gs[grid_row[r], c])
 
     row_titles = []
     for k, spec in enumerate(SUBJECTS):
@@ -79,7 +89,6 @@ def main():
         for c, theta in enumerate(HUE_8):
             theta = float(theta)
             theta_pre = pre_image(theta, fam, bs, bc)
-            dshift = (theta_pre - theta + 180.0) % 360.0 - 180.0
             for r, hue in [(r_orig, theta), (r_filt, theta_pre)]:
                 ax = axes[r, c]
                 ax.add_patch(Rectangle((0, 0), 1, 1, color=render_at_hue(hue)))
@@ -87,10 +96,6 @@ def main():
                 ax.set_xticks([]); ax.set_yticks([])
                 for sp in ax.spines.values():
                     sp.set_edgecolor("0.25"); sp.set_linewidth(0.5)
-            # delta-theta beneath each Filtered swatch
-            axes[r_filt, c].text(0.5, -0.16, f"{dshift:+.0f}°", ha="center",
-                                 va="top", fontsize=7.0, color="0.30",
-                                 transform=axes[r_filt, c].transAxes)
         # hue column headers (top row only)
         if k == 0:
             for c, name in enumerate(HUE_NAMES):
@@ -101,19 +106,13 @@ def main():
         axes[r_filt, 0].set_ylabel("Filtered", fontsize=8.5, rotation=90,
                                    labelpad=6)
 
-    # subject block labels + (beta_s, beta_c) on the far left, spanning 2 rows
-    for k, spec in enumerate(SUBJECTS):
-        y0 = axes[2 * k + 1, 0].get_position().y0
-        y1 = axes[2 * k, 0].get_position().y1
-        fig.text(0.012, (y0 + y1) / 2,
-                 f"{spec['label']}\n$\\beta_s$={spec['beta_s']:+.0f}°, "
-                 f"$\\beta_c$={spec['beta_c']:+.0f}°",
-                 ha="left", va="center", fontsize=8.6, fontweight="bold",
-                 rotation=90)
+    # Far-left subject/(beta_s, beta_c) block labels removed (2026-09-02):
+    # unreadable at print size; block identity and the fitted betas are stated
+    # in the LaTeX caption (top block = deutan sub-08, bottom = protan sub-09).
 
     # No suptitle: Elsevier/NeuroImage require the figure title in the caption,
     # not on the illustration itself. The LaTeX caption carries it (fig:filter).
-    fig.subplots_adjust(left=0.105, right=0.99, top=0.94, bottom=0.07)
+    fig.subplots_adjust(left=0.045, right=0.99, top=0.94, bottom=0.035)
     for ext in ("pdf", "png"):
         p = OUT / f"fig7_filter.{ext}"
         fig.savefig(p, dpi=300, bbox_inches="tight")

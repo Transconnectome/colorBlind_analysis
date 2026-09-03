@@ -2,12 +2,19 @@
 """
 generate_fig3_geometry_r6.py
 
-Figure 4 (label `fig:geometry`, file stem `fig3_geometry`) — REVISION R6 version.
+Figure 5 (label `fig:geometry`, file stem `fig3_geometry`) — REVISION R6 version.
 
 R6 (docs/PAPER/REVISION_PLAN_MOTION_GEOMETRY_2026-08-06.md) moves the DeltaRDM
 heatmap (old panel A) out of this figure and into the pipeline schematic
-(Figure 2, file stem `fig3_workflow`).  What remains here is the Procrustes
+(Figure 3, file stem `fig3_workflow`).  What remains here is the Procrustes
 disparity panel only, so the panel letters A/B are dropped entirely.
+
+2026-09-02 (MANUSCRIPT_EDITS_CONSOLIDATED.md §5.1): significance asterisks are
+removed from the panel entirely.  The protan-V1 mark (symmetric-LOSO p = .045)
+does not survive the head-motion-corrected pipeline (p = .077), and a single
+remaining asterisk would visually assert per-participant regional attribution,
+which §0.5 C4 withdraws.  Significance is stated only in the text and in
+Supplementary §S2.
 
 Provenance
 ----------
@@ -36,8 +43,8 @@ Deliberate difference from the original panel B
   * canvas is 180 mm x 85 mm (was 180 x 120 with three sub-axes), so the panel
     still prints at ~7 pt when included at \\textwidth.
 
-Everything else -- colours, markers, HC band, jitter seed, significance stars,
-y-limits -- is byte-for-byte the original logic.
+Everything else -- colours, markers, HC band, jitter seed, y-limits -- is
+byte-for-byte the original logic.
 
 Output: fig3_geometry_r6.png (300 dpi), fig3_geometry_r6.pdf (vector)
 """
@@ -136,11 +143,10 @@ def make_figure():
 
     # CVD subjects
     for sub in ['sub-08', 'sub-09']:
-        scores, p_vals = [], []
+        scores = []
         for roi_name in ROIS:
             roi_data = loo['results'][roi_name]['individual_cvd'][sub]
             scores.append(roi_data['cvd_score'])
-            p_vals.append(roi_data['p_value'])
 
         xpos = x + offsets[sub]
         ax_b.plot(xpos, scores, color=colors_cvd[sub], linewidth=1.0,
@@ -148,19 +154,11 @@ def make_figure():
         ax_b.scatter(xpos, scores, color=colors_cvd[sub], marker=markers[sub],
                      s=30, zorder=4, label=labels[sub])
 
-        # Significance marks follow the symmetric-LOSO estimate, which the paper
-        # treats as the inferential test for the single-case disparity comparison
-        # (Methods, ROI definition and response estimation; Table S1). The p-values
-        # stored in loo_consistent_results.json are the common-space estimates and
-        # are NOT used for the marks. Values from Table S1: protan V1 .045 (marked),
-        # deutan V2 .116, deutan V3 .143, protan hV4 .228, all others above .2.
-        LOSO_P = {('sub-09', 'V1'): 0.045}
-        for xi, sc, roi_name in zip(xpos, scores, ROIS):
-            pv = LOSO_P.get((sub, roi_name))
-            if pv is not None and pv < 0.05:
-                stars = '**' if pv < 0.01 else '*'
-                ax_b.text(xi, sc + 0.025, stars, ha='center', va='bottom',
-                          fontsize=7.5, color=colors_cvd[sub], fontweight='bold')
+        # No significance marks on the panel (2026-09-02, §5.1): the protan-V1
+        # symmetric-LOSO p = .045 drops to .077 under the head-motion-corrected
+        # pipeline, and a lone asterisk would visually assert per-participant
+        # regional attribution, which the manuscript withdraws (§0.5 C4).
+        # Region-wise tests for both pipelines live in Supplementary §S2.
 
     ax_b.set_xticks(x)
     ax_b.set_xticklabels(ROI_LABELS, fontsize=7.5)

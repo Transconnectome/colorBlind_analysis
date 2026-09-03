@@ -42,8 +42,8 @@ python3 generate_fig2.py
 | fig7_filter | ArialMT, Arial-Bold/ItalicMT | ✅ |
 | fig8_filter_eval | ArialMT, Arial-BoldMT | ✅ |
 | fig_forward_encoder | ArialMT, Arial-Bold/ItalicMT | ✅ |
-| figS_forward_tuning | ArialMT, Arial-BoldMT | ✅ |
-| figS16_adjacc_saturation | ArialMT, Arial-Bold/ItalicMT | ✅ |
+| figS3_forward_tuning | ArialMT, Arial-BoldMT | ✅ |
+| figS2_adjacc_saturation | ArialMT, Arial-Bold/ItalicMT | ✅ |
 | fig1_paradigm_v3 (Figure 1) | ArialMT, Arial-Bold/ItalicMT | ✅ **2026-08-18 해결** — `generate_fig1_v3.py` 로 전면 재작성 |
 | fig3_workflow (Figure 3) | ArialMT, Arial-BoldMT | ✅ **2026-08-18 해결** — PowerPoint 재출력 |
 

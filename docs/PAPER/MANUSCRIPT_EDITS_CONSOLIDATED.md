@@ -4,33 +4,7 @@
 >
 > **줄번호는 2026-08-16 에 실제 파일과 대조해 확인했다.** 인용된 「현행」 문구는 원고에서 그대로 가져온 것이다.
 >
-> **rev.2 (2026-08-24) — 스텁 해소.** 종전 판은 A·C·D·E·F 를 한 줄 지시로만 두고 실제 문안을 원본 문서에 남겨 두어 단독 참조가 불가능했다. 이번 개정에서 **문안 전문을 인라인 병합**하고 누락 항목 하나를 신설했다.
->
-> | 변경 | 내용 |
-> |---|---|
-> | **§4.0 신설** | SDC 변위 실측 — 종전 판에 **편집 항목 자체가 없었다.** 현행 `supplementary.tex:74` 의 `it cannot generate condition-specific differences` 를 교체하는 **필수** 항목 |
-> | §2.7 (E) · §3.3 (F) · §4.1 (A) · §4.5 (C) · §4.6 (D) | 문안·표·LaTeX 전문 인라인 |
-> | §3.6 (F3) | 전제가 현행 원고와 불일치 → 등급 **권장**으로 강등, 신규 초안 표시 |
-> | §4.7 (H) | `§S16 신설` 은 **stale 번호** — 실제 S16 은 이미 사용 중. 배치 권고 변경 |
-> | **§1 초록** | 재설계 — M7 은 핵심절만, **F2·M8 폐기**(14번 문장 삭제로 대체). 조치표는 §1.0. `SUBMISSION_CHECKLIST:336` P2 행 동반 수정 필요 |
-> | §6 I3 | **✅ 해소** (2026-08-17, 17/17 재검증) → 반영 순서 1단계 삭제 |
->
-> **rev.3 (2026-08-24) — 전처리 arm 구성 확정.** 저자 결정으로 **`hmc_v2`(재정렬 arm)를 원고에서 제외**하고, 재정렬 미적용의 근거를 **Methods 에서 보간 비용으로 제시**한다. 이에 따라 원고가 다루는 전처리 축은 **시간축 하나**이며, 보고 arm 은 `with_residuals`(정본) · `motreg`(민감도) · `motshift`(대조) 셋이다.
->
-> | 변경 | 내용 |
-> |---|---|
-> | **§0.4 신설** | 결정 기록과 그 파급. **이 절을 먼저 읽을 것** |
-> | **§1.5 신설** | `Methods/methods_v2.tex` — 재정렬 미적용 근거 문단. 이번 개정의 핵심 신규 항목 |
-> | **§2.1 삭제** | ICC(2,1) 본문 승격 **철회**. 검증 결과 arm 쌍 의존이고 CVD 포함이 부풀린 값 (§0.4-C) |
-> | **§4.2 · §4.3 삭제** | 재정렬 문단과 `tab:hmc_robustness` 폐기 |
-> | **§1.1 · §2.2 · §2.4 · §2.5 · §2.8 · §2.9 · §3.1 · §3.2 · §3.4 · §4.1 · §5.1** | `hmc_v2` 근거를 `motreg`/`motshift` 근거로 교체 |
-| **§0.5 C1·C3·C4·C6·C7 개정, C9 신설** | C9 = "왜곡의 형태는 회전이다". 금지 표현 3건 추가 |
-| **§4.9 정합 경고** | exp2 통일 arm 이 재정렬을 포함하므로 §1.5 와 표현을 맞춰야 한다 (§0.4-E) |
-| **§7 1·1b·1c 신설** | 결정 기록 · 문서 정정 · job 171184 |
-> | **§2.4 승격** | protan V1 disparity 가 **보고되는 세 arm 전부에서 유의**해진다 (§0.4-B) |
-> | **§8.1 신설** | 인용 금지 수치 목록 |
-
-> **반영 상태 (2026-08-24 `.tex` 대조): 전 항목 미반영.** `supplementary.tex` 에 `tab:motion_loco` 와 SDC 변위 수치가 없고, 46행은 여전히 `Every neural endpoint was recomputed`, 74행은 `cannot generate`, 464-468행은 `remains to be extended` 다. `methods_v2.tex` 에도 재정렬 관련 서술이 없다.
+> **반영 상태 (2026-09-01 갱신): §1.1·§1.2·§1.3 반영 완료** — 제목은 T4 로 교체했고, 초록은 234 단어 / 13 문장이 되어 §1.0 의 예측과 일치한다. **나머지 항목은 여전히 미반영이다** (2026-08-24 대조 기준): `supplementary.tex` 에 `tab:motion_loco` 와 SDC 변위 수치가 없고, 46행은 여전히 `Every neural endpoint was recomputed`, 74행은 `cannot generate`, 464-468행은 `remains to be extended` 다. `methods_v2.tex` 에도 재정렬 관련 서술이 없다.
 >
 > **rev.3 에서 폐기된 두 항목(realignment 문단 · `tab:hmc_robustness`)은 `.tex` 에 없는 것이 정상이다.** 종전 판이 이를 미반영 항목으로 적고 있었으므로 여기서 정정한다.
 
@@ -41,123 +15,188 @@
 | 단계 | 이유 |
 |---|---|
 | ~~**1. §7 형식 (I3 → I4)**~~ | I3 은 2026-08-17 에 해소됨(§6). **I4(Methods 중복본 참가자 수 상충)만 남는다** — 5분, 아무 때나 |
-| **2. §5 Supplementary** | A(3-arm 표)가 §S2 를 신설하고 M-§S2 가 거기에 표를 얹는 구조. 역순이면 §S2 를 두 번 재편 |
-| **2.5 §1.5 Methods 재정렬 문단** | §S2 와 한 벌이다. 부록 문안을 확정한 직후에 넣어야 표현이 어긋나지 않는다 |
-| **3. §2 Results → §3 Discussion → §1 제목·초록** | 초록은 본문이 확정된 뒤 마지막에 |
-| **4. §6 그림** | 별표 제거는 조판 마지막 |
+| **1.9 N3 검정 이름 확정** | §4.5b 문안을 쓰기 **전에** `color-correspondence permutation` 명칭을 정한다. 나중에 바꾸면 문안·캡션·Methods 한 문단을 다시 손대야 한다 (§0.6) |
+| **2. §5 Supplementary** | §4.1 이 §S1 을 파이프라인 절로 재편하고 §4.0 이 거기에 SDC 문단을 얹는 구조. 역순이면 §S1 을 두 번 재편한다 |
+| **2.5 §1.5 Methods 움직임 문단 + §S1 해체** | §S1·§S2·§S4 와 **한 벌**이다(rev.5). 본문에서 내려보내는 FD 분포를 **§S4** 가 받고, 본문이 §S2 와 §S4 를 가리키므로 **부록 세 문안을 먼저 확정한 뒤** 본문을 넣는다. §1.5(e-3) 의 `no confound regression` 절 삭제도 같은 회차. 번호 당기기는 여기서 하지 않는다(5단계) |
+| **3. §2 Results → §3 Discussion → ~~§1 제목·초록~~** | 초록은 본문이 확정된 뒤 마지막에. **⚠ 2026-09-01 에 §1.1–§1.3 을 먼저 반영해 이 순서를 어겼다.** 본문 §2·§3 을 반영한 뒤 **초록을 한 번 재대조할 것** — 특히 §2.5(M3)·§3.1(M5) 이 개인화 논거를 ROI 편재에서 $\hat\beta_c$ 방향과 심리물리 축으로 옮기므로, 초록 8번 문장의 `each` 가 여전히 그 논거와 맞는지 확인한다 |
+| **3.5 §4.10 중복 정리·이동** | §4.0–§4.9 문안을 전부 반영한 **뒤에** 한다. 먼저 하면 `supplementary.tex` 줄번호가 밀려 §4.0·§4.1·§4.5·§4.8 의 앵커가 어긋난다 |
+| **4. §6 그림 (+ §5.3 · §5.4)** | 별표 제거는 조판 마지막. 단 **§5.3(패널 `B` 삭제)은 §2.4 와 같은 회차**에 해야 한다 |
+| ~~**5. §S 번호 당기기 (§1.5 e-2)**~~ | **✅ 완료 (2026-09-02)** — S2–S21 → S1–S20. 제목 20개와 `\S S…` 참조 전량(Supplementary 24건 · Methods 22건 · Results 11건 · Discussion 2건)을 함께 이동했고, 출처 주석의 절 번호도 새 번호로 맞췄다. **이 시점 이후 이 문서의 §4.x 에 적힌 `§S…` 번호는 구 번호다** — 각 항목의 반영 완료 주석에 새 번호를 병기했다 |
 
 **차단 항목**: **I2 (데이터 공개 방침)** — IRB 확인이 투고 저널 관리 에이전트 쪽에서 진행 중. 결론 전까지 Methods 문장과 Data availability 절을 **둘 다 비워 둔다**(한쪽만 채우면 상충한다).
 
 ---
 
-## 0.4 전처리 arm 구성 — 결정과 파급 (2026-08-24 확정) ★ **먼저 읽을 것**
+## 0.4 전처리 파이프라인 — 2 arm 구성 (2026-09-01 확정) ★ **먼저 읽을 것**
 
 ### A. 결정
 
-**`hmc_v2`(재정렬 arm)를 원고에서 제외한다.** 대신 Methods 에서 재정렬을 적용하지 않은 근거를 **보간 비용**으로 제시한다(§1.5). 원고가 보고하는 arm 은 셋이다.
+**원고는 두 파이프라인을 보고한다.** `motreg` 와 `motshift` 는 원고에서 뺀다.
 
-| arm | 원고에서의 역할 | 재샘플링 |
-|---|---|---|
-| `with_residuals` | **정본.** 본문 전 수치의 출처 | 1회 |
-| `motreg` | **민감도 주 arm.** 움직임 귀속 판정을 진다 | 0회 추가 |
-| `motshift` | `motreg` 의 **음성 대조.** 독립 arm 이 아니다 | 0회 추가 |
-
-**근거**: 재정렬이 되돌리는 실제 변위가 기준 볼륨 대비 최대 **0.37 복셀**(0.74 mm)인 반면, 볼륨마다 다른 변환은 보간 오차를 **시변 잡음**으로 만든다. 정본은 전 볼륨에 동일 변환을 쓰므로 그 오차가 시간에 대해 일정해 상쇄된다. 미세 다중복셀 패턴 기하를 다루는 본 분석에서는 교환이 불리하다. 실측으로도 ROI tSNR 이 1.7–3.0% 낮아진다.
-
-> **⚠ 사전 확정 조항과의 관계 — 기록으로 남긴다.** `STATUS_ADDITIONAL_ANALYSIS_2026-08-15:327` 은 *"색 종점은 결과와 무관하게 전량 보고하되 판정에는 쓰지 않는다"*, `HMC_REANALYSIS_PRESPEC.md:85` 는 *"두 파이프라인 결과를 나란히 보고한다"* 로 적혀 있다. 이번 결정은 후자를 따르지 않는다. 저자 판단이며, 판단 근거(보간 비용)는 종점과 무관하게 진술 가능한 성격이다. **`HMC_REANALYSIS_PRESPEC.md` 에 이 결정과 사유를 추가 기록할 것**(§7).
-
-### B. 파급 1 — protan V1 disparity 가 올라간다
-
-`hmc_v2` 는 protan V1 을 약화시킨 **유일한** arm 이었다. 제외하면 보고되는 세 arm 전부에서 유의하다.
-
-| | 정본 | `motreg` | `motshift` | *(제외)* `hmc_v2` |
-|---|---|---|---|---|
-| sub-09 V1 disparity | $p$ = .007 / LOSO .045 | $p$ = **.0040** / LOSO **.0215** | $p$ = **.0048** / LOSO **.031** | ~~.077~~ |
-
-**이것이 이번 결정의 실질적 효과이며, 유일한 효과다.** 나머지는 바뀌지 않는다.
-
-| | 상태 |
-|---|---|
-| deutan V2 | **강등 유지.** `motreg` .218 · 대조 `motshift` .005 · 정본 LOSO .116 |
-| CVD hV4 개인 결손 | **정본 한정 유지.** `motreg` .148 / .204 |
-| protan $\hat\beta_c$ | **반전 유지.** `motreg` $+24 \to -24$ |
-| deutan V1 이 새로 유의해지던 혼란 셀(.027) | `hmc_v2` 전용이었으므로 소멸 |
-
-### C. 파급 2 — ICC 자산은 폐기한다
-
-발표 예정이던 ICC$_{2,1}$ = 0.825 는 **정본과 `hmc_v2` 사이에서만** 계산된 값이다(`_arm_agreement.py` 의 `ARMS = ["with_residuals", "hmc_v2"]`). 대체 가능성을 전부 확인했고 전부 실패했다.
-
-| 계산 방식 | hV4 | V3 | V2 | V1 | 판정 |
-|---|---|---|---|---|---|
-| 정본↔`hmc_v2` ($n{=}9$) | **0.825** | 0.662 | 0.471 | $-0.005$ | 게이트 순서와 일치 |
-| 정본↔`motreg` ($n{=}9$) | 0.710 | 0.502 | 0.615 | $-0.037$ | V2 > V3 |
-| 정본↔`motshift` ($n{=}9$) | 0.809 | 0.670 | 0.553 | 0.642 | **V1 이 0.64** |
-| 정본↔`motreg` (**HC만 $n{=}7$**) | 0.634 | 0.678 | **0.826** | 0.067 | **V2 가 hV4 를 앞선다** |
-| 정본 arm 내부 split-half ($n{=}9$) | 0.744 | 0.518 | 0.724 | 0.485 | hV4 와 V2 차이 0.02 |
-
-두 가지가 확인된다. 첫째, **깨끗한 그림은 `hmc_v2` 쌍 하나에서만 나온다.** 둘째, $n{=}9$ 와 $n{=}7$ 의 차이가 큰 이유는 **CVD 두 명이 hV4 에서 양 arm 모두 낮은 값을 가져 피험자 간 분산을 키우기 때문**이며, ICC 는 그 분산을 분모에 쓰므로 값이 올라간다. 즉 0.825 는 **CVD 포함이 부풀린 값**이다.
-
-**Dice 표와 같은 구조다.** 유리해 보이는 지표를 실었다가 리뷰어가 HC 만으로 재계산하면 무너진다. **싣지 않는다.**
-
-→ hV4 단독성은 **색 라벨 순열 게이트의 arm 간 재현**만으로 지탱한다. 이는 검정 하나가 아니라 **같은 검정이 세 arm 에서 세 번 같은 답을 준 것**이고, 다른 세 ROI 는 어느 arm 에서도 통과하지 못한다.
-
-| arm | V1 | V2 | V3 | **hV4** |
-|---|---|---|---|---|
-| `with_residuals` | .164 | .424 | .586 | **.011** |
-| `motreg` | .624 | .924 | .143 | **.013** |
-| `motshift` | .272 | .112 | .124 | **.002** |
-
-### D. 파급 3 — `motshift` 는 대조군이지 arm 이 아니다
-
-세 열을 나란히 두면 deutan V2 가 3열 중 2열에서 유의한 것처럼 보인다(정본 .040, `motshift` .005). **의미는 정반대다.** 표 머리와 각주에서 반드시 구분한다.
-
-| | Primary | Motion regression | *Control: time-shifted regressors* |
+| 파이프라인 | 역할 | 볼륨당 변환 | 리샘플링 |
 |---|---|---|---|
+| `with_residuals` (**Primary**) | 정본. 본문 전 수치의 출처 | $T$ (전 볼륨 동일) | 1회 |
+| `hmc_v2` (**Realignment**) | 머리움직임 보정판. 전 종점 재산출 | $T \circ R_i$ | 1회 |
 
-> The third column carries the same twelve regressors circularly shifted within run, preserving their autocorrelation and spectrum while destroying their temporal alignment with the data. It isolates the cost of adding regressors from the removal of motion-aligned variance, and is a control rather than an independent preprocessing variant.
+**근거 셋.**
 
-### E. 남는 정합 문제 — §4.9 exp2
+1. **`motreg` 은 `hmc_v2` 가 실제로 하는 것의 근사다.** `supplementary.tex:75` 가 이미 그렇게 적고 있다 — *"does not reconstruct the data that volume realignment would have produced."* 실물을 실으면서 근사를 함께 실을 이유가 없다.
+2. **종전 배제 사유가 사실과 달랐다.** `hmc_v2` 는 `mcflirt -mats` → `convert_xfm -concat` → 볼륨당 `applywarp` **1회**로, 정본과 리샘플링 횟수가 같다(`future_phase1_sensitivity/README.md:53`). *"볼륨마다 별도 리샘플링이 필요하다"* 는 보간 2회짜리 구 `hmc` 를 두고 한 말이 옮겨 붙은 것이다. 남는 차이는 변환이 볼륨마다 다르다는 점뿐이다.
+3. **측정된 비용은 tSNR $-1.97\%$ 다** (V1 $-2.69$, V2 $-1.88$, V3 $-1.66$, hV4 $-1.75$. `hmc_summary.csv` 에서 직접 산출, sub-10 제외). 재정렬의 통상적 대가이며 표준 절차를 생략할 근거가 되지 못한다.
 
-§4.9 의 exp2 통일 arm(`full_dataset_C010_exp2_harm_hmc`)은 **재정렬을 포함해** 처리됐고, 그 비교의 HC 기준·exp1 앵커를 `full_dataset_C010_hmc_v2` 로 맞췄다. 즉 exp1 `hmc_v2` 가 그 절에 간접적으로 남아 있다.
+**`motshift` 는 `motreg` 의 대조였으므로 함께 빠진다**(독립 arm 이 아니었다). 종전 *"세 arm 전부 유의"* 는 **한 arm 과 그 대조를 독립 확인 셋처럼 센 것**이므로, 2 arm 이 독립 확인 개수에 대해 더 정직하다.
 
-**모순은 아니다.** Methods 가 "구현해 평가했으나 정본에 채택하지 않았다"고 적으면, 세션 2 통일 arm 이 재정렬을 포함하는 것과 충돌하지 않는다. **다만 두 가지를 처리해야 한다.**
+> **⚠ 사전등록과의 관계는 판단 근거로 쓰지 않는다 (2026-09-01 저자 지시).** `HMC_REANALYSIS_PRESPEC.md` 의 조항 자체가 같은 용어 오인 위에 쓰였을 가능성이 있다. 위 세 근거는 사전등록과 무관하게 성립한다.
 
-1. §4.9 문안에서 exp1 앵커를 **정본 arm 값으로 교체**하거나, 앵커가 재정렬 arm임을 명시한다. 현재는 후자가 문안에 없다.
-2. Methods 문단(§1.5)과 §4.9 가 같은 표현("realignment")을 쓰되, **정본 미적용 / 세션 2 통일 arm 포함**이라는 구분이 독자에게 보이게 쓴다.
+### B. 두 파이프라인의 결과
 
----
+**hV4 단독 보간 게이트 — 둘 다 통과, 다른 ROI 는 둘 다 미통과**
 
-## 0.5 핵심 결론별 서술 규칙 — C1–C8 (2026-08-18 확정)
+| | V1 | V2 | V3 | **hV4** |
+|---|---|---|---|---|
+| Primary | .164 | .424 | .586 | **.011** |
+| Realignment | .922 | .228 | .810 | **.023** |
 
-> **아래 §1–§6 의 개별 수정안은 전부 이 규칙을 따라야 한다.** 충돌하면 이 절이 우선한다. 서술 전문과 근거 수치는 [`analysis/future_phase1_sensitivity/TEAM_BRIEF_2026-08-18.md`](../../analysis/future_phase1_sensitivity/TEAM_BRIEF_2026-08-18.md) §5.3.
+**hV4 LOCO 결손 (CVD 단일사례)**
 
-**적용 규칙**: 본문은 정본 arm 기준으로 서술한다. **보고되는 세 arm**(§0.4-A) 중 어디서든 부호가 뒤집히거나 유의성이 사라지는 주장은 그 층위에서 강등한다. 순서는 **유의성 주장 → 순위·존재 주장 → 서술적 관찰**이다. 부하가 걸린 종점은 §S2 부록 표에 세 arm 을 나란히 싣되 `motshift` 는 대조로 표기하고(§0.4-D), 본문은 정본 값만 쓰고 그 표를 참조한다.
+| | 통제군 평균 | deutan | protan |
+|---|---|---|---|
+| Primary | 0.456 | 0.250 · $p$=.054 · $d$=$-2.02$ | 0.125 · $p$=.011 · $d$=$-3.25$ |
+| Realignment | 0.451 | 0.354 · $p$=.242 · $d$=$-0.80$ | 0.271 · $p$=.108 · $d$=$-1.48$ |
+
+방향은 둘 다에서 보존되고 유의성은 Primary 에서만 성립한다. 순위 근거는 §2.9.
+
+**disparity — 개인별 전 ROI** (Crawford–Howell $t$, $p$)
+
+| | | V1 | V2 | V3 | hV4 |
+|---|---|---|---|---|---|
+| Primary | deutan | 1.1 (.157) | **2.1 (.040)** | 1.9 (.052) | 0.2 (.411) |
+| Primary | protan | **3.5 (.007)** | 1.0 (.181) | 0.1 (.466) | 1.1 (.150) |
+| Realignment | deutan | **2.4 (.027)** | $-1.0$ (.825) | 0.6 (.293) | 0.4 (.351) |
+| Realignment | protan | 1.6 (.077) | 1.0 (.186) | 1.1 (.151) | 1.4 (.101) |
+
+세 가지가 확인된다. **protan 의 최대 $t$ 영역은 두 파이프라인 모두 V1** 이고 유의성만 약해진다(.007 → .077). **deutan 은 최대 영역이 V2 에서 V1 로 이동**하고 V2 는 부호가 뒤집힌다($t$ $+2.1 \to -1.0$). **네 셀 전부에서 최대 $t$ 가 양수이고 최소 한 ROI 가 $p<.10$ 이다.**
+
+**LORO 8분류 (chance 0.125) — 둘 다에서 보존**
+
+최저 셀은 재정렬 arm 의 deutan V1 $= 0.229$ 로 chance 의 1.8배다. `All eight colors remained decodable` 는 두 파이프라인에서 유지된다.
+
+**disparity — 대칭 LOSO 추정량** (2026-09-02 산출. 정본 스크립트 `rerun_loo_consistent.py` 를 래퍼로 구동해 두 파이프라인을 같은 설정으로 돌렸고, Primary 가 발표본 값을 재현해 산출이 검증된다)
+
+| | | V1 | V2 | V3 | hV4 |
+|---|---|---|---|---|---|
+| Primary | deutan | 0.5 (.323) | 1.3 (.116) | 1.2 (.143) | 0.1 (.474) |
+| Primary | protan | **2.0 (.045)** | 0.8 (.234) | 0.1 (.479) | 0.8 (.228) |
+| Realignment | deutan | 1.6 (.080) | $-0.6$ (.723) | 0.4 (.338) | 0.4 (.356) |
+| Realignment | protan | 1.3 (.121) | 0.1 (.480) | 1.0 (.178) | 1.1 (.159) |
+
+**⚠ LOSO 아래에서는 재정렬 파이프라인에 유의한 칸이 하나도 없다.** 16칸 중 유의한 것은 **Primary protan V1 하나**다. `results_v4.tex:76` 이 LOSO 를 *"the inferential estimate"* 로 규정하고 있으므로, **disparity 는 보강 증거 이상으로 쓸 수 없다.** C6(해리)의 근거를 LORO 와 hV4 게이트에 두는 §0.5 의 배치가 이 결과로 더 필요해진다.
+
+산출물 `results/loso_arms/loo_consistent_{with_residuals,hmc_v2}.json`, 요약 `results/loso_two_arm_summary.json`, 래퍼 `scripts/_loso_arm_wrapper.py`.
+
+### C. ICC 는 여전히 인용 금지
+
+ICC$_{2,1}$ = 0.825 가 정본↔`hmc_v2` 쌍에서 계산됐다는 사실은 이제 문제가 아니다. 그러나 **arm 쌍 의존성**(정본↔`motreg` 로 바꾸면 통제군 $n{=}7$ 에서 V2 0.826 이 hV4 0.634 를 앞선다)과 **CVD 두 명이 피험자 간 분산을 키워 부풀린 값**이라는 두 사유는 독립적으로 유효하다. §8.1 금지 목록 유지.
+
+hV4 단독성은 **게이트의 두 파이프라인 재현**(.011 / .023)만으로 지탱한다.
+
+### D. 45° 순환이동은 주 주장이 아니다 — C9 철회
+
+45° 결과는 **동결 투영** 계열이고 원고가 보고하는 disparity 종점은 **대응 불변**이므로 두 결과가 같은 것을 재지 않는다. Procrustes 는 직교 회전을 최적화해 제거하므로 고리형 배치에서 hue 라벨의 순환이동이 disparity 에 흡수된다. 45° 가 설명하는 것은 sub-09 V1 의 **색 특이성 귀무**($p_{perm}$ = .758)이며, "신호 없음"이 아니라 **"항등 대응이 틀렸다"** 는 진단이다.
+
+또한 보간·disparity 는 **배치의 모양**을, 순환이동은 **라벨의 위치**를 묻는다. sub-09 V1 은 45° 로 되돌리면 $0.788$ 로 통제군 평균 아래이므로 그 ROI 에서 모양은 온전하다. 2성분 모형에는 균일 회전 항이 없어($\bar{\delta\theta} = 0$) 이 성분을 표현하지도 못한다.
+
+**배치**: 정량 결과와 대안 설명은 **§4.5b (§S10)** 에만 둔다. Results 와 Discussion 에는 넣지 않는다. 다만 sub-09 V1 의 색 특이성 실패를 §S10 표에 싣는 이상 그 설명도 같이 실어야 한다. 빼면 그 셀이 근거 없는 귀무로 남는다.
+
+## 0.5 핵심 결론별 서술 규칙 — C1–C8 (2026-09-01 개정)
+
+> **아래 §1–§6 의 개별 수정안은 전부 이 규칙을 따라야 한다.** 충돌하면 이 절이 우선한다.
+
+**적용 규칙**: 본문은 Primary 파이프라인 기준으로 서술한다. **두 파이프라인 중 어디서든 부호가 뒤집히거나 유의성이 사라지는 주장은 그 층위에서 강등한다.** 순서는 **유의성 주장 → 순위·존재 주장 → 서술적 관찰**이다. 부하가 걸린 종점은 부록 표에 두 파이프라인을 나란히 싣고, 본문은 Primary 값을 쓰고 그 표를 참조한다.
 
 | | 결론 | 서술 층위 | 반영 지점 |
 |---|---|---|---|
-| **C1** | 통제군 연속 hue 보간은 hV4 단독 | **유지.** 근거는 **색 라벨 순열 게이트의 3 arm 재현**($p$ = .011 / .013 / .002)뿐이다. **ICC 는 쓰지 않는다**(§0.4-C) | §4.1 §S2 3-arm 표 |
-| **C2** | 8색 범주 식별 보존 | 유지. 문구 변경 없음 | 확인만 |
-| **C3** | CVD hV4 보간 결손 | **정본 arm 한정 유의**(protan $p$=.011; deutan $p$=.054 로 정본에서도 비유의) → 민감성 공개(`motreg` .148 / .204) → **순위 배치를 바닥에 깐다**(세 arm 전부 최대 1/7) → **크기는 추정 불가로 명시** | §2.2 (M4), §2.9 |
-| **C4** | 왜곡의 영역 편재 | **protan V1 = 세 arm 전부 유의**(.007 / .0040 / .0048, LOSO 전부 유의) → 주장 가능. **deutan V2 = 강등**(`motreg` .218, 대조 `motshift` .005, 정본 LOSO .116) → 서술적 관찰. **두 사례를 대비시키는 서술은 금지** | §2.4 (M2), §3.1 (M5) |
-| **C5** | 개인차 | **발견 → 프레임워크 속성.** 참가자별 추정은 방법의 속성. 편재 확립에 필요한 것은 **표본**이지 추가 분석이 아니다 | §1.1 제목, §1.2 초록(M7), §3.5 (M6), §3.6 (F3) |
-| **C6** | 범주 보존 / 연속 기하 손상의 해리 | 유지하되 **근거를 유의성 → 순위로 교체.** 선행연구(균일 gain 감소)와 구별되는 지점 | §2.3 (M1), §2.4 (M2) |
-| **C7** | 필터 $\hat\beta_c$ | **deutan 2축 유지**($-42$, $-48$) / **protan 2축 반전**($+24 \to -24$). 배포값은 동결값 그대로 보고, protan 파라미터에 생리학적 해석 부여 금지 | §3.2 (H), §4.7 |
+| **C1** | 통제군 연속 hue 보간은 hV4 단독 | **유지.** 근거는 **게이트의 두 파이프라인 재현**($p$ = .011 / .023)이고 다른 세 ROI 는 둘 다 미통과다. **ICC 는 쓰지 않는다**(§0.4-C) | §2.1, §4.1 |
+| **C2** | 8색 범주 식별 보존 | 유지. 최저 셀(재정렬 deutan V1 $0.229$)도 chance 의 1.8배 | 확인만 |
+| **C3** | CVD hV4 보간 결손 | **Primary 한정 유의**(protan $p$=.011, deutan $p$=.054) → 재정렬 민감성 공개(.242 / .108) → **순위 배치를 바닥에 깐다** → **크기는 추정 불가로 명시**. 네 요소를 한 문단에 붙여 쓴다(§2.2). **⚠ "두 참가자는 개인 관문을 통과하지 못했다" 절은 금지** — 통제군도 5/7 실패한다 | §2.2 + §2.9 |
+| **C4** | 왜곡의 영역 귀속 | **주장하지 않는다.** protan 의 최대 영역은 두 파이프라인 모두 V1 로 안정하나 유의성이 .007 → .077 로 약해지고, deutan 은 최대 영역이 V2 → V1 로 이동하며 V2 는 부호가 뒤집힌다. **"어느 영역이 왜곡을 지는가는 이 자료로 결정되지 않는다"** 가 정확한 진술이다. 무너진 것은 **영역 귀속**이지 **왜곡의 존재**가 아니다 | §2.3, §2.4, §3.1 |
+| **C5** | 개인차 | **발견이 아니라 프레임워크 속성.** 참가자별 추정은 방법의 속성이다. 편재 확립에 필요한 것은 **표본**이지 추가 분석이 아니다 | §1.1 제목, §1.2 초록, §3.5, §3.6 |
+| **C6** | 범주 보존 / 연속 기하 손상의 해리 | **유지되고 강해진다.** 근거는 disparity 가 아니라 **LORO 보존(두 파이프라인)** 과 **hV4 LOCO 감소 + hV4 단독 게이트(두 파이프라인)** 다. 선행연구의 균일 gain 감소와 구별되는 지점 | §2.3, §2.4, §3.1 |
+| **C7** | 필터 $\hat\beta_c$ | **deutan 2축 유지**($-42$, $-48$) / **protan 반전**($+24 \to -24$). 배포값은 동결값 그대로 보고, protan 파라미터에 생리학적 해석 부여 금지 | §3.2, §4.7 |
 | **C8** | 역산·심리물리 | 불변. 해석적 단계임을 명시 | 확인만 |
-| **C9** | **왜곡의 형태는 회전이다** ★ 신규 | protan V1 최적 순환이동 45°, 이득 24.0% / 19.2%, 통제군 최적이동 이득 분포 대비 $p$ = .0091 / .0254. 45° 로 되돌리면 disparity 1.037 → 0.788 로 **통제군 평균 아래**. **기여 1 → 기여 2 의 다리** | §2.10, §3.3, §4.5 |
+| ~~**C9**~~ | ~~왜곡의 형태는 회전이다~~ | **철회.** 45° 순환이동은 §S10 의 대안 설명으로만 둔다. 사유 = §0.4-D | §4.5b |
 
 **금지 표현**
 
 | 표현 | 처리 |
 |---|---|
-| `significantly below controls` | **조건부** — arm 한정어와 민감성 문장이 붙을 때만. 단독 사용 금지 |
+| `significantly below controls` | **조건부** — 파이프라인 한정어와 민감성 문장이 붙을 때만. 단독 사용 금지 |
 | `localized to a different area in each` | 금지 |
 | `individual-specific cortical distortion` | 금지 |
 | `individually distinct pattern of distortion` | 금지 |
-| **ICC$_{2,1}$ = 0.825 (및 V1 $-0.005$)** | **금지 (신규 2026-08-24)** — arm 쌍 의존 + CVD 포함이 부풀린 값. §0.4-C |
-| **deutan V2 와 protan V1 을 대비시키는 서술** | **금지 (신규)** — 두 셀의 지위가 다르다. protan V1 은 세 arm 유의, deutan V2 는 강등 |
-| 효과크기를 유의성의 대체물로 쓰기 | 금지 — $d_{cc}$ 95% CI 가 정본 protan 조차 $[-5.93,\ -0.41]$. §2.9 |
+| ICC$_{2,1}$ = 0.825 (및 V1 $-0.005$) | 금지. §0.4-C |
+| deutan 과 protan 의 영역을 대비시키는 서술 | 금지. 두 사례를 `whereas` 로 병치하지 말고 **각각 그 자체로** 서술한다 |
+| 효과크기를 유의성의 대체물로 쓰기 | 금지. $d_{cc}$ 95% CI 가 Primary protan 조차 $[-5.93,\ -0.41]$. §2.9 |
 
-**C5 문구 주의**: "추가 분석이 필요하다"로 쓰지 않는다. 같은 자료에서 검정 형태 6종을 이미 돌렸고 전부 같은 답이므로(브리프 §3.3-3), 더 파면 해결된다는 뜻으로 읽혀 그 문장과 충돌한다. **"더 큰 표본에서의 검증이 필요하다"** 가 정확하다.
+**C5 문구 주의**: "추가 분석이 필요하다"로 쓰지 않는다. 같은 자료에서 검정 형태 6종을 이미 돌렸고 전부 같은 답이므로, 더 파면 해결된다는 뜻으로 읽혀 그 문장과 충돌한다. **"더 큰 표본에서의 검증이 필요하다"** 가 정확하다.
+
+---
+
+## 0.7 범위 결정 — 방법 논문으로 재배치 (2026-09-02 확정) ★
+
+### A. 결정
+
+**효능 주장을 철회하고 방법 기여를 앞세운다.** 결과를 줄이는 것이 아니라 **disparity 가 지고 있던 무게를 해리로 옮긴다.** Results 순 감소는 약 170 단어이고 삭제되는 소절과 그림은 없다.
+
+**근거**: 전향적 신경 평가가 개인화를 지지하지 않는다. deutan 기하는 두 필터 모두 HC 에서 멀어졌고(V2 disparity 0.68 → 개인화 0.77, RDM 유사도 0.42 → 0.05), protan hV4 보간은 개인화 필터가 세 조건 중 최하였다(0.06 대 무필터 0.14, 배포 0.19). 원고가 이미 `Neither index attributes the geometric recovery to individualization.` 이라고 적고 있다.
+
+### B. 주장 층위
+
+| | 층위 |
+|---|---|
+| 통제군 hue 보간은 hV4 단독 | **유의성 주장.** 두 파이프라인 재현($p$ = .011 / .023) |
+| CVD 범주 식별 보존 ↔ hV4 보간 저하의 **해리** | **주장.** Primary 유의, 순위는 두 파이프라인 불변 |
+| 개인 피질 표상에서 자극공간 필터를 역산하는 절차 | **방법 기여.** to our knowledge 최초 |
+| 전향적 평가 | **혼재로 보고.** JND 는 개인화 필터에서 통제군 범위로 이동, 8AFC 는 deutan 두 필터 동등·protan 배포필터에서 저하, 신경 종점은 개선 없음 |
+| 왜곡의 피질 위치 | 주장하지 않음 |
+| 필터의 효능 우위 | 주장하지 않음 |
+
+### C. Results 재배치
+
+| # | 조치 |
+|---|---|
+| **1+2 병합** | `All eight colors remain decodable` 와 `Hue interpolation is reduced at hV4` 를 한 소절로 합치고 제목을 **`Categorical identification is preserved while hue interpolation fails at hV4`** 로 한다. 마지막 문장에서 해리를 진술하고 그것이 SNR 설명을 배제함을 밝힌다 |
+| **3 압축** | disparity 소절을 324 → 약 150 단어. 개인별 ROI 표와 LOSO 귀무는 §S1 로. 제목은 `Hue geometry departs from the control reference in both CVD cases` |
+| **10 재정렬** | Filter evaluation → Psychophysics → **Identification (신설)** → Colors remained decodable → Interpolation → Geometry. 근거 강도 순이다 |
+| **5–9 불변** | 필터 도출 절차가 방법 기여이므로 줄이지 않는다 |
+
+### D. `fig:geometry` 는 본문에 남긴다
+
+필터의 $L_{\rm RDM}$ 이 그 RDM 차이 구조를 읽는다. 근거를 보이지 않고 그것으로 적합했다고 쓸 수 없다. **대신 성격을 바꾼다.** 검정 결과가 아니라 **손실이 평가하는 양의 기술**로 제시한다. 적합은 서술적이고 필터 표적 ROI 는 held-out test-loss 로 선정됐다.
+
+**Methods 에 추가할 한 문장** (`sec:methods:selection` 끝):
+
+> The loss treats the representational geometry as a descriptive quantity. Target regions follow from held-out test-loss, so the fitted parameters stand independently of the inferential status of any single disparity contrast.
+
+### E. 문체 규칙 (2026-09-02 저자 지시)
+
+교체 문안은 다음을 지킨다. **두괄식**으로 결론을 첫 문장에 둔다. **부정 표현을 최소화**하고 가능하면 긍정 서술로 바꾼다. 세미콜론, 콜론, 엠대시를 쓰지 않는다. 완충 표현과 불필요한 문장을 넣지 않는다. **직접적이고 엄밀한 동사**를 쓴다(`rose`, `varied`, `remained`, `reached`, `separated`, `attributes`, `constitutes`, `evaluates`).
+
+### F. 확정 대기 둘
+
+**기여 진술** — `CLAUDE.md` 의 Two Main Contributions 를 아래로 교체할 것을 제안한다.
+
+> **1. 해리의 규명 (finding).** CVD 개인의 피질에서 8색 **범주 식별은 보존**되고 같은 영역의 **연속 hue 보간만 저하**된다. 두 측정이 같은 복셀과 같은 런에서 나오므로 신호 품질 저하로는 이 패턴이 설명되지 않는다. 선행 CVD fMRI 는 magnitude·gain(Tregillus 2021)과 activation(Rina 2024)이며 이 해리를 보고한 바 없다.
+>
+> **2. 피질 기반 개인화 필터 프레임워크 (method, first).** 개인 자신의 피질 색 표상에서 역산한 필터로, 망막·스펙트럼 모델이 아니다. **"first" 의 스코프는 절차에 한정되며 효능을 포함하지 않는다.** N=2 전향 평가는 개념증명이고 결과는 혼재한다.
+
+**제목** — T4 는 발견에서 응용으로 가는 호를 약속하므로 지금 자료에 과하다. 후보 셋.
+
+| # | 문안 | 겨냥 |
+|---|---|---|
+| **T5a ✅ 확정 (2026-09-02)** | Preserved categorical identification with impaired hue interpolation in color vision deficiency **motivates** a cortically derived correction filter | `motivates` 가 두 기여의 관계를 진술한다. `grounds` 는 필터가 해리에서 도출됐다는 뜻이 되어 부정확하고(실제 도출은 2성분 기하 적합), `leads to` 는 본 자료가 보이지 않는 인과를 함축한다 |
+| **T6** | Inverting an individual's cortical color representation into a stimulus-space correction filter | 방법 단독. 해리가 제목에서 사라진다 |
+| **T1** | Hue identity and hue geometry dissociate in the cortical color representation of color-vision-deficient observers | 해리 단독. 필터가 사라진다 |
 
 ---
 
@@ -178,334 +217,223 @@
 
 > **⚠ 연쇄**: `SUBMISSION_CHECKLIST_IMAGING_NEURO.md:336` 의 P2 항목이 `초록 교체 (M7 + M8 IN 판)` 으로 적혀 있다. **M8 은 폐기됐으므로 그 행을 함께 고쳐야 한다.**
 
-### 1.1 제목 `main.tex:63` — M9
+### 1.1 제목 `main.tex:63` — M9 ✅ **반영 완료 (2026-09-01, T4 채택)**
 
-**현행**
+> **⚠ protan V1 을 근거로 반대 방향의 편재 주장을 하지 않는다.** protan 의 최대 영역은 두 파이프라인 모두 V1 로 안정하지만 유의성이 .007 에서 .077 로 내려가고(§0.4-B), 한 참가자에서 한 영역이 안정하다는 것이 **"참가자마다 다른 영역"** 을 뒷받침하지도 않는다.
 
-> Individual-specific distortion of cortical hue geometry in color vision deficiency informs personalized color correction
+### 1.2 초록 중간 `main.tex:89` — M7 ✅ **반영 완료 (2026-09-01)**
 
-**문제**: `Individual-specific` 이 정확히 무너진 주장이다. deutan V2 는 움직임 회귀에서 사라지고(.040 → .218) **시간 정렬을 파괴한 대조에서는 사라지지 않으므로**(.005) 상승분이 움직임에 귀속되며, 정본 arm 의 LOSO 추정량에서도 이미 비유의였다(.116). `CLAUDE.md` Policy 의 "specificity claim 금지" 와도 정면 충돌한다. `cortical hue geometry` 는 이미 정확하므로 유지한다.
+### 1.3 초록 마지막 `main.tex:89` — 14번 문장 삭제 ✅ **반영 완료 (2026-09-01)**
 
-> **⚠ protan V1 을 근거로 반대 방향의 편재 주장을 하지 않는다.** protan V1 은 세 arm 전부에서 유의하지만(§0.4-B), 한 참가자에서 한 영역이 견고하다는 것이 **"참가자마다 다른 영역"** 을 뒷받침하지는 않는다. 대비 대상인 deutan 쪽이 강등됐기 때문이다.
+## 1.5 `Methods/methods_v2.tex` — 두 파이프라인 서술 + §S1 해체 ✅ **반영 완료 (2026-09-02)**
 
-**후보**
+> **후속 수정 (2026-09-02, §5 검증 빌드 중 발견)**: 반영된 본문에 수식 모드 누락 2건이 있어 빌드가 실패했다. `:44` `(3840 \times 2160)` → `$3840 \times 2160$`, `:109` `(\hat{\mathbf{c}})` → `$\hat{\mathbf{c}}$` 로 정정 후 빌드 클린.
 
-| # | 문안 | 겨냥 |
-|---|---|---|
-| **T4** | From cortical hue-geometry distortion to individualized stimulus-space correction in color vision deficiency | **Imaging Neuroscience** — 두 기여를 모두 담음 |
-| T1 | Hue identity and hue geometry dissociate in the cortical color representation of color-vision-deficient observers | JNeurosci — 해리가 finding. `From A to B` 형식을 review 로 읽는 경향이 있어 선언형이 안전 |
-| T2 | Inverting an individual's cortical color representation into a stimulus-space correction filter | 방법 단독 강조 |
-| T3 | Preserved categorical decoding with disrupted continuous hue interpolation in color vision deficiency | 보수적 대안 |
+### (a) 본문 — `:70` 문단의 **마지막 네 문장만** 교체
 
-**`hue-representation` 은 쓰지 않는다.** 8색 범주 식별은 보존된다(정본 arm LORO 8분류 CVD 최저 셀 $0.375$ = chance $0.125$ 의 3배). "표상이 왜곡되었다"고 쓰면 살아 있는 절반까지 죽은 것으로 진술하게 되고, 이는 본 논문의 핵심 대비(해리)를 제목이 스스로 지우는 것이다.
+> **⚠ 앞 문장들은 손대지 않는다.** 정규화 서술(`Normalization to the ICBM 152 Nonlinear Asymmetric 2009c template (MNI152NLin2009cAsym) used a twelve-parameter affine transform (FLIRT) followed by nonlinear warping (FNIRT) ..., yielding 2\,mm isotropic BOLD data in MNI space.`)은 교체 대상이 **아니다.** 아래 문안의 `this composed transform` 이 그 문장을 받는다.
 
-### 1.2 초록 중간 `main.tex:89` — M7
+**교체 대상 (현행 마지막 네 문장)**: `Each functional volume was resampled once ...` 부터 `... (Supplementary~\S S1).` 까지.
 
-**현행**
+**교체**
 
-> All eight colors remained decodable from cortical activity in both CVD participants, whereas the continuous hue geometry departed from controls, **differently in each individual**.
+> Each functional volume was resampled once by this composed transform, without slice-timing correction, head-motion correction, susceptibility distortion correction, or spatial smoothing. Because a single transform served every volume in a run, the same spatial interpolation applied throughout. Head-motion correction composes a volume-specific rigid term with that transform. The resampling then attenuates high spatial frequencies and leaves a residual signal change that follows the estimated displacement, raising the error variance of each voxel time series \parencite{grootoonk2000}. Multivoxel pattern analysis operates on those per-voxel values, so every neural endpoint was computed under both pipelines and both are reported. The second pipeline estimated each volume's rigid term with MCFLIRT \parencite{jenkinson2002} and composed it with the normalization transform before the single resampling. The head-motion quality-control record appears in Supplementary~\S S1.
 
-**교체 — 한 문장으로 끝낸다**
+같은 문단 앞쪽의 `and no confound regression was applied at any stage (Supplementary~\S S1)` 절을 **삭제한다.** 런별 선형 표류 회귀자가 실제로 존재하므로 그 전칭 부정은 틀렸다. 표류 회귀자 서술은 §S1 로 옮긴다.
 
-> All eight colors remained decodable from cortical activity in both CVD participants, whereas the continuous hue geometry departed from controls in both.
+**설계 의도 다섯.**
 
-**`differently in each individual` 삭제는 필수** — §0.5 금지 표현 `individually distinct pattern of distortion` 에 해당하고 `CLAUDE.md` Policy 의 "specificity claim 금지" 와 정면 충돌한다.
+1. **동기를 주장하지 않는다.** 종전 초안의 `keeps the interpolation error constant over time, which we preferred` 는 오차를 관측한 뒤 방법을 골랐다는 뜻이 되고 그런 설계 기록이 없다. 새 문안은 **연산의 성질과 문헌에 확립된 사실만 진술한다.**
+2. **왜 이 분석에서 문제인지를 한 문장이 진다.** `Multivoxel pattern analysis operates on those per-voxel values` 가 앞 문장의 두 결과(고공간주파수 감쇠, 복셀 시계열 오차분산 증가)를 본 분석의 측정량에 연결한다. 이 연결이 없으면 독자는 그 두 사실을 왜 제시했는지 알 수 없다.
+3. **결론은 선택이 아니라 양쪽 보고다.** `every neural endpoint was computed under both pipelines and both are reported`. 두 파이프라인을 싣는 이상 정본 선택을 방어할 부담이 없다.
+4. **QC 포인터를 분리했다.** 마지막 문장이 따로 선다.
+5. 세미콜론과 콜론, 엠대시를 쓰지 않는다.
 
-**방향 대비는 초록에 넣지 않는다.** $\hat\beta_c$ 는 정본 arm 에서만 두 참가자의 부호가 갈린다(deutan $-42 / -48$ · protan $+24 / -24$ — `motreg` 에서는 둘 다 음수). 초록에서 개인화를 지탱하는 것은 8번 문장의 `each`(참가자별 적합)이지 방향 대비 finding 이 아니며, 이것이 C5(개인차 = 프레임워크 속성)와도 맞는다. 방향 대비는 **Results §2.5 (M3)** 에 arm 단서와 함께 남는다.
+### (b) 용어 · 보간 우려의 문헌 근거
 
-### 1.3 초록 마지막 `main.tex:89` — 14번 문장 삭제
+`realignment` 와 `head-motion correction` 은 영문에서 같은 것을 뜻하며 둘 다 추정과 적용을 함께 가리킨다. **본문은 `head-motion correction` 으로 통일**한다. `applywarp` 는 리샘플링 엔진일 뿐 그 자체가 보정이 아니다. 두 파이프라인의 차이는 볼륨 $i$ 에 적용되는 변환이며 Primary 는 $T$, 재정렬판은 $T \circ R_i$ 다. `applywarp` 호출은 둘 다 볼륨당 1회다.
 
-```diff
-  This study identifies a previously uncharacterized geometric distortion of the cortical color representation in CVD and introduces, to our knowledge, the first cortically grounded framework for individualized color correction.
-- Systematic studies can quantify these distortions and provide a new class of personalized filters.
-```
+**문헌 확인 결과 (2026-09-02) — 절반만 지지된다.**
 
-**사유**: `can quantify ... and provide` 는 **약속**이다. 한계는 11·12 번이 이미 말했으므로 **13번(기여 진술)에서 끝낸다.**
+| 명제 | 판정 |
+|---|---|
+| 재정렬의 리샘플링이 보간 오차를 남기고, 그 오차가 **추정 변위를 따른다** | **지지됨.** Grootoonk et al. (2000) 이 시뮬레이션 변위로 이 인공물을 특성화했고, 보정식이 **추정 변위의 주기 함수**라는 점이 시변성을 함의한다 |
+| 그 오차가 **복셀 시계열의 오차분산을 키운다** | **지지됨.** 같은 논문 서론 — *"the detection of true activations may be impaired due to the increase in error variance"* |
+| 보간이 **고공간주파수 정보를 깎는다** | **지지됨.** 같은 논문 50쪽 — *"removes some high spatial frequency information from the image"* |
+| **평활화·보간이 MVPA 디코딩을 해친다** | **확립되지 않음.** 문헌이 갈린다. Op de Beeck (2010) 은 LOC 물체와 V1 방위에서 평활화가 성능을 떨어뜨리지 않는다고 보고하고, 다른 연구들은 V1 방위·안구우세에서 낮아진다고 보고한다. **정보의 공간 스케일에 따라 갈리므로 근거로 쓰지 않는다** |
 
-**13번은 손대지 않는다.** `identifies a previously uncharacterized geometric distortion` 은 `CLAUDE.md` 가 기여 1 을 **finding** 으로 규정한 것과 일치하고, 순위 근거가 두 arm 모두에서 살아 있다(범주 식별 최저 셀 deutan V1 hmc $0.229$ vs chance $0.125$).
+**→ 문안 판정.** (a) 문안은 확립된 세 명제만 인용하고, MVPA 는 **그 결과가 본 분석의 측정량에 닿는 이유**를 설명하는 데만 쓴다. 디코딩 성능 손해를 주장하지 않는다.
 
----
+**본 자료의 실측 둘은 §S1 에 싣되 선택의 근거로 쓰지 않는다.** ROI tSNR $-1.97\%$(V1 $-2.69$, V2 $-1.88$, V3 $-1.66$, hV4 $-1.75$), 런 부트스트랩 95% CI 평균 폭이 hV4 에서 $0.206 \to 0.255$(4개 ROI 중 3개에서 증가). 산출 `results/boot_runs_{with_residuals,hmc_v2}.json`.
 
-## 1.5 `Methods/methods_v2.tex` — 재정렬 미적용 근거 ★ **신규** (등급: 필수)
+**금지 표현**: `realignment would have introduced noise`(반사실 단정), `motion was negligible`(방어 불가), `smoothing degrades decoding`(문헌 미확립).
 
-> 2026-08-24 신설. §0.4-A 결정의 이행 항목이다. **이 문단이 없으면 재정렬 미적용이 서술되지 않은 채 남는다.**
+**추가 인용 필요**: `grootoonk2000` 이 `bibliography.bib` 에 없다. PDF 는 `docs/Prior_works/Preprocessing/Grootoonk(2000)_interpolation_realignment.pdf`, NotebookLM `ColorBlind_comprehensive` 에 등록됨. DOI `10.1006/nimg.1999.0515`.
 
-### (a) 본문 문안
+### (c) §S1 은 삭제한다
 
-기존 움직임 관련 서술 뒤(움직임 파라미터 산출을 기술한 자리)에 넣는다.
+§S1 `Confound Regression and Temporal Filtering` 은 본문 `:70` 한 문단이 두 번 가리키는 것이 전부이고(다른 참조 0건), 내용은 전부 갈 곳이 있다.
 
-> Head-motion realignment was not applied. Mean framewise displacement was 0.24--0.38 mm across participants, and the maximum displacement from each run's reference volume was at most 0.37 voxel (0.74 mm). Realignment requires a separate resampling for each volume, so its interpolation error varies over time, whereas a single transform applied to every volume leaves an error that is constant over time and largely cancels in the multivariate pattern. Because the representational geometry analysed here is carried by fine-grained voxel patterns, we judged that cost to exceed the benefit at this displacement magnitude. Motion was instead addressed in the temporal domain, by adding the six motion parameters and their temporal derivatives to the second-level design matrix in a sensitivity analysis (Supplementary~\S S2).
+| §S1 의 내용 | 행선지 |
+|---|---|
+| MCFLIRT 추정 + FD 분포 · $16.2\%$ | **§S2** (파이프라인 절의 QC 문단) |
+| `served as a quality-control record only, ... resampled once` | **삭제** (본문·§S2 와 삼중 중복) |
+| 필드맵 미소비로 왜곡이 남는다 | **§S2** (§4.0 과 한자리) |
+| 표류 회귀자 · 시간 필터링 없음 | **§S2** |
 
-**마지막 문장을 반드시 붙인다.** *"적용하지 않았다"* 로 끝내면 태만으로 읽히고, *"대신 시간축에서 다뤘다"* 로 넘겨야 리뷰어의 다음 질문이 부록으로 이어진다.
+**§S2 의 제목도 바꾼다.** 재정렬판을 함께 보고하므로 `Uncorrected acquisition artifacts` 는 맞지 않는다. `Preprocessing pipelines and sensitivity analyses` 류로 바꾸고 그 아래에 파이프라인 정의, QC 기록, 종점 2열 표를 둔다.
 
-### (b) 어휘 규칙
+**번호 당기기는 맨 마지막에 한 번에 한다.** S2–S21 → S1–S20. 대상은 상호참조 **19건**(S2·S5·S7·S8·S10·S11·S12·S15·S18·S19·S21)과 제목 20개다. §S1 을 가리키는 2건은 삭제되는 문단 안에 있어 별도 조치가 필요 없다. 먼저 하면 이 문서의 §4.x 앵커가 전부 무효가 되므로 §4.x 반영이 끝난 뒤에 한다(순서 표 5단계).
 
-| 금지 | 사유 | 허용 |
-|---|---|---|
-| `we omitted a standard step` | 태만하게 읽힌다 | `was not applied`, 그리고 곧바로 근거 |
-| `realignment would have introduced noise` | 반사실 단정 | `requires a separate resampling for each volume, so its interpolation error varies over time` |
-| `motion was negligible` | 방어 불가 | 실측치를 그대로 제시 |
-| `tSNR was lower, so we did not apply it` | **본문에 쓰지 않는다.** 품질 수치는 §S2 에 둔다 | 본문은 변위 크기와 보간 논거만 |
+### (d) 연쇄 — §4.9 와의 정합
 
-### (c) 본문에 넣지 않는 것
+세션 2 통일 arm 은 재정렬을 포함해 처리됐다. **2 arm 결정으로 이 문제가 해소된다.** 원고가 재정렬판을 정식으로 보고하므로 세션 2 통일 arm 이 그것을 포함하는 것과 어긋나지 않는다. §4.9 문안에서 앵커가 어느 파이프라인인지만 명시하면 된다.
 
-**tSNR $1.7$–$3.0\%$ 하락은 §S2 에 둔다.** 본문 Methods 는 `0.37 복셀` 하나로 충분하고, 그 값은 MCFLIRT 파라미터에서 직접 나오므로 어떤 재구성 산출물도 인용하지 않는다.
-
-### (d) 연쇄 확인 — §4.9 와의 정합
-
-세션 2 통일 arm 은 재정렬을 **포함해** 처리됐다(§0.4-E). 위 문안이 `not applied` 라고 적는 대상은 **정본 파이프라인(세션 1)** 이므로 모순이 아니지만, §4.9 문안에서 그 구분이 독자에게 보여야 한다. 두 문안을 **같은 회차에 함께 확정할 것.**
-
-**산출 근거**: `analysis/phase0_preprocessing/hmc_reanalysis/server_recovered/README.md`(코드 감사 · 항등 검사), `analysis/phase0_preprocessing/results/hmc_summary.csv`(tSNR · ROI 겹침), `*_desc-motion.par`(변위).
+**산출 근거**: `future_phase1_sensitivity/README.md`(arm 정의 · 종점), `analysis/phase0_preprocessing/results/hmc_summary.csv`(tSNR), `PREPROCESSING_FINAL_REPORT.md`(FD), `results/sub07_leaveout_hV4.json`(순위).
 
 ---
 
 ## 2. `Results/results_v4.tex`
 
-### 2.1 `:38` 뒤 — B · 강건성 단서 ⚠ **철회 (2026-08-24)**
+### 2.1 `:38` 뒤 — hV4 단독성의 재현 단서 ✅ **반영 완료 (2026-09-02)**
 
-> **종전 안**: ICC$_{2,1} = 0.83$ 을 본문에 올려 hV4 단독성의 두 번째 독립 축으로 삼는다.
->
-> **철회 사유**: 그 값은 정본과 `hmc_v2` 사이에서만 성립하고, `motreg` 로 바꾸면 통제군 $n{=}7$ 에서 V2($0.826$)가 hV4($0.634$)를 앞선다. arm 내부 split-half 로 바꿔도 hV4 와 V2 차이가 $0.02$ 다. 게다가 $n{=}9$ 값은 CVD 두 명의 극단값이 피험자 간 분산을 키워 부풀린 것이다. 전체 근거는 **§0.4-C**.
+### 2.2 `:40` — CVD hV4 단일사례 (§2.9 와 **한 항목**) ✅ **반영 완료 (2026-09-02)**
 
-**대체 조치 — 한 문장은 여전히 넣는다. 근거만 바꾼다.**
+> **⚠ 나누어 적용하지 말 것.** 유의성 철회와 순위 진술은 **한 덩어리로 들어가야 유효하다.** 부정문만 먼저 반영되면 그 문단이 순수한 철회로 읽히고 결손 주장 자체가 사라진 것처럼 보인다.
 
-> This localization held under motion regression and under the time-shifted control (Supplementary~\S S2); no other retinotopic region exceeded its color-label null in any arm.
+**⚠ 다시 넣지 말 것**: *"두 참가자는 어느 arm 에서도 개인 수준 관문을 통과하지 못했다"*. 개인 색라벨 순열은 **통제군도 7명 중 5명이 실패한다.** 통과율 2/7 이면 참가자 2명에서 기대 통과 수가 0.57 이므로 0 을 관측하는 것은 통제군 통과율과 완전히 양립한다. 정보가 없는 절이면서 집단 관문과 나란히 놓여 대비처럼 읽힌다.
 
-**근거**: 이것은 ICC 없이 성립하며, 실제로 세 arm 에서 세 번 반복된 검정이다(`.011` / `.013` / `.002`). 흔들리는 보조 지표를 덧붙이는 것보다 안전하다.
+### 2.3 `:29`–`:56` — 1·2번 소절을 병합해 해리를 헤드라인으로 ✅ **반영 완료 (2026-09-02)**
 
-### 2.2 `:40` — M4 · CVD hV4 단일사례
+**⚠ `in both CVD cases` 를 반드시 붙인다 (2026-09-02 정정).** 한정 없이 쓰면 **통제군 결과와 어긋난다.** 이 소절은 통제군이 **hV4 에서만 보간에 성공한다**는 것을 함께 보고하므로, hV4 를 무조건 실패 영역으로 읽히게 하는 제목은 자기 소절을 반박한다. `fails` 도 `falls to chance` 로 바꿨다. deutan 0.250 은 chance 0.25 와 같고 protan 0.125 는 그 아래다.
 
-**현행 마지막 문장**
+**⚠ 색별 문단(`:38`)에 넣지 않는다 (2026-09-02 정정).** 그 문단은 어느 색이 결손을 이끄는지를 다루고 `hue vulnerability profile` $\mathbf{v}$ 를 정의해 적합 단계로 넘긴다. 소절 전체의 결론을 그 안에 두면 흐름이 끊긴다. 해리 진술에 필요한 두 근거(범주 식별 보존, 보간 저하)는 `:30` 과 `:36` 에서 모두 제시되므로 `:36` 끝이 제자리다.
 
-> The deutan $p$-value reflects the power of a single-case test against $n = 7$ controls.
+### 2.3b `:32` — 인코더 전이 문단의 결론 문장 ✅ **반영 완료 (2026-09-02)**
 
-**교체** (앞의 수치는 그대로 둔다)
+**⚠ 과대 진술 금지.** `common representational code` 나 `identical representation` 으로 쓰지 않는다. 검정된 것은 **채널-복셀 가중 행렬의 전이**이지 두 집단의 기하가 같다는 것이 아니며, 논문의 나머지가 기하 차이를 다룬다.
 
-```diff
-- The deutan $p$-value reflects the power of a single-case test against $n = 7$ controls.
-+ The magnitude of this reduction was sensitive to preprocessing. Neither single-case contrast reached significance once motion parameters were added to the design matrix, although the control-level interpolation architecture was unchanged (Supplementary~\S S2).
-```
+### 2.4 `:60` — disparity 소절 압축 ✅ **반영 완료 (2026-09-02)**
 
-**근거**: 현행 문장은 유의성 미달을 **검정력** 탓으로 돌린다. 그 설명은 틀렸다. 원인은 **효과크기 축소**이며, 움직임 회귀 arm 에서 $d_{cc}$ 가 protan $-3.25 \to -0.95$, deutan $-2.02 \to -1.23$ 로 줄어든다. 통제군을 늘려도 해소되지 않는다.
+**⚠ `(Figure~\ref{fig:geometry}B)` 에서 `B` 를 뺄 것.** 그 그림에는 패널이 없다. 사유는 §5.3.
 
-**⚠ `motshift` 를 이 문장에 끌어들이지 않는다.** 대조 arm 에서 protan 은 $p$ = .056 으로 오히려 정본에 가깝다. 대조는 **회귀자 추가 비용**을 재는 장치이므로 강건성 진술의 근거가 아니다. 세 arm 값은 표에만 둔다.
+**⚠ 그림은 본문에 남긴다.** 사유와 캡션 프레임 변경은 §0.7-D.
 
-### 2.3 `:56` — M1 · 소제목
+### 2.5 `:66` — 기여 2 로 넘어가는 다리 (방법 프레임) ✅ **반영 완료 (2026-09-02)**
 
-```diff
-- \subsection{Geometric deviation localizes to a distinct ROI in each CVD case}
-+ \subsection{Hue geometry departs from the control reference in both CVD cases}
-```
+**⚠ `differ ... in direction` 에 붙일 단서**: $\hat\beta_c$ 부호 대비($-42$ 대 $+24$)는 Primary 한정이다. 단서는 §3.2(a) 의 한 절이 진다. **§2.5 와 §3.2(a) 를 같은 회차에 반영할 것.**
 
-### 2.4 `:60` — M2 · 첫 문장
+### 2.6 `:195`–`:199` — 8AFC 를 독립 종점으로 분리 ✅ **반영 완료 (2026-09-02)**
 
-**현행**
+**⚠ deutan 에서 두 필터가 동등했다는 사실을 같은 문단에 둔다.** 첫 문장의 `improved equally under both` 가 그 역할을 진다. 이것이 없으면 protan 한 칸만 읽혀 개인화 우위 주장으로 오해된다.
 
-> Elevated Procrustes disparity **localized to a different ROI** in each CVD participant, V1 in the protan participant and V2 in the deutan participant (Figure~\ref{fig:geometry}B).
+### 2.7 protan orange–yellow 트랙 불일치 — 본문 미수록
 
-**교체 (2026-08-24 개정 — 두 셀의 지위가 다르다)**
+전체 104개 쌍 중 1개 셀이고 주장에 영향이 없다. 초록의 protan 근거는 **green–blue** 이며 그 쌍은 두 트랙이 정상 수렴한다(0.135 / 0.080). 수렴 트랙만 쓰면 $z$ 가 $+1.33 \to -0.58$, 평균 $\lvert z\rvert$ 가 $0.93 \to 0.84$ 로 **저자에게 유리한 방향**이므로 평균을 유지하는 현행이 보수적이다.
 
-> Procrustes disparity from the healthy-control reference was elevated in both CVD participants, at V1 in the protan participant and at V2 in the deutan participant (Figure~\ref{fig:geometry}B). The protan V1 elevation held under motion regression and under the time-shifted control ($p = .007$, $.004$, $.005$; leave-one-subject-out $p = .045$, $.022$, $.031$). The deutan V2 elevation did not: it was removed by motion regression ($p = .218$) but not by the same regressors after their temporal alignment with the data was destroyed ($p = .005$), which places the elevation on motion-aligned variance, and it was already a non-significant trend under the leave-one-subject-out estimator in the primary arm ($p = .116$). We therefore report the deutan V2 elevation descriptively (Supplementary~\S S2).
-
-**⚠ 두 참가자를 대비시키지 않는다.** 위 문안은 **각 셀을 그 자체로** 서술한다. "protan 은 견고하고 deutan 은 아니다" 로 읽히도록 병치하면 §0.5 금지 표현(`localized to a different area in each`)의 변형이 된다.
-
-### 2.5 `:66` — M3 · 기여 2 로 넘어가는 다리 ★ 최우선
-
-**현행**
-
-> The two CVD participants differ in where the deviation lies and in how strong it is. **Because each deviation is participant-specific**, a single family-level correction would match only one of them. In each participant the continuous arrangement of hues is displaced in a direction and magnitude specific to that individual, which a personalized correction must therefore offset.
-
-**문제**: 개인화 필요성 논거 전체가 **ROI 편재에 얹혀 있다.** 그 근거가 무너지면 기여 2 의 도입부가 함께 흔들린다.
-
-**교체 — 안정적인 근거로 다리를 다시 놓는다**
-
-> The two participants' deviations differ in magnitude and in the direction of the fitted hue rotation (Section~\ref{sec:results:twocomp}), and their elevated discrimination thresholds lie on different confusion axes (Section~\ref{sec:results:jnd}). A single family-level correction would therefore match only one of them.
-
-**근거**: 적합된 $\hat\beta_c$ 의 차이($-42°$ vs $+24°$)와 심리물리 역치 축 차이는 **disparity ROI 와 독립**이고 arm 교란에 노출되지 않는다. 필터 표적 ROI 도 disparity 가 아니라 **held-out test-loss** 로 선정됐다. 개인화 논거를 그쪽으로 옮긴다.
-
-> **단, deutan 만 강건성 검증을 통과했다** (§3.2 · §4.7 참조). protan $\hat\beta_c$ 는 움직임 회귀에서 부호가 바뀌므로($+24 \to -24$, 재표집 지지집합이 부호에서 겹치지 않음), 이 문장은 **fitted direction 이 다르다**는 관측 진술에 머물러야 하고 "각자 안정적으로 식별된 왜곡"으로 읽히면 안 된다.
-
-### 2.6 `:195` `:197` 뒤 — 8AFC 독립 종점 격상 (신규 문단)
-
-**현행**: 8AFC 가 JND 문단 **끝 한 문장**으로 묻혀 있다.
-
-**문제**: 8AFC 는 **적합 손실에 들어가지 않은 유일한 행동 종점**이다. JND 는 $L_\gamma$ 원자로 적합에 기여했으므로 전향적이되 **독립은 아니다.** 가장 방어하기 쉬운 결과가 가장 눈에 안 띄는 자리에 있다.
-
-**방향**: JND 문단에서 8AFC 문장 두 개를 **빼내 독립 문단**으로 만들고, `held out from the fitting loss` 를 명시한다. 새 계산 없음.
-
-**문안**
-
-> \paragraph{Identification accuracy, held out from the fitting loss.}
->
-> Eight-alternative color identification entered neither the behavioral nor the neural fitting term, so it provides a prospective test that is independent of the loss the filters were derived from. In the deutan participant identification rose from $0.81$ (95\% CI $[0.70, 0.89]$) to $0.97$ ($[0.89, 0.99]$) under both filters. In the protan participant identification was at ceiling without a filter ($1.00$, $[0.94, 1.00]$) and remained at $0.98$ ($[0.92, 1.00]$) under the individualized filter, whereas it fell to $0.86$ ($[0.75, 0.92]$) under the deployed comparator (Wilson score intervals, $n = 64$).
-
-**주장 위계 — 이 문단에 쓸 수 있는 것과 없는 것**
-
-| 금지 | 허용 |
-|---|---|
-| `individual-specific effect` | `individually derived filter` · `within-person prospective effect` |
-| `restores / normalizes cortical representation` | `produced measurable changes in` |
-| `outperforms deployed filters` | `differed from the deployed comparator in ...` |
-| protan: `robustly identified distortion 의 inverse 검증` | `preprocessing-contingent production model 에서 파생되어 사전 동결된 필터의 전향적 시험` |
-
-### 2.7 `:197` + §S19 — E · protan orange–yellow 트랙 불일치 각주
-
-sub-09 개인화 조건의 orange–yellow 트랙이 다른 트랙과 어긋난다는 사실을 각주로 공개. (등급: 권장)
-
-**문안** (`results_v4.tex:197` 문단 끝 각주 또는 §S19)
-
-> In the protan participant one of the two staircases for orange--yellow diverged from its partner under the individualized filter, settling four times higher after answering correctly at a separation four times smaller earlier in the same block. The pair's partner staircase converged normally on the same rendered stimuli, which excludes a rendering failure, and the remaining seven pairs of that block match the participant's own baseline. The pair is reported on the average of both staircases, as everywhere else; using the converged staircase alone moves it from $z = +1.33$ to $z = -0.58$ and the mean $|z|$ from $0.93$ to $0.84$.
-
-**근거**: 트랙 불일치 0.0813 은 **전부 이 한 쌍에서 온다** — orange–yellow 를 빼면 0.0193 으로 본인 기준선 0.0156 과 같은 수준. 후보 원인 5개 중 gamut/렌더링 결함은 **탈락**(sc1 이 같은 자극에서 0.170 으로 정상 수렴 — 렌더링 실패라면 두 트랙이 함께 망가진다), 범위 절단도 탈락(최대 0.80 < 상한 0.95). 남는 것은 **단일 트랙 lapse**(같은 트랙에서 0.20 정답 → 0.80 오답).
-
-**값을 조정하지 않는다.** 208개 중 이 한 트랙만 문제이므로 제외 규칙을 세우면 사후적으로 보이고, 조정 방향이 결론에 유리한 쪽이라 더 그렇다. **평균 유지 + 전량 공개**가 방어 가능한 선택이다. 초록 근거인 green–blue 는 두 트랙 모두 정상 수렴(0.135 / 0.080)이라 **영향 없음**.
-
-### 2.8 Results §3.2 첫머리 — Q1 해석 범위 진술 ★
-
-all-ROI sensitivity 표(§5.2)를 **싣기로 했으므로** 그 앞에 해석 범위를 선언한다.
-
-> Throughout, we interpret two quantities: the control-level localization of continuous hue interpolation, which is stable across preprocessing arms and across the color-label permutation gate, and the fitted filter parameters together with their psychophysical evaluation, which do not depend on preprocessing. The full region $\times$ arm grid is reported in Supplementary~\S S2 for completeness; individual cells within it are descriptive and are not used to support any claim in the main text.
-
-**근거**: 표를 실으면 리뷰어는 **본문이 주장하지 않는 셀**(예: 대조 arm 에서 유의해지는 deutan V1 $p$ = .016, deutan V2 $p$ = .005)을 반드시 본다. 이 문장이 **표의 존재가 곧 주장이 아님을 사전에 선언**하고, 표 아래 문장이 그 셀을 막는다. 두 문장이 함께 있어야 "전부 공개했으나 본문은 견고한 것만 딛고 선다"가 성립한다.
-
-**⚠ 문안 수정**: 종전 초안의 `stable across preprocessing arms` 는 arm 이 넷이라는 전제였다. 셋으로 바뀌었으므로 `across the motion arms reported in Supplementary~\S S2` 로 적는다.
+**이관처 = §4.6b (§S12 쌍별 스테어케이스 전수 표 + 표 아래 설명).** 전수 표를 실으면 독자가 직접 보고 판단하므로 각주보다 정보가 많고 선택적으로 읽히지 않는다.
 
 ---
 
-### 2.9 `:40` 뒤 — 순위 배치 (2026-08-24 · rev.3 에서 3-arm 으로 개정) ★
+### 2.8 Results 해석 범위 진술 — ✅ **개정 반영 (2026-09-02 2차): 서두 문단 철회, 내용 분산 배치**
 
-**왜 필요한가.** §2.2(M4)가 CVD hV4 결손의 **유의성**을 정본 arm 한정으로 내려놓는다. 그 문장만 두면 결손 주장 자체가 사라진 것처럼 읽힌다. 유의성 아래에 **전 arm 불변인 층위**를 깔아야 한정이 부정으로 넘어가지 않는다. C3 서술안의 세 번째 요소가 이것이다.
+### 2.9 순위 배치 — **§2.2 의 근거** (문안 없음)
 
-**§2.2 교체문 바로 뒤에 넣는다**
+> 문안은 §2.2 에 통합돼 있다. 이 절은 그 문장 3의 근거표와 단서만 담는다.
 
-> What did not depend on preprocessing was the placement of the two participants within the control range. In all three arms both CVD participants scored below the control mean, at most one of the seven controls scored below either of them, and the control group passed the group-level interpolation gate in every arm while neither CVD participant passed the individual-level test in any arm.
+**출처**: `future_phase1_sensitivity/results/sub07_leaveout_hV4.json`. 종전 판이 적은 `perm_adjacent_arm_*.json` 의 `per_subject` 는 **존재하지 않는다**. 그 파일들은 ROI별 HC 집단 게이트만 담는다.
 
-**근거 (`results/perm_adjacent_arm_*.json` 의 `per_subject` 에서 집계)** — hV4 LOCO adjacent accuracy
+**hV4 LOCO adjacent accuracy**
 
-| arm | 통제군 평균 | 통제군 7명 (오름차순) | deutan | 그 이하 통제군 | protan | 그 이하 통제군 |
+| | 통제군 평균 | 통제군 7명 (오름차순) | deutan | 그 이하 통제군 | protan | 그 이하 통제군 |
 |---|---|---|---|---|---|---|
-| `with_residuals` | 0.456 | .312 .375 .400 .438 .521 .562 .583 | 0.250 | **0/7** | 0.125 | **0/7** |
-| `motreg` | 0.458 | .250 .312 .396 .417 .600 .604 .625 | 0.271 | **1/7** | 0.312 | **1/7** |
-| *`motshift`* | 0.483 | .354 .375 .400 .458 .500 .583 .708 | 0.375 | **1/7** | 0.229 | **0/7** |
+| Primary | 0.456 | .312 .375 .400 .438 .521 .562 .583 | 0.250 | **0/7** | 0.125 | **0/7** |
+| Realignment | 0.451 | .333 .333 .375 .438 .450 .583 .646 | 0.354 | **2/7** | 0.271 | **0/7** |
 
-**⚠ 문구 정밀도 — 세 가지를 지킬 것.**
+**⚠ 문구 정밀도 둘.**
 
-1. **"below the control distribution" 로 쓰지 않는다.** `motreg` 에서 protan 0.312 는 통제군 최솟값 0.250 보다 **높고**, `motshift` 에서 deutan 0.375 도 최솟값 0.354 보다 높다. 참인 진술은 **통제군 평균 아래**이지 분포 전체 아래가 아니다.
-2. **동률 처리를 각주로 밝힌다.** 위 표는 **엄격 부등호**다(최대 1/7). 동률을 포함해 세면 `motreg` protan 과 `motshift` deutan 이 각각 2/7 이 된다. 어느 규칙이든 결론은 같으나 **하나를 골라 명시**한다.
-3. **`motshift` 는 대조로 표기한다**(§0.4-D). 세 번째 행을 독립 arm 처럼 세면 안 된다.
+1. **"below the control distribution" 로 쓰지 않는다.** 재정렬 파이프라인에서 deutan 0.354 아래에 통제군이 둘 있다(0.333, 0.333). 참인 진술은 **통제군 평균 아래**다. protan 만 두 파이프라인 모두 분포 전체 아래다.
+2. **동률은 없다.** 위 네 칸 모두 엄격 부등호로 세었고 동률 셀이 없으므로 각주가 필요 없다.
 
-**부수 확인 1 — sub-07 저커버리지는 이 결론을 흔들지 않는다 (2026-08-24 신규).** sub-07 의 hV4 는 아틀라스 70복셀 중 16복셀만 남고 사용 가능한 런도 6개 중 5개다. 그러나 그 피험자의 hV4 성적은 세 arm 에서 .400 / .600 / .400 으로 **통제군 평균 근처이거나 그 위**이고(`motreg` 에서는 7명 중 2위), 제외해도 게이트가 유지된다.
+**부수 확인 1 — sub-07 저커버리지는 이 결론을 흔들지 않는다.** sub-07 의 hV4 는 아틀라스 70복셀 중 16복셀만 남는다. 그러나 Primary 에서 그 피험자의 hV4 성적은 0.400 으로 통제군 평균 근처이고, 제외해도 게이트가 유지된다(.011 → .008, deutan .054 → .063, protan .011 → .017). 산출 `results/sub07_leaveout_hV4.json`.
 
-| arm | 통제군 평균 $n{=}7 \to n{=}6$ | 게이트 $p$ | deutan $p$ | protan $p$ |
-|---|---|---|---|---|
-| `with_residuals` | 0.456 → 0.465 | .011 → **.008** | .054 → .063 | .011 → .017 |
-| `motreg` | 0.458 → 0.434 | .013 → .041 | .148 → .183 | .204 → .246 |
-| *`motshift`* | 0.483 → 0.497 | .002 → .002 | .229 → .219 | .056 → .061 |
+다만 처리 방식이 분석마다 다른 것은 별개 문제다. SRM 계열은 같은 피험자의 hV4 를 결측으로 빼고 LOCO 는 넣는다. **Methods 에 규칙과 근거를 한 문장으로 명시할 것.**
 
-**"저커버리지 피험자가 통제군 보간 성적을 끌어내려 결손이 과장됐다"는 반론은 성립하지 않는다.** 산출 `results/sub07_leaveout_hV4.json`, 스크립트 `scripts/_sub07_leaveout.py`.
+**부수 확인 2 — 효과크기로는 대체할 수 없다.** Crawford–Garthwaite 비중심 $t$ 구간($n=7$).
 
-다만 처리 방식이 분석마다 다른 것은 별개 문제다. SRM 계열은 같은 피험자의 hV4 를 결측으로 빼고 LOCO 는 넣는다. **Methods 에 규칙과 그 근거를 한 문장으로 명시할 것.**
-
-**부수 확인 2 — 효과크기로는 대체할 수 없다 (2026-08-24 신규).** 단일사례 효과크기에 Crawford–Garthwaite 비중심 $t$ 구간을 붙이면 이렇게 된다($n=7$).
-
-| arm | case | $d_{cc}$ | 95% CI |
+| | case | $d_{cc}$ | 95% CI |
 |---|---|---|---|
-| `with_residuals` | deutan | $-2.02$ | $[-4.33,\ +0.42]$ |
-| `with_residuals` | protan | $-3.25$ | $[-5.93,\ -0.41]$ |
-| `motreg` | deutan | $-1.23$ | $[-3.38,\ +1.02]$ |
-| `motreg` | protan | $-0.95$ | $[-3.08,\ +1.24]$ |
-| *`motshift`* | deutan | $-0.85$ | $[-2.96,\ +1.33]$ |
-| *`motshift`* | protan | $-2.00$ | $[-4.30,\ +0.44]$ |
+| Primary | deutan | $-2.02$ | $[-4.33,\ +0.42]$ |
+| Primary | protan | $-3.25$ | $[-5.93,\ -0.41]$ |
+| Realignment | deutan | $-0.80$ | $[-2.91,\ +1.38]$ |
+| Realignment | protan | $-1.48$ | $[-3.68,\ +0.82]$ |
 
-**0 을 넘지 않는 유일한 칸조차 구간이 $[-5.93,\ -0.41]$ 로 하한과 상한이 14배 차이 난다.** 이 표본에서 효과의 **크기는 추정되지 않는다.**
+**0 을 넘지 않는 유일한 칸조차 구간이 $[-5.93,\ -0.41]$ 로 하한과 상한이 14배 차이 난다.** 재정렬 파이프라인에서는 두 칸 모두 0 을 포함한다. 이 표본에서 효과의 **크기는 추정되지 않는다.** (산출: `scipy.stats.nct` 비중심 $t$ 역산, $n=7$. Primary 두 칸이 발표본 값과 일치해 계산 방식이 검증됨)
 
-→ **조치**: 효과크기를 유의성의 대체물로 쓰지 않는다. 구간은 §S2 에 싣되(리뷰어가 직접 계산할 수 있는 양이므로 선제 공개가 안전하다) 본문에는 **"the magnitude of the reduction is not estimable at this sample size"** 한 구를 붙인다. 주장을 지는 것은 **순위 배치**이며, 순위 진술은 분포 가정도 구간도 필요 없어 표본이 작을수록 상대적으로 유리한 유일한 형태다.
+→ **조치**: 효과크기를 유의성의 대체물로 쓰지 않는다. 구간은 §S1 에 싣는다. 본문 대응구는 §2.2 문장 1의 `at this sample size the size of the reduction is not estimable` 이다. 주장을 지는 것은 **순위 배치**이고, 순위 진술은 분포 가정도 구간도 필요 없어 표본이 작을수록 상대적으로 유리한 유일한 형태다.
 
-### 2.10 `:66` 주변 — sub-09 V1 의 45° 회전 (신규 · 2026-08-24) ★ 기여 1 → 기여 2 의 실질적 다리
+### 2.10 sub-09 V1 의 45° 순환이동 — Results 미수록
 
-**왜 필요한가.** 현행 원고는 "기하가 왜곡되어 있다"(기여 1)와 "그 왜곡을 hue 회전 2성분으로 모형화해 역산한다"(기여 2)를 **주장으로만** 잇는다. 왜곡이 실제로 **회전**이라는 직접 증거가 본문에 없다. sub-09 V1 의 순환이동 결과가 정확히 그 증거이고, 지금 내부 문서에만 있다.
-
-**소견**: sub-09 의 V1 기하는 항등 대응에서 9명 중 disparity 가 가장 높지만($d$ = 1.037, $z_{cc}$ = $+2.28$), **hue 를 한 단계(45°) 돌려 대응시키면 0.788 로 통제군 평균 아래로 내려간다**($z_{cc}$ = $-0.59$). 기하가 무너진 것이 아니라 **회전되어 있다**는 뜻이다. 같은 사실이 `p_perm` = .758(항등 기준 색 특이성 없음)의 정체를 설명한다.
-
-**본문 문안 (Results, 기하 절 끝 · 기여 2 로 넘어가기 직전)**
-
-> The elevated disparity in the protan participant's V1 was not a loss of structure but a rotation of it. Rematching the eight hues under a one-step ($45^\circ$) cyclic shift reduced the disparity from $1.04$ to $0.79$, below the control mean, whereas the identity correspondence gave the highest value of any participant. Across the eight possible shifts the protan gain exceeded the control distribution of best-shift gains ($24.0\%$ vs $3.5 \pm 5.9\%$, $p = .009$), and both the optimum shift and its excess reproduced under motion regression ($19.2\%$, $p = .025$). The deutan participant's optimum was the identity in every region. This is the empirical form the two-component model inverts.
-
-**근거 (신규 검정, 2026-08-24)** — 최적이동 이득 = $(d[\text{항등}] - d[\text{최적}])/d[\text{항등}]$, Crawford–Howell 단측 상단
-
-| arm | ROI | 통제군 이득 | 통제군 최적이동 | deutan | protan |
-|---|---|---|---|---|---|
-| `with_residuals` | **V1** | $3.5 \pm 5.9\%$ | 0° ×4, 180° ×3 | 0° · 0.0% · $p$=.70 | **45° · 24.0% · $p$=.0091** |
-| `motreg` | **V1** | $4.9 \pm 5.5\%$ | 0° ×3, 180° ×2, 45°·225° ×1 | 0° · 0.0% · $p$=.78 | **45° · 19.2% · $p$=.0254** |
-| `with_residuals` | V2 / V3 / hV4 | 1.6 / 0.6 / 7.4% | — | 0 / 0 / 225° | 0 / 0 / 225°, 전부 n.s. |
-| `motreg` | V2 / V3 | 0.4 / 0.9% | — | 0 / 0° | 180° / 0°, n.s. |
-
-**선택편향 유보가 이 검정으로 해소된다.** `RESULTS_GEOMETRY_VALIDITY_2026-08-05` §4 유보 1은 "8개 중 최솟값을 취하므로 이득이 편향된다"였다. 그러나 **통제군도 똑같이 8개 중 최솟값을 취하므로 편향이 동일하게 걸리고**, 같은 통계량의 집단 간 대비에서는 상쇄된다. 무작위 대응 귀무분포를 따로 만들지 않아도 된다. 산출 `results/shift_gain_ch.json`, 스크립트 `scripts/_shift_gain_ch.py`.
-
-**⚠ 인용 금지 셀**: `motreg` hV4 protan 은 $p < .0001$ 로 나오지만 통제군 이득 SD 가 $0.4\%$ 로 붕괴한 결과다($t$ = 31). 쓰지 않는다. 주장은 **V1 두 arm** 에만 건다.
-
-**⚠ 남는 유보 (§4.5 순환이동 확장과 함께 한 문장으로 처리)**: 강체 45° 이동은 2성분 모형의 **특수해**다. 모형의 $\delta\theta(\theta)$ 는 hue 마다 회전량이 다르다. 따라서 "45° 균일 이동이 최적" 은 **근사적 부합**이지 모형 적합이 아니며, 원고도 그렇게 써야 한다.
-
-**C1–C8 대응**: 이 항목은 **C4(영역 편재) 아래가 아니라 C6(범주 보존 / 연속 기하 손상의 해리) 아래**에 놓인다. 어느 영역이 왜곡을 지는가를 주장하지 않고, 왜곡의 **형태**가 회전임을 주장하기 때문이다. §0.5 금지 표현에 걸리지 않는다.
+사유 = **§0.4-D**. 정량 결과와 대안 설명은 **§4.5b (§S10)** 에만 두고, Discussion 에도 넣지 않는다.
 
 ---
 
 ## 3. `Discussion/discussion_v3.tex`
 
-### 3.1 `:33` — M5 · localization 해석
+### 3.1 `:33` — localization 해석 ✅ **반영 완료 (2026-09-02)** — 현행 P3 이 `leaving the cortical locus of the distortion undetermined` 로 끝난다
 
-**현행**
+**⚠ 교체 시 딸려 나가는 인용 (2026-09-02 확인).** 종전 문단이 지고 있던 인용 4건 중 `kriegeskorte2008` 은 **원고 전체에서 이 문단이 유일한 출처**였다. 교체 후 RDM 의 1차 인용이 사라지므로 **`methods_v2.tex:216`(ΔRDM 정의 자리)로 옮겼다.** `brouwer2009`·`boehm2014`·`ohkoba2021` 은 Introduction·Methods·Results 에 남아 고아가 되지 않는다.
 
-> In both CVD participants the deficit took the form of a structured distortion of cortical color geometry, **localized to a different area in each**. ... **That the two participants' distortions localized to different areas is consistent with the perceptual case.** Among anomalous trichromats, between-observer variability in hue scaling is 3.4 times the within-observer variability \cite{emery2021}.
+**⚠ `differed in ... direction` 에 붙일 단서**: $\hat\beta_c$ 부호 대비($-42$ vs $+24$)는 Primary 한정이고 protan 은 **재정렬 파이프라인(`hmc_v2`)에서 반전된다**($-12$, §3.2 rev.4). 단서는 §3.2(a) 의 한 절이 진다. **§3.1 과 §3.2(a) 를 같은 회차에 반영할 것.**
 
-**교체**
+### 3.2 `:44` `:46` — $\hat\beta_c$ 부호 강건성 ✅ **반영 완료 (2026-09-02)** — 현행 P5 가 `even that sign depends on the reduction basis and on the preprocessing pipeline` 로 단서를 진다
 
-> In both CVD participants the deficit took the form of a structured distortion of cortical color geometry. ... The two participants' deviations differed in magnitude and in fitted direction, which is consistent with the perceptual case. We do not interpret which cortical region carries the largest deviation: the deutan V2 elevation rests on motion-aligned variance and is reported descriptively, so the region contrast between the two participants is not established here. Among anomalous trichromats, between-observer variability in hue scaling is 3.4 times the within-observer variability \cite{emery2021}.
+> **⚠ rev.4 정정 (2026-09-02 반영).** 이 절은 종전에 `baseline` × `motreg` 표를 썼으나, **§0.4-A 는 `motreg` 를 원고에서 빼고 `hmc_v2`(Realignment) 를 남기기로 확정**했다(2026-09-01). 종전 문구 *"`hmc_v2` 열은 §0.4-A 결정에 따라 뺀다"* 는 결정을 거꾸로 옮긴 것이다. 아래 표와 수치는 `hmc_v2` 로 교체했고, 원고에는 이 값이 반영되어 있다. 출처는 `filter_robustness_arms/beta_sign_three_arms.json` 이다.
 
-**근거**: `emery2021` 은 **개인차** 근거이지 **부위 편재** 근거가 아니다. 인용은 살리고 주장만 옮긴다.
+> **⚠ 이 관례의 대가**: 부록 번호가 바뀔 때마다 **41건을 손으로 고쳐야 한다.** §4.7 의 번호 당기기(구 S2–S21 → 신 S1–S20)에서 실제로 그렇게 했다. 다음에 번호가 또 움직인다면 `\label`/`\ref` 로 전환하는 편이 안전하나, 지금 바꾸면 이번 회차의 검증 결과와 대조가 어려워지므로 **투고 후로 미룬다.**
 
-### 3.2 `:44` `:46` — H · $\hat\beta_c$ 부호 강건성 (rev.3: 2-arm)
+### 3.3 균일 회전 항 부재 (F · U10) — ⚠ **Discussion 미수록으로 변경 (2026-08-25)**
 
-**현행 `:44`**
+> **종전 안**: `discussion_v3.tex:48` 문단 끝에 *"모형에 균일 회전 항이 없어 §S10 의 45° 재배열을 표현할 수 없다"* 를 넣는다. 등급 필수.
+>
+> **철회.** 이 항목은 **C9(45° 를 주 주장으로) 를 전제로 만들어졌다.** 원 지시(`REVISION_PLAN_MOTION_GEOMETRY_2026-08-06` §5)는 45° 를 소견으로 내세우던 시점의 것이고, 그때는 *"당신 모형이 그 회전을 표현 못 하지 않느냐"* 를 선제할 필요가 있었다. **C9 를 철회한 이상(§0.4-F) 선제할 주장이 없다.**
 
-> The two fitted distortions diverge, with $\hat\beta_c = -42^\circ$ in the deutan participant against $+24^\circ$ in the protan participant. The sign of ...
+**두 번째 이유가 더 중요하다 — 회전은 기하 왜곡이 아니다.**
 
-**추가할 것**: 이 대비가 **전처리 축에서 어떻게 되는가.** `hmc_v2` 열은 §0.4-A 결정에 따라 뺀다.
+강체 회전은 등거리 변환이므로 **모든 쌍거리를 보존한다.** 배치의 모양이 그대로라는 뜻이다. 본 논문의 기여 1 은 **모양의 왜곡**을 주장하는데, 모양을 바꾸지 않는 성분을 Discussion 에서 *"모형이 담지 못하는 한계"* 로 진술하면 **주장하지도 않는 것에 대한 약점을 스스로 만든다.** 리뷰어가 읽는 순서도 나쁘다 — 기하 왜곡을 논하다가 갑자기 기하를 바꾸지 않는 성분의 한계가 나온다.
 
-| | baseline | motreg | 판정 |
-|---|---|---|---|
-| deutan $\hat\beta_c$ | $-42$ | $-48$ | **부호 유지.** 두 arm 모두 재표집 300 중 **음수 300** ($P = 1.00$) |
-| protan $\hat\beta_c$ | $+24$ | $-24$ | **부호 반전** |
+**세 번째 — 두 측정이 실제로 갈린다.** 이것이 두 소견이 경쟁하지 않는 이유다.
 
-**protan 의 반전은 분산이 아니라 배타적이다.** baseline 은 300 재표집 중 263 이 $+24$, 나머지 37 이 $0$ — **음수가 한 번도 없다.** motreg 은 218 이 $-24$, 82 가 $-34$ — **양수가 한 번도 없다.** 두 arm 의 지지집합이 부호에서 겹치지 않는다.
+| 측정 | 대응 재배열에 | protan V1 |
+|---|---|---|
+| 본문 disparity (직교 회전 최적화 **후** 잔차) | **거의 둔감** | Primary .007, 보정 .077 |
+| 동결 투영 순열 (항등 대응 기준) | 민감 | 항등 실패, 45° 로 해소 |
 
-**deutan 에 반드시 병기할 단서**: 부호는 유지되나 교란 arm 에서 적합의 조건수가 나빠진다. `motreg` 에서 $\beta_c$ 가 격자 하한에 닿는 비율이 $0.00 \to 0.363$, $\beta_s$ 가 격자 끝에 닿는 비율이 $0.093 \to 0.367$ 로 올라가 **결합 `boundary_rate` 가 $0.09 \to 0.73$** 이 되며, 정본 선택 규칙의 `boundary_rate < 0.5` 문턱을 넘는다. 다만 edge 적중이 두 arm 전부 $-50$ 쪽 **단측**이고 $+50$ 은 0.00 이므로 퇴화는 **크기에만** 있고 부호 주장을 훼손하지 않는다. (크기는 애초에 판정에 쓰지 않는다 — 2성분 모형 12/12 절대복구 실패 → descriptive embedding)
+**회전에 둔감한 측정이 상승해 있으므로, protan V1 의 이탈은 강체 재배열만으로 설명되지 않는다.** 즉 모양 성분이 따로 있고, 그것이 본문이 보고하는 것이다. 재배열은 별개 현상이며 **동결 투영 순열에만 보인다.**
 
-**문안 (§S16 신설 또는 `:46` 뒤)**
+→ **조치**: Discussion 에서 삭제. 필요한 한 절은 **§4.5b 해석 문안**이 자체적으로 진다(아래 개정). Discussion 은 회전을 언급하지 않는다.
 
-> Refitting the same loss combination on the motion-regression arm, with every other element of the procedure held fixed, preserved the sign of $\hat\beta_c$ for the deutan participant ($-42$ and $-48$; negative in all 300 resamples on both arms) and reversed it for the protan participant ($+24$ to $-24$, with the two resample distributions sharing no sign). The fit for the deutan participant was more poorly conditioned on the perturbed arm, the fraction of resamples reaching a grid boundary rising from $0.09$ to $0.73$; these boundary solutions lie on the same side as the median, so they bear on the magnitude rather than the sign. The psychophysical atoms do not depend on preprocessing, so the neural term is the only component that differs between the arms.
+**⚠ 되살리지 말 것**: `Extending the model to that component is left to future work` 류의 문장은 **넣지 않는다.** 주장하지 않는 성분에 대한 future-work 약속은 그 성분이 결손이라는 인상만 남긴다.
 
-**연쇄 조치**: protan ambiguity 문장을 **전처리 축까지 확장**한다(사전 확정 분기 B).
+---
 
-### 3.3 `:48` 뒤 — F · U10 · 균일 회전 항 부재
-
-모형에 **균일 회전 항이 없다**는 사실을 명시. 정본 `REVISION_PLAN_MOTION_GEOMETRY_2026-08-06` §5 가 요구했으나 `discussion_v3.tex` 에 없다(grep 확인). (등급: 필수)
-
-**문안** (`discussion_v3.tex:48` 문단 끝)
-
-> The present model represents distortion of the confusion and S-cone axes and carries no uniform rotation term, so the whole-wheel relabeling recorded at V1 in the protan participant (Supplementary~\S S13) lies outside what it can express. Extending the model to that component is left to future work.
-
-**근거**: §S13 이 protan V1 의 45° 재배열을 보고하는데, 2성분 모형은 균일 회전을 구조적으로 표현할 수 없다($\overline{\delta\theta} = 0$). **§4.5 의 C 를 반영하면 §S13 이 더 주목받으므로 이 구멍이 더 노출된다** — C 와 함께 반영해야 한다.
-
-### 3.4 `:60` — 한계 문단 확장
-
-**현행**
-
-> Two of the reported estimates depend on analysis choices. The deutan V2 disparity elevation is significant in the common HC space and falls to a non-significant trend under the symmetric leave-one-subject-out control, whereas the protan V1 elevation is significant under both.
+### 3.4 `:60` — 한계 문단 (2 파이프라인 · 방법 프레임으로 개정)
 
 **교체**
 
-> Several of the reported estimates depend on analysis choices. The deutan V2 disparity elevation is significant in the common healthy-control space, falls to a non-significant trend under the symmetric leave-one-subject-out control, and is removed by motion regression while surviving the time-shifted control, which places it on motion-aligned variance. The protan V1 elevation is significant under every one of these (leave-one-subject-out $p = .045$, $.022$, $.031$). The single-case interpolation contrasts at hV4 do not reach significance once motion parameters are added, and the magnitude of those contrasts is not estimable at this sample size. The control-level result that fixes hV4 as the only interpretable region for interpolation is unaffected by any of these choices (Supplementary~\S S2). We therefore treat the deutan region assignment as descriptive and do not claim that the two participants' distortions are localized to different areas.
+> Several reported estimates depend on preprocessing. The deutan V2 disparity elevation reverses in sign under head-motion correction, and the region carrying the largest deviation in that participant moves from V2 to V1. The protan V1 elevation weakens from $p = .007$ to $p = .077$. Under the symmetric leave-one-subject-out reference the protan V1 elevation in the primary pipeline is the single cell to reach significance across both pipelines and all four regions. The color-correspondence permutation shows the same lability, with seven cells surviving correction in the primary pipeline and none in the head-motion-corrected pipeline. We therefore report the representational geometry as a descriptive quantity throughout.
+>
+> The neural loss term evaluates that geometry. Because target regions follow from held-out test-loss rather than from any disparity contrast, the fitted parameters stand independently of the inferential status of those contrasts. The filters reported here are the frozen values that the procedure returned, and we give them no physiological interpretation.
+>
+> The control-level result is stable across the same comparison. Interpolation across the hue circle exceeded the color-label permutation null at hV4 alone in both pipelines, and eight-way identification stayed above chance at every region in both.
+
+**설계 의도 셋.**
+
+| # | |
+|---|---|
+| 1 | **한계를 앞세우고 무엇이 남는지로 닫는다.** 세 번째 문단이 두 파이프라인에서 견디는 결과를 진술해 문단이 순수한 철회로 읽히지 않게 한다 |
+| 2 | **$L_{\rm RDM}$ 방어가 여기 들어간다.** §0.7-D 는 Methods 한 문장으로 계획했으나, §S10 에서 색 특이성이 보정 파이프라인에서 전멸했으므로 Discussion 에서도 답해야 한다. 리뷰어는 *"적합에 쓴 신경 구조가 두 번째 파이프라인에서 사라진다"* 를 여기서 묻는다 |
+| 3 | **두 참가자를 대비시키지 않는다.** deutan 과 protan 을 각각 그 자체로 진술한다 |
 
 ### 3.5 `:69` — M6 · 결론
 
@@ -532,165 +460,58 @@ all-ROI sensitivity 표(§5.2)를 **싣기로 했으므로** 그 앞에 해석 �
 
 ## 4. `Supplementary/supplementary.tex`
 
-### 4.0 §S2 `Susceptibility distortion` 문단 — SDC 변위 실측 ★ **신규 항목** (등급: 필수)
+### 4.0 §S1 `Susceptibility distortion` 문단 — SDC 변위 실측 ★ **신규 항목** (등급: 필수) ✅ **반영 완료 (2026-09-02)** — `roi_shift_summary.csv` 에서 문안의 수치 전부 재현 확인 후 교체. 절 번호는 당기기 뒤 **§S1**
 
-> 2026-08-24 추가. 이 항목은 종전 CONSOLIDATED 에 **누락**돼 있었다(§8 근거색인에 산출물 경로만 있었다). 원 근거 = `STATUS_ADDITIONAL_ANALYSIS_2026-08-15.md` §3.4e(3).
+### 4.1 §S1 — 파이프라인 정의 + LOCO 2열 표 (등급: 필수) ✅ **반영 완료 (2026-09-02)** — (a)(b)(c) 는 종전 회차에 반영돼 있었고(2열 표는 `tab:motion_loco` 가 아니라 `tab:interp_arms` 로 존재), 이번에 (c) 의 `Neither single-case contrast reached significance…` 문장과 (d) 의 격자 제한 문장을 보간 표 아래에 추가
 
-**현행 `supplementary.tex:74`**
+**⚠ 철자**: 원고는 미국식(`american`)으로 통일돼 있다. 위 문안의 `analyzed` 를 유지할 것. **`supplementary.tex:535` 의 `analysed` 는 현행 원고의 오류이므로 함께 고친다.**
 
-> Distortion displaces signal along the phase-encoding direction, which ran right to left. Within a participant it is constant across conditions, so **it cannot generate condition-specific differences** among the eight colors. Its cost is spatial, and it reduces the precision with which atlas-defined regions are assigned to functional voxels.
+### 4.2 · 4.3 — 폐기 항목의 이관처
 
-**문제**: `cannot` 은 방어 불가다. 우리가 한 것은 **필드맵에서 유도한 변위 크기 측정**이지, **SDC 를 실제 적용한 BOLD 에서 LOCO/RDM 을 재계산한 것이 아니다.** 측정이 직접 입증하는 것은 "왜곡이 후두 시각 ROI 에서 작고 ROI 내 공간 변이가 서브복셀"까지이며, hV4 처럼 작은 ROI 에서 **완전 무영향을 수학적으로 보장할 수는 없다.**
-
-**교체 문안** — 숫자를 그대로 쓰고 추론 강도를 낮춘다
-
-> Field-map-derived susceptibility displacement was measured within each analyzed ROI in all nine participants. Mean displacement ranged from 0.01 to 0.76 voxels (0.02--1.52 mm). Within-ROI spatial variation, the component that distorts a pattern rather than translating it, was 0.05--0.21 voxels (0.10--0.42 mm) in eight participants, with a 5th--95th percentile range of 0.15--0.72 voxels; in the remaining participant it reached 0.38 voxels (0.76 mm) with a 5th--95th percentile range of 1.19 voxels. Susceptibility distortion within these posterior visual ROIs was therefore predominantly subvoxel and spatially smooth, making it unlikely to account for the observed differences in representational geometry across color conditions.
-
-**어휘 규칙**
-
-| 금지 | 허용 |
-|---|---|
-| `cannot alter relative geometry` · `cannot generate condition-specific differences` | `is less likely to distort within-ROI representational geometry than spatially varying displacement` |
-| `no effect` / `무시 가능` | `predominantly subvoxel and spatially smooth` |
-| 균일 성분을 "상쇄된다" 로 단정 | 균일 성분은 **덜 우려스럽고**, **미분 성분이 직접적인 pattern-distortion term** 이라고 기술 |
-
-**"적용하지 않았다"가 "크기를 재어 보고했다"로 바뀐다.** `+sdc` arm 으로 종점을 재계산하지 않고도 달성되며, **단 그 한계를 위와 같이 명시할 때만** 성립한다. PE 부호 확정은 불필요하다 — ROI 내 이동이 거의 균일·서브복셀이라 부호를 어느 쪽으로 잡든 ROI 기하 영향이 같은 규모다.
-
-**산출**: `analysis/phase0_preprocessing/results/roi_shift_summary.csv`, `figures/sdc_cohort/`
-
----
-
-### 4.1 §S2 — A · LOCO 3-arm 표 + 범위 정정
-
-`every neural endpoint` 문장의 **범위를 정정**하고 LOCO 3-arm 표를 신설. (등급: 필수)
-
-**(a) 현행 `supplementary.tex:46` 첫 문장 교체**
-
-```diff
-- Every neural endpoint was recomputed with the six motion parameters and their temporal derivatives added to the second-level design matrix.
-+ Every neural endpoint of the first session was recomputed with the six motion parameters and their temporal derivatives added to the second-level design matrix. The filter-evaluation session was not recomputed, since its endpoints are reported descriptively and carry no inferential claim.
-```
-
-**(b) 신설 문단 + 표** (기존 `tab:motion_arms` disparity 표 뒤)
-
-> \paragraph{Interpolation under the motion arms.}
->
-> Adjacent accuracy at hV4 was recomputed on all three arms under the design of \S S8, with the healthy-control permutation repeated at $N = 1{,}000$ per arm (\cref{tab:motion_loco}). The control gate held throughout: hue interpolation exceeded its own color-label null at hV4 in every arm, and at no other region in any arm. The single-case contrasts did not. The control mean was unchanged across arms while the control standard deviation rose from $0.102$ to $0.152$ under motion regression and to $0.127$ under the shifted control. Because the shifted regressors remove no motion-aligned variance, that inflation is attributable to the twelve added regressors rather than to motion. Leave-one-color-out trains on seven colors per fold, so it carries less residual degrees of freedom than the geometric endpoints and loses precision faster when regressors are added. The single-case interpolation contrasts are therefore reported from the primary arm, with the arms tabulated here.
-
-```latex
-\begin{table}[h]
-\centering
-\caption{Adjacent accuracy at hV4 across the three preprocessing arms. Control values are the mean over seven controls with the permutation $p$ against $N = 1{,}000$ per-subject color-label shuffles. CVD entries give adjacent accuracy with the Crawford--Howell one-tailed $p$ and $d_{cc}$ against the same controls.}
-\label{tab:motion_loco}
-\begin{tabular}{lccccc}
-\toprule
- & \multicolumn{3}{c}{Healthy controls} & Deutan & Protan \\
-\cmidrule(lr){2-4}\cmidrule(lr){5-5}\cmidrule(lr){6-6}
-Arm & mean & SD & $p_{\rm perm}$ & acc ($p$, $d_{cc}$) & acc ($p$, $d_{cc}$) \\
-\midrule
-Original          & $0.456$ & $0.102$ & $.011$ & $0.250$ ($.054$, $-2.02$) & $0.125$ ($.011$, $-3.25$) \\
-Motion regression & $0.458$ & $0.152$ & $.013$ & $0.271$ ($.148$, $-1.23$) & $0.312$ ($.204$, $-0.95$) \\
-Shifted control   & $0.483$ & $0.127$ & $.002$ & $0.375$ ($.229$, $-0.85$) & $0.229$ ($.056$, $-2.00$) \\
-\bottomrule
-\end{tabular}
-\end{table}
-```
-
-**⚠ rev.3 개정**: 종전에는 이 표(3 arm)와 §4.3 `tab:hmc_robustness`(2 arm: primary/realigned)가 병존했다. **§4.3 은 폐기됐으므로 이 표가 §S2 의 유일한 arm 표가 된다.**
-
-**표에 반드시 붙일 두 가지**
-
-1. **`Shifted control` 행에 대조 표기.** 캡션에 한 문장을 넣는다(§0.4-D): *The third row carries the same twelve regressors circularly shifted within run, preserving their autocorrelation and spectrum while destroying their temporal alignment with the data. It is a control for the cost of adding regressors, not an independent preprocessing variant.*
-2. **$d_{cc}$ 옆에 95% CI 추가.** Crawford–Garthwaite 비중심 $t$ 구간(§2.9 부수확인 2). 리뷰어가 직접 계산할 수 있는 양이므로 선제 공개가 안전하다.
-
-### 4.2 §S2 재정렬 문단 · 4.3 `tab:hmc_robustness` — ⚠ **둘 다 폐기 (2026-08-24)**
-
-> **종전 안**: §S2 에 `\paragraph{Realignment.}` 를 신설하고 `tab:hmc_robustness`(primary vs realigned 8행)를 싣는다.
->
-> **폐기 사유**: §0.4-A 결정으로 `hmc_v2` 를 원고에서 제외한다. 재정렬 미적용의 서술은 **§1.5 Methods 문단**이 담당하며, 부록에는 별도 절도 표도 두지 않는다.
-
-**이관된 내용**
+종전의 §S1 재정렬 문단 신설안과 `tab:hmc_robustness` 는 **2 arm 결정으로 대체됐다.** 재정렬은 별도 문단이 아니라 §S1 의 파이프라인 정의와 종점 2열 표에 통합된다.
 
 | 종전 위치 | 새 위치 |
 |---|---|
-| 재정렬 미적용 서술 | **§1.5 (Methods 본문)** |
-| tSNR $1.7$–$3.0\%$ · ROI 겹침 $<0.6\%$ | §S2 전처리 정당화 문단 (§1.5-c) |
-| 종점 8행 표 | **삭제.** arm 표는 §4.1 `tab:motion_loco` 하나로 통합 |
+| 재정렬 서술 | §1.5 (Methods) + §S1 파이프라인 정의 |
+| tSNR $-1.97\%$ · ROI 겹침 | §S1 QC 문단 |
+| 종점 표 | §4.1 `tab:motion_loco` 2열로 통합 |
 | ICC 2행 | **삭제** (§0.4-C) |
 
-**⚠ 종전 §4.2 의 프레이밍 금지 사항은 §1.5-(b) 로 승계된다.** 특히 *"품질 수치로 종점을 기각하지 않는다"* 는 원칙은 유효하다. §1.5 본문이 tSNR 을 인용하지 않고 변위 크기와 보간 논거만 쓰는 이유가 그것이다.
+**원칙 하나는 유효하다 — 품질 수치로 종점을 기각하지 않는다.** tSNR 은 파이프라인 특성 기술이지 어느 결과를 버리는 근거가 아니다.
 
-### 4.4 §S2 / §S3 — G + BBR QC 그림
+### 4.4 §S1 / §S2 — G + BBR QC 그림 ✅ **반영 완료 (2026-09-02)** — §S1 에 `Choice of registration method.` 문단 신설. 2층 정당화(fMRIPrep 실패 → 커스텀 / BBR 육안 실패 → MI)와 `전뇌 중첩 지표는 BBR 을 선호하나 슬랩 오위치에 둔감` 선제 공개를 넣었고, Dice 수치는 인용하지 않았다
 
-**Dice 표를 인용하지 않는다.** 아카이브 정량 지표(BBR Dice 0.33–0.50 vs MI 0.27–0.36; ROI coverage 99.95% vs 85.4%)는 **BBR 을 지지한다** — 이 지표들이 "슬랩이 뇌 안에서 잘못된 위치에 안착"하는 실패 모드에 둔감하기 때문이다. 게다가 아카이브 method3 는 FSL MNI152 로 돌아 현행 정본(MNI152NLin2009cAsym res-2)과 공간이 다르다.
+### 4.5 §S10 (`supplementary.tex:464-468`) — 회귀자 시간축 대조 확장 ⚠ **폐기 (2026-09-01)**
 
-**근거는 서술로만 남긴다** (2026-08-17 결정 — QC 그림 제작 제외). 방법 이력 진술이지 결과 주장이 아니므로 그림 없이 성립하며, 아래 선제 공개가 있으면 리뷰어가 Dice 를 직접 계산해도 반박이 되지 않는다. 근거는 채택 당시 기록(`notion.md:29-35`)이다.
+이 항목은 `motreg` 와 `motshift` 를 전제로 한 논증이었다. 둘 다 원고에서 빠지므로(§0.4-A) **문안 전체를 폐기한다.**
 
-두 층위를 **같이** 써야 완성된다.
+**남는 조치 하나** ✅ **완료 (2026-09-02 확인)**: 현행 `:468` 의 `The circular-shift control that separates these accounts was applied to the disparity endpoint (S2) and remains to be extended to the permutation reported here.` 는 존재하지 않는 대조를 가리키게 되므로 **삭제한다.** 그 자리에는 두 파이프라인의 색 대응 순열 결과를 넣는다.
+→ 이미 이행되었다. 해당 문장은 살아 있는 `supplementary.tex` 에 없고 `Supplementary/archive/S18_geometry_validity.tex:76` 에만 남아 있다(아카이브이므로 무해).
 
-| 층위 | 시도했고 실패한 것 | 정당화하는 것 |
-|---|---|---|
-| 파이프라인 | fMRIPrep 정합 전 시도 실패 | 커스텀 파이프라인을 쓴 것 |
-| 정합 방법 | BBR 육안 실패 — partial FOV 에서 잘못된 경계 스냅 (10 mm 오차 위험 vs MI ~1 mm) | 커스텀 안에서 MI 를 고른 것 |
+**~~⚠ 산출 필요~~** ✅ **완료 — 산출도 검증도 끝났다 (2026-09-02)**. 종전 기재 *"현행 표는 Primary 와 `motreg` 기준"* 은 사실과 달랐다. `tab:color_specificity` 는 이미 **Primary + head-motion correction** 두 열이며 `motreg` 열은 없다. 검증 결과는 다음과 같다.
 
-이렇게 써야 "표준을 안 썼다"가 아니라 **"표준을 시도했고, 이 취득에서 실패한 측정된 이유를 보고한다"** 가 된다. **"전뇌 중첩 지표는 BBR 을 선호하나 슬랩 오위치에 둔감하다"를 선제 공개**하는 편이 안전하다.
+- **35셀 × 2 파이프라인 전부 원시 JSON 과 일치**(불일치 0셀). 양성대조 표 `tab:frozen_control` 16개 항목도 전부 일치.
+- **산문 수치 7개 진술 전부 성립.** BH 보정을 파이프라인별 35셀 내에서 재계산해 확인했다(Primary 16셀 $p<.05$ · 7셀 생존, 재정렬 15셀 · 0셀 생존, deutan V2 $q$ .0175 → .0525, protan V1 $p$ .758 → .010). 생존 7셀 = HC2 V1·V3, HC4 V3, HC6 V3, HC7 V3, Deutan V2, Protan V3.
+- **산출 스크립트는 `color_correspondence_loro.py` 가 아니라 `analysis/validation/scripts/disparity_frozen_permutation.py`** 다(전자는 별개 산출물). 두 파이프라인은 `data_dir` 만 다르고 순열 1000회·시드 42·$k$(4,4,3,3)·최소 복셀 20·통계량 정의가 모두 같다.
+- 살아 있는 `.tex` 에 `motreg`·`motshift`·`motion-regression` 은 **0건**.
+- **BH 보정 범위는 현행 유지**(파이프라인별 35셀). 두 파이프라인은 같은 데이터의 대안 전처리이므로 70셀 합산은 과보정이다.
+- deutan V2 의 $q$ 정확값이 $0.0525$ 이므로 원고 표기를 `.052` → **`.053`** 으로 정정했다.
 
-### 4.5 §S13 (`supplementary.tex:464-468`) — C · 순환이동 대조 확장
+### 4.5b §S10 — hue 순환이동으로 sub-09 V1 의 색 특이성 귀무를 설명한다 ★ **신규 (2026-08-25)** ✅ **반영 완료 (2026-09-02)** — 대부분 종전 회차에 들어가 있었고, 이번에 빠져 있던 둘을 채웠다. ① 신호 부족이 아니라는 근거(split-half $.847$, LORO $0.79$) ② 해석 세 진술 중 (iii)`disparity 가 두 파이프라인 모두에서 상승해 있으므로 재배열만으로 설명되지 않는다`. `motreg` 열은 §0.4-A 에 따라 넣지 않았다. 절 번호는 당기기 뒤 **§S10**
 
-순환이동 대조를 **색 특이성 순열**까지 확장. (등급: 필수) — **현행 마지막 문장이 미완료를 자인한다**: `The circular-shift control ... remains to be extended to the permutation reported here.`
+> **⚠ §4.5 의 순환이동과 다른 것이다.** §4.5 는 **회귀자를 시간축에서** 순환이동시키는 대조이고, 여기는 **hue 라벨을 색 바퀴에서** 한 칸씩 돌리는 분석이다. 이름이 겹치므로 원고에서 **`time-shifted regressors`** 와 **`cyclic hue relabeling`** 으로 명확히 구분해 쓴다.
 
-**결과 — 해석 2(회귀자 부산물)가 기각된다.** 35 셀 BH-FDR, arm 내 보정.
+**⚠ 인용 금지 셀**: `motreg` hV4 protan 은 $p<.0001$ 로 나오지만 통제군 이득 SD 가 $0.4\%$ 로 붕괴한 결과다($t$ = 31). 주장은 **V1 두 arm 에만** 건다.
 
-| arm | raw $p<.05$ | **BH $q<.05$** |
-|---|---|---|
-| 원본 | 16 / 35 | **7** |
-| 움직임 회귀 | 18 / 35 | **15** |
-| **순환이동 대조** | 13 / 35 | **3** |
+**⚠ 모형 포함 여부를 언급하지 않는다 (2026-08-25).** 종전 초안에 *"a rigid one-step shift is also outside the two-component model … (Discussion)"* 가 있었으나 삭제했다. 주장하지 않는 성분에 대해 모형의 표현력을 논하면 **없는 약점을 만든다.** 근거는 §3.3(미수록 사유). 또한 RDM 은 라벨 순열에 민감하므로 *"필터가 이 성분에 무관하다"* 도 단정할 수 없다 — **양쪽 다 말하지 않는 것이 정확하다.**
 
-순환이동은 같은 회귀자 12개를 **시간 정렬만 파괴한 채** 넣는다. 해석 2 가 맞다면 15 근처여야 한다. **3 이다** — 원본 7 보다도 낮다. → 7 → 15 증가는 **회귀자가 데이터와 시간 정렬돼 있을 때만** 나타나므로 **움직임 분산 제거**에서 온다.
+### 4.6 §S12 `tab:jnd_baseline` — D · 범위 절단 각주 ✅ **반영 완료 (2026-09-02)** — 문안 (a) 는 캡션 끝에, (b) 는 §4.6b 표 바로 앞 문단으로. 세미콜론은 §0.7-E 에 따라 두 문장으로 분리. 절 번호는 당기기 뒤 **§S12**
 
-**CVD 셀 분해** (움직임 귀속분 = 회귀 − 순환이동)
+### 4.6b §S12 — 쌍별 스테어케이스 전수 표 ★ **신규 (2026-08-25)** (등급: 필수) ✅ **반영 완료 (2026-09-02)** — `_staircase_pairs_table.py` 를 실행해 표가 이 문서의 것과 일치함을 확인한 뒤 삽입(`tab:staircase_pairs` = Table S12). 표 아래 문안도 함께 넣었고 세미콜론만 분리했다
 
-| | 원본 | 회귀 | 순환이동 | 움직임 귀속 |
-|---|---|---|---|---|
-| deutan V1 | .105 | **.009** | .466 | **−0.457** |
-| deutan **V2** | **.002** | **.003** | **.009** | −0.006 |
-| deutan V3 | .024 | **.005** | .077 | −0.072 |
-| deutan hV4 | .273 | **.029** | .774 | **−0.745** |
-| protan V1 | .758 | .737 | .518 | +0.219 |
-| protan V2 | **.013** | .084 | .155 | −0.071 |
-| protan **V3** | **.001** | **.001** | **.032** | −0.031 |
-| protan hV4 | .129 | .201 | .364 | −0.163 |
+**⚠ 값을 조정하지 않는다.** 208개 중 이 한 트랙만 문제이므로 제외 규칙을 세우면 사후적으로 보이고, 조정 방향이 결론에 유리한 쪽이라 더 그렇다. **평균 유지 + 전량 공개**가 방어 가능한 선택이다.
 
-**문안 — 현행 L464-468 전체를 교체**
-
-> Motion regression broadened the pattern rather than removing it. The count of cells surviving correction rose from 7 to 15, and the deutan V2 cell held at $q = .025$ while the protan V3 cell held at $q = .012$. We extended the circular-shift control of S2 to this permutation to decide whether the increase reflects the removal of motion-aligned variance or a reshaping of the residual variance by the twelve added regressors. The shifted regressors carry the same autocorrelation and spectrum without temporal alignment to the data, so they impose the cost of the added regressors while removing no motion. Under the shifted control only 3 of the 35 cells survived correction, fewer than the 7 of the primary arm. The increase therefore requires the regressors to be aligned with the data and is attributable to motion-aligned variance; the cost of adding twelve regressors, taken alone, lowers detection. The two cells that survive correction in the primary arm survive in all three arms (deutan V2, $p = .002$, $.003$, $.009$; protan V3, $p = .001$, $.001$, $.032$). The deutan V1 and hV4 cells reach significance only once motion-aligned variance is removed ($p = .105 \to .009$ and $.273 \to .029$, against $.466$ and $.774$ under the shifted control).
-
-> This endpoint moves in the opposite direction to the interpolation contrasts of S2, and the two are consistent. The permutation compares a participant to a label-shuffled null computed within the same participant and arm, so an inflation of between-subject dispersion does not touch it, whereas the single-case interpolation test is referred to the control distribution and is directly exposed to that inflation.
-
-**⚠ §4.1 A 와 방향이 반대인 것은 모순이 아니다** — 두 검정의 귀무가 다르다. 회귀자 추가는 **피험자 간 산포를 팽창**시켜 단일사례 검정(Crawford–Howell 분모)에 불리하고, 움직임 제거는 **피험자 내 색 대응을 선명하게** 해 순열에 유리하다. 위 두 번째 문단이 이것을 원고에서 직접 처리한다 — **반드시 함께 넣는다.**
-
-### 4.6 §S15 `tab:jnd_baseline` — D · 범위 절단 각주
-
-sub-08 orange–yellow 가 **범위 절단 하한**임을 각주. (등급: 필수)
-
-**근거**: 13개 trial 파일 **208 staircase 전수 스캔**. 제시 가능한 최대 수준 0.95 에서 오답을 낸 staircase 는 **정확히 2개**이고 둘 다 sub-08 세션-1 orange–yellow(sc0, sc1)다. → 보고된 역치 $t = 0.840$ ($\gamma = 3.02$, $z = +4.15$) 은 추정치가 아니라 **하한**이다. **방향은 보수적** — 기준선 결손이 실제보다 작게 적혀 있었으므로 필터 개선폭도 과소 보고. 값은 고치지 않고 절단 사실만 밝힌다.
-
-**문안 (a) — `tab:jnd_baseline` 캡션 끝에 추가**
-
-> Two staircases returned an incorrect response at the largest presentable separation, both of them the deutan participant's orange--yellow pair, so that threshold is a lower bound rather than an estimate; it is the only such pair among the 208 staircases collected in this study.
-
-**문안 (b) — §S15 본문 끝에 추가**
-
-> The deutan orange--yellow staircases spent their whole course at the top of the presented range and returned incorrect responses at the largest separation the task can present. That threshold is therefore censored, and the true value lies at or above the tabulated one. The censoring understates the baseline deficit and, with it, the improvement recorded under either filter, so the values are reported unadjusted.
-
-**산출**: `analysis/phase6_behavioral_analysis/results/exp2_behavior/a2_staircase_diagnosis.json`
-
-### 4.7 H 문안의 배치 — ⚠ **"§S16 신설" 은 stale 번호**
-
-§3.2 의 문안을 부록에 둘 경우의 위치. **단, 현행 `supplementary.tex` 의 S16 은 이미 `Comparison with Retinal-Family Distortion Models` 이다** (실제 절 S1–S21). 구 S1–S19 표 기준의 "S16 신설"을 그대로 실행하면 S16 이하가 전부 밀려 **§6 I3 이 막 해소한 번호 문제가 재발한다.**
-
-**권고: 부록 신설 없이 `discussion_v3.tex:46` 뒤 본문에 둔다.** 부록에 꼭 넣어야 한다면 **S18 `Identifiability checks` 안의 문단**으로 붙인다 — $\hat\beta_c$ 부호 강건성은 정확히 identifiability 항목이고, 새 절 번호를 만들지 않는다.
+### 4.7 H 문안의 배치 ✅ **해소 (2026-09-02)** — 부록 재편으로 신설이 불필요해졌다. $\hat\beta_c$ 부호 통계는 현 **§S14 Identifiability checks** 에 있고 Discussion 은 그 절을 가리킨다
 
 ### 4.8 `:815` — 비교자 범위 문서화 ★ 신규
 
@@ -740,57 +561,11 @@ CVD 교정 필터는 채널 이득을 재분배하므로 후자가 발생할 개
 
 **정직하게 적을수록 우리 위치가 나아질 가능성이 높은 항목이다** — 단, 그 진술은 실측 후에만 할 수 있다.
 
-### 4.9 §S2 — `exp2` 종점의 전처리 arm 재산출 ★ 신규 (2026-08-17)
-
-Q3 은 "미실시를 명시할 것인가"였으나, ses-2 디페이싱이 완료되어 **재산출로 해소**했다. exp2 를 `anat_harmonized` + 단일보간 재정렬로 다시 처리하고 사전 확정 종점 14칸을 재계산했다. HC 기준과 exp1 무필터 앵커도 같은 재정렬 arm(`full_dataset_C010_hmc_v2`)으로 맞춰 **양쪽이 arm 을 섞지 않게** 했다.
-
-**hV4 LOCO adjacent accuracy (주 종점)**
-
-| | NoFilter | Window | Optimal | HC $n{=}4$ |
-|---|---|---|---|---|
-| deutan 정본 | 0.231 | 0.250 | 0.312 | 0.456 |
-| deutan harm | 0.342 | 0.156 | 0.281 | 0.445 |
-| protan 정본 | 0.138 | 0.188 | 0.062 | 0.456 |
-| protan harm | 0.263 | 0.094 | 0.344 | 0.445 |
-
-**사전지정 결손 ROI, LOCO $\rho$ (native)**
-
-| | NoFilter | Window | Optimal | HC |
-|---|---|---|---|---|
-| deutan V2 정본 | $-0.211$ | $-0.190$ | $0.098$ | $0.162$ |
-| deutan V2 harm | $0.196$ | $0.113$ | $0.087$ | $0.080$ |
-| protan V1 정본 | $-0.020$ | $-0.096$ | $0.129$ | $0.129$ |
-| protan V1 harm | $0.258$ | $0.023$ | $-0.002$ | $0.016$ |
-
-**판정 — variant 별로 세야 한다.** `native` 와 `matched` 는 같은 데이터에 복셀 마스크만 달리 적용한 것이라 독립 검정이 아니다. 둘을 합쳐 "20 중 13" 으로 세면 분모가 부풀려지고 **arm 불일치와 variant 불일치가 섞인다.**
-
-| variant | 방향 대비 | arm 간 역전 |
-|---|---|---|
-| `native` | 10 (2명 × 5대비) | **8** |
-| `matched` | 10 | **5** |
-
-5대비 = hV4 Opt>Win · hV4 Opt>NoFilter · RDM Opt>Win · LORO Opt>Win · 결손ROI Opt>Win.
-
-**두 variant 자체도 서로 불일치한다.** `deutan_V2_opt_gt_win` 은 native 에서 역전(True→False)이나 matched 에서는 유지(True→True)이고, `protan_V1_opt_gt_win`·`protan_rdm_opt_gt_win` 도 같다. 즉 exp2 신경 종점은 **전처리 arm 과 복셀 마스크 선택 양쪽 모두**에 민감하다.
-
-**SRM Procrustes disparity (run-count-matched, 낮을수록 HC 기하에 근접)** — 주 종점과 **다르게 거동한다**
-
-| | HC | NoFilter | Window | Optimal |
-|---|---|---|---|---|
-| deutan V2 정본 ←사전지정 | 0.443 | 0.676 | 0.870 | **0.766** |
-| deutan V2 harm | 0.491 | 0.498 | 0.683 | **0.570** |
-| protan V1 정본 ←사전지정 | 0.429 | 0.700 | 0.657 | **0.626** |
-| protan V1 harm | 0.481 | 0.602 | 0.503 | **0.442** |
-| deutan hV4 정본 / harm | 0.695 / 0.668 | 0.872 / 0.770 | 1.004 / 0.825 | **0.901 / 0.675** |
-| protan hV4 정본 / harm | 0.695 / 0.668 | 0.833 / 0.940 | 0.845 / 0.830 | 0.876 / **0.624** |
-
-**8개 방향 대비 중 3개 역전** (2명 × 2 ROI[사전지정·hV4] × 2 대비; `matched` 단독이므로 위 LOCO 표와 세는 단위가 다르다). 사전지정 결손 ROI 의 4개 대비는 **전부 유지**되고, `Optimal < Window` 는 16행 중 13행에서 성립한다.
+### 4.9 §S1 — `exp2` 종점의 전처리 arm 재산출 ★ 신규 (2026-08-17) ✅ **반영 완료 (2026-09-02, 문안 정정 후)** — ⚠ **이 절의 문안에 오류가 있었다.** `of twenty directional contrasts, thirteen reversed` 는 이 절의 판정 블록과 `exp2_endpoints_arms.json` 의 `counting_note` 가 **둘 다 금지하는 합산**이다. 반영본은 `native 10 중 8, matched 10 중 5` 로 나누어 적었다. 선택지 (i)(앵커 arm 명시 구)도 함께 넣었고, 기하가 더 안정적이라는 진술을 절대값 없이 두 문장으로 덧붙였다
 
 **⚠ 이것을 근거로 종점을 교체하지 않는다.** 사전 선언된 주 종점은 **hV4 LOCO adjacent accuracy** 이고(산출 로그도 `*** PRIMARY ENDPOINT (hV4) ***` 로 명시), 그것이 불안정한 쪽이다. "기하가 안정적이니 그쪽을 보자"는 사후 종점 교체다. **정확한 진술** = *사전 선언된 주 종점은 arm 간에 불안정하고, 수렴 지표인 기하는 더 안정적이며 사전지정 ROI 에서 방향이 유지된다.*
 
 **⚠ 디스패리티는 절대값을 인용하지 않는다.** HC 기준 자체가 arm 간에 이동한다(V1 $0.429 \to 0.481$, $+12\%$). LOCO 에서 HC 가 $0.456 \to 0.445$ 로 거의 불변이었던 것과 대비된다. **순서만 안정적이고 절대값은 arm 의존적이다.**
-
-모든 CVD 조건이 HC 보다 나쁘다(단측 $p$ 전부 $.99$ 대) — 현행 `neither reached the healthy reference` 그대로다.
 
 > **⚠ 서로 다른 세 개의 수를 혼동하지 말 것.**
 >
@@ -800,19 +575,7 @@ Q3 은 "미실시를 명시할 것인가"였으나, ses-2 디페이싱이 완료
 >
 > ③ **disparity 8개 대비** = `matched` 단독, 2 ROI 한정. ② 와도 세는 단위가 다르다.
 
-**흔들리는 것이 무엇인지가 중요하다.** HC 기준은 거의 불변이고($0.456 \to 0.445$), 불안정성은 **단일 피험자·단일 조건 셀**에 국한된다(조건당 4런). exp1 에서 얻은 그림과 정확히 같다 — 집단 수준 구조는 arm 을 견디고 개인 수준 셀은 견디지 못한다.
-
-**새 문제가 아니라 기존 진술의 정량화다.** 현행 초록이 이미 `The direction of cortical change differed across participants and measures, and neither reached the healthy reference` 라고 적고 있다. 이번 결과는 그것을 확증하며 **"분석 선택에 따라서도 방향이 바뀐다"** 는 축을 추가한다.
-
 **⚠ 새 arm 을 주 결과로 채택하지 않는다.** harm arm 에서 protan Optimal 이 Window 를 이기고 RDM cosine 도 올라가 **우리에게 유리해 보이지만**, 그것을 근거로 arm 을 바꾸면 정확히 cherry-picking 이다(정본 arm 의 protan Optimal 은 0.062 로 최악이었다). **두 arm 을 나란히 싣고 어느 쪽으로도 방향 주장을 하지 않는다.**
-
-**손실은 없다.** exp2 신경 종점은 현행 원고에서 이미 우월성 근거로 쓰이지 않는다(그 역할은 심리물리가 한다). **심리물리는 전처리와 무관하므로 전량 불변**이고 기여 2 의 실증 근거도 그대로다.
-
-**문안**
-
-> \paragraph{Session-2 endpoints under the harmonised arm.}
->
-> The second session was acquired without the defacing step applied to the first, so we reprocessed it with the anatomical images harmonised and with head-motion realignment, recomputing the fourteen pre-specified endpoints. The healthy-control reference was essentially unchanged (hV4 adjacent accuracy $0.456$ against $0.445$), whereas the single-participant, single-condition cells moved substantially: of twenty directional contrasts, thirteen reversed between arms. Each of those cells rests on four runs from one participant. We therefore report both arms and draw no directional conclusion from the session-2 cortical readouts under either. The psychophysical endpoints do not depend on preprocessing and are unchanged.
 
 > **⚠ rev.3 정합 경고 (2026-08-24)** — §0.4-E. 이 절의 통일 arm 은 **재정렬을 포함해** 처리됐고, 비교의 HC 기준·exp1 무필터 앵커도 `full_dataset_C010_hmc_v2` 로 맞췄다. §1.5 Methods 가 *"정본 파이프라인에는 재정렬을 적용하지 않았다"* 고 적으므로 **모순은 아니지만**, 위 문안에 그 구분이 없다. 두 조치 중 하나를 택한다.
 >
@@ -823,29 +586,47 @@ Q3 은 "미실시를 명시할 것인가"였으나, ses-2 디페이싱이 완료
 >
 > (i) 이면 재정렬이 세션 2 통일 arm 에만 쓰였음이 독자에게 보이고, Methods 의 `not applied` 가 세션 1 정본을 가리킨다는 것도 분명해진다.
 
-**산출**: `analysis/future_phase1_sensitivity/results/exp2_endpoints_arms.json`, `analysis/future_phase1_sensitivity/results/exp2_disparity_arms.json`, `derivatives/full_dataset_C010_exp2_harm_hmc{,_matched}`
+### 4.10 Methods–Supplementary 중복 정리와 절 이동 (2026-09-02 재판정)
+
+> **근거는 분량이 아니라 중복이다.** Methods 는 6,115 단어로 본문의 약 45%를 차지하지만 IN 은 상한을 두지 않는다. **방법 논문으로 재배치한 이상(§0.7) 방법 서술을 줄이면 기여 자체가 줄어든다.** 아래는 중복이 확인된 것과, 기여가 아닌 보조 자료에 한정한다.
+
+#### (a) S8 ↔ Methods `Two decoding schemes` — 중복 (등급: 권장) ✅ **반영 완료 (2026-09-02)** — S8(현 §S7)의 LORO·LOCO 절차 서술을 삭제하고 Methods 포인터 한 문단으로 축약. 고유 내용인 leakage control 과 LOSO 문단은 유지
+
+#### (b) S9 ↔ S20 — 중복이면서 수치가 어긋난다 (등급: **필수**) ✅ **반영 완료 (2026-09-02)** — 구 S8·S9 가 현 **§S6 Cross-validation procedures and evaluation metrics** 로 병합되고 통계는 현 **§S16 Statistical Analysis** 로 일원화됐다
+
+#### (c) 이동 — 한 건만 남는다 ✅ **확인 완료 (2026-09-02)** — R+C·Machado 파라미터화는 **이미 §S16(현 §S15)에 있고** Methods 에는 한 줄 포인터만 남아 있다. Methods 에 `machado`·`stockman`·$\Delta\lambda$ 잔존 없음을 grep 으로 확인했으므로 추가 조치가 없다
+
+#### (c-2) Methods `Inverse fitting` 정리 ✅ **반영 완료 (2026-09-02)** — 872 → 716 단어
+
+#### (d) 옮기지 않는 것
+
+`Parameter selection` 303 단어(three-gate 절차), `Inverse fitting` 886 단어, `Identifiability and recovery` 317 단어. 앞의 둘은 종전 판단 그대로이고, 셋째는 (c) 에서 새로 추가됐다.
+
+#### (e) 절감 규모
+
+(a)+(b)+(c) 로 약 700 단어가 준다. **§1.5 반영으로 Methods 가 6,144 에서 6,115 로 이미 줄었다.** 비율 개선은 여전히 부산물이며 목표가 아니다.
+
+#### (f) 반영 순서
+
+§4.0–§4.9 문안 반영이 끝난 뒤에 한다. (b) 는 문단 삭제라 앵커 영향이 작으므로 먼저 해도 된다.
 
 ---
 
 ## 5. 그림
 
-### 5.1 `fig:geometry` (Fig 4) — Q2
+> **⚠ 그림 번호 정정 (2026-09-01).** 이 절이 쓰던 번호는 한 칸씩 밀려 있었다. `main.aux` 의 `\newlabel` 이 정본이며 실제 번호는 **`fig:loco` = Figure 4**, **`fig:geometry` = Figure 5** 다. Methods 에 `fig:forward`(Figure 2)와 `fig:pipeline`(Figure 3)이 들어가면서 Results 쪽이 한 칸씩 밀렸다. 본문 그림은 일곱이 아니라 **여덟**이다. 아래 소제목을 그에 맞게 고쳤다.
 
-**패널에서 별표를 제거하고 각주로 강등한다.**
+### 5.1 `fig:geometry` (**Fig 5**) — 별표 제거 ✅ **반영 완료 (2026-09-02)** — `generate_fig3_geometry_r6.py` 에서 별표 블록 제거 후 재생성(패널에 별표 없음 확인), 캡션의 "Asterisks mark …" 문장을 지정 문안으로 교체
 
-**캡션 추가구**
+**⚠ protan V1 만 별표를 남기지 않는다.** protan V1 은 Primary 에서 유의하지만 보정 파이프라인에서 .077 로 내려간다. 한쪽에만 별표가 남으면 그림이 **"참가자마다 다른 영역"** 을 시각적으로 주장하게 되고, 이는 §0.5 C4 가 주장하지 않기로 한 것이다. **양쪽 모두 제거하고 유의성은 본문과 부록에서만 진술한다.**
 
-> Asterisks are omitted; arm-wise tests for every region are given in Supplementary~\S S2.
+### 5.2 `fig:loco` (**Fig 4**) ✅ **확인 완료 (2026-09-02)** — 그림·캡션 변경 없음을 재확인했고, 부수 확인 항목(README `Known open items 1`)은 §5.4 의 README 재작성에서 닫았다
 
-**근거 (rev.3 개정)**: deutan V2 의 별표가 방어되지 않는다. 움직임 회귀에서 사라지고(.218) 시간 정렬을 파괴한 대조에서는 사라지지 않으며(.005), 정본 arm 의 LOSO 추정량에서도 이미 비유의였다(.116). 별표를 남기고 캡션에서만 단서를 다는 것은 그림과 캡션이 서로 다른 말을 하게 만든다. 그림은 발표·인용에서 캡션과 분리되어 유통되므로 **패널 자체에서 제거해야 한다.**
+### 5.3 `fig:geometry` 의 패널 `B` 참조는 존재하지 않는 패널을 가리킨다 ★ **신규 (2026-09-01) · 등급: 필수** ✅ **해소 확인 (2026-09-02)** — §2.4 반영 시 `B` 가 함께 빠져 live `results_v4.tex` 에는 잔존 참조가 없다. `fig:geometry}B` 는 `results_v4_prewrap_backup.tex` · `results_v4_HYBRID_backup.tex` (미조판 백업)에만 남아 있다
 
-**⚠ protan V1 만 별표를 남기지 않는다.** protan V1 은 세 arm 전부에서 유의하므로 기술적으로는 별표가 가능하지만, 한쪽에만 별표가 남으면 그림이 **"참가자마다 다른 영역"** 을 시각적으로 주장하게 된다. §0.5 금지 표현에 해당한다. **양쪽 모두 제거하고 유의성은 본문·부록에서만 진술한다.**
+**⚠ §2.4(M2) 의 교체 문안이 이 오류를 그대로 물려받는다.** 그 문안 첫 문장이 `(Figure~\ref{fig:geometry}B)` 를 유지하고 있으므로, §2.4 를 반영하면 오류가 새 문장으로 옮겨 갈 뿐이다. **§2.4 를 반영할 때 `B` 를 함께 뺀다.**
 
-### 5.2 `fig:loco` (Fig 3)
-
-변경 불필요. 캡션이 이미 측정·기호·검정 방향만 기술한다 (`CLAUDE.md` figure caption 규칙 준수).
-
----
+### 5.4 `Figures/` 디렉토리 정리 ★ **신규 (2026-09-01) · 등급: 권장** ✅ **반영 완료 (2026-09-02)** — (a) 미사용 4종을 `old/` 로 이동(삭제 대신 이동으로 처리; `.DS_Store` 는 이미 gitignore 등록) · (b) TIF 는 `submission_assets/` 로, PNG 사본은 `old/` 로 · (c) 파일명 유지 · (d) `FIGURES_README.md` 를 `main.aux` 기준 8+2 그림 표로 재작성하고 `Known open items 1` 을 닫음 · (e) `generate_fig3_geometry_r6.py` 도크스트링 번호 정정(Figure 5 / workflow=Figure 3)
 
 ## 6. 형식·제출 차단 — I
 
@@ -858,13 +639,64 @@ Q3 은 "미실시를 명시할 것인가"였으나, ses-2 디페이싱이 완료
 
 ---
 
+## 6.5 2026-09-02 Supplementary 감사에서 추가로 고친 것 (지시서 밖)
+
+| # | 항목 | 조치 |
+|---|---|---|
+| A1 | **부록 그림 번호 붕괴** | `fig:landscape` 에만 `\renewcommand{\thefigure}` 이 없어 본문 **Figure 8** 로 조판되고 있었다(본문 그림은 7개). 리셋을 첫 부록 그림으로 옮겨 **S1 / S2 / S3** 로 정정 |
+| A2 | **`\S\ref{app:…}` 가 `§4.5` 로 렌더링** | `\subsection*` 은 번호가 없어 직전 번호 있는 절(Discussion 4.5)을 집는다. PDF 에 `Supplementary §4.5` 가 실제로 인쇄돼 있었다. 본문 나머지와 같은 하드코딩 `\S S…` 로 교체(Methods 1건 · Discussion 2건) |
+| A3 | **부록 8개 절이 본문 미인용** | S3·S4·S6·S8·S9·S14·S17·S20(구 번호)에 Methods 의 해당 지점에서 인용을 추가. 이제 S1–S20 전부가 최소 1회 인용된다 |
+| A4 | **`0.35` 순열 귀무의 포인터 오지정** | `results_v4.tex:34` 이 §S10(구)을 가리켰으나 그 값은 §S2(구) `tab:interp_arms` 캡션에만 있다. **§S1** 로 재지정 |
+| A5 | **부록 내부 포인터 둘** | `whether the deviation is specific to color is treated in S12` → **§S10**(구 S13). 리지 페널티가 디코딩을 저하시킨다는 근거 `(\S S8)` → **§S9**(구 S10, `tab:loco_decoders` 가 실제 근거) |
+| A6 | **§0.5 C4 금지 표현 1건** | `Both CVD participants carried color-specific geometry, at different ROIs.` 의 뒷부분 삭제 |
+| A7 | **영국식 철자 6건** | `behaviour`·`favour(ed)`·`penalises` → 미국식. 원고는 `american` 으로 통일돼 있다 |
+| A8 | **§S3 QC 가 sub-10 을 포함하고 있었다** | `ROI coverage averaged 84.3% (SD 21.7%) across the ten scanned participants … all participants entered the downstream analyses` 는 **n=10 기준이고 마지막 절은 사실과 다르다**(sub-10 은 전 분석 제외). `Method_method3_header_mi/results.json` 에서 n=9 로 재산출해 **83.5% (SD 22.7%) · 유효복셀 99.5%** 로 교체하고 집계 방식(참가자별 4 ROI × 6런 평균)을 명시. sub-07 의 30.8% 는 불변. 구 84.3% 는 n=10 의 **셀 풀링** 값이고 SD 21.7% 는 n=10 의 **참가자별** 값이어서 두 집계가 섞여 있었다 |
+| A9 | **표 중복** | `tab:motion_arms`(S1)의 Primary 두 열이 `tab:disparity_loso`(S6)와 완전히 같다. 캡션에 재수록임을 명시 |
+| A10 | **조판 넘침** | `tab:motion_arms` 가 30.5pt 넘쳐 있었다. `\small` 로 해소. 남은 넘침 3건은 전부 Supplementary 밖의 기존 항목 |
+
+**남은 부산물 둘 (조치 안 함, 기록만)**
+
+- ~~그림 **파일명**이 구 절 번호를 쓴다~~ → **해소 (2026-09-02, 저자 지시).** `figS18_landscape` → `figS1_landscape`, `figS16_adjacc_saturation` → `figS2_adjacc_saturation`, `figS_forward_tuning` → `figS3_forward_tuning`. 이제 **조판되는 그림 번호**를 담는다. 생성 스크립트 3개도 같은 이름으로 옮겼고, `FIGURES_README.md`·`FIGURE_CAPTIONS.md`·`FONT_POLICY.md`·`generate_fig8.py` 의 참조를 함께 고쳤다. 본문 그림 파일명은 §5.4(c) 결정대로 그대로 둔다.
+- §S17 의 Test 1 / 2a / 2b / 2c 네 표가 `\label` 없이 Table **S14–S17** 번호를 차지한다. 번호열은 연속이고 본문이 이름으로 부르므로 조판 결함은 아니다.
+
+**§8.1 금지 목록 두 행을 갱신했다 (2026-09-02).** `hmc_v2 종점 전량` 행은 §0.4-A 가 뒤집은 옛 결정 위에 쓰인 것이어서 **철회**하고, 대신 그 값들에 걸리는 인용 규칙 셋(서술적 셀 · 영역 귀속 금지 · Primary 한정 유의성)을 명시했다. `exp2 "14칸"` 행은 JSON 의 `prespecified_cells = 14` 확인으로 **해소**했고, 금지가 남는 것은 방향 대비의 variant 간 합산임을 분명히 했다.
+
+---
+
+## 6.6 Supplementary 집약 개정 (2026-09-02 2차, 저자 지시)
+
+**저자가 지적한 셋을 먼저 고쳤다.**
+
+| 지적 | 조치 |
+|---|---|
+| `Nuisance model.` 문단이 필요한가 | **문단 해체.** 표류 회귀자·시간 필터 미적용은 Methods `:86` 의 GLM 서술과 겹치므로 §S1 `The two pipelines.` 안의 한 구로 축약했고, 필드맵 미소비 문장은 §4.0 이 지정한 대로 `Susceptibility distortion.` 서두로 옮겼다. 적용하지 않은 것을 절 제목으로 세우던 구조가 사라진다 |
+| `Regressing the motion parameters…` 가 지금 파이프라인과 맞는가 | **문장 삭제. 지적이 맞다.** 이 문장의 `run-shifted null` 은 `motshift` 이고, §0.4-A 가 `motreg` 와 함께 원고에서 뺀 arm 이다. §4.5 가 §S10 쪽 같은 성격의 문장을 *"존재하지 않는 대조를 가리킨다"* 며 삭제하도록 했는데 §S1 쪽 잔여분이 남아 있었다 |
+| `was acquired without the defacing step` | **경위 삭제.** 수정된 arm 에서 결과 일치를 확인했으므로 우리가 먼저 결함 이력을 말할 이유가 없다. `The second session was reprocessed with the anatomical images harmonized to the first and with head-motion correction` 로 바꿨다 |
+
+**전반 집약.** 절 **20 → 17**, 조판 **69 → 67 쪽**.
+
+| 유형 | 내용 |
+|---|---|
+| **절 병합 3건** | 구 §S2 `Image Orientation`(37 단어) → §S1 `Registration` 문단. 구 §S8 `Evaluation Metrics`(90) → §S7 로 합쳐 `Cross-validation procedures and evaluation metrics`. 구 §S16 `HC magnitude anchor`(130) → §S14 `Identifiability checks` 의 한 문단(Test 2b 와 같은 HC 재적합을 쓰므로 같은 자리) |
+| **중복 삭제** | §S10 이 `35칸 중 16, BH 7 생존`을 두 문단에서 반복 · protan V1 `.758 → .010` 을 두 번 진술 · §S14 가 파라미터 불확실성을 세 곳에서 서로 다른 반올림으로 진술(20/25, 22/26, 16/24) · §S14 의 FDR 요약이 서두 문단과 완전 중복 · §S13 이 `Fitting.` 블록에서 서두 문장을 그대로 반복 · §S11 이 결론 문장을 서두에서 이미 진술 |
+| **문체** | 한 문장 한 줄로 끊어져 있던 문단을 이어 붙이고, §0.7-E 에 따라 본문 산문의 세미콜론·콜론을 문장 분리로 바꿨다(캡션의 목록 구분자는 유지). `Pass criterion:` 형태의 전보체 서술을 완전한 문장으로 |
+| **절 번호** | S1–S20 → **S1–S17**. 참조 33건, 제목 17개, 출처 주석을 함께 이동했다. 병합된 절을 가리키던 Methods 인용 3건은 병합처로 합치면서 중복 인용을 제거했다 |
+
+**검증.** 조판 클린(67쪽, undefined reference 0건, Supplementary 내 넘침 0건). 세션 시작본과 숫자 토큰을 대조해 **삭제된 수치가 전부 의도된 것임을 확인**했다(중복 진술 제거 · n=10 → n=9 재산출 · `N = 1000` → `$N = 1{,}000$` 표기 통일). 대조 과정에서 §S16 의 `nichols2002` 인용이 §4.10(b) 문단 삭제로 원고 전체에서 사라진 것을 발견해 §S16 의 집단 순열 문장에 되살렸다.
+
+> **⚠ 이 문서의 §4.x 에 적힌 `§S…` 는 이제 두 세대 전 번호다.** 대응표: 구 S2→S1, S3→S2, S4→S3, S5→S4, S6→S5, S7·S8→S6, S9→S7, S10→S8, S11→S9, S12→S10, S13→S11, S14→S12, S15→S13, S16·S17→S14, S18→S15, S19→S16, S20→S17. (구 번호는 §1.5(c) 이전 기준으로 여기서 다시 한 칸 더 올라간다.)
+
+**세션 중 저자 편집 감지.** §S10 의 deutan V2 보정값이 세션 시작본의 `q = .052` 에서 현재 `q = .053` 으로 바뀌어 있다. 이 변경은 본 작업에서 하지 않았으므로 저자 편집으로 보고 그대로 두었다. 같은 시각에 `discussion_v3.tex` 도 짧아져 있었고, 번호 갱신은 그 편집본 위에 적용됐다.
+
+---
+
 ## 7. 원고 밖 잔여 작업
 
 | # | 작업 | 산출물 | 왜 필요한가 |
 |---|---|---|---|
-| **1** | **`HMC_REANALYSIS_PRESPEC.md` 에 원고 제외 결정 기록** | 그 문서에 §0.4-A 결정과 사유 추가 | 사전 확정 조항을 따르지 않는 결정이므로 **판단 시점·근거·판단자가 기록으로 남아야** 나중에 방어된다. 기록이 없으면 "결과를 보고 뺐다"와 구분되지 않는다 |
+| ~~1~~ | ~~`HMC_REANALYSIS_PRESPEC.md` 에 원고 제외 결정 기록~~ | — | **소멸 2026-09-01.** 재정렬 파이프라인을 정식으로 보고하므로 제외 결정 자체가 없어졌다 |
 | **1b** | **`TEAM_BRIEF` · `future_phase1_sensitivity/README` 정정** | ICC 0.825 를 "신규 자산"으로 적은 대목에 인용 금지 사유 추가 | 두 문서가 그 값을 본문 승격 대상으로 명시하고 있어, 두면 다음 회차에 또 올라온다 |
-| **1c** | **4-arm disparity 통합표 완성** | job 171184 (`motreg`·`motshift` disparity 전량) | §4.1 표에 disparity 행을 붙일지 결정하려면 `motreg` 의 빈 다섯 칸(sub-08 hV4, sub-09 V2·V3 등)이 필요하다. 2026-08-24 제출, node2 대기 중 |
+| ~~1c~~ | ~~재정렬 파이프라인의 미산출 값 3종~~ | — | **완료 2026-09-02.** ① LOSO 는 래퍼로 로컬 산출(§0.4-B). ② 색 대응 순열은 `disparity_frozen_permutation_hmc_v2.json` 으로 **이미 존재**했다. ③ CG 구간은 `scipy.stats.nct` 로 산출(§2.9). **BrainIAK 는 로컬에 있다(0.12)** — 기록의 '서버 전용'은 사실이 아니다 |
 | 2 | **macOS 필터 per-hue $L^*$ 실측** | 필터 ON 8색 스크린샷 + $L^*$ 표 (평균 이동 · 8색 산포) | §4.8 의 두 분기 중 하나를 확정. **배포 조건에서만 등휘도가 깨지므로 비교자 해석 전체가 여기 달려 있다** |
 | ~~3~~ | ~~ses-2 ezBIDS 디페이싱~~ | `colorBlind_data/data/2nd_exp/bids_2nd_defaced` | **완료 2026-08-17.** 0 복셀 sub-08 30.9% · sub-09 35.1% (ses-1 30.9% / 33.0%), 중시상면 절단면 형상 4장 동일, 뇌 조직 손실 없음 |
 | ~~4~~ | ~~exp2 재전처리 + 종점 14칸 재산출~~ | `full_dataset_C010_exp2_harm_hmc{,_matched}`, `future_phase1_sensitivity/results/exp2_endpoints_arms.json` | **완료 2026-08-17.** native 10개 중 **8개** · matched 10개 중 **5개** 역전. 두 arm 병기, 방향 주장 없음 (§4.9) |
@@ -878,16 +710,19 @@ Q3 은 "미실시를 명시할 것인가"였으나, ses-2 디페이싱이 완료
 |---|---|
 | arm 별 종점 · MAE 순열 | `analysis/future_phase1_sensitivity/results/{perm_adjacent_arm_*,perm_mae_arm,boot_runs_*}.json` |
 | disparity arm 비교 | `analysis/validation/results/disparity_arm_{canonical,hmc_v2}.json` · `motreg`·`motshift` = job 171184 (§7-1c) |
-| 색 특이성 arm 비교 (§4.5) | `analysis/validation/results/disparity_frozen_permutation_{current,motreg,motshift,hmc_v2}.json` |
+| 색 특이성 arm 비교 (§4.5b) | `analysis/validation/results/disparity_frozen_permutation_{current,motreg,motshift,hmc_v2}.json` |
 | **재정렬 미적용 근거 (§1.5)** | `hmc_reanalysis/server_recovered/README.md`(코드 감사·항등 검사), `phase0_preprocessing/results/hmc_summary.csv`(tSNR), `*_desc-motion.par`(변위) |
 | $\hat\beta_c$ arm 비교 | `analysis/phase5_filter_optimization/results/filter_robustness_arms/beta_sign_three_arms.json`, `results/s10_inclusion/u2_{baseline,motreg,hmc_v2}/` — **원고는 `baseline`·`motreg` 두 열만 쓴다** |
 | 필터 교차평가 | `results/filter_robustness_arms/filter_robustness_arms.json` |
 | 비교자 구현 | `~/…/OneDrive-Personal/Projects/colorBlind/colorBlind_exp2.py:150,169,723,733,741,744,799` |
+| **쌍별 스테어케이스 표 (§4.6b)** | `analysis/phase6_behavioral_analysis/results/exp2_behavior/a2_staircase_diagnosis.json`, `scripts/_staircase_pairs_table.py` |
 | SDC 미적용 정당화 | `analysis/phase0_preprocessing/results/roi_shift_summary.csv`, `figures/sdc_cohort/` |
 | **순위 배치 (§2.9)** | `analysis/future_phase1_sensitivity/results/perm_adjacent_arm_*.json` 의 `per_subject` |
 | **sub-07 제외 재산출 (§2.9)** | `analysis/future_phase1_sensitivity/results/sub07_leaveout_hV4.json`, `scripts/_sub07_leaveout.py` |
-| **45° 이동 이득 검정 (§2.10)** | `analysis/future_phase1_sensitivity/results/shift_gain_ch.json`, `scripts/_shift_gain_ch.py` |
+| **hue 순환이동 이득 검정 (§4.5b)** | `analysis/future_phase1_sensitivity/results/shift_gain_ch.json`, `scripts/_shift_gain_ch.py` |
 | **`hmc_v2` 생성 스크립트 · 코드 감사 · 항등 검사** | `analysis/phase0_preprocessing/hmc_reanalysis/server_recovered/` |
+| **ICC 전 쌍 재계산 (§0.4-C)** | `analysis/future_phase1_sensitivity/results/icc_all_pairs.json`, `scripts/_icc_all_pairs.py` |
+| **원고 제외 결정 기록** | `analysis/phase0_preprocessing/HMC_REANALYSIS_PRESPEC.md` 부록 A |
 
 ---
 
@@ -899,7 +734,7 @@ Q3 은 "미실시를 명시할 것인가"였으나, ses-2 디페이싱이 완료
 | **BBR vs MI Dice 0.33–0.50 / 0.27–0.36, ROI coverage 99.95% / 85.4%** | `_archive/registration_method_selection/` | 지표가 슬랩 오위치에 둔감해 **BBR 을 지지한다.** 아카이브 method3 는 FSL MNI152 로 돌아 정본과 공간도 다르다. **§4.4** |
 | **DVARS $-16.3\%$, tSNR $+18.6\%$** | sub-01 run-1 파일럿 | **보간 2회 구버전** 산출. 단일 보간 정본에서는 부호가 반대다(tSNR $-1.9$–$3.0\%$) |
 | **`motreg` hV4 protan 45° 이동 $p<.0001$** | `shift_gain_ch.json` | 통제군 이득 SD 가 $0.4\%$ 로 붕괴해 $t$ 가 31 까지 부풀었다. 45° 주장은 **V1 두 arm 에만** 건다. **§2.10** |
-| **`hmc_v2` 종점 전량** (deutan V1 $p$=.027, deutan V2 $p$=.825, protan V1 $p$=.077, hV4 $p$=.108/.242 등) | `disparity_individual_arms.json`, `perm_adjacent_arm_hmc_v2.json` | §0.4-A 결정으로 원고에서 제외. **저장소에는 남는다** |
-| **exp2 "14칸"** | `STATUS` §4.4 | 실제 측정 셀은 20칸이고 라벨이 합과 맞지 않는다. §4.9 의 세 가지 수 구분 참조 |
+| ~~**`hmc_v2` 종점 전량**~~ | `disparity_individual_arms.json`, `perm_adjacent_arm_hmc_v2.json`, `results/loso_arms/loo_consistent_hmc_v2.json` | **행 철회 (2026-09-02).** 이 행은 `hmc_v2` 를 원고에서 뺀다는 옛 결정 위에 쓰였고, **§0.4-A(2026-09-01)가 그 결정을 뒤집어 두 파이프라인을 나란히 보고하기로 확정했다.** 현행 §S1 의 `tab:motion_arms` 와 `tab:interp_arms` 가 여기 나열된 값들(deutan V1 $p$=.027, deutan V2 $p$=.825, protan V1 $p$=.077, hV4 $p$=.108/.242)을 이미 싣고 있다. **대신 인용 규칙 셋이 이 값들에 걸린다** — ⓐ 개별 셀은 서술적이며 본문 주장을 받치지 않는다(§4.1-d 문장이 두 표 아래에 붙어 있다), ⓑ 영역 귀속을 주장하지 않는다(§0.5 C4), ⓒ 유의성 주장은 Primary 한정이고 재정렬판의 민감성을 함께 적는다(§0.5 C3) |
+| **exp2 "14칸"** | `STATUS` §4.4 | **해소 (2026-09-02).** `exp2_endpoints_arms.json` 의 `prespecified_cells` 가 **14** 로 적혀 있어 "14" 는 사전 확정 종점의 수가 맞고, "20" 은 그것을 측정한 셀의 수다. 둘은 다른 것을 세므로 충돌이 아니다. **여전히 금지되는 것은 방향 대비의 합산이다** — `native` 8/10 과 `matched` 5/10 을 "20 중 13" 으로 묶으면 안 되며, JSON 의 `counting_note` 가 같은 취지로 적혀 있다. §4.9 반영본은 두 variant 를 나누어 적었다 |
 
 **상세 논거**: [`REVISION_PLAN_HMC_DISCLOSURE_2026-08-15.md`](REVISION_PLAN_HMC_DISCLOSURE_2026-08-15.md) · [`REVISION_PLAN_PRESUBMISSION_2026-08-10.md`](REVISION_PLAN_PRESUBMISSION_2026-08-10.md) · [`STATUS_ADDITIONAL_ANALYSIS_2026-08-15.md`](STATUS_ADDITIONAL_ANALYSIS_2026-08-15.md) · [`FRAMING_JNEURO_IMAGINGNEURO_2026-08-16.md`](FRAMING_JNEURO_IMAGINGNEURO_2026-08-16.md) · [`FILTER_ROBUSTNESS_ARMS.md`](../../analysis/phase5_filter_optimization/FILTER_ROBUSTNESS_ARMS.md)

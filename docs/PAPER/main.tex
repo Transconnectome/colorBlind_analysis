@@ -29,6 +29,8 @@
 \usepackage{epstopdf}
 \usepackage{gensymb}           % \degree
 \usepackage{xcolor}
+\usepackage{tabularx}          % wide supplementary tables wrap instead of overflowing
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
 \usepackage[nameinlink]{cleveref}  % after the class's hyperref
 
 % Supplementary sections carry their own S-counter so that \cref resolves the
@@ -106,10 +108,10 @@ Jinil Kim,$^{a}$ Albert Minkue Cho,$^{a}$ Jungwoo Seo,$^{a}$ Jiook Cha$^{a\ast}$
 
 \maketitle
 
-\keywords{color vision deficiency,  fMRI, cortical color representation, individualized color correction}
+\keywords{color vision deficiency, fMRI, multivoxel pattern analysis, representational geometry, cortical color representation, individualized color correction}
 
 \begin{abstract}
-Color vision deficiency (CVD) is typically corrected with generic filters designed from a retina-based model. Such filters change how colors appear but improve color discrimination only in some products and tasks. Filter design omits visual cortex, where the retinal loss and the observer's partial compensation combine. How that combination reshapes color representation in CVD remains underinvestigated. Here we show that categorical hue information remains decodable in CVD while the continuous geometry of cortical color representation is distorted. We scanned two adults with CVD, one with each red--green subtype, and seven color-normal controls. All eight colors remained decodable from cortical activity in both CVD participants, whereas the continuous hue geometry departed from controls in both. We modeled each distortion as a hue rotation along two color-space axes and inverted the fit into a personalized stimulus-space filter. Both CVD participants completed a second session of fMRI and behavioral testing to evaluate the filters. Under the individualized filter, the four hue-discrimination thresholds that had exceeded the control range in the first session (three for deutan, one marginal for protan) moved within that range. This small sample cannot establish superiority over a deployed accessibility filter. The direction of cortical change differed across participants and measures, and neither reached the control reference. This study characterizes a previously undescribed geometric distortion of the cortical color representation in CVD and introduces, to our knowledge, the first cortically grounded framework for individualized color correction.
+Color vision deficiency (CVD) is typically corrected with generic filters designed from a retina-based model. Such filters change how colors appear but improve color discrimination inconsistently across users and tasks. They are designed without reference to the visual cortex, where the retinal loss and the observer's partial compensation combine. How that combination reshapes color representation in CVD remains underinvestigated. Here we show that categorical hue information remains decodable in CVD while the continuous geometry of cortical color representation is distorted, and we use that distortion to design an individualized correction filter. We scanned two adults with CVD, one with each red--green subtype, and seven color-normal controls. All eight colors remained decodable from cortical activity in both CVD participants, whereas the continuous hue geometry departed from controls in both. We modeled each distortion as a hue rotation along two color-space axes and inverted the fit into an individualized stimulus-space filter. Both CVD participants completed a second session of fMRI and behavioral testing to evaluate the filters. Under the individualized filter, the four hue-discrimination thresholds that had exceeded the control range in the first session (three for deutan, one marginal for protan) moved within that range. Establishing superiority over a deployed accessibility filter requires a larger sample. The direction of cortical change differed across participants and measures, and neither reached the control reference. This study characterizes a previously undescribed geometric distortion of the cortical color representation in CVD and introduces, to our knowledge, the first cortically grounded framework for individualized color correction.
 \end{abstract}
 
 % Introduction Section
@@ -177,10 +179,14 @@ any part prepared with the assistance of these tools.
 \section*{Data and Code Availability}
 
 All analysis and preprocessing code needed to reproduce the reported results is
-openly available at \url{https://github.com/Transconnectome/colorBlind_analysis}
-\todo{[FILL AT SUBMISSION] and archived at Zenodo DOI xx.xxxx/zenodo.xxxxxxx.
-IN asks for a persistent identifier; make the repository public and mint a
-release DOI before submission so that reviewers can access it.}
+openly available at \url{https://github.com/haba6030/colorblind_public} and
+archived at Zenodo (\doi{10.5281/zenodo.22369832}, release v1.0.0). The
+repository is organized by the stages of this manuscript. Each stage carries the
+scripts that produced its results, those result files, and an executed notebook
+that compares them with the values reported here and records the outcome of
+every comparison in \texttt{REPORT.md}. Quantities that require BrainIAK with
+MPI or a compute cluster are verified against their committed outputs rather
+than recomputed, as documented in \texttt{REPRODUCE.md}.
 
 % Deposit of derived data was examined against the approved protocol and the
 % signed consent form (docs/archive/final_IRB.pdf, docs/archive/[변경2차] IRB
@@ -190,7 +196,7 @@ release DOI before submission so that reviewers can access it.}
 % deposit clause. Open deposit would require a new ethics submission. The
 % restricted-access statement below is therefore the whole of the data half.
 
-The neuroimaging and behavioural data cannot be shared openly. The protocol
+The neuroimaging and behavioral data cannot be shared openly. The protocol
 approved by the Seoul National University Institutional Review Board (SNUIRB
 No.~2510/002-023), and the written consent obtained under it, place all study
 data in an encrypted store to which the principal investigator controls access,
@@ -277,8 +283,8 @@ All four authors applied jointly for the funding that supported this work.
 % practice does, so it is included here; the fuller statement stays in Methods.
 \section*{Ethics}
 
-The study was approved by the Seoul National University Institutional Review
-Board (SNUIRB No.~2510/002-023) and was conducted in accordance with the
+The Seoul National University Institutional Review Board approved the study
+(SNUIRB No.~2510/002-023), which was conducted in accordance with the
 Declaration of Helsinki. Written informed consent was obtained from all
 participants for being included in the study.
 
@@ -301,15 +307,16 @@ Sciences, Seoul National University (2026).
 The authors declare that they have no known competing financial interests or
 personal relationships that could have appeared to influence the work reported
 in this paper. No patent has been filed on the correction filter described here,
-and no author has a financial relationship with a supplier of colour-correction
+and no author has a financial relationship with a supplier of color-correction
 eyewear or display software.
 
 \section*{Acknowledgements}
 
 Imaging was carried out at the Seoul National University Brain Imaging Center,
-and the authors thank its staff for their support.
-\todo{[CONFIRM] Add any non-author contributions, and check the centre's
-preferred citation wording for acknowledgements.}
+and the authors thank its staff for their support. The authors also thank
+Juhyoung Ryu for assistance with coregistration during preprocessing, Eunhwi Lee
+for support with the experimental design, and Seung Yun Choi for revising the
+experiment documents.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % References
@@ -328,3 +335,4 @@ preferred citation wording for acknowledgements.}
 \input{Supplementary/supplementary}
 
 \end{document}
+%:

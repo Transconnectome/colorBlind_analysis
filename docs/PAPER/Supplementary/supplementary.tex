@@ -14,16 +14,17 @@
 
 \suppsection{Session-1 hue-discrimination thresholds}{app:jnd_baseline}
 
-Session-1 threshold elevations followed each participant's subtype (\cref{tab:jnd_baseline}). The threshold is the staircase level $t$, the fraction of the pair's full CIE $LCh$ separation at which the two discs were discriminated (\S\ref{sec:methods:psychophysical}), so smaller values indicate finer discrimination. The ratio $\gamma$ divides the participant's threshold by the control mean, and $z$ expresses the same difference in control standard deviations over the seven controls. Pairs are grouped by the axis each was chosen to probe, and that assignment was fixed before any threshold was collected.
+Session-1 threshold elevations followed each participant's subtype (\cref{tab:jnd_baseline}). Smaller values of the staircase level $t$ indicate finer discrimination (\S\ref{sec:methods:psychophysical}).
 
-Each pair was measured by two interleaved staircases from starting levels $t = 0.8$ and $t = 0.5$, both following a 1-up/1-down rule with a step of $0.15$ until the second reversal and $0.03$ thereafter. A staircase terminated at eight reversals and at least 20 trials, extended by two further reversals whenever the SD of the last six reversal levels exceeded $0.10$.
+Each pair was measured by two staircases from starting levels $t = 0.8$ and $t = 0.5$, with a step of $0.15$ until the second reversal and $0.03$ thereafter. A staircase terminated at eight reversals and at least 20 trials, extended by two further reversals whenever the SD of the last six reversal levels exceeded $0.10$.
 
 Elevation localized to the axis each participant's subtype predicts. The deutan participant exceeded $z = +4$ on both deutan-axis pairs and on the yellow--purple S-cone pair, and the protan participant exceeded the control range on the protan-axis pair green--blue alone. Both participants remained inside the control range on the $180^\circ$ control pair, which places the elevation on specific axes rather than on overall sensitivity. These thresholds enter the psychophysical loss atoms of \S\ref{sec:methods:candidates}, and the same eight pairs supply the pre-filter baseline of the filter evaluation (\S\ref{sec:results:filter_eval}).
 
 \begin{table}[h]
 \centering
-\caption{Session-1 hue-discrimination thresholds without a filter. The control column is the mean $\pm$ SD over the seven controls. $\gamma$ is the ratio to the control mean and $z$ the deviation in control standard deviations. Bold: $|z| \geq 2$. Two staircases returned an incorrect response at the largest presentable separation, both of them the deutan participant's orange--yellow pair, so that threshold is a lower bound rather than an estimate. It is the only such pair among the 208 staircases collected in this study.}
+\caption{Session-1 hue-discrimination thresholds without a filter. The control column is the mean $\pm$ SD over the seven controls. $\gamma$ is the ratio to the control mean and $z$ the deviation in control standard deviations. Bold: $|z| \geq 2$. Two staircases returned an incorrect response at the largest presentable separation, both of them the deutan participant's orange--yellow pair, so that threshold is a lower bound rather than an estimate.}
 \label{tab:jnd_baseline}
+\setlength{\tabcolsep}{4pt}
 \begin{tabular}{llcccccccc}
 \toprule
 & & \multicolumn{2}{c}{Controls ($n = 7$)} & \multicolumn{3}{c}{Deutan} & \multicolumn{3}{c}{Protan} \\
@@ -48,7 +49,7 @@ Control          & red--cyan      & $0.034$ & $0.015$ & $0.015$ & $0.45$ & $-1.2
 \end{table}
 
 
-The deutan orange--yellow threshold is a lower bound. Both of its staircases spent their course at the top of the presented range and returned incorrect responses at the largest separation the task presents. Censoring understates the baseline deficit and, with it, the improvement recorded under either filter, so the value is reported unadjusted.
+The deutan orange--yellow threshold is a lower bound. Both of its staircases remained at the top of the presented range throughout and returned incorrect responses at the largest separation the task presents. Censoring understates the baseline deficit and therefore the improvement recorded under either filter, so the value is reported unadjusted.
 
 \begin{table}[h]\centering\small
 \caption{Both staircase estimates for every hue pair, given as high-start/low-start in units of the rendered separation. Bold marks the cells whose two estimates differ by more than 0.10. Thresholds reported elsewhere are the mean of the two.}
@@ -95,38 +96,17 @@ The two staircases of a pair agreed closely (\cref{tab:staircase_pairs}). They d
 \suppsection{Preprocessing pipelines and sensitivity analyses}{app:uncorrected}
 
 \paragraph{The two pipelines.}
-Every neural endpoint of the first session was computed under two pipelines. The primary pipeline resampled each functional volume once by a transform identical for every volume in a run. The second composed each volume's MCFLIRT rigid-body realignment matrix with that transform before the same single resampling, so the two differ in the alignment method and share the number of resamplings. Head-motion correction lowered ROI temporal signal-to-noise ratio by $1.7$ to $2.7\%$. In both, the per-run linear and constant drift terms of the general linear model constituted the entire nuisance model, and both pipelines left slice timing, susceptibility distortion, and temporal filtering out. Within-run motion was estimated by registering every volume to its run's middle volume and summarized as framewise displacement \parencite{power2012}, with rotations converted to displacement on a 50\,mm sphere. Across the nine analyzed participants mean framewise displacement reached $0.318 \pm 0.044$\,mm (controls $0.313 \pm 0.042$, CVD $0.338 \pm 0.046$), and $16.2\%$ of volumes exceeded $0.5$\,mm.
+Head-motion correction lowered ROI temporal signal-to-noise ratio by $1.7$ to $2.7\%$. In both pipelines the per-run linear and constant drift terms of the general linear model constituted the entire nuisance model, and both left slice timing, susceptibility distortion, and temporal filtering out. Within-run motion was summarized as framewise displacement \parencite{power2012}, with rotations converted to displacement on a 50\,mm sphere. Across the nine analyzed participants mean framewise displacement was $0.318 \pm 0.044$\,mm (controls $0.313 \pm 0.042$, CVD $0.338 \pm 0.046$), and $16.2\%$ of volumes exceeded $0.5$\,mm.
 
-\paragraph{Disparity under the two pipelines.}
-The regional attribution of disparity depends on the pipeline (\cref{tab:motion_arms}). Procrustes disparity was recomputed under head-motion correction with every other element held fixed. The protan V1 elevation remained the largest deviation in that participant under both pipelines and weakened from $p = .007$ to $p = .077$. In the deutan participant the largest deviation moved from V2 to V1 and the V2 value reversed in sign. Under the leave-one-subject-out estimator the protan V1 cell of the primary pipeline reached significance alone.
-
-\begin{table}[h]
-\centering
-\caption{Procrustes disparity by participant and region under head-motion correction. Entries give the Crawford--Howell one-tailed $t$ with $p$ in parentheses, against the control leave-one-out distribution ($n = 7$), for the common-space estimator and for the leave-one-subject-out estimator that carries the inference. The primary pipeline appears in \cref{tab:disparity_loso}, which adds the case-control effect sizes. Individual cells of this grid are descriptive and support no claim in the main text.}
-\label{tab:motion_arms}
-\small
-\begin{tabular}{llcc}
-\toprule
-Participant & Region & Crawford--Howell & Leave-one-subject-out \\
-\midrule
-Deutan & V1  & $2.4$ ($.027$) & $1.6$ ($.080$) \\
-Deutan & V2  & $-1.0$ ($.825$) & $-0.6$ ($.723$) \\
-Deutan & V3  & $0.6$ ($.293$) & $0.4$ ($.338$) \\
-Deutan & hV4 & $0.4$ ($.351$) & $0.4$ ($.356$) \\
-Protan & V1  & $1.6$ ($.077$) & $1.3$ ($.121$) \\
-Protan & V2  & $1.0$ ($.186$) & $0.1$ ($.480$) \\
-Protan & V3  & $1.1$ ($.151$) & $1.0$ ($.178$) \\
-Protan & hV4 & $1.4$ ($.101$) & $1.1$ ($.159$) \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\paragraph{Classification and interpolation under the two pipelines.}
-The two readouts dissociate under both pipelines (\cref{tab:interp_arms}). The control-group interpolation gate, the two single-case comparisons at hV4 (\S\ref{sec:results:loco}), and the eight-way classification readout (\S\ref{sec:results:loro}) were recomputed the same way. hV4 alone passes the control gate in both pipelines, and both participants remain below the control mean in both. Classification survives in both. The lowest CVD cell across the four regions reaches $0.375$ under the primary pipeline and $0.229$ under head-motion correction, $1.8$ times the $0.125$ chance level. Every single-case classification contrast stayed above $p = .10$ in both pipelines, and the single-case interpolation contrasts reached significance under the primary pipeline alone.
+\paragraph{Endpoints under the two pipelines.}
+Interpolation and classification appear in \cref{tab:interp_arms} and Procrustes
+disparity in \cref{tab:motion_arms}. The permutation null for interpolation lay at
+$0.35$ in both pipelines. Individual cells of these grids are descriptive and
+support no claim in the main text.
 
 \begin{table}[h]
 \centering
-\caption{Hue-interpolation adjacent accuracy and eight-way classification accuracy under the two pipelines. Upper rows give the control interpolation mean with its $p$ against $1{,}000$ per-subject color-label permutations ($n = 7$; the permutation null mean is $0.35$ in both pipelines). Middle rows give each CVD participant's interpolation accuracy at hV4 with the one-tailed Crawford--Howell $p$ against the control distribution. Lower rows give classification accuracy at hV4, for which chance is $0.125$ and the Crawford--Howell test is two-tailed because the hypothesis is preservation; the control mean is listed for reference and carries no test. The primary-pipeline accuracies appear with their full four-region grid in \cref{tab:alignment}. Individual cells of this grid are descriptive and support no claim in the main text.}
+\caption{Hue-interpolation adjacent accuracy and eight-way classification accuracy under the two pipelines. Upper rows give the control interpolation mean with its $p$ against $1{,}000$ per-subject color-label permutations ($n = 7$; the permutation null mean is $0.35$ in both pipelines). Middle rows give each CVD participant's interpolation accuracy at hV4 with the one-tailed Crawford--Howell $p$ against the control distribution. Lower rows give classification accuracy at hV4, for which chance is $0.125$ and the Crawford--Howell test is two-tailed because the hypothesis is preservation; the control mean is listed for reference and is not tested. The primary-pipeline accuracies appear with their full four-region grid in \cref{tab:alignment}.}
 \label{tab:interp_arms}
 \begin{tabular}{lcccc}
 \toprule
@@ -150,30 +130,89 @@ Protan hV4 & $0.375$ & $.351$ & $0.396$ & $.197$ \\
 \end{tabular}
 \end{table}
 
+\begin{table}[h]
+\centering
+\caption{Procrustes disparity by participant and region under head-motion correction. Entries give the Crawford--Howell one-tailed $t$ with $p$ in parentheses, against the control leave-one-out distribution ($n = 7$), for the common-space estimator and for the leave-one-subject-out estimator on which the inference rests. The primary pipeline appears in \cref{tab:disparity_loso}, which adds the case-control effect sizes.}
+\label{tab:motion_arms}
+\small
+\begin{tabular}{llcc}
+\toprule
+Participant & Region & Crawford--Howell & Leave-one-subject-out \\
+\midrule
+Deutan & V1  & $2.4$ ($.027$) & $1.6$ ($.080$) \\
+Deutan & V2  & $-1.0$ ($.825$) & $-0.6$ ($.723$) \\
+Deutan & V3  & $0.6$ ($.293$) & $0.4$ ($.338$) \\
+Deutan & hV4 & $0.4$ ($.351$) & $0.4$ ($.356$) \\
+Protan & V1  & $1.6$ ($.077$) & $1.3$ ($.121$) \\
+Protan & V2  & $1.0$ ($.186$) & $0.1$ ($.480$) \\
+Protan & V3  & $1.1$ ($.151$) & $1.0$ ($.178$) \\
+Protan & hV4 & $1.4$ ($.101$) & $1.1$ ($.159$) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \paragraph{Session-2 endpoints under the harmonized arm.}
-The second-session cortical readouts depend on the preprocessing arm, so we report both arms and treat every directional contrast in them as provisional. The session was reprocessed with the anatomical images harmonized to the first and with head-motion correction, and the fourteen pre-specified endpoints were recomputed within each arm, so the control reference and the Session-1 unfiltered anchor always come from the same reconstruction. The control reference moved from $0.456$ to $0.445$ in hV4 adjacent accuracy, whereas the single-participant, single-condition cells moved far more. Eight of the ten directional contrasts defined on the native voxel mask reversed between arms, as did five of the ten defined on the run-matched mask. The geometry indices moved less, and the four contrasts at the pre-specified target regions held in both arms. The psychophysical endpoints are independent of preprocessing and are unchanged.
+The second session was reprocessed with the anatomical images harmonized to the first and with head-motion correction, and the fourteen pre-specified endpoints were recomputed within each arm, so the control reference and the Session-1 unfiltered anchor always come from the same reconstruction. The control reference moved from $0.456$ to $0.445$ in hV4 adjacent accuracy. Eight of the ten directional contrasts defined on the native voxel mask reversed between arms, as did five of the ten defined on the run-matched mask. The four contrasts at the pre-specified target regions held in both arms. Every directional contrast in the second session is therefore reported as provisional. The psychophysical endpoints are independent of preprocessing and are unchanged.
 
 \paragraph{Susceptibility distortion.}
-Susceptibility distortion within the analyzed ROIs is predominantly subvoxel and spatially smooth, which places it outside the set of explanations for the observed differences in representational geometry across hue conditions. A gradient-echo field map was acquired in each session and linked to the functional runs through the BIDS \texttt{IntendedFor} field, and both pipelines left it unconsumed, so the data retain distortion along the right--left phase-encoding direction. Field-map-derived mean displacement within each analyzed ROI ranged from $0.01$ to $0.76$ voxels ($0.02$--$1.52$\,mm) across the nine participants. Within-ROI spatial variation is the component that distorts a pattern rather than translating it, and it reached $0.05$--$0.21$ voxels in eight participants and $0.38$ voxels ($0.76$\,mm) in the ninth. The residual cost is spatial, reducing the precision with which atlas-defined regions are assigned to functional voxels.
+A gradient-echo field map was acquired in each session and linked to the functional runs through the BIDS \texttt{IntendedFor} field, and both pipelines left it unconsumed, so the data retain distortion along the right--left phase-encoding direction. Field-map-derived mean displacement within each analyzed ROI ranged from $0.01$ to $0.76$ voxels ($0.02$--$1.52$\,mm) across the nine participants. Within-ROI spatial variation, the component that distorts a pattern rather than translating it, reached $0.05$--$0.21$ voxels in eight participants and $0.38$ voxels ($0.76$\,mm) in the ninth. The residual cost is spatial, reducing the precision with which atlas-defined regions are assigned to functional voxels.
 
 \paragraph{Registration.}
-The functional series cover occipital cortex alone, so registration used mutual information initialized from the scanner-defined obliquity in the NIfTI header, which tolerates limited coverage and requires no white-matter boundary. Two standard routes were evaluated first and both were rejected. A container-based route through fMRIPrep failed at the coregistration stage on every attempt with these partial-coverage series. Boundary-based registration within the custom pipeline snapped the functional slab onto an incorrect tissue boundary on visual inspection, an error on the order of $10$\,mm, where the mutual-information solution stayed within about $1$\,mm of the visually verified position. Whole-brain overlap indices favor boundary-based registration on these data, but Dice and ROI-coverage measures respond to the extent of overlap rather than to the position of a partial slab within the brain, so the visual criterion carries the choice.
+The functional series cover occipital cortex alone, so registration used mutual information initialized from the scanner-defined obliquity in the NIfTI header, which tolerates limited coverage and requires no white-matter boundary. Two standard routes were evaluated first. A container-based route through fMRIPrep did not complete the coregistration stage with these partial-coverage series. Boundary-based registration within the custom pipeline placed the functional slab on a different tissue boundary on visual inspection, an offset on the order of $10$\,mm, where the mutual-information solution stayed within about $1$\,mm of the visually verified position. Whole-brain overlap indices favor boundary-based registration on these data, but Dice and ROI-coverage measures respond to the extent of overlap rather than to the position of a partial slab within the brain, so the choice rests on the visual criterion.
 
-The mutual-information optimum is shallow under this field of view. Across the runs of a single session, where the fitted transform should be identical, the mean pairwise displacement of the solution ranged from $0.9$ to $4.2$\,mm. Removing facial voxels from the anatomical image, which leaves the brain unchanged, moved the solution by $1.9$\,mm in the deutan participant and $9.4$\,mm in the protan participant. The transform is fixed within a run, so it enters the eight hues of a run as run-to-run noise alone, which averaging over the six runs attenuates. Rigid-body estimation and distortion correction are constrained just as weakly when little of the head is imaged, so acquisitions of this type would benefit from correction validated for partial coverage.
+The mutual-information optimum is shallow under this field of view. Across the runs of a single session, where the fitted transform should be identical, the mean pairwise displacement of the solution ranged from $0.9$ to $4.2$\,mm. Removing facial voxels from the anatomical image, which leaves the brain unchanged, moved the solution by $1.9$\,mm in the deutan participant and $9.4$\,mm in the protan participant. The transform is fixed within a run, so it enters the eight hues of a run as run-to-run noise alone, which is attenuated by averaging over the six runs. Rigid-body estimation and distortion correction are constrained just as weakly when little of the head is imaged, so acquisitions of this type would benefit from correction validated for partial coverage.
 
 
 % ========== Section 3: Quality Control ==========
 
 \suppsection{ROI coverage}{app:roi_coverage}
 
-ROI coverage averaged $83.5\%$ (SD $22.7\%$) across the nine analyzed participants, and $99.5\%$ of ROI voxels carried reliable stimulus-evoked responses. Coverage was computed as the intersection of the Wang atlas ROIs (V1, V2, V3, hV4) with each participant's BOLD brain mask in MNI space, taken per participant as the mean over the four regions and six runs. Its lowest value in the sample was $30.8\%$. Every analyzed participant entered the downstream analyses.
+ROI coverage averaged $83.5\%$ (SD $22.7\%$) across the nine analyzed participants, and $99.5\%$ of ROI voxels showed reliable stimulus-evoked responses. Coverage was computed as the intersection of the Wang atlas ROIs (V1, V2, V3, hV4) with each participant's BOLD brain mask in MNI space, taken per participant as the mean over the four regions and six runs. Its lowest value in the sample was $30.8\%$. Every analyzed participant entered the downstream analyses.
 
 
 % ========== Section 4: K-Selection ==========
 
 \suppsection{Dimensionality selection for the shared response model}{app:dimensionality}
 
-SRM used $k = 4$ at V1 and V2 and $k = 3$ at V3 and hV4, with cross-subject RDM Spearman correlations of $0.60$, $0.57$, $0.55$ and $0.32$. The reduced dimension was determined by leave-one-subject-out cross-validation over the candidate values 2 to 6 \parencite{cunningham2014}. On each of the seven folds, one control participant was withheld from SRM training and three quality metrics were computed for every candidate. RDM split-half reliability was the Spearman correlation between representational dissimilarity matrices built from the odd runs 1, 3, and 5 and the even runs 2, 4, and 6 of the withheld participant in SRM space. The remaining two metrics were the cross-subject RDM correlation and the reconstruction error. Candidates were ranked within each fold and metric, and the candidate with the best mean rank was selected.
+Three quality metrics were computed on each of the seven leave-one-subject-out folds for every candidate $k$ \parencite{cunningham2014}. RDM split-half reliability is the Spearman correlation, in SRM space, between representational dissimilarity matrices built from the odd runs 1, 3 and 5 and the even runs 2, 4 and 6 of the withheld participant. The other two are the cross-subject RDM correlation and the reconstruction error. Selection used RDM split-half reliability alone (\cref{tab:kselect}).
+
+A composite of all three metrics, ranked within fold and averaged, would instead select $k = 5$ at V2, $k = 4$ at V3 and $k = 6$ at hV4. Reconstruction error falls monotonically with $k$ at every ROI, so it ranks $k = 6$ first in every fold with a rank SD of zero and carries no information about which $k$ preserves representational structure.
+
+\begin{table}[h]
+\centering
+\caption{Shared-response-model dimensionality selection, means over the seven leave-one-subject-out folds. Reconstruction error is given in units of $10^{-5}$. Bold marks the selected $k$, the value with the highest mean RDM split-half reliability at that region.}
+\label{tab:kselect}
+\small
+\begin{tabular}{llccc}
+\toprule
+Region & $k$ & RDM split-half & Cross-subject RDM & Reconstruction error \\
+\midrule
+V1  & $2$ & $0.371$ & $0.451$ & $9.58$ \\
+    & $3$ & $0.472$ & $0.524$ & $8.31$ \\
+    & $4$ & $\mathbf{0.496}$ & $0.596$ & $7.25$ \\
+    & $5$ & $0.422$ & $0.514$ & $6.23$ \\
+    & $6$ & $0.349$ & $0.506$ & $5.44$ \\
+\addlinespace
+V2  & $2$ & $0.267$ & $0.394$ & $12.79$ \\
+    & $3$ & $0.389$ & $0.433$ & $11.50$ \\
+    & $4$ & $\mathbf{0.429}$ & $0.566$ & $9.99$ \\
+    & $5$ & $0.390$ & $0.523$ & $8.42$ \\
+    & $6$ & $0.359$ & $0.492$ & $7.14$ \\
+\addlinespace
+V3  & $2$ & $0.306$ & $0.273$ & $12.25$ \\
+    & $3$ & $\mathbf{0.446}$ & $0.546$ & $11.12$ \\
+    & $4$ & $0.439$ & $0.614$ & $9.78$ \\
+    & $5$ & $0.312$ & $0.437$ & $8.91$ \\
+    & $6$ & $0.273$ & $0.380$ & $7.96$ \\
+\addlinespace
+hV4 & $2$ & $0.302$ & $0.136$ & $22.00$ \\
+    & $3$ & $\mathbf{0.560}$ & $0.317$ & $18.86$ \\
+    & $4$ & $0.520$ & $0.274$ & $17.89$ \\
+    & $5$ & $0.487$ & $0.223$ & $17.12$ \\
+    & $6$ & $0.423$ & $0.290$ & $15.96$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 
 % --------------------------------------------------------------------------
@@ -198,17 +237,17 @@ SRM used $k = 4$ at V1 and V2 and $k = 3$ at V3 and hV4, with cross-subject RDM 
 
 \suppsection{Comparison with alternative decoders}{app:decoders}
 
-The hue-channel basis model was adopted for its interpolation behavior rather than for its classification accuracy. We compared six decoders on the same SRM-aligned amplitudes under both cross-validation schemes, which separate them in opposite directions. The interpolation result carries the present analyses.
+Six decoders were compared on the same SRM-aligned amplitudes under both cross-validation schemes, which separate them in opposite directions.
 
-Linear discriminant analysis classified held-out runs most accurately at every ROI (\cref{tab:loro_decoders}). Its control mean reached $0.878$ at V1 against a chance level of $0.125$, with the support vector machine next at $0.777$ and the hue-channel basis model at $0.542$. The ordering held at V2, V3 and hV4. Four of the six decoders exceeded chance at every ROI, so eight-way classification is recoverable by several readouts and favors none of them.
+Under leave-one-run-out classification, linear discriminant analysis was most accurate at every region (\cref{tab:loro_decoders}), with a control mean of $0.878$ at V1 against a chance level of $0.125$, the support vector machine next at $0.777$, and the hue-channel basis model at $0.542$. Four of the six decoders exceeded chance at every region.
 
-Interpolation to a held-out hue reverses the ordering at hV4, the ROI on which the main analyses rest (\cref{tab:loco_decoders}). The hue-channel basis model reached an adjacent accuracy of $0.470$ there, against a chance level of $0.25$ for its continuous-hue output. It is the only decoder whose control mean exceeds its own chance level, doing so at V1 ($0.360$), V2 ($0.283$) and hV4, with the widest margin at hV4. The classifiers remained below their $0.375$ chance level at every ROI, and ridge and kernel ridge remained below $0.25$ everywhere. The analytic chance level compares a decoder against a uniform prediction, whereas the stricter main-text criterion uses a color-label permutation null that preserves the covariance among voxels, and hV4 is the region that meets it (\S\ref{sec:results:loco}). The pattern follows from the model form. The hue-channel basis model represents a hue as activation over six tuned channels and can therefore evaluate a hue it never saw during training, whereas a classifier trained on seven discrete labels carries no output unit for the eighth.
+Under leave-one-color-out interpolation the ordering reverses (\cref{tab:loco_decoders}). The hue-channel basis model is the only decoder whose control mean exceeds its own chance level, reaching $0.470$ at hV4 against $0.25$, and $0.360$ at V1 and $0.283$ at V2. The classifiers stayed below their $0.375$ chance level at every region, and ridge and kernel ridge below $0.25$ everywhere. Kernel ridge returned exactly $0.000$ in every participant, region and alignment, and the multilayer perceptron returned exactly the chance value with zero variance across participants, both constant predictions.
 
-Two rows are constant-output artifacts. Kernel ridge regression returned an adjacent accuracy of exactly $0.000$ in every participant, ROI and alignment, and the multilayer perceptron returned exactly the chance value with zero variance across participants, which is the signature of a constant prediction. We treat both as uninformative rather than competitive.
+The reversal follows from the model form. A classifier trained on seven discrete labels has no output unit for the eighth, whereas the hue-channel basis model represents a hue as activation over six tuned channels and can evaluate a hue it never saw in training. It was adopted for that interpolation behavior rather than for its classification accuracy.
 
 \begin{table}[h]
 \centering
-\caption{Eight-way classification accuracy under leave-one-run-out cross-validation, SRM-aligned amplitudes, chance $= 0.125$. control mean $\pm$ SD ($n = 7$), with the two CVD participants listed separately. Bold: highest control mean in the ROI. Three further variants sit outside this comparison: the ensemble decoders were retired from the pipeline, the two hybrid decoders were run for interpolation alone, and four alternative readouts of the hue-channel basis model vary the readout rather than the decoder.}
+\caption{Eight-way classification accuracy under leave-one-run-out cross-validation, SRM-aligned amplitudes, chance $= 0.125$. Control mean $\pm$ SD ($n = 7$), with the two CVD participants listed separately. Bold: highest control mean in the ROI. Three further variants fall outside this comparison: the ensemble decoders were retired from the pipeline, the two hybrid decoders were run for interpolation alone, and four alternative readouts of the hue-channel basis model vary the readout rather than the decoder.}
 \label{tab:loro_decoders}
 \begin{tabular}{llccc}
 \toprule
@@ -247,7 +286,7 @@ hV4 & LDA & $\mathbf{0.658 \pm 0.092}$ & 0.813 & 0.729 \\
 
 \begin{table}[h]
 \centering
-\caption{Adjacent accuracy under leave-one-color-out cross-validation, SRM-aligned amplitudes. control mean $\pm$ SD ($n = 7$), with the two CVD participants listed separately. Chance depends on the output space of the decoder. The hue-channel basis, ridge and kernel ridge return a continuous hue, so a uniform prediction lands within the $45^\circ$ tolerance on 91 of 360 draws and chance is $0.25$. The LDA, SVM and MLP classifiers return one of the eight stimulus hues, for which the tolerance admits 3 of 8 and chance is $0.375$. The constant-output MLP sits at exactly $0.375$ at V1 and V2, which confirms the classifier value. Bold: the largest margin above the applicable chance level. Kernel ridge and the MLP are constant-output rows, noted in the text. The hue-channel-basis rows of this table and of \cref{tab:loro_decoders} constitute the SRM-space readouts referred to in \cref{app:alignment}.}
+\caption{Adjacent accuracy under leave-one-color-out cross-validation, SRM-aligned amplitudes. Control mean $\pm$ SD ($n = 7$), with the two CVD participants listed separately. Chance depends on the output space of the decoder. The hue-channel basis, ridge and kernel ridge return a continuous hue, so a uniform prediction lands within the $45^\circ$ tolerance on 91 of 360 draws and chance is $0.25$. The LDA, SVM and MLP classifiers return one of the eight stimulus hues, for which the tolerance admits 3 of 8 and chance is $0.375$. Bold: the largest margin above the applicable chance level. Kernel ridge and the MLP are constant-output rows, noted in the text. The hue-channel-basis rows of this table and of \cref{tab:loro_decoders} constitute the SRM-space readouts referred to in \cref{app:alignment}.}
 \label{tab:loco_decoders}
 \begin{tabular}{llccc}
 \toprule
@@ -304,23 +343,38 @@ The squared residuals are averaged over both samples and voxels, so the selected
 
 \suppsection{Cross-validation procedures and evaluation metrics}{app:cv_metrics}
 
-\paragraph{Cross-run alignment and leakage control.}
-The fixed-reference alignment bounds the leakage that a nested alignment could introduce. The run-level Procrustes alignment (\S\ref{sec:methods:roi}) maps runs 2--6 onto a fixed run-1 reference by an orthogonal rotation that uses no stimulus labels, so the alignment frame is defined independently of the held-out run or hue. Re-estimating the alignment inside each fold raised hue-channel-basis LORO accuracy from $0.545$ to $0.578$. Leakage in the fixed-reference pipeline would predict the opposite direction, so the reported estimate is free of inflation from the alignment step. That variant also replaces the run-1 reference with the training-run mean, so it bounds the leakage question rather than isolating the nesting itself.
+\paragraph{Leakage control on the run-level alignment.}
+The run-level rotation of \S\ref{sec:methods:roi} was estimated once from all six runs and held fixed during cross-validation, so a held-out run or hue contributed to the alignment frame of the training data. To bound the effect, leave-one-run-out classification was repeated with a nested variant in which, on each fold, the five training runs were centered, scaled, and rotated onto their own mean, and the held-out run was rotated onto that mean.
 
-\paragraph{Leave-one-subject-out (LOSO).}
-LOSO is the cross-subject transfer of \S\ref{sec:methods:loro} and evaluates generalization to held-out participants. All eight hues enter training, so it extends LORO across participants and has no interpolation counterpart. The encoder $W$ maps the six channels onto the voxels of the participant it was fitted to, so cross-subject prediction requires a common voxel space and LOSO ran on the SRM-transformed data. For each control participant, $W$ was trained on the remaining control participants' shared-space data and tested on the held-out participant.
+The variant changes the reference together with the nesting and therefore bounds the leakage rather than isolating it. Leakage through the fixed reference would raise the fixed-reference accuracy above the nested one; the observed difference runs the other way (\cref{tab:cv_leakage}).
 
-\paragraph{Evaluation metrics.}
-Hue decoding was evaluated on two metrics and voxel prediction on one. The first decoding metric is mean absolute error between the predicted and the true hue angle, for which a uniform random predictor on a circle gives a chance level of $90^\circ$. The second is eight-way classification accuracy, obtained by assigning the decoded hue to the nearest stimulus hue, which is a $\pm 22.5^\circ$ bin around each of the eight hues and gives a chance level of $12.5\%$. Voxel response prediction was evaluated as the Pearson correlation between predicted and observed response vectors across all voxels and hues in the test set.
+\begin{table}[h]
+\centering
+\caption{Eight-way leave-one-run-out classification accuracy of the hue-channel basis model under the two run-alignment procedures, pooled over participants and the four regions (chance $0.125$). The fixed-reference procedure is the one used throughout the main text.}
+\label{tab:cv_leakage}
+\begin{tabular}{llcc}
+\toprule
+Procedure & Reference pattern & Rotation estimated from & Accuracy \\
+\midrule
+Fixed reference & run 1 & all six runs, once & $0.545$ \\
+Nested & mean of the five training runs & training runs of each fold & $0.578$ \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-% ========== Section 8: LOO-Consistent Disparity ==========
+\paragraph{Cross-subject transfer.}
+The transfer of \S\ref{sec:methods:loro} differs from the within-participant schemes in three respects.
+\begin{itemize}
+\item Space. Training and test responses are the $k$-dimensional shared-space patterns of \S\ref{sec:methods:srm}; controls enter through their SRM bases and CVD participants through the SVD projection into the control-trained space.
+\item Encoder. $W$ maps the six channels onto the shared dimensions and was estimated by the pseudoinverse of \S\ref{sec:methods:encoding} from the shared-space responses of the training controls, with all eight hues and all runs in training; the scheme therefore has no interpolation counterpart.
+\item Readout. The held-out participant's shared-space responses were decoded by the same correlation readout and scored as eight-way classification accuracy against the chance level of $0.125$.
+\end{itemize}
 
 \suppsection{Leave-one-out disparity estimation}{app:loo_disparity}
 
-Disparity was estimated against leave-one-control-out references. For each fold $i$ the reference $R_{-i}$ is the mean of the remaining six control participants' aligned data. The held-out $\text{ctrl}_i$ and both CVD participants are compared against that same reference, so control and CVD disparities are measured against identical references within each fold. Individual CVD significance used the \textcite{crawford1998} modified $t$, comparing each CVD participant's mean disparity over the seven folds to the control distribution ($n = 7$, $df = 6$). Each CVD participant therefore contributes the mean of its seven fold disparities, whereas each control participant contributes the single value from the fold that held it out. The control distribution retains fold-to-fold variance that the CVD statistic averages out, which renders the comparison conservative.
+For each fold $i$ the reference $R_{-i}$ is the mean of the remaining six control participants' aligned data, and the held-out control and both CVD participants are compared against it. Each CVD participant contributes the mean of its seven fold disparities, whereas each control participant contributes the single value from the fold that held it out, so the control distribution retains fold-to-fold variance that the CVD statistic averages out and the comparison is conservative.
 
-\paragraph{Common-space and symmetric-LOSO estimates.}
-The two estimators answer different questions, so \cref{tab:disparity_loso} reports both. The geometric-disparity tests (\S\ref{sec:results:geometry}) are reported primarily in the common control-trained SRM space, in which the seven controls train the shared space and each subject of interest is projected in. In that space the held-out control reference is in-sample whereas the projected CVD participant is out-of-sample. We therefore computed a symmetric leave-one-subject-out (LOSO) estimate as well, in which every control and CVD subject alike is projected by SVD into a space trained on the remaining six controls (Methods, \S\ref{sec:methods:rdm}). The common space defines the representation the filter is fitted in, since every other stage of the pipeline operates there, whereas testing whether a participant departs from the control distribution requires the held-out participant to be projected on the same terms as the CVD participants, which the symmetric estimate supplies. Both use the \textcite{crawford1998} one-tailed single-case $t$ ($df = 6$). \cref{tab:motion_arms} repeats both estimators under head-motion correction.
+Both estimators of \S\ref{sec:methods:rdm} appear in \cref{tab:disparity_loso}. The common control-trained space is the one the filter is fitted in, since every other stage of the pipeline operates there, whereas the symmetric leave-one-subject-out space projects the held-out control on the same terms as each CVD participant. \cref{tab:motion_arms} repeats both estimators under head-motion correction.
 
 \begin{table}[h]
 \centering
@@ -367,19 +421,26 @@ Disparity and color specificity address different questions. Disparity measures 
 
 \suppsection{Alignment-independent checks on the disparity measure}{app:triangulation}
 
-Disparity tracks the same subject-level quantity when the alignment method changes. We recomputed each participant's distance from the control mean with two procedures that use no shared response model, then correlated the result with the SRM disparity used in the main analyses. Crossnobis distance in native voxel space agreed at $r = 0.632$ pooled across ROIs ($p < .001$) and PCA distance at $r = 0.780$ ($p < .001$). Agreement was strongest at V1 and V2 (\cref{tab:triangulation}).
+Disparity tracks the same subject-level quantity when the alignment method changes. Three distances that use no shared response model were computed for each of the nine participants from the run-aligned amplitudes of \S\ref{sec:methods:roi} and correlated with SRM disparity. Agreement was substantial under both reductions (pooled Spearman $r = 0.780$ for PCA and $0.544$ for PCA--CCA, both $p < .001$) and highest at V1 and V2 (\cref{tab:triangulation}).
+\begin{itemize}
+\item Crossnobis. An $8 \times 8$ cross-validated Mahalanobis distance matrix per participant in that participant's own voxel space \parencite{walther2016}, cross-validated over the 15 run pairs with Ledoit--Wolf shrinkage of the noise covariance. The participant score is $1 - r_s$ between this matrix and the control-mean matrix.
+\item PCA. Each participant's hue-by-voxel pattern reduced to the region's $k$ by principal components, followed by Procrustes disparity over all participant pairs. The participant score is the mean disparity to the seven controls.
+\item PCA--CCA. As PCA, with a canonical-correlation alignment of each pair before the Procrustes step.
+\end{itemize}
+Group-level contrasts under the three distances were as follows.
+\begin{itemize}
+\item Crossnobis: control-to-control minus control-to-CVD RDM similarity of $0.104$ at V1 (permutation $p = .120$) and below $0.05$ at V2, V3, and hV4.
+\item PCA: Hedges' $g$, signed control--CVD minus control--control pairs, from $-0.13$ to $+0.40$ across regions.
+\item PCA--CCA: $g$ from $-0.13$ to $+0.16$.
+\end{itemize}
+Pairwise alignment fits each participant pair independently and is therefore noisier than a jointly fitted shared space, which is consistent with the size of these group-level effects. The section's claim rests on the subject-level agreement above rather than on them.
+Variance explained by the shared response model under the symmetric leave-one-subject-out projection is given in \cref{tab:variance_explained}; the check asks whether elevated disparity could reflect poorer reconstruction of the CVD data. Variance explained and disparity were uncorrelated across participants (Spearman $r = -0.214$ pooled over regions, $p = .211$).
 
-Cross-validated Mahalanobis distance reproduces the ordering without any alignment step. Following \textcite{walther2016}, we computed an $8 \times 8$ crossnobis distance matrix per participant in native voxel space, cross-validated over the 15 run pairs, with Ledoit--Wolf shrinkage of the noise covariance. Control-to-control RDM similarity exceeded control-to-CVD similarity at V1 by $0.104$ (permutation $p = .120$), and the three remaining ROIs gave differences below $0.05$. The convergent correlation with SRM disparity reached $r = 0.833$ at V1 ($p = .005$) and $r = 0.733$ at V2 ($p = .025$).
-
-A second alignment algorithm gives the same subject ordering. We replaced SRM with PCA at matched dimensionality, with and without a subsequent canonical-correlation alignment, and computed Procrustes disparity over all participant pairs. Group-level effects were small under both variants, with Hedges' $g$ from $-0.13$ to $+0.40$ under PCA and from $-0.13$ to $+0.16$ under PCA-CCA. Pairwise alignment fits each pair independently and therefore carries more noise than a jointly fitted shared space, which accounts for their size. Subject-level agreement with SRM disparity was substantial under both (PCA pooled $r = 0.780$ and PCA-CCA pooled $r = 0.544$, both $p < .001$).
-
-The shared space reconstructs the CVD data at least as well as the control data (\cref{tab:variance_explained}), which places reconstruction quality outside the set of explanations for the elevated disparity. Under the symmetric leave-one-subject-out framework, variance explained was higher in CVD than in controls at all four ROIs. Variance explained and disparity varied independently across participants (pooled $r = -0.214$, $p = .211$), so the two indices track separate properties. High reconstruction quality together with high disparity describes a strong signal held in a different arrangement.
-
-These checks concern the measurement alone, and the argument rests on the subject-level agreement between three distances computed under three different alignment procedures. Whether the deviation is specific to color is treated in \cref{app:geometry_validity}.
+These checks concern the dependence of the distance on the alignment procedure. The color specificity of a deviation, which depends on whether the projection is held fixed, is treated in \cref{app:geometry_validity}.
 
 \begin{table}[h]
 \centering
-\caption{Convergent validity of SRM disparity with two alignment-independent distances, Spearman $r$ over the nine analyzed participants. Crossnobis distance uses native voxel space with no alignment step. PCA and PCA-CCA replace the shared response model with a pairwise alignment at matched dimensionality. Bold: $p < 0.05$.}
+\caption{Spearman correlation between SRM Procrustes disparity and three distances computed without the shared response model, over the nine analyzed participants within each region and pooled over the four regions ($n = 36$). Crossnobis: distance of the cross-validated Mahalanobis RDM from the control-mean RDM in the participant's own voxel space. PCA and PCA--CCA: mean pairwise Procrustes disparity to the seven controls after reduction to the region's $k$, without and with canonical-correlation alignment. Bold: $p < 0.05$.}
 \label{tab:triangulation}
 \begin{tabular}{lccccc}
 \toprule
@@ -394,7 +455,7 @@ PCA-CCA                  & 0.483 & 0.433 & 0.100 & $-0.067$ & \textbf{0.544} \\
 
 \begin{table}[h]
 \centering
-\caption{Variance explained by the shared response model under the symmetric leave-one-subject-out projection, in which controls and CVD participants are projected identically. Hedges' $g$ is signed control minus CVD, so negative values indicate better reconstruction of the CVD data.}
+\caption{Variance explained by the shared response model at the selected dimensionality $k$ under the symmetric leave-one-subject-out projection, in which controls and CVD participants are projected identically. Entries are group means over $n = 7$ controls and $n = 2$ CVD participants. Hedges' $g$ is signed control minus CVD.}
 \label{tab:variance_explained}
 \begin{tabular}{lcccc}
 \toprule
@@ -408,37 +469,86 @@ hV4 & 3 & 0.225 & 0.253 & $-0.39$ \\
 \end{tabular}
 \end{table}
 
-% ========== Section 10: Mean Activation ==========
-
 \suppsection{Activation-level comparison}{app:activation}
 
-Both CVD participants fell inside the control distribution on every activation metric at every ROI. Activation-level metrics were compared between the controls and each CVD participant on the amplitudes before SRM alignment. The metrics were mean activation magnitude (mean $|\beta|$), signal-to-noise ratio, color modulation depth, run-to-run reliability, and spatial variance, each evaluated at V1, V2, V3 and hV4. Every comparison is a two-tailed single-case test against the seven controls \parencite{crawford1998}, the procedure applied one-tailed to the geometric and interpolation endpoints.
+Five activation metrics were compared between the controls and each CVD participant on the amplitudes before SRM alignment, at V1, V2, V3 and hV4: mean activation magnitude (mean $|\beta|$), signal-to-noise ratio, color modulation depth, run-to-run reliability, and spatial variance. Each comparison is a two-tailed single-case test against the seven controls \parencite{crawford1998}, the procedure applied one-tailed to the geometric and interpolation endpoints. Both CVD participants fell inside the control distribution on every metric at every region, and the two amplitude metrics are given in \cref{tab:activation}.
 
-For mean $|\beta|$ every value satisfied $p \geq 0.182$, the largest deviation being $d_{cc} = +1.61$ in the deutan participant at V3. For color modulation depth the largest deviation was $d_{cc} = +2.16$ in the deutan participant at V2 ($p = 0.090$). The largest deviations on both metrics were positive, the opposite of the direction a uniform attenuation predicts. Voxel-level color selectivity was substantial in both groups (one-way ANOVA across voxels, $F > 4$, $p < 0.001$ in V1--V3). With seven controls a two-tailed test at $\alpha = 0.05$ requires a deviation of $2.62$ control standard deviations, and its power against a true deviation of $2$ SD is approximately $0.35$. These tests therefore exclude a substantial uniform attenuation and leave equality untested.
+Voxel-level color selectivity was substantial in both groups (one-way ANOVA across voxels, $F > 4$, $p < 0.001$ in V1--V3). Activation metrics and SRM disparity varied independently across participants, with Pearson $r$ from $-0.29$ to $+0.51$ over 20 tests and all $p \geq 0.130$. With seven controls a two-tailed test at $\alpha = 0.05$ requires a deviation of $2.62$ control standard deviations, and its power against a true deviation of $2$ SD is approximately $0.35$, so these tests exclude a substantial uniform attenuation and leave equality untested.
 
-The control--CVD difference resides in the representational pattern rather than in response amplitude. Activation metrics and SRM disparity varied independently across participants, with Pearson $r$ from $-0.29$ to $+0.51$ over 20 tests and all $p \geq 0.130$.
+\begin{table}[h]
+\centering
+\caption{Activation-level single-case comparisons on the pre-alignment amplitudes. Entries give the Crawford--Howell case-control effect size $d_{cc}$ with the two-tailed $p$ in parentheses, against the seven controls.}
+\label{tab:activation}
+\small
+\begin{tabular}{llcc}
+\toprule
+Region & Metric & Deutan & Protan \\
+\midrule
+V1  & mean $|\beta|$           & $+0.48$ ($.668$) & $-0.73$ ($.520$) \\
+    & color modulation depth   & $+1.09$ ($.349$) & $+1.03$ ($.374$) \\
+\addlinespace
+V2  & mean $|\beta|$           & $+0.73$ ($.520$) & $-0.48$ ($.668$) \\
+    & color modulation depth   & $+2.16$ ($.090$) & $+0.08$ ($.942$) \\
+\addlinespace
+V3  & mean $|\beta|$           & $+1.61$ ($.182$) & $+0.18$ ($.873$) \\
+    & color modulation depth   & $+1.55$ ($.196$) & $+0.35$ ($.753$) \\
+\addlinespace
+hV4 & mean $|\beta|$           & $+1.13$ ($.330$) & $-0.10$ ($.928$) \\
+    & color modulation depth   & $+0.75$ ($.509$) & $-0.34$ ($.764$) \\
+\bottomrule
+\end{tabular}
+\end{table}
 
 
 % ========== Section 11: Retinal-Family Model Comparison ==========
 
 \suppsection{Comparison with the retinal-family distortion model}{app:retinal_family}
 
-The retinal-family (R+C) model saturated its gain boundary in both participants and therefore represents the fitted distortion poorly. It was fit by the same grid search and held-out composite criterion as the 2-component model (\S\ref{sec:methods:selection}), with $g$ searched over $[0, 3]$ in steps of $0.05$, so the two classes are directly comparable on $\overline{L}_{\rm test}$.
-
 \paragraph{Model.}
-The prevailing account attributes CVD color distortion to a cone-spectral shift at the retinal level \parencite{machado2009}, optionally augmented by a cortical compensation gain $g$ \parencite{boehm2014,tregillus2021},
-%
+The retinal-plus-cortical (R+C) model attributes CVD color distortion to a
+cone-spectral shift at the retinal level \parencite{machado2009}, combined with a
+cortical compensation gain $g$. The gain is motivated by the red--green contrast
+gain reported for anomalous trichromats \parencite{boehm2014,tregillus2021},
+whose measures scale response amplitude rather than a hue displacement,
+
 \begin{equation}
   \delta\theta_{\rm RC}(\theta;\,g)
     = (2 - g)\,\delta\theta_{\rm Mach}(\theta)
   \label{eq:rc}
 \end{equation}
-%
-where $\delta\theta_{\rm Mach}$ is the per-hue angular shift predicted by the Machado model, evaluated here on the Stockman and Sharpe cone fundamentals \parencite{stockman2000} rather than on the Smith and Pokorny fundamentals it is defined for. The gain $g$ parameterizes cortical compensation, cancelling the retinal shift at $g = 2$ and reversing it past the undistorted hue above that value. The confusion axis is the color-space direction along which CVD observers confound hues with one another, and $\delta\theta_{\rm Mach}$ lies entirely along it, so R+C carries a single free parameter and displaces hues along one fixed direction. $\Delta\lambda$ was held fixed rather than fitted, and each participant was evaluated at three published cone-shift anchors for their subtype, $6.0$, $6.5$, and $8.0$\,nm for deutan and $1.5$, $3.0$, and $10.0$\,nm for protan, with results reported at the anchor of lowest held-out loss.
+
+where $\delta\theta_{\rm Mach}$ is the per-hue angular shift predicted by the
+Machado model for a cone-spectral shift $\Delta\lambda$. That model is defined on
+the Smith and Pokorny cone fundamentals, and it is evaluated here on the Stockman
+and Sharpe fundamentals \parencite{stockman2000}, the cone model used elsewhere in
+this analysis. The gain reproduces the retinal shift at $g = 1$, cancels it at
+$g = 2$, and reverses its sign above that value. $\Delta\lambda$ was fixed, and
+each participant was evaluated at three cone-shift anchors for their subtype,
+$6.0$, $6.5$ and $8.0$\,nm for deutan and $1.5$, $3.0$ and $10.0$\,nm for protan.
+
 \paragraph{Fits.}
-The retinal-plus-cortical model reached the gain boundary in both participants (\cref{tab:modelfits}). Anchor choice matters for the protan participant, where boundary saturation ranged from $0\%$ to $100\%$ across the three $\Delta\lambda$ values, so the reported fit is the anchor that generalized best. For the deutan participant, $100\%$ of resample solutions saturated at $g \to 3.0$, and the fit was rejected at the boundary-saturation gate as model misspecification (\S\ref{sec:results:rc_insufficient}). For the protan participant, $41\%$ of solutions saturated at $g = 2.95$, which passed that gate, and the held-out composite favored the 2-component fit ($\overline{L}_{\rm test} = -1.54$ against $-0.86$). A gain above 2 implies cortical overshoot past the undistorted hue, which the participants' confirmed residual CVD excludes. Fitting a retinal-family model directly against $\Delta$RDM reproduced the same boundary behavior in both participants.
+Fitted values appear in \cref{tab:modelfits}. Estimates at a grid boundary are
+treated as saturation of the search range rather than as parameter estimates
+(Gate 2; \S\ref{sec:methods:selection}). Under the loss combination adopted for
+each participant the fitted gain exceeds $2$, the value at which the cortical
+term cancels the retinal shift, so the family matches the data only by reversing
+the sign of the retinal hue displacement. In the protan participant the proportion of
+resample solutions at the boundary ranged from $0\%$ to $100\%$ across the three
+anchors, and the anchor of lowest held-out loss is reported.
+
 \begin{table}[ht]
-  \caption{Distortion-model fits for both CVD participants, all scored on the same held-out composite test-loss ($\overline{L}_{\rm test}$, lower is better; \S\ref{sec:methods:selection}; the neural RDM atom in each adopted fit is V2 for the deutan and V1 for the protan participant). $\overline{L}_{\rm test}$ and its interquartile range are medians over the $N = 300$ control 5-train/2-test resamples. Each 2-component row is the selected combination followed by the next-ranked one that passed the boundary-saturation gate, which is a $\beta_s$-dominant alternative in the deutan participant and returns the same estimate in the protan participant. The retinal-plus-cortical (R+C) fits are reported for comparison: the deutan R+C was rejected at the boundary-saturation gate (\S\ref{sec:results:rc_insufficient}), and the protan R+C generalized worse than the 2-component fit.}
+  \caption{Distortion-model fits for both CVD participants, all scored on the same
+  held-out composite test-loss ($\overline{L}_{\rm test}$, lower is better;
+  \S\ref{sec:methods:selection}). Each R+C row is scored on the loss combination
+  adopted for the same participant's 2-component fit. The neural RDM atom in that
+  combination is V2 for the deutan and V1 for the protan participant.
+  $\overline{L}_{\rm test}$ is the median, and IQR the interquartile range, of the
+  held-out loss over the $N = 300$ control 5-train/2-test resamples. Each
+  2-component row gives the selected combination followed by the next-ranked
+  combination that passed the boundary-saturation gate (Gate 2). Each R+C row
+  gives the median fitted gain with the percentage of resample solutions at a grid
+  boundary. No held-out loss is reported for a fit rejected at Gate 2, which
+  precedes ranking.}
   \label{tab:modelfits}
   \centering
   \small
@@ -456,7 +566,14 @@ The retinal-plus-cortical model reached the gain boundary in both participants (
 
 
 \paragraph{Degrees of freedom of the family.}
-One free parameter along one fixed direction accounts for the boundary behavior. The cortical gain $g$ rescales the retinal shift uniformly, so the R+C family displaces hues along the confusion axis for every value of $g$ and generates no component along the S-cone axis. The 2-component model's S-cone term $\beta_s \cos(\theta - 90^\circ)$ lies $60^\circ$ from the deutan confusion axis and $74^\circ$ from the protan one, and the observed interpolation deficit concentrates at the S-cone intermediate hues (\S\ref{sec:results:loco}). This restriction is a property of the model class and holds across fitting criteria (\S\ref{sec:results:rc_insufficient}).
+The gain rescales one fixed per-hue profile, so the relative weight of the
+S-cone-axis and confusion-axis content of $\delta\theta_{\rm Mach}$ is set by the
+cone model rather than fitted. Projected onto the basis of Eq.~\ref{eq:2comp},
+that profile has $\lvert\beta_s / \beta_c\rvert = 0.92$ to $0.95$ in the deutan
+participant and $0.08$ to $0.24$ in the protan participant across the three
+anchors, and the two cosines together account for $0.32$ to $0.33$ and $0.18$ to
+$0.19$ of its sum of squares. The 2-component model assigns the two amplitudes
+independently, which is the degree of freedom the family lacks.
 
 
 % --------------------------------------------------------------------------
@@ -478,42 +595,84 @@ One free parameter along one fixed direction accounts for the boundary behavior.
 
 \suppsection{Identifiability of the fitted parameters}{app:identifiability}
 
-Four pre-specified checks bound what the fit can estimate. Test~1 assesses voxel-level parameter recovery, Test~2a measures the algorithm's noise floor, and Tests~2b and 2c assess specificity to CVD data. Each ran on the two selected fits with PCA-basis voxel synthesis (spatial PCA(20) on SRM-projected amplitudes) as the feature space. Benjamini--Hochberg correction across the six test-bearing checks (2 candidates $\times$ 3 tests, $\alpha = 0.05$) returned no result below threshold. The selected optimum is therefore treated throughout as a descriptive embedding of the CVD-specific distortion direction rather than as a point estimate with physiological magnitude.
-
 \paragraph{Unselected loss atom: hV4 LOCO voxel prediction ($L_{\rm LOCO}$).}
-This atom scores how well a candidate distortion accounts for the CVD participant's own held-out responses at hV4. For each held-out hue $c$, ridge weights $W_c$ were estimated from the remaining seven hues across all six runs, with the penalty chosen by generalized cross-validation as in \S\ref{sec:methods:encoding}. The candidate distortion relabels each stimulus by its perceived hue, so the held-out response is predicted as $\hat{Y}_c = \mathbf{c}(\theta_c + \delta\theta_c)^\top W_c$. The fit for that hue is the Pearson correlation $\rho_c$ between $\hat{Y}_c$ and the participant's run-averaged pattern at hue $c$. The loss averages the complement over the eight hues:
+For each held-out hue $c$, ridge weights $W_c$ were estimated from the remaining seven hues across all six runs, with the penalty chosen by generalized cross-validation (\S\ref{sec:methods:encoding}). The candidate distortion relabels each stimulus by its perceived hue, so the held-out response is predicted as $\hat{Y}_c = \mathbf{c}(\theta_c + \delta\theta_c)^\top W_c$, and $\rho_c$ is the Pearson correlation between $\hat{Y}_c$ and the participant's run-averaged pattern at hue $c$. The loss averages the complement over the eight hues:
 %
 \begin{equation}
   L_{\rm LOCO} = \frac{1}{8}\sum_{c=1}^{8}\bigl(1 - \rho_c\bigr)
   \label{eq:lloco}
 \end{equation}
 %
-Fitting the weights within participant keeps the prediction in that participant's voxel space, since the number of voxels differs across participants and control-trained weights do not transfer.
+The weights were fitted within participant because voxel counts differ across participants and control-trained weights do not transfer.
 
-\paragraph{The four checks.}
-Every check returned a verdict below its pre-specified criterion in both participants (\cref{tab:identifiability}). Test~1 generated synthetic fMRI data at the selected optimum (PCA basis, 7~control donors $\times$ 20 noise draws $= 140$ samples per candidate) with the psychophysical thresholds scaled to the distortion magnitude at the ground-truth $(\beta_s, \beta_c)$, re-ran the same fitting pipeline on each sample, and required a recovery fraction within $10^\circ$ on both axes ($f_{10^\circ}$) of $0.5$. Test~2a repeated that generation at a ground truth of $(0, 0)$ with real control thresholds and no synthetic psychophysical signal, which measures the noise floor free of synthesis-design contamination. Test~2b substituted each control participant's real amplitudes as a pseudo-CVD carrier (7 carriers per candidate, deterministic) and ranked the selected CVD fit's distance from the origin among the seven control distances. Test~2c shuffled the CVD trial labels over $N = 1{,}000$ permutations with the control data held fixed. Test~2b is descriptive and entered no selection decision.
-
-Recovery separates the two axes by magnitude. Test~2a places the effective parameter uncertainty at about $20^\circ$ on $\beta_s$ and $25^\circ$ on $\beta_c$, so the non-dominant axes ($|\hat\beta_s| \leq 6^\circ$ in both participants) lie below that floor and remain unrecoverable. The deutan dominant axis ($|\hat\beta_c| = 42^\circ$) exceeds the floor and was recovered with a bias of $4.7^\circ$, against $16^\circ$ on its non-dominant axis, which is the pattern that partial magnitude recoverability predicts.
+\paragraph{Sample composition of the four checks.}
+Each check was run on the PCA-basis loss of the selected combination (\S\ref{sec:methods:identifiability}). Criteria and outcomes are listed in \cref{tab:identifiability}.
+\begin{itemize}
+  \item Test~1: synthetic data at the selected optimum from 7 control donors $\times$ 20 noise draws ($n = 140$ per participant). Noise was drawn from the top 20 principal components of each donor's residual spatial covariance with an AR(1) correlation of $0.3$ across runs, and the psychophysical thresholds were scaled to the distortion magnitude at the ground truth.
+  \item Test~2a: the same synthesis at a ground truth of $(0^\circ, 0^\circ)$ ($n = 140$), with each donor's measured thresholds in place of scaled ones.
+  \item Test~2b: each control participant's measured amplitudes as a pseudo-CVD case ($n = 7$, one deterministic fit each).
+  \item Test~2c: $N = 1{,}000$ permutations of the CVD color labels, the same permutation applied in every ROI, with the control data held fixed.
+\end{itemize}
 
 \begin{table}[h]
 \centering
-\caption{Outcome of the four pre-specified identifiability checks, all computed on the PCA-basis loss. Test~1 assesses voxel-level parameter recovery, Test~2a the noise floor under a null ground truth, Test~2b specificity against control pseudo-CVD carriers, and Test~2c specificity against a color-label permutation null. Criteria were fixed before the checks were run. $f_{10^\circ}$ is the fraction of samples recovered within $10^\circ$ on both axes, and $f_{10^\circ}^{\rm origin}$ is the same fraction referred to the origin. Entries for Test~2a give the median $|\hat\beta|$ on each axis with the interquartile range in parentheses.}
+\caption{Pre-specified identifiability checks on the selected fit of each participant, computed on the PCA-basis loss. Test~1, parameter recovery at the selected optimum; Test~2a, recovery at a null ground truth; Test~2b, rank of the CVD fit among control pseudo-CVD fits; Test~2c, color-label permutation. Bias is the recovered minus the true parameter, given as $(\beta_s, \beta_c)$ and averaged over the seven donor cells; $f_{10^\circ}$ is the fraction of samples recovered within $10^\circ$ on both axes, and $f_{10^\circ}^{\rm origin}$ the same fraction referred to the origin. Test~2a entries give the median $|\hat\beta|$ on each axis with the interquartile range in parentheses. ${\rm rank}_{\rm dist}$ is the one-sided percentile rank of the CVD fit's distance from the origin among the seven control distances. Test~2c entries give the composite loss at the selected cell, the 5th percentile of the permutation distribution, and the one-sided permutation $p$ value, with lower loss indicating a closer fit. Verdict compares each entry with its criterion.}
 \label{tab:identifiability}
 \small
-\begin{tabular}{llccc}
+\begin{tabularx}{\textwidth}{llYYc}
 \toprule
 Test & Criterion & Deutan $(6^\circ, -42^\circ)$ & Protan $(2^\circ, +24^\circ)$ & Verdict \\
 \midrule
-1   & $f_{10^\circ} \geq 0.5$, $|$bias$| < 10^\circ$ & $f_{10^\circ} = 0.26$; bias $(+16^\circ, -4.7^\circ)$ & $f_{10^\circ} = 0.14$; bias $(+11^\circ, -27^\circ)$ & FAIL \\
+1   & $f_{10^\circ} \geq 0.5$, $|$bias$| < 10^\circ$ & $f_{10^\circ} = 0.26$; bias $(+18.6^\circ, -4.7^\circ)$ & $f_{10^\circ} = 0.14$; bias $(+11.9^\circ, -26.4^\circ)$ & FAIL \\
 2a  & $|$bias$| < 5^\circ$ & $22^\circ\;(40)$, $26^\circ\;(10.5)$; $f_{10^\circ}^{\rm origin} = 0.00$ & $16^\circ\;(17.5)$, $24^\circ\;(9)$; $f_{10^\circ}^{\rm origin} = 0.00$ & FAIL \\
-2b  & rank$_{\rm dist} = 1.0$ & $0.875$ & $0.875$ & FAIL \\
+2b  & ${\rm rank}_{\rm dist} = 1.0$ & $0.875$ & $0.875$ & not met \\
 2c  & $p_{\rm perm} < 0.05$ & $-2.892$ against a $5\%$ cut of $-3.136$; $p = .167$ & $-1.681$ against $-3.053$; $p = .471$ & FAIL \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\paragraph{What the checks bound.}
+The four checks concern the parameters as magnitudes. Test~1 and Test~2a place
+the recovery uncertainty of the procedure above the fitted S-cone amplitudes in
+both participants, so those amplitudes are bounded and not estimated, and the
+deutan confusion-axis magnitude is the one fitted value that exceeds that
+uncertainty. Test~2b and Test~2c place the fits inside the range that control
+data and permuted labels produce, so the values do not separate the CVD
+participants from either reference. The parameters are accordingly read as the
+direction and relative weight of a distortion and not as physiological
+quantities, and magnitudes are not compared between participants or attributed
+to regions.
+
+These checks are distinct from the generalization tested at selection. Gate 3
+ranks candidates by held-out loss on control references withheld from training
+(\S\ref{sec:methods:selection}), which asks whether the loss surface transfers to
+unseen references, whereas Test~1 asks whether the location of its minimum can be
+recovered under matched noise. A surface can transfer while remaining flat near
+its minimum, and the resample spread of \cref{tab:fit_stability} is consistent
+with that combination. The stimulus-space filter follows from the fitted
+transform whatever the status of its parameters, and its evaluation is the
+prospective session of \S\ref{sec:methods:filter}, which does not rest on the
+parameters being point estimates.
+
+\paragraph{Sign of $\hat\beta_c$ under the two reduction bases.}
+\cref{tab:sign_basis} counts the sign of $\hat\beta_c$ over the $N = 300$ control resamples of \S\ref{sec:methods:selection}, under the PCA-basis loss used by the checks above and under the SRM-basis loss.
+
+\begin{table}[h]
+\centering
+\caption{Sign of $\hat\beta_c$ across the $N = 300$ control 5-train/2-test resamples, by reduction basis. Entries are counts of resamples; every zero-valued entry is the $(32^\circ, 0^\circ)$ solution.}
+\label{tab:sign_basis}
+\small
+\begin{tabular}{llccc}
+\toprule
+Participant & Basis & $\hat\beta_c < 0$ & $\hat\beta_c = 0$ & $\hat\beta_c > 0$ \\
+\midrule
+Deutan & PCA & 300 & 0 & 0 \\
+Deutan & SRM & 300 & 0 & 0 \\
+Protan & PCA & 0 & 37 & 263 \\
+Protan & SRM & 77 & 171 & 52 \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-\paragraph{Basis caveat.}
-All four tests use the PCA-basis loss. For the protan participant the sign of $\hat\beta_c$, which carries the mechanism class, holds under that loss alone. Under the SRM-basis loss the modal argmin is $(32^\circ, 0^\circ)$ in 171 of 300 resamples, leaving $\hat\beta_c$ positive in $17\%$ and negative in $26\%$, so the two reductions return different mechanism classes for this participant. The deutan sign holds under both bases, at $300$ of $300$ resamples in each.
 
 \begin{figure}[htbp]
   % Supplementary figures are numbered S1, S2, ... \setcounter is global but
@@ -525,33 +684,19 @@ All four tests use the PCA-basis loss. For the protan participant the sign of $\
   \caption{\textbf{Per-subject loss landscape and parameter uncertainty.}
   The $z$-scored composite loss over the $(\beta_s, \beta_c)$ grid, reconstructed on the full seven-control pool, with lower values in yellow.
   The loss combination is $\gamma_{\rm OY} + L_{\rm RDM}^{(V2)}$ for the deutan participant and $\gamma_{\rm all} + L_{\rm RDM}^{(V1)}$ for the protan participant.
-  The red star marks the argmin of that surface, at $(\hat\beta_s, \hat\beta_c) = (6^\circ, -42^\circ)$ for the deutan participant and $(2^\circ, +24^\circ)$ for the protan participant.
-  It is a descriptive low-dimensional embedding of the distortion rather than a physiological point estimate.
-  White points give the per-resample argmins over $N = 300$ control 5-train/2-test resamples.}
+  The red star marks the argmin of that surface, at $(\hat\beta_s, \hat\beta_c) = (6^\circ, -42^\circ)$ and $(2^\circ, +24^\circ)$ respectively.
+  White points give the per-resample argmins over the $N = 300$ control 5-train/2-test resamples.}
   \label{fig:landscape}
 \end{figure}
 
-
-% --------------------------------------------------------------------------
-% ==== S13  Stability of the selected fits ====
-% --------------------------------------------------------------------------
-
 \suppsection{Stability of the selected fits}{app:fit_stability}
 
-\paragraph{Control leave-one-out magnitude anchor.}
-Both CVD estimates fall inside the corresponding control range, so parameter magnitude alone is a descriptive anchor rather than a test of CVD-versus-control specificity. Each of the $n = 7$ control participants was refit as a pseudo-CVD case with the remaining control pool as reference, under that participant's own selected loss. The deutan combination is $\gamma_{\rm OY} + L_{\rm RDM}^{(V2)}$ and the protan combination $\gamma_{\rm all} + L_{\rm RDM}^{(V1)}$. The deutan estimate is $\|\hat\beta\| = 42.4^\circ$ against an control range of $30.5^\circ$ to $58.1^\circ$ (mean $49.1^\circ$). The protan estimate is $24.1^\circ$ against $23.4^\circ$ to $55.5^\circ$ (mean $35.7^\circ$), close to the lower bound.
+Table~\ref{tab:fit_stability} collects, for the two selected fits, the separation precondition, the held-out generalization of the selected cell, the neural-term ablation, the resample stability, the control pseudo-CVD refits, and the refit on the head-motion-corrected pipeline (\cref{app:uncorrected}). Every refit held the selected loss combination and every other element of the procedure fixed. The pipeline refit changes the neural atom alone, because the psychophysical atoms do not depend on preprocessing.
 
-\paragraph{Sign stability across the two preprocessing pipelines.}
-Each participant's selected loss combination was refit on the head-motion-corrected pipeline (\cref{app:uncorrected}) with every other element of the procedure held fixed, and the two participants diverge. The sign of $\hat\beta_c$ held for the deutan participant, whose median moved from $-42^\circ$ to $-46^\circ$ with the fraction of negative resamples at $1.000$ and $0.947$. It reversed for the protan participant, whose median moved from $+24^\circ$ to $-12^\circ$, with the head-motion-corrected pipeline returning $79.3\%$ negative resamples against none under the primary pipeline. The deutan fit was also more poorly conditioned on the second pipeline, the combined fraction of resamples reaching a grid boundary rising from $0.09$ to $0.72$, and those boundary solutions lie on the same side as the median, so they bear on the magnitude rather than on the sign. The psychophysical atoms are independent of preprocessing, so the neural atom is the sole component that differs between the two fits. We therefore report the deployed protan parameter as the frozen value it is and give it no physiological interpretation.
-
-\paragraph{Resample structure.}
-Each participant's selected fit is the global minimum of its loss surface on the full data (\cref{fig:landscape}), and the $(32^\circ, 0^\circ)$ solution is the secondary basin of the protan PCA landscape, so the two reductions disagree about which basin is the minimum. Across the 300 resamples $\hat\beta_c$ concentrates at $-42^\circ$ and $-44^\circ$ ($202$ of $300$) and stays within $[-48^\circ, -36^\circ]$, whereas $\hat\beta_s$ distributes almost uniformly from $0^\circ$ to $14^\circ$.
-
-\paragraph{Gate statistics and neural-term ablation.}
-Table~\ref{tab:fit_stability} collects the statistics that describe how each selected cell was reached and how stable it is. The separation block reports the precondition that admitted a $\Delta$RDM atom at a given ROI (\S\ref{sec:methods:selection}). The ablation block refits each participant's selected combination with the psychophysical atoms alone and with the $\Delta$RDM atom alone, holding every other element of the procedure fixed, so the three argmins are directly comparable. All entries are medians over the same $N = 300$ control 5-train/2-test resamples, on the PCA-basis loss unless the row names the SRM basis.
+In the control refits each of the seven control participants was fit as a pseudo-CVD case, with the remaining six controls as the reference pool, under the loss combination selected for the CVD participant whose anchor it provides. These are the seven control distances that Test~2b ranks (\cref{tab:identifiability}). Both CVD magnitudes lie inside the corresponding control range, so $\|\hat\beta\|$ serves as a descriptive anchor and not as a test of CVD specificity.
 
 \begin{table}[htbp]
-  \caption{Gate statistics, neural-term ablation, and resample stability for the two selected fits. Separation $d$ is the standardized distance between the participant and the control distribution at each ROI, and the $\Delta$RDM atom was admissible only where it was positive and exceeded the pre-set threshold (\S\ref{sec:methods:selection}), which left all four ROIs in the deutan participant and V1 alone in the protan participant. $\Delta\overline{L}$ is the change in an atom's held-out loss at the selected cell relative to the no-distortion cell $(0^\circ, 0^\circ)$, with negative values favoring the fitted distortion, and the fold count gives how many of the seven leave-one-out folds favor it. The boundary-saturation rate is the fraction of resamples whose solution reached a grid edge. Parameter IQRs are given as $(\beta_s, \beta_c)$.}
+  \caption{Gate statistics, neural-term ablation, resample stability, control pseudo-CVD refits, and preprocessing refit for the two selected fits. Separation $d$ is the standardized distance between the participant's loss value and the control leave-one-out distribution at each ROI, and the $\Delta$RDM atom was admissible only where $d$ met the pre-set threshold (\S\ref{sec:methods:selection}). The grid percentile is the rank of the selected cell's held-out loss among the $1{,}326$ grid cells. $\Delta\overline{L}$ is the change in an atom's held-out loss at the selected cell relative to the no-distortion cell $(0^\circ, 0^\circ)$, negative values favoring the fitted distortion, with the number of the seven leave-one-out folds that favor it in parentheses. Ablation rows give the argmin when the selected combination is refit with the psychophysical atoms alone, with the $\Delta$RDM atom alone, and in full, on the PCA basis unless the row names the SRM basis. The boundary-saturation rate is the fraction of resamples whose solution reached a grid edge, given per axis in the preprocessing block, and parameter IQRs are given as $(\beta_s, \beta_c)$. $\|\hat\beta\|$ is the Euclidean norm of $(\hat\beta_s, \hat\beta_c)$; the control range and mean are over the seven control participants refit as pseudo-CVD cases under the CVD participant's selected loss. Preprocessing rows give the primary-pipeline value followed by the head-motion-corrected value (\cref{app:uncorrected}). Unless a block states otherwise, entries are medians over the same $N = 300$ control 5-train/2-test resamples.}
   \label{tab:fit_stability}
   \centering
   \small
@@ -573,45 +718,40 @@ Table~\ref{tab:fit_stability} collects the statistics that describe how each sel
     \multicolumn{3}{l}{\emph{Resample stability, psychophysical alone $\rightarrow$ selected}} \\
     \quad Boundary-saturation rate & $0.23 \rightarrow 0.09$ & $0.00 \rightarrow 0.00$ \\
     \quad Parameter IQR, PCA basis & $(18^\circ, 6^\circ) \rightarrow (8^\circ, 2^\circ)$ & $(6^\circ, 4^\circ) \rightarrow (0^\circ, 0^\circ)$ \\
-    \quad Parameter IQR, SRM basis & $(18^\circ, 6^\circ) \rightarrow (10^\circ, 4^\circ)$ & $(6^\circ, 4^\circ) \rightarrow (0^\circ, 2^\circ)$ \\
+    \quad Parameter IQR, SRM basis & $(18^\circ, 6^\circ) \rightarrow (10^\circ, 4^\circ)$ & $(6^\circ, 4^\circ) \rightarrow (0^\circ, 2^\circ)$ \\ \midrule
+    \multicolumn{3}{l}{\emph{Control pseudo-CVD refits ($n = 7$, own selected loss)}} \\
+    \quad $\|\hat\beta\|$, CVD participant & $42.4^\circ$ & $24.1^\circ$ \\
+    \quad $\|\hat\beta\|$, control range (mean) & $30.5^\circ$--$58.1^\circ$ ($49.1^\circ$) & $23.4^\circ$--$55.5^\circ$ ($35.7^\circ$) \\ \midrule
+    \multicolumn{3}{l}{\emph{Preprocessing refit, primary $\rightarrow$ head-motion-corrected}} \\
+    \quad Median $\hat\beta_c$ & $-42^\circ \rightarrow -46^\circ$ & $+24^\circ \rightarrow -12^\circ$ \\
+    \quad Fraction of resamples with $\hat\beta_c < 0$ & $1.000 \rightarrow 0.947$ & $0.000 \rightarrow 0.793$ \\
+    \quad Resamples with $\hat\beta_s$ at a grid edge & $0.09 \rightarrow 0.44$ & $0.00 \rightarrow 0.00$ \\
+    \quad Resamples with $\hat\beta_c$ at a grid edge & $0.00 \rightarrow 0.28$ & $0.00 \rightarrow 0.11$ \\
     \bottomrule
   \end{tabular}
 \end{table}
 
-
 \suppsection{Filter-evaluation session design and comparator}{app:filter_eval}
 
-\paragraph{Comparator.}
-The deployed comparator was the macOS accessibility Color Filter (System Settings $>$ Accessibility $>$ Display, build 26.5.1), set at an intensity the participant self-tuned before scanning. It is the unmodified shipping product, an operating-system-level post-display transform. We compared against it rather than a re-implemented retinal-simulation transform so that the comparator is the correction an end user actually encounters. The individualized filter was rendered directly in PsychoPy from the frozen per-subject pre-image.
+\paragraph{Comparator and rendering.}
+The deployed comparator was the macOS accessibility Color Filter (System Settings $>$ Accessibility $>$ Display, build 26.5.1), an operating-system-level post-display transform used as shipped, at an intensity the participant set before scanning. It was chosen over a re-implemented retinal-simulation transform because it is the correction available to an end user. The individualized filter was rendered in PsychoPy from the frozen per-participant pre-image (\S\ref{sec:results:filter}).
 
-\paragraph{Acquisition.}
-Eight fMRI runs were acquired in ABBA-counterbalanced order, four per filter. Scanner time set this count, since six runs per condition would run roughly 90 minutes, beyond the 60--75-minute window over which participant attention and head motion stay acceptable. Four runs per condition takes about 60 minutes and sits at the recommended boundary.
-
-\paragraph{Run-count adequacy.}
-Four runs retain the Session-1 landmark, the separation between the control mean and the two CVD cases at hV4. Across all $\binom{6}{n}$ subsets of the six-run Session-1 data, hV4 LOCO adjacent accuracy held that separation at every run count down to four (\cref{fig:adjacc_saturation}). At $n = 4$ the control mean reached $0.45$ against $0.46$ at six runs and stayed above the $0.25$ chance level, while both CVD participants stayed below it (deutan $0.23$, protan $0.14$, single-case $d_{cc} < -2$ in both). Four runs nonetheless sits below the count recommended for fine-grained RDM-based model comparison, so the second session targets movement toward or away from the control reference rather than adjudication between model classes.
-
-The filter conditions each have four runs, whereas the Session-1 control reference and the unfiltered baseline each have six. Noise in either pattern inflates disparity and RDM similarity, so an unmatched comparison would penalize the filter conditions twice, once against the baseline and once against the control distribution that the single-case test uses. Every neural index is therefore reported run-matched. For the interpolation indices the control reference is subsampled to four runs. For the geometry indices both the control means and the unfiltered baseline are rebuilt from four runs, exhaustively over all $\binom{6}{4} = 15$ subsets, with the shared response model refitted within each subset and the resulting metrics averaged (\texttt{exp2\_runmatched\_geometry.py}). The filter conditions themselves are never subsampled. The control reference comprises $n = 7$ controls at V1--V3 and $n = 6$ at hV4, where one control has too few voxels. Matching raises the protan V1 RDM similarity of the unfiltered baseline from $0.25$ to $0.33$, which moves the individualized filter from above that baseline to below it, and leaves the ordering of conditions unchanged on all four indices.
-% TERMINOLOGY (resolved 2026-08-05): was "RDM-based model discrimination"; changed to
-% "model comparison". "discrimination" is now reserved paper-wide for the behavioral
-% JND construct; the neural LORO construct is "color classification".
+\paragraph{Acquisition and run count.}
+Eight runs were acquired, four per filter, in ABBA order. Four runs per condition took about 60 minutes; six would have taken about 90, beyond the 60--75 minutes over which attention and head motion remain acceptable. Across all $\binom{6}{n}$ run subsets of the six-run Session-1 data, hV4 adjacent accuracy at $n = 4$ gave a mean of $0.45$ over the seven controls ($0.46$ at $n = 6$, the Session-1 value of \S\ref{sec:results:loco}), a deutan value of $0.23$, and a protan value of $0.14$, with $d_{cc} < -2$ in both participants (\cref{fig:adjacc_saturation}). Four runs are fewer than recommended for RDM-based model comparison, so the session tests movement toward or away from the control reference and not the choice between model classes.
 
 \begin{figure}[tb]
   \renewcommand{\thefigure}{S\arabic{figure}}  % see the note on the first supplementary figure
   \centering
   \includegraphics[width=\linewidth]{figS2_adjacc_saturation}
-  \caption{\textbf{Hue-interpolation adjacent accuracy as a function of the number of runs.} LOCO adjacent accuracy (six-channel basis, OLS pseudoinverse decoder) as a function of the number of runs $n$, computed over all $\binom{6}{n}$ run subsets of the Session-1 data, per ROI. Black line, control mean $\pm$ SEM (shaded band); dashed line, the $0.25$ chance level; markers, the two CVD single cases (deutan, protan). At hV4 the control mean stays above chance and the CVD deficit persists at every run count, including the deployed $n = 4$ (orange guide); the metric does not depend on having the full six runs.}
+  \caption{\textbf{Hue-interpolation adjacent accuracy as a function of the number of runs.} LOCO adjacent accuracy (six-channel basis, OLS pseudoinverse decoder) as a function of the number of runs $n$, computed over all $\binom{6}{n}$ run subsets of the Session-1 data, per ROI. Black line, control mean $\pm$ SEM (shaded band); dashed line, the $0.25$ chance level; markers, the two CVD single cases (deutan, protan). The orange guide marks $n = 4$, the per-condition run count of the second session.}
   \label{fig:adjacc_saturation}
 \end{figure}
 
-\paragraph{Single-case inference.}
-Each condition's neural index was compared to the control distribution as the case-control effect size $d_{cc}$ (\S\ref{sec:methods:stats}), reported in place of an inferential $p$ because the grand-mean permutation null is biased for this design. Robustness was assessed by leave-one-run separation, the contrast holding after any single run is dropped, and by re-extracting both conditions on the no-filter baseline voxel set.
+\paragraph{Run matching.}
+The filter conditions have four runs each, the Session-1 control reference and the unfiltered baseline six, and noise in either pattern inflates disparity and RDM similarity. Every neural index was therefore computed run-matched, with the filter conditions never subsampled. For the interpolation indices the control reference was subsampled to four runs. For the geometry indices the control means and the unfiltered baseline were rebuilt from all $\binom{6}{4} = 15$ four-run subsets, with the shared response model refit within each subset and the metrics averaged (\texttt{exp2\_runmatched\_geometry.py}). The control reference has $n = 7$ at V1--V3 and $n = 6$ at hV4, where one control has too few voxels. Matching raised the protan V1 RDM similarity of the unfiltered baseline from $0.25$ to $0.33$ and left the ordering of conditions unchanged on all four indices.
 
-% --------------------------------------------------------------------------
-% ==== S15  Second-session outcomes by condition ====
-% Split from the former "Filter-evaluation session design and comparator"
-% on 2026-09-04: the design half and the condition-level results half each
-% carry their own exhibits (words_trimming.md §5.4).
-% --------------------------------------------------------------------------
+\paragraph{Single-case inference.}
+Effect sizes follow \S\ref{sec:methods:stats}. Each neural contrast was recomputed after dropping each single run and after re-extracting both filter conditions on the voxel set of the unfiltered baseline. Dropping a run left the direction of every contrast in \cref{app:exp2_outcomes} unchanged. Re-extraction on the baseline voxel set lowered the V1 magnitudes, one of the reasons the second-session contrasts are reported as provisional (\cref{app:uncorrected}).
 
 \suppsection{Second-session outcomes by condition}{app:exp2_outcomes}
 
@@ -665,7 +805,7 @@ The three neural indices of the second session appear in \cref{tab:exp2_geometry
 
 \begin{table}[tb]
   \centering
-  \caption{\textbf{Second-session interpolation and representational geometry.} All entries are run-matched (four runs per cell). NF, no-filter (Session-1 baseline); Dep, deployed accessibility filter; Ind, individualized filter. Parenthetical values are Crawford--Howell single-case effect sizes $d_{cc}$ against the control distribution. For adjacent accuracy the control entry is the mean $\pm$ SD over $n = 6$ controls at hV4 and the analytic chance level is $0.25$. For SRM disparity the control entry is the mean over $n = 7$ controls and lower values are more control-like. For RDM similarity the control entry is the leave-one-out self-consistency, a single value with no dispersion, so no effect size is defined and higher values are more control-like. The target region is the one carrying each participant's elevated Session-1 disparity, V2 for the deutan and V1 for the protan participant.}
+  \caption{\textbf{Second-session interpolation and representational geometry.} All entries are run-matched (four runs per cell). NF, no-filter (Session-1 baseline); Dep, deployed accessibility filter; Ind, individualized filter. Parenthetical values are Crawford--Howell single-case effect sizes $d_{cc}$ against the control distribution. For adjacent accuracy the control entry is the mean $\pm$ SD over $n = 6$ controls at hV4 and the analytic chance level is $0.25$. For SRM disparity the control entry is the mean over $n = 7$ controls and lower values are more control-like. For RDM similarity the control entry is the leave-one-out self-consistency, a single value with no dispersion, so no effect size is defined and higher values are more control-like. The target region is the one at which each participant's Session-1 disparity was elevated, V2 for the deutan and V1 for the protan participant.}
   \label{tab:exp2_geometry}
   \small
   \begin{tabular}{lcccc}
@@ -686,7 +826,7 @@ The three neural indices of the second session appear in \cref{tab:exp2_geometry
 \end{table}
 
 \paragraph{Forward-tuning encoding index.}
-The forward-tuning correlation $\rho$ is the Pearson correlation between the predicted and the observed voxel pattern, averaged over the eight held-out hues. It indexes the encoding fit rather than the decoding accuracy that carries the comparison. Figure~\ref{fig:forward_tuning} shows this index against the reference hue map, reported as corroboration only, since it lies outside the validated Session-1 decoding pipeline. In the deutan participant the individualized filter approaches the control level at hV4 ($\rho = +0.18$ against controls $+0.21$) while the deployed filter drives it negative ($\rho = -0.39$). In the protan participant the three conditions do not separate, all reaching $\rho \approx -0.02$ at hV4.
+The forward-tuning correlation $\rho$ is the Pearson correlation between the predicted and the observed voxel pattern, averaged over the eight held-out hues. It indexes the encoding fit rather than the decoding accuracy on which the comparison rests. Figure~\ref{fig:forward_tuning} shows this index against the reference hue map, reported as corroboration only, since it lies outside the validated Session-1 decoding pipeline. In the deutan participant the individualized filter approaches the control level at hV4 ($\rho = +0.18$ against controls $+0.21$) while under the deployed filter it falls to $\rho = -0.39$. In the protan participant the three conditions do not separate, all reaching $\rho \approx -0.02$ at hV4.
 
 \begin{figure}[tb]
   \renewcommand{\thefigure}{S\arabic{figure}}  % see note on the previous figure
@@ -710,35 +850,43 @@ The forward-tuning correlation $\rho$ is the Pearson correlation between the pre
 
 \suppsection{Statistical analysis and effect sizes}{app:statistics}
 
-Unless noted otherwise, the significance threshold was $\alpha = 0.05$. False Discovery Rate correction \parencite{benjamini1995} was applied within two pre-specified families alone, the RDM hue-pair comparisons ($q = 0.05$, 28 pairs per participant) and the six parameter-identifiability checks (\cref{sec:methods:identifiability}). The exploratory per-hue vulnerability comparisons and the per-pair identification tests, including the blue-hue deficit, are reported one-tailed and uncorrected. Individual CVD participants were compared to the control distribution using the \textcite{crawford1998} modified $t$-test,
+\cref{tab:test_directions} lists, for each endpoint, the test, the direction of the alternative hypothesis, the multiple-comparison family, and the location of the values. Single-case effect sizes are the case-control index $d_{cc} = (x_{\rm case} - \bar{x}_{\rm ctrl}) / s_{\rm ctrl} = t\sqrt{(n+1)/n}$, where $n$ is the number of controls entering the test; $n = 7$ throughout except at hV4 in the second session, where $n = 6$ (\cref{tab:exp2_geometry}).
 
-with the tail set by the pre-specified direction of each endpoint, one-tailed upper for disparity, one-tailed lower for interpolation, and two-tailed for classification and for the activation metrics.
-
-Single-case effect sizes are the case-control index $d_{cc} = (x_{\rm case} - \bar{x}_{\rm ctrl}) / s_{\rm ctrl} = t\sqrt{(n+1)/n}$, where $n$ is the control sample size used in the test. Mann--Whitney $U$ tests carry the rank-biserial correlation $r_{\rm rb}$ as their effect size, and group-level effect sizes are Hedges' $g$ \parencite{hedges1985}. Effect sizes for the single-case interpolation comparisons appear in \cref{tab:effect_sizes}, and the geometric-disparity effect sizes appear beside their $t$ statistics in \cref{tab:disparity_loso}. Single-case comparisons of within-subject LORO accuracy against the control distribution reached $|d_{cc}|$ between $0.25$ and $1.58$ across the eight participant-by-ROI tests, with all $p \geq 0.189$ (two-tailed). The largest deviation was the deutan participant at V3 ($d_{cc} = -1.58$), and at hV4 both participants gave $d_{cc} = -1.08$ ($p = 0.352$).
+Single-case comparisons of within-participant classification accuracy, in the Procrustes-aligned space of the main text, were as follows.
+\begin{itemize}
+\item Eight tests (two participants by four regions), two-tailed, all $p \geq 0.189$.
+\item $|d_{cc}|$ from $0.25$ to $1.58$; the largest deviation was the deutan participant at V3 ($d_{cc} = -1.58$).
+\item At hV4 both participants gave $d_{cc} = -1.08$ ($p = 0.352$).
+\end{itemize}
 
 \begin{table}[h]
 \centering
-\caption{Effect sizes for the single-case hue-interpolation comparisons at hV4 (main text, \S\ref{sec:results:loco}). Crawford--Howell case-control effect size $d_{cc} = t\sqrt{(n+1)/n}$ against the $n = 7$ control distribution, one-tailed. Per-hue tests are uncorrected and exploratory across eight hues. Both CVD participants share identical statistics at the three hues where adjacent accuracy is zero. Blue lies just above the conventional threshold and is the largest per-hue deviation.}
-\label{tab:effect_sizes}
-\begin{tabular}{lccc}
+\caption{Test and direction of the alternative hypothesis by endpoint. CH, Crawford--Howell modified $t$ against $n$ controls ($df = n - 1$); BH, Benjamini--Hochberg at $\alpha = 0.05$ within the stated family. Uncorrected tests are pre-specified unless marked exploratory.}
+\label{tab:test_directions}
+\small
+\begin{tabular}{p{4.0cm}p{3.6cm}p{2.4cm}p{4.6cm}}
 \toprule
-Comparison (hV4) & $t$ & $p$ & $d_{cc}$ \\
+Endpoint & Test & Alternative & Correction; reported in \\
 \midrule
-LOCO adjacent accuracy, deutan & $-1.89$ & $0.054$ & $-2.02$ \\
-LOCO adjacent accuracy, protan & $-3.04$ & $0.012$ & $-3.25$ \\
-\midrule
-\multicolumn{4}{l}{\emph{Per-hue adjacent accuracy (one-tailed, exploratory; both participants)}} \\
-Blue & $-1.93$ & $0.051$ & $-2.06$ \\
-Purple & $-0.79$ & $0.229$ & $-0.85$ \\
-Magenta & $-1.47$ & $0.096$ & $-1.57$ \\
+LORO classification, Session 1 & CH & two-tailed & none; \cref{tab:interp_arms,tab:alignment} \\
+LOCO adjacent accuracy at hV4 & CH & one-tailed, lower & none; \S\ref{sec:results:loco}, \cref{tab:interp_arms} \\
+Per-hue adjacent accuracy at hV4 & CH & one-tailed, lower & none, exploratory over eight hues; Figure~\ref{fig:loco}C \\
+Control interpolation gate & color-label permutation, $N = 1{,}000$ & one-tailed, upper & none; \cref{tab:interp_arms} \\
+Procrustes disparity & CH & one-tailed, upper & none; \cref{tab:disparity_loso,tab:motion_arms} \\
+Activation metrics & CH & two-tailed & none; \cref{tab:activation} \\
+Color-correspondence permutation & label permutation, $N = 1{,}000$ & one-tailed [confirm] & BH over the 35 cells of each pipeline; \cref{tab:color_specificity} \\
+Identifiability checks & \cref{app:identifiability} & --- & BH over six tests; \cref{tab:identifiability} \\
+Cross-subject transfer & Mann--Whitney $U$, $r_{\rm rb}$ & [confirm] & none; \cref{app:decoders} \\
+Group control--CVD contrasts & subject-label permutation, $N = 10{,}000$; Hedges' $g$ & [confirm] & none; \cref{app:triangulation} \\
+Second-session interpolation and disparity & CH & one-tailed, toward the control range & none; \cref{tab:exp2_geometry} \\
+Second-session identification & Wilson score interval, $n = 64$ & --- & none; \cref{tab:exp2_8afc} \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-
 \suppsection{Alignment robustness of the within-subject readouts}{app:alignment}
 
-The two alignment spaces agree on the pattern that carries the Results. LORO and LOCO are trained and tested within a single participant, so the main text computes them on the Procrustes-aligned amplitudes, which retain that participant's voxels at full resolution, and SRM enters only where a comparison spans participants. \cref{tab:alignment} gives both readouts in the Procrustes space, and the hue-channel-basis rows of \cref{tab:loro_decoders,tab:loco_decoders} give the same readouts in the SRM space.
+The two alignment spaces agree on the pattern on which the Results rest. LORO and LOCO are trained and tested within a single participant, so the main text computes them on the Procrustes-aligned amplitudes, which retain that participant's voxels at full resolution, and SRM enters only where a comparison spans participants. \cref{tab:alignment} gives both readouts in the Procrustes space, and the hue-channel-basis rows of \cref{tab:loro_decoders,tab:loco_decoders} give the same readouts in the SRM space.
 
 Classification stays above the $0.125$ chance level for both CVD participants at every region in both spaces, with the lowest cell at $0.312$. Interpolation at hV4 remains reduced in both participants in both spaces, and the ordering of the two participants is preserved. Procrustes alignment yields the higher control-mean accuracy at all four regions for classification and at three of the four for interpolation, and it is the higher of the two spaces in 26 of the 36 participant-by-region classification cells. This follows from the dimensionality reduction in SRM discarding response variance that a within-subject readout can otherwise use.
 
@@ -766,28 +914,36 @@ hV4 & $0.488$ & $0.375$ & $0.375$ & $0.456$ & $0.250$ & $0.125$ \\
 % --------------------------------------------------------------------------
 % ==== S17  (was Supplementary/S18_geometry_validity.tex) ====
 % --------------------------------------------------------------------------
-% Supplementary S16 — Validity of the geometric comparison
-% 2026-08-07
-% Governing document: docs/PAPER/REVISION_PLAN_MOTION_GEOMETRY_2026-08-06.md §S18 (rule R5).
+% Supplementary — Validity of the geometric comparison
 % Source numbers: analysis/phase2_SRM_across_between/results/RESULTS_GEOMETRY_VALIDITY_2026-08-05.md
 %   §1 (control positive control), §2 (color specificity), §4 (cyclic shift)
 % Raw outputs: analysis/future_phase1_sensitivity/results/{with_residuals,hmc_v2}/color_correspondence/frozen_permutation.json,
-%   analysis/validation/results/cyclic_shift_disparity.json (hmc_v2 variant not yet computed)
-% Counts and BH-FDR recomputed from the JSON on 2026-08-07:
-%   35 cells, 16 raw p<.05 (the "15" in RESULTS_GEOMETRY_VALIDITY §2 prose is a
-%   miscount of its own table), 7 surviving BH; motion-regressed 18 raw / 15 BH.
+%   analysis/validation/results/cyclic_shift_disparity.json
+% Counts recomputed from the JSON: 35 cells; the primary and head-motion-corrected
+%   pipelines are as tabulated in tab:color_specificity. Earlier counts in this
+%   comment referred to the motreg arm, which the manuscript no longer reports.
+% hV4 shift gains are omitted: the ROI has no geometric endpoint.
+
+% --------------------------------------------------------------------------
+% ==== S17  (was Supplementary/S18_geometry_validity.tex) ====
+% --------------------------------------------------------------------------
+% Supplementary — Validity of the geometric comparison
+% Compressed 2026-09-06. Procedure: analysis/validation/scripts/disparity_frozen_permutation.py
+% Raw outputs: analysis/future_phase1_sensitivity/results/{with_residuals,hmc_v2}/color_correspondence/frozen_permutation.json,
+%   analysis/validation/results/cyclic_shift_disparity.json (primary pipeline only)
+% Counts and BH-FDR recomputed from the JSON on 2026-09-06:
+%   primary 35 cells, 16 raw p<.05, 7 surviving BH; head-motion-corrected 15 raw / 0 BH.
 % The cyclic-shift gain is referred to the control gain distribution, which is computed
 %   under the same minimum-over-eight rule and therefore absorbs the same selection
-%   bias. hV4 shift gains are omitted: the ROI carries no geometric endpoint, and
-%   the motion-regressed control gain SD there collapses to 0.38%.
+%   bias. hV4 shift gains are omitted: the ROI carries no geometric endpoint.
 
 \suppsection{Validity of the geometric comparison}{app:geometry_validity}
 
-The color-correspondence permutation carries power only when the shared projection is held fixed, since re-estimating it at each permutation lets the re-fit absorb the shuffle. The permutation asks whether a participant's colors map onto the control geometry in the identity order, which differs from the color-label permutation null of the main text, where the question is whether the control group interpolates above chance in a region. We tested both variants on the controls, in whom color structure is established. Re-estimation detected 0 of 7 at V1, V2 and V3 and 0 of 6 at hV4, with mean permutation $z$ near zero in every ROI, whereas freezing the projection recovered detection, reaching 5 of 7 at V3 and 2 to 3 of 7 elsewhere (\cref{tab:frozen_control}). Every color-specificity result below uses the frozen projection.
+The color-correspondence permutation asks whether the identity mapping between a participant's eight colors and the control reference outperforms a shuffled mapping (\cref{app:loo_disparity}). It was computed under a leave-one-run-out design that holds the shared projection fixed. On each of the $7 \times 6$ participant-by-run folds, the shared response model was fitted to the six training controls' five-run mean patterns, the reference was their held-out run in the shared space, and the target participant's projection was fitted to its own five training runs and applied unchanged to its held-out run. Procrustes disparity between the projected held-out run and the reference was then compared with the distribution obtained by permuting the eight color labels of that run $1{,}000$ times; $z$ and $p_{\rm perm}$ are computed after averaging over folds, and each CVD participant contributes the mean over the seven participant folds. A projection re-estimated on the held-out run, the procedure of the main analyses, absorbs the permutation, because the singular-value fit selects a subspace matched to whichever label order it receives. \cref{tab:frozen_control} gives both variants on the controls, in whom color structure is established; every result below uses the frozen projection.
 
 \begin{table}[h]
 \centering
-\caption{Color-correspondence permutation on the controls, used as a positive control. Detection counts and mean permutation $z$ under a projection re-estimated at each permutation and under a frozen projection. Lower $z$ indicates a better identity correspondence than the shuffled null.}
+\caption{Color-correspondence permutation on the controls, used as a positive control for the two projection variants. Entries give the number of controls with $p_{\rm perm} < .05$ and the mean permutation $z$ under a projection re-estimated on the held-out run and under a projection fitted to the training runs and frozen. $z$ is the observed disparity minus the permutation-null mean in null SD units, so negative values indicate a better identity correspondence than the shuffled null. Control 7 is omitted at hV4 (ROI below the voxel minimum of the shared-space analyses).}
 \label{tab:frozen_control}
 \begin{tabular}{lccccc}
 \toprule
@@ -803,11 +959,11 @@ hV4 & 6 & 0 & $+0.06$ & 2 & $-1.07$ \\
 \end{tabular}
 \end{table}
 
-Both CVD participants carried color-specific geometry. The deutan participant reached $p = .002$ at V2, the lowest V2 value among the nine participants, and $p = .024$ at V3. The protan participant reached $p = .001$ at V3 and $p = .013$ at V2, while V1 returned $p = .758$. Across the 35 participant-by-ROI cells, 16 fell below $.05$ against a chance expectation of $1.8$, and 7 survived Benjamini--Hochberg correction over all 35 (\cref{tab:color_specificity}). Two of the survivors belong to the CVD participants, the deutan V2 cell ($q = .018$) and the protan V3 cell ($q = .012$). V3 carried color specificity most broadly, with 5 of its 9 cells surviving.
+\cref{tab:color_specificity} gives the full participant-by-region grid in both preprocessing pipelines. In the primary pipeline 16 of the 35 cells fell below $.05$, against a chance expectation of $1.8$, and 7 survived Benjamini--Hochberg correction over the 35 cells, among them the deutan V2 cell ($q = .018$) and the protan V3 cell ($q = .012$). Under head-motion correction 15 cells fell below $.05$ and none survived correction. The protan V1 cell was null in the primary pipeline ($p = .758$) and not under head-motion correction ($p = .010$). Individual cells of this grid are descriptive and support no claim in the main text.
 
 \begin{table}[h]
 \centering
-\caption{Color-correspondence permutation under the frozen projection, one cell per participant and region, in the two preprocessing pipelines. Entries give $p_{\rm perm}$ against $N = 1{,}000$ permutations. Seven cells survive Benjamini--Hochberg correction across the 35 cells of the primary pipeline and none survive it in the head-motion-corrected pipeline.}
+\caption{Color-correspondence permutation under the frozen projection, one cell per participant and region, in the primary and head-motion-corrected pipelines. Entries give $p_{\rm perm}$ against $N = 1{,}000$ label permutations of the held-out run, with the test direction observed disparity below the null. Bold: $q < 0.05$ after Benjamini--Hochberg correction over the 35 cells of the same pipeline. Control 7 is omitted at hV4 (ROI below the voxel minimum of the shared-space analyses).}
 \label{tab:color_specificity}
 \begin{tabular}{lcccccccc}
 \toprule
@@ -816,20 +972,38 @@ Both CVD participants carried color-specific geometry. The deutan participant re
 Participant & V1 & V2 & V3 & hV4 & V1 & V2 & V3 & hV4 \\
 \midrule
 Control 1 & $0.088$ & $0.020$ & $0.062$ & $0.393$ & $0.012$ & $0.072$ & $0.018$ & $0.290$ \\
-Control 2 & $0.001$ & $0.016$ & $0.004$ & $0.136$ & $0.437$ & $0.420$ & $0.191$ & $0.019$ \\
+Control 2 & $\mathbf{0.001}$ & $0.016$ & $\mathbf{0.004}$ & $0.136$ & $0.437$ & $0.420$ & $0.191$ & $0.019$ \\
 Control 3 & $0.109$ & $0.520$ & $0.255$ & $0.272$ & $0.325$ & $0.113$ & $0.176$ & $0.101$ \\
-Control 4 & $0.152$ & $0.014$ & $0.001$ & $0.041$ & $0.420$ & $0.006$ & $0.015$ & $0.173$ \\
+Control 4 & $0.152$ & $0.014$ & $\mathbf{0.001}$ & $0.041$ & $0.420$ & $0.006$ & $0.015$ & $0.173$ \\
 Control 5 & $0.057$ & $0.773$ & $0.034$ & $0.031$ & $0.079$ & $0.194$ & $0.032$ & $0.038$ \\
-Control 6 & $0.407$ & $0.290$ & $0.009$ & $0.220$ & $0.373$ & $0.117$ & $0.010$ & $0.012$ \\
-Control 7 & $0.034$ & $0.159$ & $0.004$ & --- & $0.008$ & $0.005$ & $0.391$ & --- \\
-\textbf{Deutan} & $0.105$ & $0.002$ & $0.024$ & $0.273$ & $0.022$ & $0.003$ & $0.047$ & $0.257$ \\
-\textbf{Protan} & $0.758$ & $0.013$ & $0.001$ & $0.129$ & $0.010$ & $0.148$ & $0.053$ & $0.815$ \\
+Control 6 & $0.407$ & $0.290$ & $\mathbf{0.009}$ & $0.220$ & $0.373$ & $0.117$ & $0.010$ & $0.012$ \\
+Control 7 & $0.034$ & $0.159$ & $\mathbf{0.004}$ & --- & $0.008$ & $0.005$ & $0.391$ & --- \\
+\textbf{Deutan} & $0.105$ & $\mathbf{0.002}$ & $0.024$ & $0.273$ & $0.022$ & $0.003$ & $0.047$ & $0.257$ \\
+\textbf{Protan} & $0.758$ & $0.013$ & $\mathbf{0.001}$ & $0.129$ & $0.010$ & $0.148$ & $0.053$ & $0.815$ \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Under head-motion correction 15 cells fell below $.05$ and none survived correction. The deutan V2 cell held its nominal value across the two pipelines ($p = .002$ and $p = .003$) while its corrected value moved from $q = .018$ to $q = .053$, and the protan V1 cell moved from $p = .758$ to $p = .010$. Individual cells of this grid are descriptive and support no claim in the main text.
+Because the protan V1 identity correspondence was null in the primary pipeline while its disparity was elevated (Section~\ref{sec:results:geometry}), we evaluated the eight cyclic shifts of that participant's color labels under the same frozen design and referred the gain of the best shift to the seven controls' gains (\cref{tab:cyclic_shift}). The V1 correspondence is displaced by one hue step, and the departure is not one of signal quality. At that region the participant's eight-way classification accuracy was $0.562$ under the Procrustes readout and $0.625$ in the SRM space, against control means of $0.580$ and $0.542 \pm 0.106$ (\cref{tab:alignment,tab:loro_decoders}), and linear discriminant analysis reached $0.854$ against a control mean of $0.878 \pm 0.050$, all above the $0.125$ chance level. The activation-level metrics, including run-to-run reliability, likewise placed the participant inside the control distribution at V1 (\cref{app:activation}).
+The deutan participant's optimal shift was the identity at V1, V2 and V3. The rotation does not account for the elevation itself, which holds in both pipelines, and the shift analysis applies to the primary pipeline alone, since the cell is not null under head-motion correction. The optimal shift depends on the reduction basis (\cref{tab:cyclic_shift}, last three rows), and which rearrangement restores control-level similarity remains open.
 
-The protan participant's V1 correspondence is displaced by one hue step, and the failure is not one of signal. That participant's V1 split-half pattern reliability reaches $.847$, above the highest control value, and eight-way classification there reaches $0.79$ against a chance level of $0.125$. Rotating the color labels by $45^\circ$ lowered Procrustes disparity from $1.037$ to $0.788$, a gain of $24.0\%$. We referred that gain to the distribution of shift gains across the seven controls ($3.5 \pm 5.9\%$), which is computed under the same minimum-over-eight rule and therefore carries the same selection bias. The protan gain exceeded that distribution (Crawford--Howell $t = 3.22$, $p = .009$, $d_{cc} = 3.44$), and the rotated geometry sat below the control mean disparity of $0.839 \pm 0.087$. The same rotation raised the second-order RSA similarity from $\rho \approx 0.00$ to $\rho = +0.52$, against a control mean of $0.45$, exceeding its own selection-bias null ($z = +5.02$, $p = .002$, $p_{\rm adj} = .032$). Disparity at this region is nonetheless elevated in both pipelines, so the departure is not accounted for by a rigid relabeling alone. The account applies to the primary pipeline, since that cell is no longer null under head-motion correction. The deutan participant showed the identity mapping as optimal at V1, V2 and V3.
+Taken together, these checks establish the design under which the comparison is read. The frozen projection is the variant with power, as the control positive control shows, and under it the deviations of both CVD participants depend on which hue evoked which response rather than on generic pattern differences. What the checks do not establish is where that dependence sits: the grid is descriptive, its cells shift between preprocessing pipelines, and the regional attribution is left open in the main text (\S\ref{sec:results:geometry}).
 
-Which rearrangement restores control-level similarity remains open. Under the SRM basis a $225^\circ$ shift ($+0.50$) sits close to the $315^\circ$ optimum ($+0.52$). Under the PCA basis the optimum falls at $135^\circ$ ($p = .048$, which does not survive correction).
+\begin{table}[h]
+\centering
+\caption{Cyclic-shift analysis of the protan V1 correspondence under the frozen projection, primary pipeline. The eight cyclic shifts of the color labels were evaluated, and the gain is the proportional reduction of Procrustes disparity from the identity to the best shift. Control gains are computed under the same minimum-over-eight rule and therefore carry the same selection bias; the control reference is mean $\pm$ SD over $n = 7$. The single-case test is the Crawford--Howell one-tailed $t$ ($df = 6$) with $d_{cc} = t\sqrt{8/7}$, upper-tailed for the gain. The last row gives the optimal shift under the PCA reduction.}
+\label{tab:cyclic_shift}
+\small
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llccl}
+\toprule
+Quantity & Condition & Protan & Controls & Test \\
+\midrule
+Procrustes disparity & identity & $1.037$ & $0.839 \pm 0.087$ & \\
+ & $45^\circ$ shift & $0.788$ & & \\
+Gain, best shift & & $24.0\%$ & $3.5 \pm 5.9\%$ & $t = 3.22$, $p = .009$, $d_{cc} = 3.44$ \\
+\midrule
+Optimal shift & PCA basis & $135^\circ$ & & $p = .048$, uncorrected \\
+\bottomrule
+\end{tabular}
+\end{table}

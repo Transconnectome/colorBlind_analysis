@@ -5,7 +5,7 @@
 
 > **Decoding and characterizing color perception in color vision deficiency (CVD) using fMRI-based forward encoding models and Shared Response Model (SRM) group comparison**
 
-![overallPipeline](analysis/Overall.png)
+![Analysis pipeline: acquisition, alignment, neural features, model and filter](assets/readme_pipeline.png)
 
 ## Table of Contents
 
